@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsType } from 'kibana/server';
 import { graphMigrations } from './migrations';
 
@@ -10,6 +12,20 @@ export const graphWorkspace: SavedObjectsType = {
   name: 'graph-workspace',
   namespaceType: 'single',
   hidden: false,
+  management: {
+    icon: 'graphApp',
+    defaultSearchField: 'title',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/app/graph#/workspace/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'graph.show',
+      };
+    },
+  },
   migrations: graphMigrations,
   mappings: {
     properties: {
@@ -37,6 +53,10 @@ export const graphWorkspace: SavedObjectsType = {
       },
       wsState: {
         type: 'text',
+      },
+      legacyIndexPatternRef: {
+        type: 'text',
+        index: false,
       },
     },
   },

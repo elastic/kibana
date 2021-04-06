@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { createSelector } from 'reselect';
 import { ServerApiError } from '../../../../common/types';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
@@ -18,29 +20,24 @@ import {
   isOutdatedResourceState,
   LoadedResourceState,
   Pagination,
-  TrustedAppCreateFailure,
   TrustedAppsListData,
   TrustedAppsListPageLocation,
   TrustedAppsListPageState,
 } from '../state';
-import {
-  isTrustedAppCreateFailureState,
-  isTrustedAppCreatePendingState,
-  isTrustedAppCreateSuccessState,
-} from '../state/type_guards';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const freshDataTimestamp = state.listView.freshDataTimestamp;
   const currentPage = state.listView.listResourceState;
   const location = state.location;
-
   return (
-    state.active &&
+    Boolean(state.active) &&
     isOutdatedResourceState(currentPage, (data) => {
       return (
         data.pageIndex === location.page_index &&
         data.pageSize === location.page_size &&
-        data.timestamp >= freshDataTimestamp
+        data.timestamp >= freshDataTimestamp &&
+        data.filter === location.filter
       );
     })
   );
@@ -70,6 +67,10 @@ export const getCurrentLocationPageIndex = (state: Immutable<TrustedAppsListPage
 
 export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageState>): number => {
   return state.location.page_size;
+};
+
+export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageState>): string => {
+  return state.location.filter;
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
@@ -133,26 +134,112 @@ export const getDeletionDialogEntry = (
   return state.deletionDialog.entry;
 };
 
-export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
-  createView,
-}) => {
-  return isTrustedAppCreatePendingState(createView);
+export const isCreationDialogLocation = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return !!state.location.show;
 };
 
-export const getTrustedAppCreateData: (
+export const getCreationSubmissionResourceState = (
   state: Immutable<TrustedAppsListPageState>
-) => undefined | Immutable<NewTrustedApp> = ({ createView }) => {
-  return (isTrustedAppCreatePendingState(createView) && createView.data) || undefined;
+): Immutable<AsyncResourceState<TrustedApp>> => {
+  return state.creationDialog.submissionResourceState;
 };
 
-export const getApiCreateErrors: (
+export const getCreationDialogFormEntry = (
   state: Immutable<TrustedAppsListPageState>
-) => undefined | TrustedAppCreateFailure['data'] = ({ createView }) => {
-  return (isTrustedAppCreateFailureState(createView) && createView.data) || undefined;
+): Immutable<NewTrustedApp> | undefined => {
+  return state.creationDialog.formState?.entry;
 };
 
-export const wasCreateSuccessful: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
-  createView,
-}) => {
-  return isTrustedAppCreateSuccessState(createView);
+export const isCreationDialogFormValid = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.creationDialog.formState?.isValid || false;
 };
+
+export const isCreationInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadingResourceState(state.creationDialog.submissionResourceState);
+};
+
+export const isCreationSuccessful = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadedResourceState(state.creationDialog.submissionResourceState);
+};
+
+export const getCreationError = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<ServerApiError> | undefined => {
+  const submissionResourceState = state.creationDialog.submissionResourceState;
+
+  return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
+};
+
+export const entriesExistState: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<TrustedAppsListPageState['entriesExist']> = (state) => state.entriesExist;
+
+export const checkingIfEntriesExist: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
+  return !isLoadedResourceState(doEntriesExists);
+});
+
+export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
+  entriesExistState,
+  (doEntriesExists) => {
+    return isLoadedResourceState(doEntriesExists) && doEntriesExists.data;
+  }
+);
+
+export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
+  state
+) => state.active;
+
+export const policiesState = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<TrustedAppsListPageState['policies']> => state.policies;
+
+export const loadingPolicies: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(policiesState, (policies) => isLoadingResourceState(policies));
+
+export const listOfPolicies: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
+  return isLoadedResourceState(policies) ? policies.data.items : [];
+});
+
+export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
+  getCurrentLocation,
+  ({ show }) => {
+    return show === 'edit';
+  }
+);
+
+export const editItemId: (
+  state: Immutable<TrustedAppsListPageState>
+) => string | undefined = createSelector(getCurrentLocation, ({ id }) => {
+  return id;
+});
+
+export const editItemState: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<TrustedAppsListPageState>['creationDialog']['editItem'] = (state) => {
+  return state.creationDialog.editItem;
+};
+
+export const isFetchingEditTrustedAppItem: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(editItemState, (editTrustedAppState) => {
+  return editTrustedAppState ? isLoadingResourceState(editTrustedAppState) : false;
+});
+
+export const editTrustedAppFetchError: (
+  state: Immutable<TrustedAppsListPageState>
+) => ServerApiError | undefined = createSelector(editItemState, (itemForEditState) => {
+  return itemForEditState && getCurrentResourceError(itemForEditState);
+});
+
+export const editingTrustedApp: (
+  state: Immutable<TrustedAppsListPageState>
+) => undefined | Immutable<TrustedApp> = createSelector(editItemState, (editTrustedAppState) => {
+  if (editTrustedAppState && isLoadedResourceState(editTrustedAppState)) {
+    return editTrustedAppState.data;
+  }
+});

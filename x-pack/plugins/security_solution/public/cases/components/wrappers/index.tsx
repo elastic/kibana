@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import styled from 'styled-components';
-import { gutterTimeline } from '../../../common/lib/helpers';
 
 export const WhitePageWrapper = styled.div`
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -21,6 +21,6 @@ export const SectionWrapper = styled.div`
 `;
 
 export const HeaderWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} 0
-  ${theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 0 ${theme.eui.paddingSizes.l}`};
 `;

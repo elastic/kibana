@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import $ from 'jquery';
@@ -30,19 +19,26 @@ export function createInfiniteScrollDirective() {
       more: '=',
     },
     link: ($scope: LazyScope, $element: JQuery) => {
-      const $window = $(window);
       let checkTimer: any;
+      /**
+       * depending on which version of Discover is displayed, different elements are scrolling
+       * and have therefore to be considered for calculation of infinite scrolling
+       */
+      const scrollDiv = $element.parents('.dscTable');
+      const scrollDivMobile = $(window);
 
       function onScroll() {
         if (!$scope.more) return;
+        const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+        const usedScrollDiv = isMobileView ? scrollDivMobile : scrollDiv;
+        const scrollTop = usedScrollDiv.scrollTop();
 
-        const winHeight = Number($window.height());
-        const winBottom = Number(winHeight) + Number($window.scrollTop());
-        const offset = $element.offset();
-        const elTop = offset ? offset.top : 0;
+        const winHeight = Number(usedScrollDiv.height());
+        const winBottom = Number(winHeight) + Number(scrollTop);
+        const elTop = $element.get(0).offsetTop || 0;
         const remaining = elTop - winBottom;
 
-        if (remaining <= winHeight * 0.5) {
+        if (remaining <= winHeight) {
           $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
             $scope.more();
           });
@@ -57,10 +53,12 @@ export function createInfiniteScrollDirective() {
         }, 50);
       }
 
-      $window.on('scroll', scheduleCheck);
+      scrollDiv.on('scroll', scheduleCheck);
+      window.addEventListener('scroll', scheduleCheck);
       $scope.$on('$destroy', function () {
         clearTimeout(checkTimer);
-        $window.off('scroll', scheduleCheck);
+        scrollDiv.off('scroll', scheduleCheck);
+        window.removeEventListener('scroll', scheduleCheck);
       });
       scheduleCheck();
     },

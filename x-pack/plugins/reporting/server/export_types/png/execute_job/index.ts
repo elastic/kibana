@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import apm from 'elastic-apm-node';
@@ -24,7 +25,6 @@ export const runTaskFnFactory: RunTaskFnFactory<
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return async function runTask(jobId, job, cancellationToken) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
@@ -32,9 +32,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
     let apmGeneratePng: { end: () => void } | null | undefined;
 
     const generatePngObservable = await generatePngObservableFactory(reporting);
-    const jobLogger = logger.clone([jobId]);
+    const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {

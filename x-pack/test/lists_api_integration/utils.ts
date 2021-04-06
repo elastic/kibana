@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import {
@@ -115,7 +116,7 @@ export const waitFor = async (
   maxTimeout: number = 5000,
   timeoutWait: number = 10
 ) => {
-  await new Promise(async (resolve, reject) => {
+  await new Promise<void>(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
     while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
@@ -156,10 +157,11 @@ export const binaryToString = (res: any, callback: any): void => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllExceptions = async (es: Client): Promise<void> => {
+export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
+      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:exception-list or type:exception-list-agnostic',
       wait_for_completion: true,
       refresh: true,
@@ -175,12 +177,14 @@ export const deleteAllExceptions = async (es: Client): Promise<void> => {
  * @param type The type to import as
  * @param contents The contents of the import
  * @param fileName filename to import as
+ * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   type: Type,
   contents: string[],
-  fileName: string
+  fileName: string,
+  testValues?: string[]
 ): Promise<void> => {
   await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
@@ -191,7 +195,8 @@ export const importFile = async (
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
-  await waitForListItems(supertest, contents, fileName);
+  const testValuesOrContents = testValues ?? contents;
+  await waitForListItems(supertest, testValuesOrContents, fileName);
 };
 
 /**

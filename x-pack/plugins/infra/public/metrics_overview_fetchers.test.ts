@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { coreMock } from 'src/core/public/mocks';
@@ -9,7 +10,7 @@ import { createMetricsHasData, createMetricsFetchData } from './metrics_overview
 import { CoreStart } from 'kibana/public';
 import { InfraClientStartDeps, InfraClientStartExports } from './types';
 import moment from 'moment';
-import { FAKE_SNAPSHOT_RESPONSE } from './test_utils';
+import { FAKE_OVERVIEW_RESPONSE } from './test_utils';
 
 function setup() {
   const core = coreMock.createStart();
@@ -51,7 +52,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
   describe('createMetricsFetchData()', () => {
     it('should just work', async () => {
       const { core, mockedGetStartServices } = setup();
-      core.http.post.mockResolvedValue(FAKE_SNAPSHOT_RESPONSE);
+      core.http.post.mockResolvedValue(FAKE_OVERVIEW_RESPONSE);
       const fetchData = createMetricsFetchData(mockedGetStartServices);
       const endTime = moment('2020-07-02T13:25:11.629Z');
       const startTime = endTime.clone().subtract(1, 'h');
@@ -68,20 +69,12 @@ describe('Metrics UI Observability Homepage Functions', () => {
         bucketSize,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
-      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/snapshot', {
+      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview', {
         body: JSON.stringify({
           sourceId: 'default',
-          metrics: [{ type: 'cpu' }, { type: 'memory' }, { type: 'rx' }, { type: 'tx' }],
-          groupBy: [],
-          nodeType: 'host',
-          includeTimeseries: true,
-          overrideCompositeSize: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),
-            interval: '300s',
-            forceInterval: true,
-            ignoreLookback: true,
           },
         }),
       });

@@ -1,37 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
-import { FileUploadComponentProps, getFileUploadComponent } from './get_file_upload_component';
-// @ts-ignore
-import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
-import { IDataPluginServices } from '../../../../src/plugins/data/public';
+import { CoreStart, Plugin } from '../../../../src/core/public';
+import {
+  FileUploadStartApi,
+  getFileUploadComponent,
+  importerFactory,
+  hasImportPermission,
+} from './api';
+import { setStartServices } from './kibana_services';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupDependencies {}
-export interface StartDependencies {
-  data: IDataPluginServices;
+export interface FileUploadSetupDependencies {}
+export interface FileUploadStartDependencies {
+  data: DataPublicPluginStart;
 }
 
-export type SetupContract = ReturnType<FileUploadPlugin['setup']>;
-export interface StartContract {
-  getFileUploadComponent: () => Promise<React.ComponentType<FileUploadComponentProps>>;
-}
+export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
+export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
 export class FileUploadPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup, plugins: SetupDependencies) {
-    setupInitServicesAndConstants(core);
-  }
+  implements
+    Plugin<
+      FileUploadPluginSetup,
+      FileUploadPluginStart,
+      FileUploadSetupDependencies,
+      FileUploadStartDependencies
+    > {
+  public setup() {}
 
-  public start(core: CoreStart, plugins: StartDependencies) {
-    startInitServicesAndConstants(core, plugins);
+  public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
+    setStartServices(core, plugins);
     return {
       getFileUploadComponent,
+      importerFactory,
+      getMaxBytes,
+      getMaxBytesFormatted,
+      hasImportPermission,
     };
   }
 }

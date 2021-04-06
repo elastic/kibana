@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,10 +10,9 @@ import { AlertMessageDocLinkToken } from '../../common/types/alerts';
 import { AlertMessageTokenType } from '../../common/enums';
 
 export class AlertingDefaults {
+  public static readonly THROTTLE: string = '1d';
+  public static readonly SCHEDULE_INTERVAL: string = '1m';
   public static readonly ALERT_STATE = {
-    resolved: i18n.translate('xpack.monitoring.alerts.state.resolved', {
-      defaultMessage: 'resolved',
-    }),
     firing: i18n.translate('xpack.monitoring.alerts.state.firing', {
       defaultMessage: 'firing',
     }),

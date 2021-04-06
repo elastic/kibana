@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
@@ -17,11 +19,12 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
   parentEntityIDSafeVersion,
+  processNameSafeVersion,
   timestampSafeVersion,
 } from './models/event';
 import {
@@ -31,6 +34,7 @@ import {
 import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
+import { EventOptions } from './types/generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -43,21 +47,6 @@ export type Event = AlertEvent | SafeEndpointEvent;
  * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
  */
 export const ANCESTRY_LIMIT: number = 2;
-
-interface EventOptions {
-  timestamp?: number;
-  entityID?: string;
-  parentEntityID?: string;
-  eventType?: string | string[];
-  eventCategory?: string | string[];
-  processName?: string;
-  ancestry?: string[];
-  ancestryArrayLimit?: number;
-  pid?: number;
-  parentPid?: number;
-  extensions?: object;
-  eventsDataStream?: DataStream;
-}
 
 const Windows: OSFields[] = [
   {
@@ -112,6 +101,7 @@ const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.success,
   HostPolicyResponseActionStatus.failure,
   HostPolicyResponseActionStatus.warning,
+  HostPolicyResponseActionStatus.unsupported,
 ];
 
 const APPLIED_POLICIES: Array<{
@@ -300,6 +290,10 @@ export interface TreeNode {
  */
 export interface Tree {
   /**
+   * Children grouped by the parent's ID
+   */
+  childrenByParent: Map<string, Map<string, TreeNode>>;
+  /**
    * Map of entity_id to node
    */
   children: Map<string, TreeNode>;
@@ -317,6 +311,8 @@ export interface Tree {
    * All events from children, ancestry, origin, and the alert in a single array
    */
   allEvents: Event[];
+  startTime: Date;
+  endTime: Date;
 }
 
 export interface TreeOptions {
@@ -529,6 +525,7 @@ export class EndpointDocGenerator {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
+        code: 'malicious_file',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -562,6 +559,8 @@ export class EndpointDocGenerator {
             version: '3.0.33',
           },
           temp_file_path: 'C:/temp/fake_malware.exe',
+          quarantine_result: true,
+          quarantine_message: 'fake quarantine message',
         },
       },
       process: {
@@ -645,7 +644,7 @@ export class EndpointDocGenerator {
     const ancestry: string[] =
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
 
-    const processName = options.processName ? options.processName : randomProcessName();
+    const processName = options.processName ? options.processName : this.randomProcessName();
     const detailRecordForEventType =
       options.extensions ||
       ((eventCategory) => {
@@ -718,6 +717,35 @@ export class EndpointDocGenerator {
     };
   }
 
+  private static getStartEndTimes(events: Event[]): { startTime: Date; endTime: Date } {
+    let startTime: number;
+    let endTime: number;
+    if (events.length > 0) {
+      startTime = timestampSafeVersion(events[0]) ?? new Date().getTime();
+      endTime = startTime;
+    } else {
+      startTime = new Date().getTime();
+      endTime = startTime;
+    }
+
+    for (const event of events) {
+      const eventTimestamp = timestampSafeVersion(event);
+      if (eventTimestamp !== undefined) {
+        if (eventTimestamp < startTime) {
+          startTime = eventTimestamp;
+        }
+
+        if (eventTimestamp > endTime) {
+          endTime = eventTimestamp;
+        }
+      }
+    }
+    return {
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    };
+  }
+
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
@@ -729,16 +757,16 @@ export class EndpointDocGenerator {
   public generateTree(options: TreeOptions = {}): Tree {
     const optionsWithDef = getTreeOptionsWithDef(options);
     const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
-      const nodeId = entityIDSafeVersion(event);
-      if (!nodeId) {
+      const nodeID = entityIDSafeVersion(event);
+      if (!nodeID) {
         return nodeMap;
       }
 
       // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
       // and add the event to the right array.
-      let node = nodeMap.get(nodeId);
+      let node = nodeMap.get(nodeID);
       if (!node) {
-        node = { id: nodeId, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
+        node = { id: nodeID, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
       }
 
       // place the event in the right array depending on its category
@@ -752,7 +780,7 @@ export class EndpointDocGenerator {
         node.relatedAlerts.push(event);
       }
 
-      return nodeMap.set(nodeId, node);
+      return nodeMap.set(nodeID, node);
     };
 
     const groupNodesByParent = (children: Map<string, TreeNode>) => {
@@ -815,12 +843,18 @@ export class EndpointDocGenerator {
     const childrenByParent = groupNodesByParent(childrenNodes);
     const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
+    const allEvents = [...ancestry, ...children];
+    const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
+
     return {
+      childrenByParent,
       children: childrenNodes,
       ancestry: ancestryNodes,
-      allEvents: [...ancestry, ...children],
+      allEvents,
       origin,
       childrenLevels: levels,
+      startTime,
+      endTime,
     };
   }
 
@@ -937,6 +971,7 @@ export class EndpointDocGenerator {
           eventCategory: ['process'],
           eventType: ['end'],
           eventsDataStream: opts.eventsDataStream,
+          processName: processNameSafeVersion(root),
         })
       );
     }
@@ -974,6 +1009,7 @@ export class EndpointDocGenerator {
             ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
             eventsDataStream: opts.eventsDataStream,
+            processName: processNameSafeVersion(ancestor),
           })
         );
       }
@@ -1244,6 +1280,7 @@ export class EndpointDocGenerator {
       status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
@@ -1262,7 +1299,7 @@ export class EndpointDocGenerator {
       title: 'Elastic Endpoint',
       version: '0.5.0',
       description: 'This is the Elastic Endpoint package.',
-      type: 'solution',
+      type: 'integration',
       download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
       path: '/package/endpoint/0.5.0',
       icons: [
@@ -1274,6 +1311,7 @@ export class EndpointDocGenerator {
         },
       ],
       status: 'installed',
+      release: 'ga',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
@@ -1300,6 +1338,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',
@@ -1454,7 +1493,7 @@ export class EndpointDocGenerator {
               {
                 name: 'workflow',
                 message: 'Failed to apply a portion of the configuration (kernel)',
-                status: HostPolicyResponseActionStatus.success,
+                status: HostPolicyResponseActionStatus.unsupported,
               },
               {
                 name: 'download_model',
@@ -1599,7 +1638,13 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.failure,
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.warning,
+      HostPolicyResponseActionStatus.unsupported,
     ]);
+  }
+
+  /** Return a random fake process name */
+  private randomProcessName(): string {
+    return this.randomChoice(fakeProcessNames);
   }
 }
 
@@ -1611,7 +1656,3 @@ const fakeProcessNames = [
   'iexlorer.exe',
   'explorer.exe',
 ];
-/** Return a random fake process name */
-function randomProcessName(): string {
-  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
-}

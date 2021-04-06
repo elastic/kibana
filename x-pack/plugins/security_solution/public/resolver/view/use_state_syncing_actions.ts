@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useLayoutEffect } from 'react';
@@ -16,6 +17,8 @@ export function useStateSyncingActions({
   databaseDocumentID,
   resolverComponentInstanceID,
   indices,
+  filters,
+  shouldUpdate,
 }: {
   /**
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
@@ -23,13 +26,30 @@ export function useStateSyncingActions({
   databaseDocumentID: string;
   resolverComponentInstanceID: string;
   indices: string[];
+  shouldUpdate: boolean;
+  filters: object;
 }) {
   const dispatch = useResolverDispatch();
   const locationSearch = useLocation().search;
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch, indices },
+      payload: {
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        locationSearch,
+        indices,
+        shouldUpdate,
+        filters,
+      },
     });
-  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch, indices]);
+  }, [
+    dispatch,
+    databaseDocumentID,
+    resolverComponentInstanceID,
+    locationSearch,
+    indices,
+    shouldUpdate,
+    filters,
+  ]);
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
@@ -45,13 +46,14 @@ export class GlobalSearchPlugin
 
   start({ http }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
     this.licenseChecker = new LicenseChecker(licensing.license$);
-    const { find } = this.searchService.start({
+    const { find, getSearchableTypes } = this.searchService.start({
       http,
       licenseChecker: this.licenseChecker,
     });
 
     return {
       find,
+      getSearchableTypes,
     };
   }
 

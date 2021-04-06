@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-utils';
 import { getInstalledPackages } from '../npm';
 
-import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
+import { LICENSE_ALLOWED, DEV_ONLY_LICENSE_ALLOWED, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';
 
 run(
@@ -36,7 +25,7 @@ run(
     // packages are valid
     assertLicensesValid({
       packages: packages.filter((pkg) => !pkg.isDevOnly),
-      validLicenses: LICENSE_WHITELIST,
+      validLicenses: LICENSE_ALLOWED,
     });
     log.success('All production dependency licenses are allowed');
 
@@ -45,7 +34,7 @@ run(
     if (flags.dev) {
       assertLicensesValid({
         packages: packages.filter((pkg) => pkg.isDevOnly),
-        validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST),
+        validLicenses: LICENSE_ALLOWED.concat(DEV_ONLY_LICENSE_ALLOWED),
       });
       log.success('All development dependency licenses are allowed');
     }

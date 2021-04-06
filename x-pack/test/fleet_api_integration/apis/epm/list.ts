@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,6 +13,7 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
@@ -19,7 +21,13 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
     setupFleetAndAgents(providerContext);
+    after(async () => {
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
 
     describe('list api tests', async () => {
       it('lists all packages from the registry', async function () {
@@ -43,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchLimitedPackageList();
+
         expect(listResponse.response).to.eql(['endpoint']);
       });
     });

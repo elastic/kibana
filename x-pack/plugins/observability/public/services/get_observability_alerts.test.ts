@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from 'kibana/public';
@@ -79,7 +80,7 @@ describe('getObservabilityAlerts', () => {
               { id: 2, consumer: 'apm' },
               { id: 3, consumer: 'uptime' },
               { id: 4, consumer: 'logs' },
-              { id: 5, consumer: 'metrics' },
+              { id: 5, consumer: 'infrastructure' },
               { id: 6, consumer: 'alerts' },
             ],
           };
@@ -104,7 +105,7 @@ describe('getObservabilityAlerts', () => {
       },
       {
         id: 5,
-        consumer: 'metrics',
+        consumer: 'infrastructure',
       },
       {
         id: 6,

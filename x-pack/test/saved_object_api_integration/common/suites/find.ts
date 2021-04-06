@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -106,7 +107,14 @@ export const getTestCases = (
         // expected depends on which spaces the user is authorized against...
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
       },
-    },
+    } as FindTestCase,
+    multiNamespaceIsolatedType: {
+      title: buildTitle('find multi-namespace isolated type'),
+      query: `type=sharecapabletype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharecapabletype'),
+      },
+    } as FindTestCase,
     namespaceAgnosticType: {
       title: buildTitle('find namespace-agnostic type'),
       query: `type=globaltype&fields=title${namespacesQueryParam}`,

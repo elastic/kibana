@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -39,7 +28,7 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: CONFIG_PATH,
     })),
-    (msg) => deprecationMessages.push(msg)
+    () => ({ message }) => deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -58,7 +47,6 @@ test('set correct defaults', () => {
         "http://localhost:9200",
       ],
       "ignoreVersionMismatch": false,
-      "logQueries": false,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
@@ -118,6 +106,35 @@ test('#requestHeadersWhitelist accepts both string and array of strings', () => 
     })
   );
   expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
+});
+
+describe('reserved headers', () => {
+  test('throws if customHeaders contains reserved headers', () => {
+    expect(() => {
+      config.schema.validate({
+        customHeaders: { foo: 'bar', 'x-elastic-product-origin': 'beats' },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]"`
+    );
+  });
+
+  test('throws if requestHeadersWhitelist contains reserved headers', () => {
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: ['foo', 'x-elastic-product-origin'] });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: expected value of type [string] but got [Array]
+      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]"
+    `);
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: 'x-elastic-product-origin' });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-product-origin]
+      - [requestHeadersWhitelist.1]: could not parse array value from json input"
+    `);
+  });
 });
 
 describe('reads files', () => {
@@ -227,12 +244,12 @@ describe('throws when config is invalid', () => {
   beforeAll(() => {
     const realFs = jest.requireActual('fs');
     mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-    const utils = jest.requireActual('../utils');
+    const crypto = jest.requireActual('@kbn/crypto');
     mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
-      utils.readPkcs12Keystore(path, password)
+      crypto.readPkcs12Keystore(path, password)
     );
     mockReadPkcs12Truststore.mockImplementation((path: string, password?: string) =>
-      utils.readPkcs12Truststore(path, password)
+      crypto.readPkcs12Truststore(path, password)
     );
   });
 

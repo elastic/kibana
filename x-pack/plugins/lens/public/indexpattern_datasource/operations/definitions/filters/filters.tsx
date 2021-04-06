@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './filters.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
@@ -14,10 +16,17 @@ import { OperationDefinition } from '../index';
 import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
-import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  Query,
+  esKuery,
+  esQuery,
+} from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
+const OPERATION_NAME = 'filters';
 
 // references types from src/plugins/data/common/search/aggs/buckets/filters.ts
 export interface Filter {
@@ -62,14 +71,14 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
 };
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: 'filters';
+  operationType: typeof OPERATION_NAME;
   params: {
     filters: Filter[];
   };
 }
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
-  type: 'filters',
+  type: OPERATION_NAME,
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
@@ -78,7 +87,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
-    if (previousColumn?.operationType === 'terms') {
+    if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
         filters: [
           {
@@ -95,7 +104,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     return {
       label: filtersLabel,
       dataType: 'string',
-      operationType: 'filters',
+      operationType: OPERATION_NAME,
       scale: 'ordinal',
       isBucketed: true,
       params,
@@ -110,32 +119,27 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     };
   },
 
-  toEsAggsConfig: (column, columnId, indexPattern) => {
+  toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
-    return {
+    return buildExpressionFunction<AggFunctionsMapping['aggFilters']>('aggFilters', {
       id: columnId,
       enabled: true,
-      type: 'filters',
       schema: 'segment',
-      params: {
-        filters: validFilters?.length > 0 ? validFilters : [defaultFilter],
-      },
-    };
+      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+    }).toAst();
   },
 
-  paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
-    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: ({ layer, columnId, currentColumn, indexPattern, updateLayer, data }) => {
     const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
-          paramName: 'filters',
+          layer,
+          columnId,
+          paramName: OPERATION_NAME,
           value: newFilters,
         })
       );
@@ -203,7 +207,7 @@ export const FilterList = ({
     <>
       <DragDropBuckets
         onDragEnd={updateFilters}
-        onDragStart={() => setIsOpenByCreation(false)}
+        onDragStart={() => {}}
         droppableId="FILTERS_DROPPABLE_AREA"
         items={localFilters}
       >
@@ -227,8 +231,7 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {

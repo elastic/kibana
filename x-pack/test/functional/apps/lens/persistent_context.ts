@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 19, 2025 @ 06:31:44.000'
       );
       await filterBar.toggleFilterEnabled('ip');
-      await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await appsMenu.clickLink('Visualize Library', { category: 'kibana' });
       await PageObjects.visualize.clickNewVisualization();
       await PageObjects.visualize.waitForGroupsSelectPage();
       await PageObjects.visualize.clickVisType('lens');
@@ -68,10 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('keeps selected index pattern after refresh', async () => {
-      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await PageObjects.lens.switchDataPanelIndexPattern('log*');
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
     });
 
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       await PageObjects.lens.save('persistentcontext');

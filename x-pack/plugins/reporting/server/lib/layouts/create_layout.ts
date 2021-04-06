@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LAYOUT_TYPES } from '../../../common/constants';
 import { CaptureConfig } from '../../types';
-import { LayoutInstance, LayoutParams } from './';
+import { LayoutInstance, LayoutParams, LayoutTypes } from './';
+import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
@@ -18,6 +20,10 @@ export function createLayout(
     return new PreserveLayout(layoutParams.dimensions);
   }
 
-  // this is the default because some jobs won't have anything specified
+  if (layoutParams && layoutParams.dimensions && layoutParams.id === LayoutTypes.CANVAS) {
+    return new CanvasLayout(layoutParams.dimensions);
+  }
+
+  // layoutParams is optional as PrintLayout doesn't use it
   return new PrintLayout(captureConfig);
 }

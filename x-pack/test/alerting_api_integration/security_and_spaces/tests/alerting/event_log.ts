@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,11 +24,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
     it('should generate events for alert decrypt errors', async () => {
       const spaceId = Spaces[0].id;
       const response = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.noop',
+            rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
             throttle: null,
           })
@@ -35,18 +36,20 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(spaceId, alertId, 'alert', 'alerts');
+      objectRemover.add(spaceId, alertId, 'rule', 'alerting');
 
-      // break AAD
-      await supertest
-        .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            name: 'bar',
-          },
-        })
-        .expect(200);
+      await retry.try(async () => {
+        // break AAD
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
+          .expect(200);
+      });
 
       const events = await retry.try(async () => {
         // there can be a successful execute before the error one
@@ -56,7 +59,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute'],
+          actions: new Map([['execute', { gte: 1 }]]),
         });
         const errorEvents = someEvents.filter(
           (event) => event?.kibana?.alerting?.status === 'error'

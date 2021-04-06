@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
-import buildState from './build_state';
+import consumeState from './consume_state';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
@@ -23,7 +24,7 @@ const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
-  const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
+  const externalConf = consumeState(resolve(__dirname, stateFilePath));
   process.env.stack_functional_integration = true;
   logAll(log);
 
@@ -40,14 +41,14 @@ export default async ({ readConfigFile }) => {
       },
     },
     junit: {
-      reportName: `Stack Functional Integration Tests - ${provisionedConfigs.VM}`,
+      reportName: `Stack Functional Integration Tests - ${externalConf.VM}`,
     },
     servers: servers(),
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
-    testFiles: tests.map(prepend).map(logTest),
+    testFiles: tests(externalConf.TESTS_LIST).map(prepend).map(logTest),
     // testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
@@ -63,6 +64,12 @@ export default async ({ readConfigFile }) => {
   };
   return settings;
 };
+
+const split = (splitter) => (x) => x.split(splitter);
+
+function tests(externalTestsList) {
+  return split(' ')(externalTestsList);
+}
 
 // Returns index 1 from the resulting array-like.
 const splitRight = (re) => (testPath) => re.exec(testPath)[1];

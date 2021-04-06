@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,13 +26,13 @@ export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administr
 });
 
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
-  windows: i18n.translate('xpack.securitySolution.administration.os.windows', {
+  [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
   }),
-  macos: i18n.translate('xpack.securitySolution.administration.os.macos', {
+  [OperatingSystem.MAC]: i18n.translate('xpack.securitySolution.administration.os.macos', {
     defaultMessage: 'Mac',
   }),
-  linux: i18n.translate('xpack.securitySolution.administration.os.linux', {
+  [OperatingSystem.LINUX]: i18n.translate('xpack.securitySolution.administration.os.linux', {
     defaultMessage: 'Linux',
   }),
 };

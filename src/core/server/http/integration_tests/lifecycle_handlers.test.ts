@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import supertest from 'supertest';
@@ -36,7 +25,7 @@ const actualVersion = pkg.version;
 const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';
-const whitelistedTestPath = '/xsrf/test/route/whitelisted';
+const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const setupDeps = {
@@ -50,26 +39,40 @@ describe('core lifecycle handlers', () => {
 
   beforeEach(async () => {
     const configService = configServiceMock.create();
-    configService.atPath.mockReturnValue(
-      new BehaviorSubject({
-        hosts: ['localhost'],
-        maxPayload: new ByteSizeValue(1024),
-        autoListen: true,
-        ssl: {
-          enabled: false,
-        },
-        compression: { enabled: true },
-        name: kibanaName,
-        customResponseHeaders: {
-          'some-header': 'some-value',
-        },
-        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
-        requestId: {
-          allowFromAnyIp: true,
-          ipAllowlist: [],
-        },
-      } as any)
-    );
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'server') {
+        return new BehaviorSubject({
+          hosts: ['localhost'],
+          maxPayload: new ByteSizeValue(1024),
+          autoListen: true,
+          ssl: {
+            enabled: false,
+          },
+          cors: {
+            enabled: false,
+          },
+          compression: { enabled: true },
+          name: kibanaName,
+          customResponseHeaders: {
+            'some-header': 'some-value',
+          },
+          xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+          requestId: {
+            allowFromAnyIp: true,
+            ipAllowlist: [],
+          },
+        } as any);
+      }
+      if (path === 'externalUrl') {
+        return new BehaviorSubject({
+          policy: [],
+        } as any);
+      }
+      if (path === 'csp') {
+        return new BehaviorSubject({} as any);
+      }
+      throw new Error(`Unexpected config path: ${path}`);
+    });
     server = createHttpServer({ configService });
 
     const serverSetup = await server.setup(setupDeps);
@@ -172,19 +175,19 @@ describe('core lifecycle handlers', () => {
       });
 
       destructiveMethods.forEach((method) => {
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: testPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
-          { path: whitelistedTestPath, validate: false },
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
+          { path: allowlistedTestPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
@@ -235,7 +238,7 @@ describe('core lifecycle handlers', () => {
         });
 
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
-          await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+          await getSupertest(method.toLowerCase(), allowlistedTestPath).expect(200, 'ok');
         });
 
         it('accepts requests on a route with disabled xsrf protection', async () => {

@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, ReactNode, useState } from 'react';
+
+import type { ReactNode } from 'react';
+import React, { Fragment, useState } from 'react';
+import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -13,13 +17,15 @@ import {
   // @ts-ignore
   EuiSearchBar,
   EuiText,
-  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Loading } from '../../../components';
-import { PackageList } from '../../../types';
+import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
 import { PackageCard } from './package_card';
 
 interface ListProps {
@@ -118,7 +124,7 @@ function GridColumn({ list }: GridColumnProps) {
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => (
-          <EuiFlexItem key={`${item.name}-${item.version}`}>
+          <EuiFlexItem key={pkgKeyFromPackageInfo(item)}>
             <PackageCard {...item} />
           </EuiFlexItem>
         ))

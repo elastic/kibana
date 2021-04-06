@@ -1,31 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-import uuid from 'uuid';
-import {
-  ElasticsearchClient,
-  DeleteDocumentResponse,
-  GetResponse,
-  SearchResponse,
-} from '../../../elasticsearch/';
+import { omit, isObject } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '../../../elasticsearch/';
+import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import {
+  ISavedObjectsPointInTimeFinder,
+  PointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+} from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -48,6 +39,10 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -59,6 +54,7 @@ import {
   SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsResolveResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -67,6 +63,7 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateGetSavedObjectsAggs } from './aggs_utils';
@@ -80,10 +77,16 @@ import {
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Left = { tag: 'Left'; error: Record<string, any> };
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Right = { tag: 'Right'; value: Record<string, any> };
+interface Left {
+  tag: 'Left';
+  error: Record<string, any>;
+}
+
+interface Right {
+  tag: 'Right';
+  value: Record<string, any>;
+}
+
 type Either = Left | Right;
 const isLeft = (either: Either): either is Left => either.tag === 'Left';
 const isRight = (either: Either): either is Right => either.tag === 'Right';
@@ -96,15 +99,30 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
+  logger: Logger;
 }
 
 /**
  * @public
  */
-export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
+  extends SavedObjectsBaseOptions {
+  /**
+   * (default=false) If true, sets all the counter fields to 0 if they don't
+   * already exist. Existing fields will be left as-is and won't be incremented.
+   */
+  initialize?: boolean;
+  /** {@link SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
-  /** The Elasticsearch Refresh setting for this operation */
+  /**
+   * (default='wait_for') The Elasticsearch refresh setting for this
+   * operation. See {@link MutatingOperationRefreshSetting}
+   */
   refresh?: MutatingOperationRefreshSetting;
+  /**
+   * Attributes to use when upserting the document if it doesn't exist.
+   */
+  upsertAttributes?: Attributes;
 }
 
 /**
@@ -128,6 +146,16 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 /**
  * @public
  */
+export interface SavedObjectsIncrementCounterField {
+  /** The field name to increment the counter by.*/
+  fieldName: string;
+  /** The number to increment the field by (defaults to 1).*/
+  incrementBy?: number;
+}
+
+/**
+ * @public
+ */
 export class SavedObjectsRepository {
   private _migrator: IKibanaMigrator;
   private _index: string;
@@ -136,6 +164,7 @@ export class SavedObjectsRepository {
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
+  private _logger: Logger;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -150,6 +179,7 @@ export class SavedObjectsRepository {
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     client: ElasticsearchClient,
+    logger: Logger,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -175,6 +205,7 @@ export class SavedObjectsRepository {
       serializer,
       allowedTypes,
       client,
+      logger,
     });
   }
 
@@ -187,6 +218,7 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
+      logger,
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -206,6 +238,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
     this._serializer = serializer;
+    this._logger = logger;
   }
 
   /**
@@ -227,7 +260,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id,
+      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       overwrite = false,
       references = [],
@@ -239,7 +272,7 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     if (initialNamespaces) {
-      if (!this._registry.isMultiNamespace(type)) {
+      if (!this._registry.isShareable(type)) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
           '"options.initialNamespaces" can only be used on multi-namespace types'
         );
@@ -291,6 +324,7 @@ export class SavedObjectsRepository {
       refresh,
       body: raw._source,
       ...(overwrite && version ? decodeRequestVersion(version) : {}),
+      require_alias: true,
     };
 
     const { body } =
@@ -327,7 +361,7 @@ export class SavedObjectsRepository {
       if (!this._allowedTypes.includes(object.type)) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
       } else if (object.initialNamespaces) {
-        if (!this._registry.isMultiNamespace(object.type)) {
+        if (!this._registry.isShareable(object.type)) {
           error = SavedObjectsErrorHelpers.createBadRequestError(
             '"initialNamespaces" can only be used on multi-namespace types'
           );
@@ -348,7 +382,9 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) {
+        object.id = SavedObjectsUtils.generateId();
+      }
 
       return {
         tag: 'Right' as 'Right',
@@ -369,7 +405,7 @@ export class SavedObjectsRepository {
         _source: ['type', 'namespaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget(
+      ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
               docs: bulkGetDocs,
@@ -397,8 +433,9 @@ export class SavedObjectsRepository {
       if (esRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult.found === true;
-        if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
+        const docFound = indexFound && actualResult?.found === true;
+        // @ts-expect-error MultiGetHit._source is optional
+        if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
           return {
             tag: 'Left' as 'Left',
@@ -413,7 +450,10 @@ export class SavedObjectsRepository {
           };
         }
         savedObjectNamespaces =
-          initialNamespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
+          initialNamespaces ||
+          // @ts-expect-error MultiGetHit._source is optional
+          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
@@ -459,6 +499,7 @@ export class SavedObjectsRepository {
     const bulkResponse = bulkCreateParams.length
       ? await this.client.bulk({
           refresh,
+          require_alias: true,
           body: bulkCreateParams,
         })
       : undefined;
@@ -471,7 +512,7 @@ export class SavedObjectsRepository {
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex]
+          bulkResponse?.body.items[esRequestIndex] ?? {}
         )[0] as any;
 
         if (error) {
@@ -535,10 +576,10 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: { includes: ['type', 'namespaces'] },
     }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget(
+      ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
               docs: bulkGetDocs,
@@ -557,13 +598,14 @@ export class SavedObjectsRepository {
 
       const { type, id, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (doc.found) {
+      if (doc?.found) {
         errors.push({
           id,
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            ...(!this.rawDocExistsInNamespace(doc, namespace) && {
+            // @ts-expect-error MultiGetHit._source is optional
+            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
           },
@@ -607,7 +649,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+    const { body, statusCode } = await this.client.delete(
       {
         id: rawId,
         index: this.getIndexForType(type),
@@ -623,6 +665,7 @@ export class SavedObjectsRepository {
     }
 
     const deleteDocNotFound = body.result === 'not_found';
+    // @ts-expect-error 'error' does not exist on type 'DeleteResponse'
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
@@ -696,11 +739,13 @@ export class SavedObjectsRepository {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
+   * @property {Array<unknown>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.pit]
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
@@ -716,6 +761,8 @@ export class SavedObjectsRepository {
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
+      pit,
+      searchAfter,
       sortField,
       sortOrder,
       fields,
@@ -742,6 +789,10 @@ export class SavedObjectsRepository {
     } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
+      );
+    } else if (preference?.length && pit) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.preference must be excluded when options.pit is used'
       );
     }
 
@@ -786,21 +837,28 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
-      size: perPage,
-      from: perPage * (page - 1),
+      // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
+      index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
+      // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
+      from: searchAfter ? undefined : perPage * (page - 1),
       _source: includedFields(type, fields),
-      rest_total_hits_as_int: true,
       preference,
+      rest_total_hits_as_int: true,
+      size: perPage,
       body: {
+        size: perPage,
         seq_no_primary_term: true,
+        from: perPage * (page - 1),
+        _source: includedFields(type, fields),
         ...(aggsObject != null ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
           searchFields,
+          pit,
           rootSearchFields,
           type: allowedTypes,
+          searchAfter,
           sortField,
           sortOrder,
           namespaces,
@@ -812,7 +870,7 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+    const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
       ignore: [404],
     });
     if (statusCode === 404) {
@@ -832,11 +890,15 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+        (hit: estypes.Hit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
+          // @ts-expect-error @elastic/elasticsearch declared Id as string | number
           ...this._rawToSavedObject(hit),
-          score: (hit as any)._score,
+          score: hit._score!,
+          // @ts-expect-error @elastic/elasticsearch declared sort as string | number
+          sort: hit.sort,
         })
       ),
+      pit_id: body.pit_id,
     } as SavedObjectsFindResponse<T, A>;
   }
 
@@ -895,10 +957,10 @@ export class SavedObjectsRepository {
       .map(({ value: { type, id, fields } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: includedFields(type, fields),
+        _source: { includes: includedFields(type, fields) },
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget(
+      ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
               docs: bulkGetDocs,
@@ -917,7 +979,8 @@ export class SavedObjectsRepository {
         const { type, id, esRequestIndex } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
-        if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
+        // @ts-expect-error MultiGetHit._source is optional
+        if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
             id,
             type,
@@ -925,25 +988,8 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        const { originId, updated_at: updatedAt } = doc._source;
-        let namespaces = [];
-        if (!this._registry.isNamespaceAgnostic(type)) {
-          namespaces = doc._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-          ];
-        }
-
-        return {
-          id,
-          type,
-          namespaces,
-          ...(originId && { originId }),
-          ...(updatedAt && { updated_at: updatedAt }),
-          version: encodeHitVersion(doc),
-          attributes: doc._source[type],
-          references: doc._source.references || [],
-          migrationVersion: doc._source.migrationVersion,
-        };
+        // @ts-expect-error MultiGetHit._source is optional
+        return this.getSavedObjectFromSource(type, id, doc);
       }),
     };
   }
@@ -968,7 +1014,7 @@ export class SavedObjectsRepository {
 
     const namespace = normalizeNamespace(options.namespace);
 
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
@@ -976,33 +1022,141 @@ export class SavedObjectsRepository {
       { ignore: [404] }
     );
 
-    const docNotFound = body.found === false;
     const indexNotFound = statusCode === 404;
-    if (docNotFound || indexNotFound || !this.rawDocExistsInNamespace(body, namespace)) {
+
+    if (
+      !isFoundGetResponse(body) ||
+      indexNotFound ||
+      !this.rawDocExistsInNamespace(body, namespace)
+    ) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    return this.getSavedObjectFromSource(type, id, body);
+  }
 
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body._source.namespace),
-      ];
+  /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {
-      id,
-      type,
-      namespaces,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(body),
-      attributes: body._source[type],
-      references: body._source.references || [],
-      migrationVersion: body._source.migrationVersion,
-    };
+    const namespace = normalizeNamespace(options.namespace);
+    if (namespace === undefined) {
+      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+
+    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
+    const time = this._getCurrentTime();
+
+    // retrieve the alias, and if it is not disabled, update it
+    const aliasResponse = await this.client.update<{ 'legacy-url-alias': LegacyUrlAlias }>(
+      {
+        id: rawAliasId,
+        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
+        refresh: false,
+        _source: 'true',
+        body: {
+          script: {
+            source: `
+              if (ctx._source[params.type].disabled != true) {
+                if (ctx._source[params.type].resolveCounter == null) {
+                  ctx._source[params.type].resolveCounter = 1;
+                }
+                else {
+                  ctx._source[params.type].resolveCounter += 1;
+                }
+                ctx._source[params.type].lastResolved = params.time;
+                ctx._source.updated_at = params.time;
+              }
+            `,
+            lang: 'painless',
+            params: {
+              type: LEGACY_URL_ALIAS_TYPE,
+              time,
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (
+      aliasResponse.statusCode === 404 ||
+      aliasResponse.body.get?.found === false ||
+      aliasResponse.body.get?._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
+    ) {
+      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+
+    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get!._source[LEGACY_URL_ALIAS_TYPE];
+    const objectIndex = this.getIndexForType(type);
+    const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
+      {
+        body: {
+          docs: [
+            {
+              // attempt to find an exact match for the given ID
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: objectIndex,
+            },
+            {
+              // also attempt to find a match for the legacy URL alias target ID
+              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
+              _index: objectIndex,
+            },
+          ],
+        },
+      },
+      { ignore: [404] }
+    );
+
+    const exactMatchDoc = bulkGetResponse?.body.docs[0];
+    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
+    const foundExactMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
+    const foundAliasMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
+
+    if (foundExactMatch && foundAliasMatch) {
+      return {
+        // @ts-expect-error MultiGetHit._source is optional
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'conflict',
+        aliasTargetId: legacyUrlAlias.targetId,
+      };
+    } else if (foundExactMatch) {
+      return {
+        // @ts-expect-error MultiGetHit._source is optional
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'exactMatch',
+      };
+    } else if (foundAliasMatch) {
+      return {
+        // @ts-expect-error MultiGetHit._source is optional
+        saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
+        outcome: 'aliasMatch',
+        aliasTargetId: legacyUrlAlias.targetId,
+      };
+    }
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
 
   /**
@@ -1042,8 +1196,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body, statusCode } = await this.client.update(
-      {
+    const { body } = await this.client
+      .update<SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
@@ -1053,20 +1207,21 @@ export class SavedObjectsRepository {
           doc,
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
-      },
-      { ignore: [404] }
-    );
+        require_alias: true,
+      })
+      .catch((err) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          // see "404s from missing index" above
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        throw err;
+      });
 
-    if (statusCode === 404) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    const { originId } = body.get._source;
-    let namespaces = [];
+    const { originId } = body.get?._source ?? {};
+    let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body.get._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body.get._source.namespace),
+      namespaces = body.get?._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(body.get?._source.namespace),
       ];
     }
 
@@ -1074,7 +1229,6 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      // @ts-expect-error update doesn't have _seq_no, _primary_term as Record<string, any> / any in LP
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
@@ -1098,7 +1252,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );
@@ -1161,7 +1315,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );
@@ -1214,7 +1368,7 @@ export class SavedObjectsRepository {
       return { namespaces: doc.namespaces };
     } else {
       // if there are no namespaces remaining, delete the saved object
-      const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+      const { body, statusCode } = await this.client.delete(
         {
           id: this._serializer.generateRawId(undefined, type, id),
           refresh,
@@ -1232,6 +1386,7 @@ export class SavedObjectsRepository {
       }
 
       const deleteDocNotFound = body.result === 'not_found';
+      // @ts-expect-error
       const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
       if (deleteDocNotFound || deleteIndexNotFound) {
         // see "404s from missing index" above
@@ -1366,9 +1521,10 @@ export class SavedObjectsRepository {
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult.found === true;
+          const docFound = indexFound && actualResult?.found === true;
           if (
             !docFound ||
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
           ) {
             return {
@@ -1380,10 +1536,13 @@ export class SavedObjectsRepository {
               },
             };
           }
-          namespaces = actualResult._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(actualResult._source.namespace),
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          namespaces = actualResult!._source.namespaces ?? [
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          versionProperties = getExpectedVersionProperties(version, actualResult);
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          versionProperties = getExpectedVersionProperties(version, actualResult!);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`
@@ -1421,6 +1580,7 @@ export class SavedObjectsRepository {
           refresh,
           body: bulkUpdateParams,
           _source_includes: ['originId'],
+          require_alias: true,
         })
       : undefined;
 
@@ -1431,7 +1591,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex];
+        const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
@@ -1524,37 +1684,104 @@ export class SavedObjectsRepository {
     }
 
     return {
-      updated: body.updated,
+      updated: body.updated!,
     };
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Increments all the specified counter fields (by one by default). Creates the document
+   * if one doesn't exist for the given id.
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {string} counterFieldName
-   * @param {object} [options={}]
-   * @property {object} [options.migrationVersion=undefined]
-   * @returns {promise}
+   * @remarks
+   * When supplying a field name like `stats.api.counter` the field name will
+   * be used as-is to create a document like:
+   *   `{attributes: {'stats.api.counter': 1}}`
+   * It will not create a nested structure like:
+   *   `{attributes: {stats: {api: {counter: 1}}}}`
+   *
+   * When using incrementCounter for collecting usage data, you need to ensure
+   * that usage collection happens on a best-effort basis and doesn't
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * // Initialize all fields to 0
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *     'stats.sampleDataInstalled',
+   *   ], {initialize: true});
+   *
+   * // Increment the apiCalls field counter
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *   ])
+   *
+   * // Increment the apiCalls field counter by 4
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     { fieldName: 'stats.apiCalls' incrementBy: 4 },
+   *   ])
+   *
+   * // Initialize the document with arbitrary fields if not present
+   * repository.incrementCounter<{ appId: string }>(
+   *   'dashboard_counter_type',
+   *   'counter_id',
+   *   [ 'stats.apiCalls'],
+   *   { upsertAttributes: { appId: 'myId' } }
+   * )
+   * ```
+   *
+   * @param type - The type of saved object whose fields should be incremented
+   * @param id - The id of the document whose fields should be incremented
+   * @param counterFields - An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}
+   * @param options - {@link SavedObjectsIncrementCounterOptions}
+   * @returns The saved object after the specified fields were incremented
    */
-  async incrementCounter(
+  async incrementCounter<T = unknown>(
     type: string,
     id: string,
-    counterFieldName: string,
-    options: SavedObjectsIncrementCounterOptions = {}
-  ): Promise<SavedObject> {
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
+    options: SavedObjectsIncrementCounterOptions<T> = {}
+  ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
-    if (typeof counterFieldName !== 'string') {
-      throw new Error('"counterFieldName" argument must be a string');
+
+    const isArrayOfCounterFields =
+      Array.isArray(counterFields) &&
+      counterFields.every(
+        (field) =>
+          typeof field === 'string' || (isObject(field) && typeof field.fieldName === 'string')
+      );
+
+    if (!isArrayOfCounterFields) {
+      throw new Error(
+        '"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>'
+      );
     }
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      migrationVersion,
+      refresh = DEFAULT_REFRESH_SETTING,
+      initialize = false,
+      upsertAttributes,
+    } = options;
+
+    const normalizedCounterFields = counterFields.map((counterField) => {
+      const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
+      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+      return {
+        fieldName,
+        incrementBy: initialize ? 0 : incrementBy,
+      };
+    });
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1567,58 +1794,254 @@ export class SavedObjectsRepository {
       savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
 
+    // attributes: { [counterFieldName]: incrementBy },
     const migrated = this._migrator.migrateDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: {
+        ...(upsertAttributes ?? {}),
+        ...normalizedCounterFields.reduce((acc, counterField) => {
+          const { fieldName, incrementBy } = counterField;
+          acc[fieldName] = incrementBy;
+          return acc;
+        }, {} as Record<string, number>),
+      },
       migrationVersion,
       updated_at: time,
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const { body } = await this.client.update({
+    const { body } = await this.client.update<SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
+      require_alias: true,
       _source: 'true',
       body: {
         script: {
           source: `
-              if (ctx._source[params.type][params.counterFieldName] == null) {
-                ctx._source[params.type][params.counterFieldName] = params.count;
-              }
-              else {
-                ctx._source[params.type][params.counterFieldName] += params.count;
+              for (int i = 0; i < params.counterFieldNames.length; i++) {
+                def counterFieldName = params.counterFieldNames[i];
+                def count = params.counts[i];
+
+                if (ctx._source[params.type][counterFieldName] == null) {
+                  ctx._source[params.type][counterFieldName] = count;
+                }
+                else {
+                  ctx._source[params.type][counterFieldName] += count;
+                }
               }
               ctx._source.updated_at = params.time;
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            counts: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.incrementBy
+            ),
+            counterFieldNames: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.fieldName
+            ),
             time,
             type,
-            counterFieldName,
           },
         },
         upsert: raw._source,
       },
     });
 
-    const { originId } = body.get._source;
+    const { originId } = body.get?._source ?? {};
     return {
       id,
       type,
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       ...(originId && { originId }),
       updated_at: time,
-      references: body.get._source.references,
-      // @ts-expect-error
+      references: body.get?._source.references ?? [],
       version: encodeHitVersion(body),
-      attributes: body.get._source[type],
+      attributes: body.get?._source[type],
     };
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType(
+   *   type: 'visualization',
+   *   { keepAlive: '5m' },
+   * );
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id, keepAlive: '2m' },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    { keepAlive = '5m', preference }: SavedObjectsOpenPointInTimeOptions = {}
+  ): Promise<SavedObjectsOpenPointInTimeResponse> {
+    const types = Array.isArray(type) ? type : [type];
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
+    if (allowedTypes.length === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    const esOptions = {
+      index: this.getIndicesForTypes(allowedTypes),
+      keep_alive: keepAlive,
+      ...(preference ? { preference } : {}),
+    };
+
+    const {
+      body,
+      statusCode,
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
+      // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
+      esOptions,
+      {
+        ignore: [404],
+      }
+    );
+    if (statusCode === 404) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    return {
+      id: body.id,
+    };
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
+   * @remarks
+   * While the `keepAlive` that is provided will cause a PIT to automatically close,
+   * it is highly recommended to explicitly close a PIT when you are done with it
+   * in order to avoid consuming unneeded resources in Elasticsearch.
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * const { id } = await repository.openPointInTimeForType(
+   *   type: 'index-pattern',
+   *   { keepAlive: '2m' },
+   * );
+   *
+   * const response = await repository.find({
+   *   type: 'index-pattern',
+   *   search: 'foo*',
+   *   sortField: 'name',
+   *   sortOrder: 'desc',
+   *   pit: {
+   *     id: 'abc123',
+   *     keepAlive: '2m',
+   *   },
+   *   searchAfter: [1234, 'abcd'],
+   * });
+   *
+   * await repository.closePointInTime(response.pit_id);
+   * ```
+   *
+   * @param {string} id
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - {@link SavedObjectsClosePointInTimeResponse}
+   */
+  async closePointInTime(
+    id: string,
+    options?: SavedObjectsClosePointInTimeOptions
+  ): Promise<SavedObjectsClosePointInTimeResponse> {
+    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+      body: { id },
+    });
+
+    return body;
+  }
+
+  /**
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * large sets of saved objects. We strongly recommend using this API for
+   * any `find` queries that might return more than 1000 saved objects,
+   * however this API is only intended for use in server-side "batch"
+   * processing of objects where you are collecting all objects in memory
+   * or streaming them back to the client.
+   *
+   * Do NOT use this API in a route handler to facilitate paging through
+   * saved objects on the client-side unless you are streaming all of the
+   * results back to the client at once. Because the returned generator is
+   * stateful, you cannot rely on subsequent http requests retrieving new
+   * pages from the same Kibana server in multi-instance deployments.
+   *
+   * This generator wraps calls to {@link SavedObjectsRepository.find} and
+   * iterates over multiple pages of results using `_pit` and `search_after`.
+   * This will open a new Point-In-Time (PIT), and continue paging until a
+   * set of results is received that's smaller than the designated `perPage`.
+   *
+   * Once you have retrieved all of the results you need, it is recommended
+   * to call `close()` to clean up the PIT and prevent Elasticsearch from
+   * consuming resources unnecessarily. This is only required if you are
+   * done iterating and have not yet paged through all of the results: the
+   * PIT will automatically be closed for you once you reach the last page
+   * of results, or if the underlying call to `find` fails for any reason.
+   *
+   * @example
+   * ```ts
+   * const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+   *   type: 'visualization',
+   *   search: 'foo*',
+   *   perPage: 100,
+   * };
+   *
+   * const finder = savedObjectsClient.createPointInTimeFinder(findOptions);
+   *
+   * const responses: SavedObjectFindResponse[] = [];
+   * for await (const response of finder.find()) {
+   *   responses.push(...response);
+   *   if (doneSearching) {
+   *     await finder.close();
+   *   }
+   * }
+   * ```
+   */
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder {
+    return new PointInTimeFinder(findOptions, {
+      logger: this._logger,
+      client: this,
+      ...dependencies,
+    });
   }
 
   /**
@@ -1627,7 +2050,16 @@ export class SavedObjectsRepository {
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    return this._registry.getIndex(type) || this._index;
+    // TODO migrationsV2: Remove once we remove migrations v1
+    //   This is a hacky, but it required the least amount of changes to
+    //   existing code to support a migrations v2 index. Long term we would
+    //   want to always use the type registry to resolve a type's index
+    //   (including the default index).
+    if (this._migrator.soMigrationsConfig.enableV2) {
+      return `${this._registry.getIndex(type) || this._index}_${this._migrator.kibanaVersion}`;
+    } else {
+      return this._registry.getIndex(type) || this._index;
+    }
   }
 
   /**
@@ -1651,7 +2083,7 @@ export class SavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
-    return omit(savedObject, 'namespace') as SavedObject<T>;
+    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
   /**
@@ -1695,7 +2127,7 @@ export class SavedObjectsRepository {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
 
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
@@ -1706,8 +2138,7 @@ export class SavedObjectsRepository {
     );
 
     const indexFound = statusCode !== 404;
-    const docFound = indexFound && body.found === true;
-    if (docFound) {
+    if (indexFound && isFoundGetResponse(body)) {
       if (!this.rawDocExistsInNamespace(body, namespace)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
@@ -1732,7 +2163,7 @@ export class SavedObjectsRepository {
     }
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: rawId,
         index: this.getIndexForType(type),
@@ -1741,20 +2172,66 @@ export class SavedObjectsRepository {
     );
 
     const indexFound = statusCode !== 404;
-    const docFound = indexFound && body.found === true;
-    if (!docFound || !this.rawDocExistsInNamespace(body, namespace)) {
+    if (
+      !indexFound ||
+      !isFoundGetResponse(body) ||
+      !this.rawDocExistsInNamespace(body, namespace)
+    ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    return body as SavedObjectsRawDoc;
+    return body;
+  }
+
+  private getSavedObjectFromSource<T>(
+    type: string,
+    id: string,
+    doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
+  ): SavedObject<T> {
+    const { originId, updated_at: updatedAt } = doc._source;
+
+    let namespaces: string[] = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = doc._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
+      ];
+    }
+
+    return {
+      id,
+      type,
+      namespaces,
+      ...(originId && { originId }),
+      ...(updatedAt && { updated_at: updatedAt }),
+      version: encodeHitVersion(doc),
+      attributes: doc._source[type],
+      references: doc._source.references || [],
+      migrationVersion: doc._source.migrationVersion,
+      coreMigrationVersion: doc._source.coreMigrationVersion,
+    };
+  }
+
+  private async resolveExactMatch<T>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    const object = await this.get<T>(type, id, options);
+    return { saved_object: object, outcome: 'exactMatch' };
   }
 }
 
-function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
+function getBulkOperationError(
+  error: { type: string; reason?: string; index?: string },
+  type: string,
+  id: string
+) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
       return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
     case 'document_missing_exception':
       return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+    case 'index_not_found_exception':
+      return errorContent(SavedObjectsErrorHelpers.createIndexAliasNotFoundError(error.index!));
     default:
       return {
         message: error.reason || JSON.stringify(error),
@@ -1818,3 +2295,15 @@ const normalizeNamespace = (namespace?: string) => {
 const errorContent = (error: DecoratedError) => error.output.payload;
 
 const unique = (array: string[]) => [...new Set(array)];
+
+/**
+ * Type and type guard function for converting a possibly not existant doc to an existant doc.
+ */
+type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
+  Required<
+    Pick<estypes.GetResponse<TDocument>, '_primary_term' | '_seq_no' | '_version' | '_source'>
+  >;
+
+const isFoundGetResponse = <TDocument = unknown>(
+  doc: estypes.GetResponse<TDocument>
+): doc is GetResponseFound<TDocument> => doc.found;

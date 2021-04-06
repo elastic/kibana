@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import styled from 'styled-components';
 import {
   EuiLink,
-  EuiIcon,
   EuiSpacer,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -20,20 +20,22 @@ import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
 import { useStatusBar } from './use_status_bar';
 import { MonitorIDLabel, OverallAvailability } from '../translations';
-import { URL_LABEL } from '../../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../../common/translations';
 import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
+import { MonitorTags } from '../../../common/monitor_tags';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
-    width: 35%;
+    width: 30%;
+    max-width: 250px;
   }
 `;
 
 export const MonListDescription = styled(EuiDescriptionListDescription)`
   &&& {
-    width: 65%;
+    width: 70%;
     overflow-wrap: anywhere;
   }
 `;
@@ -53,12 +55,7 @@ export const MonitorStatusBar: React.FC = () => {
         <StatusByLocations locations={locations ?? []} />
       </div>
       <EuiSpacer />
-      <EuiDescriptionList
-        type="column"
-        compressed={true}
-        textStyle="reverse"
-        style={{ maxWidth: '450px' }}
-      >
+      <EuiDescriptionList type="column" compressed={true} textStyle="reverse">
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
           <FormattedMessage
@@ -70,8 +67,8 @@ export const MonitorStatusBar: React.FC = () => {
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>
-          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-            {full} <EuiIcon type={'popout'} size="s" />
+          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank" external>
+            {full}
           </EuiLink>
         </MonListDescription>
         <MonListTitle>{MonitorIDLabel}</MonListTitle>
@@ -84,6 +81,10 @@ export const MonitorStatusBar: React.FC = () => {
             </MonListDescription>
           </>
         )}
+        <MonListTitle>{TAGS_LABEL}</MonListTitle>
+        <MonListDescription>
+          <MonitorTags ping={monitorStatus} />
+        </MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
         <MonitorRedirects monitorStatus={monitorStatus} />
       </EuiDescriptionList>

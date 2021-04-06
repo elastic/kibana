@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, getOr } from 'lodash/fp';
@@ -23,6 +24,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
     options: HostOverviewRequestOptions,
     response: IEsSearchResponse<OverviewHostHit>
   ): Promise<HostsOverviewStrategyResponse> => {
+    // @ts-expect-error @elastic/elasticsearch no way to declare type for aggregations
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewHostQuery(options))],
@@ -58,7 +60,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
         winlogbeatMWSysmonOperational: getOr(
           null,
           'winlog_module.mwsysmon_operational_event_count.doc_count',
-          response
+          aggregations
         ),
       },
     };

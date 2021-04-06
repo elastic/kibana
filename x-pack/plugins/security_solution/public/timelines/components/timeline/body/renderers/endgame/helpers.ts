@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isNillEmptyOrNotFinite } from '../helpers';
@@ -49,13 +50,22 @@ export const getUserDomainField = (eventAction: string | null | undefined): stri
 export const getUserNameField = (eventAction: string | null | undefined): string =>
   getTargetUserAndTargetDomain(eventAction) ? 'endgame.target_user_name' : 'user.name';
 
-export const getEventDetails = (eventAction: string | null | undefined): string => {
+export const getEventDetails = ({
+  eventAction,
+  eventOutcome,
+}: {
+  eventAction: string | null | undefined;
+  eventOutcome: string | null | undefined;
+}): string => {
   switch (eventAction) {
     case 'explicit_user_logon':
       return ''; // no details
+    case 'log_off': // fall through
     case 'user_logoff':
-      return i18n.LOGGED_OFF;
+      return eventOutcome?.toLowerCase() === 'failure' ? i18n.FAILED_TO_LOG_OFF : i18n.LOGGED_OFF;
     default:
-      return i18n.SUCCESSFULLY_LOGGED_IN;
+      return eventOutcome?.toLowerCase() === 'failure'
+        ? i18n.FAILED_TO_LOG_IN
+        : i18n.SUCCESSFULLY_LOGGED_IN;
   }
 };

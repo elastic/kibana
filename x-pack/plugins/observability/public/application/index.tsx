@@ -1,30 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { MouseEvent, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../xpack_legacy/common';
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
-
-const observabilityLabelBreadcrumb = {
-  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
-    defaultMessage: 'Observability',
-  }),
-};
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
   return breadcrumbs.map(({ text }) => text).reverse();
@@ -40,12 +37,24 @@ function App() {
           const Wrapper = () => {
             const { core } = usePluginContext();
 
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
-              core.chrome.setBreadcrumbs(breadcrumb);
-              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
-            }, [core, breadcrumb]);
+              const href = core.http.basePath.prepend('/app/observability');
+              const breadcrumbs = [
+                {
+                  href,
+                  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
+                    defaultMessage: 'Observability',
+                  }),
+                  onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+                    event.preventDefault();
+                    core.application.navigateToUrl(href);
+                  },
+                },
+                ...route.breadcrumb,
+              ];
+              core.chrome.setBreadcrumbs(breadcrumbs);
+              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumbs));
+            }, [core]);
 
             const params = useRouteParams(path);
             return route.handler(params);
@@ -59,7 +68,7 @@ function App() {
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ObservabilityPluginSetupDeps,
+  plugins: ObservabilityPublicPluginsStart,
   appMountParameters: AppMountParameters
 ) => {
   const { element, history } = appMountParameters;
@@ -74,7 +83,7 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...core, ...plugins }}>
+    <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>

@@ -1,11 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
@@ -24,14 +30,15 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
         defaultMessage: 'Index data',
       }
     ),
-    validateConnector: (action: EsIndexActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: EsIndexActionConnector
+    ): ConnectorValidationResult<Pick<EsIndexConfig, 'index'>, unknown> => {
+      const configErrors = {
         index: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { config: { errors: configErrors }, secrets: { errors: {} } };
       if (!action.config.index) {
-        errors.index.push(
+        configErrors.index.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexText',
             {
@@ -44,12 +51,13 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
     },
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
-    validateParams: (actionParams: IndexActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: IndexActionParams
+    ): GenericValidationResult<IndexActionParams> => {
       const errors = {
         documents: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (!actionParams.documents?.length || Object.keys(actionParams.documents[0]).length === 0) {
         errors.documents.push(
           i18n.translate(

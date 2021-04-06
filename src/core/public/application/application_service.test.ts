@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -28,7 +17,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow, mount } from 'enzyme';
 
-import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
@@ -54,7 +42,6 @@ describe('#setup()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -367,16 +354,6 @@ describe('#setup()', () => {
       MockHistory.push.mockClear();
     });
   });
-
-  it("`registerMountContext` calls context container's registerContext", () => {
-    const { registerMountContext } = service.setup(setupDeps);
-    const container = setupDeps.context.createContextContainer.mock.results[0].value;
-    const pluginId = Symbol();
-
-    const appMount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, appMount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
-  });
 });
 
 describe('#start()', () => {
@@ -384,7 +361,6 @@ describe('#start()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -697,7 +673,7 @@ describe('#start()', () => {
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
-        const mountPromise = new Promise((resolve) => (finishMount = resolve));
+        const mountPromise = new Promise<void>((resolve) => (finishMount = resolve));
         const app = {
           id: 'some-id',
           title: 'some-title',
@@ -753,6 +729,19 @@ describe('#start()', () => {
           0,
         ]
       `);
+    });
+
+    it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
+      service.setup(setupDeps);
+      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('myTestApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
+
+      await navigateToApp('myOtherApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
     });
 
     describe('when `replace` option is true', () => {
@@ -856,7 +845,6 @@ describe('#stop()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();

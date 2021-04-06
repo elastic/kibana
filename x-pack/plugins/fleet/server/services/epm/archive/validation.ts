@@ -1,25 +1,81 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import yaml from 'js-yaml';
-import { uniq } from 'lodash';
-import {
+import { pick, uniq } from 'lodash';
+
+import type {
   ArchivePackage,
   RegistryPolicyTemplate,
   RegistryDataStream,
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
+  PackageSpecManifest,
+} from '../../../../common/types';
+import {
+  RegistryInputKeys,
+  RegistryVarsEntryKeys,
+  RegistryPolicyTemplateKeys,
+  RegistryStreamKeys,
+  RegistryDataStreamKeys,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
-import { unpackBufferEntries } from './index';
 import { pkgToPkgKey } from '../registry';
+
+import { unpackBufferEntries } from './index';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
+
+// not sure these are 100% correct but they do the job here
+// keeping them local until others need them
+type OptionalPropertyOf<T extends object> = Exclude<
+  {
+    [K in keyof T]: T extends Record<K, T[K]> ? never : K;
+  }[keyof T],
+  undefined
+>;
+type RequiredPropertyOf<T extends object> = Exclude<keyof T, OptionalPropertyOf<T>>;
+
+type RequiredPackageProp = RequiredPropertyOf<ArchivePackage>;
+type OptionalPackageProp = OptionalPropertyOf<ArchivePackage>;
+// pro: guarantee only supplying known values. these keys must be in ArchivePackage. no typos or new values
+// pro: any values added to these lists will be passed through by default
+// pro & con: values do need to be shadowed / repeated from ArchivePackage, but perhaps we want to limit values
+const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
+  'name',
+  'version',
+  'description',
+  'title',
+  'format_version',
+  'release',
+  'owner',
+] as const;
+
+const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
+  'readme',
+  'assets',
+  'data_streams',
+  'internal',
+  'license',
+  'type',
+  'categories',
+  'conditions',
+  'screenshots',
+  'icons',
+  'policy_templates',
+] as const;
+
+const registryInputProps = Object.values(RegistryInputKeys);
+const registryVarsProps = Object.values(RegistryVarsEntryKeys);
+const registryPolicyTemplateProps = Object.values(RegistryPolicyTemplateKeys);
+const registryStreamProps = Object.values(RegistryStreamKeys);
+const registryDataStreamProps = Object.values(RegistryDataStreamKeys);
 
 // TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
 // package registry. At some point this should probably be replaced (or enhanced) with verification based on
@@ -58,44 +114,55 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   }
 
   // ... which must be valid YAML
-  let manifest;
+  let manifest: ArchivePackage;
   try {
     manifest = yaml.load(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
   }
 
+  // must have mandatory fields
+  const reqGiven = pick(manifest, requiredArchivePackageProps);
+  const requiredKeysMatch =
+    Object.keys(reqGiven).toString() === requiredArchivePackageProps.toString();
+  if (!requiredKeysMatch) {
+    const list = requiredArchivePackageProps.join(', ');
+    throw new PackageInvalidArchiveError(
+      `Invalid top-level package manifest: one or more fields missing of ${list}`
+    );
+  }
+
+  // at least have all required properties
+  // get optional values and combine into one object for the remaining operations
+  const optGiven = pick(manifest, optionalArchivePackageProps);
+  const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
+
   // Package name and version from the manifest must match those from the toplevel directory
-  const pkgKey = pkgToPkgKey({ name: manifest.name, version: manifest.version });
+  const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
   if (toplevelDir !== pkgKey) {
     throw new PackageInvalidArchiveError(
-      `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${toplevelDir}`
+      `Name ${parsed.name} and version ${parsed.version} do not match top-level directory ${toplevelDir}`
     );
   }
 
-  const { name, version, description, type, categories, format_version: formatVersion } = manifest;
-  // check for mandatory fields
-  if (!(name && version && description && type && categories && formatVersion)) {
-    throw new PackageInvalidArchiveError(
-      'Invalid top-level package manifest: one or more fields missing of name, version, description, type, categories, format_version'
-    );
+  parsed.data_streams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  parsed.policy_templates = parseAndVerifyPolicyTemplates(manifest);
+  // add readme if exists
+  const readme = parseAndVerifyReadme(paths, parsed.name, parsed.version);
+  if (readme) {
+    parsed.readme = readme;
   }
 
-  const dataStreams = parseAndVerifyDataStreams(paths, name, version);
-  const policyTemplates = parseAndVerifyPolicyTemplates(manifest);
-
-  return {
-    name,
-    version,
-    description,
-    type,
-    categories,
-    format_version: formatVersion,
-    data_streams: dataStreams,
-    policy_templates: policyTemplates,
-  };
+  return parsed;
 }
-function parseAndVerifyDataStreams(
+
+function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: string): string | null {
+  const readmeRelPath = `/docs/README.md`;
+  const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
+  return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
+}
+
+export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
   pkgVersion: string
@@ -137,44 +204,59 @@ function parseAndVerifyDataStreams(
     const {
       title: dataStreamTitle,
       release,
-      ingest_pipeline: ingestPipeline,
       type,
       dataset,
+      ingest_pipeline: ingestPipeline,
+      streams: manifestStreams,
+      ...restOfProps
     } = manifest;
     if (!(dataStreamTitle && release && type)) {
       throw new PackageInvalidArchiveError(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'release', 'type'`
       );
     }
-    const streams = parseAndVerifyStreams(manifest, dataStreamPath);
+    const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
     // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
-    return dataStreams.push({
-      dataset: dataset || `${pkgName}.${dataStreamPath}`,
-      title: dataStreamTitle,
-      release,
-      package: pkgName,
-      ingest_pipeline: ingestPipeline || 'default',
-      path: dataStreamPath,
-      type,
-      streams,
-    });
+    dataStreams.push(
+      Object.entries(restOfProps).reduce(
+        (validatedDataStream, [key, value]) => {
+          if (registryDataStreamProps.includes(key as RegistryDataStreamKeys)) {
+            // @ts-expect-error
+            validatedDataStream[key] = value;
+          }
+          return validatedDataStream;
+        },
+        {
+          title: dataStreamTitle,
+          release,
+          type,
+          package: pkgName,
+          dataset: dataset || `${pkgName}.${dataStreamPath}`,
+          ingest_pipeline: ingestPipeline || 'default',
+          path: dataStreamPath,
+          streams,
+        }
+      )
+    );
   });
 
   return dataStreams;
 }
-function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+
+export function parseAndVerifyStreams(
+  manifestStreams: any,
+  dataStreamPath: string
+): RegistryStream[] {
   const streams: RegistryStream[] = [];
-  const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
     manifestStreams.forEach((manifestStream: any) => {
       const {
         input,
         title: streamTitle,
-        description,
-        enabled,
         vars: manifestVars,
         template_path: templatePath,
+        ...restOfProps
       } = manifestStream;
       if (!(input && streamTitle)) {
         throw new PackageInvalidArchiveError(
@@ -182,100 +264,137 @@ function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryS
         );
       }
       const vars = parseAndVerifyVars(manifestVars, `data stream ${dataStreamPath}`);
+
       // default template path name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L143
-      streams.push({
-        input,
-        title: streamTitle,
-        description,
-        enabled,
-        vars,
-        template_path: templatePath || 'stream.yml.hbs',
-      });
+      streams.push(
+        Object.entries(restOfProps).reduce(
+          (validatedStream, [key, value]) => {
+            if (registryStreamProps.includes(key as RegistryStreamKeys)) {
+              // @ts-expect-error
+              validatedStream[key] = value;
+            }
+            return validatedStream;
+          },
+          {
+            input,
+            title: streamTitle,
+            vars,
+            template_path: templatePath || 'stream.yml.hbs',
+          } as RegistryStream
+        )
+      );
     });
   }
   return streams;
 }
-function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
+
+export function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
   const vars: RegistryVarsEntry[] = [];
   if (manifestVars && manifestVars.length > 0) {
     manifestVars.forEach((manifestVar) => {
-      const {
-        name,
-        title: varTitle,
-        description,
-        type,
-        required,
-        show_user: showUser,
-        multi,
-        def,
-        os,
-      } = manifestVar;
+      const { name, type, ...restOfProps } = manifestVar;
       if (!(name && type)) {
         throw new PackageInvalidArchiveError(
           `Invalid var definition for ${location}: one of mandatory fields 'name' and 'type' missing in var: ${manifestVar}`
         );
       }
-      vars.push({
-        name,
-        title: varTitle,
-        description,
-        type,
-        required,
-        show_user: showUser,
-        multi,
-        default: def,
-        os,
-      });
+
+      vars.push(
+        Object.entries(restOfProps).reduce(
+          (validatedVarEntry, [key, value]) => {
+            if (registryVarsProps.includes(key as RegistryVarsEntryKeys)) {
+              // @ts-expect-error
+              validatedVarEntry[key] = value;
+            }
+            return validatedVarEntry;
+          },
+          { name, type } as RegistryVarsEntry
+        )
+      );
     });
   }
   return vars;
 }
-function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+
+export function parseAndVerifyPolicyTemplates(
+  manifest: PackageSpecManifest
+): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
-  if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
+  if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
     manifestPolicyTemplates.forEach((policyTemplate: any) => {
-      const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
-      if (!(name && policyTemplateTitle && description && inputs)) {
+      const {
+        name,
+        title: policyTemplateTitle,
+        description,
+        inputs,
+        multiple,
+        ...restOfProps
+      } = policyTemplate;
+      if (!(name && policyTemplateTitle && description)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in policy template: ${policyTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${policyTemplate}`
         );
       }
-
-      const parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      let parsedInputs: RegistryInput[] | undefined = [];
+      if (inputs) {
+        parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      }
 
       // defaults to true if undefined, but may be explicitly set to false.
       let parsedMultiple = true;
       if (typeof multiple === 'boolean' && multiple === false) parsedMultiple = false;
 
-      policyTemplates.push({
-        name,
-        title: policyTemplateTitle,
-        description,
-        inputs: parsedInputs,
-        multiple: parsedMultiple,
-      });
+      policyTemplates.push(
+        Object.entries(restOfProps).reduce(
+          (validatedPolicyTemplate, [key, value]) => {
+            if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
+              // @ts-expect-error
+              validatedPolicyTemplate[key] = value;
+            }
+            return validatedPolicyTemplate;
+          },
+          {
+            name,
+            title: policyTemplateTitle,
+            description,
+            inputs: parsedInputs,
+            multiple: parsedMultiple,
+          } as RegistryPolicyTemplate
+        )
+      );
     });
   }
   return policyTemplates;
 }
-function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
+
+export function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
   const inputs: RegistryInput[] = [];
   if (manifestInputs && manifestInputs.length > 0) {
     manifestInputs.forEach((input: any) => {
-      const { type, title: inputTitle, description, vars } = input;
-      if (!(type && inputTitle)) {
+      const { title: inputTitle, vars, ...restOfProps } = input;
+      if (!(input.type && inputTitle)) {
         throw new PackageInvalidArchiveError(
           `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${input}`
         );
       }
       const parsedVars = parseAndVerifyVars(vars, location);
-      inputs.push({
-        type,
-        title: inputTitle,
-        description,
-        vars: parsedVars,
-      });
+
+      inputs.push(
+        Object.entries(restOfProps).reduce(
+          (validatedInput, [key, value]) => {
+            if (registryInputProps.includes(key as RegistryInputKeys)) {
+              // @ts-expect-error
+              validatedInput[key] = value;
+            }
+            return validatedInput;
+          },
+          {
+            title: inputTitle,
+            vars: parsedVars,
+          } as RegistryInput
+        )
+      );
     });
   }
   return inputs;

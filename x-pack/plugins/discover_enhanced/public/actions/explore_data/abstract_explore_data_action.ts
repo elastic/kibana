@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -42,7 +43,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract async getUrl(context: Context): Promise<KibanaURL>;
+  protected abstract getUrl(context: Context): Promise<KibanaURL>;
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;

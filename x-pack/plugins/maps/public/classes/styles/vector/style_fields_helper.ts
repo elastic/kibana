@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -67,6 +68,11 @@ export class StyleFieldsHelper {
     this._ordinalAndCategoricalFields = ordinalAndCategoricalFields;
     this._numberFields = numberFields;
     this._ordinalFields = ordinalFields;
+  }
+
+  hasFieldForStyle(field: IField, styleName: VECTOR_STYLES): boolean {
+    const fieldList = this.getFieldsForStyle(styleName);
+    return fieldList.some((styleField) => field.getName() === styleField.name);
   }
 
   getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {

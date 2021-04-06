@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import {
-  IIndexPattern,
   Query,
   Filter,
   esFilters,
@@ -18,8 +21,6 @@ import {
   SavedQuery,
   SavedQueryTimeFilter,
 } from '../../../../../../../../src/plugins/data/public';
-
-import { BrowserFields } from '../../../../common/containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
@@ -28,24 +29,20 @@ import { DispatchUpdateReduxTime } from '../../../../common/components/super_dat
 import { QueryBar } from '../../../../common/components/query_bar';
 import { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
+import { timelineActions } from '../../../store/timeline';
 
 export interface QueryBarTimelineComponentProps {
-  applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
-  browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filters: Filter[];
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
-  filterQueryDraft: KueryFilterQuery;
   from: string;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
   setFilters: (filters: Filter[]) => void;
-  setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
   to: string;
@@ -60,21 +57,16 @@ const getNonDropAreaFilters = (filters: Filter[] = []) =>
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
-    applyKqlFilterQuery,
-    browserFields,
     dataProviders,
     filters,
     filterManager,
     filterQuery,
-    filterQueryDraft,
     from,
     fromStr,
     kqlMode,
-    indexPattern,
     isRefreshPaused,
     savedQueryId,
     setFilters,
-    setKqlFilterQueryDraft,
     setSavedQueryId,
     refreshInterval,
     timelineId,
@@ -82,14 +74,16 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     toStr,
     updateReduxTime,
   }) => {
+    const dispatch = useDispatch();
     const [dateRangeFrom, setDateRangeFrom] = useState<string>(
       fromStr != null ? fromStr : new Date(from).toISOString()
     );
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
+    const { browserFields, indexPattern } = useSourcererScope(SourcererScopeName.timeline);
 
-    const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
+    const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
@@ -101,6 +95,23 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
     const savedQueryServices = useSavedQueryServices();
+
+    const applyKqlFilterQuery = useCallback(
+      (expression: string, kind) =>
+        dispatch(
+          timelineActions.applyKqlFilterQuery({
+            id: timelineId,
+            filterQuery: {
+              kuery: {
+                kind,
+                expression,
+              },
+              serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+            },
+          })
+        ),
+      [dispatch, indexPattern, timelineId]
+    );
 
     useEffect(() => {
       let isSubscribed = true;
@@ -181,10 +192,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
               });
             }
           } catch (exc) {
-            setSavedQuery(null);
+            setSavedQuery(undefined);
           }
         } else if (isSubscribed) {
-          setSavedQuery(null);
+          setSavedQuery(undefined);
         }
       }
       setSavedQueryByServices();
@@ -194,23 +205,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedQueryId]);
 
-    const onChangedQuery = useCallback(
-      (newQuery: Query) => {
-        if (
-          filterQueryDraft == null ||
-          (filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
-          filterQueryDraft.kind !== newQuery.language
-        ) {
-          setKqlFilterQueryDraft(
-            newQuery.query as string,
-            newQuery.language as KueryFilterQueryKind
-          );
-        }
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterQueryDraft]
-    );
-
     const onSubmitQuery = useCallback(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
         if (
@@ -218,10 +212,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           (filterQuery != null && filterQuery.expression !== newQuery.query) ||
           filterQuery.kind !== newQuery.language
         ) {
-          setKqlFilterQueryDraft(
-            newQuery.query as string,
-            newQuery.language as KueryFilterQueryKind
-          );
           applyKqlFilterQuery(newQuery.query as string, newQuery.language as KueryFilterQueryKind);
         }
         if (timefilter != null) {
@@ -242,7 +232,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     const onSavedQuery = useCallback(
-      (newSavedQuery: SavedQuery | null) => {
+      (newSavedQuery: SavedQuery | undefined) => {
         if (newSavedQuery != null) {
           if (newSavedQuery.id !== savedQueryId) {
             setSavedQueryId(newSavedQuery.id);
@@ -292,10 +282,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
-        filterQueryDraft={filterQueryDraft}
         filterManager={filterManager}
         filters={queryBarFilters}
-        onChangedQuery={onChangedQuery}
         onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}

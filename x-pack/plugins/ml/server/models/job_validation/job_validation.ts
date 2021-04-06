@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
-import { renderTemplate } from '../../../common/util/string_utils';
-import {
-  getMessages,
-  MessageId,
-  JobValidationMessageDef,
-} from '../../../common/constants/messages';
+import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
@@ -39,7 +34,6 @@ export async function validateJob(
   client: IScopedClusterClient,
   mlClient: MlClient,
   payload: ValidateJobPayload,
-  kbnVersion = 'current',
   isSecurityDisabled?: boolean
 ) {
   const messages = getMessages();
@@ -54,7 +48,7 @@ export async function validateJob(
     // if so, run the extended tests and merge the messages.
     // otherwise just return the basic test messages.
     const basicValidation = basicJobValidation(job, fields, {}, true);
-    let validationMessages;
+    let validationMessages: JobValidationMessage[];
 
     if (basicValidation.valid === true) {
       // remove basic success messages from tests
@@ -70,7 +64,14 @@ export async function validateJob(
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field;
-        const timeRange = await fs.getTimeFieldRange(index, timeField, job.datafeed_config.query);
+        const timeRange = await fs.getTimeFieldRange(
+          index,
+          timeField,
+          job.datafeed_config.query,
+          job.datafeed_config.runtime_mappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          job.datafeed_config.indices_options
+        );
 
         duration = {
           start: timeRange.start.epoch,
@@ -112,36 +113,7 @@ export async function validateJob(
       validationMessages.push({ id: 'skipped_extended_tests' });
     }
 
-    return uniqWithIsEqual(validationMessages).map((message) => {
-      const messageId = message.id as MessageId;
-      const messageDef = messages[messageId] as JobValidationMessageDef;
-      if (typeof messageDef !== 'undefined') {
-        // render the message template with the provided metadata
-        if (typeof messageDef.heading !== 'undefined') {
-          message.heading = renderTemplate(messageDef.heading, message);
-        }
-        message.text = renderTemplate(messageDef.text, message);
-        // check if the error message provides a link with further information
-        // if so, add it to the message to be returned with it
-        if (typeof messageDef.url !== 'undefined') {
-          // the link is also treated as a template so we're able to dynamically link to
-          // documentation links matching the running version of Kibana.
-          message.url = renderTemplate(messageDef.url, { version: kbnVersion! });
-        }
-
-        message.status = messageDef.status;
-      } else {
-        message.text = i18n.translate(
-          'xpack.ml.models.jobValidation.unknownMessageIdErrorMessage',
-          {
-            defaultMessage: '{messageId} (unknown message id)',
-            values: { messageId },
-          }
-        );
-      }
-
-      return message;
-    });
+    return uniqWithIsEqual(validationMessages);
   } catch (error) {
     throw Boom.badRequest(error);
   }

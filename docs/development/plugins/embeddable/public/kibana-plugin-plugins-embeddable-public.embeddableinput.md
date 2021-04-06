@@ -16,9 +16,7 @@ export declare type EmbeddableInput = {
     enhancements?: SerializableState;
     disabledActions?: string[];
     disableTriggers?: boolean;
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
     searchSessionId?: string;
+    syncColors?: boolean;
 };
 ```

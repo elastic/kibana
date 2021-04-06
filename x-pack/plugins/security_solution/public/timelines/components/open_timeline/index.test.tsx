@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -18,7 +19,7 @@ import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineType } from '../../../../common/types/timeline';
 
-import { TestProviders, apolloClient, mockOpenTimelineQueryResults } from '../../../common/mock';
+import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
 import { getTimelineTabsUrl } from '../../../common/components/link_to';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -123,7 +124,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -186,7 +186,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -230,7 +229,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={true}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -257,7 +255,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -276,7 +273,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -301,7 +297,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -328,7 +323,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -355,7 +349,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -396,7 +389,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -435,7 +427,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -467,7 +458,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -495,7 +485,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -523,7 +512,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -569,7 +557,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -582,16 +569,8 @@ describe('StatefulOpenTimeline', () => {
         wrapper.update();
 
         wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-        expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
-        expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
-
-        expect(
-          wrapper
-            .find('[data-test-subj="note-previews-container"]')
-            .find('[data-test-subj="updated-by"]')
-            .first()
-            .text()
-        ).toEqual('elastic');
+        expect(wrapper.find('.euiCommentEvent__headerUsername').exists()).toEqual(true);
+        expect(wrapper.find('.euiCommentEvent__headerUsername').first().text()).toEqual('elastic');
       });
     });
 
@@ -601,7 +580,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -619,7 +597,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={true}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -645,7 +622,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -672,7 +648,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -699,7 +674,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -735,7 +709,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}

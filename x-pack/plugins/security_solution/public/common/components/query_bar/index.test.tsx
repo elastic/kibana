@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -33,7 +34,16 @@ describe('QueryBar ', () => {
     await waitFor(() => getByTestId('queryInput')); // check for presence of query input
     return mount(Component);
   };
+  let abortSpy: jest.SpyInstance;
+  beforeAll(() => {
+    const mockAbort = new AbortController();
+    mockAbort.abort();
+    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
+  });
 
+  afterAll(() => {
+    abortSpy.mockRestore();
+  });
   beforeEach(() => {
     mockOnChangeQuery.mockClear();
     mockOnSubmitQuery.mockClear();
@@ -72,8 +82,8 @@ describe('QueryBar ', () => {
 
     expect(searchBarProps).toEqual({
       dataTestSubj: undefined,
-      dateRangeFrom: 'now-24h',
-      dateRangeTo: 'now',
+      dateRangeFrom: 'now/d',
+      dateRangeTo: 'now/d',
       filters: [],
       indexPatterns: [
         {
@@ -162,6 +172,18 @@ describe('QueryBar ', () => {
               searchable: true,
               type: 'string',
             },
+            {
+              aggregatable: false,
+              name: 'nestedField.firstAttributes',
+              searchable: true,
+              type: 'string',
+            },
+            {
+              aggregatable: false,
+              name: 'nestedField.secondAttributes',
+              searchable: true,
+              type: 'string',
+            },
           ],
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
@@ -173,78 +195,13 @@ describe('QueryBar ', () => {
         query: 'here: query',
       },
       refreshInterval: undefined,
+      savedQuery: undefined,
       showAutoRefreshOnly: false,
       showDatePicker: false,
       showFilterBar: true,
       showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
-    });
-  });
-
-  describe('state', () => {
-    test('clears draftQuery when filterQueryDraft has been cleared', async () => {
-      const wrapper = await getWrapper(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{ query: '', language: 'kuery' }}
-          filterQueryDraft={{ expression: 'host.name', kind: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-
-      let queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-      queryInput.simulate('change', { target: { value: 'host.name:*' } });
-
-      wrapper.update();
-      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-      expect(queryInput.props().children).toBe('host.name:*');
-
-      wrapper.setProps({ filterQueryDraft: null });
-      wrapper.update();
-      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-
-      expect(queryInput.props().children).toBe('');
-    });
-  });
-
-  describe('#onQueryChange', () => {
-    test(' is the only reference that changed when filterQueryDraft props get updated', async () => {
-      const wrapper = await getWrapper(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-      const searchBarProps = wrapper.find(SearchBar).props();
-      const onChangedQueryRef = searchBarProps.onQueryChange;
-      const onSubmitQueryRef = searchBarProps.onQuerySubmit;
-      const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
-
-      const queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-      queryInput.simulate('change', { target: { value: 'hello: world' } });
-      wrapper.update();
-
-      expect(onChangedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQueryChange);
-      expect(onSubmitQueryRef).toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
-      expect(onSavedQueryRef).toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
     });
   });
 
@@ -329,7 +286,6 @@ describe('QueryBar ', () => {
       const onChangedQueryRef = searchBarProps.onQueryChange;
       const onSubmitQueryRef = searchBarProps.onQuerySubmit;
       const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
-
       wrapper.setProps({ onSavedQuery: jest.fn() });
       wrapper.update();
 
@@ -359,22 +315,21 @@ describe('QueryBar ', () => {
           onSavedQuery={mockOnSavedQuery}
         />
       );
+      const isSavedQueryPopoverOpen = () =>
+        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+
+      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+
+      wrapper
+        .find('button[data-test-subj="saved-query-management-popover-button"]')
+        .simulate('click');
+
       await waitFor(() => {
-        const isSavedQueryPopoverOpen = () =>
-          wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
-
-        expect(isSavedQueryPopoverOpen()).toBeFalsy();
-
-        wrapper
-          .find('button[data-test-subj="saved-query-management-popover-button"]')
-          .simulate('click');
-
         expect(isSavedQueryPopoverOpen()).toBeTruthy();
+      });
+      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
 
-        wrapper
-          .find('button[data-test-subj="saved-query-management-save-button"]')
-          .simulate('click');
-
+      await waitFor(() => {
         expect(isSavedQueryPopoverOpen()).toBeFalsy();
       });
     });

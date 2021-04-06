@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -46,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
             // tries to do that and we have to workaround this behaviour. We also need to wait until our
             // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
-            (window as Record<string, any>).__isScriptExecuted__ = new Promise((resolve) => {
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise<void>((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
                   href:

@@ -5,6 +5,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["globalSearch"],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "savedObjectsTagging"],
   "configPath": ["xpack", "global_search_bar"]
 }

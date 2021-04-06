@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { euiStyled, EuiTheme, withTheme } from '../../../../../observability/public';
+import {
+  euiStyled,
+  EuiTheme,
+  withTheme,
+} from '../../../../../../../src/plugins/kibana_react/common';
 import { DocumentTitle } from '../../../components/document_title';
 import { Header } from '../../../components/header';
 import { ColumnarPage, PageContent } from '../../../components/page';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
-import { Source } from '../../../containers/source';
+import { Source } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';

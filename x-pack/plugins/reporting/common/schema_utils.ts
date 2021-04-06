@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -17,6 +18,13 @@ export const durationToNumber = (value: number | moment.Duration): number => {
     return value;
   }
   return value.asMilliseconds();
+};
+
+export const numberToDuration = (value: number | moment.Duration): moment.Duration => {
+  if (typeof value === 'number') {
+    return moment.duration(value, 'milliseconds');
+  }
+  return value;
 };
 
 export const byteSizeValueToNumber = (value: number | ByteSizeValue) => {

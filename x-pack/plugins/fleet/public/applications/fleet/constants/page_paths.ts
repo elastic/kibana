@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export type StaticPage =
@@ -17,7 +18,11 @@ export type StaticPage =
   | 'data_streams';
 
 export type DynamicPage =
-  | 'integration_details'
+  | 'integration_details_overview'
+  | 'integration_details_policies'
+  | 'integration_details_settings'
+  | 'integration_details_custom'
+  | 'integration_policy_edit'
   | 'policy_details'
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
@@ -41,6 +46,11 @@ export const PAGE_ROUTING_PATHS = {
   integrations_all: '/integrations',
   integrations_installed: '/integrations/installed',
   integration_details: '/integrations/detail/:pkgkey/:panel?',
+  integration_details_overview: '/integrations/detail/:pkgkey/overview',
+  integration_details_policies: '/integrations/detail/:pkgkey/policies',
+  integration_details_settings: '/integrations/detail/:pkgkey/settings',
+  integration_details_custom: '/integrations/detail/:pkgkey/custom',
+  integration_policy_edit: '/integrations/edit-integration/:packagePolicyId',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -67,8 +77,12 @@ export const pagePathGetters: {
   integrations: () => '/integrations',
   integrations_all: () => '/integrations',
   integrations_installed: () => '/integrations/installed',
-  integration_details: ({ pkgkey, panel }) =>
-    `/integrations/detail/${pkgkey}${panel ? `/${panel}` : ''}`,
+  integration_details_overview: ({ pkgkey }) => `/integrations/detail/${pkgkey}/overview`,
+  integration_details_policies: ({ pkgkey }) => `/integrations/detail/${pkgkey}/policies`,
+  integration_details_settings: ({ pkgkey }) => `/integrations/detail/${pkgkey}/settings`,
+  integration_details_custom: ({ pkgkey }) => `/integrations/detail/${pkgkey}/custom`,
+  integration_policy_edit: ({ packagePolicyId }) =>
+    `/integrations/edit-integration/${packagePolicyId}`,
   policies: () => '/policies',
   policies_list: () => '/policies',
   policy_details: ({ policyId, tabId }) => `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
@@ -78,8 +92,8 @@ export const pagePathGetters: {
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   fleet: () => '/fleet',
   fleet_agent_list: ({ kuery }) => `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
-  fleet_agent_details: ({ agentId, tabId }) =>
-    `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}`,
+  fleet_agent_details: ({ agentId, tabId, logQuery }) =>
+    `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,
   fleet_enrollment_tokens: () => '/fleet/enrollment-tokens',
   data_streams: () => '/data-streams',
 };

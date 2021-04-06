@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
+
 import { Error } from '../../../components';
-import { AgentPolicy, PackageInfo, PackagePolicy, GetPackagesResponse } from '../../../types';
+import type { AgentPolicy, PackageInfo, PackagePolicy, GetPackagesResponse } from '../../../types';
 import {
   useGetOneAgentPolicy,
   useGetPackages,
@@ -16,6 +19,7 @@ import {
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 export const StepSelectPackage: React.FunctionComponent<{
   agentPolicyId: string;
@@ -32,7 +36,7 @@ export const StepSelectPackage: React.FunctionComponent<{
 }) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
-    packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
+    packageInfo ? pkgKeyFromPackageInfo(packageInfo) : undefined
   );
   const [selectedPkgError, setSelectedPkgError] = useState<Error>();
 
@@ -92,7 +96,7 @@ export const StepSelectPackage: React.FunctionComponent<{
         updatePackageInfo(undefined);
       }
     };
-    if (!packageInfo || selectedPkgKey !== `${packageInfo.name}-${packageInfo.version}`) {
+    if (!packageInfo || selectedPkgKey !== pkgKeyFromPackageInfo(packageInfo)) {
       fetchPackageInfo();
     }
   }, [selectedPkgKey, packageInfo, updatePackageInfo, setIsLoadingSecondStep]);
@@ -140,15 +144,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             return {
               label: title || name,
               key: pkgkey,
-              prepend: (
-                <PackageIcon
-                  packageName={name}
-                  version={version}
-                  icons={icons}
-                  size="m"
-                  tryApi={true}
-                />
-              ),
+              prepend: <PackageIcon packageName={name} version={version} icons={icons} size="m" />,
               checked: selectedPkgKey === pkgkey ? 'on' : undefined,
             };
           })}

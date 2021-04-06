@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo } from 'react';
 import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { Link } from 'react-router-dom';
 import { useMlLink } from '../../../contexts/kibana';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
@@ -39,26 +38,24 @@ export const ViewLink: FC<Props> = ({ item }) => {
       jobId: item.id,
       analysisType: analysisType as DataFrameAnalysisConfigType,
     },
-    excludeBasePath: true,
   });
 
   return (
     <EuiToolTip position="bottom" content={tooltipText}>
-      <Link to={viewAnalyticsResultsLink}>
-        <EuiButtonEmpty
-          color="text"
-          size="xs"
-          iconType="visTable"
-          aria-label={viewJobResultsButtonText}
-          className="results-button"
-          data-test-subj="mlOverviewAnalyticsJobViewButton"
-          isDisabled={disabled}
-        >
-          {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
-            defaultMessage: 'View',
-          })}
-        </EuiButtonEmpty>
-      </Link>
+      <EuiButtonEmpty
+        href={viewAnalyticsResultsLink}
+        color="text"
+        size="xs"
+        iconType="visTable"
+        aria-label={viewJobResultsButtonText}
+        className="results-button"
+        data-test-subj="mlOverviewAnalyticsJobViewButton"
+        isDisabled={disabled}
+      >
+        {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
+          defaultMessage: 'View',
+        })}
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 };

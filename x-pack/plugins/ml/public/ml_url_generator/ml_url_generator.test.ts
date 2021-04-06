@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MlUrlGenerator } from './ml_url_generator';
@@ -87,7 +88,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*'))"
+          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*')))"
         );
       });
       it('should generate valid URL for the Anomaly Explorer page for multiple jobIds', async () => {
@@ -103,7 +104,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:())"
+          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"
         );
       });
     });
@@ -130,7 +131,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*'))))"
         );
       });
 
@@ -161,7 +162,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2')),query:(query_string:(analyze_wildcard:!t,query:'*')),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z'))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2'),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z')),query:(query_string:(analyze_wildcard:!t,query:'*'))))"
         );
       });
     });

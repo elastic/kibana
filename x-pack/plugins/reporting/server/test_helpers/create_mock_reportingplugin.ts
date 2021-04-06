@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
+import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { fieldFormats } from 'src/plugins/data/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -21,7 +25,7 @@ import {
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { ReportingStartDeps } from '../types';
+import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
@@ -30,10 +34,7 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockPluginSetup = (
-  mockReportingCore: ReportingCore,
-  setupMock?: any
-): ReportingInternalSetup => {
+export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
@@ -41,22 +42,35 @@ const createMockPluginSetup = (
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    taskManager: { registerTaskDefinitions: jest.fn() } as any,
+    ...setupMock,
   };
 };
 
 const logger = createMockLevelLogger();
 
-const createMockPluginStart = (
-  mockReportingCore: ReportingCore,
+const createMockReportingStore = () => ({} as ReportingStore);
+
+export const createMockPluginStart = (
+  mockReportingCore: ReportingCore | undefined,
   startMock?: any
 ): ReportingInternalStart => {
-  const store = new ReportingStore(mockReportingCore, logger);
+  const store = mockReportingCore
+    ? new ReportingStore(mockReportingCore, logger)
+    : createMockReportingStore();
+
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
+    esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    data: startMock.data || dataPluginMock.createStartContract(),
     store,
+    taskManager: {
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+    } as any,
+    ...startMock,
   };
 };
 
@@ -72,7 +86,7 @@ interface ReportingConfigTestType {
 
 export const createMockConfigSchema = (
   overrides: Partial<ReportingConfigTestType> = {}
-): ReportingConfigTestType => {
+): ReportingConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
     index: '.reporting',
@@ -92,13 +106,16 @@ export const createMockConfigSchema = (
       ...overrides.capture,
     },
     queue: {
+      indexInterval: 'week',
+      pollEnabled: true,
+      pollInterval: 3000,
       timeout: 120000,
       ...overrides.queue,
     },
     csv: {
       ...overrides.csv,
     },
-  };
+  } as any;
 };
 
 export const createMockConfig = (
@@ -113,36 +130,43 @@ export const createMockConfig = (
   };
 };
 
-export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
-  data: startMock.data,
-});
-
 export const createMockReportingCore = async (
   config: ReportingConfig,
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = {
+  const mockReportingCore = ({
     getConfig: () => config,
     getElasticsearchService: () => setupDepsMock?.elasticsearch,
-  } as ReportingCore;
+    getDataService: () => startDepsMock?.data,
+  } as unknown) as ReportingCore;
 
   if (!setupDepsMock) {
-    setupDepsMock = createMockPluginSetup(mockReportingCore, {});
+    setupDepsMock = createMockPluginSetup({});
   }
   if (!startDepsMock) {
     startDepsMock = createMockPluginStart(mockReportingCore, {});
   }
 
-  config = config || {};
-  const core = new ReportingCore(logger);
+  const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
+  const core = new ReportingCore(logger, context);
+  core.setConfig(config);
 
   core.pluginSetup(setupDepsMock);
-  core.setConfig(config);
   await core.pluginSetsUp();
 
-  core.pluginStart(startDepsMock);
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(core, context);
+  }
+  await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
+
+  setFieldFormats({
+    fieldFormatServiceFactory() {
+      const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+      return Promise.resolve(fieldFormatsRegistry);
+    },
+  });
 
   return core;
 };

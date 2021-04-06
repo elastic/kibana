@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution via Regsvcs/Regasm",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(RegAsm.exe or RegSvcs.exe)",
   "risk_score": 21,
@@ -30,13 +31,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1121",
-          "name": "Regsvcs/Regasm",
-          "reference": "https://attack.mitre.org/techniques/T1121/"
-        }
-      ]
+      "technique": []
     },
     {
       "framework": "MITRE ATT&CK",
@@ -47,13 +42,21 @@
       },
       "technique": [
         {
-          "id": "T1121",
-          "name": "Regsvcs/Regasm",
-          "reference": "https://attack.mitre.org/techniques/T1121/"
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.009",
+              "name": "Regsvcs/Regasm",
+              "reference": "https://attack.mitre.org/techniques/T1218/009/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

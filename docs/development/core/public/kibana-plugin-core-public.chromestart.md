@@ -67,6 +67,7 @@ core.chrome.setHelpExtension(elem => {
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
 |  [setBreadcrumbsAppendExtension(breadcrumbsAppendExtension)](./kibana-plugin-core-public.chromestart.setbreadcrumbsappendextension.md) | Mount an element next to the last breadcrumb |
 |  [setCustomNavLink(newCustomNavLink)](./kibana-plugin-core-public.chromestart.setcustomnavlink.md) | Override the current set of custom nav link |
+|  [setHeaderBanner(headerBanner)](./kibana-plugin-core-public.chromestart.setheaderbanner.md) | Set the banner that will appear on top of the chrome header. |
 |  [setHelpExtension(helpExtension)](./kibana-plugin-core-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
 |  [setHelpSupportUrl(url)](./kibana-plugin-core-public.chromestart.sethelpsupporturl.md) | Override the default support URL shown in the help menu |
 |  [setIsVisible(isVisible)](./kibana-plugin-core-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |

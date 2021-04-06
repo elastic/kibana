@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { set } from '@elastic/safer-lodash-set';
@@ -26,7 +15,9 @@ import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = jest.fn<any, any>((doc: any) => set(doc, 'attributes.name', 'HOI!'));
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
+    ]);
     const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
@@ -48,15 +39,31 @@ describe('migrateRawDocs', () => {
       },
     ]);
 
-    expect(transform).toHaveBeenCalled();
+    const obj1 = {
+      id: 'b',
+      type: 'a',
+      attributes: { name: 'AAA' },
+      migrationVersion: {},
+      references: [],
+    };
+    const obj2 = {
+      id: 'd',
+      type: 'c',
+      attributes: { name: 'DDD' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(2);
+    expect(transform).toHaveBeenNthCalledWith(1, obj1);
+    expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
 
-  test('passes invalid docs through untouched and logs error', async () => {
+  test('throws when encountering a corrupt saved object document', async () => {
     const logger = createSavedObjectsMigrationLoggerMock();
-    const transform = jest.fn<any, any>((doc: any) =>
-      set(_.cloneDeep(doc), 'attributes.name', 'TADA')
-    );
-    const result = await migrateRawDocs(
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
+    ]);
+    const result = migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
@@ -66,29 +73,45 @@ describe('migrateRawDocs', () => {
       logger
     );
 
+    expect(result).rejects.toMatchInlineSnapshot(
+      `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
+    );
+
+    expect(transform).toHaveBeenCalledTimes(0);
+  });
+
+  test('handles when one document is transformed into multiple documents', async () => {
+    const transform = jest.fn<any, any>((doc: any) => [
+      set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
+      { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
+    ]);
+    const result = await migrateRawDocs(
+      new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      transform,
+      [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
+      createSavedObjectsMigrationLoggerMock()
+    );
+
     expect(result).toEqual([
-      { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
       {
-        _id: 'c:d',
-        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {}, references: [] },
+        _id: 'a:b',
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      },
+      {
+        _id: 'foo:bar',
+        _source: { type: 'foo', foo: { name: 'baz' }, references: [] },
       },
     ]);
 
-    expect(transform.mock.calls).toEqual([
-      [
-        {
-          id: 'd',
-          type: 'c',
-          attributes: {
-            name: 'DDD',
-          },
-          migrationVersion: {},
-          references: [],
-        },
-      ],
-    ]);
-
-    expect(logger.error).toBeCalledTimes(1);
+    const obj = {
+      id: 'b',
+      type: 'a',
+      attributes: { name: 'AAA' },
+      migrationVersion: {},
+      references: [],
+    };
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(transform).toHaveBeenCalledWith(obj);
   });
 
   test('rejects when the transform function throws an error', async () => {

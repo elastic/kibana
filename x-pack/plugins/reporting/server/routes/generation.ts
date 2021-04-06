@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -12,7 +13,7 @@ import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
+import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
@@ -47,7 +48,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       const enqueueJob = enqueueJobFactory(reporting, logger);
       const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-      // return the queue's job information
+      // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
       return res.ok({
@@ -68,8 +69,8 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   /*
    * Error should already have been logged by the time we get here
    */
-  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
-    if (err instanceof Boom) {
+  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom.Boom) {
+    if (err instanceof Boom.Boom) {
       return res.customError({
         statusCode: err.output.statusCode,
         body: err.output.payload.message,

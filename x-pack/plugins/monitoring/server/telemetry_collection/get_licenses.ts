@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ESLicense } from 'src/plugins/telemetry_collection_manager/server';
 import { LegacyAPICaller } from 'kibana/server';
+import { ESLicense } from '../../../telemetry_collection_xpack/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**

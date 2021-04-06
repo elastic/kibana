@@ -383,7 +383,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
     >
       <button
         aria-label="Add Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={true}
         onClick={[Function]}
         type="button"
@@ -397,7 +397,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
       </button>
       <button
         aria-label="Remove Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={true}
         onClick={[Function]}
         type="button"
@@ -793,7 +793,7 @@ Array [
     >
       <button
         aria-label="Add Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -807,7 +807,7 @@ Array [
       </button>
       <button
         aria-label="Remove Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={true}
         onClick={[Function]}
         type="button"
@@ -872,7 +872,7 @@ Array [
     >
       <button
         aria-label="Add Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={true}
         onClick={[Function]}
         type="button"
@@ -886,7 +886,7 @@ Array [
       </button>
       <button
         aria-label="Remove Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -951,7 +951,7 @@ Array [
     >
       <button
         aria-label="Add Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -965,7 +965,7 @@ Array [
       </button>
       <button
         aria-label="Remove Color"
-        className="euiButtonIcon euiButtonIcon--primary"
+        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         disabled={false}
         onClick={[Function]}
         type="button"

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineReducers, createStore } from 'redux';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import { TrustedApp, OperatingSystem } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
@@ -31,7 +32,11 @@ import {
 import { trustedAppsPageReducer } from '../store/reducer';
 import { TrustedAppsListResourceStateChanged } from '../store/action';
 
-const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
+const OPERATING_SYSTEMS: OperatingSystem[] = [
+  OperatingSystem.WINDOWS,
+  OperatingSystem.MAC,
+  OperatingSystem.LINUX,
+];
 
 const generate = <T>(count: number, generator: (i: number) => T) =>
   [...new Array(count).keys()].map(generator);
@@ -39,12 +44,16 @@ const generate = <T>(count: number, generator: (i: number) => T) =>
 export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedApp => {
   return {
     id: String(i),
+    version: 'abc123',
     name: generate(longTexts ? 10 : 1, () => `trusted app ${i}`).join(' '),
     description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
-    os: OS_LIST[i % 3],
+    updated_at: '1 minute ago',
+    updated_by: 'someone',
+    os: OPERATING_SYSTEMS[i % 3],
     entries: [],
+    effectScope: { type: 'global' },
   };
 };
 
@@ -70,6 +79,7 @@ export const createTrustedAppsListData = (
     pageIndex: fullPagination.pageIndex,
     totalItemsCount: fullPagination.totalItemCount,
     timestamp,
+    filter: '',
   };
 };
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -25,8 +26,9 @@ import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
+import { usePageUrlState } from '../../util/url_state';
 
-class AnomaliesTable extends Component {
+export class AnomaliesTableInternal extends Component {
   constructor(props) {
     super(props);
 
@@ -145,8 +147,20 @@ class AnomaliesTable extends Component {
     });
   };
 
+  onTableChange = ({ page, sort }) => {
+    const { tableState, updateTableState } = this.props;
+    const result = {
+      pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
+      pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
+      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      sortDirection:
+        sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
+    };
+    updateTableState(result);
+  };
+
   render() {
-    const { bounds, tableData, filter, influencerFilter } = this.props;
+    const { bounds, tableData, filter, influencerFilter, tableState } = this.props;
 
     if (
       tableData === undefined ||
@@ -186,8 +200,8 @@ class AnomaliesTable extends Component {
 
     const sorting = {
       sort: {
-        field: 'severity',
-        direction: 'desc',
+        field: tableState.sortField,
+        direction: tableState.sortDirection,
       },
     };
 
@@ -199,8 +213,15 @@ class AnomaliesTable extends Component {
       };
     };
 
+    const pagination = {
+      pageIndex: tableState.pageIndex,
+      pageSize: tableState.pageSize,
+      totalItemCount: tableData.anomalies.length,
+      pageSizeOptions: [10, 25, 100],
+    };
+
     return (
-      <React.Fragment>
+      <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
@@ -209,26 +230,46 @@ class AnomaliesTable extends Component {
           className="ml-anomalies-table eui-textOverflowWrap"
           items={tableData.anomalies}
           columns={columns}
-          pagination={{
-            pageSizeOptions: [10, 25, 100],
-            initialPageSize: 25,
-          }}
+          pagination={pagination}
           sorting={sorting}
           itemId="rowId"
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           compressed={true}
           rowProps={getRowProps}
           data-test-subj="mlAnomaliesTable"
+          onTableChange={this.onTableChange}
         />
-      </React.Fragment>
+      </>
     );
   }
 }
-AnomaliesTable.propTypes = {
+
+export const getDefaultAnomaliesTableState = () => ({
+  pageIndex: 0,
+  pageSize: 25,
+  sortField: 'severity',
+  sortDirection: 'desc',
+});
+
+export const AnomaliesTable = (props) => {
+  const [tableState, updateTableState] = usePageUrlState(
+    'mlAnomaliesTable',
+    getDefaultAnomaliesTableState()
+  );
+  return (
+    <AnomaliesTableInternal
+      {...props}
+      tableState={tableState}
+      updateTableState={updateTableState}
+    />
+  );
+};
+
+AnomaliesTableInternal.propTypes = {
   bounds: PropTypes.object.isRequired,
   tableData: PropTypes.object,
   filter: PropTypes.func,
   influencerFilter: PropTypes.func,
+  tableState: PropTypes.object.isRequired,
+  updateTableState: PropTypes.func.isRequired,
 };
-
-export { AnomaliesTable };

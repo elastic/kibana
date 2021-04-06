@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
@@ -56,33 +57,31 @@ export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
  * This validator checks that and updates form values by setting errors states imperatively to
  * indicate this error state.
  */
-export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
+export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   const fields = form.getFields();
   if (
     !(
-      fields[ROLLOVER_FORM_PATHS.maxAge].value ||
-      fields[ROLLOVER_FORM_PATHS.maxDocs].value ||
-      fields[ROLLOVER_FORM_PATHS.maxSize].value
+      fields[ROLLOVER_FORM_PATHS.maxAge]?.value ||
+      fields[ROLLOVER_FORM_PATHS.maxDocs]?.value ||
+      fields[ROLLOVER_FORM_PATHS.maxSize]?.value
     )
   ) {
-    fields[ROLLOVER_FORM_PATHS.maxAge].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
+    if (path === ROLLOVER_FORM_PATHS.maxAge) {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
         message: i18nTexts.editPolicy.errors.maximumAgeRequiredMessage,
-      },
-    ]);
-    fields[ROLLOVER_FORM_PATHS.maxDocs].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
+      };
+    } else if (path === ROLLOVER_FORM_PATHS.maxDocs) {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
         message: i18nTexts.editPolicy.errors.maximumDocumentsRequiredMessage,
-      },
-    ]);
-    fields[ROLLOVER_FORM_PATHS.maxSize].setErrors([
-      {
-        validationType: ROLLOVER_EMPTY_VALIDATION,
+      };
+    } else {
+      return {
+        code: ROLLOVER_EMPTY_VALIDATION,
         message: i18nTexts.editPolicy.errors.maximumSizeRequiredMessage,
-      },
-    ]);
+      };
+    }
   } else {
     fields[ROLLOVER_FORM_PATHS.maxAge].clearErrors(ROLLOVER_EMPTY_VALIDATION);
     fields[ROLLOVER_FORM_PATHS.maxDocs].clearErrors(ROLLOVER_EMPTY_VALIDATION);
@@ -90,15 +89,11 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
   }
 };
 
-export const minAgeValidator: ValidationFunc<any, any, any> = (arg) =>
-  numberGreaterThanField({
-    than: 0,
-    allowEquality: true,
-    message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
-  })({
-    ...arg,
-    value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
-  });
+export const integerValidator: ValidationFunc<FormInternal, string, string> = (arg) => {
+  if (!Number.isInteger(Number(arg.value ?? ''))) {
+    return { message: i18nTexts.editPolicy.errors.integerRequired };
+  }
+};
 
 export const createPolicyNameValidations = ({
   policies,

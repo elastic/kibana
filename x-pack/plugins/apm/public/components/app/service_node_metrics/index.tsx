@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -20,13 +21,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
-import { useAgentName } from '../../../hooks/useAgentName';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
@@ -38,12 +39,12 @@ const INITIAL_DATA = {
   containerId: '',
 };
 
-const Truncate = styled.span`
+const Truncate = euiStyled.span`
   display: block;
   ${truncate(px(unit * 12))}
 `;
 
-const MetadataFlexGroup = styled(EuiFlexGroup)`
+const MetadataFlexGroup = euiStyled(EuiFlexGroup)`
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
   margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
   padding: ${({ theme }) =>
@@ -56,11 +57,12 @@ type ServiceNodeMetricsProps = RouteComponentProps<{
 }>;
 
 export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { kuery, start, end },
+  } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
-  const { agentName } = useAgentName();
-  const { data } = useServiceMetricCharts(urlParams, agentName);
-  const { start, end } = urlParams;
+  const { agentName } = useApmServiceContext();
+  const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
@@ -71,15 +73,15 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           params: {
             path: { serviceName, serviceNodeName },
             query: {
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, serviceNodeName, start, end, uiFilters]
+    [kuery, serviceName, serviceNodeName, start, end]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -177,29 +179,10 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           </EuiFlexItem>
         </MetadataFlexGroup>
       )}
-      {agentName && (
-        <ChartsSyncContextProvider>
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map((chart) => (
-              <EuiFlexItem key={chart.key}>
-                <EuiPanel>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    fetchStatus={status}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer size="xxl" />
-        </ChartsSyncContextProvider>
-      )}
       <SearchBar />
       <EuiPage>
         {agentName && (
-          <ChartsSyncContextProvider>
+          <ChartPointerEventContextProvider>
             <EuiFlexGrid columns={2} gutterSize="s">
               {data.charts.map((chart) => (
                 <EuiFlexItem key={chart.key}>
@@ -215,7 +198,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
               ))}
             </EuiFlexGrid>
             <EuiSpacer size="xxl" />
-          </ChartsSyncContextProvider>
+          </ChartPointerEventContextProvider>
         )}
       </EuiPage>
     </>

@@ -1,35 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { vega, vegaLite } from '../lib/vega';
+import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
-import { getEnableExternalUrls } from '../services';
+import { getEnableExternalUrls, getData } from '../services';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
-vega.scheme('elastic', euiPaletteColorBlind());
+scheme('elastic', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -42,8 +33,8 @@ const vegaFunctions = {
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
-  if (!vega.expressionFunction(funcName)) {
-    vega.expressionFunction(funcName, function handlerFwd(...args) {
+  if (!expressionFunction(funcName)) {
+    expressionFunction(funcName, function handlerFwd(...args) {
       const view = this.context.dataflow;
       view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
     });
@@ -65,13 +56,13 @@ export class VegaBaseView {
     this._filterManager = opts.filterManager;
     this._fireEvent = opts.fireEvent;
     this._timefilter = opts.timefilter;
-    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
   async init() {
@@ -113,6 +104,10 @@ export class VegaBaseView {
           this._$messages = null;
         }
         if (this._view) {
+          const state = this._view.getState();
+          if (state) {
+            this._vegaStateRestorer.save(state);
+          }
           this._view.finalize();
         }
         this._view = null;
@@ -127,17 +122,57 @@ export class VegaBaseView {
     }
   }
 
+  /**
+   * Find index pattern by its title, if not given, gets it from spec or a defaults one
+   * @param {string} [index]
+   * @returns {Promise<string>} index id
+   */
+  async findIndex(index) {
+    const { indexPatterns } = getData();
+    let idxObj;
+
+    if (index) {
+      [idxObj] = await indexPatterns.find(index);
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          })
+        );
+      }
+    } else {
+      [idxObj] = await extractIndexPatternsFromSpec(
+        this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec
+      );
+
+      if (!idxObj) {
+        const defaultIdx = await indexPatterns.getDefault();
+
+        if (defaultIdx) {
+          idxObj = defaultIdx;
+        } else {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
+              defaultMessage: 'Unable to find default index',
+            })
+          );
+        }
+      }
+    }
+
+    return idxObj.id;
+  }
+
   createViewConfig() {
     const config = {
-      // eslint-disable-next-line import/namespace
-      logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
     };
 
     // Override URL sanitizer to prevent external data loading (if disabled)
-    const loader = vega.loader();
-    const originalSanitize = loader.sanitize.bind(loader);
-    loader.sanitize = (uri, options) => {
+    const vegaLoader = loader();
+    const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
+    vegaLoader.sanitize = async (uri, options) => {
       if (uri.bypassToken === bypassToken) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
@@ -154,9 +189,20 @@ export class VegaBaseView {
           })
         );
       }
-      return originalSanitize(uri, options);
+      const result = await originalSanitize(uri, options);
+      // This will allow Vega users to load images from any domain.
+      result.crossOrigin = null;
+
+      return result;
     };
-    config.loader = loader;
+    config.loader = vegaLoader;
+
+    const vegaLogger = logger(Warn);
+
+    vegaLogger.warn = this.onWarn.bind(this);
+    vegaLogger.error = this.onError.bind(this);
+
+    config.logger = vegaLogger;
 
     return config;
   }
@@ -225,7 +271,13 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
-      return view.runAsync(); // Allows callers to await rendering
+      const state = this._vegaStateRestorer.restore();
+
+      if (state) {
+        return view.setState(state);
+      } else {
+        return view.runAsync();
+      }
     }
   }
 
@@ -261,7 +313,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
@@ -272,7 +324,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
@@ -394,8 +446,8 @@ export class VegaBaseView {
       }
       const debugObj = {};
       window.VEGA_DEBUG = debugObj;
-      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+      window.VEGA_DEBUG.VEGA_VERSION = vegaVersion;
+      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLiteVersion;
       window.VEGA_DEBUG.view = view;
       window.VEGA_DEBUG.vega_spec = spec;
       window.VEGA_DEBUG.vegalite_spec = vlspec;

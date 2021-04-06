@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -34,13 +23,15 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
+import { activeCursor$ } from '../../lib/active_cursor';
 import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
+import { emptyLabel } from '../../../../../common/empty_label';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -54,7 +45,7 @@ const generateAnnotationData = (values, formatter) =>
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
-  eventBus.trigger(ACTIVE_CURSOR, cursor);
+  activeCursor$.next(cursor);
 };
 
 export const TimeSeries = ({
@@ -69,20 +60,23 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
+  syncColors,
+  palettesService,
 }) => {
   const chartRef = useRef();
+  // const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
-    const updateCursor = (_, cursor) => {
+    const updateCursor = (cursor) => {
       if (chartRef.current) {
         chartRef.current.dispatchExternalPointerEvent(cursor);
       }
     };
 
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
+    const subscription = activeCursor$.subscribe(updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -97,18 +91,34 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { legacyColors: colors, theme: themeService } = getChartsSetup();
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+  const { theme: themeService } = getChartsSetup();
 
-  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
   };
+
+  const getSeriesColor = useCallback(
+    (seriesName, seriesGroupId, seriesId) => {
+      const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
+      const props = {
+        seriesById,
+        seriesName,
+        seriesId,
+        baseColor: seriesById[0].baseColor,
+        seriesPalette: seriesById[0].palette,
+        palettesRegistry: palettesService,
+        syncColors,
+      };
+      return getSplitByTermsColor(props) || null;
+    },
+    [palettesService, series, syncColors]
+  );
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -139,6 +149,7 @@ export const TimeSeries = ({
         tooltip={{
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
@@ -165,6 +176,7 @@ export const TimeSeries = ({
         (
           {
             id,
+            seriesId,
             label,
             labelFormatted,
             bars,
@@ -175,9 +187,9 @@ export const TimeSeries = ({
             yScaleType,
             groupId,
             color,
+            isSplitByTerms,
             stack,
             points,
-            useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
             tickFormat,
@@ -188,19 +200,20 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
+          // The colors from the paletteService should be applied only when the timeseries is split by terms
+          const splitColor = getSeriesColor(seriesName, seriesId, id);
+          const finalColor = isSplitByTerms && splitColor ? splitColor : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName}
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -211,7 +224,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
@@ -226,7 +238,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName}
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
@@ -238,7 +250,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}

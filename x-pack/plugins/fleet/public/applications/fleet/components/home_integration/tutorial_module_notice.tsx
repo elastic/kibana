@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
+import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
+
 import { useGetPackages, useLink, useCapabilities } from '../../hooks';
+import { pkgKeyFromPackageInfo } from '../../services/pkg_key_from_package_info';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
@@ -40,8 +44,8 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                 ),
                 availableAsIntegrationLink: (
                   <EuiLink
-                    href={getHref('integration_details', {
-                      pkgkey: `${pkgInfo.name}-${pkgInfo.version}`,
+                    href={getHref('integration_details_overview', {
+                      pkgkey: pkgKeyFromPackageInfo(pkgInfo),
                     })}
                   >
                     <FormattedMessage

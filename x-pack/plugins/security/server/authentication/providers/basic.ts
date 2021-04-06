@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { canRedirectRequest } from '../can_redirect_request';
+import type { KibanaRequest } from 'src/core/server';
+
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import {
-  HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
 } from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 
@@ -108,7 +111,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
       return AuthenticationResult.redirectTo(
-        `${basePath}/login?next=${encodeURIComponent(
+        `${basePath}/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
           `${basePath}${request.url.pathname}${request.url.search}`
         )}`
       );
@@ -131,12 +134,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.notHandled();
     }
 
-    // Query string may contain the path where logout has been called or
-    // logout reason that login page may need to know.
-    const queryString = request.url.search || `?msg=LOGGED_OUT`;
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**

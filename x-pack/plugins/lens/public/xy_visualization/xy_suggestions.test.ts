@@ -1,16 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSuggestions } from './xy_suggestions';
-import {
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-  DataType,
-  TableSuggestion,
-} from '../types';
+import { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
@@ -89,12 +85,7 @@ describe('xy_suggestions', () => {
     jest.resetAllMocks();
   });
 
-  test('ignores invalid combinations', () => {
-    const unknownCol = () => {
-      const str = strCol('foo');
-      return { ...str, operation: { ...str.operation, dataType: 'wonkies' as DataType } };
-    };
-
+  test('partially maps invalid combinations, but hides them', () => {
     expect(
       ([
         {
@@ -111,19 +102,41 @@ describe('xy_suggestions', () => {
         },
         {
           isMultiRow: false,
-          columns: [strCol('foo'), numCol('bar')],
+          columns: [numCol('bar')],
           layerId: 'first',
           changeType: 'unchanged',
         },
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({ table, keptLayerIds: [] });
+        expect(suggestions.every((suggestion) => suggestion.hide)).toEqual(true);
+        expect(suggestions).toHaveLength(10);
+      })
+    );
+  });
+
+  test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
+    expect(
+      ([
         {
           isMultiRow: true,
-          columns: [unknownCol(), numCol('bar')],
+          columns: [dateCol('a')],
           layerId: 'first',
-          changeType: 'unchanged',
+          changeType: 'reduced',
         },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
-      )
+        {
+          isMultiRow: false,
+          columns: [numCol('bar')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({
+          table,
+          keptLayerIds: [],
+          state: {} as XYState,
+        });
+        expect(suggestions).toHaveLength(0);
+      })
     );
   });
 
@@ -471,7 +484,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(visualizationTypes.length - 1);
-    expect(suggestion.title).toEqual('Stacked bar');
+    expect(suggestion.title).toEqual('Bar vertical stacked');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
         layers: [
@@ -915,8 +928,9 @@ describe('xy_suggestions', () => {
         Object {
           "seriesType": "bar_stacked",
           "splitAccessor": undefined,
-          "x": "quantity",
+          "x": undefined,
           "y": Array [
+            "quantity",
             "price",
           ],
         },

@@ -5,14 +5,15 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     role="dialog"
     tabIndex={0}
   >
     <button
       aria-label="Closes keyboard shortcuts reference"
-      className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
       data-test-subj="euiFlyoutCloseButton"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >

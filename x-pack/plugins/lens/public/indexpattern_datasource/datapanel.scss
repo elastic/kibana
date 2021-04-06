@@ -4,10 +4,18 @@
   padding: $euiSize $euiSize 0;
 }
 
+.lnsInnerIndexPatternDataPanel__switcher {
+  min-width: 0;
+}
+
 .lnsInnerIndexPatternDataPanel__header {
   display: flex;
   align-items: center;
   margin-bottom: $euiSizeS;
+}
+
+.lnsInnerIndexPatternDataPanel__titleTooltip {
+  margin-right: $euiSizeXS;
 }
 
 .lnsInnerIndexPatternDataPanel__fieldItems {

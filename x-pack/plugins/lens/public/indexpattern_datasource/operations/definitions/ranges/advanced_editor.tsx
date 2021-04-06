@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './advanced_editor.scss';
 
-import React, { useState, MouseEventHandler } from 'react';
+import React, { useState, MouseEventHandler, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
-import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
+import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
   NewBucketButton,
@@ -30,7 +31,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
-import { useDebounceWithOptions } from '../helpers';
+import { isValidNumber, useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -47,17 +48,21 @@ export const RangePopover = ({
   range,
   setRange,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: (open: boolean) => void;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
+
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
@@ -86,9 +91,6 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    if (isOpenByCreation) {
-      setIsOpenByCreation(false);
-    }
     if (isPopoverOpen) {
       setIsPopoverOpen(false);
     }
@@ -98,14 +100,11 @@ export const RangePopover = ({
     <EuiPopover
       display="block"
       ownFocus
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       closePopover={onSubmit}
       button={
         <Button
           onClick={() => {
-            if (isOpenByCreation) {
-              setIsOpenByCreation(false);
-            }
             setIsPopoverOpen((isOpen) => !isOpen);
           }}
         />
@@ -255,11 +254,7 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => {
-            if (isOpenByCreation) {
-              setIsOpenByCreation(false);
-            }
-          }}
+          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
@@ -283,8 +278,7 @@ export const AdvancedRangeEditor = ({
             >
               <RangePopover
                 range={range}
-                isOpenByCreation={idx === lastIndex && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === lastIndex && isOpenByCreation}
                 setRange={(newRange: LocalRangeType) => {
                   const newRanges = [...localRanges];
                   if (newRange.id === newRanges[idx].id) {

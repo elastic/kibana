@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useContext, useMemo } from 'react';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
 import { useLocation } from 'react-router-dom';
-import { AnyIntraAppRouteState } from '../types';
+
+import type { AnyIntraAppRouteState } from '../types';
 
 interface IntraAppState<S extends AnyIntraAppRouteState = AnyIntraAppRouteState> {
   forRoute: string;
@@ -63,5 +65,12 @@ export function useIntraAppState<S = AnyIntraAppRouteState>():
       wasHandled.add(intraAppState);
       return intraAppState.routeState as S;
     }
-  }, [intraAppState, location.pathname]);
+
+    // Default is to return the state in the Fleet HashRouter, in order to enable use of route state
+    // that is used via Kibana's ScopedHistory from within the Fleet HashRouter (ex. things like
+    // `core.application.navigateTo()`
+    // Once this https://github.com/elastic/kibana/issues/70358 is implemented (move to BrowserHistory
+    // using kibana's ScopedHistory), then this work-around can be removed.
+    return location.state as S;
+  }, [intraAppState, location.pathname, location.state]);
 }

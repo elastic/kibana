@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
@@ -72,7 +74,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   // Track component loaded
   useEffect(() => {
-    trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
+    trackMetric(METRIC_TYPE.LOADED, UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
 
   useEffect(() => {

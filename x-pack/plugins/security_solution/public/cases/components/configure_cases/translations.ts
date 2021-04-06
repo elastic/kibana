@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
 export const INCIDENT_MANAGEMENT_SYSTEM_TITLE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.incidentManagementSystemTitle',
+  'xpack.securitySolution.cases.configureCases.incidentManagementSystemTitle',
   {
     defaultMessage: 'Connect to external incident management system',
   }
 );
 
 export const INCIDENT_MANAGEMENT_SYSTEM_DESC = i18n.translate(
-  'xpack.securitySolution.case.configureCases.incidentManagementSystemDesc',
+  'xpack.securitySolution.cases.configureCases.incidentManagementSystemDesc',
   {
     defaultMessage:
       'You may optionally connect Security cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
@@ -24,50 +25,57 @@ export const INCIDENT_MANAGEMENT_SYSTEM_DESC = i18n.translate(
 );
 
 export const INCIDENT_MANAGEMENT_SYSTEM_LABEL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.incidentManagementSystemLabel',
+  'xpack.securitySolution.cases.configureCases.incidentManagementSystemLabel',
   {
     defaultMessage: 'Incident management system',
   }
 );
 
 export const ADD_NEW_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.case.configureCases.addNewConnector',
+  'xpack.securitySolution.cases.configureCases.addNewConnector',
   {
     defaultMessage: 'Add new connector',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsTitle',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsTitle',
   {
     defaultMessage: 'Case Closures',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsDesc',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsDesc',
   {
     defaultMessage:
       'Define how you wish Security cases to be closed. Automated case closures require an established connection to an external incident management system.',
   }
 );
 
+export const CASE_COLSURE_OPTIONS_SUB_CASES = i18n.translate(
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsSubCases',
+  {
+    defaultMessage: 'Automated closures of sub-cases is not currently supported.',
+  }
+);
+
 export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsLabel',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsLabel',
   {
     defaultMessage: 'Case closure options',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_MANUAL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsManual',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsManual',
   {
     defaultMessage: 'Manually close Security cases',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_NEW_INCIDENT = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsNewIncident',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsNewIncident',
   {
     defaultMessage:
       'Automatically close Security cases when pushing new incident to external system',
@@ -75,82 +83,106 @@ export const CASE_CLOSURE_OPTIONS_NEW_INCIDENT = i18n.translate(
 );
 
 export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
-  'xpack.securitySolution.case.configureCases.caseClosureOptionsClosedIncident',
+  'xpack.securitySolution.cases.configureCases.caseClosureOptionsClosedIncident',
   {
     defaultMessage: 'Automatically close Security cases when incident is closed in external system',
   }
 );
+export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.fieldMappingTitle', {
+    values: { thirdPartyName },
+    defaultMessage: '{ thirdPartyName } field mappings',
+  });
+};
 
-export const FIELD_MAPPING_TITLE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingTitle',
-  {
-    defaultMessage: 'Field mappings',
-  }
-);
-
-export const FIELD_MAPPING_DESC = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingDesc',
-  {
+export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.fieldMappingDesc', {
+    values: { thirdPartyName },
     defaultMessage:
-      'Map Security case fields when pushing data to a third-party. Field mappings require an established connection to an external incident management system.',
-  }
-);
+      'Map Security Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
+  });
+};
+
+export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.fieldMappingDescErr', {
+    values: { thirdPartyName },
+    defaultMessage:
+      'Field mappings require an established connection to { thirdPartyName }. Please check your connection credentials.',
+  });
+};
+export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.editFieldMappingTitle', {
+    values: { thirdPartyName },
+    defaultMessage: 'Edit { thirdPartyName } field mappings',
+  });
+};
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingFirstCol',
+  'xpack.securitySolution.cases.configureCases.fieldMappingFirstCol',
   {
     defaultMessage: 'Security case field',
   }
 );
 
-export const FIELD_MAPPING_SECOND_COL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingSecondCol',
-  {
-    defaultMessage: 'External incident field',
-  }
-);
+export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.fieldMappingSecondCol', {
+    values: { thirdPartyName },
+    defaultMessage: '{ thirdPartyName } field',
+  });
+};
 
 export const FIELD_MAPPING_THIRD_COL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingThirdCol',
+  'xpack.securitySolution.cases.configureCases.fieldMappingThirdCol',
   {
     defaultMessage: 'On edit and update',
   }
 );
 
 export const FIELD_MAPPING_EDIT_NOTHING = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingEditNothing',
+  'xpack.securitySolution.cases.configureCases.fieldMappingEditNothing',
   {
     defaultMessage: 'Nothing',
   }
 );
 
 export const FIELD_MAPPING_EDIT_OVERWRITE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingEditOverwrite',
+  'xpack.securitySolution.cases.configureCases.fieldMappingEditOverwrite',
   {
     defaultMessage: 'Overwrite',
   }
 );
 
 export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingEditAppend',
+  'xpack.securitySolution.cases.configureCases.fieldMappingEditAppend',
   {
     defaultMessage: 'Append',
   }
 );
 
-export const CANCEL = i18n.translate('xpack.securitySolution.case.configureCases.cancelButton', {
+export const CANCEL = i18n.translate('xpack.securitySolution.cases.configureCases.cancelButton', {
   defaultMessage: 'Cancel',
 });
 
+export const SAVE = i18n.translate('xpack.securitySolution.cases.configureCases.saveButton', {
+  defaultMessage: 'Save',
+});
+
+export const SAVE_CLOSE = i18n.translate(
+  'xpack.securitySolution.cases.configureCases.saveAndCloseButton',
+  {
+    defaultMessage: 'Save & close',
+  }
+);
+
 export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.warningTitle',
+  'xpack.securitySolution.cases.configureCases.warningTitle',
   {
     defaultMessage: 'Warning',
   }
 );
 
 export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.warningMessage',
+  'xpack.securitySolution.cases.configureCases.warningMessage',
   {
     defaultMessage:
       'The selected connector has been deleted. Either select a different connector or create a new one.',
@@ -158,21 +190,50 @@ export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
 );
 
 export const MAPPING_FIELD_NOT_MAPPED = i18n.translate(
-  'xpack.securitySolution.case.configureCases.mappingFieldNotMapped',
+  'xpack.securitySolution.cases.configureCases.mappingFieldNotMapped',
   {
     defaultMessage: 'Not mapped',
   }
 );
 
-export const UPDATE_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.case.configureCases.updateConnector',
+export const COMMENT = i18n.translate(
+  'xpack.securitySolution.cases.configureCases.commentMapping',
   {
-    defaultMessage: 'Update connector',
+    defaultMessage: 'Comments',
+  }
+);
+
+export const NO_FIELDS_ERROR = (connectorName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.noFieldsError', {
+    values: { connectorName },
+    defaultMessage:
+      'No { connectorName } fields found. Please check your { connectorName } connector settings or your { connectorName } instance settings to resolve.',
+  });
+};
+
+export const BLANK_MAPPINGS = (connectorName: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.blankMappings', {
+    values: { connectorName },
+    defaultMessage: 'At least one field needs to be mapped to { connectorName }',
+  });
+};
+
+export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string => {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.requiredMappings', {
+    values: { connectorName, fields },
+    defaultMessage:
+      'At least one Case field needs to be mapped to the following required { connectorName } fields: { fields }',
+  });
+};
+export const UPDATE_FIELD_MAPPINGS = i18n.translate(
+  'xpack.securitySolution.cases.configureCases.updateConnector',
+  {
+    defaultMessage: 'Update field mappings',
   }
 );
 
 export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string => {
-  return i18n.translate('xpack.securitySolution.case.configureCases.updateSelectedConnector', {
+  return i18n.translate('xpack.securitySolution.cases.configureCases.updateSelectedConnector', {
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });

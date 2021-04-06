@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,12 +14,14 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+
 import { SO_SEARCH_LIMIT } from '../../../constants';
 import { useLink, useGetPackagePolicies } from '../../../hooks';
-import { AgentPolicy } from '../../../types';
+import type { AgentPolicy } from '../../../types';
 import { Loading } from '../../agents/components';
+
+import { OverviewStats } from './overview_stats';
+import { OverviewPanel } from './overview_panel';
 
 export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
   agentPolicies,
@@ -30,7 +33,7 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
   });
 
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-agent-policy-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPagePoliciesPanelTitle', {
           defaultMessage: 'Agent policies',

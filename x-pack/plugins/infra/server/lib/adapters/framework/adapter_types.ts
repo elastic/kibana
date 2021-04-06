@@ -1,31 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../../../../src/plugins/data/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { APMPluginSetup } from '../../../../../../plugins/apm/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../common/typed_json';
+import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
-export interface InfraServerPluginDeps {
+export interface InfraServerPluginSetupDeps {
+  data: DataPluginSetup;
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
-  apm: APMPluginSetup;
-  alerts: AlertingPluginContract;
+  alerting: AlertingPluginContract;
   ml?: MlPluginSetup;
+}
+
+export interface InfraServerPluginStartDeps {
+  data: DataPluginStart;
 }
 
 export interface CallWithRequestParams extends GenericParams {
@@ -157,23 +165,6 @@ export interface InfraFieldDetails {
 export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
 }
-
-export interface InfraTSVBResponse {
-  [key: string]: InfraTSVBPanel;
-}
-
-export interface InfraTSVBPanel {
-  id: string;
-  series: InfraTSVBSeries[];
-}
-
-export interface InfraTSVBSeries {
-  id: string;
-  label: string;
-  data: InfraTSVBDataPoint[];
-}
-
-export type InfraTSVBDataPoint = [number, number];
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;

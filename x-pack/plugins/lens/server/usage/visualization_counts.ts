@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { LensVisualizationUsage } from './types';
 
 export async function getVisualizationCounts(
-  callCluster: LegacyAPICaller,
+  getEsClient: () => Promise<ElasticsearchClient>,
   kibanaIndex: string
 ): Promise<LensVisualizationUsage> {
-  const results = await callCluster('search', {
+  const esClient = await getEsClient();
+  const { body: results } = await esClient.search({
     index: kibanaIndex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -49,6 +50,7 @@ export async function getVisualizationCounts(
     },
   });
 
+  // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
   const buckets = results.aggregations.groups.buckets;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

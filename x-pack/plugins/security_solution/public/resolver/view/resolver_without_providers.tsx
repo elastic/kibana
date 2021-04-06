@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,11 +20,13 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
+import { useSyncSelectedNode } from './use_sync_selected_node';
+import { ResolverNoProcessEvents } from './resolver_no_process_events';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -33,7 +36,14 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
+    {
+      className,
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -41,7 +51,18 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
+    useStateSyncingActions({
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+      shouldUpdate,
+      filters,
+    });
+
+    /**
+     * This will keep the selectedNode in the view in sync with the nodeID specified in the url
+     */
+    useSyncSelectedNode();
 
     const { timestamp } = useContext(SideEffectContext);
 
@@ -54,7 +75,7 @@ export const ResolverWithoutProviders = React.memo(
     } = useSelector((state: ResolverState) =>
       selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -76,6 +97,10 @@ export const ResolverWithoutProviders = React.memo(
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const colorMap = useColors();
 
+    const noProcessEventsFound = useMemo(() => processNodePositions.size < 1, [
+      processNodePositions,
+    ]);
+
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
         {isLoading ? (
@@ -92,43 +117,50 @@ export const ResolverWithoutProviders = React.memo(
               />
             </div>
           </div>
+        ) : noProcessEventsFound ? (
+          <ResolverNoProcessEvents />
         ) : (
-          <GraphContainer
-            data-test-subj="resolver:graph"
-            className="resolver-graph kbn-resetFocusState"
-            onMouseDown={onMouseDown}
-            ref={ref}
-            role="tree"
-            tabIndex={0}
-            aria-activedescendant={activeDescendantId || undefined}
-          >
-            {connectingEdgeLineSegments.map(
-              ({ points: [startPosition, endPosition], metadata }) => (
-                <EdgeLine
-                  edgeLineMetadata={metadata}
-                  key={metadata.reactKey}
-                  startPosition={startPosition}
-                  endPosition={endPosition}
-                  projectionMatrix={projectionMatrix}
-                />
-              )
-            )}
-            {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityIDSafeVersion(processEvent);
-              return (
-                <ProcessEventDot
-                  key={processEntityId}
-                  position={position}
-                  projectionMatrix={projectionMatrix}
-                  event={processEvent}
-                  isProcessTerminated={terminatedProcesses.has(processEntityId)}
-                  timeAtRender={timeAtRender}
-                />
-              );
-            })}
-          </GraphContainer>
+          <>
+            <GraphContainer
+              data-test-subj="resolver:graph"
+              className="resolver-graph kbn-resetFocusState"
+              onMouseDown={onMouseDown}
+              ref={ref}
+              role="tree"
+              tabIndex={0}
+              aria-activedescendant={activeDescendantId || undefined}
+            >
+              {connectingEdgeLineSegments.map(
+                ({ points: [startPosition, endPosition], metadata }) => (
+                  <EdgeLine
+                    edgeLineMetadata={metadata}
+                    key={metadata.reactKey}
+                    startPosition={startPosition}
+                    endPosition={endPosition}
+                    projectionMatrix={projectionMatrix}
+                  />
+                )
+              )}
+              {[...processNodePositions].map(([treeNode, position]) => {
+                const nodeID = nodeModel.nodeID(treeNode);
+                if (nodeID === undefined) {
+                  throw new Error('Tried to render a node without an ID');
+                }
+                return (
+                  <ProcessEventDot
+                    key={nodeID}
+                    nodeID={nodeID}
+                    position={position}
+                    projectionMatrix={projectionMatrix}
+                    node={treeNode}
+                    timeAtRender={timeAtRender}
+                  />
+                );
+              })}
+            </GraphContainer>
+            <PanelRouter />
+          </>
         )}
-        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

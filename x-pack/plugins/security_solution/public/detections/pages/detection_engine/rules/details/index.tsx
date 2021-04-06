@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
+  EuiButtonIcon,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,10 +21,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -35,12 +43,13 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -51,20 +60,15 @@ import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
 } from '../../../../components/alerts_table/default_config';
-import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
-import * as detectionI18n from '../../translations';
-import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
+import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
+import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
-import * as ruleI18n from '../translations';
-import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
-import { State } from '../../../../../common/store';
-import { InputsRange } from '../../../../../common/store/inputs/model';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
+import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
@@ -77,16 +81,18 @@ import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
-import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
-import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
+import {
+  focusUtilityBarAction,
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
@@ -95,7 +101,22 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import * as detectionI18n from '../../translations';
+import * as ruleI18n from '../translations';
+import * as statusI18n from '../../../../components/rules/rule_status/translations';
+import * as i18n from './translations';
+import { isTab } from '../../../../../common/components/accessibility/helpers';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -104,32 +125,44 @@ enum RuleDetailTabs {
 }
 
 const getRuleDetailsTabs = (rule: Rule | null) => {
-  const canUseExceptions = rule && !isMlRule(rule.type) && !isThresholdRule(rule.type);
   return [
     {
       id: RuleDetailTabs.alerts,
       name: detectionI18n.ALERT,
       disabled: false,
+      dataTestSubj: 'alertsTab',
     },
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
-      disabled: !canUseExceptions,
+      disabled: false,
+      dataTestSubj: 'exceptionsTab',
     },
     {
       id: RuleDetailTabs.failures,
       name: i18n.FAILURE_HISTORY_TAB,
       disabled: false,
+      dataTestSubj: 'failureHistoryTab',
     },
   ];
 };
 
-export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
-  filters,
-  graphEventId,
-  query,
-  setAbsoluteRangeDatePicker,
-}) => {
+const RuleDetailsPageComponent = () => {
+  const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const graphEventId = useShallowEqualSelector(
+    (state) =>
+      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
+  );
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [
     {
@@ -139,6 +172,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       signalIndexName,
     },
   ] = useUserData();
@@ -149,6 +183,15 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
+  const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
+  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
+    ruleStatus?.current_status ?? null
+  );
+  useEffect(() => {
+    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
+      setCurrentStatus(ruleStatus?.current_status ?? null);
+    }
+  }, [currentStatus, ruleStatus, setCurrentStatus]);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
@@ -168,7 +211,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -263,6 +306,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             isSelected={tab.id === ruleDetailTab}
             disabled={tab.disabled}
             key={tab.id}
+            data-test-subj={tab.dataTestSubj}
           >
             {tab.name}
           </EuiTab>
@@ -271,18 +315,68 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     ),
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
-  const ruleError = useMemo(
-    () =>
-      rule?.status === 'failed' &&
+
+  const handleRefresh = useCallback(() => {
+    if (fetchRuleStatus != null && ruleId != null) {
+      fetchRuleStatus(ruleId);
+    }
+  }, [fetchRuleStatus, ruleId]);
+
+  const ruleStatusInfo = useMemo(() => {
+    return loadingStatus ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
+      <>
+        <RuleStatus
+          status={getRuleStatusText(currentStatus?.status)}
+          statusDate={currentStatus?.status_date}
+        >
+          <EuiButtonIcon
+            data-test-subj="refreshButton"
+            color="primary"
+            onClick={handleRefresh}
+            iconType="refresh"
+            aria-label={ruleI18n.REFRESH}
+          />
+        </RuleStatus>
+      </>
+    );
+  }, [currentStatus, loadingStatus, handleRefresh]);
+  const ruleError = useMemo(() => {
+    if (loadingStatus) {
+      return (
+        <EuiFlexItem>
+          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+        </EuiFlexItem>
+      );
+    } else if (
+      currentStatus?.status === 'failed' &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_failure_at != null ? (
+      currentStatus?.last_failure_at != null
+    ) {
+      return (
         <RuleStatusFailedCallOut
-          message={rule?.last_failure_message ?? ''}
-          date={rule?.last_failure_at}
+          message={currentStatus?.last_failure_message ?? ''}
+          date={currentStatus?.last_failure_at}
         />
-      ) : null,
-    [rule, ruleDetailTab]
-  );
+      );
+    } else if (
+      (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
+      ruleDetailTab === RuleDetailTabs.alerts &&
+      currentStatus?.last_success_at != null
+    ) {
+      return (
+        <RuleStatusFailedCallOut
+          message={currentStatus?.last_success_message ?? ''}
+          date={currentStatus?.last_success_at}
+          color="warning"
+        />
+      );
+    }
+    return null;
+  }, [ruleDetailTab, currentStatus, loadingStatus]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -290,13 +384,15 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
     },
-    [setAbsoluteRangeDatePicker]
+    [dispatch]
   );
 
   const handleOnChangeEnabledRule = useCallback(
@@ -380,6 +476,28 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     }
   }, [rule]);
 
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    focusUtilityBarAction(containerElement.current);
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -399,10 +517,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <NeedAdminForUpdateRulesCallOut />
+      <ReadOnlyAlertsCallOut />
+      <ReadOnlyRulesCallOut />
       {indicesExist ? (
-        <>
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -415,6 +534,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                   href: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
                   pageId: SecurityPageName.detections,
+                  dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
                 subtitle={subTitle}
@@ -428,7 +548,15 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         </>,
                       ]
                     : []),
-                  <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                  <>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                      <EuiFlexItem grow={false}>
+                        {statusI18n.STATUS}
+                        {':'}
+                      </EuiFlexItem>
+                      {ruleStatusInfo}
+                    </EuiFlexGroup>
+                  </>,
                 ]}
                 title={title}
               >
@@ -438,17 +566,19 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       position="top"
                       content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
-                      <RuleSwitch
-                        id={rule?.id ?? '-1'}
-                        isDisabled={
-                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                          userHasNoPermissions(canUserCRUD) ||
-                          (!hasMlPermissions && !rule?.enabled)
-                        }
-                        enabled={rule?.enabled ?? false}
-                        optionLabel={i18n.ACTIVATE_RULE}
-                        onChange={handleOnChangeEnabledRule}
-                      />
+                      <EuiFlexGroup>
+                        <RuleSwitch
+                          id={rule?.id ?? '-1'}
+                          isDisabled={
+                            !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                            userHasNoPermissions(canUserCRUD) ||
+                            (!hasMlPermissions && !rule?.enabled)
+                          }
+                          enabled={rule?.enabled ?? false}
+                          onChange={handleOnChangeEnabledRule}
+                        />
+                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
 
@@ -534,9 +664,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
+                    hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -560,7 +690,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </>
+        </StyledFullHeightContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
@@ -576,33 +706,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
 RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  return (state: State) => {
-    const globalInputs: InputsRange = getGlobalInputs(state);
-    const { query, filters } = globalInputs;
-
-    const timeline: TimelineModel =
-      getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults;
-    const { graphEventId } = timeline;
-
-    return {
-      query,
-      filters,
-      graphEventId,
-    };
-  };
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const RuleDetailsPage = connector(memo(RuleDetailsPageComponent));
+export const RuleDetailsPage = React.memo(RuleDetailsPageComponent);
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';

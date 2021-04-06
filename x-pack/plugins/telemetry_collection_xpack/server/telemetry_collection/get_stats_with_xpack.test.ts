@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 
@@ -60,28 +62,28 @@ function mockEsClient() {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // mock for license should return a basic license
   esClient.license.get.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { license: { type: 'basic' } } }
   );
   // mock for xpack usage should return an empty object
   esClient.xpack.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: {} }
   );
   // mock for nodes usage should resolve for this test
   esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
   );
   // mock for info should resolve for this test
   esClient.info.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: {
         cluster_uuid: 'test',
         cluster_name: 'test',
-        version: { number: '8.0.0' },
-      },
+        version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
+      } as estypes.RootNodeInfoResponse,
     }
   );
 
@@ -138,9 +140,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const esClient = mockEsClient();
     const usageCollection = mockUsageCollection({
       ...kibana,
-      monitoringTelemetry: [
-        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
-      ],
+      monitoringTelemetry: {
+        stats: [{ collectionSource: 'monitoring', timestamp: new Date().toISOString() }],
+      },
     });
     const context = getContext();
 

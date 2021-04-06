@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AppClient } from '../../../../types';
-import { IRouter, RequestHandlerContext } from '../../../../../../../../src/core/server';
+import type {
+  AppClient,
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -14,11 +18,13 @@ import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
 import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
+import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
+import { isOutdated } from '../../migrations/helpers';
 
-export const createIndexRoute = (router: IRouter) => {
+export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -57,31 +63,31 @@ class CreateIndexError extends Error {
 }
 
 export const createDetectionIndex = async (
-  context: RequestHandlerContext,
+  context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient
 ): Promise<void> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
-  const callCluster = clusterClient.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   if (!siemClient) {
     throw new CreateIndexError('', 404);
   }
 
   const index = siemClient.getSignalsIndex();
-  const policyExists = await getPolicyExists(callCluster, index);
+  await ensureMigrationCleanupPolicy({ alias: index, esClient });
+  const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {
-    await setPolicy(callCluster, index, signalsPolicy);
+    await setPolicy(esClient, index, signalsPolicy);
   }
-  if (await templateNeedsUpdate(callCluster, index)) {
-    await setTemplate(callCluster, index, getSignalsTemplate(index));
+  if (await templateNeedsUpdate({ alias: index, esClient })) {
+    await setTemplate(esClient, index, getSignalsTemplate(index));
   }
-  const indexExists = await getIndexExists(callCluster, index);
+  const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
-    const indexVersion = await getIndexVersion(callCluster, index);
-    if (indexVersion !== SIGNALS_TEMPLATE_VERSION) {
-      await callCluster('indices.rollover', { alias: index });
+    const indexVersion = await getIndexVersion(esClient, index);
+    if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
+      await esClient.indices.rollover({ alias: index });
     }
   } else {
-    await createBootstrapIndex(callCluster, index);
+    await createBootstrapIndex(esClient, index);
   }
 };

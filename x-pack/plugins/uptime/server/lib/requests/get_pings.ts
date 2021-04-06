@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   GetPingsParams,
@@ -59,7 +61,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   status,
   sort,
   size: sizeParam,
-  location,
+  locations,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -72,31 +74,21 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
           { range: { '@timestamp': { gte: from, lte: to } } },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
-        ],
+        ] as QueryContainer[],
         ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
-    aggs: {
-      locations: {
-        terms: {
-          field: 'observer.geo.name',
-          missing: 'N/A',
-          size: 1000,
-        },
-      },
-    },
-    ...(location ? { post_filter: { term: { 'observer.geo.name': location } } } : {}),
+    ...((locations ?? []).length > 0
+      ? { post_filter: { terms: { 'observer.geo.name': (locations as unknown) as string[] } } }
+      : {}),
   };
 
   const {
     body: {
       hits: { hits, total },
-      aggregations: aggs,
     },
   } = await uptimeEsClient.search({ body: searchBody });
-
-  const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;
@@ -113,7 +105,6 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   return {
     total: total.value,
-    locations: locations.buckets.map((bucket) => bucket.key as string),
     pings,
   };
 };

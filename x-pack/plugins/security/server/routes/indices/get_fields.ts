@@ -1,28 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '../index';
+
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import type { RouteDefinitionParams } from '../index';
 
-interface FieldMappingResponse {
-  [indexName: string]: {
-    mappings: {
-      [fieldName: string]: {
-        mapping: {
-          [fieldName: string]: {
-            type: string;
-          };
-        };
-      };
-    };
-  };
-}
-
-export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/fields/{query}',
@@ -30,14 +18,14 @@ export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinition
     },
     async (context, request, response) => {
       try {
-        const indexMappings = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('indices.getFieldMapping', {
-            index: request.params.query,
-            fields: '*',
-            allowNoIndices: false,
-            includeDefaults: true,
-          })) as FieldMappingResponse;
+        const {
+          body: indexMappings,
+        } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
+          index: request.params.query,
+          fields: '*',
+          allow_no_indices: false,
+          include_defaults: true,
+        });
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
         // 1. Iterate over all matched indices.
@@ -48,7 +36,13 @@ export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinition
           new Set(
             Object.values(indexMappings).flatMap((indexMapping) => {
               return Object.keys(indexMapping.mappings).filter((fieldName) => {
-                const mappingValues = Object.values(indexMapping.mappings[fieldName].mapping);
+                const mappingValues = Object.values(
+                  // `FieldMapping` type from `TypeFieldMappings` --> `GetFieldMappingResponse` is not correct and
+                  // doesn't have any properties.
+                  (indexMapping.mappings[fieldName] as {
+                    mapping: Record<string, { type: string }>;
+                  }).mapping
+                );
                 const hasMapping = mappingValues.length > 0;
 
                 const isRuntimeField = hasMapping && mappingValues[0]?.type === 'runtime';

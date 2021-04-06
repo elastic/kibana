@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
+
+import type { ReactEventHandler } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -17,8 +20,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import {
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import type { ApplicationStart } from 'kibana/public';
+
+import type {
   AgentPolicy,
   PackageInfo,
   NewPackagePolicy,
@@ -34,21 +39,21 @@ import {
 } from '../../../hooks';
 import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { PLUGIN_ID } from '../../../../../../common/constants';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
 import { CreatePackagePolicyPageLayout } from './components';
-import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
-import {
-  PackagePolicyValidationResults,
-  validatePackagePolicy,
-  validationHasErrors,
-} from './services';
+import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
+import type { PackagePolicyValidationResults } from './services';
+import { validatePackagePolicy, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -57,10 +62,7 @@ const StepsWithLessPadding = styled(EuiSteps)`
 `;
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
-  const {
-    notifications,
-    application: { navigateToApp },
-  } = useStartServices();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -69,6 +71,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ policyId: string; pkgkey: string }>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
+  const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
 
@@ -77,15 +80,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
-  const agentPolicyId = agentPolicy?.id;
   // Retrieve agent count
+  const agentPolicyId = agentPolicy?.id;
   useEffect(() => {
     const getAgentCount = async () => {
-      if (agentPolicyId) {
-        const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
-        }
+      const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
+      if (data?.results.total !== undefined) {
+        setAgentCount(data.results.total);
       }
     };
 
@@ -216,17 +217,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     return from === 'policy'
       ? getHref('policy_details', { policyId: agentPolicyId || policyId })
-      : getHref('integration_details', { pkgkey });
+      : getHref('integration_details_overview', { pkgkey });
   }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(
     (ev) => {
       if (routeState && routeState.onCancelNavigateTo) {
         ev.preventDefault();
-        navigateToApp(...routeState.onCancelNavigateTo);
+        handleNavigateTo(routeState.onCancelNavigateTo);
       }
     },
-    [routeState, navigateToApp]
+    [routeState, handleNavigateTo]
   );
 
   // Save package policy
@@ -249,10 +250,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     const { error, data } = await savePackagePolicy();
     if (!error) {
       if (routeState && routeState.onSaveNavigateTo) {
-        navigateToApp(
-          ...(typeof routeState.onSaveNavigateTo === 'function'
+        handleNavigateTo(
+          typeof routeState.onSaveNavigateTo === 'function'
             ? routeState.onSaveNavigateTo(data!.item)
-            : routeState.onSaveNavigateTo)
+            : routeState.onSaveNavigateTo
         );
       } else {
         history.push(getPath('policy_details', { policyId: agentPolicy?.id || policyId }));
@@ -333,15 +334,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
-          <StepConfigurePackagePolicy
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
+
           {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {packagePolicy.policy_id && packagePolicy.package?.name && ExtensionView && (
+          {ExtensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
             </ExtensionWrapper>
@@ -401,7 +407,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         ? packageInfo && (
             <IntegrationBreadcrumb
               pkgTitle={packageInfo.title}
-              pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
             />
           )
         : agentPolicy && (
@@ -473,4 +479,30 @@ const IntegrationBreadcrumb: React.FunctionComponent<{
 }> = ({ pkgTitle, pkgkey }) => {
   useBreadcrumbs('add_integration_to_policy', { pkgTitle, pkgkey });
   return null;
+};
+
+const useNavigateToCallback = () => {
+  const history = useHistory();
+  const {
+    application: { navigateToApp },
+  } = useStartServices();
+
+  return useCallback(
+    (navigateToProps: Parameters<ApplicationStart['navigateToApp']>) => {
+      // If navigateTo appID is `fleet`, then don't use Kibana's navigateTo method, because that
+      // uses BrowserHistory but within fleet, we are using HashHistory.
+      // This temporary workaround hook can be removed once this issue is addressed:
+      // https://github.com/elastic/kibana/issues/70358
+      if (navigateToProps[0] === PLUGIN_ID) {
+        const { path = '', state } = navigateToProps[1] || {};
+        history.push({
+          pathname: path.charAt(0) === '#' ? path.substr(1) : path,
+          state,
+        });
+      }
+
+      return navigateToApp(...navigateToProps);
+    },
+    [history, navigateToApp]
+  );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -119,6 +120,10 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('generateReportButton');
     }
 
+    async toggleReportMode() {
+      await testSubjects.click('reportModeToggle');
+    }
+
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
       const isToastPresent = await testSubjects.exists('completeReportSuccess', {
@@ -135,8 +140,8 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
 
     async setTimepickerInDataRange() {
       log.debug('Reporting:setTimepickerInDataRange');
-      const fromTime = 'Sep 19, 2015 @ 06:31:44.000';
-      const toTime = 'Sep 19, 2015 @ 18:01:44.000';
+      const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
+      const toTime = 'Aug 23, 2019 @ 16:18:51.821';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 

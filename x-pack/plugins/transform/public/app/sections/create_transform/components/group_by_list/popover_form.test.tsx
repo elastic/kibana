@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
+import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+const startMock = coreMock.createStart();
 
 import { AggName } from '../../../../../../common/types/aggregations';
 
@@ -87,15 +94,24 @@ describe('Transform: Group By <PopoverForm />', () => {
     const otherAggNames: AggName[] = [];
     const onChange = (item: PivotGroupByConfig) => {};
 
+    // mock services for QueryStringInput
+    const services = {
+      ...startMock,
+      data: dataPluginMock.createStartContract(),
+      appName: 'the-test-app',
+    };
+
     const wrapper = shallow(
-      <PopoverForm
-        defaultData={defaultData}
-        otherAggNames={otherAggNames}
-        options={{}}
-        onChange={onChange}
-      />
+      <KibanaContextProvider services={services}>
+        <PopoverForm
+          defaultData={defaultData}
+          otherAggNames={otherAggNames}
+          options={{}}
+          onChange={onChange}
+        />
+      </KibanaContextProvider>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find(PopoverForm)).toMatchSnapshot();
   });
 });

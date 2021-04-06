@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 
 import { SetupPlugins } from '../../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
 
-type TrackFn = (type: UiStatsMetricType, event: string | string[], count?: number) => void;
+type TrackFn = (type: UiCounterMetricType, event: string | string[], count?: number) => void;
 
 const noop = () => {};
 
@@ -34,7 +35,7 @@ export const initTelemetry = (
 ) => {
   telemetryManagementSection?.toggleSecuritySolutionExample(true);
 
-  _track = usageCollection?.reportUiStats?.bind(null, appId) ?? noop;
+  _track = usageCollection?.reportUiCounter?.bind(null, appId) ?? noop;
 };
 
 export enum TELEMETRY_EVENT {

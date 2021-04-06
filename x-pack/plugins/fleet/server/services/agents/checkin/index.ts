@@ -1,25 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import {
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
+
+import type {
   Agent,
   NewAgentEvent,
   AgentEvent,
   AgentSOAttributes,
   AgentEventSOAttributes,
 } from '../../../types';
-
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { agentCheckinState } from './state';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { getAgentActionsForCheckin } from '../actions';
+import { updateAgent } from '../crud';
+
+import { agentCheckinState } from './state';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   data: {
     events: NewAgentEvent[];
@@ -29,13 +37,7 @@ export async function agentCheckin(
   options?: { signal: AbortSignal }
 ) {
   const updateData: Partial<AgentSOAttributes> = {};
-  const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, data.events);
-  if (
-    updatedErrorEvents &&
-    !(updatedErrorEvents.length === 0 && agent.current_error_events.length === 0)
-  ) {
-    updateData.current_error_events = JSON.stringify(updatedErrorEvents);
-  }
+  await processEventsForCheckin(soClient, agent, data.events);
   if (data.localMetadata && !deepEqual(data.localMetadata, agent.local_metadata)) {
     updateData.local_metadata = data.localMetadata;
   }
@@ -44,9 +46,8 @@ export async function agentCheckin(
   }
   // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
+    await updateAgent(esClient, agent.id, updateData);
   }
-
   // Check if some actions are not acknowledged
   let actions = await getAgentActionsForCheckin(soClient, agent.id);
   if (actions.length > 0) {
@@ -54,7 +55,7 @@ export async function agentCheckin(
   }
 
   // Wait for new actions
-  actions = await agentCheckinState.subscribeToNewActions(soClient, agent, options);
+  actions = await agentCheckinState.subscribeToNewActions(soClient, esClient, agent, options);
 
   return { actions };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -38,11 +39,7 @@ export const openAddNewConnectorOption = () => {
   });
 };
 
-export const selectLastConnectorCreated = () => {
+export const selectLastConnectorCreated = (id: string) => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });
-  cy.get('@createConnector')
-    .its('response')
-    .then((response) => {
-      cy.get(CONNECTOR(response.body.id)).click();
-    });
+  cy.get(CONNECTOR(id)).click();
 };

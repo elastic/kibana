@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
+import { UptimeESClient } from '../../lib';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export class QueryContext {
-  callES: ElasticsearchClient;
+  callES: UptimeESClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -19,15 +21,17 @@ export class QueryContext {
   size: number;
   statusFilter?: string;
   hasTimespanCache?: boolean;
+  query?: string;
 
   constructor(
-    database: any,
+    database: UptimeESClient,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
     filterClause: any | null,
     size: number,
-    statusFilter?: string
+    statusFilter?: string,
+    query?: string
   ) {
     this.callES = database;
     this.dateRangeStart = dateRangeStart;
@@ -36,17 +40,19 @@ export class QueryContext {
     this.filterClause = filterClause;
     this.size = size;
     this.statusFilter = statusFilter;
+    this.query = query;
   }
 
-  async search(params: any): Promise<any> {
-    return this.callES.search({ body: params.body });
+  async search<TParams>(params: TParams) {
+    return this.callES.search(params);
   }
 
   async count(params: any): Promise<any> {
-    return this.callES.count(params);
+    const { body } = await this.callES.count(params);
+    return body;
   }
 
-  async dateAndCustomFilters(): Promise<any[]> {
+  async dateAndCustomFilters(): Promise<ESFilter[]> {
     const clauses = [await this.dateRangeFilter()];
     if (this.filterClause) {
       clauses.push(this.filterClause);

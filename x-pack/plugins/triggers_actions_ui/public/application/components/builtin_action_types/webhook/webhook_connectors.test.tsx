@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
-import { DocLinksStart } from 'kibana/public';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
@@ -33,7 +34,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -61,7 +61,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -92,7 +91,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );

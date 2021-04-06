@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,7 +19,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
+import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../../../common/search_strategy';
@@ -228,6 +229,19 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     ));
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
+  const tableSorting = useMemo(
+    () =>
+      sorting
+        ? {
+            sort: {
+              field: sorting.field,
+              direction: sorting.direction,
+            },
+          }
+        : undefined,
+    [sorting]
+  );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
@@ -251,16 +265,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               columns={columns}
               items={pageOfItems}
               onChange={onChange}
-              sorting={
-                sorting
-                  ? {
-                      sort: {
-                        field: sorting.field,
-                        direction: sorting.direction,
-                      },
-                    }
-                  : undefined
-              }
+              sorting={tableSorting}
             />
             <FooterAction>
               <EuiFlexItem>

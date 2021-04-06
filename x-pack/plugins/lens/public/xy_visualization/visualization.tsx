@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,24 +11,19 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
-  Visualization,
-  OperationMetadata,
-  VisualizationType,
-  AccessorConfig,
-  FramePublicAPI,
-} from '../types';
-import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
+import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
+import { State, SeriesType, visualizationTypes, XYLayerConfig } from './types';
+import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { ColorAssignments, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getColumnToLabelMap } from './state_helpers';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -62,7 +58,7 @@ function getDescription(state?: State) {
     return {
       icon: LensIconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-        defaultMessage: 'Mixed H. bar',
+        defaultMessage: 'Mixed bar horizontal',
       }),
     };
   }
@@ -78,7 +74,7 @@ function getDescription(state?: State) {
 
   return {
     icon: visualizationType.icon,
-    label: visualizationType.label,
+    label: visualizationType.fullLabel || visualizationType.label,
   };
 }
 
@@ -192,8 +188,10 @@ export const getXyVisualization = ({
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
         frame,
-        layer,
-        sortedAccessors,
+        {
+          ...layer,
+          accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        },
         paletteService
       );
     }
@@ -300,7 +298,11 @@ export const getXyVisualization = ({
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
+    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
+    return {
+      icon: visualizationType?.icon || 'gear',
+      label: visualizationType?.label || '',
+    };
   },
 
   renderLayerContextMenu(domElement, props) {
@@ -324,7 +326,11 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor
+          {...props}
+          formatFactory={data.fieldFormats.deserialize}
+          paletteService={paletteService}
+        />
       </I18nProvider>,
       domElement
     );
@@ -334,11 +340,11 @@ export const getXyVisualization = ({
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
-    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+    const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
-    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
 
     const errors: Array<{
@@ -349,14 +355,14 @@ export const getXyVisualization = ({
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+      const checks: Array<[string, (layer: XYLayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
         ['Break down', hasNoSplitAccessor],
       ];
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
           accessors.length > 0 || xAccessor != null || splitAccessor != null
       );
       for (const [dimension, criteria] of checks) {
@@ -367,59 +373,74 @@ export const getXyVisualization = ({
       }
     }
 
+    if (datasourceLayers && state) {
+      for (const layer of state.layers) {
+        const datasourceAPI = datasourceLayers[layer.layerId];
+        if (datasourceAPI) {
+          for (const accessor of layer.accessors) {
+            const operation = datasourceAPI.getOperationForColumnId(accessor);
+            if (operation && operation.dataType !== 'number') {
+              errors.push({
+                shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
+                  defaultMessage: `Wrong data type for {axis}.`,
+                  values: {
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+                longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
+                  defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
+                  values: {
+                    label: operation.label,
+                    dataType: operation.dataType,
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+              });
+            }
+          }
+        }
+      }
+    }
+
     return errors.length ? errors : undefined;
+  },
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const layers = state.layers;
+
+    const filteredLayers = layers.filter(({ accessors }: XYLayerConfig) => accessors.length > 0);
+    const accessorsWithArrayValues = [];
+    for (const layer of filteredLayers) {
+      const { layerId, accessors } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows) {
+        break;
+      }
+      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
+      for (const accessor of accessors) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+        if (hasArrayValues) {
+          accessorsWithArrayValues.push(columnToLabel[accessor]);
+        }
+      }
+    }
+    return accessorsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
   },
 });
 
-function getAccessorColorConfig(
-  colorAssignments: ColorAssignments,
-  frame: FramePublicAPI,
-  layer: LayerConfig,
-  sortedAccessors: string[],
-  paletteService: PaletteRegistry
-): AccessorConfig[] {
-  const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-  return sortedAccessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    if (layerContainsSplits) {
-      return {
-        columnId: accessor as string,
-        triggerIcon: 'disabled',
-      };
-    }
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-    const rank = colorAssignments[currentPalette.name].getRank(
-      layer,
-      columnToLabel[accessor] || accessor,
-      accessor
-    );
-    const customColor =
-      currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getColor(
-        [
-          {
-            name: columnToLabel[accessor] || accessor,
-            rankAtDepth: rank,
-            totalSeriesAtDepth: totalSeriesCount,
-          },
-        ],
-        { maxDepth: 1, totalSeries: totalSeriesCount },
-        currentPalette.params
-      );
-    return {
-      columnId: accessor as string,
-      triggerIcon: customColor ? 'color' : 'disabled',
-      color: customColor ? customColor : undefined,
-    };
-  });
-}
-
 function validateLayersForDimension(
   dimension: string,
-  layers: LayerConfig[],
-  missingCriteria: (layer: LayerConfig) => boolean
+  layers: XYLayerConfig[],
+  missingCriteria: (layer: XYLayerConfig) => boolean
 ):
   | { valid: true }
   | {
@@ -489,7 +510,7 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
+function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
   return {
     layerId,
     seriesType,

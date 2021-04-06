@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { contentSources } from '../../../__mocks__/content_sources.mock';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiTableRow, EuiSwitch, EuiIcon } from '@elastic/eui';
-import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import { SourceIcon } from '../source_icon';
 
@@ -36,7 +39,7 @@ describe('SourceRow', () => {
     const source = {
       ...contentSources[0],
       status: 'error',
-      errorReason: 1,
+      errorReason: 'credentials_invalid',
     };
     const wrapper = shallow(<SourceRow isOrganization source={source} />);
 
@@ -70,7 +73,7 @@ describe('SourceRow', () => {
     };
     const wrapper = shallow(<SourceRow isOrganization source={source} />);
 
-    expect(wrapper.find('.source-row__document-count').contains('Remote')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="SourceDocumentCount"]').contains('Remote')).toBeTruthy();
   });
 
   it('renders details link', () => {

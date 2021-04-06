@@ -1,13 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo, useState, useEffect } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../../../../../hooks';
-import { AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
+
+import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
+
+function sortLogLevels(levels: string[]): string[] {
+  return [
+    ...new Set([
+      // order by severity for known level
+      ...ORDERED_FILTER_LOG_LEVELS.filter((level) => levels.includes(level)),
+      // Add unknown log level
+      ...levels.sort(),
+    ]),
+  ];
+}
 
 export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
@@ -22,7 +37,7 @@ export const LogLevelFilter: React.FunctionComponent<{
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values = await data.autocomplete.getValueSuggestions({
+        const values: string[] = await data.autocomplete.getValueSuggestions({
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [LOG_LEVEL_FIELD],
@@ -30,7 +45,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           field: LOG_LEVEL_FIELD,
           query: '',
         });
-        setLevelValues(values.sort());
+        setLevelValues(sortLogLevels(values));
       } catch (e) {
         setLevelValues([]);
       }

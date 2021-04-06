@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -21,14 +22,10 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
       refreshTelemetryHistory: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async (
-    { savedObjectsClient, uptimeEsClient },
-    _context,
-    request,
-    response
-  ): Promise<any> => {
+  handler: async ({ savedObjectsClient, uptimeEsClient, request }): Promise<any> => {
     const pageView = request.body as PageViewParams;
     if (pageView.refreshTelemetryHistory) {
       KibanaTelemetryAdapter.clearLocalTelemetry();
@@ -37,10 +34,6 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       uptimeEsClient,
       savedObjectsClient
     );
-    const pageViewResult = KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
-
-    return response.ok({
-      body: pageViewResult,
-    });
+    return KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
   },
 });

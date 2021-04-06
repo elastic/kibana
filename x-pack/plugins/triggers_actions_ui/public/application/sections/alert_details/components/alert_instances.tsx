@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -11,7 +12,7 @@ import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@ela
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
 import {
   Alert,
   AlertInstanceSummary,
@@ -24,6 +25,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import './alert_instances.scss';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -41,11 +43,12 @@ export const alertInstancesTableColumns = (
   {
     field: 'instance',
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
-      { defaultMessage: 'Instance' }
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.alert',
+      { defaultMessage: 'Alert' }
     ),
     sortable: false,
     truncateText: true,
+    width: '45%',
     'data-test-subj': 'alertInstancesTableCell-instance',
     render: (value: string) => {
       return (
@@ -61,10 +64,10 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
-    width: '100px',
+    width: '15%',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return (
-        <EuiHealth color={value.healthColor}>
+        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
           {value.label}
           {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
@@ -75,7 +78,7 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'start',
-    width: '200px',
+    width: '190px',
     render: (value: Date | undefined, instance: AlertInstanceListItem) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
@@ -88,7 +91,6 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'duration',
-    align: CENTER_ALIGNMENT,
     render: (value: number, instance: AlertInstanceListItem) => {
       return value ? durationAsString(moment.duration(value)) : '';
     },
@@ -97,7 +99,7 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
-    width: '100px',
+    width: '80px',
     'data-test-subj': 'alertInstancesTableCell-duration',
   },
   {
@@ -192,6 +194,7 @@ export function AlertInstances({
         columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
         tableLayout="fixed"
+        className="alertInstancesList"
       />
     </Fragment>
   );
@@ -229,7 +232,7 @@ const INACTIVE_LABEL = i18n.translate(
 function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || alertType.defaultActionGroupId;
   const actionGroup = alertType?.actionGroups?.find(
-    (group: ActionGroup) => group.id === actionGroupId
+    (group: ActionGroup<string>) => group.id === actionGroupId
   );
   return actionGroup?.name;
 }

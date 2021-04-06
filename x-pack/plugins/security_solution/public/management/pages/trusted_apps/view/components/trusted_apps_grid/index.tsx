@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo, useCallback, useEffect } from 'react';
@@ -15,9 +16,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useHistory } from 'react-router-dom';
 import { Pagination } from '../../../state';
 
 import {
+  getCurrentLocation,
   getListErrorMessage,
   getListItems,
   getListPagination,
@@ -32,7 +35,8 @@ import {
 
 import { NO_RESULTS_MESSAGE } from '../../translations';
 
-import { TrustedAppCard } from '../trusted_app_card';
+import { TrustedAppCard, TrustedAppCardProps } from '../trusted_app_card';
+import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export interface PaginationBarProps {
   pagination: Pagination;
@@ -74,15 +78,31 @@ const GridMessage: FC = ({ children }) => (
 );
 
 export const TrustedAppsGrid = memo(() => {
+  const history = useHistory();
   const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
   const isLoading = useTrustedAppsSelector(isListLoading);
   const error = useTrustedAppsSelector(getListErrorMessage);
+  const location = useTrustedAppsSelector(getCurrentLocation);
 
   const handleTrustedAppDelete = useTrustedAppsStoreActionCallback((trustedApp) => ({
     type: 'trustedAppDeletionDialogStarted',
     payload: { entry: trustedApp },
   }));
+
+  const handleTrustedAppEdit: TrustedAppCardProps['onEdit'] = useCallback(
+    (trustedApp) => {
+      history.push(
+        getTrustedAppsListPath({
+          ...location,
+          show: 'edit',
+          id: trustedApp.id,
+        })
+      );
+    },
+    [history, location]
+  );
+
   const handlePaginationChange = useTrustedAppsNavigateCallback(({ index, size }) => ({
     page_index: index,
     page_size: size,
@@ -113,7 +133,11 @@ export const TrustedAppsGrid = memo(() => {
             <EuiFlexGroup direction="column">
               {listItems.map((item) => (
                 <EuiFlexItem grow={false} key={item.id}>
-                  <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
+                  <TrustedAppCard
+                    trustedApp={item}
+                    onDelete={handleTrustedAppDelete}
+                    onEdit={handleTrustedAppEdit}
+                  />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

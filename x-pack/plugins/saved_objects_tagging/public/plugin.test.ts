@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -11,10 +12,10 @@ import { managementPluginMock } from '../../../../src/plugins/management/public/
 import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { SavedObjectsTaggingClientConfigRawType } from './config';
-import { TagsCache } from './tags';
-import { tagsCacheMock } from './tags/tags_cache.mock';
+import { TagsCache } from './services';
+import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
-jest.mock('./tags/tags_cache');
+jest.mock('./services/tags/tags_cache');
 const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<TagsCache>>;
 
 describe('SavedObjectTaggingPlugin', () => {

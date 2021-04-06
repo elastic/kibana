@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,8 +26,6 @@ const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
 const ALERT_INTERVALS_TO_WRITE = 5;
 const ALERT_INTERVAL_SECONDS = 3;
 const ALERT_INTERVAL_MILLIS = ALERT_INTERVAL_SECONDS * 1000;
-
-const DefaultActionMessage = `alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}`;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -93,9 +92,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(group).to.be('all documents');
 
         // we'll check title and message in this test, but not subsequent ones
-        expect(title).to.be('alert always fire group all documents exceeded threshold');
+        expect(title).to.be('alert always fire group all documents met threshold');
 
-        const messagePattern = /alert always fire group all documents value \d+ exceeded threshold count &gt; -1 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -134,7 +133,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
 
-        const messagePattern = /alert always fire group group-\d value \d+ exceeded threshold count .+ over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: count is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 
@@ -171,7 +170,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
 
-        const messagePattern = /alert always fire group all documents value \d+ exceeded threshold sum\(testedValue\) between 0,1000000 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: sum\(testedValue\) is between 0 and 1000000 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -206,7 +205,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
 
-        const messagePattern = /alert always fire group all documents value .+ exceeded threshold avg\(testedValue\) .+ 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -247,7 +246,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-2') inGroup2++;
 
-        const messagePattern = /alert always fire group group-. value \d+ exceeded threshold max\(testedValue\) .* 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 
@@ -292,7 +291,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
 
-        const messagePattern = /alert always fire group group-. value \d+ exceeded threshold min\(testedValue\) .* 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: min\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
 
@@ -345,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 name: '{{{alertName}}}',
                 value: '{{{context.value}}}',
                 title: '{{{context.title}}}',
-                message: DefaultActionMessage,
+                message: '{{{context.message}}}',
               },
               date: '{{{context.date}}}',
               // TODO: I wanted to write the alert value here, but how?
@@ -358,15 +357,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const { status, body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
           consumer: 'alerts',
           enabled: true,
-          alertTypeId: ALERT_TYPE_ID,
+          rule_type_id: ALERT_TYPE_ID,
           schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
           actions: [action],
+          notify_when: 'onActiveAlert',
           params: {
             index: ES_TEST_INDEX_NAME,
             timeField: params.timeField || 'date',
@@ -388,7 +388,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       return alertId;
     }
@@ -397,11 +397,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { statusCode, body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for index threshold FT',
-      actionTypeId: ACTION_TYPE_ID,
+      connector_type_id: ACTION_TYPE_ID,
       config: {
         index: ES_TEST_OUTPUT_INDEX_NAME,
       },
@@ -414,7 +414,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
   expect(statusCode).to.be(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
+  objectRemover.add(Spaces.space1.id, actionId, 'connector', 'actions');
 
   return actionId;
 }

@@ -1,62 +1,67 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { Client } from 'elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
 const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];
 
 export async function deleteIndex(options: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
-  index: string;
+  index: string | string[];
   log: ToolingLog;
   retryIfSnapshottingCount?: number;
 }): Promise<void> {
-  const { client, stats, index, log, retryIfSnapshottingCount = 10 } = options;
+  const { client, stats, log, retryIfSnapshottingCount = 10 } = options;
+  const indices = [options.index].flat();
 
   const getIndicesToDelete = async () => {
-    const aliasInfo = await client.indices.getAlias({ name: index, ignore: [404] });
-    return aliasInfo.status === 404 ? [index] : Object.keys(aliasInfo);
+    const resp = await client.indices.getAlias(
+      {
+        name: indices,
+      },
+      {
+        ignore: [404],
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
+
+    return resp.statusCode === 404 ? indices : Object.keys(resp.body);
   };
 
   try {
     const indicesToDelete = await getIndicesToDelete();
-    await client.indices.delete({ index: indicesToDelete });
-    for (let i = 0; i < indicesToDelete.length; i++) {
-      const indexToDelete = indicesToDelete[i];
-      stats.deletedIndex(indexToDelete);
+    await client.indices.delete(
+      { index: indicesToDelete },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
+    for (const index of indices) {
+      stats.deletedIndex(index);
     }
   } catch (error) {
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
-      stats.waitingForInProgressSnapshot(index);
-      await waitForSnapshotCompletion(client, index, log);
+      for (const index of indices) {
+        stats.waitingForInProgressSnapshot(index);
+      }
+      await waitForSnapshotCompletion(client, indices, log);
       return await deleteIndex({
         ...options,
         retryIfSnapshottingCount: retryIfSnapshottingCount - 1,
       });
     }
 
-    if (get(error, 'body.error.type') !== 'index_not_found_exception') {
+    if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
       throw error;
     }
   }
@@ -68,8 +73,8 @@ export async function deleteIndex(options: {
  * @param  {Error} error
  * @return {Boolean}
  */
-export function isDeleteWhileSnapshotInProgressError(error: object) {
-  return get(error, 'body.error.reason', '').startsWith(
+export function isDeleteWhileSnapshotInProgressError(error: any) {
+  return (error?.meta?.body?.error?.reason ?? '').startsWith(
     'Cannot delete indices that are being snapshotted'
   );
 }
@@ -78,28 +83,48 @@ export function isDeleteWhileSnapshotInProgressError(error: object) {
  * Wait for the any snapshot in any repository that is
  * snapshotting this index to complete.
  */
-export async function waitForSnapshotCompletion(client: Client, index: string, log: ToolingLog) {
+export async function waitForSnapshotCompletion(
+  client: KibanaClient,
+  index: string | string[],
+  log: ToolingLog
+) {
   const isSnapshotPending = async (repository: string, snapshot: string) => {
     const {
-      snapshots: [status],
-    } = await client.snapshot.status({
-      repository,
-      snapshot,
-    });
+      body: {
+        snapshots: [status],
+      },
+    } = await client.snapshot.status(
+      {
+        repository,
+        snapshot,
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
 
     log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 
   const getInProgressSnapshots = async (repository: string) => {
-    const { snapshots: inProgressSnapshots } = await client.snapshot.get({
-      repository,
-      snapshot: '_current',
-    });
+    const {
+      body: { snapshots: inProgressSnapshots },
+    } = await client.snapshot.get(
+      {
+        repository,
+        snapshot: '_current',
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
+
     return inProgressSnapshots;
   };
 
-  for (const repository of Object.keys(await client.snapshot.getRepository({} as any))) {
+  const { body: repositoryMap } = await client.snapshot.getRepository({} as any);
+  for (const repository of Object.keys(repositoryMap)) {
     const allInProgress = await getInProgressSnapshots(repository);
     const found = allInProgress.find((s: any) => s.indices.includes(index));
 

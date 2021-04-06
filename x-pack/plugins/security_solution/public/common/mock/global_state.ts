@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -24,7 +25,7 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -202,6 +203,8 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -210,9 +213,14 @@ export const mockGlobalState: State = {
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -220,7 +228,7 @@ export const mockGlobalState: State = {
         isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
-        kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
         timelineType: TimelineType.default,
@@ -237,7 +245,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

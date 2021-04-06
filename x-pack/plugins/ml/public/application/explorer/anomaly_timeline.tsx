@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo, useState } from 'react';
@@ -159,7 +160,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiFlexItem>
                 {selectedCells ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty size="xs" onClick={setSelectedCells.bind(null, undefined)}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      onClick={setSelectedCells.bind(null, undefined)}
+                      data-test-subj="mlAnomalyTimelineClearSelection"
+                    >
                       <FormattedMessage
                         id="xpack.ml.explorer.clearSelectionLabel"
                         defaultMessage="Clear selection"

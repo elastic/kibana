@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -28,16 +29,19 @@ interface ProviderItemBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isPopoverOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
   register?: DataProvidersAnd;
+  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   val: string | number;
   type?: DataProviderType;
+  wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -49,33 +53,42 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     kqlQuery,
     isEnabled,
     isExcluded,
+    isPopoverOpen,
     onDataProviderEdited,
     operator,
     providerId,
     register,
+    setIsPopoverOpen,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
     type = DataProviderType.default,
+    wrapperRef,
   }) => {
-    const timelineById = useShallowEqualSelector(timelineSelectors.timelineByIdSelector);
-    const timelineType = timelineId ? timelineById[timelineId]?.timelineType : TimelineType.default;
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const timelineType = useShallowEqualSelector((state) => {
+      if (!timelineId) {
+        return TimelineType.default;
+      }
+
+      return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
+    });
     const { getManageTimelineById } = useManageTimeline();
     const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
       getManageTimelineById,
       timelineId,
     ]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
-    }, [isPopoverOpen]);
+    }, [isPopoverOpen, setIsPopoverOpen]);
 
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    }, []);
+      wrapperRef?.current?.focus();
+    }, [wrapperRef, setIsPopoverOpen]);
 
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();

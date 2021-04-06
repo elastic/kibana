@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -86,6 +87,10 @@ export const MonitorType = t.intersection([
 
 export type Monitor = t.TypeOf<typeof MonitorType>;
 
+export const PingHeadersType = t.record(t.string, t.union([t.string, t.array(t.string)]));
+
+export type PingHeaders = t.TypeOf<typeof PingHeadersType>;
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -135,7 +140,7 @@ export const PingType = t.intersection([
         bytes: t.number,
         redirects: t.array(t.string),
         status_code: t.number,
-        headers: t.record(t.string, t.string),
+        headers: PingHeadersType,
       }),
       version: t.string,
     }),
@@ -211,6 +216,7 @@ export const PingType = t.intersection([
         type: t.string,
         url: t.string,
         end: t.number,
+        text: t.string,
       }),
     }),
     tags: t.array(t.string),
@@ -228,6 +234,7 @@ export const PingType = t.intersection([
       full: t.string,
       port: t.number,
       scheme: t.string,
+      path: t.string,
     }),
     service: t.partial({
       name: t.string,
@@ -235,10 +242,33 @@ export const PingType = t.intersection([
   }),
 ]);
 
-export const SyntheticsJourneyApiResponseType = t.type({
-  checkGroup: t.string,
-  steps: t.array(PingType),
-});
+export const SyntheticsJourneyApiResponseType = t.intersection([
+  t.type({
+    checkGroup: t.string,
+    steps: t.array(PingType),
+  }),
+  t.partial({
+    details: t.union([
+      t.intersection([
+        t.type({
+          timestamp: t.string,
+          journey: PingType,
+        }),
+        t.partial({
+          next: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+          previous: t.type({
+            timestamp: t.string,
+            checkGroup: t.string,
+          }),
+        }),
+      ]),
+      t.null,
+    ]),
+  }),
+]);
 
 export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
 
@@ -276,7 +306,6 @@ export const makePing = (f: {
 
 export const PingsResponseType = t.type({
   total: t.number,
-  locations: t.array(t.string),
   pings: t.array(PingType),
 });
 
@@ -289,7 +318,7 @@ export const GetPingsParamsType = t.intersection([
   t.partial({
     index: t.number,
     size: t.number,
-    location: t.string,
+    locations: t.string,
     monitorId: t.string,
     sort: t.string,
     status: t.string,

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiBasicTable,
@@ -16,10 +18,10 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiText,
-  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
+
+import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
 import {
   useBreadcrumbs,
   usePagination,
@@ -29,8 +31,9 @@ import {
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
-import { EnrollmentAPIKey } from '../../../types';
+import type { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
+
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
@@ -280,7 +283,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            fieldPrefix={ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}
+            indexPattern={ENROLLMENT_API_KEYS_INDEX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

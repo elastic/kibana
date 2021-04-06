@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IUiSettingsClient, Logger } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -13,17 +15,18 @@ import {
   AlertThreadPoolRejectionsState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  CommonAlertFilter,
   ThreadPoolRejectionsAlertParams,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance, AlertServices } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert, RawAlertInstance } from '../../../alerts/common';
+import { Alert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
+import { Globals } from '../static_globals';
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
@@ -44,29 +47,31 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     ];
   }
 
-  protected defaultParams: ThreadPoolRejectionsAlertParams = {
-    threshold: 300,
-    duration: '5m',
-  };
-
   constructor(
     rawAlert: Alert | undefined = undefined,
-    public readonly type: string,
+    public readonly id: string,
     public readonly threadPoolType: string,
-    public readonly label: string,
+    public readonly name: string,
     public readonly actionVariables: ActionVariables
   ) {
-    super(rawAlert);
+    super(rawAlert, {
+      id,
+      name,
+      defaultParams: {
+        threshold: 300,
+        duration: '5m',
+      },
+      actionVariables,
+    });
   }
 
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
+    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
@@ -74,19 +79,18 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
-      this.config.ui.max_bucket_size,
+      Globals.app.config.ui.max_bucket_size,
       this.threadPoolType,
       duration
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, nodeId, rejectionCount, ccs } = stat;
+      const { clusterUuid, rejectionCount, ccs } = stat;
 
       return {
-        instanceKey: `${clusterUuid}:${nodeId}`,
         shouldFire: rejectionCount > threshold,
         rejectionCount,
         severity: AlertSeverity.Danger,
@@ -98,23 +102,11 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceStates = alertInstance.state
-      ?.alertStates as AlertThreadPoolRejectionsState[];
-    const nodeUuid = filters?.find((filter) => filter.nodeUuid)?.nodeUuid;
-
-    if (!alertInstanceStates?.length || !nodeUuid) {
-      return true;
-    }
-
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeUuid);
-    return Boolean(nodeAlerts.length);
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
-  protected getUiMessage(
-    alertState: AlertThreadPoolRejectionsState,
-    rejectionCount: number
-  ): AlertMessage {
-    const { nodeName, nodeId } = alertState;
+  protected getUiMessage(alertState: AlertThreadPoolRejectionsState): AlertMessage {
+    const { nodeName, nodeId, rejectionCount } = alertState;
     return {
       text: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting {rejectionCount} {type} rejections at #absolute`,
@@ -244,7 +236,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
     instance.scheduleActions('default', {
       internalShortMessage,
-      internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
+      internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       threadPoolType: type,
       state: AlertingDefaults.ALERT_STATE.firing,
       count,
@@ -252,61 +244,5 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
       action,
       actionPlain: shortActionText,
     });
-  }
-
-  protected async processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    logger: Logger,
-    state: { lastChecked?: number }
-  ) {
-    const currentUTC = +new Date();
-    for (const cluster of clusters) {
-      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
-      if (!nodes.length) {
-        continue;
-      }
-
-      const firingNodeUuids = nodes.filter((node) => node.shouldFire);
-
-      if (!firingNodeUuids.length) {
-        continue;
-      }
-
-      const instanceSuffix = firingNodeUuids.map((node) => node.meta.nodeId);
-
-      const instancePrefix = `${this.type}:${cluster.clusterUuid}:`;
-      const alertInstanceId = `${instancePrefix}:${instanceSuffix}`;
-      const alertInstance = services.alertInstanceFactory(alertInstanceId);
-      const newAlertStates: AlertThreadPoolRejectionsState[] = [];
-
-      for (const node of nodes) {
-        if (!node.shouldFire) {
-          continue;
-        }
-        const stat = node.meta as AlertThreadPoolRejectionsState;
-        const nodeState = this.getDefaultAlertState(
-          cluster,
-          node
-        ) as AlertThreadPoolRejectionsState;
-        const { nodeId, nodeName, rejectionCount } = stat;
-        nodeState.nodeId = nodeId;
-        nodeState.nodeName = nodeName;
-        nodeState.ui.triggeredMS = currentUTC;
-        nodeState.ui.isFiring = true;
-        nodeState.ui.severity = node.severity;
-        nodeState.ui.message = this.getUiMessage(nodeState, rejectionCount);
-        newAlertStates.push(nodeState);
-      }
-
-      alertInstance.replaceState({ alertStates: newAlertStates });
-      if (newAlertStates.length) {
-        this.executeActions(alertInstance, newAlertStates, cluster);
-      }
-    }
-
-    state.lastChecked = currentUTC;
-    return state;
   }
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import httpProxy from 'http-proxy';
@@ -15,24 +16,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-const mapping = [
-  {
-    source: 'title',
-    target: 'name',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -43,8 +26,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'www.resilientisinkibanaactions.com',
       orgId: '201',
-      incidentConfiguration: { mapping },
-      isCaseOwned: true,
     },
     secrets: {
       apiKeyId: 'key',
@@ -53,25 +34,17 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        savedObjectId: '123',
-        title: 'a title',
-        description: 'a description',
-        incidentTypes: [1001],
-        severityCode: 6,
-        createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: 'elastic' },
-        updatedAt: null,
-        updatedBy: null,
-        externalId: null,
+        incident: {
+          name: 'a title',
+          description: 'a description',
+          incidentTypes: [1001],
+          severityCode: 6,
+          externalId: null,
+        },
         comments: [
           {
-            commentId: '456',
-            version: 'WzU3LDFd',
             comment: 'first comment',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: { fullName: 'Elastic User', username: 'elastic' },
-            updatedAt: null,
-            updatedBy: null,
+            commentId: '456',
           },
         ],
       },
@@ -90,11 +63,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     describe('IBM Resilient - Action Creation', () => {
       it('should return 200 when creating a ibm resilient action successfully', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient action',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               ...mockResilient.config,
               apiUrl: resilientSimulatorURL,
@@ -105,42 +78,38 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         expect(createdAction).to.eql({
           id: createdAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'An IBM Resilient action',
-          actionTypeId: '.resilient',
+          connector_type_id: '.resilient',
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
-            incidentConfiguration: mockResilient.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
 
         const { body: fetchedAction } = await supertest
-          .get(`/api/actions/action/${createdAction.id}`)
+          .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'An IBM Resilient action',
-          actionTypeId: '.resilient',
+          connector_type_id: '.resilient',
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
-            incidentConfiguration: mockResilient.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
       });
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with no apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: { orgId: '201' },
           })
           .expect(400)
@@ -156,11 +125,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with no orgId', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: { apiUrl: resilientSimulatorURL },
           })
           .expect(400)
@@ -176,15 +145,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with a not present in allowedHosts apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: 'http://resilient.mynonexistent.com',
               orgId: mockResilient.config.orgId,
-              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
             secrets: mockResilient.secrets,
           })
@@ -201,15 +169,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action without secrets', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
           })
           .expect(400)
@@ -222,56 +189,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             });
           });
       });
-
-      it('should respond with a 400 Bad Request when creating a ibm resilient action with empty mapping', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
-            config: {
-              apiUrl: resilientSimulatorURL,
-              orgId: mockResilient.config.orgId,
-              incidentConfiguration: { mapping: [] },
-            },
-            secrets: mockResilient.secrets,
-          })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
-            });
-          });
-      });
-
-      it('should respond with a 400 Bad Request when creating a ibm resilient action with wrong actionType', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
-            config: {
-              apiUrl: resilientSimulatorURL,
-              orgId: mockResilient.config.orgId,
-              incidentConfiguration: {
-                mapping: [
-                  {
-                    source: 'title',
-                    target: 'description',
-                    actionType: 'non-supported',
-                  },
-                ],
-              },
-            },
-            secrets: mockResilient.secrets,
-          })
-          .expect(400);
-      });
     });
 
     describe('IBM Resilient - Executor', () => {
@@ -280,15 +197,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A ibm resilient simulator',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
-              incidentConfiguration: mockResilient.config.incidentConfiguration,
             },
             secrets: mockResilient.secrets,
           });
@@ -306,14 +222,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       describe('Validation', () => {
         it('should handle failing with a simulated success without action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
-              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
               expect(resp.body.retry).to.eql(false);
               // Node.js 12 oddity:
@@ -347,14 +263,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without unsupported action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'non-supported' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -365,65 +281,67 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
 
         it('should handle failing with a simulated success without title', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockResilient.params,
                 subActionParams: {
-                  savedObjectId: 'success',
+                  incident: {
+                    description: 'success',
+                  },
+                  comments: [],
                 },
               },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
 
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockResilient.params,
                 subActionParams: {
-                  ...mockResilient.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{}],
+                  incident: {
+                    ...mockResilient.params.subActionParams.incident,
+                    name: 'success',
+                  },
+                  comments: [{ comment: 'comment' }],
                 },
               },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -434,24 +352,23 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment message', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 ...mockResilient.params,
                 subActionParams: {
-                  ...mockResilient.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
+                  incident: {
+                    ...mockResilient.params.subActionParams.incident,
+                    name: 'success',
+                  },
                   comments: [{ commentId: 'success' }],
                 },
               },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -464,7 +381,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body } = await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -480,7 +397,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(body).to.eql({
             status: 'ok',
-            actionId: simulatedActionId,
+            connector_id: simulatedActionId,
             data: {
               id: '123',
               title: '123',

@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
+import { IndexPattern, IFieldType } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
-import { getFileUploadComponent } from '../../../kibana_services';
-import { GeojsonFileSource } from '../../sources/geojson_file_source';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-// @ts-expect-error
+import { getFileUpload } from '../../../kibana_services';
+import { GeoJsonFileSource } from '../../sources/geojson_file_source';
+import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps } from '../../../../../file_upload/public';
+import { FileUploadComponentProps, ImportResults } from '../../../../../file_upload/public';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
 export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
@@ -64,13 +65,13 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   }
 
   async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUploadComponent();
+    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
     if (this._isMounted) {
       this.setState({ fileUploadComponent });
     }
   }
 
-  _onFileUpload = (geojsonFile: FeatureCollection, name: string) => {
+  _onFileUpload = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
       return;
     }
@@ -80,7 +81,21 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+    const areResultsTrimmed = previewCoverage < 100;
+    const sourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: geojsonFile,
+      areResultsTrimmed,
+      tooltipContent: areResultsTrimmed
+        ? i18n.translate('xpack.maps.fileUpload.trimmedResultsMsg', {
+            defaultMessage: `Results limited to {numFeatures} features, {previewCoverage}% of file.`,
+            values: {
+              numFeatures: geojsonFile.features.length,
+              previewCoverage,
+            },
+          })
+        : null,
+      name,
+    });
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors
@@ -88,43 +103,28 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.props.previewLayers([layerDescriptor]);
   };
 
-  _onIndexingComplete = (indexResponses: { indexDataResp: unknown; indexPatternResp: unknown }) => {
+  _onIndexingComplete = (results: { indexDataResp: ImportResults; indexPattern: IndexPattern }) => {
     if (!this._isMounted) {
       return;
     }
 
     this.props.advanceToNextStep();
 
-    const { indexDataResp, indexPatternResp } = indexResponses;
-
-    // @ts-ignore
-    const indexCreationFailed = !(indexDataResp && indexDataResp.success);
-    // @ts-ignore
-    const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
-    // @ts-ignore
-    const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
-    if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
-      this.setState({ indexingStage: INDEXING_STAGE.ERROR });
-      return;
-    }
-
-    // @ts-ignore
-    const { fields, id: indexPatternId } = indexPatternResp;
-    const geoField = fields.find((field: IFieldType) =>
+    const geoField = results.indexPattern.fields.find((field: IFieldType) =>
       [ES_GEO_FIELD_TYPE.GEO_POINT as string, ES_GEO_FIELD_TYPE.GEO_SHAPE as string].includes(
         field.type
       )
     );
-    if (!indexPatternId || !geoField) {
+    if (!results.indexPattern.id || !geoField) {
       this.setState({ indexingStage: INDEXING_STAGE.ERROR });
       this.props.previewLayers([]);
     } else {
       const esSearchSourceConfig = {
-        indexPatternId,
+        indexPatternId: results.indexPattern.id,
         geoField: geoField.name,
         // Only turn on bounds filter for large doc counts
         // @ts-ignore
-        filterByMapBounds: indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
+        filterByMapBounds: results.indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
         scalingType:
           geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT
             ? SCALING_TYPES.CLUSTERS
@@ -135,6 +135,17 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
       ]);
     }
+  };
+
+  _onIndexingError = () => {
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.props.stopStepLoading();
+    this.props.disableNextBtn();
+
+    this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };
 
   // Called on file upload screen when UI state changes
@@ -164,13 +175,12 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     return (
       <EuiPanel>
         <FileUpload
-          appName={'Maps'}
           isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
           onFileUpload={this._onFileUpload}
           onFileRemove={this._onFileRemove}
           onIndexReady={this._onIndexReady}
-          transformDetails={'geo'}
           onIndexingComplete={this._onIndexingComplete}
+          onIndexingError={this._onIndexingError}
         />
       </EuiPanel>
     );

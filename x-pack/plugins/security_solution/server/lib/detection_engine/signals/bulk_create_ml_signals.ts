@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
-import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
@@ -20,7 +24,7 @@ interface BulkCreateMlSignalsParams {
   actions: RuleAlertAction[];
   someResult: AnomalyResults;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -67,12 +71,18 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
 };
 
-const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<EcsAnomaly> => {
+const transformAnomalyResultsToEcs = (
+  results: AnomalyResults
+): estypes.SearchResponse<EcsAnomaly> => {
   const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
     ...rest,
-    _source: transformAnomalyFieldsToEcs(_source),
+    _source: transformAnomalyFieldsToEcs(
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      _source
+    ),
   }));
 
+  // @ts-expect-error Anomaly is not assignable to EcsAnomaly
   return {
     ...results,
     hits: {

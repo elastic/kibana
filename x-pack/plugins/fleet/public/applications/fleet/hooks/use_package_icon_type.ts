@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
 import { ICON_TYPES } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../types';
+
+import type { PackageInfo, PackageListItem } from '../types';
 import { useLinks } from '../sections/epm/hooks';
+
 import { sendGetPackageInfoByKey } from './index';
 
 type Package = PackageInfo | PackageListItem;
@@ -27,7 +30,7 @@ export const usePackageIconType = ({
   icons: paramIcons,
   tryApi = false,
 }: UsePackageIconType) => {
-  const { toImage } = useLinks();
+  const { toPackageImage } = useLinks();
   const [iconList, setIconList] = useState<UsePackageIconType['icons']>();
   const [iconType, setIconType] = useState<string>(''); // FIXME: use `empty` icon during initialization - see: https://github.com/elastic/kibana/issues/60622
   const pkgKey = `${packageName}-${version}`;
@@ -42,9 +45,10 @@ export const usePackageIconType = ({
     const svgIcons = (paramIcons || iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
-    const localIconSrc = Array.isArray(svgIcons) && (svgIcons[0].path || svgIcons[0].src);
+    const localIconSrc =
+      Array.isArray(svgIcons) && toPackageImage(svgIcons[0], packageName, version);
     if (localIconSrc) {
-      CACHED_ICONS.set(pkgKey, toImage(localIconSrc));
+      CACHED_ICONS.set(pkgKey, localIconSrc);
       setIconType(CACHED_ICONS.get(pkgKey) || '');
       return;
     }
@@ -67,7 +71,6 @@ export const usePackageIconType = ({
 
     CACHED_ICONS.set(pkgKey, 'package');
     setIconType('package');
-  }, [paramIcons, pkgKey, toImage, iconList, packageName, iconType, tryApi]);
-
+  }, [paramIcons, pkgKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
   return iconType;
 };

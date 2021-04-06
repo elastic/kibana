@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from 'src/core/server';
 import {
   KibanaRequest,
@@ -12,7 +14,7 @@ import {
 } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType } from '../../../licensing/common/types';
+import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -26,6 +28,7 @@ interface SetupSettings {
 }
 
 export class License {
+  private currentLicense: ILicense | undefined;
   private licenseStatus: LicenseStatus = {
     isValid: false,
     message: 'Invalid License',
@@ -36,6 +39,7 @@ export class License {
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
     licensing.license$.subscribe((license) => {
+      this.currentLicense = license;
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
 
@@ -74,6 +78,13 @@ export class License {
 
       return handler(ctx, request, response);
     };
+  }
+
+  isCurrentLicenseAtLeast(type: LicenseType): boolean {
+    if (!this.currentLicense) {
+      return false;
+    }
+    return this.currentLicense.hasAtLeast(type);
   }
 
   getStatus() {

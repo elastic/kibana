@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
@@ -14,16 +15,26 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
-export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
+export const timelineDefaults: SubsetTimelineModel &
+  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
+  activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+    query: '',
+    size: 100,
+  },
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],
@@ -38,7 +49,6 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,
-    filterQueryDraft: null,
   },
   loadingEventIds: [],
   title: '',
@@ -52,10 +62,13 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'number',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.draft,
   version: null,
 };

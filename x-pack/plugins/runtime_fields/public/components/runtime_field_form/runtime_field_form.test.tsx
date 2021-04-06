@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import '../../__jest__/setup_environment';
@@ -18,7 +20,7 @@ const setup = (props?: Props) =>
   })(props) as TestBed;
 
 const links = {
-  painlessSyntax: 'https://jestTest.elastic.co/to-be-defined.html',
+  runtimePainless: 'https://jestTest.elastic.co/to-be-defined.html',
 };
 
 describe('Runtime field form', () => {
@@ -45,28 +47,28 @@ describe('Runtime field form', () => {
     const { exists, find } = testBed;
 
     expect(exists('painlessSyntaxLearnMoreLink')).toBe(true);
-    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.painlessSyntax);
+    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.runtimePainless);
   });
 
   test('should accept a "defaultValue" prop', () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ defaultValue, links });
     const { find } = testBed;
 
     expect(find('nameField.input').props().value).toBe(defaultValue.name);
     expect(find('typeField').props().value).toBe(defaultValue.type);
-    expect(find('scriptField').props().value).toBe(defaultValue.script);
+    expect(find('scriptField').props().value).toBe(defaultValue.script.source);
   });
 
   test('should accept an "onChange" prop to forward the form state', async () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ onChange, defaultValue, links });
 

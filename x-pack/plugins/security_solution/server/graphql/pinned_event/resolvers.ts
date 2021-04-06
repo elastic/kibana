@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
-import { PinnedEvent } from '../../lib/pinned_event/saved_object';
+import { PinnedEvent } from '../../lib/timeline/saved_object/pinned_events';
 
 export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<QueryResolvers.GetAllPinnedEventsByTimelineIdResolver>;
 

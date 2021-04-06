@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies unusual child processes of Service Host (svchost.exe) that traditionally do not spawn any child processes. This may indicate a code injection or an equivalent form of exploitation.",
+  "false_positives": [
+    "Changes to Windows services or a rarely executed child process."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Service Host Child Process - Childless Service",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n     process.parent.name : \"svchost.exe\" and\n\n     /* based on svchost service arguments -s svcname where the service is known to be childless */\n\n    process.parent.args : (\"WdiSystemHost\",\"LicenseManager\",\n      \"StorSvc\",\"CDPSvc\",\"cdbhsvc\",\"BthAvctpSvc\",\"SstpSvc\",\"WdiServiceHost\",\n      \"imgsvc\",\"TrkWks\",\"WpnService\",\"IKEEXT\",\"PolicyAgent\",\"CryptSvc\",\n      \"netprofm\",\"ProfSvc\",\"StateRepository\",\"camsvc\",\"LanmanWorkstation\",\n      \"NlaSvc\",\"EventLog\",\"hidserv\",\"DisplayEnhancementService\",\"ShellHWDetection\",\n      \"AppHostSvc\",\"fhsvc\",\"CscService\",\"PushToInstall\") and\n\n      /* unknown FPs can be added here */\n\n     not process.name : (\"WerFault.exe\",\"WerFaultSecure.exe\",\"wermgr.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "6a8ab9cc-4023-4d17-b5df-1a3e16882ce7",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/",
+          "subtechnique": [
+            {
+              "id": "T1055.012",
+              "name": "Process Hollowing",
+              "reference": "https://attack.mitre.org/techniques/T1055/012/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

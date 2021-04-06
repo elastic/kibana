@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { PackagePolicy, PackagePolicyInput } from '../types';
+
+import type { PackagePolicy, PackagePolicyInput } from '../types';
+
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
@@ -100,7 +103,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([]);
   });
 
-  it('returns agent inputs', () => {
+  it('returns agent inputs with streams', () => {
     expect(
       storedPackagePoliciesToAgentInputs([
         {
@@ -139,6 +142,46 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             data_stream: { dataset: 'bar', type: 'logs' },
           },
         ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs without streams', () => {
+    expect(
+      storedPackagePoliciesToAgentInputs([
+        {
+          ...mockPackagePolicy,
+          package: {
+            name: 'mock-package',
+            title: 'Mock package',
+            version: '0.0.0',
+          },
+          inputs: [
+            {
+              ...mockInput,
+              compiled_input: {
+                inputVar: 'input-value',
+              },
+              streams: [],
+            },
+          ],
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-uuid',
+        name: 'mock-package-policy',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock-package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
       },
     ]);
   });

@@ -1,30 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { Client } from 'elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   createLegacyEsTestCluster,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   DEFAULT_SUPERUSER_PASS,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   esTestConfig,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kbnTestConfig,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaServerTestUser,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaTestUser,
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   setupUsers,
 } from '@kbn/test';
 import { defaultsDeep, get } from 'lodash';
@@ -32,11 +29,10 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { CoreStart } from 'src/core/server';
+import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
 import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
-import KbnServer from '../../legacy/server/kbn_server';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -50,7 +46,7 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  migrations: { skip: true },
+  migrations: { skip: false },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
@@ -70,11 +66,8 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      open: false,
-      quiet: false,
       silent: false,
       watch: false,
-      repl: false,
       basePath: false,
       runExamples: false,
       oss: true,
@@ -83,7 +76,6 @@ export function createRootWithSettings(
       dist: false,
       ...cliArgs,
     },
-    isDevClusterMaster: false,
   });
 
   return new Root(
@@ -132,14 +124,6 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
   );
 }
 
-/**
- * Returns `kbnServer` instance used in the "legacy" Kibana.
- * @param root
- */
-export function getKbnServer(root: Root): KbnServer {
-  return (root as any).server.legacy.kbnServer;
-}
-
 export const request: Record<
   HttpMethod,
   (root: Root, path: string) => ReturnType<typeof getSupertest>
@@ -171,8 +155,8 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
-  coreStart: CoreStart;
-  kbnServer: KbnServer;
+  coreSetup: InternalCoreSetup;
+  coreStart: InternalCoreStart;
   stop: () => Promise<void>;
 }
 
@@ -197,7 +181,7 @@ export function createTestServers({
   adjustTimeout: (timeout: number) => void;
   settings?: {
     es?: {
-      license: 'oss' | 'basic' | 'gold' | 'trial';
+      license: 'basic' | 'gold' | 'trial';
       [key: string]: any;
     };
     kbn?: {
@@ -220,7 +204,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get(settings, 'es.license', 'oss');
+  const license = get(settings, 'es.license', 'basic');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
@@ -290,14 +274,12 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
-      await root.setup();
+      const coreSetup = await root.setup();
       const coreStart = await root.start();
-
-      const kbnServer = getKbnServer(root);
 
       return {
         root,
-        kbnServer,
+        coreSetup,
         coreStart,
         stop: async () => await root.shutdown(),
       };

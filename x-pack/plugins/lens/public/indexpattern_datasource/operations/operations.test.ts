@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
@@ -55,7 +56,22 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['terms']));
+      ).toEqual(['terms', 'unique_count', 'last_value']);
+    });
+
+    it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'string',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => op.isBucketed
+        )
+      ).toEqual(['terms']);
     });
 
     it('should return operations on numbers', () => {
@@ -67,7 +83,42 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
+      ).toEqual([
+        'range',
+        'terms',
+        'median',
+        'average',
+        'sum',
+        'min',
+        'max',
+        'unique_count',
+        'percentile',
+        'last_value',
+      ]);
+    });
+
+    it('should return only metric operations on numbers when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'number',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => !op.isBucketed
+        )
+      ).toEqual([
+        'median',
+        'average',
+        'sum',
+        'min',
+        'max',
+        'unique_count',
+        'percentile',
+        'last_value',
+      ]);
     });
 
     it('should return operations on dates', () => {
@@ -155,14 +206,14 @@ describe('getOperationTypesForField', () => {
   });
 
   describe('getAvailableOperationsByMetaData', () => {
-    it('should put the average operation first', () => {
+    it('should put the median operation first', () => {
       const numberOperation = getAvailableOperationsByMetadata(expectedIndexPatterns[1]).find(
         ({ operationMetaData }) =>
           !operationMetaData.isBucketed && operationMetaData.dataType === 'number'
       )!;
       expect(numberOperation.operations[0]).toEqual(
         expect.objectContaining({
-          operationType: 'avg',
+          operationType: 'median',
         })
       );
     });
@@ -239,13 +290,34 @@ describe('getOperationTypesForField', () => {
             "operations": Array [
               Object {
                 "field": "bytes",
-                "operationType": "avg",
+                "operationType": "median",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "average",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
                 "operationType": "sum",
                 "type": "field",
+              },
+              Object {
+                "operationType": "cumulative_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "counter_rate",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "differences",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "moving_average",
+                "type": "fullReference",
               },
               Object {
                 "field": "bytes",
@@ -259,22 +331,41 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "timestamp",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
                 "field": "source",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "median",
+                "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "string",
+              "isBucketed": false,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "source",
+                "operationType": "last_value",
                 "type": "field",
               },
             ],

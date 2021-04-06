@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { darken, readableColor } from 'polished';
@@ -10,21 +11,25 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
 
 import { NodeContextMenu } from './node_context_menu';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { findInventoryFields } from '../../../../../../common/inventory_models';
 
 const initialState = {
   isPopoverOpen: false,
   isOverlayOpen: false,
+  isAlertFlyoutVisible: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -39,11 +44,11 @@ interface Props {
   currentTime: number;
 }
 
-export const Node = class extends React.PureComponent<Props, State> {
+export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
-    const { isPopoverOpen } = this.state;
+    const { isPopoverOpen, isAlertFlyoutVisible } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -54,6 +59,9 @@ export const Node = class extends React.PureComponent<Props, State> {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
     });
+
+    const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
+
     return (
       <>
         <NodeContextMenu
@@ -66,30 +74,40 @@ export const Node = class extends React.PureComponent<Props, State> {
           popoverPosition="downCenter"
           openNewOverlay={this.toggleNewOverlay}
         >
-          <NodeContainer
-            data-test-subj="nodeContainer"
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
+          <ConditionalToolTip
+            currentTime={currentTime}
+            formatter={formatter}
+            hidden={isPopoverOpen}
+            node={node}
+            options={options}
+            nodeType={nodeType}
           >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode ? (
-                  <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
-                  </ValueInner>
-                ) : (
-                  ellipsisMode && (
+            <NodeContainer
+              data-test-subj="nodeContainer"
+              style={{ width: squareSize || 0, height: squareSize || 0 }}
+              onClick={this.togglePopover}
+            >
+              <SquareOuter color={color} style={nodeBorder}>
+                <SquareInner color={color}>
+                  {valueMode ? (
                     <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>...</Label>
+                      <Label color={color}>{node.name}</Label>
+                      <Value color={color}>{value}</Value>
                     </ValueInner>
-                  )
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
+                  ) : (
+                    ellipsisMode && (
+                      <ValueInner aria-label={nodeAriaLabel}>
+                        <Label color={color}>...</Label>
+                      </ValueInner>
+                    )
+                  )}
+                </SquareInner>
+              </SquareOuter>
+            </NodeContainer>
+          </ConditionalToolTip>
         </NodeContextMenu>
         <NodeContextPopover
+          openAlertFlyout={this.openAlertFlyout}
           node={node}
           nodeType={nodeType}
           isOpen={this.state.isOverlayOpen}
@@ -97,12 +115,41 @@ export const Node = class extends React.PureComponent<Props, State> {
           currentTime={currentTime}
           onClose={this.toggleNewOverlay}
         />
+        <AlertFlyout
+          filter={
+            options.fields
+              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+              : ''
+          }
+          options={options}
+          nodeType={nodeType}
+          setVisible={this.setAlertFlyoutVisible}
+          visible={isAlertFlyoutVisible}
+        />
       </>
     );
   }
 
+  private openAlertFlyout = () => {
+    this.setState({
+      isOverlayOpen: false,
+      isAlertFlyoutVisible: true,
+    });
+  };
+
+  private setAlertFlyoutVisible = (isOpen: boolean) => {
+    this.setState({
+      isAlertFlyoutVisible: isOpen,
+    });
+  };
+
   private togglePopover = () => {
-    this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    const { nodeType } = this.props;
+    if (nodeType === 'host') {
+      this.toggleNewOverlay();
+    } else {
+      this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    }
   };
 
   private toggleNewOverlay = () => {
@@ -117,7 +164,7 @@ export const Node = class extends React.PureComponent<Props, State> {
       this.setState({ isPopoverOpen: false });
     }
   };
-};
+}
 
 const NodeContainer = euiStyled.div`
   position: relative;

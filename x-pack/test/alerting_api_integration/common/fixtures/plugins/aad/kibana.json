@@ -1,5 +1,5 @@
 {
-  "id": "aad-fixtures",
+  "id": "aadFixtures",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

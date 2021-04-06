@@ -8,6 +8,7 @@ exports[`Home component should render services 1`] = `
         "setHeaderActionMenu": [Function],
       },
       "config": Object {
+        "profilingEnabled": false,
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
@@ -95,6 +96,7 @@ exports[`Home component should render traces 1`] = `
         "setHeaderActionMenu": [Function],
       },
       "config": Object {
+        "profilingEnabled": false,
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,

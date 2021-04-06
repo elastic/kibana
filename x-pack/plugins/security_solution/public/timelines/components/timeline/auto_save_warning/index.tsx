@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,8 +13,9 @@ import {
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { setTimelineRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useStateToaster } from '../../../../common/components/toasters';
@@ -22,9 +24,8 @@ import * as i18n from './translations';
 const AutoSaveWarningMsgComponent = () => {
   const dispatch = useDispatch();
   const dispatchToaster = useStateToaster()[1];
-  const { timelineId, newTimelineModel } = useSelector(
-    timelineSelectors.autoSaveMsgSelector,
-    shallowEqual
+  const { timelineId, newTimelineModel } = useDeepEqualSelector(
+    timelineSelectors.autoSaveMsgSelector
   );
 
   const handleClick = useCallback(() => {

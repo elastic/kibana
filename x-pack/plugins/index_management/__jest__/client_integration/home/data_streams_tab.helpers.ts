@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -19,11 +20,13 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
-    clickIncludeManagedSwitch: () => void;
+    toggleViewFilterAt: (index: number) => void;
+    sortTableOnStorageSize: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
     clickDeleteActionAt: (index: number) => void;
+    selectDataStream: (name: string, selected: boolean) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
@@ -81,9 +84,24 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('includeStatsSwitch').simulate('click');
   };
 
-  const clickIncludeManagedSwitch = () => {
-    const { find } = testBed;
-    find('includeManagedSwitch').simulate('click');
+  const toggleViewFilterAt = (index: number) => {
+    const { find, component } = testBed;
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+    component.update();
+    act(() => {
+      find('filterItem').at(index).simulate('click');
+    });
+    component.update();
+  };
+
+  const sortTableOnStorageSize = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_storageSizeBytes_3.tableHeaderSortButton').simulate('click');
+    });
+    component.update();
   };
 
   const clickReloadButton = () => {
@@ -123,6 +141,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
   const clickDeleteActionAt = (index: number) => {
     findDeleteActionAt(index).simulate('click');
+  };
+
+  const selectDataStream = (name: string, selected: boolean) => {
+    const {
+      form: { selectCheckBox },
+    } = testBed;
+    selectCheckBox(`checkboxSelectRow-${name}`, selected);
   };
 
   const findDeleteConfirmationModal = () => {
@@ -189,11 +214,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
-      clickIncludeManagedSwitch,
+      toggleViewFilterAt,
+      sortTableOnStorageSize,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
       clickDeleteActionAt,
+      selectDataStream,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
       clickDetailPanelIndexTemplateLink,
@@ -222,7 +249,12 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   health: 'green',
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
+  storageSizeBytes: 1,
   maxTimeStamp: 420,
+  privileges: {
+    delete_index: true,
+  },
+  hidden: false,
   ...dataStream,
 });
 

@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useContext, useEffect } from 'react';
+
+import type { GetFleetStatusResponse } from '../types';
+
 import { useConfig } from './use_config';
 import { sendGetFleetStatus } from './use_request';
-import { GetFleetStatusResponse } from '../types';
 
 interface FleetStatusState {
   enabled: boolean;
   isLoading: boolean;
   isReady: boolean;
+  error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
 }
 
@@ -44,7 +48,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
         missingRequirements: res.data?.missing_requirements,
       }));
     } catch (error) {
-      setState((s) => ({ ...s, isLoading: true }));
+      setState((s) => ({ ...s, isLoading: false, error }));
     }
   }
   useEffect(() => {

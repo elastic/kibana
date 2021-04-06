@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   async function createToken() {
-    const { access_token: accessToken } = await (es as any).shield.getAccessToken({
+    const {
+      body: { access_token: accessToken },
+    } = await es.security.getToken({
       body: {
         grant_type: 'password',
         username: 'elastic',
@@ -66,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Access token expiration is set to 15s for API integration tests.
       // Let's wait for 20s to make sure token expires.
-      await new Promise((resolve) => setTimeout(() => resolve(), 20000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
 
       await supertest
         .get('/internal/security/me')

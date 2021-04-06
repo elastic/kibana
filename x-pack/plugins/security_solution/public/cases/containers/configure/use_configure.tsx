@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect, useCallback, useReducer } from 'react';
+import { useEffect, useCallback, useReducer, useRef } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
 import {
@@ -13,8 +14,8 @@ import {
   displaySuccessToast,
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
-import { CasesConfigurationMapping, ClosureType, CaseConfigure, CaseConnector } from './types';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -24,7 +25,7 @@ export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
   firstLoad: boolean;
   loading: boolean;
-  mapping: CasesConfigurationMapping[] | null;
+  mappings: CaseConnectorMapping[];
   persistLoading: boolean;
   version: string;
 }
@@ -58,8 +59,8 @@ export type Action =
       closureType: ClosureType;
     }
   | {
-      type: 'setMapping';
-      mapping: CasesConfigurationMapping[];
+      type: 'setMappings';
+      mappings: CaseConnectorMapping[];
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -102,10 +103,10 @@ export const configureCasesReducer = (state: State, action: Action) => {
         closureType: action.closureType,
       };
     }
-    case 'setMapping': {
+    case 'setMappings': {
       return {
         ...state,
-        mapping: action.mapping,
+        mappings: action.mappings,
       };
     }
     default:
@@ -119,7 +120,7 @@ export interface ReturnUseCaseConfigure extends State {
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
-  setMapping: (newMapping: CasesConfigurationMapping[]) => void;
+  setMappings: (newMapping: CaseConnectorMapping[]) => void;
 }
 
 export const initialState: State = {
@@ -141,7 +142,7 @@ export const initialState: State = {
   },
   firstLoad: false,
   loading: true,
-  mapping: null,
+  mappings: [],
   persistLoading: false,
   version: '',
 };
@@ -170,10 +171,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setMapping = useCallback((newMapping: CasesConfigurationMapping[]) => {
+  const setMappings = useCallback((mappings: CaseConnectorMapping[]) => {
     dispatch({
-      mapping: newMapping,
-      type: 'setMapping',
+      mappings,
+      type: 'setMappings',
     });
   }, []);
 
@@ -206,85 +207,32 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
   }, []);
 
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRefetchRef = useRef(false);
+  const abortCtrlRefetchRef = useRef(new AbortController());
 
-  const refetchCaseConfigure = useCallback(() => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
+  const isCancelledPersistRef = useRef(false);
+  const abortCtrlPersistRef = useRef(new AbortController());
 
-    const fetchCaseConfiguration = async () => {
-      try {
-        setLoading(true);
-        const res = await getCaseConfigure({ signal: abortCtrl.signal });
-        if (!didCancel) {
-          if (res != null) {
-            setConnector(res.connector);
-            if (setClosureType != null) {
-              setClosureType(res.closureType);
-            }
-            setVersion(res.version);
+  const refetchCaseConfigure = useCallback(async () => {
+    try {
+      isCancelledRefetchRef.current = false;
+      abortCtrlRefetchRef.current.abort();
+      abortCtrlRefetchRef.current = new AbortController();
 
-            if (!state.firstLoad) {
-              setFirstLoad(true);
-              if (setCurrentConfiguration != null) {
-                setCurrentConfiguration({
-                  closureType: res.closureType,
-                  connector: {
-                    ...res.connector,
-                  },
-                });
-              }
-            }
+      setLoading(true);
+      const res = await getCaseConfigure({ signal: abortCtrlRefetchRef.current.signal });
+
+      if (!isCancelledRefetchRef.current) {
+        if (res != null) {
+          setConnector(res.connector);
+          if (setClosureType != null) {
+            setClosureType(res.closureType);
           }
-          setLoading(false);
-        }
-      } catch (error) {
-        if (!didCancel) {
-          setLoading(false);
-          errorToToaster({
-            dispatchToaster,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            title: i18n.ERROR_TITLE,
-          });
-        }
-      }
-    };
+          setVersion(res.version);
+          setMappings(res.mappings);
 
-    fetchCaseConfiguration();
-
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.firstLoad]);
-
-  const persistCaseConfigure = useCallback(
-    async ({ connector, closureType }: ConnectorConfiguration) => {
-      let didCancel = false;
-      const abortCtrl = new AbortController();
-      const saveCaseConfiguration = async () => {
-        try {
-          setPersistLoading(true);
-          const connectorObj = {
-            connector,
-            closure_type: closureType,
-          };
-          const res =
-            state.version.length === 0
-              ? await postCaseConfigure(connectorObj, abortCtrl.signal)
-              : await patchCaseConfigure(
-                  {
-                    ...connectorObj,
-                    version: state.version,
-                  },
-                  abortCtrl.signal
-                );
-          if (!didCancel) {
-            setConnector(res.connector);
-            if (setClosureType) {
-              setClosureType(res.closureType);
-            }
-            setVersion(res.version);
+          if (!state.firstLoad) {
+            setFirstLoad(true);
             if (setCurrentConfiguration != null) {
               setCurrentConfiguration({
                 closureType: res.closureType,
@@ -293,33 +241,115 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 },
               });
             }
-
-            displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
-            setPersistLoading(false);
           }
-        } catch (error) {
-          if (!didCancel) {
-            setPersistLoading(false);
+          if (res.error != null) {
+            errorToToaster({
+              dispatchToaster,
+              error: new Error(res.error),
+              title: i18n.ERROR_TITLE,
+            });
+          }
+        }
+        setLoading(false);
+      }
+    } catch (error) {
+      if (!isCancelledRefetchRef.current) {
+        if (error.name !== 'AbortError') {
+          errorToToaster({
+            dispatchToaster,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            title: i18n.ERROR_TITLE,
+          });
+        }
+        setLoading(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.firstLoad]);
+
+  const persistCaseConfigure = useCallback(
+    async ({ connector, closureType }: ConnectorConfiguration) => {
+      try {
+        isCancelledPersistRef.current = false;
+        abortCtrlPersistRef.current.abort();
+        abortCtrlPersistRef.current = new AbortController();
+        setPersistLoading(true);
+
+        const connectorObj = {
+          connector,
+          closure_type: closureType,
+        };
+
+        const res =
+          state.version.length === 0
+            ? await postCaseConfigure(connectorObj, abortCtrlPersistRef.current.signal)
+            : await patchCaseConfigure(
+                {
+                  ...connectorObj,
+                  version: state.version,
+                },
+                abortCtrlPersistRef.current.signal
+              );
+
+        if (!isCancelledPersistRef.current) {
+          setConnector(res.connector);
+          if (setClosureType) {
+            setClosureType(res.closureType);
+          }
+          setVersion(res.version);
+          setMappings(res.mappings);
+          if (setCurrentConfiguration != null) {
+            setCurrentConfiguration({
+              closureType: res.closureType,
+              connector: {
+                ...res.connector,
+              },
+            });
+          }
+          if (res.error != null) {
+            errorToToaster({
+              dispatchToaster,
+              error: new Error(res.error),
+              title: i18n.ERROR_TITLE,
+            });
+          }
+          displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
+          setPersistLoading(false);
+        }
+      } catch (error) {
+        if (!isCancelledPersistRef.current) {
+          if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
               dispatchToaster,
             });
           }
+          setConnector(state.currentConfiguration.connector);
+          setPersistLoading(false);
         }
-      };
-      saveCaseConfiguration();
-      return () => {
-        didCancel = true;
-        abortCtrl.abort();
-      };
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.version]
+    [
+      dispatchToaster,
+      setClosureType,
+      setConnector,
+      setCurrentConfiguration,
+      setMappings,
+      setPersistLoading,
+      setVersion,
+      state,
+    ]
   );
 
   useEffect(() => {
     refetchCaseConfigure();
+    return () => {
+      isCancelledRefetchRef.current = true;
+      abortCtrlRefetchRef.current.abort();
+      isCancelledPersistRef.current = true;
+      abortCtrlPersistRef.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -330,6 +360,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     setCurrentConfiguration,
     setConnector,
     setClosureType,
-    setMapping,
+    setMappings,
   };
 };

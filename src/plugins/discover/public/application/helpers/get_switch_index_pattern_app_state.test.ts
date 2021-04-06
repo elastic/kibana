@@ -1,53 +1,39 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { IIndexPatternFieldList, IndexPattern } from '../../../../data/common/index_patterns';
+import { IndexPattern } from '../../../../data/common/index_patterns';
 
-const currentIndexPattern: IndexPattern = {
-  id: 'prev',
-  getFieldByName(name) {
-    return this.fields.getByName(name);
-  },
-  fields: {
-    getByName: (name: string) => {
-      const fields = [
-        { name: 'category', sortable: true },
-        { name: 'name', sortable: true },
-      ] as IIndexPatternFieldList;
-      return fields.find((field) => field.name === name);
+/**
+ * Helper function returning an index pattern
+ */
+const getIndexPattern = (id: string, timeFieldName: string, fields: string[]) => {
+  return {
+    id,
+    timeFieldName,
+    getFieldByName(name) {
+      return this.fields.getByName(name);
     },
-  },
-} as IndexPattern;
+    fields: {
+      getByName: (name: string) => {
+        return fields
+          .map((field) => ({
+            name: field,
+            sortable: true,
+          }))
+          .find((field) => field.name === name);
+      },
+    },
+  } as IndexPattern;
+};
 
-const nextIndexPattern = {
-  id: 'next',
-  getFieldByName(name) {
-    return this.fields.getByName(name);
-  },
-  fields: {
-    getByName: (name: string) => {
-      const fields = [{ name: 'category', sortable: true }] as IIndexPatternFieldList;
-      return fields.find((field) => field.name === name);
-    },
-  },
-} as IndexPattern;
+const currentIndexPattern = getIndexPattern('curr', '', ['category', 'name']);
+const nextIndexPattern = getIndexPattern('next', '', ['category']);
 
 describe('Discover getSwitchIndexPatternAppState', () => {
   test('removing fields that are not part of the next index pattern, keeping unknown fields ', async () => {
@@ -70,10 +56,10 @@ describe('Discover getSwitchIndexPatternAppState', () => {
         ['name', 'asc'],
       ]
     );
-    expect(result.columns).toEqual(['_source']);
+    expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['category', 'desc']]);
   });
-  test('removing sorted by fields that without modifying columns', async () => {
+  test('removing sorted by fields not available in the next index pattern without modifying columns', async () => {
     const result = getSwitchIndexPatternAppState(
       currentIndexPattern,
       nextIndexPattern,
@@ -86,5 +72,30 @@ describe('Discover getSwitchIndexPatternAppState', () => {
     );
     expect(result.columns).toEqual(['name']);
     expect(result.sort).toEqual([['category', 'desc']]);
+  });
+  test('keep sorting by timefield when switching between index patterns with different timeFields', async () => {
+    const current = getIndexPattern('a', 'timeFieldA', ['timeFieldA']);
+    const next = getIndexPattern('b', 'timeFieldB', ['timeFieldB']);
+
+    const result = getSwitchIndexPatternAppState(current, next, [], [['timeFieldA', 'desc']]);
+    expect(result.columns).toEqual([]);
+    expect(result.sort).toEqual([['timeFieldB', 'desc']]);
+  });
+  test('remove sorting by timefield when switching to an index pattern without timefield that contains the timefield column', async () => {
+    // Why: timefield column is prepended, keeping the sort, user would need to add the column to remove sorting in legacy grid
+    const current = getIndexPattern('a', 'timeFieldA', ['timeFieldA']);
+    const next = getIndexPattern('b', '', ['timeFieldA']);
+
+    const result = getSwitchIndexPatternAppState(current, next, [], [['timeFieldA', 'desc']]);
+    expect(result.columns).toEqual([]);
+    expect(result.sort).toEqual([]);
+  });
+  test('add sorting by timefield when switching from an index pattern without timefield to an indexpattern with timefield', async () => {
+    const current = getIndexPattern('b', '', ['timeFieldA']);
+    const next = getIndexPattern('a', 'timeFieldA', ['timeFieldA']);
+
+    const result = getSwitchIndexPatternAppState(current, next, [], []);
+    expect(result.columns).toEqual([]);
+    expect(result.sort).toEqual([['timeFieldA', 'desc']]);
   });
 });

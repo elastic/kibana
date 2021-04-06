@@ -9,7 +9,7 @@ Constructs a new instance of the `ExpressionRenderHandler` class
 <b>Signature:</b>
 
 ```typescript
-constructor(element: HTMLElement, { onRenderError }?: Partial<ExpressionRenderHandlerParams>);
+constructor(element: HTMLElement, { onRenderError, renderMode, syncColors, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
 ```
 
 ## Parameters
@@ -17,5 +17,5 @@ constructor(element: HTMLElement, { onRenderError }?: Partial<ExpressionRenderHa
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  element | <code>HTMLElement</code> |  |
-|  { onRenderError } | <code>Partial&lt;ExpressionRenderHandlerParams&gt;</code> |  |
+|  { onRenderError, renderMode, syncColors, hasCompatibleActions, } | <code>ExpressionRenderHandlerParams</code> |  |
 

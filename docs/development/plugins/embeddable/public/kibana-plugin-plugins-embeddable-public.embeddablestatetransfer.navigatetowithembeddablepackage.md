@@ -12,7 +12,6 @@ A wrapper around the  method which navigates to the specified appId with [embedd
 navigateToWithEmbeddablePackage(appId: string, options?: {
         path?: string;
         state: EmbeddablePackageState;
-        appendToExistingState?: boolean;
     }): Promise<void>;
 ```
 
@@ -21,7 +20,7 @@ navigateToWithEmbeddablePackage(appId: string, options?: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        state: EmbeddablePackageState;</code><br/><code>        appendToExistingState?: boolean;</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        state: EmbeddablePackageState;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

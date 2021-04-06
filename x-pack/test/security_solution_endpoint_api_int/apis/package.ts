@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
-import { SearchResponse } from 'elasticsearch';
 import {
   ResolverPaginatedEvents,
   SafeEndpointEvent,
@@ -47,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
   const generator = new EndpointDocGenerator('data');
 
   const searchForID = async <T>(id: string) => {
-    return es.search<SearchResponse<T>>({
+    return es.search<T>({
       index: eventsIndexPattern,
       body: {
         query: {
@@ -55,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             filter: [
               {
                 ids: {
-                  values: id,
+                  values: [id],
                 },
               },
             ],
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // ensure that the event was inserted into ES
-        expect(eventWithBothIPs.body.hits.hits[0]._source.event?.id).to.be(
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.event?.id).to.be(
           eventWithoutNetworkObject.event?.id
         );
       });
@@ -106,10 +107,21 @@ export default function ({ getService }: FtrProviderContext) {
         // this id comes from the es archive file endpoint/pipeline/dns
         const id = 'LrLSOVHVsFY94TAi++++++eF';
         const { body }: { body: ResolverPaginatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/events?limit=1`)
+          .post(`/api/endpoint/resolver/events`)
+          .query({ limit: 1 })
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `event.id:"${id}"`,
+            filter: JSON.stringify({
+              bool: {
+                filter: [{ term: { 'event.id': id } }],
+              },
+            }),
+            indexPatterns: [eventsIndexPattern],
+            // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
+            timeRange: {
+              from: '2020-10-01T13:50:15.14364600Z',
+              to: '2020-10-01T13:50:15.14364600Z',
+            },
           })
           .expect(200);
         expect(body.events.length).to.eql(1);
@@ -121,10 +133,21 @@ export default function ({ getService }: FtrProviderContext) {
         // this id comes from the es archive file endpoint/pipeline/dns
         const id = 'LrLSOVHVsFY94TAi++++++eP';
         const { body }: { body: ResolverPaginatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/events?limit=1`)
+          .post(`/api/endpoint/resolver/events`)
+          .query({ limit: 1 })
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `event.id:"${id}"`,
+            filter: JSON.stringify({
+              bool: {
+                filter: [{ term: { 'event.id': id } }],
+              },
+            }),
+            indexPatterns: [eventsIndexPattern],
+            // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
+            timeRange: {
+              from: '2020-10-01T13:50:15.44516300Z',
+              to: '2020-10-01T13:50:15.44516300Z',
+            },
           })
           .expect(200);
         expect(body.events.length).to.eql(1);
@@ -151,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('sets the event.ingested field', async () => {
         const resp = await searchForID<EventIngested>(genData.eventsInfo[0]._id);
-        expect(resp.body.hits.hits[0]._source.event.ingested).to.not.be(undefined);
+        expect(resp.body.hits.hits[0]._source?.event.ingested).to.not.be(undefined);
       });
     });
 
@@ -197,11 +220,11 @@ export default function ({ getService }: FtrProviderContext) {
           networkIndexData.eventsInfo[0]._id
         );
         // Should be 'United States'
-        expect(eventWithBothIPs.body.hits.hits[0]._source.source.geo?.country_name).to.not.be(
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.source.geo?.country_name).to.not.be(
           undefined
         );
         // should be 'Iceland'
-        expect(eventWithBothIPs.body.hits.hits[0]._source.destination.geo?.country_name).to.not.be(
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.destination.geo?.country_name).to.not.be(
           undefined
         );
 
@@ -209,18 +232,18 @@ export default function ({ getService }: FtrProviderContext) {
           networkIndexData.eventsInfo[1]._id
         );
         // Should be 'United States'
-        expect(eventWithBothIPs.body.hits.hits[0]._source.source.geo?.country_name).to.not.be(
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.source.geo?.country_name).to.not.be(
           undefined
         );
-        expect(eventWithSourceOnly.body.hits.hits[0]._source.destination?.geo).to.be(undefined);
+        expect(eventWithSourceOnly.body.hits.hits[0]._source?.destination?.geo).to.be(undefined);
       });
 
       it('does not set geoip fields for events in indices other than the network index', async () => {
         const eventWithBothIPs = await searchForID<NetworkEvent>(
           processIndexData.eventsInfo[0]._id
         );
-        expect(eventWithBothIPs.body.hits.hits[0]._source.source.geo).to.be(undefined);
-        expect(eventWithBothIPs.body.hits.hits[0]._source.destination.geo).to.be(undefined);
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.source.geo).to.be(undefined);
+        expect(eventWithBothIPs.body.hits.hits[0]._source?.destination.geo).to.be(undefined);
       });
     });
   });

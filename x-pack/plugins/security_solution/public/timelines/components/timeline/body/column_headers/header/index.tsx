@@ -1,59 +1,101 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { useShallowEqualSelector } from '../../../../../../common/hooks/use_selector';
+import { timelineActions } from '../../../../../store/timeline';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
-import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
+import { OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
 import { useManageTimeline } from '../../../../manage_timeline';
+import { isEqlOnSelector } from './selectors';
 
 interface Props {
   header: ColumnHeaderOptions;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
 export const HeaderComponent: React.FC<Props> = ({
   header,
-  onColumnRemoved,
-  onColumnSorted,
   onFilterChange = noop,
   sort,
   timelineId,
 }) => {
-  const onClick = useCallback(() => {
-    onColumnSorted!({
-      columnId: header.id,
-      sortDirection: getNewSortDirectionOnClick({
-        clickedHeader: header,
-        currentSort: sort,
-      }),
+  const dispatch = useDispatch();
+  const getIsEqlOn = useMemo(() => isEqlOnSelector(), []);
+  const isEqlOn = useShallowEqualSelector((state) => getIsEqlOn(state, timelineId));
+
+  const onColumnSort = useCallback(() => {
+    const columnId = header.id;
+    const columnType = header.type ?? 'text';
+    const sortDirection = getNewSortDirectionOnClick({
+      clickedHeader: header,
+      currentSort: sort,
     });
-  }, [onColumnSorted, header, sort]);
+    const headerIndex = sort.findIndex((col) => col.columnId === columnId);
+    let newSort = [];
+    if (headerIndex === -1) {
+      newSort = [
+        ...sort,
+        {
+          columnId,
+          columnType,
+          sortDirection,
+        },
+      ];
+    } else {
+      newSort = [
+        ...sort.slice(0, headerIndex),
+        {
+          columnId,
+          columnType,
+          sortDirection,
+        },
+        ...sort.slice(headerIndex + 1),
+      ];
+    }
+    dispatch(
+      timelineActions.updateSort({
+        id: timelineId,
+        sort: newSort,
+      })
+    );
+  }, [dispatch, header, sort, timelineId]);
+
+  const onColumnRemoved = useCallback(
+    (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
+    [dispatch, timelineId]
+  );
+
   const { getManageTimelineById } = useManageTimeline();
+
   const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
     getManageTimelineById,
     timelineId,
   ]);
+  const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
+
   return (
     <>
       <HeaderContent
         header={header}
         isLoading={isLoading}
         isResizing={false}
-        onClick={onClick}
+        onClick={onColumnSort}
+        showSortingCapability={showSortingCapability}
         sort={sort}
       >
         <Actions

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { parseUsageCollection } from './ts_parser';
@@ -26,6 +15,8 @@ import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externall
 import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
 import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
 import { parsedSchemaDefinedWithSpreadsCollector } from './__fixture__/parsed_schema_defined_with_spreads_collector';
+import { parsedStatsCollector } from './__fixture__/parsed_stats_collector';
+import { parsedImportedInterfaceFromExport } from './__fixture__/parsed_imported_interface_from_export';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(
@@ -98,6 +89,18 @@ describe('parseUsageCollection', () => {
     const { program, sourceFile } = loadFixtureProgram('imported_usage_interface.ts');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual(parsedImportedUsageInterface);
+  });
+
+  it('parses stats collectors, discarding those without schemas', () => {
+    const { program, sourceFile } = loadFixtureProgram('stats_collector.ts');
+    const result = [...parseUsageCollection(sourceFile, program)];
+    expect(result).toEqual(parsedStatsCollector);
+  });
+
+  it('follows `export { Usage } from "./path"` expressions', () => {
+    const { program, sourceFile } = loadFixtureProgram('imported_interface_from_export/index.ts');
+    const result = [...parseUsageCollection(sourceFile, program)];
+    expect(result).toEqual(parsedImportedInterfaceFromExport);
   });
 
   it('skips files that do not define a collector', () => {

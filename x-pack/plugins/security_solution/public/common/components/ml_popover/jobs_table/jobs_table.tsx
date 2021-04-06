@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -57,9 +58,11 @@ const JobName = ({ id, description, basePath }: JobNameProps) => {
 
   return (
     <JobNameWrapper>
-      <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
-        <EuiText size="s">{id}</EuiText>
-      </EuiLink>
+      <EuiText size="s">
+        <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
+          {id}
+        </EuiLink>
+      </EuiText>
       <EuiText color="subdued" size="xs">
         {description.length > truncateThreshold
           ? `${description.substring(0, truncateThreshold)}...`

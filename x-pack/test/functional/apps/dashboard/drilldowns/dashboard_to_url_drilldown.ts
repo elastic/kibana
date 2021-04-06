@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    it.skip('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
+    it('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
       await PageObjects.dashboard.gotoDashboardEditMode(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
       );
@@ -36,13 +37,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
 
-      const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{event.from}}',to:'{{event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
+      const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{date event.from}}',to:'{{date event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
 
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
         destinationURLTemplate: urlTemplate,
         trigger: 'SELECT_RANGE_TRIGGER',
       });
+
+      await testSubjects.click('urlDrilldownAdditionalOptions');
+      await testSubjects.click('urlDrilldownOpenInNewTab');
+
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
 
@@ -55,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           saveAsNew: false,
           waitDialogIsClosed: true,
+          exitFromEditMode: true,
         }
       );
 
@@ -65,10 +71,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_DISCOVER_URL);
 
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-
       // check that new time range duration was applied
       const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
+      // check that hours duration is more than 1 hour (meaning that the default time range of last 15 minutes has not been applied)
+      expect(newTimeRangeDurationHours).to.be.greaterThan(1);
     });
   });
 

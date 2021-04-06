@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
 import {
-  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
-  TriggerId,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
@@ -21,7 +21,7 @@ import {
  *
  * @param triggers
  */
-export function ensureNestedTriggers(triggers: TriggerId[]): TriggerId[] {
+export function ensureNestedTriggers(triggers: string[]): string[] {
   if (
     !triggers.includes(APPLY_FILTER_TRIGGER) &&
     (triggers.includes(VALUE_CLICK_TRIGGER) || triggers.includes(SELECT_RANGE_TRIGGER))

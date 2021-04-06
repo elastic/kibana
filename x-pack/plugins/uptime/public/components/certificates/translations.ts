@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -64,4 +65,8 @@ export const FINGERPRINTS_COL = i18n.translate('xpack.uptime.certs.list.expirati
 
 export const COPY_FINGERPRINT = i18n.translate('xpack.uptime.certs.list.copyFingerprint', {
   defaultMessage: 'Click to copy fingerprint value',
+});
+
+export const NO_CERTS_AVAILABLE = i18n.translate('xpack.uptime.certs.list.empty', {
+  defaultMessage: 'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+',
 });

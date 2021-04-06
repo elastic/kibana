@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
@@ -10,7 +12,11 @@ import { action } from '@storybook/addon-actions';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { TrustedApp, WindowsConditionEntry } from '../../../../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  TrustedApp,
+  WindowsConditionEntry,
+} from '../../../../../../../common/endpoint/types';
 
 import { createSampleTrustedApp } from '../../../test_utils';
 
@@ -25,14 +31,14 @@ addDecorator((storyFn) => (
 ));
 
 const PATH_CONDITION: WindowsConditionEntry = {
-  field: 'process.executable.caseless',
+  field: ConditionEntryField.PATH,
   operator: 'included',
   type: 'match',
   value: '/some/path/on/file/system',
 };
 
 const SIGNER_CONDITION: WindowsConditionEntry = {
-  field: 'process.code_signature',
+  field: ConditionEntryField.SIGNER,
   operator: 'included',
   type: 'match',
   value: 'Elastic',
@@ -44,19 +50,37 @@ storiesOf('TrustedApps/TrustedAppCard', module)
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   })
   .add('multiple entries', () => {
     const trustedApp: TrustedApp = createSampleTrustedApp(5);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   })
   .add('longs texts', () => {
     const trustedApp: TrustedApp = createSampleTrustedApp(5, true);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
 
-    return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
+    return (
+      <TrustedAppCard
+        trustedApp={trustedApp}
+        onDelete={action('onClick')}
+        onEdit={action('onClick')}
+      />
+    );
   });

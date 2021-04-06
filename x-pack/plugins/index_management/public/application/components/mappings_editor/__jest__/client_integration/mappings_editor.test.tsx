@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
@@ -129,6 +131,18 @@ describe('Mappings editor: core', () => {
       testBed.component.update();
     });
 
+    test('should have 4 tabs (fields, runtime, template, advanced settings)', () => {
+      const { find } = testBed;
+      const tabs = find('formTab').map((wrapper) => wrapper.text());
+
+      expect(tabs).toEqual([
+        'Mapped fields',
+        'Runtime fields',
+        'Dynamic templates',
+        'Advanced options',
+      ]);
+    });
+
     test('should keep the changes when switching tabs', async () => {
       const {
         actions: { addField, selectTab, updateJsonEditor, getJsonEditorValue, getToggleValue },
@@ -196,7 +210,6 @@ describe('Mappings editor: core', () => {
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
 
-      // await act(() => promise);
       // ----------------------------------------------------------------------------
       // Go back to dynamic templates tab and make sure our changes are still there
       // ----------------------------------------------------------------------------

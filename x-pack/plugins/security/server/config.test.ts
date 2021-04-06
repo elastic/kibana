@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('crypto', () => ({
@@ -9,8 +10,9 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
-import { createConfig, ConfigSchema } from './config';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+import { ConfigSchema, createConfig } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -902,8 +904,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.password]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.password]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
         `);
 
         expect(() =>
@@ -918,8 +921,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
         `);
       });
 
@@ -973,8 +977,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: types that failed validation:
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
             - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
         `);
@@ -993,8 +998,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: types that failed validation:
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
             - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
         `);
@@ -1058,6 +1064,40 @@ describe('config schema', () => {
                     "key": "some-key",
                   },
                 },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with `elasticsearch_anonymous_user` credentials', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 0,
+                    credentials: 'elasticsearch_anonymous_user',
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": "elasticsearch_anonymous_user",
                 "description": "Continue as Guest",
                 "enabled": true,
                 "hint": "For anonymous users",
@@ -1519,21 +1559,21 @@ describe('createConfig()', () => {
       ConfigSchema.validate({
         audit: {
           appender: {
-            kind: 'file',
-            path: '/path/to/file.txt',
+            type: 'file',
+            fileName: '/path/to/file.txt',
             layout: {
-              kind: 'json',
+              type: 'json',
             },
           },
         },
       }).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
-        "kind": "file",
+        "fileName": "/path/to/file.txt",
         "layout": Object {
-          "kind": "json",
+          "type": "json",
         },
-        "path": "/path/to/file.txt",
+        "type": "file",
       }
     `);
   });
@@ -1544,12 +1584,12 @@ describe('createConfig()', () => {
         audit: {
           // no layout configured
           appender: {
-            kind: 'file',
+            type: 'file',
             path: '/path/to/file.txt',
           },
         },
       })
-    ).toThrow('[audit.appender.2.kind]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {

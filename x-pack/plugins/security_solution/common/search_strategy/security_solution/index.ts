@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -14,7 +15,6 @@ import {
   HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
-  HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -27,6 +27,7 @@ import {
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
+  HostFirstLastSeenRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -63,13 +64,7 @@ import {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import {
-  DocValueFields,
-  TimerangeInput,
-  SortField,
-  PaginationInput,
-  PaginationInputPaginated,
-} from '../common';
+import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
 
 export * from './hosts';
 export * from './matrix_histogram';
@@ -86,7 +81,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFields[];
+  docValueFields?: estypes.DocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -110,7 +105,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
-  : T extends HostsQueries.firstLastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
@@ -158,7 +153,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications
   ? HostAuthenticationsRequestOptions
-  : T extends HostsQueries.firstLastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions

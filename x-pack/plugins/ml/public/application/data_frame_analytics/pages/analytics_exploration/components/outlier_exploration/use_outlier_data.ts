@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo } from 'react';
@@ -21,7 +22,6 @@ import {
   getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
@@ -38,6 +38,7 @@ import {
 } from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
+import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
@@ -63,18 +64,13 @@ export const useOutlierData = (
     return newColumns;
   }, [jobConfig, indexPattern]);
 
-  const dataGrid = useDataGrid(
+  const dataGrid = useExplorationDataGrid(
     columns,
-    25,
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
     (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY && d !== ML__INCREMENTAL_ID
   );
-
-  useEffect(() => {
-    dataGrid.resetPagination();
-  }, [JSON.stringify(searchQuery)]);
 
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {
@@ -149,26 +145,18 @@ export const useOutlierData = (
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
-
-      const split = columnId.split('.');
       let backgroundColor;
 
-      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`];
+      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
 
       // column with feature values get color coded by its corresponding influencer value
       if (Array.isArray(featureNames)) {
-        const featureIndex = featureNames.indexOf(columnId);
-
-        if (featureIndex > -1) {
-          backgroundColor = colorRange(
-            fullItem[`${resultsField}.${FEATURE_INFLUENCE}.influence`][featureIndex]
-          );
+        const featureForColumn = featureNames.find(
+          (feature) => columnId === feature.feature_name[0]
+        );
+        if (featureForColumn) {
+          backgroundColor = colorRange(featureForColumn.influence[0]);
         }
-      }
-
-      // column with influencer values get color coded by its own value
-      if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
-        backgroundColor = colorRange(cellValue);
       }
 
       if (backgroundColor !== undefined) {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import classNames from 'classnames';
 
 import {
   EuiFlexGroup,
@@ -12,9 +12,12 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+import classNames from 'classnames';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
@@ -22,7 +25,12 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import {
+  ActionConnector,
+  AlertCommentRequestRt,
+  CommentType,
+  ContextTypeUserRt,
+} from '../../../../../cases/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';
@@ -32,12 +40,16 @@ import {
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
+  getAlertAttachment,
+  getGeneratedAlertsAttachment,
+  useFetchAlertData,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
+import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -50,6 +62,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
+  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -78,6 +91,17 @@ const MyEuiCommentList = styled(EuiCommentList)`
         display: none;
       }
     }
+
+    & .comment-alert .euiCommentEvent {
+      background-color: ${theme.eui.euiColorLightestShade};
+      border: ${theme.eui.euiFlyoutBorder};
+      padding: 10px;
+      border-radius: ${theme.eui.paddingSizes.xs};
+    }
+
+    & .comment-alert .euiCommentEvent__headerData {
+      flex-grow: 1;
+    }
   `}
 `;
 
@@ -96,8 +120,13 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
+    onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { commentId } = useParams<{ commentId?: string }>();
+    const { detailName: caseId, commentId, subCaseId } = useParams<{
+      detailName: string;
+      commentId?: string;
+      subCaseId?: string;
+    }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -105,6 +134,11 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
+      getManualAlertIdsWithNoRuleId(caseData.comments)
+    );
+
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -119,15 +153,16 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
         patchComment({
-          caseId: caseData.id,
+          caseId,
           commentId: id,
           commentUpdate: content,
           fetchUserActions,
           version,
           updateCase,
+          subCaseId,
         });
       },
-      [caseData.id, fetchUserActions, patchComment, updateCase]
+      [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
     );
 
     const handleOutlineComment = useCallback(
@@ -193,15 +228,16 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
-          caseId={caseData.id}
+          caseId={caseId}
           disabled={!userCanCrud}
           ref={addCommentRef}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          subCaseId={subCaseId}
         />
       ),
-      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
     );
 
     useEffect(() => {
@@ -260,11 +296,16 @@ export const UserActionTree = React.memo(
     const userActions: EuiCommentProps[] = useMemo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
+          // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null) {
+              if (
+                comment != null &&
+                isRight(ContextTypeUserRt.decode(comment)) &&
+                comment.type === CommentType.user
+              ) {
                 return [
                   ...comments,
                   {
@@ -315,6 +356,64 @@ export const UserActionTree = React.memo(
                       />
                     ),
                   },
+                ];
+              } else if (
+                comment != null &&
+                isRight(AlertCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.alert
+              ) {
+                // TODO: clean this up
+                const alertId = Array.isArray(comment.alertId)
+                  ? comment.alertId.length > 0
+                    ? comment.alertId[0]
+                    : ''
+                  : comment.alertId;
+
+                const alertIndex = Array.isArray(comment.index)
+                  ? comment.index.length > 0
+                    ? comment.index[0]
+                    : ''
+                  : comment.index;
+
+                if (isEmpty(alertId)) {
+                  return comments;
+                }
+
+                const ruleId =
+                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
+                const ruleName =
+                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+
+                return [
+                  ...comments,
+                  getAlertAttachment({
+                    action,
+                    alertId,
+                    index: alertIndex,
+                    loadingAlertData,
+                    ruleId,
+                    ruleName,
+                    onShowAlertDetails,
+                  }),
+                ];
+              } else if (comment != null && comment.type === CommentType.generatedAlert) {
+                // TODO: clean this up
+                const alertIds = Array.isArray(comment.alertId)
+                  ? comment.alertId
+                  : [comment.alertId];
+
+                if (isEmpty(alertIds)) {
+                  return comments;
+                }
+
+                return [
+                  ...comments,
+                  getGeneratedAlertsAttachment({
+                    action,
+                    alertIds,
+                    ruleId: comment.rule?.id ?? '',
+                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                  }),
                 ];
               }
             }
@@ -380,10 +479,10 @@ export const UserActionTree = React.memo(
               ];
             }
 
-            // title, description, comments, tags
+            // title, description, comment updates, tags
             if (
               action.actionField.length === 1 &&
-              ['title', 'description', 'comment', 'tags'].includes(action.actionField[0])
+              ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
             ) {
               const myField = action.actionField[0];
               const label: string | JSX.Element = getLabelTitle({
@@ -409,9 +508,12 @@ export const UserActionTree = React.memo(
         handleManageQuote,
         handleSaveComment,
         isLoadingIds,
+        loadingAlertData,
+        manualAlertsData,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
+        onShowAlertDetails,
       ]
     );
 

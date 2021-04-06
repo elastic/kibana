@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { take, toArray } from 'rxjs/operators';
@@ -79,6 +80,25 @@ describe('licensing plugin', () => {
         const { license$ } = await plugin.start();
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(true);
+      });
+
+      it('calls `callAsInternalUser` with the correct parameters', async () => {
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense(),
+          features: {},
+        });
+
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
+        await license$.pipe(take(1)).toPromise();
+
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+        expect(esClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
+          method: 'GET',
+          path: '/_xpack?accept_enterprise=true',
+        });
       });
 
       it('observable receives updated licenses', async () => {

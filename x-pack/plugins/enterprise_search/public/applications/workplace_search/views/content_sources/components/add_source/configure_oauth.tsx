@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, FormEvent } from 'react';
 
-import { Location } from 'history';
 import { useActions, useValues } from 'kea';
-import { useLocation } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -18,16 +17,12 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 
-import { parseQueryParams } from '../../../../../../applications/shared/query_params';
-import { Loading } from '../../../../../../applications/shared/loading';
-import { SourceLogic } from '../../source_logic';
+import { Loading } from '../../../../../shared/loading';
 
-interface OauthQueryParams {
-  preContentSourceId: string;
-}
+import { AddSourceLogic } from './add_source_logic';
+import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
 
 interface ConfigureOauthProps {
   header: React.ReactNode;
@@ -36,40 +31,37 @@ interface ConfigureOauthProps {
 }
 
 export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
-  const { search } = useLocation() as Location;
-
-  const { preContentSourceId } = (parseQueryParams(search) as unknown) as OauthQueryParams;
   const [formLoading, setFormLoading] = useState(false);
 
   const {
     getPreContentSourceConfigData,
     setSelectedGithubOrganizations,
     createContentSource,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
   const {
     currentServiceType,
     githubOrganizations,
     selectedGithubOrganizationsMap,
     sectionLoading,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const checkboxOptions = githubOrganizations.map((item) => ({ id: item, label: item }));
 
   useEffect(() => {
-    getPreContentSourceConfigData(preContentSourceId);
+    getPreContentSourceConfigData();
   }, []);
 
   const handleChange = (option: string) => setSelectedGithubOrganizations(option);
   const formSubmitSuccess = () => onFormCreated(name);
   const handleFormSubmitError = () => setFormLoading(false);
-  const handleFormSubmut = (e: FormEvent) => {
+  const handleFormSubmit = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
     createContentSource(currentServiceType, formSubmitSuccess, handleFormSubmitError);
   };
 
   const configfieldsForm = (
-    <form onSubmit={handleFormSubmut}>
+    <form onSubmit={handleFormSubmit}>
       <EuiFlexGroup
         direction="row"
         alignItems="flexStart"
@@ -78,7 +70,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
         responsive={false}
       >
         <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-          <EuiFormRow label="Select GitHub organizations to sync">
+          <EuiFormRow label={CONFIG_OAUTH_LABEL}>
             <EuiCheckboxGroup
               options={checkboxOptions}
               idToSelectedMap={selectedGithubOrganizationsMap as EuiCheckboxGroupIdToSelectedMap}
@@ -88,7 +80,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
           <EuiSpacer size="xl" />
           <EuiFormRow>
             <EuiButton isLoading={formLoading} color="primary" fill type="submit">
-              Complete connection
+              {CONFIG_OAUTH_BUTTON}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -97,9 +89,10 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   );
 
   return (
-    <div className="step-4">
+    <>
       {header}
+      <EuiSpacer />
       {sectionLoading ? <Loading /> : configfieldsForm}
-    </div>
+    </>
   );
 };

@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { CoreSetup, OverlayRef } from 'src/core/public';
 
 import { toMountPoint, createKibanaReactContext } from './shared_imports';
 import { LoadEditorResponse, RuntimeField } from './types';
+import { RuntimeFieldEditorFlyoutContentProps } from './components';
 
 export interface OpenRuntimeFieldEditorProps {
   onSave(field: RuntimeField): void;
-  defaultValue?: RuntimeField;
+  defaultValue?: RuntimeFieldEditorFlyoutContentProps['defaultValue'];
+  ctx?: RuntimeFieldEditorFlyoutContentProps['ctx'];
 }
 
 export const getRuntimeFieldEditorLoader = (
@@ -24,10 +28,12 @@ export const getRuntimeFieldEditorLoader = (
 
   let overlayRef: OverlayRef | null = null;
 
-  const openEditor = ({ onSave, defaultValue }: OpenRuntimeFieldEditorProps) => {
+  const openEditor = ({ onSave, defaultValue, ctx }: OpenRuntimeFieldEditorProps) => {
     const closeEditor = () => {
-      overlayRef?.close();
-      overlayRef = null;
+      if (overlayRef) {
+        overlayRef.close();
+        overlayRef = null;
+      }
     };
 
     const onSaveField = (field: RuntimeField) => {
@@ -43,6 +49,7 @@ export const getRuntimeFieldEditorLoader = (
             onCancel={() => overlayRef?.close()}
             docLinks={docLinks}
             defaultValue={defaultValue}
+            ctx={ctx}
           />
         </KibanaReactContextProvider>
       )

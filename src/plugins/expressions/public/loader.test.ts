@@ -1,36 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { first, skip, toArray } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
-import { parseExpression, IInterpreterRenderHandlers } from '../common';
+import {
+  parseExpression,
+  IInterpreterRenderHandlers,
+  RenderMode,
+  AnyExpressionFunctionDefinition,
+} from '../common';
 
 // eslint-disable-next-line
-const { __getLastExecution } = require('./services');
+const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element: HTMLElement = null as any;
 
 jest.mock('./services', () => {
+  let renderMode: RenderMode | undefined;
   const renderers: Record<string, unknown> = {
     test: {
       render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
+        renderMode = handlers.getRenderMode();
         handlers.done();
       },
     },
@@ -39,9 +35,18 @@ jest.mock('./services', () => {
   // eslint-disable-next-line
   const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
 
+  const testFn: AnyExpressionFunctionDefinition = {
+    fn: () => ({ type: 'render', as: 'test' }),
+    name: 'testrender',
+    args: {},
+    help: '',
+  };
+  service.registerFunction(testFn);
+
   const moduleMock = {
     __execution: undefined,
     __getLastExecution: () => moduleMock.__execution,
+    __getLastRenderMode: () => renderMode,
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
     }),
@@ -130,6 +135,14 @@ describe('ExpressionLoader', () => {
     expect(response).toBe(2);
   });
 
+  it('passes mode to the renderer', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'testrender', {
+      renderMode: 'edit',
+    });
+    await expressionLoader.render$.pipe(first()).toPromise();
+    expect(__getLastRenderMode()).toEqual('edit');
+  });
+
   it('cancels the previous request when the expression is updated', () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', {});
     const execution = __getLastExecution();
@@ -142,7 +155,7 @@ describe('ExpressionLoader', () => {
 
   it('inspect() returns correct inspector adapters', () => {
     const expressionDataHandler = new ExpressionLoader(element, expressionString, {});
-    expect(expressionDataHandler.inspect()).toHaveProperty('data');
+    expect(expressionDataHandler.inspect()).toHaveProperty('tables');
     expect(expressionDataHandler.inspect()).toHaveProperty('requests');
   });
 });

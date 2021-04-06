@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import tar from 'tar';
 import yauzl from 'yauzl';
+
 import { bufferToStream, streamToBuffer } from '../streams';
-import { ArchiveEntry } from './index';
+
+import type { ArchiveEntry } from './index';
 
 export async function untarBuffer(
   buffer: Buffer,
@@ -69,7 +72,7 @@ export function getBufferExtractor(
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) =>
     yauzl.fromBuffer(buffer, opts, (err?: Error, handle?: yauzl.ZipFile) =>
-      err ? reject(err) : resolve(handle)
+      err ? reject(err) : resolve(handle!)
     )
   );
 }
@@ -80,7 +83,7 @@ function getZipReadStream(
 ): Promise<NodeJS.ReadableStream> {
   return new Promise((resolve, reject) =>
     zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
-      err ? reject(err) : resolve(readStream)
+      err ? reject(err) : resolve(readStream!)
     )
   );
 }

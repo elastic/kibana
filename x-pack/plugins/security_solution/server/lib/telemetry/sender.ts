@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -14,6 +15,11 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import { TelemetryDiagTask } from './task';
 
 export type SearchTypes =
   | string
@@ -56,20 +62,34 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
+  private diagTask?: TelemetryDiagTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
+
+    if (taskManager) {
+      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
+    }
   }
 
-  public start(core?: CoreStart, telemetryStart?: TelemetryPluginStart) {
+  public start(
+    core?: CoreStart,
+    telemetryStart?: TelemetryPluginStart,
+    taskManager?: TaskManagerStartContract
+  ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
 
-    this.logger.debug(`Starting task`);
+    if (taskManager && this.diagTask) {
+      this.logger.debug(`Starting diag task`);
+      this.diagTask.start(taskManager);
+    }
+
+    this.logger.debug(`Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
@@ -80,6 +100,38 @@ export class TelemetryEventsSender {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+  }
+
+  public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
+    const query = {
+      expand_wildcards: 'open,hidden',
+      index: '.logs-endpoint.diagnostic.collection-*',
+      ignore_unavailable: true,
+      size: this.maxQueueSize,
+      body: {
+        query: {
+          range: {
+            'event.ingested': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
+        sort: [
+          {
+            'event.ingested': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    };
+
+    if (!this.core) {
+      throw Error('could not fetch diagnostic alerts. core is not available');
+    }
+    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+    return callCluster('search', query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -109,6 +161,11 @@ export class TelemetryEventsSender {
     });
   }
 
+  public async isTelemetryOptedIn() {
+    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+    return this.isOptedIn === true;
+  }
+
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -121,9 +178,7 @@ export class TelemetryEventsSender {
     try {
       this.isSending = true;
 
-      // Checking opt-in status is relatively expensive (calls a saved-object), so
-      // we only check it when we have things to send.
-      this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+      this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
@@ -238,6 +293,43 @@ interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
 }
 
+// Allow list process fields within events.  This includes "process" and "Target.process".'
+/* eslint-disable @typescript-eslint/naming-convention */
+const allowlistProcessFields: AllowlistFields = {
+  name: true,
+  executable: true,
+  command_line: true,
+  hash: true,
+  pid: true,
+  uptime: true,
+  Ext: {
+    architecture: true,
+    code_signature: true,
+    dll: true,
+    token: {
+      integrity_level_name: true,
+    },
+  },
+  parent: {
+    name: true,
+    executable: true,
+    command_line: true,
+    hash: true,
+    Ext: {
+      architecture: true,
+      code_signature: true,
+      dll: true,
+      token: {
+        integrity_level_name: true,
+      },
+    },
+    uptime: true,
+    pid: true,
+    ppid: true,
+  },
+  thread: true,
+};
+
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
@@ -245,9 +337,17 @@ const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  Memory_protection: true,
+  Ransomware: true,
+  data_stream: true,
   ecs: true,
   elastic: true,
   event: true,
+  rule: {
+    id: true,
+    name: true,
+    ruleset: true,
+  },
   file: {
     name: true,
     path: true,
@@ -260,28 +360,17 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      malware_signature: true,
+      quarantine_result: true,
+      quarantine_message: true,
     },
   },
   host: {
     os: true,
   },
-  process: {
-    name: true,
-    executable: true,
-    command_line: true,
-    hash: true,
-    Ext: {
-      code_signature: true,
-    },
-    parent: {
-      name: true,
-      executable: true,
-      command_line: true,
-      hash: true,
-      Ext: {
-        code_signature: true,
-      },
-    },
+  process: allowlistProcessFields,
+  Target: {
+    process: allowlistProcessFields,
   },
 };
 
@@ -291,7 +380,7 @@ export function copyAllowlistedFields(
 ): TelemetryEvent {
   return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
     const eventValue = event[allowKey];
-    if (eventValue) {
+    if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {

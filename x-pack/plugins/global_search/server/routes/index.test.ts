@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock } from '../../../../../src/core/server/mocks';
@@ -14,7 +15,6 @@ describe('registerRoutes', () => {
     registerRoutes(router);
 
     expect(router.post).toHaveBeenCalledTimes(1);
-
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/internal/global_search/find',
@@ -22,7 +22,14 @@ describe('registerRoutes', () => {
       expect.any(Function)
     );
 
-    expect(router.get).toHaveBeenCalledTimes(0);
+    expect(router.get).toHaveBeenCalledTimes(1);
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/internal/global_search/searchable_types',
+      }),
+      expect.any(Function)
+    );
+
     expect(router.delete).toHaveBeenCalledTimes(0);
     expect(router.put).toHaveBeenCalledTimes(0);
   });

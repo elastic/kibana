@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
@@ -23,6 +24,8 @@ describe('Resolver: panel loading and resolution states', () => {
       nodeID: 'origin',
       eventCategory: 'registry',
       eventID: firstRelatedEventID,
+      eventTimestamp: '0',
+      winlogRecordID: '0',
     },
     panelView: 'eventDetail',
   });
@@ -63,6 +66,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -109,6 +114,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         memoryHistory.push({
           search: queryStringWithEventDetailSelected,
@@ -129,7 +136,7 @@ describe('Resolver: panel loading and resolution states', () => {
     });
 
     describe('when navigating to the event categories panel', () => {
-      let resumeRequest: (pausableRequest: ['entities']) => void;
+      let resumeRequest: (pausableRequest: ['eventsWithEntityIDAndCategory']) => void;
       beforeEach(() => {
         const {
           metadata: { databaseDocumentID },
@@ -140,7 +147,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         resumeRequest = resume;
         memoryHistory = createMemoryHistory();
-        pause(['entities']);
+        pause(['eventsWithEntityIDAndCategory']);
 
         simulator = new Simulator({
           dataAccessLayer,
@@ -148,6 +155,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -170,7 +179,7 @@ describe('Resolver: panel loading and resolution states', () => {
       });
 
       it('should successfully load the events in category panel', async () => {
-        await resumeRequest(['entities']);
+        await resumeRequest(['eventsWithEntityIDAndCategory']);
         await expect(
           simulator.map(() => ({
             resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,
@@ -186,7 +195,7 @@ describe('Resolver: panel loading and resolution states', () => {
     });
 
     describe('when navigating to the node detail panel', () => {
-      let resumeRequest: (pausableRequest: ['entities']) => void;
+      let resumeRequest: (pausableRequest: ['nodeData']) => void;
       beforeEach(() => {
         const {
           metadata: { databaseDocumentID },
@@ -197,7 +206,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         resumeRequest = resume;
         memoryHistory = createMemoryHistory();
-        pause(['entities']);
+        pause(['nodeData']);
 
         simulator = new Simulator({
           dataAccessLayer,
@@ -205,6 +214,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -226,7 +237,7 @@ describe('Resolver: panel loading and resolution states', () => {
       });
 
       it('should successfully load the events in category panel', async () => {
-        await resumeRequest(['entities']);
+        await resumeRequest(['nodeData']);
         await expect(
           simulator.map(() => ({
             resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,

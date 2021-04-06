@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,8 +12,8 @@ import { of, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { mountWithIntl } from '@kbn/test/jest';
 import { applicationServiceMock } from '../../../../../src/core/public/mocks';
-import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
+import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { SearchBar } from './search_bar';
 
 type Result = { id: string; type: string } | string;
@@ -54,7 +55,7 @@ describe('SearchBar', () => {
   });
 
   const triggerFocus = () => {
-    component.find('input[data-test-subj="header-search"]').simulate('focus');
+    component.find('input[data-test-subj="nav-search-input"]').simulate('focus');
   };
 
   const update = () => {
@@ -86,7 +87,7 @@ describe('SearchBar', () => {
 
     component = mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
@@ -100,7 +101,7 @@ describe('SearchBar', () => {
     update();
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
-    expect(searchService.find).toHaveBeenCalledWith('', {});
+    expect(searchService.find).toHaveBeenCalledWith({}, {});
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
 
     await simulateTypeChar('d');
@@ -108,18 +109,19 @@ describe('SearchBar', () => {
 
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
     expect(searchService.find).toHaveBeenCalledTimes(2);
-    expect(searchService.find).toHaveBeenCalledWith('d', {});
+    expect(searchService.find).toHaveBeenCalledWith({ term: 'd' }, {});
   });
 
   it('supports keyboard shortcuts', () => {
     mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
         trackUiMetric={jest.fn()}
-      />
+      />,
+      { attachTo: document.body }
     );
 
     const searchEvent = new KeyboardEvent('keydown', {
@@ -146,7 +148,7 @@ describe('SearchBar', () => {
 
     component = mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}

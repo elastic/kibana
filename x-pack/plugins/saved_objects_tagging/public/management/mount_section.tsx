@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -11,13 +12,16 @@ import { CoreSetup, ApplicationStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
-import { ITagInternalClient } from '../tags';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {
   tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
+  assignmentService: ITagAssignmentService;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
+  title: string;
 }
 
 const RedirectToHomeIfUnauthorized: FC<{
@@ -31,10 +35,19 @@ const RedirectToHomeIfUnauthorized: FC<{
   return children! as React.ReactElement;
 };
 
-export const mountSection = async ({ tagClient, core, mountParams }: MountSectionParams) => {
+export const mountSection = async ({
+  tagClient,
+  tagCache,
+  assignmentService,
+  core,
+  mountParams,
+  title,
+}: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
+  const assignableTypes = await assignmentService.getAssignableTypes();
+  coreStart.chrome.docTitle.change(title);
 
   ReactDOM.render(
     <I18nProvider>
@@ -43,7 +56,10 @@ export const mountSection = async ({ tagClient, core, mountParams }: MountSectio
           setBreadcrumbs={setBreadcrumbs}
           core={coreStart}
           tagClient={tagClient}
+          tagCache={tagCache}
+          assignmentService={assignmentService}
           capabilities={capabilities}
+          assignableTypes={assignableTypes}
         />
       </RedirectToHomeIfUnauthorized>
     </I18nProvider>,
@@ -51,6 +67,7 @@ export const mountSection = async ({ tagClient, core, mountParams }: MountSectio
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

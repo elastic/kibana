@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -114,7 +115,6 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
     } = currUsage;
 
     // Stats filtered by telemetry collectors need to be flattened since they're pulled in a generic way.
-    // A plugin might not provide flat stats if it implements formatForBulkUpload in its collector.
     // e.g: we want `xpack.reporting` to just be `reporting`
     const plugins = { ...pluginsTop, ...xpack };
 
@@ -183,7 +183,7 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,

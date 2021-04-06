@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,18 +12,34 @@ export default function ({ getPageObjects, getService }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const security = getService('security');
 
   describe('tooltip filter actions', () => {
+    before(async () => {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_maps_all',
+        'geoshape_data_reader',
+        'global_dashboard_all',
+        'meta_for_geoshape_data_reader',
+        'global_discover_read',
+      ]);
+    });
     async function loadDashboardAndOpenTooltip() {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
+
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dash for tooltip filter action test');
 
       await PageObjects.maps.lockTooltipAtPosition(200, -200);
     }
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
 
     describe('apply filter to current view', () => {
       before(async () => {

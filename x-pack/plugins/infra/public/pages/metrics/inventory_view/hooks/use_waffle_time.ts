@@ -1,24 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useCallback, useState, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
+import DateMath from '@elastic/datemath';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
 import { useUrlState } from '../../../../utils/use_url_state';
-
+import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,
 };
 
 export const useWaffleTime = () => {
+  // INFO: We currently only use the "to" time, but in the future we may do more.
+  const [getTime] = useKibanaTimefilterTime({ from: 'now', to: 'now' });
+  const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
-    defaultState: DEFAULT_WAFFLE_TIME_STATE,
+    defaultState: {
+      ...DEFAULT_WAFFLE_TIME_STATE,
+      currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
+    },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',

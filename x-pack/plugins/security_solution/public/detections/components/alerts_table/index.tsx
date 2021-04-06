@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
@@ -47,12 +48,14 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
-  canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;
+  hasIndexMaintenance: boolean;
   from: string;
   loading: boolean;
   onRuleChange?: () => void;
@@ -65,7 +68,6 @@ type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
-  canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
@@ -74,6 +76,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   hasIndexWrite,
+  hasIndexMaintenance,
   isSelectAllChecked,
   loading,
   loadingEventIds,
@@ -259,10 +262,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     (refetchQuery: inputsModel.Refetch, totalCount: number) => {
       return (
         <AlertsUtilityBar
-          canUserCRUD={canUserCRUD}
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
+          hasIndexMaintenance={hasIndexMaintenance}
           currentFilter={filterGroup}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
@@ -275,8 +278,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       );
     },
     [
-      canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       clearSelectionCallback,
       filterGroup,
       showBuildingBlockAlerts,
@@ -335,6 +338,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
+      renderCellValue={DefaultCellRenderer}
+      rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}

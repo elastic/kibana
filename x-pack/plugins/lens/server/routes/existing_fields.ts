@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
+import { errors, estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
-import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { PluginStartContract } from '../plugin';
 
-export function isBoomError(error: { isBoom?: boolean }): error is Boom {
+export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
   return error.isBoom === true;
 }
 
@@ -26,9 +30,10 @@ export interface Field {
   isMeta: boolean;
   lang?: string;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
-export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
+export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
   const router = setup.http.createRouter();
 
   router.post(
@@ -47,11 +52,18 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
       },
     },
     async (context, req, res) => {
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
           body: await fetchFieldExistence({
             ...req.params,
             ...req.body,
+            indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
+              savedObjectsClient,
+              esClient
+            ),
             context,
           }),
         });
@@ -59,18 +71,16 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
         logger.info(
           `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
         );
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
         }
         if (isBoomError(e)) {
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -80,6 +90,7 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  indexPatternsService,
   dslQuery = { match_all: {} },
   fromDate,
   toDate,
@@ -87,68 +98,48 @@ async function fetchFieldExistence({
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  indexPatternsService: IndexPatternsService;
   dslQuery: object;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
-  const { indexPattern, indexPatternTitle } = await fetchIndexPatternDefinition(
-    indexPatternId,
-    context
-  );
+  const indexPattern = await indexPatternsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.legacy.client,
-    index: indexPatternTitle,
-    timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
+    client: context.core.elasticsearch.client.asCurrentUser,
+    index: indexPattern.title,
+    timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
   });
 
   return {
-    indexPatternTitle,
+    indexPatternTitle: indexPattern.title,
     existingFieldNames: existingFields(docs, fields),
-  };
-}
-
-async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
-  const savedObjectsClient = context.core.savedObjects.client;
-  const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
-    'index-pattern',
-    indexPatternId
-  );
-  const indexPatternTitle = indexPattern.attributes.title;
-
-  return {
-    indexPattern,
-    indexPatternTitle,
   };
 }
 
 /**
  * Exported only for unit tests.
  */
-export function buildFieldList(
-  indexPattern: SavedObject<IndexPatternAttributes>,
-  metaFields: string[]
-): Field[] {
-  return JSON.parse(indexPattern.attributes.fields).map(
-    (field: { name: string; lang: string; scripted?: boolean; script?: string }) => {
-      return {
-        name: field.name,
-        isScript: !!field.scripted,
-        lang: field.lang,
-        script: field.script,
-        // id is a special case - it doesn't show up in the meta field list,
-        // but as it's not part of source, it has to be handled separately.
-        isMeta: metaFields.includes(field.name) || field.name === '_id',
-      };
-    }
-  );
+export function buildFieldList(indexPattern: IndexPattern, metaFields: string[]): Field[] {
+  return indexPattern.fields.map((field) => {
+    return {
+      name: field.name,
+      isScript: !!field.scripted,
+      lang: field.lang,
+      script: field.script,
+      // id is a special case - it doesn't show up in the meta field list,
+      // but as it's not part of source, it has to be handled separately.
+      isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
+    };
+  });
 }
 
 async function fetchIndexPatternStats({
@@ -160,7 +151,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: ILegacyScopedClusterClient;
+  client: ElasticsearchClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -190,7 +181,8 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const result = await client.callAsCurrentUser('search', {
+  const runtimeFields = fields.filter((f) => f.runtimeField);
+  const { body: result } = await client.search({
     index,
     body: {
       size: SAMPLE_SIZE,
@@ -198,15 +190,21 @@ async function fetchIndexPatternStats({
       sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       fields: ['*'],
       _source: false,
+      runtime_mappings: runtimeFields.reduce((acc, field) => {
+        if (!field.runtimeField) return acc;
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
+        acc[field.name] = field.runtimeField;
+        return acc;
+      }, {} as Record<string, estypes.RuntimeField>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
-            lang: field.lang,
-            source: field.script,
+            lang: field.lang!,
+            source: field.script!,
           },
         };
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.ScriptField>),
     },
   });
   return result.hits.hits;
@@ -215,10 +213,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -227,7 +222,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }

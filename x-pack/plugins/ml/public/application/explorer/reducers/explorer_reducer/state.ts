@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Duration } from 'moment';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { Dictionary } from '../../../../../common/types/common';
 
@@ -16,24 +18,23 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
-  TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
+import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 
 export interface ExplorerState {
   annotations: AnnotationsTable;
-  bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
   filteredFields: any[];
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   influencers: Dictionary<any>;
   isAndOperator: boolean;
   loading: boolean;
@@ -43,7 +44,7 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: Duration | undefined;
   swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
@@ -68,7 +69,6 @@ export function getExplorerDefaultState(): ExplorerState {
       annotationsData: [],
       aggregations: {},
     },
-    bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,

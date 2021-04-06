@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Subject } from 'rxjs';
 import {
   Embeddable,
   LensByValueInput,
@@ -13,19 +13,13 @@ import {
   LensEmbeddableInput,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import {
-  Query,
-  TimeRange,
-  Filter,
-  TimefilterContract,
-  IndexPatternsContract,
-} from 'src/plugins/data/public';
+import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
+import { AttributeService, ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
@@ -110,7 +104,7 @@ describe('embeddable', () => {
     mountpoint.remove();
   });
 
-  it('should render expression with expression renderer', async () => {
+  it('should render expression once with expression renderer', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -118,15 +112,103 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
+| expression`);
+  });
+
+  it('should render once even if reload is called before embeddable is fully initialized', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    await embeddable.reload();
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+    embeddable.render(mountpoint);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not render the visualization if any error arises', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: [{ shortMessage: '', longMessage: 'my validation error' }],
           }),
       },
       {} as LensEmbeddableInput
@@ -134,9 +216,7 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({} as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
-| expression`);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
   });
 
   it('should initialize output with deduped list of index patterns', async () => {
@@ -157,15 +237,21 @@ describe('embeddable', () => {
         indexPatternService: ({
           get: (id: string) => Promise.resolve({ id }),
         } as unknown) as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       {} as LensEmbeddableInput
@@ -189,15 +275,21 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -205,11 +297,147 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
     embeddable.updateInput({
       timeRange,
       query,
       filters,
       searchSessionId: 'searchSessionId',
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render once if session id changes and ', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      searchSessionId: 'newSession',
+    });
+    embeddable.reload();
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
+    const sampleInput = ({
+      id: '123',
+      enhancements: {
+        dynamicActions: {},
+      },
+    } as unknown) as LensEmbeddableInput;
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      viewMode: ViewMode.VIEW,
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      ...sampleInput,
+      viewMode: ViewMode.VIEW,
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render when dynamic actions input changes', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      enhancements: {
+        dynamicActions: {},
+      },
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -235,15 +463,21 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       input
@@ -260,6 +494,51 @@ describe('embeddable', () => {
     );
 
     expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
+  });
+
+  it('should pass render mode to expression', async () => {
+    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+    const query: Query = { language: 'kquery', query: '' };
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      renderMode: 'noInteractivity',
+    } as LensEmbeddableInput;
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      input
+    );
+    await embeddable.initializeSavedVis(input);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer.mock.calls[0][0].renderMode).toEqual('noInteractivity');
   });
 
   it('should merge external context with query and filters of the saved object', async () => {
@@ -288,16 +567,22 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       input
@@ -324,15 +609,21 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -351,6 +642,43 @@ describe('embeddable', () => {
     );
   });
 
+  it('should execute trigger on row click event from expression renderer', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
+
+    onEvent({ name: 'tableRowContextMenuClick', data: {} });
+
+    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick);
+  });
+
   it('should not re-render if only change is in disabled filter', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
@@ -363,15 +691,21 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
@@ -395,48 +729,216 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
   });
 
-  it('should re-render on auto refresh fetch observable', async () => {
-    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+  it('should call onload after rerender and onData$ call ', async () => {
+    const onLoad = jest.fn();
 
-    const autoRefreshFetchSubject = new Subject();
-    const timefilter = ({
-      getAutoRefreshFetch$: () => autoRefreshFetchSubject.asObservable(),
-    } as unknown) as TimefilterContract;
+    expressionRenderer = jest.fn(({ onData$ }) => {
+      setTimeout(() => {
+        onData$?.({});
+      }, 10);
+
+      return null;
+    });
 
     const embeddable = new Embeddable(
       {
-        timefilter,
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
-      { id: '123', timeRange, query, filters } as LensEmbeddableInput
+      ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({
-      id: '123',
-      timeRange,
-      query,
-      filters,
-    } as LensEmbeddableInput);
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    act(() => {
-      autoRefreshFetchSubject.next();
+    expect(onLoad).toHaveBeenCalledWith(true);
+    expect(onLoad).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // loading should become false
+    expect(onLoad).toHaveBeenCalledTimes(2);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      searchSessionId: 'newSession',
     });
+    embeddable.reload();
+
+    // loading should become again true
+    expect(onLoad).toHaveBeenCalledTimes(3);
+    expect(onLoad).toHaveBeenNthCalledWith(3, true);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // loading should again become false
+    expect(onLoad).toHaveBeenCalledTimes(4);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false);
+  });
+
+  it('should call onFilter event on filter call ', async () => {
+    const onFilter = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'filter', data: { pings: false } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onFilter).toHaveBeenCalledWith({ pings: false });
+    expect(onFilter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onBrush event on brushing', async () => {
+    const onBrushEnd = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'brush', data: { range: [0, 1] } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onBrushEnd).toHaveBeenCalledWith({ range: [0, 1] });
+    expect(onBrushEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onTableRowClick event ', async () => {
+    const onTableRowClick = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'tableRowContextMenuClick', data: { name: 'test' } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onTableRowClick).toHaveBeenCalledWith({ name: 'test' });
+    expect(onTableRowClick).toHaveBeenCalledTimes(1);
   });
 });

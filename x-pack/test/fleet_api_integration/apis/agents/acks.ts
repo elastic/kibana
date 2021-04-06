@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,9 +14,9 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
-  const supertest = getSupertestWithoutAuth(providerContext);
+  const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
+  const supertest = getService('supertest');
   let apiKey: { id: string; api_key: string };
 
   describe('fleet_agents_acks', () => {
@@ -31,13 +32,14 @@ export default function (providerContext: FtrProviderContext) {
       const {
         body: { _source: agentDoc },
       } = await esClient.get({
-        index: '.kibana',
-        id: 'fleet-agents:agent1',
+        index: '.fleet-agents',
+        id: 'agent1',
       });
-      agentDoc['fleet-agents'].access_api_key_id = apiKey.id;
+      // @ts-expect-error has unknown type
+      agentDoc.access_api_key_id = apiKey.id;
       await esClient.update({
-        index: '.kibana',
-        id: 'fleet-agents:agent1',
+        index: '.fleet-agents',
+        id: 'agent1',
         refresh: true,
         body: {
           doc: agentDoc,
@@ -49,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 401 if this a not a valid acks access', async () => {
-      await supertest
+      await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
@@ -60,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 200 if this a valid acks request', async () => {
-      const { body: apiResponse } = await supertest
+      const { body: apiResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -91,13 +93,10 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       expect(apiResponse.action).to.be('acks');
+
       const { body: eventResponse } = await supertest
         .get(`/api/fleet/agents/agent1/events`)
         .set('kbn-xsrf', 'xx')
-        .set(
-          'Authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
         .expect(200);
       const expectedEvents = eventResponse.list.filter(
         (item: Record<string, string>) =>
@@ -120,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains event for another agent id', async () => {
-      const { body: apiResponse } = await supertest
+      const { body: apiResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -147,7 +146,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains action that does not belong to agent current actions', async () => {
-      const { body: apiResponse } = await supertest
+      const { body: apiResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -181,7 +180,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
-      const { body: apiResponse } = await supertest
+      const { body: apiResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -211,10 +210,6 @@ export default function (providerContext: FtrProviderContext) {
       const { body: actionRes } = await supertest
         .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
-        .set(
-          'Authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
         .send({
           action: {
             type: 'UPGRADE',
@@ -223,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       const actionId = actionRes.item.id;
-      await supertest
+      await supertestWithoutAuth
         .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -245,11 +240,11 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const res = await kibanaServer.savedObjects.get({
-        type: 'fleet-agents',
+      const res = await esClient.get<{ upgraded_at: unknown }>({
+        index: '.fleet-agents',
         id: 'agent1',
       });
-      expect(res.attributes.upgraded_at).to.be.ok();
+      expect(res.body._source?.upgraded_at).to.be.ok();
     });
   });
 }

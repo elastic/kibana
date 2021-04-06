@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { ApiKey } from '../../../common/model';
+
+import type { RouteDefinitionParams } from '../';
+import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
-export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetApiKeysRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key',
@@ -28,11 +30,11 @@ export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitio
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const isAdmin = request.query.isAdmin === 'true';
-        const { api_keys: apiKeys } = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getAPIKeys', { owner: !isAdmin })) as { api_keys: ApiKey[] };
+        const apiResponse = await context.core.elasticsearch.client.asCurrentUser.security.getApiKey<{
+          api_keys: ApiKey[];
+        }>({ owner: !isAdmin });
 
-        const validKeys = apiKeys.filter(({ invalidated }) => !invalidated);
+        const validKeys = apiResponse.body.api_keys.filter(({ invalidated }) => !invalidated);
 
         return response.ok({ body: { apiKeys: validKeys } });
       } catch (error) {

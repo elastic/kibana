@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
-  const users: { [rollName: string]: { username: string; password: string; permissions?: any } } = {
+  const users: {
+    [roleName: string]: { username: string; password: string; permissions?: any; roles?: string[] };
+  } = {
     fleet_user: {
       permissions: {
         feature: {
@@ -23,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       password: 'changeme',
     },
     fleet_admin: {
+      roles: ['superuser'],
       permissions: {
         feature: {
           fleet: ['all'],
@@ -48,13 +52,13 @@ export default function ({ getService }: FtrProviderContext) {
           // Import a repository first
           await security.user.create(user.username, {
             password: user.password,
-            roles: [roleName],
+            roles: [roleName, ...(user.roles || [])],
             full_name: user.username,
           });
         }
       }
 
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');

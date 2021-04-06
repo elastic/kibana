@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { coreMock } from 'src/core/public/mocks';
+import { savedObjectsManagementPluginMock } from 'src/plugins/saved_objects_management/public/mocks';
+
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
-import { spacesManagerMock } from '../spaces_manager/mocks';
-import { CopySavedObjectsToSpaceService } from '.';
-import { notificationServiceMock } from 'src/core/public/mocks';
-import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
+import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space_service';
 
 describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the CopyToSpaceSavedObjectsManagementAction', () => {
+      const { getStartServices } = coreMock.createSetup();
       const deps = {
-        spacesManager: spacesManagerMock.create(),
-        notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
+        getStartServices,
       };
 
       const service = new CopySavedObjectsToSpaceService();

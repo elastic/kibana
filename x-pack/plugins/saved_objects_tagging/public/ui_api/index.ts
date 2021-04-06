@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { OverlayStart } from 'src/core/public';
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { TagsCapabilities } from '../../common';
-import { ITagsCache, ITagInternalClient } from '../tags';
-import { getTagIdsFromReferences, updateTagsReferences } from '../utils';
+import { ITagsCache, ITagInternalClient } from '../services';
+import {
+  getTagIdsFromReferences,
+  updateTagsReferences,
+  convertTagNameToId,
+  getTag,
+} from '../utils';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
@@ -39,6 +45,8 @@ export const getUiApi = ({
     convertNameToReference: buildConvertNameToReference({ cache }),
     hasTagDecoration,
     getTagIdsFromReferences,
+    getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences,
+    getTag: (tagId: string) => getTag(tagId, cache.getState()),
   };
 };

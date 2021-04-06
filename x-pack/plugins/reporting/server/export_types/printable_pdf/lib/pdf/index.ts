@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,9 +11,9 @@ import concat from 'concat-stream';
 import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
-import { Content, ContentText } from 'pdfmake/interfaces';
+import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../../lib/layouts';
-import { getDocOptions } from './get_doc_options';
+import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { getTemplate } from './get_template';
 
@@ -67,7 +68,7 @@ export class PdfMaker {
     this._content.push(contents);
   }
 
-  addImage(base64EncodedData: string, { title = '', description = '' }) {
+  addBrandedImage(img: ContentImage, { title = '', description = '' }) {
     const contents: Content[] = [];
 
     if (title && title.length > 0) {
@@ -88,24 +89,32 @@ export class PdfMaker {
       });
     }
 
-    const size = this._layout.getPdfImageSize();
-    const img = {
-      image: `data:image/png;base64,${base64EncodedData}`,
-      alignment: 'center',
-      height: size.height,
-      width: size.width,
-    };
-
     const wrappedImg = {
       table: {
         body: [[img]],
       },
-      layout: 'noBorder',
+      layout: REPORTING_TABLE_LAYOUT,
     };
 
     contents.push(wrappedImg);
 
     this._addContents(contents);
+  }
+
+  addImage(base64EncodedData: string, opts = { title: '', description: '' }) {
+    const size = this._layout.getPdfImageSize();
+    const img = {
+      image: `data:image/png;base64,${base64EncodedData}`,
+      alignment: 'center' as 'center',
+      height: size.height,
+      width: size.width,
+    };
+
+    if (this._layout.useReportingBranding) {
+      return this.addBrandedImage(img, opts);
+    }
+
+    this._addContents([img]);
   }
 
   setTitle(title: string) {

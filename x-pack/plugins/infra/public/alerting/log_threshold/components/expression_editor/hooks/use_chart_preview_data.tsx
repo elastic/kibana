@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useState, useMemo } from 'react';
-import { AlertsContext } from '../editor';
+import { HttpHandler } from 'kibana/public';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -17,12 +20,13 @@ import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../..
 
 interface Options {
   sourceId: string;
-  context: AlertsContext;
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
 }
 
-export const useChartPreviewData = ({ context, sourceId, alertParams, buckets }: Options) => {
+export const useChartPreviewData = ({ sourceId, alertParams, buckets }: Options) => {
+  const { http } = useKibana().services;
+
   const [chartPreviewData, setChartPreviewData] = useState<
     GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series']
   >([]);
@@ -32,7 +36,7 @@ export const useChartPreviewData = ({ context, sourceId, alertParams, buckets }:
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(sourceId, context.http.fetch, alertParams, buckets);
+        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, alertParams, buckets);
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -42,7 +46,7 @@ export const useChartPreviewData = ({ context, sourceId, alertParams, buckets }:
         setHasError(true);
       },
     },
-    [sourceId, context.http.fetch, alertParams, buckets]
+    [sourceId, http, alertParams, buckets]
   );
 
   const isLoading = useMemo(() => getChartPreviewDataRequest.state === 'pending', [
@@ -59,7 +63,7 @@ export const useChartPreviewData = ({ context, sourceId, alertParams, buckets }:
 
 export const callGetChartPreviewDataAPI = async (
   sourceId: string,
-  fetch: AlertsContext['http']['fetch'],
+  fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) => {

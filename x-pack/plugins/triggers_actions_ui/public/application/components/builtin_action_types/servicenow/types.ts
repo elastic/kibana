@@ -1,42 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
 import { UserConfiguredActionConnector } from '../../../../types';
+import {
+  ExecutorSubActionPushParamsITSM,
+  ExecutorSubActionPushParamsSIR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
   ServiceNowSecrets
 >;
 
-export interface ServiceNowActionParams {
+export interface ServiceNowITSMActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comment: string;
-    externalId: string | null;
-    severity: string;
-    urgency: string;
-    impact: string;
-  };
+  subActionParams: ExecutorSubActionPushParamsITSM;
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
+export interface ServiceNowSIRActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
 export interface ServiceNowConfig {
   apiUrl: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
 export interface ServiceNowSecrets {
   username: string;
   password: string;
 }
+
+export interface Choice {
+  value: string;
+  label: string;
+  element: string;
+  dependent_value: string;
+}
+
+export type Fields = Record<string, Choice[]>;

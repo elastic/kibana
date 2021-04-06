@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment, ReactElement } from 'react';
@@ -16,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
-import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
 
@@ -59,10 +59,10 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
     }
   };
 
-  _onFieldMetaOptionsChange = (fieldMetaOptions: FieldMetaOptions) => {
+  _onDataMappingChange = (updatedObjects: Partial<DynamicOptions>) => {
     const options = {
       ...(this.props.styleProperty.getOptions() as DynamicOptions),
-      fieldMetaOptions,
+      ...updatedObjects,
     };
     this.props.onDynamicStyleChange(this.props.styleProperty.getStyleName(), options);
   };
@@ -101,10 +101,6 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
   }
 
   render() {
-    const fieldMetaOptionsPopover = this.props.styleProperty.renderFieldMetaPopover(
-      this._onFieldMetaOptionsChange
-    );
-
     const staticDynamicSelect = this.renderStaticDynamicSelect();
 
     const stylePropertyForm =
@@ -127,7 +123,9 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
           {React.cloneElement(this.props.children, {
             staticDynamicSelect,
           })}
-          {fieldMetaOptionsPopover}
+          {(this.props.styleProperty as IStyleProperty<DynamicOptions>).renderDataMappingPopover(
+            this._onDataMappingChange
+          )}
         </Fragment>
       );
 

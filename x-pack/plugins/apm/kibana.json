@@ -8,34 +8,32 @@
     "data",
     "licensing",
     "triggersActionsUi",
-    "embeddable"
+    "embeddable",
+    "infra"
   ],
   "optionalPlugins": [
+    "spaces",
     "cloud",
     "usageCollection",
     "taskManager",
     "actions",
-    "alerts",
+    "alerting",
     "observability",
     "security",
     "ml",
-    "home"
+    "home",
+    "maps"
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
-  "extraPublicDirs": [
-    "public/style/variables"
-  ],
+  "configPath": ["xpack", "apm"],
+  "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "kibanaUtils",
-    "observability",
-    "home",
     "maps",
-    "ml"
+    "ml",
+    "observability"
   ]
 }

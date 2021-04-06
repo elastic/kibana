@@ -1,38 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
-  EuiLink,
+  EuiEmptyPrompt,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
+  EuiLink,
   EuiPageContent,
-  EuiTitle,
+  EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiEmptyPrompt,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
   EuiSwitch,
-  EuiFlexItem,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
-import { User, Role } from '../../../../common/model';
-import { ConfirmDeleteUsers } from '../components';
-import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
-import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
-import { RoleTableDisplay } from '../../role_table_display';
-import { RolesAPIClient } from '../../roles';
+import type { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { UserAPIClient } from '..';
+import type { Role, User } from '../../../../common/model';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
+import { ConfirmDeleteUsers } from '../components';
+import type { UserAPIClient } from '../user_api_client';
+import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
@@ -237,7 +239,7 @@ export class UsersGridPage extends Component<Props, State> {
             <EuiPageContentHeaderSection>
               <EuiButton
                 data-test-subj="createUserButton"
-                {...reactRouterNavigate(this.props.history, `/edit/`)}
+                {...reactRouterNavigate(this.props.history, `/create`)}
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"

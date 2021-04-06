@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import { Map as MbMap, FeatureIdentifier } from 'mapbox-gl';
+import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
-  GEO_JSON_TYPE,
-  FIELD_ORIGIN,
-  STYLE_TYPE,
-  SOURCE_FORMATTERS_DATA_REQUEST_ID,
-  LAYER_STYLE_TYPE,
   DEFAULT_ICON,
+  FIELD_ORIGIN,
+  GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  LAYER_STYLE_TYPE,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
+  STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -25,7 +27,7 @@ import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
-import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
 import { StaticColorProperty } from './properties/static_color_property';
@@ -43,6 +45,7 @@ import {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
+  DynamicStyleProperties,
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
@@ -66,11 +69,11 @@ import {
 import { DataRequest } from '../../util/data_request';
 import { IStyle } from '../style';
 import { IStyleProperty } from './properties/style_property';
-import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
-import { createStyleFieldsHelper } from './style_fields_helper';
+import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
+import { IESAggField } from '../../fields/agg';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -81,8 +84,9 @@ export interface IVectorStyle extends IStyle {
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   getSourceFieldNames(): string[];
   getStyleMeta(): StyleMeta;
-  getDescriptorWithMissingStylePropsRemoved(
+  getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
+    previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
@@ -174,7 +178,8 @@ export class VectorStyle implements IVectorStyle {
   constructor(
     descriptor: VectorStyleDescriptor | null,
     source: IVectorSource,
-    layer: IVectorLayer
+    layer: IVectorLayer,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     this._source = source;
     this._layer = layer;
@@ -193,11 +198,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._lineColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-      VECTOR_STYLES.LINE_COLOR
+      VECTOR_STYLES.LINE_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._fillColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
-      VECTOR_STYLES.FILL_COLOR
+      VECTOR_STYLES.FILL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._lineWidthStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
@@ -226,11 +233,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._labelColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
-      VECTOR_STYLES.LABEL_COLOR
+      VECTOR_STYLES.LABEL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
-      VECTOR_STYLES.LABEL_BORDER_COLOR
+      VECTOR_STYLES.LABEL_BORDER_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
@@ -239,11 +248,187 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
+  async _updateFieldsInDescriptor(
+    nextFields: IField[],
+    styleFieldsHelper: StyleFieldsHelper,
+    previousFields: IField[],
+    mapColors: string[]
+  ) {
+    const originalProperties = this.getRawProperties();
+    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
+      originalProperties
+    ) as VECTOR_STYLES[]).filter((key) => {
+      const dynamicOptions = getDynamicOptions(originalProperties, key);
+      if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
+        return false;
+      }
+
+      const hasMatchingField = nextFields.some((field) => {
+        return (
+          dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
+        );
+      });
+      return !hasMatchingField;
+    });
+
+    let hasChanges = false;
+
+    const updatedProperties: VectorStylePropertiesDescriptor = { ...originalProperties };
+    invalidStyleNames.forEach((invalidStyleName) => {
+      for (let i = 0; i < previousFields.length; i++) {
+        const previousField = previousFields[i];
+        const nextField = nextFields[i];
+        if (previousField.isEqual(nextField)) {
+          continue;
+        }
+        const isFieldDataTypeCompatible = styleFieldsHelper.hasFieldForStyle(
+          nextField,
+          invalidStyleName
+        );
+        if (!isFieldDataTypeCompatible) {
+          return;
+        }
+        hasChanges = true;
+        (updatedProperties[invalidStyleName] as DynamicStyleProperties) = {
+          type: STYLE_TYPE.DYNAMIC,
+          options: {
+            ...originalProperties[invalidStyleName].options,
+            field: rectifyFieldDescriptor(nextField as IESAggField, {
+              origin: previousField.getOrigin(),
+              name: previousField.getName(),
+            }),
+          } as DynamicStylePropertyOptions,
+        };
+      }
+    });
+
+    return this._deleteFieldsFromDescriptorAndUpdateStyling(
+      nextFields,
+      updatedProperties,
+      hasChanges,
+      styleFieldsHelper,
+      mapColors
+    );
+  }
+
+  async _deleteFieldsFromDescriptorAndUpdateStyling(
+    nextFields: IField[],
+    originalProperties: VectorStylePropertiesDescriptor,
+    hasChanges: boolean,
+    styleFieldsHelper: StyleFieldsHelper,
+    mapColors: string[]
+  ) {
+    // const originalProperties = this.getRawProperties();
+    const updatedProperties = {} as VectorStylePropertiesDescriptor;
+
+    const dynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter((key) => {
+      const dynamicOptions = getDynamicOptions(originalProperties, key);
+      return dynamicOptions && dynamicOptions.field && dynamicOptions.field.name;
+    });
+
+    dynamicProperties.forEach((key: VECTOR_STYLES) => {
+      // Convert dynamic styling to static stying when there are no style fields
+      const styleFields = styleFieldsHelper.getFieldsForStyle(key);
+      if (styleFields.length === 0) {
+        const staticProperties = getDefaultStaticProperties(mapColors);
+        updatedProperties[key] = staticProperties[key] as any;
+        return;
+      }
+
+      const dynamicProperty = originalProperties[key];
+      if (!dynamicProperty || !dynamicProperty.options) {
+        return;
+      }
+      const fieldName = (dynamicProperty.options as DynamicStylePropertyOptions).field!.name;
+      if (!fieldName) {
+        return;
+      }
+
+      const matchingOrdinalField = nextFields.find((ordinalField) => {
+        return fieldName === ordinalField.getName();
+      });
+
+      if (matchingOrdinalField) {
+        return;
+      }
+
+      updatedProperties[key] = {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...originalProperties[key]!.options,
+        },
+      } as any;
+
+      if ('field' in updatedProperties[key].options) {
+        delete (updatedProperties[key].options as DynamicStylePropertyOptions).field;
+      }
+    });
+
+    if (Object.keys(updatedProperties).length !== 0) {
+      return {
+        hasChanges: true,
+        nextStyleDescriptor: VectorStyle.createDescriptor(
+          {
+            ...originalProperties,
+            ...updatedProperties,
+          },
+          this.isTimeAware()
+        ),
+      };
+    } else {
+      return {
+        hasChanges,
+        nextStyleDescriptor: VectorStyle.createDescriptor(
+          {
+            ...originalProperties,
+          },
+          this.isTimeAware()
+        ),
+      };
+    }
+  }
+
+  /*
+   * Changes to source descriptor and join descriptor will impact style properties.
+   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
+   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
+   * When this happens, the style will be linked to a no-longer-existing ordinal field.
+   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
+   * properties that are tied to missing oridinal fields
+   *
+   * This method does not update its descriptor. It just returns a new descriptor that the caller
+   * can then use to update store state via dispatch.
+   */
+  async getDescriptorWithUpdatedStyleProps(
+    nextFields: IField[],
+    previousFields: IField[],
+    mapColors: string[]
+  ) {
+    const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
+
+    return previousFields.length === nextFields.length
+      ? // Field-config changed
+        await this._updateFieldsInDescriptor(
+          nextFields,
+          styleFieldsHelper,
+          previousFields,
+          mapColors
+        )
+      : // Deletions or additions
+        await this._deleteFieldsFromDescriptorAndUpdateStyling(
+          nextFields,
+          this.getRawProperties(),
+          false,
+          styleFieldsHelper,
+          mapColors
+        );
+  }
+
   getType() {
     return LAYER_STYLE_TYPE.VECTOR;
   }
 
-  getAllStyleProperties() {
+  getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>> {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -303,94 +488,6 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  /*
-   * Changes to source descriptor and join descriptor will impact style properties.
-   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
-   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
-   * When this happens, the style will be linked to a no-longer-existing ordinal field.
-   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
-   * properties that are tied to missing oridinal fields
-   *
-   * This method does not update its descriptor. It just returns a new descriptor that the caller
-   * can then use to update store state via dispatch.
-   */
-  async getDescriptorWithMissingStylePropsRemoved(nextFields: IField[], mapColors: string[]) {
-    const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
-    const originalProperties = this.getRawProperties();
-    const updatedProperties = {} as VectorStylePropertiesDescriptor;
-
-    const dynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter((key) => {
-      if (!originalProperties[key]) {
-        return false;
-      }
-      const propertyDescriptor = originalProperties[key];
-      if (
-        !propertyDescriptor ||
-        !('type' in propertyDescriptor) ||
-        propertyDescriptor.type !== STYLE_TYPE.DYNAMIC ||
-        !propertyDescriptor.options
-      ) {
-        return false;
-      }
-      const dynamicOptions = propertyDescriptor.options as DynamicStylePropertyOptions;
-      return dynamicOptions.field && dynamicOptions.field.name;
-    });
-
-    dynamicProperties.forEach((key: VECTOR_STYLES) => {
-      // Convert dynamic styling to static stying when there are no style fields
-      const styleFields = styleFieldsHelper.getFieldsForStyle(key);
-      if (styleFields.length === 0) {
-        const staticProperties = getDefaultStaticProperties(mapColors);
-        updatedProperties[key] = staticProperties[key] as any;
-        return;
-      }
-
-      const dynamicProperty = originalProperties[key];
-      if (!dynamicProperty || !dynamicProperty.options) {
-        return;
-      }
-      const fieldName = (dynamicProperty.options as DynamicStylePropertyOptions).field!.name;
-      if (!fieldName) {
-        return;
-      }
-
-      const matchingOrdinalField = nextFields.find((ordinalField) => {
-        return fieldName === ordinalField.getName();
-      });
-
-      if (matchingOrdinalField) {
-        return;
-      }
-
-      updatedProperties[key] = {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...originalProperties[key].options,
-        },
-      } as any;
-      // @ts-expect-error
-      delete updatedProperties[key].options.field;
-    });
-
-    if (Object.keys(updatedProperties).length === 0) {
-      return {
-        hasChanges: false,
-        nextStyleDescriptor: { ...this._descriptor },
-      };
-    }
-
-    return {
-      hasChanges: true,
-      nextStyleDescriptor: VectorStyle.createDescriptor(
-        {
-          ...originalProperties,
-          ...updatedProperties,
-        },
-        this.isTimeAware()
-      ),
-    };
-  }
-
   async pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest) {
     const features = _.get(sourceDataRequest.getData(), 'features', []);
 
@@ -403,6 +500,12 @@ export class VectorStyle implements IVectorStyle {
     if (supportedFeatures.length > 1) {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
+
+        // ignore centroid features as they are added for styling and not part of the real data set
+        if (feature.properties[KBN_IS_CENTROID_FEATURE]) {
+          continue;
+        }
+
         if (!hasFeatureType[VECTOR_SHAPE_TYPE.POINT] && POINTS.includes(feature.geometry.type)) {
           hasFeatureType[VECTOR_SHAPE_TYPE.POINT] = true;
         }
@@ -478,11 +581,11 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getRawProperties() {
+  getRawProperties(): VectorStylePropertiesDescriptor {
     return this._descriptor.properties || {};
   }
 
-  getDynamicPropertiesArray() {
+  getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>> {
     const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       (styleProperty) => styleProperty.isDynamic() && styleProperty.isComplete()
@@ -523,7 +626,7 @@ export class VectorStyle implements IVectorStyle {
       dataRequestId = SOURCE_FORMATTERS_DATA_REQUEST_ID;
     } else {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+        return !!join.getRightJoinSource().getFieldByName(fieldName);
       });
       if (targetJoin) {
         dataRequestId = targetJoin.getSourceFormattersDataRequestId();
@@ -744,7 +847,7 @@ export class VectorStyle implements IVectorStyle {
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
   }
 
-  _makeField(fieldDescriptor?: StylePropertyField) {
+  _makeField(fieldDescriptor?: StylePropertyField): IField | null {
     if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
@@ -755,10 +858,10 @@ export class VectorStyle implements IVectorStyle {
       return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
+        return !!join.getRightJoinSource().getFieldByName(fieldDescriptor.name);
       });
       return targetJoin
-        ? targetJoin.getRightJoinSource().getMetricFieldForName(fieldDescriptor.name)
+        ? targetJoin.getRightJoinSource().getFieldByName(fieldDescriptor.name)
         : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
@@ -792,7 +895,8 @@ export class VectorStyle implements IVectorStyle {
 
   _makeColorProperty(
     descriptor: ColorStylePropertyDescriptor | undefined,
-    styleName: VECTOR_STYLES
+    styleName: VECTOR_STYLES,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     if (!descriptor || !descriptor.options) {
       return new StaticColorProperty({ color: '' }, styleName);
@@ -806,7 +910,8 @@ export class VectorStyle implements IVectorStyle {
         styleName,
         field,
         this._layer,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        chartsPaletteServiceGetColor
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -881,4 +986,33 @@ export class VectorStyle implements IVectorStyle {
       throw new Error(`${descriptor} not implemented`);
     }
   }
+}
+
+function getDynamicOptions(
+  originalProperties: VectorStylePropertiesDescriptor,
+  key: VECTOR_STYLES
+): DynamicStylePropertyOptions | null {
+  if (!originalProperties[key]) {
+    return null;
+  }
+  const propertyDescriptor = originalProperties[key];
+  if (
+    !propertyDescriptor ||
+    !('type' in propertyDescriptor) ||
+    propertyDescriptor.type !== STYLE_TYPE.DYNAMIC ||
+    !propertyDescriptor.options
+  ) {
+    return null;
+  }
+  return propertyDescriptor.options as DynamicStylePropertyOptions;
+}
+
+function rectifyFieldDescriptor(
+  currentField: IESAggField,
+  previousFieldDescriptor: StylePropertyField
+): StylePropertyField {
+  return {
+    origin: previousFieldDescriptor.origin,
+    name: currentField.getName(),
+  };
 }

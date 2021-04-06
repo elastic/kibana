@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +29,6 @@ export const LabelInput = ({
 }) => {
   const [inputValue, setInputValue] = useState(value);
 
-  useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
   useDebounce(() => onChange(inputValue), 256, [inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +48,7 @@ export const LabelInput = ({
           inputRef.current = node;
         }
       }}
-      onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+      onKeyUp={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
         if (keys.ENTER === key && onSubmit) {
           onSubmit();
         }

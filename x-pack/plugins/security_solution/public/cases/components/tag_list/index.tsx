@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -18,12 +19,13 @@ import {
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, FormDataProvider, useForm } from '../../../shared_imports';
+import { Form, FormDataProvider, useForm, getUseField, Field } from '../../../shared_imports';
 import { schema } from './schema';
-import { CommonUseField } from '../create';
 import { useGetTags } from '../../containers/use_get_tags';
 
 import { Tags } from './tags';
+
+const CommonUseField = getUseField({ component: Field });
 
 interface TagListProps {
   disabled?: boolean;

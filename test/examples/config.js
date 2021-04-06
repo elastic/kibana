@@ -1,27 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import path from 'path';
+import path, { resolve } from 'path';
 import { services } from '../plugin_functional/services';
+import fs from 'fs';
+import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+
+  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
+  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
+  const examples = examplesFiles.filter((file) =>
+    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
+  );
 
   return {
     testFiles: [
@@ -30,6 +27,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),
+      require.resolve('./expressions_explorer'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -44,7 +42,10 @@ export default async function ({ readConfigFile }) {
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     apps: functionalConfig.get('apps'),
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),
@@ -57,9 +58,11 @@ export default async function ({ readConfigFile }) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--run-examples',
-        // Required to run examples
+        // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        ...examples.map(
+          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
+        ),
       ],
     },
   };

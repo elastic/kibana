@@ -1,32 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import {
   PluginSetupContract as AlertingSetup,
   AlertType,
-} from '../../../../../../plugins/alerts/server';
+} from '../../../../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType = {
+export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   async executor() {},
   producer: 'alerts',
 };
 
-export const alwaysFiringAlertType: any = {
+export const alwaysFiringAlertType: AlertType<
+  { instances: Array<{ id: string; state: any }> },
+  {
+    globalStateValue: boolean;
+    groupInSeriesIndex: number;
+  },
+  { instanceStateValue: boolean; globalStateValue: boolean; groupInSeriesIndex: number },
+  never,
+  'default' | 'other'
+> = {
   id: 'test.always-firing',
   name: 'Always Firing',
   actionGroups: [
@@ -35,7 +46,8 @@ export const alwaysFiringAlertType: any = {
   ],
   defaultActionGroupId: 'default',
   producer: 'alerts',
-  async executor(alertExecutorOptions: any) {
+  minimumLicenseRequired: 'basic',
+  async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
@@ -52,7 +64,7 @@ export const alwaysFiringAlertType: any = {
   },
 };
 
-export const failingAlertType: any = {
+export const failingAlertType: AlertType<never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [
@@ -63,16 +75,17 @@ export const failingAlertType: any = {
   ],
   producer: 'alerts',
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   async executor() {
     throw new Error('Failed to execute alert type');
   },
 };
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
-    alerts.registerType(noopAlertType);
-    alerts.registerType(alwaysFiringAlertType);
-    alerts.registerType(failingAlertType);
+  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+    alerting.registerType(noopAlertType);
+    alerting.registerType(alwaysFiringAlertType);
+    alerting.registerType(failingAlertType);
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',

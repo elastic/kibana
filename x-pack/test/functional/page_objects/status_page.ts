@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function StatusPagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function StatusPagePageProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
   const find = getService('find');
-  const { common } = getPageObjects(['common']);
+  const deployment = getService('deployment');
 
   class StatusPage {
     async initTests() {
@@ -21,7 +22,7 @@ export function StatusPagePageProvider({ getService, getPageObjects }: FtrProvid
 
     async navigateToPage() {
       return await retry.try(async () => {
-        const url = common.getHostPort() + '/status';
+        const url = deployment.getHostPort() + '/status';
         log.info(`StatusPage:navigateToPage(): ${url}`);
         await browser.get(url);
       });

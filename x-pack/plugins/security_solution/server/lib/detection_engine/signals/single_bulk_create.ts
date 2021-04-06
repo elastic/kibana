@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { countBy, isEmpty } from 'lodash';
+import { countBy, isEmpty, get } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, BaseSignalHit } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerting/server';
+import { SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
@@ -19,7 +24,7 @@ import { isEventTypeSignal } from './build_event_type_signal';
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -51,12 +56,12 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
+    if (doc._source?.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
-        doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
-        doc._source.signal.rule.id === ruleId
+        doc._source?.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
+        doc._source?.signal.rule.id === ruleId
       );
     }
   });
@@ -68,7 +73,7 @@ export const filterDuplicateRules = (
  * @param ruleId The rule id
  * @param signals The candidate new signals
  */
-export const filterDuplicateSignals = (ruleId: string, signals: BaseSignalHit[]) => {
+export const filterDuplicateSignals = (ruleId: string, signals: WrappedSignalHit[]) => {
   return signals.filter(
     (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
   );
@@ -78,12 +83,14 @@ export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
   createdItemsCount: number;
+  createdItems: SignalHit[];
   errors: string[];
 }
 
 export interface BulkInsertSignalsResponse {
   bulkCreateDuration: string;
   createdItemsCount: number;
+  createdItems: SignalHit[];
 }
 
 // Bulk Index documents.
@@ -111,7 +118,7 @@ export const singleBulkCreate = async ({
   logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
   if (filteredEvents.hits.hits.length === 0) {
     logger.debug(buildRuleMessage(`all events were duplicates`));
-    return { success: true, createdItemsCount: 0, errors: [] };
+    return { success: true, createdItemsCount: 0, createdItems: [], errors: [] };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -151,7 +158,7 @@ export const singleBulkCreate = async ({
     }),
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -164,7 +171,28 @@ export const singleBulkCreate = async ({
   );
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
 
-  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  const createdItems = filteredEvents.hits.hits
+    .map((doc, index) => ({
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+      ...buildBulkBody({
+        doc,
+        ruleParams,
+        id,
+        actions,
+        name,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        interval,
+        enabled,
+        tags,
+        throttle,
+      }),
+    }))
+    .filter((_, index) => get(response.items[index], 'create.status') === 201);
+  const createdItemsCount = createdItems.length;
   const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
   const errorCountByMessage = errorAggregator(response, [409]);
 
@@ -184,6 +212,7 @@ export const singleBulkCreate = async ({
       success: false,
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount,
+      createdItems,
     };
   } else {
     return {
@@ -191,15 +220,16 @@ export const singleBulkCreate = async ({
       success: true,
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount,
+      createdItems,
     };
   }
 };
 
 // Bulk Index new signals.
 export const bulkInsertSignals = async (
-  signals: BaseSignalHit[],
+  signals: WrappedSignalHit[],
   logger: Logger,
-  services: AlertServices,
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   refresh: RefreshTypes
 ): Promise<BulkInsertSignalsResponse> => {
   // index documents after creating an ID based on the
@@ -214,7 +244,7 @@ export const bulkInsertSignals = async (
     doc._source,
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     refresh,
     body: bulkBody,
   });
@@ -234,6 +264,13 @@ export const bulkInsertSignals = async (
   }
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  const createdItems = signals
+    .map((doc, index) => ({
+      ...doc._source,
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+    }))
+    .filter((_, index) => get(response.items[index], 'create.status') === 201);
   logger.debug(`bulk created ${createdItemsCount} signals`);
-  return { bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
+  return { bulkCreateDuration: makeFloatString(end - start), createdItems, createdItemsCount };
 };

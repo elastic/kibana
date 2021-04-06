@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 
 import { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
@@ -30,7 +32,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
   startDate,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   const getSubtitle = useCallback(
     (totalCount: number) =>

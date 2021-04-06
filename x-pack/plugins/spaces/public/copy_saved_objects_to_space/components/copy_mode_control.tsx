@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiFormFieldset,
-  EuiTitle,
   EuiCheckableCard,
-  EuiRadioGroup,
-  EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormFieldset,
   EuiIconTip,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 export interface CopyModeControlProps {
@@ -127,6 +129,15 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
         }}
       >
         <EuiCheckableCard
+          id={createNewCopiesEnabled.id}
+          label={createLabel(createNewCopiesEnabled)}
+          checked={createNewCopies}
+          onChange={() => onChange({ createNewCopies: true })}
+        />
+
+        <EuiSpacer size="s" />
+
+        <EuiCheckableCard
           id={createNewCopiesDisabled.id}
           label={createLabel(createNewCopiesDisabled)}
           checked={!createNewCopies}
@@ -140,15 +151,6 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
             data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
           />
         </EuiCheckableCard>
-
-        <EuiSpacer size="s" />
-
-        <EuiCheckableCard
-          id={createNewCopiesEnabled.id}
-          label={createLabel(createNewCopiesEnabled)}
-          checked={createNewCopies}
-          onChange={() => onChange({ createNewCopies: true })}
-        />
       </EuiFormFieldset>
 
       <EuiSpacer size="m" />

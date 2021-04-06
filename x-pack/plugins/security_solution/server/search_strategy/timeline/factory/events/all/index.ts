@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, uniq } from 'lodash/fp';
@@ -9,11 +10,12 @@ import { cloneDeep, uniq } from 'lodash/fp';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
+  EventHit,
   TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
-} from '../../../../../../common/search_strategy/timeline';
+} from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
@@ -38,9 +40,10 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     const { activePage, querySize } = options.pagination;
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
-    const edges: TimelineEdges[] = hits.map((hit) =>
-      // @ts-expect-error
-      formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit)
+    const edges: TimelineEdges[] = await Promise.all(
+      hits.map((hit) =>
+        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit as EventHit)
+      )
     );
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
@@ -50,6 +53,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       ...response,
       inspect,
       edges,
+      // @ts-expect-error code doesn't handle TotalHits
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,

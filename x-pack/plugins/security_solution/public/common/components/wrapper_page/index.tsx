@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import classNames from 'classnames';
@@ -9,7 +10,7 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { CommonProps } from '@elastic/eui';
 
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
@@ -23,15 +24,15 @@ const Wrapper = styled.div`
     flex: 1 1 auto;
   }
 
-  &.siemWrapperPage--withTimeline {
-    padding-right: ${gutterTimeline};
-  }
-
   &.siemWrapperPage--noPadding {
     padding: 0;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+  }
+
+  &.siemWrapperPage--withTimeline {
+    padding-bottom: ${gutterTimeline};
   }
 `;
 
@@ -53,7 +54,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   noTimeline,
   ...otherProps
 }) => {
-  const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
   }, [setGlobalFullScreen]);

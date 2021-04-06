@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
+import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 /**
  * Represents the definition of the attributes of the specific saved object that are supposed to be
@@ -15,7 +16,6 @@ export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
   private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
-  public readonly allowPredefinedID: boolean;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     const attributesToEncrypt = new Set<string>();
@@ -35,7 +35,6 @@ export class EncryptedSavedObjectAttributesDefinition {
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
     this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
-    this.allowPredefinedID = !!typeRegistration.allowPredefinedID;
   }
 
   /**

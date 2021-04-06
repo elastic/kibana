@@ -1,21 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getEmptyIndex,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
-import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
+import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
+import { listMock } from '../../../../../../lists/server/mocks';
+import { siemMock } from '../../../../mocks';
+import { FrameworkRequest } from '../../../framework';
+import { ExceptionListClient } from '../../../../../../lists/server';
+import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -53,7 +59,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
+jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines', () => {
   return {
     installPrepackagedTimelines: jest.fn().mockResolvedValue({
       success: true,
@@ -66,9 +72,11 @@ jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
 });
 
 describe('add_prepackaged_rules_route', () => {
+  const siemMockClient = siemMock.createClient();
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let securitySetup: SecurityPluginSetup;
+  let mockExceptionsClient: ExceptionListClient;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -79,6 +87,8 @@ describe('add_prepackaged_rules_route', () => {
       },
       authz: {},
     } as unknown) as SecurityPluginSetup;
+
+    mockExceptionsClient = listMock.getExceptionListClient();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -92,6 +102,10 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+    );
     addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
   });
 
@@ -116,8 +130,11 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('it returns a 400 if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const request = addPrepackagedRulesRequest();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+      );
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(400);
@@ -133,6 +150,7 @@ describe('add_prepackaged_rules_route', () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         addPrepackagedRulesRequest(),
+        // @ts-expect-error
         contextWithoutSecuritySolution
       );
       expect(response.status).toEqual(404);
@@ -169,9 +187,10 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('catches errors if payloads cause errors to be thrown', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(() => {
-        throw new Error('Test error');
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -269,6 +288,42 @@ describe('add_prepackaged_rules_route', () => {
       rules_updated: 1,
       timelines_installed: 0,
       timelines_updated: 0,
+    });
+  });
+
+  describe('createPrepackagedRules', () => {
+    test('uses exception lists client from context when available', async () => {
+      context.lists = {
+        getExceptionListClient: jest.fn(),
+        getListClient: jest.fn(),
+      };
+
+      await createPrepackagedRules(
+        context,
+        siemMockClient,
+        clients.alertsClient,
+        {} as FrameworkRequest,
+        1200,
+        mockExceptionsClient
+      );
+
+      expect(mockExceptionsClient.createEndpointList).not.toHaveBeenCalled();
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
+    test('uses passed in exceptions list client when lists client not available in context', async () => {
+      const { lists, ...myContext } = context;
+
+      await createPrepackagedRules(
+        myContext,
+        siemMockClient,
+        clients.alertsClient,
+        {} as FrameworkRequest,
+        1200,
+        mockExceptionsClient
+      );
+
+      expect(mockExceptionsClient.createEndpointList).toHaveBeenCalled();
     });
   });
 });

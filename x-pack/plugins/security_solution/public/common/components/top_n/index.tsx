@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -17,7 +18,6 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel, inputsSelectors, State } from '../../store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
@@ -25,7 +25,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -47,11 +47,16 @@ const makeMapStateToProps = () => {
 
     return {
       activeTimelineEventType: activeTimeline.eventType,
-      activeTimelineFilters,
+      activeTimelineFilters:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimelineFilters : EMPTY_FILTERS,
       activeTimelineFrom: activeTimelineInput.timerange.from,
-      activeTimelineKqlQueryExpression: getKqlQueryTimeline(state, TimelineId.active),
+      activeTimelineKqlQueryExpression:
+        activeTimeline.activeTab === TimelineTabs.query
+          ? getKqlQueryTimeline(state, TimelineId.active)
+          : null,
       activeTimelineTo: activeTimelineInput.timerange.to,
-      dataProviders: activeTimeline.dataProviders,
+      dataProviders:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimeline.dataProviders : [],
       globalQuery: getGlobalQuerySelector(state),
       globalFilters: getGlobalFiltersQuerySelector(state),
       kqlMode: activeTimeline.kqlMode,
@@ -61,9 +66,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps);
 
 //  * `indexToAdd`, which enables the alerts index to be appended to
 //    the `indexPattern` returned by `useWithSource`, may only be populated when
@@ -74,7 +77,6 @@ interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   indexPattern: IIndexPattern;
-  indexNames: string[];
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -93,56 +95,70 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   indexPattern,
-  indexNames,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
   onFilterAdded,
-  setAbsoluteRangeDatePicker,
   timelineId,
   toggleTopN,
   value,
 }) => {
-  const kibana = useKibana();
+  const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime(false);
 
   const options = getOptions(
     timelineId === TimelineId.active ? activeTimelineEventType : undefined
   );
+
+  const combinedQueries = useMemo(
+    () =>
+      timelineId === TimelineId.active
+        ? combineQueries({
+            browserFields,
+            config: esQuery.getEsQueryConfig(uiSettings),
+            dataProviders,
+            filters: activeTimelineFilters,
+            indexPattern,
+            kqlMode,
+            kqlQuery: {
+              language: 'kuery',
+              query: activeTimelineKqlQueryExpression ?? '',
+            },
+          })?.filterQuery
+        : undefined,
+    [
+      activeTimelineFilters,
+      activeTimelineKqlQueryExpression,
+      browserFields,
+      dataProviders,
+      indexPattern,
+      kqlMode,
+      timelineId,
+      uiSettings,
+    ]
+  );
+
+  const defaultView = useMemo(
+    () =>
+      timelineId === TimelineId.detectionsPage ||
+      timelineId === TimelineId.detectionsRulesDetailsPage
+        ? 'alert'
+        : options[0].value,
+    [options, timelineId]
+  );
+
   return (
     <TopN
-      combinedQueries={
-        timelineId === TimelineId.active
-          ? combineQueries({
-              browserFields,
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              dataProviders,
-              filters: activeTimelineFilters,
-              indexPattern,
-              kqlMode,
-              kqlQuery: {
-                language: 'kuery',
-                query: activeTimelineKqlQueryExpression ?? '',
-              },
-            })?.filterQuery
-          : undefined
-      }
+      combinedQueries={combinedQueries}
       data-test-subj="top-n"
-      defaultView={
-        timelineId === TimelineId.detectionsPage ||
-        timelineId === TimelineId.detectionsRulesDetailsPage
-          ? 'alert'
-          : options[0].value
-      }
+      defaultView={defaultView}
       deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
       field={field}
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
-      indexNames={indexNames}
       options={options}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
-      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
       setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
       setQuery={setQuery}
       timelineId={timelineId}

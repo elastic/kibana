@@ -1,60 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
-import { AlertsContextProvider, AlertAdd } from '../../../../plugins/triggers_actions_ui/public';
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({
-  http,
   triggersActionsUi,
-  charts,
-  uiSettings,
-  docLinks,
-  data,
-  toastNotifications,
-  capabilities,
-}: AlertingExampleComponentParams) => {
+}: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+
+  const onCloseAlertFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
+    setAlertFlyoutVisibility,
+  ]);
+
+  const AddAlertFlyout = useMemo(
+    () =>
+      triggersActionsUi.getAddAlertFlyout({
+        consumer: ALERTING_EXAMPLE_APP_ID,
+        onClose: onCloseAlertFlyout,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onCloseAlertFlyout]
+  );
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiCard
           icon={<EuiIcon size="xxl" type={`bell`} />}
-          title={`Create Alert`}
-          description="Create an new Alert based on one of our example Alert Types ."
+          title={`Create Rule`}
+          description="Create a new Rule based on one of our example Rule Types ."
           onClick={() => setAlertFlyoutVisibility(true)}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <AlertsContextProvider
-          value={{
-            http,
-            actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-            alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
-            toastNotifications,
-            uiSettings,
-            docLinks,
-            charts,
-            dataFieldsFormats: data.fieldFormats,
-            capabilities,
-          }}
-        >
-          <AlertAdd
-            consumer={ALERTING_EXAMPLE_APP_ID}
-            addFlyoutVisible={alertFlyoutVisible}
-            setAddFlyoutVisibility={setAlertFlyoutVisibility}
-          />
-        </AlertsContextProvider>
-      </EuiFlexItem>
+      <EuiFlexItem>{alertFlyoutVisible && AddAlertFlyout}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

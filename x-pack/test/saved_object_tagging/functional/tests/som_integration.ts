@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitUntilUrlIncludes('/app/management/kibana/objects');
         await PageObjects.savedObjects.waitTableIsLoaded();
 
-        expect(await PageObjects.savedObjects.getCurrentSearchValue()).to.eql('tag:(tag-1)');
+        expect(await PageObjects.savedObjects.getCurrentSearchValue()).to.eql('tag:("tag-1")');
         expect(await PageObjects.savedObjects.getRowTitles()).to.eql([
           'Visualization 1 (tag-1)',
           'Visualization 3 (tag-1 + tag-3)',

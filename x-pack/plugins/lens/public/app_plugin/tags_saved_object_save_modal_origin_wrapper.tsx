@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
@@ -13,10 +14,12 @@ import {
 } from '../../../../../src/plugins/saved_objects/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
-type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalProps, 'onSave'> & {
+export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
+
+export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalProps, 'onSave'> & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: OnSaveProps & { returnToOrigin: boolean; newTags?: string[] }) => void;
+  onSave: (props: OriginSaveProps) => void;
 };
 
 export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSaveModalOriginProps> = ({

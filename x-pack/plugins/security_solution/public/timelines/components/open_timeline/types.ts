@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type React from 'react';
@@ -25,9 +26,11 @@ export interface FavoriteTimelineResult {
 }
 
 export interface TimelineResultNote {
+  eventId?: string | null;
   savedObjectId?: string | null;
   note?: string | null;
   noteId?: string | null;
+  timelineId?: string | null;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -164,9 +167,9 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** Refetch table */
-  refetch?: (existingTimeline?: OpenTimelineResult[], existingCount?: number) => void;
-  /** The results of executing a search */
-  searchResults: OpenTimelineResult[];
+  refetch?: () => void;
+  /** The results of executing a search, null is the status before data fatched */
+  searchResults: OpenTimelineResult[] | null;
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
   /** Toggle export timelines modal*/
@@ -218,13 +221,11 @@ export enum TimelineTabsStyle {
 }
 
 export interface TimelineTab {
-  count: number | undefined;
   disabled: boolean;
   href: string;
   id: TimelineTypeLiteral;
   name: string;
   onClick: (ev: { preventDefault: () => void }) => void;
-  withNext: boolean;
 }
 
 export interface TemplateTimelineFilter {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
@@ -55,6 +56,12 @@ export function getTermsFields(fields: IFieldType[]): IFieldType[] {
   });
 }
 
+export function getSortFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    return field.sortable && !indexPatterns.isNestedField(field);
+  });
+}
+
 export function getAggregatableGeoFieldTypes(): string[] {
   const aggregatableFieldTypes = [ES_GEO_FIELD_TYPE.GEO_POINT];
   if (getIsGoldPlus()) {
@@ -66,6 +73,12 @@ export function getAggregatableGeoFieldTypes(): string[] {
 export function getGeoFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
+  });
+}
+
+export function getGeoPointFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
   });
 }
 

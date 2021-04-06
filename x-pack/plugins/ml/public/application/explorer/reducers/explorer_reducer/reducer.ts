@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
@@ -12,7 +13,6 @@ import { Action } from '../../explorer_dashboard_service';
 import {
   getClearedSelectedAnomaliesState,
   getDefaultSwimlaneData,
-  getSelectionTimeRange,
   getSwimlaneBucketInterval,
   getViewBySwimlaneOptions,
 } from '../../explorer_utils';
@@ -23,6 +23,7 @@ import { jobSelectionChange } from './job_selection_change';
 import { ExplorerState } from './state';
 import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
+import { getTimeBoundsFromSelection } from '../../hooks/use_selected_cells';
 
 export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
   const { type, payload } = nextAction;
@@ -48,10 +49,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = jobSelectionChange(state, payload);
       break;
 
-    case EXPLORER_ACTION.SET_BOUNDS:
-      nextState = { ...state, bounds: payload };
-      break;
-
     case EXPLORER_ACTION.SET_CHARTS:
       nextState = {
         ...state,
@@ -61,6 +58,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
           seriesToPlot: payload.seriesToPlot,
           // convert truthy/falsy value to Boolean
           tooManyBuckets: !!payload.tooManyBuckets,
+          errorMessages: payload.errorMessages,
         },
       };
       break;
@@ -143,7 +141,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = state;
   }
 
-  if (nextState.selectedJobs === null || nextState.bounds === undefined) {
+  if (nextState.selectedJobs === null) {
     return nextState;
   }
 
@@ -163,21 +161,16 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     selectedCells: nextState.selectedCells!,
   });
 
-  const { bounds, selectedCells } = nextState;
+  const { selectedCells } = nextState;
 
-  const timerange = getSelectionTimeRange(
-    selectedCells,
-    swimlaneBucketInterval.asSeconds(),
-    bounds
-  );
+  const timeRange = getTimeBoundsFromSelection(selectedCells);
 
   return {
     ...nextState,
     swimlaneBucketInterval,
-    viewByLoadedForTimeFormatted:
-      selectedCells !== undefined && selectedCells.showTopFieldValues === true
-        ? formatHumanReadableDateTime(timerange.earliestMs)
-        : null,
+    viewByLoadedForTimeFormatted: timeRange
+      ? formatHumanReadableDateTime(timeRange.earliestMs)
+      : null,
     viewBySwimlaneFieldName,
     viewBySwimlaneOptions,
     ...checkSelectedCells(nextState),

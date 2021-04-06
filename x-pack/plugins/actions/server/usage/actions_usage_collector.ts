@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -22,6 +23,7 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __servicenow: { type: 'long' },
   __jira: { type: 'long' },
   __resilient: { type: 'long' },
+  __teams: { type: 'long' },
 };
 
 export function createActionsUsageCollector(
@@ -44,7 +46,7 @@ export function createActionsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: ActionsUsage = get(doc, 'state') as ActionsUsage;
+        const { runs, ...state } = get(doc, 'state') as ActionsUsage & { runs: number };
 
         return {
           ...state,

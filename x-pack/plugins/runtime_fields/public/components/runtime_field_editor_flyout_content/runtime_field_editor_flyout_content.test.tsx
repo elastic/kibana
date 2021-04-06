@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 import { DocLinksStart } from 'src/core/public';
 
@@ -21,7 +23,10 @@ const setup = (props?: Props) =>
 const docLinks: DocLinksStart = {
   ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
   DOC_LINK_VERSION: 'jest',
-  links: {} as any,
+  links: {
+    runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
+    scriptedFields: {} as any,
+  } as any,
 };
 
 const noop = () => {};
@@ -39,7 +44,7 @@ describe('Runtime field editor flyout', () => {
     const field: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
 
     const { find } = setup({ ...defaultProps, defaultValue: field });
@@ -47,14 +52,14 @@ describe('Runtime field editor flyout', () => {
     expect(find('flyoutTitle').text()).toBe(`Edit ${field.name} field`);
     expect(find('nameField.input').props().value).toBe(field.name);
     expect(find('typeField').props().value).toBe(field.type);
-    expect(find('scriptField').props().value).toBe(field.script);
+    expect(find('scriptField').props().value).toBe(field.script.source);
   });
 
   test('should accept an onSave prop', async () => {
     const field: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
@@ -93,10 +98,7 @@ describe('Runtime field editor flyout', () => {
 
       expect(onSave).toHaveBeenCalledTimes(0);
       expect(find('saveFieldButton').props().disabled).toBe(true);
-      expect(form.getErrorsMessages()).toEqual([
-        'Give a name to the field.',
-        'Script must emit() a value.',
-      ]);
+      expect(form.getErrorsMessages()).toEqual(['Give a name to the field.']);
       expect(exists('formError')).toBe(true);
       expect(find('formError').text()).toBe('Fix errors in form before continuing.');
     });
@@ -120,7 +122,7 @@ describe('Runtime field editor flyout', () => {
       expect(fieldReturned).toEqual({
         name: 'someName',
         type: 'keyword', // default to keyword
-        script: 'script=123',
+        script: { source: 'script=123' },
       });
 
       // Change the type and make sure it is forwarded
@@ -139,7 +141,7 @@ describe('Runtime field editor flyout', () => {
       expect(fieldReturned).toEqual({
         name: 'someName',
         type: 'other_type',
-        script: 'script=123',
+        script: { source: 'script=123' },
       });
     });
   });

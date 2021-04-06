@@ -1,70 +1,75 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
-import {
-  ChromeStart,
-  DocLinksStart,
-  ToastsSetup,
-  HttpSetup,
-  IUiSettingsClient,
-  ApplicationStart,
-  ChromeBreadcrumb,
-  CoreStart,
-  ScopedHistory,
-  SavedObjectsClientContract,
-} from 'kibana/public';
+import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'kibana/public';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
-import { Section, routeToAlertDetails } from './constants';
-import { AppContextProvider } from './app_context';
+import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PluginStartContract as AlertingStart } from '../../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
+import type { SpacesPluginStart } from '../../../spaces/public';
+
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+
+import { setSavedObjectsClient } from '../common/lib/data_apis';
+import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
 
-export interface AppDeps {
+export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  chrome: ChromeStart;
-  alerts?: AlertingStart;
-  navigateToApp: CoreStart['application']['navigateToApp'];
-  docLinks: DocLinksStart;
-  toastNotifications: ToastsSetup;
+  alerting?: AlertingStart;
+  spaces?: SpacesPluginStart;
   storage?: Storage;
-  http: HttpSetup;
-  uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  capabilities: ApplicationStart['capabilities'];
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
-  savedObjects?: {
-    client: SavedObjectsClientContract;
-  };
   kibanaFeatures: KibanaFeature[];
+  element: HTMLElement;
 }
 
-export const App = (appDeps: AppDeps) => {
-  const sections: Section[] = ['alerts', 'connectors'];
+export const renderApp = (deps: TriggersAndActionsUiServices) => {
+  const { element } = deps;
+  render(<App deps={deps} />, element);
+  return () => {
+    unmountComponentAtNode(element);
+  };
+};
+
+export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
+  const { savedObjects, uiSettings } = deps;
+  const sections: Section[] = ['rules', 'connectors'];
+  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
-
+  setSavedObjectsClient(savedObjects.client);
   return (
-    <Router history={appDeps.history}>
-      <AppContextProvider appDeps={appDeps}>
-        <AppWithoutRouter sectionsRegex={sectionsRegex} />
-      </AppContextProvider>
-    </Router>
+    <I18nProvider>
+      <EuiThemeProvider darkMode={isDarkMode}>
+        <KibanaContextProvider services={{ ...deps }}>
+          <Router history={deps.history}>
+            <AppWithoutRouter sectionsRegex={sectionsRegex} />
+          </Router>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
+    </I18nProvider>
   );
 };
 
@@ -76,10 +81,16 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
       />
       <Route
-        path={routeToAlertDetails}
+        path={routeToRuleDetails}
         component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
       />
-      <Redirect from={'/'} to="alerts" />
+      <Route
+        exact
+        path={legacyRouteToRuleDetails}
+        render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
+      />
+      <Redirect from={'/'} to="rules" />
+      <Redirect from={'/alerts'} to="rules" />
     </Switch>
   );
 };

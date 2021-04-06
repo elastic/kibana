@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataStream } from './data_stream_helper';
@@ -238,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.from(statuses)).to.eql(['failure']);
       });
 
-      it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
+      it('metadata api should return the endpoint based on the elastic agent id, and status should be unhealthy', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
         const { body } = await supertest
@@ -256,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
         expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
-        expect(body.hosts[0].host_status).to.eql('error');
+        expect(body.hosts[0].host_status).to.eql('unhealthy');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);

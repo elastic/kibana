@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  EuiPopover,
-  PopoverAnchorPosition,
-  EuiLoadingSpinner,
-  EuiHeaderSectionItemButton,
-} from '@elastic/eui';
-import React, { Component } from 'react';
-import { Capabilities, ApplicationStart } from 'src/core/public';
-import { Subscription } from 'rxjs';
-import { Space } from '../../common/model/space';
-import { SpaceAvatar } from '../space_avatar';
-import { SpacesManager } from '../spaces_manager';
+import type { PopoverAnchorPosition } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import React, { Component, lazy, Suspense } from 'react';
+import type { Subscription } from 'rxjs';
+
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { getSpaceAvatarComponent } from '../space_avatar';
+import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spacesManager: SpacesManager;
@@ -139,7 +143,9 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return this.getButton(
-      <SpaceAvatar space={activeSpace} size={'s'} />,
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazySpaceAvatar space={activeSpace} size={'s'} />
+      </Suspense>,
       (activeSpace as Space).name
     );
   };

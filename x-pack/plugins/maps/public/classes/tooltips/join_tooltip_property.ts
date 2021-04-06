@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ITooltipProperty } from './tooltip_property';
-import { IJoin } from '../joins/join';
+import { InnerJoin } from '../joins/inner_join';
 import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _leftInnerJoins: IJoin[];
+  private readonly _leftInnerJoins: InnerJoin[];
 
-  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: IJoin[]) {
+  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: InnerJoin[]) {
     this._tooltipProperty = tooltipProperty;
     this._leftInnerJoins = leftInnerJoins;
   }

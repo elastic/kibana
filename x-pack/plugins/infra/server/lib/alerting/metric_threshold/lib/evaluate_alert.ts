@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { InfraSource } from '../../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
@@ -35,21 +36,23 @@ interface CompositeAggregationsResponse {
   };
 }
 
-export const evaluateAlert = (
-  callCluster: AlertServices['callCluster'],
-  params: AlertExecutorOptions['params'],
+export interface EvaluatedAlertParams {
+  criteria: MetricExpressionParams[];
+  groupBy: string | undefined | string[];
+  filterQuery: string | undefined;
+}
+
+export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
+  esClient: ElasticsearchClient,
+  params: Params,
   config: InfraSource['configuration'],
   timeframe?: { start: number; end: number }
 ) => {
-  const { criteria, groupBy, filterQuery } = params as {
-    criteria: MetricExpressionParams[];
-    groupBy: string | undefined | string[];
-    filterQuery: string | undefined;
-  };
+  const { criteria, groupBy, filterQuery } = params;
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
-        callCluster,
+        esClient,
         criterion,
         config.metricAlias,
         config.fields.timestamp,
@@ -57,8 +60,17 @@ export const evaluateAlert = (
         filterQuery,
         timeframe
       );
-      const { threshold, comparator } = criterion;
-      const comparisonFunction = comparatorMap[comparator];
+      const { threshold, warningThreshold, comparator, warningComparator } = criterion;
+      const pointsEvaluator = (points: any[] | typeof NaN | null, t?: number[], c?: Comparator) => {
+        if (!t || !c) return [false];
+        const comparisonFunction = comparatorMap[c];
+        return Array.isArray(points)
+          ? points.map(
+              (point) => t && typeof point.value === 'number' && comparisonFunction(point.value, t)
+            )
+          : [false];
+      };
+
       return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
         if (isTooManyBucketsPreviewException(points)) throw points;
         return {
@@ -66,12 +78,8 @@ export const evaluateAlert = (
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
-          shouldFire: Array.isArray(points)
-            ? points.map(
-                (point) =>
-                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
-              )
-            : [false],
+          shouldFire: pointsEvaluator(points, threshold, comparator),
+          shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
           isNoData: Array.isArray(points)
             ? points.map((point) => point?.value === null || point === null)
             : [points === null],
@@ -83,7 +91,7 @@ export const evaluateAlert = (
 };
 
 const getMetric: (
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
   timefield: string,
@@ -91,7 +99,7 @@ const getMetric: (
   filterQuery: string | undefined,
   timeframe?: { start: number; end: number }
 ) => Promise<Record<string, number[]>> = async function (
-  callCluster,
+  esClient,
   params,
   index,
   timefield,
@@ -119,7 +127,8 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        (body) => callCluster('search', { body, index }),
+        // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
+        (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -134,12 +143,17 @@ const getMetric: (
         {}
       );
     }
-    const result = await callCluster('search', {
+    const { body: result } = await esClient.search({
       body: searchBody,
       index,
     });
 
-    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
+    return {
+      [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
+        (result.aggregations! as unknown) as Aggregation,
+        aggType
+      ),
+    };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it

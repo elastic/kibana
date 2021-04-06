@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,17 +15,15 @@ import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
 } from '../../../../triggers_actions_ui/server';
+import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-
 const ActionGroupId = 'threshold met';
-const ComparatorFns = getComparatorFns();
-export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, {}, {}, ActionContext> {
+): AlertType<Params, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -32,7 +31,7 @@ export function getAlertType(
   const actionGroupName = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionGroupThresholdMetTitle',
     {
-      defaultMessage: 'Threshold Met',
+      defaultMessage: 'Threshold met',
     }
   );
 
@@ -86,8 +85,8 @@ export function getAlertType(
     }
   );
 
-  const actionVariableContextFunctionLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextFunctionLabel',
+  const actionVariableContextConditionsLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
     {
       defaultMessage: 'A string describing the threshold comparator and threshold',
     }
@@ -117,7 +116,7 @@ export function getAlertType(
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
-        { name: 'function', description: actionVariableContextFunctionLabel },
+        { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
@@ -125,19 +124,29 @@ export function getAlertType(
         ...alertParamsVariables,
       ],
     },
+    minimumLicenseRequired: 'basic',
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };
 
-  async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
+  async function executor(
+    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+  ) {
     const { alertId, name, services, params } = options;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
-      throw new Error(getInvalidComparatorMessage(params.thresholdComparator));
+      throw new Error(
+        i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
+          defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+          values: {
+            comparator: params.thresholdComparator,
+          },
+        })
+      );
     }
 
-    const callCluster = services.callCluster;
+    const esClient = services.scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -157,7 +166,7 @@ export function getAlertType(
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await (await data).timeSeriesQuery({
       logger,
-      callCluster,
+      esClient,
       query: queryParams,
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
@@ -172,13 +181,15 @@ export function getAlertType(
       if (!met) continue;
 
       const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-      const humanFn = `${agg} ${params.thresholdComparator} ${params.threshold.join(',')}`;
+      const humanFn = `${agg} is ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
         date,
         group: instanceId,
         value,
-        function: humanFn,
+        conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
@@ -186,34 +197,4 @@ export function getAlertType(
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
   }
-}
-
-export function getInvalidComparatorMessage(comparator: string) {
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-    values: {
-      comparator,
-    },
-  });
-}
-
-type ComparatorFn = (value: number, threshold: number[]) => boolean;
-
-function getComparatorFns(): Map<string, ComparatorFn> {
-  const fns: Record<string, ComparatorFn> = {
-    '<': (value: number, threshold: number[]) => value < threshold[0],
-    '<=': (value: number, threshold: number[]) => value <= threshold[0],
-    '>=': (value: number, threshold: number[]) => value >= threshold[0],
-    '>': (value: number, threshold: number[]) => value > threshold[0],
-    between: (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
-    notBetween: (value: number, threshold: number[]) =>
-      value < threshold[0] || value > threshold[1],
-  };
-
-  const result = new Map<string, ComparatorFn>();
-  for (const key of Object.keys(fns)) {
-    result.set(key, fns[key]);
-  }
-
-  return result;
 }

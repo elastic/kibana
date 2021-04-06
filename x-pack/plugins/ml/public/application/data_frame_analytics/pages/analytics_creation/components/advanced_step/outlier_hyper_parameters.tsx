@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -29,7 +30,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.methodHelpText', {
             defaultMessage:
-              'Sets the method that outlier detection uses. If not set, uses an ensemble of different methods and normalises and combines their individual outlier scores to obtain the overall outlier score. We recommend to use the ensemble method',
+              'Sets the method that outlier detection uses. If not set, uses an ensemble of different methods, normalizes and combines their individual outlier scores to obtain the overall outlier score. It is recommended to use the ensemble method.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD]}
@@ -55,7 +56,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.nNeighborsHelpText', {
             defaultMessage:
-              'The value for how many nearest neighbors each method of outlier detection will use to calculate its outlier score. When not set, different values will be used for different ensemble members. Must be a positive integer',
+              'The value for how many nearest neighbors each method of outlier detection uses to calculate its outlier score. When not set, different values are used for different ensemble members. Must be a positive integer.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS]}
@@ -65,7 +66,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
               'xpack.ml.dataframe.analytics.create.nNeighborsInputAriaLabel',
               {
                 defaultMessage:
-                  'The value for how many nearest neighbors each method of outlier detection will use to calculate its outlier score.',
+                  'The value for how many nearest neighbors each method of outlier detection uses to calculate its outlier score.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardnNeighborsInput"

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -14,7 +15,6 @@ import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useApolloClient } from '../../common/utils/apollo_context';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
@@ -38,7 +38,6 @@ export const TimelinesPageComponent: React.FC = () => {
   }, [setImportDataModalToggle]);
   const { indicesExist } = useSourcererScope();
 
-  const apolloClient = useApolloClient();
   const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
     .crud;
 
@@ -82,7 +81,6 @@ export const TimelinesPageComponent: React.FC = () => {
 
             <TimelinesContainer>
               <StatefulOpenTimeline
-                apolloClient={apolloClient!}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
                 isModal={false}
                 importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}

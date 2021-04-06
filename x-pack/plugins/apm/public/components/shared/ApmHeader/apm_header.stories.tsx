@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTitle } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { HttpSetup } from '../../../../../../../src/core/public';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
-import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ApmHeader } from './';
 
@@ -18,18 +20,20 @@ export default {
   component: ApmHeader,
   decorators: [
     (Story: ComponentType) => {
-      createCallApmApi(({} as unknown) as HttpSetup);
+      createCallApmApi(({} as unknown) as CoreStart);
 
       return (
-        <MockUrlParamsContextProvider
-          params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
-        >
-          <MockApmPluginContextWrapper>
-            <MemoryRouter>
-              <Story />
-            </MemoryRouter>
-          </MockApmPluginContextWrapper>
-        </MockUrlParamsContextProvider>
+        <EuiThemeProvider>
+          <MockUrlParamsContextProvider
+            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+          >
+            <MockApmPluginContextWrapper>
+              <MemoryRouter>
+                <Story />
+              </MemoryRouter>
+            </MockApmPluginContextWrapper>
+          </MockUrlParamsContextProvider>
+        </EuiThemeProvider>
       );
     },
   ],

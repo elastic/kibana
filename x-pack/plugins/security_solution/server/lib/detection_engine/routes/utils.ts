@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import Joi from 'joi';
+import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
-import { SanitizedAlert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 
 import {
   RouteValidationFunction,
@@ -15,7 +17,7 @@ import {
   CustomHttpResponseOptions,
   SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
-import { AlertsClient } from '../../../../../alerts/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
@@ -24,7 +26,7 @@ export interface OutputError {
   statusCode: number;
 }
 
-export const transformError = (err: Error & { statusCode?: number }): OutputError => {
+export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
   if (Boom.isBoom(err)) {
     return {
       message: err.output.payload.message,
@@ -32,10 +34,17 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
     };
   } else {
     if (err.statusCode != null) {
-      return {
-        message: err.message,
-        statusCode: err.statusCode,
-      };
+      if (err.body?.error != null) {
+        return {
+          statusCode: err.statusCode,
+          message: `${err.body.error.type}: ${err.body.error.reason}`,
+        };
+      } else {
+        return {
+          statusCode: err.statusCode,
+          message: err.message,
+        };
+      }
     } else if (err instanceof BadRequestError) {
       // allows us to throw request validation errors in the absence of Boom
       return {

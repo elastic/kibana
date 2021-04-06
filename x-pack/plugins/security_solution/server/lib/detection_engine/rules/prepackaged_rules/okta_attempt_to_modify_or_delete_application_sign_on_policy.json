@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "An adversary may attempt to modify or delete the sign on policy for an Okta application in order to remove or weaken an organization's security controls.",
+  "description": "Detects attempts to modify or delete a sign on policy for an Okta application. An adversary may attempt to modify or delete the sign on policy for an Okta application in order to remove or weaken an organization's security controls.",
   "false_positives": [
     "Consider adding exceptions to this rule to filter false positives if sign on policies for Okta applications are regularly modified or deleted in your organization."
   ],
@@ -11,11 +11,12 @@
     "logs-okta*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Modification or Removal of an Okta Application Sign-On Policy",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:(application.policy.sign_on.update or application.policy.sign_on.rule.delete)",
   "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/App_Based_Signon.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
   ],
@@ -30,6 +31,7 @@
     "SecOps",
     "Identity and Access"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 5
 }

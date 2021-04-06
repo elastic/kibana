@@ -1,71 +1,38 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
-import { getNotifications, getData, getSavedObjects } from './services';
+import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
+import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
-export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizationDependencies) =>
+type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
+  render(visData: VegaParser): Promise<void>;
+  destroy(): void;
+};
+
+export const createVegaVisualization = ({
+  getServiceSettings,
+}: VegaVisualizationDependencies): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
-    private readonly savedObjectsClient = getSavedObjects();
     private vegaView: InstanceType<typeof VegaView> | null = null;
+    private vegaStateRestorer = createVegaStateRestorer({
+      isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
+    });
 
     constructor(
       private el: HTMLDivElement,
       private fireEvent: IInterpreterRenderHandlers['event']
     ) {}
-
-    /**
-     * Find index pattern by its title, of if not given, gets default
-     * @param {string} [index]
-     * @returns {Promise<string>} index id
-     */
-    async findIndex(index: string) {
-      const { indexPatterns } = this.dataPlugin;
-      let idxObj;
-
-      if (index) {
-        // @ts-expect-error
-        idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
-              defaultMessage: 'Index {index} not found',
-              values: { index: `"${index}"` },
-            })
-          );
-        }
-      } else {
-        idxObj = await indexPatterns.getDefault();
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
-              defaultMessage: 'Unable to find default index',
-            })
-          );
-        }
-      }
-      return idxObj.id;
-    }
 
     async render(visData: VegaParser) {
       const { toasts } = getNotifications();
@@ -108,15 +75,15 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
         const vegaViewParams = {
           parentEl: this.el,
           fireEvent: this.fireEvent,
+          vegaStateRestorer: this.vegaStateRestorer,
           vegaParser,
           serviceSettings,
           filterManager,
           timefilter,
-          findIndex: this.findIndex.bind(this),
         };
 
         if (vegaParser.useMap) {
-          const { VegaMapView } = await import('./vega_view/vega_map_view');
+          const { VegaMapView } = await import('./vega_view/vega_map_view/view');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {
           const { VegaView: VegaViewClass } = await import('./vega_view/vega_view');
@@ -127,6 +94,7 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
     }
 
     destroy() {
+      this.vegaStateRestorer.clear();
       this.vegaView?.destroy();
     }
   };

@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
-import { SavedObject } from 'src/core/server';
+
+import { schema } from '@kbn/config-schema';
+import type { SavedObject } from 'src/core/server';
+
 import {
   copySavedObjectsToSpacesFactory,
   resolveCopySavedObjectsToSpacesConflictsFactory,
 } from '../../../lib/copy_to_spaces';
-import { ExternalRouteDeps } from '.';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 
@@ -21,7 +24,8 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService, getImportExportObjectLimit, getStartServices } = deps;
+  const { externalRouter, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
+  const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   externalRouter.post(
     {
@@ -63,7 +67,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             ),
             includeReferences: schema.boolean({ defaultValue: false }),
             overwrite: schema.boolean({ defaultValue: false }),
-            createNewCopies: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: true }),
           },
           {
             validate: (object) => {
@@ -77,12 +81,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();
-
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        startServices.savedObjects,
-        getImportExportObjectLimit,
-        request
-      );
       const {
         spaces: destinationSpaceIds,
         objects,
@@ -90,6 +88,16 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         overwrite,
         createNewCopies,
       } = request.body;
+
+      const { headers } = request;
+      usageStatsClientPromise.then((usageStatsClient) =>
+        usageStatsClient.incrementCopySavedObjects({ headers, createNewCopies, overwrite })
+      );
+
+      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+        startServices.savedObjects,
+        request
+      );
       const sourceSpaceId = getSpacesService().getSpaceId(request);
       const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
         objects,
@@ -142,19 +150,23 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             }
           ),
           includeReferences: schema.boolean({ defaultValue: false }),
-          createNewCopies: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: true }),
         }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();
+      const { objects, includeReferences, retries, createNewCopies } = request.body;
+
+      const { headers } = request;
+      usageStatsClientPromise.then((usageStatsClient) =>
+        usageStatsClient.incrementResolveCopySavedObjectsErrors({ headers, createNewCopies })
+      );
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         startServices.savedObjects,
-        getImportExportObjectLimit,
         request
       );
-      const { objects, includeReferences, retries, createNewCopies } = request.body;
       const sourceSpaceId = getSpacesService().getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,

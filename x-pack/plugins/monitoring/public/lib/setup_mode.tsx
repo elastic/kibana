@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -180,14 +181,10 @@ export const setSetupModeMenuItem = () => {
 
   const globalState = angularState.injector.get('globalState');
   const enabled = !globalState.inSetupMode;
-
-  const services = {
-    usageCollection: Legacy.shims.usageCollection,
-  };
   const I18nContext = Legacy.shims.I18nContext;
 
   render(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={Legacy.shims.kibanaServices}>
       <I18nContext>
         <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
       </I18nContext>

@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rison from 'rison-node';
 import { IBasePath } from 'kibana/public';
+import moment from 'moment-timezone';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
-
-// type of the desired pdf output (print or preserve_layout)
-const PDF_LAYOUT_TYPE = 'preserve_layout';
 
 interface PageCount {
   pageCount: number;
 }
 
-type Arguments = [CanvasWorkpad, PageCount, IBasePath];
+export type LayoutType = 'canvas' | 'preserve_layout';
+
+type Arguments = [CanvasWorkpad, LayoutType, PageCount, IBasePath];
 
 interface PdfUrlData {
   createPdfUri: string;
@@ -26,6 +27,7 @@ interface PdfUrlData {
 
 function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
+  layoutType: LayoutType,
   { pageCount }: PageCount,
   basePath: IBasePath
 ): PdfUrlData {
@@ -50,10 +52,10 @@ function getPdfUrlParts(
   }
 
   const jobParams = {
-    browserTimezone: 'America/Phoenix', // TODO: get browser timezone, or Kibana setting?
+    browserTimezone: moment.tz.guess(),
     layout: {
       dimensions: { width, height },
-      id: PDF_LAYOUT_TYPE,
+      id: layoutType,
     },
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,

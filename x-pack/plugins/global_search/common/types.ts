@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -87,3 +88,28 @@ export interface GlobalSearchBatchedResults {
    */
   results: GlobalSearchResult[];
 }
+
+/**
+ * Search parameters for the {@link GlobalSearchPluginStart.find | `find` API}
+ *
+ * @public
+ */
+export interface GlobalSearchFindParams {
+  /**
+   * The term to search for. Can be undefined if searching by filters.
+   */
+  term?: string;
+  /**
+   * The types of results to search for.
+   */
+  types?: string[];
+  /**
+   * The tag ids to filter search by.
+   */
+  tags?: string[];
+}
+
+/**
+ * @public
+ */
+export type GlobalSearchProviderFindParams = GlobalSearchFindParams;

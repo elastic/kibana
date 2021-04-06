@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -18,9 +19,9 @@ import {
   SectionTitle,
 } from '../../../../../observability/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useLicense } from '../../../hooks/useLicense';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { CustomLinkMenuSection } from './CustomLinkMenuSection';
 import { getSections } from './sections';
 
@@ -30,16 +31,16 @@ interface Props {
 
 function ActionMenuButton({ onClick }: { onClick: () => void }) {
   return (
-    <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={onClick}>
       {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-        defaultMessage: 'Actions',
+        defaultMessage: 'Investigate',
       })}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 }
 
 export function TransactionActionMenu({ transaction }: Props) {
-  const license = useLicense();
+  const license = useLicenseContext();
   const hasGoldLicense = license?.isActive && license?.hasAtLeast('gold');
 
   const { core } = useApmPluginContext();
@@ -63,7 +64,13 @@ export function TransactionActionMenu({ transaction }: Props) {
         isOpen={isActionPopoverOpen}
         anchorPosition="downRight"
         button={
-          <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
+          <ActionMenuButton
+            onClick={() =>
+              setIsActionPopoverOpen(
+                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
+              )
+            }
+          />
         }
       >
         <div>

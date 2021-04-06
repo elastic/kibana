@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
-import { euiStyled } from '../../../../../observability/public';
-import { LogColumn, LogMessagePart } from '../../../../common/http_api';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -28,10 +29,11 @@ interface LogEntryMessageColumnProps {
   highlights: LogColumn[];
   isActiveHighlight: boolean;
   wrapMode: WrapMode;
+  render?: (message: string) => React.ReactNode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, wrapMode }) => {
+  ({ columnValue, highlights, isActiveHighlight, wrapMode, render }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -40,7 +42,16 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
       [columnValue, highlights, isActiveHighlight]
     );
 
-    return <MessageColumnContent wrapMode={wrapMode}>{message}</MessageColumnContent>;
+    const messageAsString = useMemo(
+      () => (isMessageColumn(columnValue) ? renderMessageSegments(columnValue.message) : ''),
+      [columnValue]
+    );
+
+    return (
+      <MessageColumnContent wrapMode={wrapMode}>
+        {render ? render(messageAsString) : message}
+      </MessageColumnContent>
+    );
   }
 );
 
@@ -90,3 +101,16 @@ const formatMessageSegments = (
 
     return 'failed to format message';
   });
+
+const renderMessageSegments = (messageSegments: LogMessagePart[]): string => {
+  return messageSegments
+    .map((messageSegment) => {
+      if (isConstantSegment(messageSegment)) {
+        return messageSegment.constant;
+      }
+      if (isFieldSegment(messageSegment)) {
+        return messageSegment.value.toString();
+      }
+    })
+    .join(' ');
+};

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Readable } from 'stream';
@@ -9,6 +10,7 @@ import { Readable } from 'stream';
 import { HapiReadableStream } from '../../rules/types';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -64,23 +66,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   updated_by: 'elastic',
   tags: [],
   throttle: 'no_actions',
-  threat: [
-    {
-      framework: 'MITRE ATT&CK',
-      tactic: {
-        id: 'TA0040',
-        name: 'impact',
-        reference: 'https://attack.mitre.org/tactics/TA0040/',
-      },
-      technique: [
-        {
-          id: 'T1499',
-          name: 'endpoint denial of service',
-          reference: 'https://attack.mitre.org/techniques/T1499/',
-        },
-      ],
-    },
-  ],
+  threat: getThreatMock(),
   exceptions_list: getListArrayMock(),
   filters: [
     {

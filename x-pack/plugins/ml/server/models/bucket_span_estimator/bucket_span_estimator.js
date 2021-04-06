@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, each, remove, sortBy, get } from 'lodash';
@@ -19,7 +20,17 @@ export function estimateBucketSpanFactory(client) {
 
   class BucketSpanEstimator {
     constructor(
-      { index, timeField, aggTypes, fields, duration, query, splitField },
+      {
+        index,
+        timeField,
+        aggTypes,
+        fields,
+        duration,
+        query,
+        splitField,
+        runtimeMappings,
+        indicesOptions,
+      },
       splitFieldValues,
       maxBuckets
     ) {
@@ -36,6 +47,9 @@ export function estimateBucketSpanFactory(client) {
       this.thresholds = {
         minimumBucketSpanMS: 0,
       };
+
+      this.runtimeMappings =
+        runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {};
 
       // determine durations for bucket span estimation
       // taking into account the clusters' search.max_buckets settings
@@ -68,7 +82,8 @@ export function estimateBucketSpanFactory(client) {
         this.index,
         this.timeField,
         this.duration,
-        this.query
+        this.query,
+        indicesOptions
       );
 
       if (this.aggTypes.length === this.fields.length) {
@@ -84,7 +99,9 @@ export function estimateBucketSpanFactory(client) {
                 this.fields[i],
                 this.duration,
                 this.query,
-                this.thresholds
+                this.thresholds,
+                this.runtimeMappings,
+                indicesOptions
               ),
               result: null,
             });
@@ -106,7 +123,9 @@ export function estimateBucketSpanFactory(client) {
                   this.fields[i],
                   this.duration,
                   queryCopy,
-                  this.thresholds
+                  this.thresholds,
+                  this.runtimeMappings,
+                  indicesOptions
                 ),
                 result: null,
               });
@@ -240,7 +259,7 @@ export function estimateBucketSpanFactory(client) {
     }
   }
 
-  const getFieldCardinality = function (index, field) {
+  const getFieldCardinality = function (index, field, runtimeMappings, indicesOptions) {
     return new Promise((resolve, reject) => {
       asCurrentUser
         .search({
@@ -254,7 +273,9 @@ export function estimateBucketSpanFactory(client) {
                 },
               },
             },
+            ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           },
+          ...(indicesOptions ?? {}),
         })
         .then(({ body }) => {
           const value = get(body, ['aggregations', 'field_count', 'value'], 0);
@@ -266,13 +287,13 @@ export function estimateBucketSpanFactory(client) {
     });
   };
 
-  const getRandomFieldValues = function (index, field, query) {
+  const getRandomFieldValues = function (index, field, query, runtimeMappings, indicesOptions) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
-      getFieldCardinality(index, field)
+      getFieldCardinality(index, field, runtimeMappings, indicesOptions)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
@@ -292,7 +313,9 @@ export function estimateBucketSpanFactory(client) {
                     },
                   },
                 },
+                ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
               },
+              ...(indicesOptions ?? {}),
             })
             .then(({ body }) => {
               // eslint-disable-next-line camelcase
@@ -378,7 +401,13 @@ export function estimateBucketSpanFactory(client) {
           // a partition has been selected, so we need to load some field values to use in the
           // bucket span tests.
           if (formConfig.splitField !== undefined) {
-            getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
+            getRandomFieldValues(
+              formConfig.index,
+              formConfig.splitField,
+              formConfig.query,
+              formConfig.runtimeMappings,
+              formConfig.indicesOptions
+            )
               .then((splitFieldValues) => {
                 runEstimator(splitFieldValues);
               })

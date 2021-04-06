@@ -109,7 +109,23 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
 </EuiToolTip>
 `;
 
-exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
+exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand button with loading icon when layer is invisible 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <EuiButtonIcon
+    aria-label="Expand layers panel"
+    className="mapLayerControl__openLayerTOCButton"
+    color="text"
+    iconType="menuLeft"
+    onClick={[Function]}
+  />
+</EuiToolTip>
+`;
+
+exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"

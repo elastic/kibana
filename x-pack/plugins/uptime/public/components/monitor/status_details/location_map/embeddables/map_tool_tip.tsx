@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -21,8 +22,7 @@ import { AppState } from '../../../../../state';
 import { monitorLocationsSelector } from '../../../../../state/selectors';
 import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
+import type { RenderTooltipContentParams } from '../../../../../../../maps/public';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 import { LastCheckLabel } from '../../translations';
 

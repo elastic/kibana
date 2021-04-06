@@ -1,26 +1,37 @@
-.dscSidebar__container {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  background-color: transparent;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
+.dscSidebar {
+  margin: 0;
+  flex-grow: 1;
+  padding-left: $euiSize;
+  width: $euiSize * 19;
+  height: 100%;
+
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+    padding: $euiSize $euiSize 0 $euiSize;
+    background-color: $euiPageBackgroundColor;
+  }
 }
 
-.dscIndexPattern__container {
-  display: flex;
+.dscSidebar__group {
+  height: 100%;
+}
+
+.dscSidebar__mobile {
+  width: 100%;
+  padding: $euiSize $euiSize 0;
+
+  .dscSidebar__mobileBadge {
+    margin-left: $euiSizeS;
+    vertical-align: text-bottom;
+  }
+}
+
+.dscSidebar__flyoutHeader {
   align-items: center;
-  height: $euiSize * 3;
-  margin-top: -$euiSizeS;
-}
-
-.dscIndexPattern__triggerButton {
-  @include euiTitle('xs');
-  line-height: $euiSizeXXL;
 }
 
 .dscFieldList {
-  list-style: none;
-  margin-bottom: 0;
+  padding: 0 $euiSizeXS $euiSizeXS;
 }
 
 .dscFieldListHeader {
@@ -29,16 +40,8 @@
 }
 
 .dscFieldList--popular {
+  padding-bottom: $euiSizeS;
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldChooser {
-  padding-left: $euiSize;
-}
-
-.dscFieldChooser__toggle {
-  color: $euiColorMediumShade;
-  margin-left: $euiSizeS !important;
 }
 
 .dscSidebarItem {
@@ -57,40 +60,12 @@
  */
 .dscSidebarItem__action {
   opacity: 0; /* 1 */
-  transition: none;
+
+  &.dscSidebarItem__mobile {
+    opacity: 1;
+  }
 
   &:focus {
     opacity: 1; /* 2 */
   }
-  font-size: $euiFontSizeXS;
-  padding: 2px 6px !important;
-  height: 22px !important;
-  min-width: auto !important;
-  .euiButton__content {
-    padding: 0 4px;
-  }
-}
-
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldSearch__toggleButton {
-  width: calc(100% - #{$euiSizeS});
-  color: $euiColorPrimary;
-  padding-left: $euiSizeXS;
-  margin-left: $euiSizeXS;
-}
-
-.dscFieldSearch__filterWrapper {
-  flex-grow: 0;
-}
-
-.dscFieldSearch__formWrapper {
-  padding: $euiSizeM;
-}
-
-.dscFieldDetails {
-  color: $euiTextColor;
-  margin-bottom: $euiSizeS;
 }

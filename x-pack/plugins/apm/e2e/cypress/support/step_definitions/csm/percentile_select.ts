@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { verifyClientMetrics } from './client_metrics_helper';
-import { getDataTestSubj } from './utils';
+import { getDataTestSubj, waitForLoadingToFinish } from './utils';
 
 When('the user changes the selected percentile', () => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   getDataTestSubj('uxPercentileSelect').select('95');
 });

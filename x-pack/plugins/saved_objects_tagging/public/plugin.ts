@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,7 +12,7 @@ import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache } from './tags';
+import { TagsClient, TagsCache, TagAssignmentService } from './services';
 import { getUiApi } from './ui_api';
 import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 
@@ -24,6 +25,7 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
+  private assignmentService?: TagAssignmentService;
   private readonly config: SavedObjectsTaggingClientConfig;
 
   constructor(context: PluginInitializerContext) {
@@ -37,18 +39,22 @@ export class SavedObjectTaggingPlugin
     { management, savedObjectsTaggingOss }: SetupDeps
   ) {
     const kibanaSection = management.sections.section.kibana;
+    const title = i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
+      defaultMessage: 'Tags',
+    });
     kibanaSection.registerApp({
       id: tagManagementSectionId,
-      title: i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
-        defaultMessage: 'Tags',
-      }),
-      order: 2,
+      title,
+      order: 1.5,
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
         return mountSection({
           tagClient: this.tagClient!,
+          tagCache: this.tagCache!,
+          assignmentService: this.assignmentService!,
           core,
           mountParams,
+          title,
         });
       },
     });
@@ -62,10 +68,11 @@ export class SavedObjectTaggingPlugin
 
   public start({ http, application, overlays }: CoreStart) {
     this.tagCache = new TagsCache({
-      refreshHandler: () => this.tagClient!.getAll(),
+      refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
     this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
+    this.assignmentService = new TagAssignmentService({ http });
 
     // do not fetch tags on anonymous page
     if (!http.anonymousPaths.isAnonymous(window.location.pathname)) {
@@ -77,6 +84,7 @@ export class SavedObjectTaggingPlugin
 
     return {
       client: this.tagClient,
+      cache: this.tagCache,
       ui: getUiApi({
         cache: this.tagCache,
         client: this.tagClient,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -20,7 +21,7 @@ export const ReportLink = ({ getUrl }: Props) => (
         <a href={getUrl()}>
           <FormattedMessage
             id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-            defaultMessage="Management &gt; Kibana &gt; Reporting"
+            defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
           />
         </a>
       ),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -23,7 +24,7 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-} from '../common/constants';
+} from '../common';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { initIndexingRoutes } from './data_indexing/indexing_routes';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -52,26 +54,41 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) {
+export async function initRoutes(
+  core,
+  getLicenseId,
+  emsSettings,
+  kbnVersion,
+  logger,
+  drawingFeatureEnabled
+) {
   let emsClient;
-
-  if (emsSettings.isIncludeElasticMapsService()) {
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: kbnVersion,
-      appName: EMS_APP_NAME,
-      fileApiUrl: emsSettings.getEMSFileApiUrl(),
-      tileApiUrl: emsSettings.getEMSTileApiUrl(),
-      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
-      fetchFunction: fetch,
-    });
-    emsClient.addQueryParams({ license: licenseUid });
-  } else {
-    emsClient = EMPTY_EMS_CLIENT;
-  }
+  let lastLicenseId;
+  const router = core.http.createRouter();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
-    return emsSettings.isEMSEnabled() ? emsClient : EMPTY_EMS_CLIENT;
+    const currentLicenseId = getLicenseId();
+    if (emsClient && emsSettings.isEMSEnabled() && lastLicenseId === currentLicenseId) {
+      return emsClient;
+    }
+
+    lastLicenseId = currentLicenseId;
+    if (emsSettings.isIncludeElasticMapsService()) {
+      emsClient = new EMSClient({
+        language: i18n.getLocale(),
+        appVersion: kbnVersion,
+        appName: EMS_APP_NAME,
+        fileApiUrl: emsSettings.getEMSFileApiUrl(),
+        tileApiUrl: emsSettings.getEMSTileApiUrl(),
+        landingPageUrl: emsSettings.getEMSLandingPageUrl(),
+        fetchFunction: fetch,
+      });
+      emsClient.addQueryParams({ license: currentLicenseId });
+      return emsClient;
+    } else {
+      return EMPTY_EMS_CLIENT;
+    }
   }
 
   router.get(
@@ -548,7 +565,6 @@ export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) 
     },
     async (context, request, response) => {
       const { query } = request;
-
       if (!query.indexPatternTitle) {
         logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
         return response.custom({
@@ -558,13 +574,10 @@ export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) 
       }
 
       try {
-        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getSettings',
-          {
-            index: query.indexPatternTitle,
-          }
-        );
-        const indexPatternSettings = getIndexPatternSettings(resp);
+        const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
+          index: query.indexPatternTitle,
+        });
+        const indexPatternSettings = getIndexPatternSettings(resp.body);
         return response.ok({
           body: indexPatternSettings,
         });
@@ -611,4 +624,7 @@ export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) 
   }
 
   initMVTRoutes({ router, logger });
+  if (drawingFeatureEnabled) {
+    initIndexingRoutes({ router, logger, dataPlugin });
+  }
 }

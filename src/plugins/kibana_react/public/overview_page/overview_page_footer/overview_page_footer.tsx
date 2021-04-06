@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC, MouseEvent } from 'react';
@@ -32,7 +21,7 @@ interface Props {
   path: string;
   /** Callback function to invoke when the user wants to set their default route to the current page */
   onSetDefaultRoute?: (event: MouseEvent) => void;
-  /** Callback function to invoke when the user wants to change their default route button is changed */
+  /** Callback function to invoke when the user wants to change their default route button is changed */
   onChangeDefaultRoute?: (event: MouseEvent) => void;
 }
 
@@ -51,9 +40,9 @@ export const OverviewPageFooter: FC<Props> = ({
   } = useKibana<CoreStart>();
 
   const { show, save } = application.capabilities.advancedSettings;
-  const isAdvancedSettingsEnabled = show && save;
+  if (!show && !save) return <></>;
 
-  const defaultRoutebutton = defaultRoute.includes(path) ? (
+  const defaultRouteButton = defaultRoute.includes(path) ? (
     <RedirectAppLinks application={application}>
       <EuiButtonEmpty
         className="kbnOverviewPageFooter__button"
@@ -102,27 +91,7 @@ export const OverviewPageFooter: FC<Props> = ({
     <footer className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <div>
-            <RedirectAppLinks application={application}>
-              <EuiButtonEmpty
-                className="kbnOverviewPageFooter__button"
-                data-test-subj="allPlugins"
-                flush="both"
-                href={addBasePath('/app/home#/feature_directory')}
-                iconType="apps"
-                size="xs"
-              >
-                <FormattedMessage
-                  id="kibana-react.pageFooter.appDirectoryButtonLabel"
-                  defaultMessage="View app directory"
-                />
-              </EuiButtonEmpty>
-            </RedirectAppLinks>
-          </div>
+          <div>{defaultRouteButton}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </footer>

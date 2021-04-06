@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './dimension_container.scss';
 
 import React, { useState, useEffect } from 'react';
@@ -10,7 +12,9 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiTitle,
+  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
@@ -54,24 +58,42 @@ export function DimensionContainer({
           className="lnsDimensionContainer"
         >
           <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-            <EuiTitle size="xs">
-              <EuiButtonEmpty
-                onClick={closeFlyout}
-                data-test-subj="lns-indexPattern-dimensionContainerTitle"
-                id="lnsDimensionContainerTitle"
-                iconType="sortLeft"
-                flush="left"
-              >
-                <strong>
-                  {i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                    defaultMessage: '{groupLabel} configuration',
-                    values: {
-                      groupLabel,
-                    },
+            <EuiFlexGroup
+              gutterSize="none"
+              alignItems="center"
+              className="lnsDimensionContainer__headerLink"
+              onClick={closeFlyout}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  color="text"
+                  data-test-subj="lns-indexPattern-dimensionContainerBack"
+                  className="lnsDimensionContainer__backIcon"
+                  onClick={closeFlyout}
+                  iconType="sortLeft"
+                  aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                    defaultMessage: 'Close configuration',
                   })}
-                </strong>
-              </EuiButtonEmpty>
-            </EuiTitle>
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="xs">
+                  <h2
+                    id="lnsDimensionContainerTitle"
+                    className="lnsDimensionContainer__headerTitle"
+                  >
+                    <strong>
+                      {i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                        defaultMessage: '{groupLabel} configuration',
+                        values: {
+                          groupLabel,
+                        },
+                      })}
+                    </strong>
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
             {panel}

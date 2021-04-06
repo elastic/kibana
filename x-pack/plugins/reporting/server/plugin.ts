@@ -1,29 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '../common/constants';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
-import { buildConfig, ReportingConfigType } from './config';
-import { createQueueFactory, LevelLogger, ReportingStore } from './lib';
+import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
+import { LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
-import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
+import type {
+  ReportingRequestHandlerContext,
+  ReportingSetup,
+  ReportingSetupDeps,
+  ReportingStart,
+  ReportingStartDeps,
+} from './types';
 import { registerReportingUsageCollector } from './usage';
-
-const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    reporting?: ReportingStart | null;
-  }
-}
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -33,12 +30,13 @@ export class ReportingPlugin
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
+    this.reportingCore = new ReportingCore(this.logger, context);
     this.initializerContext = context;
-    this.reportingCore = new ReportingCore(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     // prevent throwing errors in route handlers about async deps not being initialized
+    // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (this.reportingCore.pluginIsStarted()) {
         return {}; // ReportingStart contract
@@ -47,33 +45,13 @@ export class ReportingPlugin
       }
     });
 
-    core.uiSettings.register({
-      [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-        name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
-          defaultMessage: 'PDF footer image',
-        }),
-        value: null,
-        description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
-          defaultMessage: `Custom image to use in the PDF's footer`,
-        }),
-        type: 'image',
-        schema: schema.nullable(schema.byteSize({ max: '200kb' })),
-        category: [PLUGIN_ID],
-        // Used client-side for size validation
-        validation: {
-          maxSize: {
-            length: kbToBase64Length(200),
-            description: '200 kB',
-          },
-        },
-      },
-    });
+    registerUiSettings(core);
 
     const { elasticsearch, http } = core;
-    const { features, licensing, security, spaces } = plugins;
+    const { features, licensing, security, spaces, taskManager } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
 
-    const router = http.createRouter();
+    const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
 
     reportingCore.pluginSetup({
@@ -84,6 +62,7 @@ export class ReportingPlugin
       router,
       security,
       spaces,
+      taskManager,
     });
 
     registerReportingUsageCollector(reportingCore, plugins);
@@ -117,14 +96,15 @@ export class ReportingPlugin
 
       const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);
       const store = new ReportingStore(reportingCore, logger);
-      const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
 
-      reportingCore.pluginStart({
+      await reportingCore.pluginStart({
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
-        esqueue,
         store,
+        esClient: core.elasticsearch.client,
+        data: plugins.data,
+        taskManager: plugins.taskManager,
       });
 
       this.logger.debug('Start complete');

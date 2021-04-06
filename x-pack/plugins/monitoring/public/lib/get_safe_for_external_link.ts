@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface LocationHash {
@@ -24,15 +25,16 @@ export function getSafeForExternalLink(
 
   let newGlobalState = globalStateExecResult[1];
   Object.keys(globalState).forEach((globalStateKey) => {
+    let value = globalState[globalStateKey];
+    if (globalStateKey === 'cluster_uuid') {
+      value = `'${value}'`;
+    }
     const keyRegExp = new RegExp(`${globalStateKey}:([^,]+)`);
     const execResult = keyRegExp.exec(newGlobalState);
     if (execResult && execResult.length) {
-      newGlobalState = newGlobalState.replace(
-        execResult[0],
-        `${globalStateKey}:${globalState[globalStateKey]}`
-      );
+      newGlobalState = newGlobalState.replace(execResult[0], `${globalStateKey}:${value}`);
     } else {
-      newGlobalState += `,${globalStateKey}:${globalState[globalStateKey]}`;
+      newGlobalState += `,${globalStateKey}:${value}`;
     }
   });
 

@@ -20,7 +20,7 @@ cd kibana
 
 Install the version of Node.js listed in the `.node-version` file. This
 can be automated with tools such as
-https://github.com/creationix/nvm[nvm],
+https://github.com/nvm-sh/nvm[nvm],
 https://github.com/coreybutler/nvm-windows[nvm-windows] or
 https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
 you can switch to the correct version when using nvm by running:
@@ -46,6 +46,23 @@ versions you need to be using. Please see
 https://github.com/nodejs/node-gyp#installation[https://github.com/nodejs/node-gyp#installation]
 and follow the guide according your platform.
 ____
+
+In case you don't have an internet connection, the `yarn kbn bootstrap` command will 
+fail. As it is likely you have the required node_modules in the 
+offline mirror, you can try to run the step in offline mode by using:
+
+[source,bash]
+----
+yarn kbn bootstrap --offline
+----
+
+In any other circumstance where you want to force the node_modules install step 
+you can use:
+
+[source,bash]
+----
+yarn kbn bootstrap --force-install
+----
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
@@ -109,6 +126,20 @@ yarn start --run-examples
 View all available options by running `yarn start --help`
 
 Read about more advanced options for <<running-kibana-advanced>>.
+
+[discrete]
+=== Install pre-commit hook (optional)
+
+In case you want to run a couple of checks like linting or check the file casing of the files to commit, we provide 
+a way to install a pre-commit hook. To configure it you just need to run the following:
+
+[source,bash]
+----
+node scripts/register_git_hook
+----
+
+After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`.
+If you choose to not install it, don't worry, we still run a quick ci check to provide feedback earliest as we can about the same checks. 
 
 [discrete]
 === Code away!

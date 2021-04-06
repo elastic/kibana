@@ -1,23 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
+import {
+  getSingleMetricViewerJobErrorMessage,
+  parseTimeIntervalForJob,
+} from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
-  Job,
-  JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
+  Datafeed,
+  Job,
 } from '../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobsResponse,
+  MlJobsStatsResponse,
+  JobsExistResponse,
+} from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -27,20 +36,10 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getEarliestDatafeedStartTime,
   getLatestDataOrBucketTimestamp,
-  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-
-export interface MlJobsResponse {
-  jobs: Job[];
-  count: number;
-}
-
-export interface MlJobsStatsResponse {
-  jobs: JobStats[];
-  count: number;
-}
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 interface Results {
   [id: string]: {
@@ -52,7 +51,10 @@ interface Results {
 export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    client,
+    mlClient
+  );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
@@ -141,7 +143,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }
@@ -172,9 +177,9 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     });
 
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const dataCounts = job.data_counts;
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob: MlSummaryJob = {
         id: job.job_id,
@@ -200,9 +205,11 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           dataCounts?.latest_record_timestamp,
           dataCounts?.latest_bucket_timestamp
         ),
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
+        awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -230,8 +237,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const timeRange: { to?: number; from?: number } = {};
 
       const dataCounts = job.data_counts;
@@ -242,13 +248,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
       }
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob = {
         id: job.job_id,
         job_id: job.job_id,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         isRunning: hasDatafeed && job.datafeed_config.state === 'started',
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         timeRange,
       };
 
@@ -256,6 +264,25 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     });
 
     return { jobs, jobsMap };
+  }
+
+  async function getJobForCloning(jobId: string) {
+    const [{ body: jobResults }, datafeedResult] = await Promise.all([
+      mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
+      getDatafeedByJobId(jobId, true),
+    ]);
+    const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
+    if (datafeedResult && datafeedResult.job_id === jobId) {
+      result.datafeed = datafeedResult;
+    }
+
+    if (jobResults && jobResults.jobs) {
+      const job = jobResults.jobs.find((j) => j.job_id === jobId);
+      if (job) {
+        result.job = job;
+      }
+    }
+    return result;
   }
 
   async function createFullJobsList(jobIds: string[] = []) {
@@ -266,6 +293,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
+
     const [
       { body: jobResults },
       { body: jobStatsResults },
@@ -291,6 +319,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
             (ds) => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
+            // @ts-expect-error
             datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
           }
         }
@@ -359,6 +388,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
+            // @ts-expect-error
             tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
@@ -392,13 +422,20 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const detailed = true;
     const jobIds: string[] = [];
     try {
-      const { body } = await asInternalUser.tasks.list({ actions, detailed });
-      Object.keys(body.nodes).forEach((nodeId) => {
-        const tasks = body.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach((taskId) => {
-          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
-        });
+      const { body } = await asInternalUser.tasks.list({
+        // @ts-expect-error @elastic-elasticsearch expects it to be a string
+        actions,
+        detailed,
       });
+
+      if (body.nodes) {
+        Object.keys(body.nodes).forEach((nodeId) => {
+          const tasks = body.nodes![nodeId].tasks;
+          Object.keys(tasks).forEach((taskId) => {
+            jobIds.push(tasks[taskId].description!.replace(/^delete-job-/, ''));
+          });
+        });
+      }
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
@@ -414,10 +451,18 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds: string[] = [], allSpaces: boolean = false) {
-    const results: { [id: string]: boolean } = {};
+  async function jobsExist(
+    jobIds: string[] = [],
+    allSpaces: boolean = false
+  ): Promise<JobsExistResponse> {
+    const results: JobsExistResponse = {};
     for (const jobId of jobIds) {
       try {
+        if (jobId === '') {
+          results[jobId] = { exists: false, isGroup: false };
+          continue;
+        }
+
         const { body } = allSpaces
           ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
               job_id: jobId,
@@ -425,13 +470,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           : await mlClient.getJobs<MlJobsResponse>({
               job_id: jobId,
             });
-        results[jobId] = body.count > 0;
+
+        const isGroup = body.jobs.some((j) => j.groups !== undefined && j.groups.includes(jobId));
+        results[jobId] = { exists: body.count > 0, isGroup };
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
         if (e.statusCode !== 404) {
           throw e;
         }
-        results[jobId] = false;
+        results[jobId] = { exists: false, isGroup: false };
       }
     }
     return results;
@@ -486,6 +533,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return false;
   }
 
+  function isJobAwaitingNodeAssignment(job: CombinedJobWithStats) {
+    return job.node === undefined && job.state === JOB_STATE.OPENING;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -493,6 +544,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
+    getJobForCloning,
     createFullJobsList,
     deletingJobTasks,
     jobsExist,

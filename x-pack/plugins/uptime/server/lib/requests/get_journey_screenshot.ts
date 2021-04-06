@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { ESSearchBody } from '../../../../../typings/elasticsearch';
+import { Ping } from '../../../common/runtime_types/ping';
 
-interface GetJourneyScreenshotParams {
+export interface GetJourneyScreenshotParams {
   checkGroup: string;
   stepIndex: number;
 }
@@ -16,7 +18,9 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
 > = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
-  const params: ESSearchBody = {
+  const params = {
+    track_total_hits: true,
+    size: 0,
     query: {
       bool: {
         filter: [
@@ -30,19 +34,38 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
               'synthetics.type': 'step/screenshot',
             },
           },
-          {
-            term: {
-              'synthetics.step.index': stepIndex,
-            },
-          },
-        ],
+        ] as QueryContainer[],
       },
     },
-    _source: ['synthetics.blob'],
+    aggs: {
+      step: {
+        filter: {
+          term: {
+            'synthetics.step.index': stepIndex,
+          },
+        },
+        aggs: {
+          image: {
+            top_hits: {
+              size: 1,
+              _source: ['synthetics.blob', 'synthetics.step.name'],
+            },
+          },
+        },
+      },
+    },
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
-  if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
+
+  if (result?.hits?.total.value < 1) {
     return null;
   }
-  return result.hits.hits.map(({ _source }: any) => _source?.synthetics?.blob ?? null)[0];
+
+  const stepHit = result?.aggregations?.step.image.hits.hits[0]?._source as Ping;
+
+  return {
+    blob: stepHit?.synthetics?.blob ?? null,
+    stepName: stepHit?.synthetics?.step?.name ?? '',
+    totalSteps: result?.hits?.total.value,
+  };
 };

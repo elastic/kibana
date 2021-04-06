@@ -1,16 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiBreakpoints: {
+      l: '1200px',
+    },
+  },
+});
 
 const request =
   '{"index": ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"allowNoIndices": true, "ignoreUnavailable": true, "body": { "aggregations": {"hosts": {"cardinality": {"field": "host.name" } }, "hosts_histogram": {"auto_date_histogram": {"field": "@timestamp","buckets": "6"},"aggs": { "count": {"cardinality": {"field": "host.name" }}}}}, "query": {"bool": {"filter": [{"range": { "@timestamp": {"gte": 1562290224506,"lte": 1562376624506 }}}]}}, "size": 0, "track_total_hits": false}}';
@@ -18,13 +27,12 @@ const response =
   '{"took": 880,"timed_out": false,"_shards": {"total": 26,"successful": 26,"skipped": 0,"failed": 0},"hits": {"max_score": null,"hits": []},"aggregations": {"hosts": {"value": 541},"hosts_histogram": {"buckets": [{"key_as_string": "2019 - 07 - 05T01: 00: 00.000Z", "key": 1562288400000, "doc_count": 1492321, "count": { "value": 105 }}, {"key_as_string": "2019 - 07 - 05T13: 00: 00.000Z", "key": 1562331600000, "doc_count": 2412761, "count": { "value": 453}},{"key_as_string": "2019 - 07 - 06T01: 00: 00.000Z", "key": 1562374800000, "doc_count": 111658, "count": { "value": 15}}],"interval": "12h"}},"status": 200}';
 
 describe('Modal Inspect', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const closeModal = jest.fn();
 
   describe('rendering', () => {
     test('when isShowing is positive and request and response are not null', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ModalInspectQuery
             closeModal={closeModal}
             isShowing={true}
@@ -87,7 +95,7 @@ describe('Modal Inspect', () => {
   describe('functionality from tab statistics/request/response', () => {
     test('Click on statistic Tab', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ModalInspectQuery
             closeModal={closeModal}
             isShowing={true}
@@ -126,7 +134,7 @@ describe('Modal Inspect', () => {
 
     test('Click on request Tab', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ModalInspectQuery
             closeModal={closeModal}
             isShowing={true}
@@ -193,7 +201,7 @@ describe('Modal Inspect', () => {
 
     test('Click on response Tab', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ModalInspectQuery
             closeModal={closeModal}
             isShowing={true}
@@ -229,7 +237,7 @@ describe('Modal Inspect', () => {
   describe('events', () => {
     test('Make sure that toggle function has been called when you click on the close button', () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ModalInspectQuery
             closeModal={closeModal}
             isShowing={true}

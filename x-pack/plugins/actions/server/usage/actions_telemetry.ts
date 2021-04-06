@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+} from 'kibana/server';
+import { ActionResult } from '../types';
 
-export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: string) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.types = [:]',
@@ -33,9 +40,8 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
     },
   };
 
-  const searchResult = await callCluster('search', {
+  const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -47,26 +53,33 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
       },
     },
   });
-
+  // @ts-expect-error aggegation type is not specified
+  const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
   return {
-    countTotal: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
+    countTotal: Object.keys(aggs).reduce(
+      (total: number, key: string) => parseInt(aggs[key], 0) + total,
       0
     ),
-    countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      // ES DSL aggregations are returned as `any` by callCluster
+    countByType: Object.keys(aggs).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: aggs[key],
       }),
       {}
     ),
   };
 }
 
-export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getInUseTotalCount(
+  esClient: ElasticsearchClient,
+  actionsBulkGet: (
+    objects?: SavedObjectsBulkGetObject[] | undefined,
+    options?: SavedObjectsBaseOptions | undefined
+  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
+  kibanaIndex: string
+): Promise<{ countTotal: number; countByType: Record<string, number> }> {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -102,9 +115,8 @@ export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaInd
     },
   };
 
-  const actionResults = await callCluster('search', {
+  const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -147,7 +159,32 @@ export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaInd
     },
   });
 
-  return actionResults.aggregations.refs.actionRefIds.value.total;
+  // @ts-expect-error aggegation type is not specified
+  const aggs = actionResults.aggregations.refs.actionRefIds.value;
+  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
+    id: key,
+    type: 'action',
+    fields: ['id', 'actionTypeId'],
+  }));
+  const actions = await actionsBulkGet(bulkFilter);
+  const countByType = actions.saved_objects.reduce(
+    (actionTypeCount: Record<string, number>, action) => {
+      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
+      const currentCount =
+        actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
+      actionTypeCount[alertTypeId] = currentCount + 1;
+      return actionTypeCount;
+    },
+    {}
+  );
+  return { countTotal: aggs.total, countByType };
+}
+
+function replaceFirstAndLastDotSymbols(strToReplace: string) {
+  const hasFirstSymbolDot = strToReplace.startsWith('.');
+  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
+  const hasLastSymbolDot = strToReplace.endsWith('.');
+  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index

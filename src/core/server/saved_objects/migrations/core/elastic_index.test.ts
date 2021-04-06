@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
@@ -44,41 +34,6 @@ describe('ElasticIndex', () => {
       expect(client.indices.get).toHaveBeenCalledWith({ index: '.kibana-test' }, { ignore: [404] });
     });
 
-    test('fails if the index doc type is unsupported', async () => {
-      client.indices.get.mockImplementation((params) => {
-        const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
-          [index]: {
-            aliases: { foo: index },
-            mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
-          },
-        });
-      });
-
-      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
-        /cannot be automatically migrated/
-      );
-    });
-
-    test('fails if there are multiple root types', async () => {
-      client.indices.get.mockImplementation((params) => {
-        const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
-          [index]: {
-            aliases: { foo: index },
-            mappings: {
-              doc: { dynamic: 'strict', properties: { a: 'b' } },
-              doctor: { dynamic: 'strict', properties: { a: 'b' } },
-            },
-          },
-        });
-      });
-
-      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
-        /cannot be automatically migrated/
-      );
-    });
-
     test('decorates index info with exists and indexName', async () => {
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
@@ -86,8 +41,9 @@ describe('ElasticIndex', () => {
           [index]: {
             aliases: { foo: index },
             mappings: { dynamic: 'strict', properties: { a: 'b' } },
+            settings: {},
           },
-        });
+        } as estypes.GetIndexResponse);
       });
 
       const info = await Index.fetchInfo(client, '.baz');
@@ -96,6 +52,7 @@ describe('ElasticIndex', () => {
         mappings: { dynamic: 'strict', properties: { a: 'b' } },
         exists: true,
         indexName: '.baz',
+        settings: {},
       });
     });
   });
@@ -114,17 +71,6 @@ describe('ElasticIndex', () => {
           },
         },
         index: '.abcd',
-      });
-    });
-  });
-
-  describe('deleteIndex', () => {
-    test('calls indices.delete', async () => {
-      await Index.deleteIndex(client, '.lotr');
-
-      expect(client.indices.delete).toHaveBeenCalledTimes(1);
-      expect(client.indices.delete).toHaveBeenCalledWith({
-        index: '.lotr',
       });
     });
   });
@@ -156,7 +102,7 @@ describe('ElasticIndex', () => {
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
@@ -179,7 +125,7 @@ describe('ElasticIndex', () => {
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
@@ -207,14 +153,18 @@ describe('ElasticIndex', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
       client.reindex.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          task: 'abc',
+        } as estypes.ReindexResponse)
       );
       client.tasks.get.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          completed: true,
+        } as estypes.GetTaskResponse)
       );
 
       const info = {
@@ -222,7 +172,7 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          dynamic: 'strict',
+          dynamic: 'strict' as const,
           properties: { foo: { type: 'keyword' } },
         },
       };
@@ -281,13 +231,16 @@ describe('ElasticIndex', () => {
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
       client.reindex.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          task: 'abc',
+        } as estypes.ReindexResponse)
       );
       client.tasks.get.mockResolvedValue(
+        // @ts-expect-error @elastic/elasticsearch GetTaskResponse requires a `task` property even on errors
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {
@@ -295,7 +248,7 @@ describe('ElasticIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        })
+        } as estypes.GetTaskResponse)
       );
 
       const info = {
@@ -308,6 +261,7 @@ describe('ElasticIndex', () => {
         },
       };
 
+      // @ts-expect-error
       await expect(Index.convertToAlias(client, info, '.muchacha', 10)).rejects.toThrow(
         /Re-index failed \[search_phase_execution_exception\] all shards failed/
       );
@@ -341,7 +295,9 @@ describe('ElasticIndex', () => {
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
       client.bulk.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          items: [] as any[],
+        } as estypes.BulkResponse)
       );
 
       const index = '.myalias';
@@ -378,7 +334,7 @@ describe('ElasticIndex', () => {
       client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
-        })
+        } as estypes.BulkResponse)
       );
 
       const index = '.myalias';
@@ -454,7 +410,18 @@ describe('ElasticIndex', () => {
       expect(await read()).toEqual([]);
 
       expect(client.search).toHaveBeenCalledWith({
-        body: { size: 100 },
+        body: {
+          size: 100,
+          query: {
+            bool: {
+              must_not: {
+                term: {
+                  type: 'fleet-agent-events',
+                },
+              },
+            },
+          },
+        },
         index,
         scroll: '5m',
       });
@@ -568,6 +535,7 @@ describe('ElasticIndex', () => {
       mappings,
       count,
       migrations,
+      kibanaVersion,
     }: any) {
       client.indices.get = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -581,7 +549,12 @@ describe('ElasticIndex', () => {
         })
       );
 
-      const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
+      const hasMigrations = await Index.migrationsUpToDate(
+        client,
+        index,
+        migrations,
+        kibanaVersion
+      );
       return { hasMigrations };
     }
 
@@ -595,6 +568,7 @@ describe('ElasticIndex', () => {
         },
         count: 0,
         migrations: { dashy: '2.3.4' },
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeFalsy();
@@ -622,6 +596,7 @@ describe('ElasticIndex', () => {
         },
         count: 2,
         migrations: {},
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeTruthy();
@@ -663,6 +638,7 @@ describe('ElasticIndex', () => {
         },
         count: 3,
         migrations: { dashy: '23.2.5' },
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeFalsy();
@@ -688,6 +664,7 @@ describe('ElasticIndex', () => {
           bashy: '99.9.3',
           flashy: '3.4.5',
         },
+        kibanaVersion: '7.10.0',
       });
 
       function shouldClause(type: string, version: string) {
@@ -713,6 +690,15 @@ describe('ElasticIndex', () => {
                 shouldClause('dashy', '23.2.5'),
                 shouldClause('bashy', '99.9.3'),
                 shouldClause('flashy', '3.4.5'),
+                {
+                  bool: {
+                    must_not: {
+                      term: {
+                        coreMigrationVersion: '7.10.0',
+                      },
+                    },
+                  },
+                },
               ],
             },
           },

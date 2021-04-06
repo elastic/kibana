@@ -1,101 +1,95 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import type { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SearchSessionStatus } from './status';
 
-export interface ISessionService {
+export const SEARCH_SESSION_TYPE = 'search-session';
+export interface SearchSessionSavedObjectAttributes {
+  sessionId: string;
   /**
-   * Returns the active session ID
-   * @returns The active session ID
+   * User-facing session name to be displayed in session management
    */
-  getSessionId: () => string | undefined;
+  name?: string;
   /**
-   * Returns the observable that emits an update every time the session ID changes
-   * @returns `Observable`
+   * App that created the session. e.g 'discover'
    */
-  getSession$: () => Observable<string | undefined>;
-
+  appId?: string;
   /**
-   * Whether the active session is already saved (i.e. sent to background)
+   * Creation time of the session
    */
-  isStored: () => boolean;
-
+  created: string;
   /**
-   * Whether the active session is restored (i.e. reusing previous search IDs)
+   * Last touch time of the session
    */
-  isRestore: () => boolean;
-
+  touched: string;
   /**
-   * Starts a new session
+   * Expiration time of the session. Expiration itself is managed by Elasticsearch.
    */
-  start: () => string;
-
+  expires: string;
   /**
-   * Restores existing session
+   * Time of transition into completed state,
+   *
+   * Can be "null" in case already completed session
+   * transitioned into in-progress session
    */
-  restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
+  completed?: string | null;
   /**
-   * Clears the active session.
+   * status
    */
-  clear: () => void;
-
+  status: SearchSessionStatus;
   /**
-   * Saves a session
+   * urlGeneratorId
    */
-  save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
+  urlGeneratorId?: string;
   /**
-   * Gets a saved session
+   * The application state that was used to create the session.
+   * Should be used, for example, to re-load an expired search session.
    */
-  get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
+  initialState?: Record<string, unknown>;
   /**
-   * Gets a list of saved sessions
+   * Application state that should be used to restore the session.
+   * For example, relative dates are conveted to absolute ones.
    */
-  find: (
-    options: SearchSessionFindOptions
-  ) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
+  restoreState?: Record<string, unknown>;
+  /**
+   * Mapping of search request hashes to their corresponsing info (async search id, etc.)
+   */
+  idMapping: Record<string, SearchSessionRequestInfo>;
 
   /**
-   * Updates a session
+   * This value is true if the session was actively stored by the user. If it is false, the session may be purged by the system.
    */
-  update: (
-    sessionId: string,
-    attributes: Partial<BackgroundSessionSavedObjectAttributes>
-  ) => Promise<any>;
-
+  persisted: boolean;
   /**
-   * Deletes a session
+   * The realm type/name & username uniquely identifies the user who created this search session
    */
-  delete: (sessionId: string) => Promise<void>;
+  realmType?: string;
+  realmName?: string;
+  username?: string;
 }
 
-export interface BackgroundSessionSavedObjectAttributes {
-  name: string;
-  created: string;
-  expires: string;
+export interface SearchSessionRequestInfo {
+  /**
+   * ID of the async search request
+   */
+  id: string;
+  /**
+   * Search strategy used to submit the search request
+   */
+  strategy: string;
+  /**
+   * status
+   */
   status: string;
-  initialState: Record<string, unknown>;
-  restoreState: Record<string, unknown>;
-  idMapping: Record<string, string>;
+  /**
+   * An optional error. Set if status is set to error.
+   */
+  error?: string;
 }
 
 export interface SearchSessionFindOptions {

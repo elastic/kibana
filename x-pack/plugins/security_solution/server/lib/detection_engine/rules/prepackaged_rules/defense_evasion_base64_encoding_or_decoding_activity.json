@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Base64 Encoding/Decoding Activity",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(base64 or base64plain or base64url or base64mime or base64pem)",
   "risk_score": 21,
@@ -38,17 +38,7 @@
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
           "reference": "https://attack.mitre.org/techniques/T1140/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
-      },
-      "technique": [
+        },
         {
           "id": "T1027",
           "name": "Obfuscated Files or Information",
@@ -57,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -11,15 +12,12 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
-  EuiSpacer,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +28,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 
+import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -49,77 +49,20 @@ const getDefaultState = () => ({
   title: '',
 });
 
-const statusToEuiColor = (status) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'primary';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'danger';
-      break;
-    default:
-      return status;
-  }
-};
-
-const statusToEuiIconType = (status) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'iInCircle';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'cross';
-      break;
-    case VALIDATION_STATUS.SUCCESS:
-      return 'check';
-      break;
-    case VALIDATION_STATUS.WARNING:
-      return 'alert';
-      break;
-    default:
-      return status;
-  }
-};
-
-const Link = ({ url }) => (
-  <EuiLink href={url} target="_BLANK">
-    <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
-  </EuiLink>
-);
-Link.propTypes = {
-  url: PropTypes.string.isRequired,
-};
-
-// Message is its own component so it can be passed
-// as the "title" prop in the Callout component.
-const Message = ({ message }) => (
-  <React.Fragment>
-    {message.text} {message.url && <Link url={message.url} />}
-  </React.Fragment>
-);
-Message.propTypes = {
-  message: PropTypes.shape({
-    text: PropTypes.string,
-    url: PropTypes.string,
-  }),
-};
-
 const MessageList = ({ messages, idFilterList }) => {
   const callouts = messages
     .filter((m) => idFilterList.includes(m.id) === false)
-    .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />);
+    .map((m, i) => <Callout key={`${m.id}_${i}`} {...m} />);
 
   // there could be no error or success messages due to the
   // idFilterList being applied. so rather than showing nothing,
   // show a message saying all passed
   const allPassedCallout = (
     <Callout
-      message={{
-        text: i18n.translate('xpack.ml.validateJob.allPassed', {
-          defaultMessage: 'All validation checks passed successfully',
-        }),
-        status: VALIDATION_STATUS.SUCCESS,
-      }}
+      text={i18n.translate('xpack.ml.validateJob.allPassed', {
+        defaultMessage: 'All validation checks passed successfully',
+      })}
+      status={VALIDATION_STATUS.SUCCESS}
     />
   );
 
@@ -128,27 +71,6 @@ const MessageList = ({ messages, idFilterList }) => {
 MessageList.propTypes = {
   messages: PropTypes.array,
   idFilterList: PropTypes.array,
-};
-
-const Callout = ({ message }) => (
-  <React.Fragment>
-    <EuiCallOut
-      color={statusToEuiColor(message.status)}
-      size="s"
-      title={message.heading || <Message message={message} />}
-      iconType={statusToEuiIconType(message.status)}
-    >
-      {message.heading && <Message message={message} />}
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </React.Fragment>
-);
-Callout.propTypes = {
-  message: PropTypes.shape({
-    status: PropTypes.string,
-    text: PropTypes.string,
-    url: PropTypes.string,
-  }),
 };
 
 const LoadingSpinner = () => (
@@ -160,24 +82,19 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={close} style={{ width: '800px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
+  <EuiModal onClose={close} style={{ width: '800px' }}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
 
-      <EuiModalBody>{children}</EuiModalBody>
+    <EuiModalBody>{children}</EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage
-            id="xpack.ml.validateJob.modal.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
+    <EuiModalFooter>
+      <EuiButton onClick={close} size="s" fill>
+        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 );
 Modal.propType = {
   close: PropTypes.func.isRequired,
@@ -208,66 +125,109 @@ export class ValidateJobUI extends Component {
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
 
+    // Run job validation only if a job config has been passed on and the duration makes sense to run it.
+    // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
     if (typeof job === 'object') {
-      let shouldShowLoadingIndicator = true;
+      if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
+        let shouldShowLoadingIndicator = true;
 
-      this.props.ml
-        .validateJob({ duration, fields, job })
-        .then((messages) => {
-          shouldShowLoadingIndicator = false;
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
-              isLoading: false,
-              isModalVisible: true,
-            },
-            data: {
-              messages,
-              success: true,
-            },
-            title: job.job_id,
-          });
-          if (typeof this.props.setIsValid === 'function') {
-            this.props.setIsValid(
-              messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+        this.props.ml
+          .validateJob({ duration, fields, job })
+          .then((validationMessages) => {
+            const messages = parseMessages(validationMessages, getDocLinks());
+            shouldShowLoadingIndicator = false;
+
+            const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
+
+            if (messagesContainError) {
+              messages.push({
+                id: 'job_validation_includes_error',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationIncludesErrorText', {
+                  defaultMessage:
+                    'Job validation has failed, but you can still continue and create the job. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              });
+            }
+
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
+                isLoading: false,
+                isModalVisible: true,
+              },
+              data: {
+                messages,
+                success: true,
+              },
+              title: job.job_id,
+            });
+            if (typeof this.props.setIsValid === 'function') {
+              this.props.setIsValid(!messagesContainError);
+            }
+          })
+          .catch((error) => {
+            const { toasts } = this.props.kibana.services.notifications;
+            const toastNotificationService = toastNotificationServiceProvider(toasts);
+            toastNotificationService.displayErrorToast(
+              error,
+              i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+                defaultMessage: 'Job Validation Error',
+              })
             );
-          }
-        })
-        .catch((error) => {
-          const { toasts } = this.props.kibana.services.notifications;
-          const toastNotificationService = toastNotificationServiceProvider(toasts);
-          toastNotificationService.displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
-              defaultMessage: 'Job Validation Error',
-            })
-          );
-        });
-
-      // wait for 250ms before triggering the loading indicator
-      // to avoid flickering when there's a loading time below
-      // 250ms for the job validation data
-      const delay = 250;
-      setTimeout(() => {
-        if (shouldShowLoadingIndicator) {
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              isLoading: true,
-              isModalVisible: false,
-            },
           });
+
+        // wait for 250ms before triggering the loading indicator
+        // to avoid flickering when there's a loading time below
+        // 250ms for the job validation data
+        const delay = 250;
+        setTimeout(() => {
+          if (shouldShowLoadingIndicator) {
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                isLoading: true,
+                isModalVisible: false,
+              },
+            });
+          }
+        }, delay);
+      } else {
+        this.setState({
+          ...this.state,
+          ui: {
+            ...this.state.ui,
+            iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
+            isLoading: false,
+            isModalVisible: true,
+          },
+          data: {
+            messages: [
+              {
+                id: 'job_validation_skipped',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
+                  defaultMessage:
+                    'Job validation could not be run because of insufficient sample data. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              },
+            ],
+            success: true,
+          },
+          title: job.job_id,
+        });
+        if (typeof this.props.setIsValid === 'function') {
+          this.props.setIsValid(true);
         }
-      }, delay);
+      }
     }
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
-    const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
+    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

@@ -1,70 +1,67 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from 'elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
+
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  ILegacyClusterClient,
-  IRouter,
-  ILegacyScopedClusterClient,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-  ScopeableRequest,
-} from '../../../../../../src/core/server';
-import { Authentication, AuthenticationResult } from '../../authentication';
-import { Session } from '../../session_management';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult } from '../../authentication';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { Session } from '../../session_management';
+import { sessionMock } from '../../session_management/session.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { sessionMock } from '../../session_management/session.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
-
 describe('Change password', () => {
-  let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let router: jest.Mocked<SecurityRouter>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
-  let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockContext: RequestHandlerContext;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
 
-  function checkPasswordChangeAPICall(username: string, request: ScopeableRequest) {
-    expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
-    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-      'shield.changePassword',
-      { username, body: { password: 'new-password' } }
+  function checkPasswordChangeAPICall(username: string, headers?: Headers) {
+    expect(
+      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword
+    ).toHaveBeenCalledWith(
+      { username, body: { password: 'new-password' } },
+      headers && { headers }
     );
   }
 
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
+
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
     session.get.mockResolvedValue(sessionMock.createValue());
 
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockClusterClient = routeParamsMock.clusterClient;
-    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-
-    mockContext = ({
-      licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
-      },
-    } as unknown) as RequestHandlerContext;
+    mockContext = {
+      core: coreMock.createRequestHandlerContext(),
+      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } },
+    } as any;
 
     defineChangeUserPasswordRoutes(routeParamsMock);
 
@@ -108,26 +105,24 @@ describe('Change password', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       params: { username },
       body: { password: 'old-password', newPassword: 'new-password' },
+      headers: { 'some-custom-header': 'foo' }, // the test cases below assert that this custom request header is NOT included in the ES API calls
     });
 
     it('returns 403 if old password is wrong.', async () => {
       const changePasswordFailure = new (errors.AuthenticationException as any)('Unauthorized', {
         body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
       });
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(changePasswordFailure);
+      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+        changePasswordFailure
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(403);
       expect(response.payload).toEqual(changePasswordFailure);
 
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+      checkPasswordChangeAPICall(username, {
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
 
@@ -148,16 +143,15 @@ describe('Change password', () => {
       expect(response.payload).toEqual(loginFailureReason);
 
       checkPasswordChangeAPICall(username, {
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
 
     it('returns 500 if password update request fails with non-401 error.', async () => {
       const failureReason = new Error('Request failed.');
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+        failureReason
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -165,10 +159,7 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
 
       checkPasswordChangeAPICall(username, {
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
 
@@ -179,10 +170,7 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
       expect(authc.login).toHaveBeenCalledTimes(1);
@@ -209,10 +197,7 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
       expect(authc.login).toHaveBeenCalledTimes(1);
@@ -230,10 +215,7 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        headers: {
-          ...mockRequest.headers,
-          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
-        },
+        authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
       expect(authc.login).not.toHaveBeenCalled();
@@ -249,7 +231,9 @@ describe('Change password', () => {
 
     it('returns 500 if password update request fails.', async () => {
       const failureReason = new Error('Request failed.');
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+        failureReason
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -257,7 +241,7 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
       expect(authc.login).not.toHaveBeenCalled();
 
-      checkPasswordChangeAPICall(username, mockRequest);
+      checkPasswordChangeAPICall(username);
     });
 
     it('successfully changes user password.', async () => {
@@ -267,7 +251,7 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
       expect(authc.login).not.toHaveBeenCalled();
 
-      checkPasswordChangeAPICall(username, mockRequest);
+      checkPasswordChangeAPICall(username);
     });
   });
 });

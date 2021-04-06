@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
+  getRequestPayload,
   DropDownLabel,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -23,6 +26,8 @@ import {
   StepDefineExposedState,
 } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
+import { isPivotAggsWithExtendedForm } from '../../../../../common/pivot_aggs';
+import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 
 /**
  * Clones aggregation configuration and updates parent references
@@ -44,6 +49,37 @@ function cloneAggItem(item: PivotAggsConfig, parentRef?: PivotAggsConfig) {
 }
 
 /**
+ * Checks if the aggregations collection is invalid.
+ */
+function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
+  return aggsArray.some((agg) => {
+    return (
+      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
+      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
+    );
+  });
+}
+
+export function validatePivotConfig(config: TransformPivotConfig['pivot']) {
+  const valid =
+    Object.values(config.aggregations).length > 0 && Object.values(config.group_by).length > 0;
+  const isValid: boolean = valid && !isConfigInvalid(dictionaryToArray(config.aggregations));
+  return {
+    isValid,
+    ...(isValid
+      ? {}
+      : {
+          errorMessage: i18n.translate(
+            'xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody',
+            {
+              defaultMessage: 'Please choose at least one group-by field and aggregation.',
+            }
+          ),
+        }),
+  };
+}
+
+/**
  * Returns a root aggregation configuration
  * for provided aggregation item.
  */
@@ -62,8 +98,8 @@ export const usePivotConfig = (
   const toastNotifications = useToastNotifications();
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
-    () => getPivotDropdownOptions(indexPattern),
-    [indexPattern]
+    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
+    [defaults.runtimeMappings, indexPattern]
   );
 
   // The list of selected aggregations
@@ -262,7 +298,14 @@ export const usePivotConfig = (
   const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
   const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
 
-  const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
+  const requestPayload = useMemo(() => getRequestPayload(pivotAggsArr, pivotGroupByArr), [
+    pivotAggsArr,
+    pivotGroupByArr,
+  ]);
+
+  const validationStatus = useMemo(() => {
+    return validatePivotConfig(requestPayload.pivot);
+  }, [requestPayload]);
 
   const actions = useMemo(() => {
     return {
@@ -302,7 +345,8 @@ export const usePivotConfig = (
         groupByOptionsData,
         pivotAggsArr,
         pivotGroupByArr,
-        valid,
+        validationStatus,
+        requestPayload,
       },
     };
   }, [
@@ -315,6 +359,9 @@ export const usePivotConfig = (
     groupByOptionsData,
     pivotAggsArr,
     pivotGroupByArr,
-    valid,
+    validationStatus,
+    requestPayload,
   ]);
 };
+
+export type PivotService = ReturnType<typeof usePivotConfig>;

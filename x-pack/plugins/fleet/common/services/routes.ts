@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
@@ -33,6 +35,10 @@ export const epmRouteService = {
 
   getInfoPath: (pkgkey: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  },
+
+  getStatsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getFilePath: (filePath: string) => {
@@ -140,6 +146,8 @@ export const agentRouteService = {
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+  getCreateActionPath: (agentId: string) =>
+    AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {

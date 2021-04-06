@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
@@ -16,6 +17,7 @@ import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
@@ -79,7 +81,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     fromStr,
     id,
     isLoading,
-    kind,
     kqlQuery,
     policy,
     queries,
@@ -202,7 +203,23 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         start={startDate}
       />
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.duration === nextProps.duration &&
+    prevProps.end === nextProps.end &&
+    prevProps.fromStr === nextProps.fromStr &&
+    prevProps.id === nextProps.id &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.policy === nextProps.policy &&
+    prevProps.setDuration === nextProps.setDuration &&
+    prevProps.start === nextProps.start &&
+    prevProps.startAutoReload === nextProps.startAutoReload &&
+    prevProps.stopAutoReload === nextProps.stopAutoReload &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.toStr === nextProps.toStr &&
+    prevProps.updateReduxTime === nextProps.updateReduxTime &&
+    deepEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&
+    deepEqual(prevProps.queries, nextProps.queries)
 );
 
 export const formatDate = (

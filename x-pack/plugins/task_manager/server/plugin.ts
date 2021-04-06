@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
@@ -14,12 +16,12 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '../../../../src/core/server';
-import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -35,13 +37,15 @@ export type TaskManagerStartContract = Pick<
   TaskScheduling,
   'schedule' | 'runNow' | 'ensureScheduled'
 > &
-  Pick<TaskStore, 'fetch' | 'get' | 'remove'>;
+  Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
+    removeIfExists: TaskStore['remove'];
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
-  private config?: TaskManagerConfig;
+  private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
@@ -51,15 +55,11 @@ export class TaskManagerPlugin
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
-      .create<TaskManagerConfig>()
-      .pipe(first())
-      .toPromise();
-
+  public setup(core: CoreSetup): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
@@ -99,7 +99,7 @@ export class TaskManagerPlugin
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
+      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
@@ -109,12 +109,12 @@ export class TaskManagerPlugin
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
+    const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
-      serializer: savedObjects.createSerializer(),
+      serializer,
       savedObjectsRepository,
       esClient: elasticsearch.createClient('taskManager').asInternalUser,
       index: this.config!.index,
-      maxAttempts: this.config!.max_attempts,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
@@ -150,12 +150,14 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      definitions: this.definitions,
     });
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
+      removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),

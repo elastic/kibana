@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, ReactElement } from 'react';
@@ -12,7 +13,7 @@ import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const EMPTY_VALUE = '';
 
-interface Break {
+export interface Break {
   color: string;
   label: ReactElement<any> | string | number;
   symbolId?: string;

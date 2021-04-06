@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -130,22 +131,13 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    // width: '175px',
     sortable: true,
     render: (_field, node) => {
       return (
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) =>
-            state.nodeId === node.resolver || state.stackProductUuid === node.resolver
-          }
-          nextStepsFilter={(nextStep) => {
-            if (nextStep.text.includes('Elasticsearch nodes')) {
-              return false;
-            }
-            return true;
-          }}
+          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver.uuid}
         />
       );
     },

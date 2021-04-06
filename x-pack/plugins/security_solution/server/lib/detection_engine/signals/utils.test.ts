@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -23,11 +25,12 @@ import {
   parseInterval,
   getDriftTolerance,
   getGapBetweenRuns,
-  getGapMaxCatchupRatio,
+  getNumCatchupIntervals,
   errorAggregator,
   getListsClient,
-  getSignalTimeTuples,
+  getRuleRangeTuples,
   getExceptions,
+  hasTimestampFields,
   wrapBuildingBlocks,
   generateSignalId,
   createErrorsFromShard,
@@ -36,6 +39,7 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  calculateThresholdSignalUuid,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -59,6 +63,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const ruleStatusServiceMock = {
+  success: jest.fn(),
+  find: jest.fn(),
+  goingToRun: jest.fn(),
+  error: jest.fn(),
+  partialFailure: jest.fn(),
+};
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -97,7 +109,7 @@ describe('utils', () => {
       expect(duration?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
     });
 
-    test('it returns null given an invalid duration', () => {
+    test('it throws given an invalid duration', () => {
       const duration = parseInterval('junk');
       expect(duration).toBeNull();
     });
@@ -136,7 +148,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-6m',
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -146,7 +158,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-5m',
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift?.asMilliseconds()).toEqual(0);
     });
@@ -155,7 +167,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
@@ -165,7 +177,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now',
-        interval: moment.duration(0, 'milliseconds'),
+        intervalDuration: moment.duration(0, 'milliseconds'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(10, 'minutes').asMilliseconds());
@@ -175,7 +187,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'invalid',
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -185,7 +197,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: '10m',
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -195,7 +207,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now-1m',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(4, 'minutes').asMilliseconds());
@@ -205,7 +217,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: moment().subtract(10, 'minutes').toISOString(),
         to: 'now',
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
@@ -215,7 +227,7 @@ describe('utils', () => {
       const drift = getDriftTolerance({
         from: 'now-6m',
         to: moment().toISOString(),
-        interval: moment.duration(5, 'minutes'),
+        intervalDuration: moment.duration(5, 'minutes'),
       });
       expect(drift).not.toBeNull();
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -226,7 +238,7 @@ describe('utils', () => {
     test('it returns a gap of 0 when "from" and interval match each other and the previous started was from the previous interval time', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-5m',
         to: 'now',
         now: nowDate.clone(),
@@ -238,7 +250,7 @@ describe('utils', () => {
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'now',
         now: nowDate.clone(),
@@ -250,7 +262,7 @@ describe('utils', () => {
     test('it returns a negative gap of 5 minutes when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-10m',
         to: 'now',
         now: nowDate.clone(),
@@ -262,7 +274,7 @@ describe('utils', () => {
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 10 minutes ago and so was the interval', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(10, 'minutes').toDate(),
-        interval: '10m',
+        intervalDuration: moment.duration(10, 'minutes'),
         from: 'now-11m',
         to: 'now',
         now: nowDate.clone(),
@@ -274,7 +286,7 @@ describe('utils', () => {
     test('it returns a gap of only -30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is 30 seconds more', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').subtract(30, 'seconds').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'now',
         now: nowDate.clone(),
@@ -286,7 +298,7 @@ describe('utils', () => {
     test('it returns an exact 0 gap when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(6, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'now',
         now: nowDate.clone(),
@@ -298,7 +310,7 @@ describe('utils', () => {
     test('it returns a gap of 30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute and 30 seconds late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(6, 'minutes').subtract(30, 'seconds').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'now',
         now: nowDate.clone(),
@@ -310,7 +322,7 @@ describe('utils', () => {
     test('it returns a gap of 1 minute when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is two minutes late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'now',
         now: nowDate.clone(),
@@ -319,32 +331,21 @@ describe('utils', () => {
       expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    test('it returns null if given a previousStartedAt of null', () => {
+    test('it returns 0 if given a previousStartedAt of null', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: null,
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-5m',
         to: 'now',
         now: nowDate.clone(),
       });
-      expect(gap).toBeNull();
-    });
-
-    test('it returns null if the interval is an invalid string such as "invalid"', () => {
-      const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone().toDate(),
-        interval: 'invalid', // if not set to "x" where x is an interval such as 6m
-        from: 'now-5m',
-        to: 'now',
-        now: nowDate.clone(),
-      });
-      expect(gap).toBeNull();
+      expect(gap.asMilliseconds()).toEqual(0);
     });
 
     test('it returns the expected result when "from" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'invalid',
         to: 'now',
         now: nowDate.clone(),
@@ -356,7 +357,7 @@ describe('utils', () => {
     test('it returns the expected result when "to" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        interval: '5m',
+        intervalDuration: moment.duration(5, 'minutes'),
         from: 'now-6m',
         to: 'invalid',
         now: nowDate.clone(),
@@ -597,134 +598,116 @@ describe('utils', () => {
     });
   });
 
-  describe('getSignalTimeTuples', () => {
+  describe('getRuleRangeTuples', () => {
     test('should return a single tuple if no gap', () => {
-      const someTuples = getSignalTimeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
-        gap: null,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
-        ruleParamsFrom: 'now-30s',
-        ruleParamsTo: 'now',
-        ruleParamsMaxSignals: 20,
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
         buildRuleMessage,
       });
-      const someTuple = someTuples[0];
+      const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
+      expect(tuples.length).toEqual(1);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
+    });
+
+    test('should return a single tuple if malformed interval prevents gap calculation', () => {
+      const { tuples, remainingGap } = getRuleRangeTuples({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        interval: 'invalid',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        buildRuleMessage,
+      });
+      const someTuple = tuples[0];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
+      expect(tuples.length).toEqual(1);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
 
     test('should return two tuples if gap and previouslyStartedAt', () => {
-      const someTuples = getSignalTimeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
-        gap: moment.duration(10, 's'),
         previousStartedAt: moment().subtract(65, 's').toDate(),
         interval: '50s',
-        ruleParamsFrom: 'now-55s',
-        ruleParamsTo: 'now',
-        ruleParamsMaxSignals: 20,
+        from: 'now-55s',
+        to: 'now',
+        maxSignals: 20,
         buildRuleMessage,
       });
-      const someTuple = someTuples[1];
-      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(10);
+      const someTuple = tuples[1];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
 
     test('should return five tuples when give long gap', () => {
-      const someTuples = getSignalTimeTuples({
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
-        gap: moment.duration(65, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
-        previousStartedAt: moment().subtract(65, 's').toDate(),
+        previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
         interval: '10s',
-        ruleParamsFrom: 'now-13s',
-        ruleParamsTo: 'now',
-        ruleParamsMaxSignals: 20,
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
         buildRuleMessage,
       });
-      expect(someTuples.length).toEqual(5);
-      someTuples.forEach((item, index) => {
+      expect(tuples.length).toEqual(5);
+      tuples.forEach((item, index) => {
         if (index === 0) {
           return;
         }
-        expect(moment(item.to).diff(moment(item.from), 's')).toEqual(10);
+        expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
+      expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
 
-    // this tests if calculatedFrom in utils.ts:320 parses an int and not a float
-    // if we don't parse as an int, then dateMath.parse will fail
-    // as it doesn't support parsing `now-67.549`, it only supports ints like `now-67`.
-    test('should return five tuples when given a gap with a decimal to ensure no parsing errors', () => {
-      const someTuples = getSignalTimeTuples({
+    test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
+      const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
-        gap: moment.duration(67549, 'ms'), // 64 is 5 times the interval + lookback, which will trigger max lookback
-        previousStartedAt: moment().subtract(67549, 'ms').toDate(),
-        interval: '10s',
-        ruleParamsFrom: 'now-13s',
-        ruleParamsTo: 'now',
-        ruleParamsMaxSignals: 20,
-        buildRuleMessage,
-      });
-      expect(someTuples.length).toEqual(5);
-    });
-
-    test('should return single tuples when give a negative gap (rule ran sooner than expected)', () => {
-      const someTuples = getSignalTimeTuples({
-        logger: mockLogger,
-        gap: moment.duration(-15, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
         previousStartedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
-        ruleParamsFrom: 'now-13s',
-        ruleParamsTo: 'now',
-        ruleParamsMaxSignals: 20,
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
         buildRuleMessage,
       });
-      expect(someTuples.length).toEqual(1);
-      const someTuple = someTuples[0];
+      expect(tuples.length).toEqual(1);
+      const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+      expect(remainingGap.asMilliseconds()).toEqual(0);
     });
   });
 
   describe('getMaxCatchupRatio', () => {
-    test('should return null if rule has never run before', () => {
-      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
-        logger: mockLogger,
-        previousStartedAt: null,
-        interval: '30s',
-        ruleParamsFrom: 'now-30s',
-        buildRuleMessage,
-        unit: 's',
+    test('should return 0 if gap is 0', () => {
+      const catchup = getNumCatchupIntervals({
+        gap: moment.duration(0),
+        intervalDuration: moment.duration(11000),
       });
-      expect(maxCatchup).toBeNull();
-      expect(ratio).toBeNull();
-      expect(gapDiffInUnits).toBeNull();
+      expect(catchup).toEqual(0);
     });
 
-    test('should should have non-null values when gap is present', () => {
-      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
-        logger: mockLogger,
-        previousStartedAt: moment().subtract(65, 's').toDate(),
-        interval: '50s',
-        ruleParamsFrom: 'now-55s',
-        buildRuleMessage,
-        unit: 's',
+    test('should return 1 if gap is in (0, intervalDuration]', () => {
+      const catchup = getNumCatchupIntervals({
+        gap: moment.duration(10000),
+        intervalDuration: moment.duration(10000),
       });
-      expect(maxCatchup).toEqual(0.2);
-      expect(ratio).toEqual(0.2);
-      expect(gapDiffInUnits).toEqual(10);
+      expect(catchup).toEqual(1);
     });
 
-    // when a rule runs sooner than expected we don't
-    // consider that a gap as that is a very rare circumstance
-    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
-      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
-        logger: mockLogger,
-        previousStartedAt: moment().subtract(-15, 's').toDate(),
-        interval: '10s',
-        ruleParamsFrom: 'now-13s',
-        buildRuleMessage,
-        unit: 's',
+    test('should round up return value', () => {
+      const catchup = getNumCatchupIntervals({
+        gap: moment.duration(15000),
+        intervalDuration: moment.duration(11000),
       });
-      expect(maxCatchup).toBeNull();
-      expect(ratio).toBeNull();
-      expect(gapDiffInUnits).toBeNull();
+      expect(catchup).toEqual(2);
     });
   });
 
@@ -799,6 +782,145 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
+    });
+  });
+
+  describe('hasTimestampFields', () => {
+    test('returns true when missing timestamp override field', async () => {
+      const timestampField = 'event.ingested';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'myfakerulename',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+    test('returns true when missing timestamp field', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'myfakerulename',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'NOT Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
     });
   });
 
@@ -878,7 +1000,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
       ]);
     });
 
@@ -917,8 +1039,8 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
-        'reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-345" reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
       ]);
     });
 
@@ -932,7 +1054,7 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['']);
+      expect(createdErrors).toEqual(['index: "index-123"']);
     });
 
     test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
@@ -947,7 +1069,9 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['reason: "some reason something went wrong"']);
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong"',
+      ]);
     });
 
     test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
@@ -964,7 +1088,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason something went wrong" caused by type: "some type"',
+        'index: "index-123" reason: "some reason something went wrong" caused by type: "some type"',
       ]);
     });
   });
@@ -979,10 +1103,12 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -996,10 +1122,12 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1007,6 +1135,8 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      // @ts-expect-error not full interface
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1017,6 +1147,24 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      // @ts-expect-error not full interface
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if mixed reasons for shard failures', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        // @ts-expect-error not full interface
+        { reason: { reason: 'Not a sort failure' } },
+        // @ts-expect-error not full interface
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1034,9 +1182,29 @@ describe('utils', () => {
       expect(success).toEqual(true);
     });
 
+    test('result with error will create success: true within the result set if shard failure reasons are sorting on timestamp field', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        // @ts-expect-error not full interface
+        { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        // @ts-expect-error not full interface
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: 'event.ingested',
+      });
+      expect(success).toEqual(true);
+    });
+
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1046,7 +1214,11 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1056,7 +1228,11 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1068,28 +1244,33 @@ describe('utils', () => {
   describe('lastValidDate', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
 
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
 
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1119,7 +1300,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
@@ -1147,10 +1328,12 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1159,18 +1342,22 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1178,15 +1365,18 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override select values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1198,10 +1388,12 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });
@@ -1251,6 +1443,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
@@ -1259,6 +1452,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
           createdSignalsCount: 2,
+          createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
@@ -1268,10 +1462,12 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
         createdSignalsCount: 5, // Adds the 3 and 2 together
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });
@@ -1290,6 +1486,20 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('calculateThresholdSignalUuid', () => {
+    it('should generate a uuid without key', () => {
+      const startedAt = new Date('2020-12-17T16:27:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, ['agent.name']);
+      expect(signalUuid).toEqual('a4832768-a379-583a-b1a2-e2ce2ad9e6e9');
+    });
+
+    it('should generate a uuid with key', () => {
+      const startedAt = new Date('2019-11-18T13:32:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, ['host.ip'], '1.2.3.4');
+      expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
     });
   });
 });

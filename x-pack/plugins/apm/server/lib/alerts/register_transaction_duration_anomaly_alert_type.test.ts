@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { APMConfig } from '../..';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
@@ -34,14 +35,14 @@ describe('Transaction duration anomaly alert', () => {
   describe("doesn't send alert", () => {
     it('ml is not defined', async () => {
       let alertExecutor: any;
-      const alerts = {
+      const alerting = {
         registerType: ({ executor }) => {
           alertExecutor = executor;
         },
       } as AlertingPlugin['setup'];
 
       registerTransactionDurationAnomalyAlertType({
-        alerts,
+        alerting,
         ml: undefined,
         config$: mockedConfig$,
       });
@@ -65,7 +66,7 @@ describe('Transaction duration anomaly alert', () => {
 
       let alertExecutor: any;
 
-      const alerts = {
+      const alerting = {
         registerType: ({ executor }) => {
           alertExecutor = executor;
         },
@@ -77,7 +78,7 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerts,
+        alerting,
         ml,
         config$: mockedConfig$,
       });
@@ -103,7 +104,7 @@ describe('Transaction duration anomaly alert', () => {
 
       let alertExecutor: any;
 
-      const alerts = {
+      const alerting = {
         registerType: ({ executor }) => {
           alertExecutor = executor;
         },
@@ -119,7 +120,7 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerts,
+        alerting,
         ml,
         config$: mockedConfig$,
       });
@@ -162,7 +163,7 @@ describe('Transaction duration anomaly alert', () => {
 
       let alertExecutor: any;
 
-      const alerts = {
+      const alerting = {
         registerType: ({ executor }) => {
           alertExecutor = executor;
         },
@@ -198,7 +199,7 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerts,
+        alerting,
         ml,
         config$: mockedConfig$,
       });
@@ -261,7 +262,7 @@ describe('Transaction duration anomaly alert', () => {
 
       let alertExecutor: any;
 
-      const alerts = {
+      const alerting = {
         registerType: ({ executor }) => {
           alertExecutor = executor;
         },
@@ -285,7 +286,7 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        alerts,
+        alerting,
         ml,
         config$: mockedConfig$,
       });

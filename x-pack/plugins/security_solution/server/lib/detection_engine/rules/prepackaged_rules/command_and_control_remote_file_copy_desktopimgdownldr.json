@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote File Download via Desktopimgdownldr Utility",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:desktopimgdownldr.exe or process.pe.original_file_name:desktopimgdownldr.exe or winlog.event_data.OriginalFileName:desktopimgdownldr.exe) and process.args:/lockscreenurl\\:http*",
+  "query": "event.category:process and event.type:(start or process_started) and (process.name:desktopimgdownldr.exe or process.pe.original_file_name:desktopimgdownldr.exe) and process.args:/lockscreenurl\\:http*",
   "references": [
     "https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/"
   ],
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 4
 }

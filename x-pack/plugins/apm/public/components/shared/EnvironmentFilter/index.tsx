@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSelect } from '@elastic/eui';
@@ -13,8 +14,8 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
@@ -63,11 +64,10 @@ export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { uiFilters, urlParams } = useUrlParams();
+  const { urlParams } = useUrlParams();
 
-  const { environment } = uiFilters;
-  const { start, end } = urlParams;
-  const { environments, status = 'loading' } = useEnvironments({
+  const { environment, start, end } = urlParams;
+  const { environments, status = 'loading' } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,

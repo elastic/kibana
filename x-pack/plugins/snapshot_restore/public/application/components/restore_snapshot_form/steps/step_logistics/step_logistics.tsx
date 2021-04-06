@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverGt from 'semver/functions/gt';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -25,9 +28,7 @@ import { EuiSelectableOption } from '@elastic/eui';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
-import { documentationLinksService } from '../../../../services/documentation';
-
-import { useServices } from '../../../../app_context';
+import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
@@ -38,6 +39,8 @@ import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
+import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
+
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
   restoreSettings,
@@ -45,10 +48,12 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   errors,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const {
     indices: unfilteredSnapshotIndices,
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
+    version,
   } = snapshotDetails;
 
   const snapshotIndices = unfilteredSnapshotIndices.filter(
@@ -76,6 +81,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement,
     partial,
     includeGlobalState,
+    includeAliases,
   } = restoreSettings;
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
@@ -164,7 +170,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRestoreDocUrl()}
+            href={docLinks.links.snapshotRestore.restoreSnapshot}
             target="_blank"
             iconType="help"
           >
@@ -563,11 +569,34 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           </EuiTitle>
         }
         description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-            defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings."
-          />
+          <>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
+              defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
+              templates with the same name. Also restores persistent settings and all system indices. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
+                    {i18n.translate(
+                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
+                      { defaultMessage: 'Learn more.' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+
+            {/* Only display callout if include_global_state is enabled and the snapshot was created by ES 7.12+
+             * Note: Once we support features states in the UI, we will also need to add a check here for that
+             * See https://github.com/elastic/kibana/issues/95128 more details
+             */}
+            {includeGlobalState && semverGt(version, '7.12.0') && (
+              <>
+                <EuiSpacer size="s" />
+                <SystemIndicesOverwrittenCallOut />
+              </>
+            )}
+          </>
         }
         fullWidth
       >
@@ -593,6 +622,42 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             checked={includeGlobalState === undefined ? false : includeGlobalState}
             onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
             disabled={!snapshotIncludeGlobalState}
+            data-test-subj="includeGlobalStateSwitch"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Include aliases */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesTitle"
+                defaultMessage="Restore aliases"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesDescription"
+            defaultMessage="Restores index aliases along with their associated indices."
+          />
+        }
+        fullWidth
+      >
+        <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesLabel"
+                defaultMessage="Restore aliases"
+              />
+            }
+            checked={includeAliases === undefined ? true : includeAliases}
+            onChange={(e) => updateRestoreSettings({ includeAliases: e.target.checked })}
+            data-test-subj="includeAliasesSwitch"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

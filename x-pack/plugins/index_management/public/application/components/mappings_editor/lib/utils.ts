@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 
 import {
@@ -18,6 +20,8 @@ import {
   ParameterName,
   ComboBoxOption,
   GenericObject,
+  RuntimeFields,
+  NormalizedRuntimeFields,
 } from '../types';
 
 import {
@@ -77,14 +81,9 @@ const getTypeLabel = (type?: DataType): string => {
     : `${TYPE_DEFINITION.other.label}: ${type}`;
 };
 
-export const getTypeLabelFromField = (field: Field) => {
-  const { type, runtime_type: runtimeType } = field;
+export const getTypeLabelFromField = (field: { type: DataType }) => {
+  const { type } = field;
   const typeLabel = getTypeLabel(type);
-
-  if (type === 'runtime') {
-    const runtimeTypeLabel = getTypeLabel(runtimeType);
-    return `${typeLabel} ${runtimeTypeLabel}`;
-  }
 
   return typeLabel;
 };
@@ -566,3 +565,29 @@ export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recu
       ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
       : { ...acc, [key]: value };
   }, {} as T);
+
+export const normalizeRuntimeFields = (fields: RuntimeFields = {}): NormalizedRuntimeFields => {
+  return Object.entries(fields).reduce((acc, [name, field]) => {
+    const id = getUniqueId();
+    return {
+      ...acc,
+      [id]: {
+        id,
+        source: {
+          name,
+          ...field,
+        },
+      },
+    };
+  }, {} as NormalizedRuntimeFields);
+};
+
+export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): RuntimeFields => {
+  return Object.values(fields).reduce((acc, { source }) => {
+    const { name, ...rest } = source;
+    return {
+      ...acc,
+      [name]: rest,
+    };
+  }, {} as RuntimeFields);
+};

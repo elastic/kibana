@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 import {
   saveAction,
@@ -29,27 +19,24 @@ import {
   editAction,
 } from './actions';
 
+interface Options {
+  client: KibanaClient;
+  dataDir: string;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}
+
 export class EsArchiver {
-  private readonly client: Client;
+  private readonly client: KibanaClient;
   private readonly dataDir: string;
   private readonly log: ToolingLog;
   private readonly kbnClient: KbnClient;
 
-  constructor({
-    client,
-    dataDir,
-    log,
-    kibanaUrl,
-  }: {
-    client: Client;
-    dataDir: string;
-    log: ToolingLog;
-    kibanaUrl: string;
-  }) {
-    this.client = client;
-    this.dataDir = dataDir;
-    this.log = log;
-    this.kbnClient = new KbnClient({ log, url: kibanaUrl });
+  constructor(options: Options) {
+    this.client = options.client;
+    this.dataDir = options.dataDir;
+    this.log = options.log;
+    this.kbnClient = options.kbnClient;
   }
 
   /**
@@ -169,7 +156,7 @@ export class EsArchiver {
    *  @return Promise
    */
   async emptyKibanaIndex() {
-    await emptyKibanaIndexAction({
+    return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,

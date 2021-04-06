@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -30,10 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertest.get(`/api/uptime/pings?from=${from}&to=${to}&size=10`);
 
-      const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
+      const { total, pings } = decodePingsResponseData(apiResponse.body);
 
       expect(total).to.be(2000);
-      expect(locations).to.eql(['mpls']);
       expect(pings).length(10);
       expect(pings.map(({ monitor: { id } }) => id)).to.eql([
         '0074-up',
@@ -58,10 +58,9 @@ export default function ({ getService }: FtrProviderContext) {
         `/api/uptime/pings?from=${from}&to=${to}&size=${size}`
       );
 
-      const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
+      const { total, pings } = decodePingsResponseData(apiResponse.body);
 
       expect(total).to.be(2000);
-      expect(locations).to.eql(['mpls']);
       expect(pings).length(50);
       expect(pings.map(({ monitor: { id } }) => id)).to.eql([
         '0074-up',
@@ -127,10 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
         `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}`
       );
 
-      const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
+      const { total, pings } = decodePingsResponseData(apiResponse.body);
 
       expect(total).to.be(20);
-      expect(locations).to.eql(['mpls']);
       pings.forEach(({ monitor: { id } }) => expect(id).to.eql('0001-up'));
       expect(pings.map(({ timestamp }) => timestamp)).to.eql([
         '2019-09-11T03:40:34.371Z',
@@ -162,10 +160,9 @@ export default function ({ getService }: FtrProviderContext) {
         `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}&sort=${sort}`
       );
 
-      const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
+      const { total, pings } = decodePingsResponseData(apiResponse.body);
 
       expect(total).to.be(20);
-      expect(locations).to.eql(['mpls']);
       expect(pings.map(({ timestamp }) => timestamp)).to.eql([
         '2019-09-11T03:31:04.380Z',
         '2019-09-11T03:31:34.366Z',

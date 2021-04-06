@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -91,7 +92,7 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
@@ -102,7 +103,7 @@ export const buildDnsQuery = ({
           aggs: {
             bucket_sort: {
               bucket_sort: {
-                sort: [getQueryOrder(sort), { _key: { order: 'asc' } }],
+                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
                 from: cursorStart,
                 size: querySize,
               },

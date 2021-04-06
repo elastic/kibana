@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
 
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';
@@ -64,21 +66,18 @@ export const timelineQueryByIdSelector = () =>
 
 export const globalSelector = () => createSelector(selectGlobal, (global) => global);
 
+const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
+
 export const globalQuerySelector = () =>
-  createSelector(
-    selectGlobal,
-    (global) =>
-      global.query || {
-        query: '',
-        language: 'kuery',
-      }
-  );
+  createSelector(selectGlobal, (global) => global.query || DEFAULT_QUERY);
 
 export const globalSavedQuerySelector = () =>
   createSelector(selectGlobal, (global) => global.savedQuery || null);
 
+const NO_FILTERS: Filter[] = [];
+
 export const globalFiltersQuerySelector = () =>
-  createSelector(selectGlobal, (global) => global.filters || []);
+  createSelector(selectGlobal, (global) => global.filters || NO_FILTERS);
 
 export const getTimelineSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 

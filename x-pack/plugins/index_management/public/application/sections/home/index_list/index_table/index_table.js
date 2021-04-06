@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import qs from 'query-string';
@@ -101,7 +103,11 @@ export class IndexTable extends Component {
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(
-      () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
+      () =>
+        this.props.reloadIndices(
+          this.props.indices.map((i) => i.name),
+          { asSystemRequest: true }
+        ),
       REFRESH_RATE_INDEX_LIST
     );
     const { location, filterChanged } = this.props;
@@ -265,7 +271,7 @@ export class IndexTable extends Component {
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              appServices.uiMetricService.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
+              appServices.uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { interval, from, Subject } from 'rxjs';
@@ -25,7 +26,7 @@ describe('Poll Monitor', () => {
 
     expect(instantiator).not.toHaveBeenCalled();
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       monitoredObservable.pipe(take(3)).subscribe({
         next,
@@ -45,7 +46,7 @@ describe('Poll Monitor', () => {
     const instantiator = jest.fn(() => interval(100));
     const monitoredObservable = createObservableMonitor(instantiator, { heartbeatInterval });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       monitoredObservable.pipe(take(3)).subscribe({
         next,
@@ -79,7 +80,7 @@ describe('Poll Monitor', () => {
     const onError = jest.fn();
     const monitoredObservable = createObservableMonitor(instantiator, { onError });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       const error = jest.fn();
       monitoredObservable
@@ -135,7 +136,7 @@ describe('Poll Monitor', () => {
       inactivityTimeout: 500,
     });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       const error = jest.fn();
       monitoredObservable

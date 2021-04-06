@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import request, { Cookie } from 'request';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -140,12 +141,12 @@ export default function ({ getService }: FtrProviderContext) {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('legacyEs').deleteByQuery({
+        const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          q: 'doc_type:token',
+          body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
 
         const response = await supertest
           .get('/abc/xyz/')

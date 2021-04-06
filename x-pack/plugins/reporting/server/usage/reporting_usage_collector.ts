@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first, map } from 'rxjs/operators';
@@ -14,16 +15,6 @@ import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
 import { reportingSchema } from './schema';
 
-// places the reporting data as kibana stats
-const METATYPE = 'kibana_stats';
-
-interface XpackBulkUpload {
-  usage: {
-    xpack: {
-      reporting: ReportingUsageType;
-    };
-  };
-}
 /*
  * @return {Object} kibana usage stats type collection object
  */
@@ -34,31 +25,14 @@ export function getReportingUsageCollector(
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
-  return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
+  return usageCollection.makeUsageCollector<ReportingUsageType>({
     type: 'reporting',
-    fetch: ({ callCluster }: CollectorFetchContext) => {
+    fetch: ({ esClient }: CollectorFetchContext) => {
       const config = reporting.getConfig();
-      return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
+      return getReportingUsage(config, getLicense, esClient, exportTypesRegistry);
     },
     isReady,
     schema: reportingSchema,
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
-     */
-    formatForBulkUpload: (result: ReportingUsageType) => {
-      return {
-        type: METATYPE,
-        payload: {
-          usage: {
-            xpack: {
-              reporting: result,
-            },
-          },
-        },
-      };
-    },
   });
 }
 

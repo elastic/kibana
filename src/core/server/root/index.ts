@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ConnectableObservable, Subscription } from 'rxjs';
-import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
+import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
 import { Env, RawConfigurationProvider } from '../config';
 import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
@@ -47,7 +36,7 @@ export class Root {
 
   public async setup() {
     try {
-      await this.server.setupCoreConfig();
+      this.server.setupCoreConfig();
       await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();
@@ -99,7 +88,7 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
-      map((config) => this.loggingSystem.upgrade(config)),
+      concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
       tap({ error: (err) => console.error('Configuring logger failed:', err) }),

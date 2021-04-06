@@ -1,22 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
-  const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
+  const security = getService('security');
 
   describe('GeoJSON import layer panel', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'global_maps_all',
+        'geoall_data_writer',
+        'global_index_pattern_management_all',
+      ]);
       await PageObjects.maps.openNewMap();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     beforeEach(async () => {
@@ -32,8 +42,8 @@ export default function ({ getPageObjects }) {
     });
 
     it('should add GeoJSON file to map', async () => {
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(true);
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(2);
 
       const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
         DEFAULT_LOAD_FILE_NAME
@@ -44,9 +54,9 @@ export default function ({ getPageObjects }) {
     it('should remove layer on cancel', async () => {
       await PageObjects.maps.cancelLayerAdd();
 
-      await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(false);
+      await PageObjects.maps.waitForLayerDeleted('point');
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(1);
     });
 
     it('should replace layer on input change', async () => {
@@ -76,8 +86,8 @@ export default function ({ getPageObjects }) {
       );
       expect(filePickerLoadedFile).to.be(true);
       // Check that no file is loaded in layer preview
-      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-      expect(layerLoadedInToc).to.be(false);
+      const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
+      expect(numberOfLayers).to.be(1);
     });
 
     it('should prevent import button from activating unless valid index name provided', async () => {

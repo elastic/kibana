@@ -1,0 +1,105 @@
+@import '../../../../../core/public/mixins';
+
+discover-app {
+  flex-grow: 1;
+}
+
+.dscPage {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    @include kibanaFullBodyHeight();
+  }
+
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+
+  .dscPageBody {
+    overflow: hidden;
+  }
+}
+
+.dscPageBody__inner {
+  overflow: hidden;
+  height: 100%;
+}
+
+.dscPageBody__contents {
+  overflow: hidden;
+  padding-top: $euiSizeXS / 2; // A little breathing room for the index pattern button
+}
+
+.dscPageContent__wrapper {
+  padding: 0 $euiSize $euiSize 0;
+  overflow: hidden; // Ensures horizontal scroll of table
+
+  @include euiBreakpoint('xs', 's') {
+    padding: 0 $euiSize $euiSize;
+  }
+}
+
+.dscPageContent {
+  border: $euiBorderThin;
+}
+
+.dscPageContent,
+.dscPageContent__inner {
+  height: 100%;
+}
+
+.dscPageContent--centered {
+  height: auto;
+}
+
+.dscResultCount {
+  padding: $euiSizeS;
+  min-height: $euiSize * 3;
+
+  @include euiBreakpoint('xs', 's') {
+    .dscResultCount__toggle {
+      align-items: flex-end;
+    }
+
+    .dscResuntCount__title,
+    .dscResultCount__actions {
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+.dscTimechart {
+  display: block;
+  position: relative;
+
+  // SASSTODO: the visualizing component should have an option or a modifier
+  .series > rect {
+    fill-opacity: .5;
+    stroke-width: 1;
+  }
+}
+
+.dscHistogram {
+  display: flex;
+  height: $euiSize * 12.5;
+  padding: $euiSizeS;
+}
+
+// new slimmer layout for data grid
+.dscHistogramGrid {
+  display: flex;
+  height: $euiSize * 8;
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+}
+
+.dscTable {
+  // SASSTODO: add a monospace modifier to the doc-table component
+  .kbnDocTable__row {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
+  }
+}
+
+.dscTable__footer {
+  background-color: $euiColorLightShade;
+  padding: $euiSizeXS $euiSizeS;
+  text-align: center;
+}

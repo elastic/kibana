@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Section } from '../sections';
+
+import type { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
 import { useLink, useConfig } from '../hooks';
 
@@ -108,7 +111,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiFlexItem>
                     <EuiButtonEmpty
                       iconType="popout"
-                      href="https://ela.st/ingest-manager-feedback"
+                      href="https://ela.st/fleet-feedback"
                       target="_blank"
                     >
                       <FormattedMessage
@@ -122,7 +125,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
                         <FormattedMessage
                           id="xpack.fleet.appNavigation.settingsButton"
-                          defaultMessage="Settings"
+                          defaultMessage="Fleet settings"
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>

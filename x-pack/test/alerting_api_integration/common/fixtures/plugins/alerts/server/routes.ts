@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   CoreSetup,
   RequestHandlerContext,
@@ -11,15 +13,15 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
-import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
+import { RawAlert } from '../../../../../../../plugins/alerting/server/types';
+import {
+  ConcreteTaskInstance,
+  TaskInstance,
+} from '../../../../../../../plugins/task_manager/server';
+import { FixtureStartDeps } from './plugin';
 
-export function defineRoutes(
-  core: CoreSetup<FixtureStartDeps>,
-  { spaces, security }: Partial<FixtureSetupDeps>
-) {
+export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -40,13 +42,16 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       const { id } = req.params;
 
+      const [
+        { savedObjects },
+        { encryptedSavedObjects, security, spaces },
+      ] = await core.getStartServices();
       if (!security) {
         return res.ok({
           body: {},
         });
       }
 
-      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
       const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
         includedHiddenTypes: ['alert'],
       });
@@ -64,19 +69,19 @@ export function defineRoutes(
 
       const user = await security.authc.getCurrentUser(req);
       if (!user) {
-        return res.internalError({});
+        throw new Error('Failed to get the current user');
       }
 
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
       // API key for the user, instead of having the user create it themselves, which requires api_key
       // privileges
-      const createAPIKeyResult = await security.authc.grantAPIKeyAsInternalUser(req, {
+      const createAPIKeyResult = await security.authc.apiKeys.grantAsInternalUser(req, {
         name: `alert:migrated-to-7.10:${user.username}`,
         role_descriptors: {},
       });
 
       if (!createAPIKeyResult) {
-        return res.internalError({});
+        throw new Error('Failed to grant an API Key');
       }
 
       const result = await savedObjectsWithAlerts.update<RawAlert>(
@@ -181,6 +186,40 @@ export function defineRoutes(
         'task',
         alert.attributes.scheduledTaskId!,
         { runAt }
+      );
+      return res.ok({ body: result });
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/alerts_fixture/{id}/reset_task_status',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          status: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const [{ savedObjects }] = await core.getStartServices();
+      const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+        includedHiddenTypes: ['task', 'alert'],
+      });
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
+      const result = await savedObjectsWithTasksAndAlerts.update<ConcreteTaskInstance>(
+        'task',
+        alert.attributes.scheduledTaskId!,
+        { status }
       );
       return res.ok({ body: result });
     }

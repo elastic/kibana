@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -24,6 +13,7 @@ import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
+import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -73,6 +63,7 @@ describe('Header', () => {
     const navLinks$ = new BehaviorSubject([
       { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
     ]);
+    const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
@@ -82,6 +73,9 @@ describe('Header', () => {
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
+    const breadcrumbsAppendExtension$ = new BehaviorSubject<
+      undefined | ChromeBreadcrumbsAppendExtension
+    >(undefined);
     const component = mountWithIntl(
       <Header
         {...mockProps()}
@@ -91,6 +85,8 @@ describe('Header', () => {
         recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
         customNavLink$={customNavLink$}
+        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+        headerBanner$={headerBanner$}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();
@@ -104,5 +100,19 @@ describe('Header', () => {
     component.update();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
+
+    act(() =>
+      breadcrumbsAppendExtension$.next({
+        content: (root: HTMLDivElement) => {
+          root.innerHTML = '<div class="my-extension">__render__</div>';
+          return () => (root.innerHTML = '');
+        },
+      })
+    );
+    component.update();
+    expect(component.find('HeaderExtension').exists()).toBeTruthy();
+    expect(
+      component.find('HeaderExtension').getDOMNode().querySelector('.my-extension')
+    ).toBeTruthy();
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useMemo } from 'react';
@@ -12,22 +13,33 @@ import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { getFilterAggTypeConfig } from '../config';
-import { FilterAggType, PivotAggsConfigFilter } from '../types';
+import type { FilterAggType, PivotAggsConfigFilter } from '../types';
+import type { RuntimeMappings } from '../../types';
+import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
+import { isPopulatedObject } from '../../../../../../../../../common/shared_imports';
 
 /**
  * Resolves supported filters for provided field.
  */
 export function getSupportedFilterAggs(
   fieldName: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  runtimeMappings?: RuntimeMappings
 ): FilterAggType[] {
-  const field = indexPattern.fields.getByName(fieldName);
+  const indexPatternField = indexPattern.fields.getByName(fieldName);
 
-  if (field === undefined) {
-    throw new Error(`The field ${fieldName} does not exist in the index`);
+  if (indexPatternField !== undefined) {
+    return [...commonFilterAggs, ...filterAggsFieldSupport[indexPatternField.type]];
+  }
+  if (isPopulatedObject(runtimeMappings) && runtimeMappings.hasOwnProperty(fieldName)) {
+    const runtimeField = runtimeMappings[fieldName];
+    return [
+      ...commonFilterAggs,
+      ...filterAggsFieldSupport[getKibanaFieldTypeFromEsType(runtimeField.type)],
+    ];
   }
 
-  return [...commonFilterAggs, ...filterAggsFieldSupport[field.type]];
+  throw new Error(`The field ${fieldName} does not exist in the index or runtime mappings`);
 }
 
 /**
@@ -41,12 +53,12 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   onChange,
   selectedField,
 }) => {
-  const { indexPattern } = useContext(CreateTransformWizardContext);
+  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
 
-  const filterAggsOptions = useMemo(() => getSupportedFilterAggs(selectedField, indexPattern!), [
-    indexPattern,
-    selectedField,
-  ]);
+  const filterAggsOptions = useMemo(
+    () => getSupportedFilterAggs(selectedField, indexPattern!, runtimeMappings),
+    [indexPattern, selectedField, runtimeMappings]
+  );
 
   useUpdateEffect(() => {
     // reset filter agg on field change

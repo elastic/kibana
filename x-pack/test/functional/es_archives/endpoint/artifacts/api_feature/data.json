@@ -60,9 +60,13 @@
         "created": 1593183699663,
         "schemaVersion": "v1",
         "semanticVersion": "1.0.1",
-        "ids": [
-          "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
-          "endpoint-exceptionlist-windows-v1-8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e"
+        "artifacts": [
+          {
+            "artifactId": "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
+          },
+          {
+            "artifactId": "endpoint-exceptionlist-windows-v1-8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e"
+          }
         ]
       },
       "type": "endpoint:user-artifact-manifest",

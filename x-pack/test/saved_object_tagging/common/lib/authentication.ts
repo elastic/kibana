@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ROLES = {
@@ -92,6 +93,19 @@ export const ROLES = {
       ],
     },
   },
+  KIBANA_RBAC_DEFAULT_SPACE_DASHBOARD_WRITE_USER: {
+    name: 'kibana_rbac_default_space_dashboard_write_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            dashboard: ['all'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
   KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER: {
     name: 'kibana_rbac_default_space_visualize_read_user',
     privileges: {
@@ -99,6 +113,19 @@ export const ROLES = {
         {
           feature: {
             visualize: ['read'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_WRITE_USER: {
+    name: 'kibana_rbac_default_space_visualize_write_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            visualize: ['all'],
           },
           spaces: ['default'],
         },
@@ -192,6 +219,16 @@ export const USERS = {
     username: 'a_kibana_rbac_default_space_visualize_read_user',
     password: 'password',
     roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER.name],
+  },
+  DEFAULT_SPACE_DASHBOARD_WRITE_USER: {
+    username: 'a_kibana_rbac_default_space_dashboard_write_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_DASHBOARD_WRITE_USER.name],
+  },
+  DEFAULT_SPACE_VISUALIZE_WRITE_USER: {
+    username: 'a_kibana_rbac_default_space_visualize_write_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_WRITE_USER.name],
   },
   DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER: {
     username: 'a_kibana_rbac_default_space_advanced_settings_read_user',

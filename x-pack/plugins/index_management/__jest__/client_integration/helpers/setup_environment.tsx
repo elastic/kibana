@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ import { notificationService } from '../../../public/application/services/notifi
 import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
-import { setExtensionsService } from '../../../public/application/store/selectors';
+import { setExtensionsService } from '../../../public/application/store/selectors/extension_service';
 import {
   MappingsEditorProvider,
   ComponentTemplatesProvider,
@@ -39,7 +40,7 @@ export const services = {
   uiMetricService: new UiMetricService('index_management'),
 };
 
-services.uiMetricService.setup({ reportUiStats() {} } as any);
+services.uiMetricService.setup({ reportUiCounter() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
 

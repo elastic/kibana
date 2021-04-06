@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
+import {
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { shouldProviderUseLoginForm } from '../../../common/model';
 import { parseNext } from '../../../common/parse_next';
-import { LoginState } from '../../../common/login_state';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Login view.
@@ -26,8 +33,8 @@ export function defineLoginRoutes({
       validate: {
         query: schema.object(
           {
-            next: schema.maybe(schema.string()),
-            msg: schema.maybe(schema.string()),
+            [NEXT_URL_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
+            [LOGOUT_REASON_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
           },
           { unknowns: 'allow' }
         ),
@@ -59,7 +66,7 @@ export function defineLoginRoutes({
         // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
         // be sure that config is present for every provider in `config.authc.sortedProviders`.
         const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
-        const usesLoginForm = type === 'basic' || type === 'token';
+        const usesLoginForm = shouldProviderUseLoginForm(type);
         return {
           type,
           name,

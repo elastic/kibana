@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -61,39 +62,42 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
     }
   }, [dispatch, filters, selectedFilters]);
 
-  const updateUrlParams: UpdateUrlParams = (updatedParams) => {
-    if (!history || !location) return;
-    const { pathname, search } = location;
-    const currentParams = getParsedParams(search);
-    const mergedParams = {
-      ...currentParams,
-      ...updatedParams,
-    };
+  const updateUrlParams: UpdateUrlParams = useCallback(
+    (updatedParams) => {
+      if (!history || !location) return;
+      const { pathname, search } = location;
+      const currentParams = getParsedParams(search);
+      const mergedParams = {
+        ...currentParams,
+        ...updatedParams,
+      };
 
-    history.push({
-      pathname,
-      search: stringify(
-        // drop any parameters that have no value
-        Object.keys(mergedParams).reduce((params, key) => {
-          const value = mergedParams[key];
-          if (value === undefined || value === '') {
-            return params;
-          }
-          return {
-            ...params,
-            [key]: value,
-          };
-        }, {}),
-        { sort: false }
-      ),
-    });
-    const filterMap = getMapFromFilters(mergedParams.filters);
-    if (!filterMap) {
-      dispatch(setSelectedFilters(null));
-    } else {
-      dispatch(setSelectedFilters(mapMapToObject(filterMap)));
-    }
-  };
+      history.push({
+        pathname,
+        search: stringify(
+          // drop any parameters that have no value
+          Object.keys(mergedParams).reduce((params, key) => {
+            const value = mergedParams[key];
+            if (value === undefined || value === '') {
+              return params;
+            }
+            return {
+              ...params,
+              [key]: value,
+            };
+          }, {}),
+          { sort: false }
+        ),
+      });
+      const filterMap = getMapFromFilters(mergedParams.filters);
+      if (!filterMap) {
+        dispatch(setSelectedFilters(null));
+      } else {
+        dispatch(setSelectedFilters(mapMapToObject(filterMap)));
+      }
+    },
+    [dispatch, history, location]
+  );
 
   return [useGetUrlParams, updateUrlParams];
 };

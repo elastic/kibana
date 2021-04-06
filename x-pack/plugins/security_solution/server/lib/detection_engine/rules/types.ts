@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -28,7 +29,7 @@ import {
   Name,
   Severity,
   Tags,
-  Threat,
+  Threats,
   To,
   Type,
   References,
@@ -59,7 +60,7 @@ import {
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
@@ -95,17 +96,16 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
-import { Alert, SanitizedAlert } from '../../../../../alerts/common';
+import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
-export interface RuleAlertType extends Alert {
-  params: RuleTypeParams;
-}
+export type RuleAlertType = Alert<RuleTypeParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -173,11 +173,15 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+export const isAlertTypes = (
+  partialAlert: Array<PartialAlert<RuleTypeParams>>
+): partialAlert is RuleAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
 };
 
-export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+export const isAlertType = (
+  partialAlert: PartialAlert<RuleTypeParams>
+): partialAlert is RuleAlertType => {
   return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
@@ -231,10 +235,11 @@ export interface CreateRulesOptions {
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
-  threat: Threat;
+  threat: Threats;
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;
@@ -288,7 +293,7 @@ export interface PatchRulesOptions {
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;
   threshold: ThresholdOrUndefined;
@@ -305,7 +310,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert | null;
+  rule: SanitizedAlert<RuleTypeParams> | null;
 }
 
 export interface ReadRuleOptions {

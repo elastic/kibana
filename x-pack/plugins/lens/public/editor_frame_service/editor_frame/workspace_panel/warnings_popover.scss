@@ -1,0 +1,17 @@
+.lnsWorkspaceWarning__button {
+  color: $euiColorWarningText;
+}
+
+.lnsWorkspaceWarningList {
+  @include euiYScroll;
+  max-height: $euiSize * 20;
+  width: $euiSize * 16;
+}
+
+.lnsWorkspaceWarningList__item {
+  padding: $euiSize;
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
+}

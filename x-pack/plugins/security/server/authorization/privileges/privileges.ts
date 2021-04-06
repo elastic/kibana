@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
-import { SecurityLicense } from '../../../common/licensing';
-import {
-  KibanaFeature,
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
+  KibanaFeature,
 } from '../../../../features/server';
-import { RawKibanaPrivileges } from '../../../common/model';
-import { Actions } from '../actions';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { RawKibanaPrivileges } from '../../../common/model';
+import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import {
   featurePrivilegeIterator,

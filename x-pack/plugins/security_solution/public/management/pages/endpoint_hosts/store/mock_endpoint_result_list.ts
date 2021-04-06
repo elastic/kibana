@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpStart } from 'kibana/public';
@@ -19,7 +20,7 @@ import {
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/policy_list/services/ingest';
+} from '../../policy/store/services/ingest';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -53,7 +54,7 @@ export const mockEndpointResultList: (options?: {
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),
-      host_status: HostStatus.ERROR,
+      host_status: HostStatus.UNHEALTHY,
       query_strategy_version: queryStrategyVersion,
     });
   }
@@ -73,7 +74,7 @@ export const mockEndpointResultList: (options?: {
 export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
-    host_status: HostStatus.ERROR,
+    host_status: HostStatus.UNHEALTHY,
     query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };

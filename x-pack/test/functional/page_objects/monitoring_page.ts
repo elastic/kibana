@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -10,7 +11,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const find = getService('find');
 
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
@@ -26,11 +26,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
         await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
       }
       await PageObjects.common.navigateToApp('monitoring');
-    }
-
-    async getWelcome() {
-      const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
-      return await el.getVisibleText();
     }
 
     async getAccessDeniedMessage() {

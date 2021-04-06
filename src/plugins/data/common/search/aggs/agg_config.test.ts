@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { identity } from 'lodash';
@@ -151,6 +140,51 @@ describe('AggConfig', () => {
       expect(dsl.aggs).toHaveProperty(avgConfig.id);
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
       expect(dsl.aggs[avgConfig.id].avg).toBe(football);
+    });
+
+    it('merges subAggs from #write() output to the current subaggs', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'median',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {},
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      const histoConfig = ac.byName('date_histogram')[0];
+      const avgConfig = ac.byName('avg')[0];
+      const medianConfig = ac.byName('median')[0];
+      const football = {};
+
+      jest
+        .spyOn(histoConfig, 'write')
+        .mockImplementation(() => ({ params: {}, subAggs: [avgConfig] }));
+      jest.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
+      jest.spyOn(medianConfig, 'write').mockImplementation(() => ({ params: football }));
+
+      (histoConfig as any).subAggs = [medianConfig];
+      const dsl = histoConfig.toDsl();
+      expect(dsl).toHaveProperty('aggs');
+      expect(dsl.aggs).toHaveProperty(avgConfig.id);
+      expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
+      expect(dsl.aggs[avgConfig.id].avg).toBe(football);
+      expect(dsl.aggs).toHaveProperty(medianConfig.id);
+      expect(dsl.aggs[medianConfig.id]).toHaveProperty('percentiles');
+      expect(dsl.aggs[medianConfig.id].percentiles).toBe(football);
     });
   });
 
@@ -518,40 +552,45 @@ describe('AggConfig', () => {
       const aggConfig = ac.createAggConfig(configStates);
       expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
         Object {
-          "arguments": Object {
-            "enabled": Array [
-              true,
-            ],
-            "field": Array [
-              "machine.os.keyword",
-            ],
-            "id": Array [
-              "1",
-            ],
-            "missingBucket": Array [
-              false,
-            ],
-            "missingBucketLabel": Array [
-              "Missing",
-            ],
-            "order": Array [
-              "asc",
-            ],
-            "otherBucket": Array [
-              false,
-            ],
-            "otherBucketLabel": Array [
-              "Other",
-            ],
-            "schema": Array [
-              "segment",
-            ],
-            "size": Array [
-              5,
-            ],
-          },
-          "function": "aggTerms",
-          "type": "function",
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "enabled": Array [
+                  true,
+                ],
+                "field": Array [
+                  "machine.os.keyword",
+                ],
+                "id": Array [
+                  "1",
+                ],
+                "missingBucket": Array [
+                  false,
+                ],
+                "missingBucketLabel": Array [
+                  "Missing",
+                ],
+                "order": Array [
+                  "asc",
+                ],
+                "otherBucket": Array [
+                  false,
+                ],
+                "otherBucketLabel": Array [
+                  "Other",
+                ],
+                "schema": Array [
+                  "segment",
+                ],
+                "size": Array [
+                  5,
+                ],
+              },
+              "function": "aggTerms",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
         }
       `);
     });
@@ -575,7 +614,7 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const aggArg = aggConfig.toExpressionAst()?.arguments.orderAgg;
+      const aggArg = aggConfig.toExpressionAst()?.chain[0].arguments.orderAgg;
       expect(aggArg).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -629,11 +668,16 @@ describe('AggConfig', () => {
       range.expressionName = 'aggRange';
       const rangesParam = range.params.find((p) => p.name === 'ranges');
       rangesParam!.toExpressionAst = (val: any) => ({
-        type: 'function',
-        function: 'aggRanges',
-        arguments: {
-          ranges: ['oh hi there!'],
-        },
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'aggRanges',
+            arguments: {
+              ranges: ['oh hi there!'],
+            },
+          },
+        ],
       });
 
       const ac = new AggConfigs(indexPattern, [], { typesRegistry });
@@ -645,7 +689,7 @@ describe('AggConfig', () => {
       };
 
       const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()!.arguments.ranges;
+      const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
       expect(ranges).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -677,8 +721,40 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const json = aggConfig.toExpressionAst()?.arguments.json;
+      const json = aggConfig.toExpressionAst()?.chain[0].arguments.json;
       expect(json).toEqual([JSON.stringify(configStates.params.json)]);
+    });
+
+    it('stringifies arrays only if they are objects', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const configStates = {
+        type: 'range',
+        params: {
+          field: 'bytes',
+          ranges: [
+            { from: 0, to: 1000 },
+            { from: 1001, to: 2000 },
+            { from: 2001, to: 3000 },
+          ],
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const ranges = aggConfig.toExpressionAst()?.chain[0].arguments.ranges;
+      expect(ranges).toEqual([JSON.stringify(configStates.params.ranges)]);
+    });
+
+    it('does not stringify arrays which are not objects', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const configStates = {
+        type: 'percentiles',
+        params: {
+          field: 'bytes',
+          percents: [1, 25, 50, 75, 99],
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const percents = aggConfig.toExpressionAst()?.chain[0].arguments.percents;
+      expect(percents).toEqual([1, 25, 50, 75, 99]);
     });
   });
 

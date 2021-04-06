@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect } from 'react';
@@ -93,7 +94,11 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   );
   useEffect(() => {
     dispatch(
-      getSnapshotCountAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now', filters: esKuery })
+      getSnapshotCountAction.get({
+        dateRangeStart: 'now-24h',
+        dateRangeEnd: 'now',
+        filters: esKuery,
+      })
     );
   }, [dispatch, esKuery]);
 
@@ -122,7 +127,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       enabled={enabled}
       hasFilters={!!overviewFilters?.filters}
       isOldAlert={isOldAlert}
-      locations={locations}
+      locations={locations || []}
       numTimes={numTimes}
       setAlertParams={setAlertParams}
       shouldUpdateUrl={shouldUpdateUrl}

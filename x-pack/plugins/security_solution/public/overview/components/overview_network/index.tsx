@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -89,34 +90,39 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     [goToNetwork, formatUrl]
   );
 
+  const title = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.networkTitle"
+        defaultMessage="Network events"
+      />
+    ),
+    []
+  );
+
+  const subtitle = useMemo(
+    () =>
+      !isEmpty(overviewNetwork) ? (
+        <FormattedMessage
+          defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
+          id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
+          values={{
+            formattedNetworkEventsCount,
+            networkEventsCount,
+          }}
+        />
+      ) : (
+        <>{''}</>
+      ),
+    [formattedNetworkEventsCount, networkEventsCount, overviewNetwork]
+  );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
         <EuiPanel data-test-subj="overview-network-query">
           <>
-            <HeaderSection
-              id={OverviewNetworkQueryId}
-              subtitle={
-                !isEmpty(overviewNetwork) ? (
-                  <FormattedMessage
-                    defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
-                    id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
-                    values={{
-                      formattedNetworkEventsCount,
-                      networkEventsCount,
-                    }}
-                  />
-                ) : (
-                  <>{''}</>
-                )
-              }
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.overview.networkTitle"
-                  defaultMessage="Network events"
-                />
-              }
-            >
+            <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
               {networkPageButton}
             </HeaderSection>
 

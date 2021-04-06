@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -18,7 +19,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 import { toggleNavLink } from './services/toggle_nav_link';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
@@ -30,12 +31,12 @@ import { ConfigSchema } from '../config';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
-  licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
@@ -44,16 +45,9 @@ export interface GraphPluginStartDependencies {
 
 export class GraphPlugin
   implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
-  private licensing: LicensingPluginSetup | null = null;
-
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  setup(
-    core: CoreSetup<GraphPluginStartDependencies>,
-    { licensing, home }: GraphPluginSetupDependencies
-  ) {
-    this.licensing = licensing;
-
+  setup(core: CoreSetup<GraphPluginStartDependencies>, { home }: GraphPluginSetupDependencies) {
     if (home) {
       home.featureCatalogue.register({
         id: 'graph',
@@ -92,8 +86,9 @@ export class GraphPlugin
         return renderApp({
           ...params,
           pluginInitializerContext: this.initializerContext,
-          licensing,
+          licensing: pluginsStart.licensing,
           core: coreStart,
+          coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
           kibanaLegacy: pluginsStart.kibanaLegacy,
@@ -104,7 +99,6 @@ export class GraphPlugin
           graphSavePolicy: config.savePolicy,
           storage: new Storage(window.localStorage),
           capabilities: coreStart.application.capabilities.graph,
-          coreStart,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
@@ -115,11 +109,8 @@ export class GraphPlugin
     });
   }
 
-  start(core: CoreStart, { home }: GraphPluginStartDependencies) {
-    if (this.licensing === null) {
-      throw new Error('Start called before setup');
-    }
-    this.licensing.license$.subscribe((license) => {
+  start(core: CoreStart, { home, licensing }: GraphPluginStartDependencies) {
+    licensing.license$.subscribe((license) => {
       const licenseInformation = checkLicense(license);
       toggleNavLink(licenseInformation, core.chrome.navLinks);
       if (home && !licenseInformation.enableAppLink) {

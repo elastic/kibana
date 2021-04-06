@@ -1,29 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import './discover_field_search.scss';
+
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFacetButton,
   EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -34,6 +25,8 @@ import {
   EuiFormRow,
   EuiButtonGroup,
   EuiOutsideClickDetector,
+  EuiFilterButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -60,13 +53,18 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
+
+  /**
+   * use new fields api
+   */
+  useNewFieldsApi?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -108,7 +106,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         defaultMessage: 'Show field filter settings',
       });
 
-  const handleFacetButtonClicked = () => {
+  const handleFilterButtonClicked = () => {
     setPopoverOpen(!isPopoverOpen);
   };
 
@@ -162,20 +160,21 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   };
 
   const buttonContent = (
-    <EuiFacetButton
+    <EuiFilterButton
       aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
-      className="dscFieldSearch__toggleButton"
-      icon={<EuiIcon type="filter" />}
+      iconType="arrowDown"
       isSelected={activeFiltersCount > 0}
-      quantity={activeFiltersCount}
-      onClick={handleFacetButtonClicked}
+      numFilters={0}
+      hasActiveFilters={activeFiltersCount > 0}
+      numActiveFilters={activeFiltersCount}
+      onClick={handleFilterButtonClicked}
     >
       <FormattedMessage
-        id="discover.fieldChooser.fieldFilterFacetButtonLabel"
+        id="discover.fieldChooser.fieldFilterButtonLabel"
         defaultMessage="Filter by type"
       />
-    </EuiFacetButton>
+    </EuiFilterButton>
   );
 
   const select = (
@@ -232,6 +231,21 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     );
   };
 
+  const footer = () => {
+    return (
+      <EuiPopoverFooter>
+        <EuiSwitch
+          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+            defaultMessage: 'Hide missing fields',
+          })}
+          checked={values.missing}
+          onChange={handleMissingChange}
+          data-test-subj="missingSwitch"
+        />
+      </EuiPopoverFooter>
+    );
+  };
+
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
       <EuiForm data-test-subj="filterSelectionPanel">
@@ -255,7 +269,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            compressed
             fullWidth
             onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
@@ -263,13 +276,14 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div className="dscFieldSearch__filterWrapper">
-        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+      <EuiSpacer size="xs" />
+      <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+        <EuiFilterGroup className="dscFieldSearch__filterWrapper">
           <EuiPopover
             id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
-            anchorPosition="downLeft"
+            anchorPosition="rightUp"
             display="block"
             isOpen={isPopoverOpen}
             closePopover={() => {
@@ -283,19 +297,10 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter>
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                  defaultMessage: 'Hide missing fields',
-                })}
-                checked={values.missing}
-                onChange={handleMissingChange}
-                data-test-subj="missingSwitch"
-              />
-            </EuiPopoverFooter>
+            {footer()}
           </EuiPopover>
-        </EuiOutsideClickDetector>
-      </div>
+        </EuiFilterGroup>
+      </EuiOutsideClickDetector>
     </React.Fragment>
   );
 }

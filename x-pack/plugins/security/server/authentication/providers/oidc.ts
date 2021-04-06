@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import type from 'type-detect';
-import { KibanaRequest } from '../../../../../../src/core/server';
+
+import type { KibanaRequest } from 'src/core/server';
+
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
-import {
-  AuthenticationProviderOptions,
-  BaseAuthenticationProvider,
-  AuthenticationProviderSpecificOptions,
-} from './base';
+import type { RefreshTokenResult, TokenPair } from '../tokens';
+import { Tokens } from '../tokens';
+import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes possible OpenID Connect login flows.
@@ -247,14 +249,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/authenticate`.
-      result = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
-        body: {
-          state: stateOIDCState,
-          nonce: stateNonce,
-          redirect_uri: authenticationResponseURI,
-          realm: this.realm,
-        },
-      });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/oidc/authenticate',
+          body: {
+            state: stateOIDCState,
+            nonce: stateNonce,
+            redirect_uri: authenticationResponseURI,
+            realm: this.realm,
+          },
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -288,11 +296,15 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
-      const {
-        state,
-        nonce,
-        redirect,
-      } = await this.options.client.callAsInternalUser('shield.oidcPrepare', { body: params });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      const { state, nonce, redirect } = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: params,
+        })
+      ).body as any;
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(
@@ -406,18 +418,17 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (state?.accessToken) {
       try {
-        const logoutBody = {
-          body: {
-            token: state.accessToken,
-            refresh_token: state.refreshToken,
-          },
-        };
         // This operation should be performed on behalf of the user with a privilege that normal
         // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-        const { redirect } = await this.options.client.callAsInternalUser(
-          'shield.oidcLogout',
-          logoutBody
-        );
+        // We can replace generic `transport.request` with a dedicated API method call once
+        // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+        const { redirect } = (
+          await this.options.client.asInternalUser.transport.request({
+            method: 'POST',
+            path: '/_security/oidc/logout',
+            body: { token: state.accessToken, refresh_token: state.refreshToken },
+          })
+        ).body as any;
 
         this.logger.debug('User session has been successfully invalidated.');
 
@@ -434,7 +445,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -450,14 +461,18 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
+    const searchParams = new URLSearchParams([
+      [
+        NEXT_URL_QUERY_STRING_PARAMETER,
+        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`,
+      ],
+      ['providerType', this.type],
+      ['providerName', this.options.name],
+    ]);
     return AuthenticationResult.redirectTo(
       `${
         this.options.basePath.serverBasePath
-      }/internal/security/capture-url?next=${encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
-      )}&providerType=${encodeURIComponent(this.type)}&providerName=${encodeURIComponent(
-        this.options.name
-      )}`,
+      }/internal/security/capture-url?${searchParams.toString()}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: null }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { signalParamsSchema, SignalParamsSchema } from './signal_params_schema';
@@ -101,5 +102,57 @@ describe('signal_params_schema', () => {
     const schema = signalParamsSchema();
     const { falsePositives, ...withoutFalsePositives } = getSignalParamsSchemaMock();
     expect(schema.validate(withoutFalsePositives).falsePositives).toEqual([]);
+  });
+
+  test('threshold validates with `value` only', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 200,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(schema.validate(mock).threshold?.value).toEqual(200);
+  });
+
+  test('threshold does not validate without `value`', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      field: 'agent.id',
+      cardinality: [
+        {
+          field: ['host.name'],
+          value: 5,
+        },
+      ],
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
+  });
+
+  test('threshold `cardinality` cannot currently be greater than length 1', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 100,
+      cardinality: [
+        {
+          field: 'host.name',
+          value: 5,
+        },
+        {
+          field: 'user.name',
+          value: 5,
+        },
+      ],
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
   });
 });

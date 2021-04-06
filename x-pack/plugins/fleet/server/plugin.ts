@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Observable } from 'rxjs';
+
+import type { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchServiceStart,
   Logger,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -17,15 +20,25 @@ import {
   RequestHandlerContext,
   KibanaRequest,
 } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import {
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
+import type { CloudSetup } from '../../cloud/server';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -44,35 +57,40 @@ import {
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
-  registerAgentRoutes,
+  registerAgentAPIRoutes,
+  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
-import { EsAssetReference, FleetConfigType, NewPackagePolicy } from '../common';
+import type {
+  ESIndexPatternService,
+  AgentService,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from './services';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
   agentPolicyService,
   packagePolicyService,
-  PackageService,
 } from './services';
 import {
   getAgentStatusById,
   authenticateAgentWithAccessToken,
-  listAgents,
-  getAgent,
+  getAgentsByKuery,
+  getAgentById,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
-import { registerIngestManagerUsageCollector } from './collectors/register';
+import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
+import { makeRouterEnforcingSuperuser } from './routes/security';
+import { startFleetServerSetup } from './services/fleet_server';
+import { FleetArtifactsClient } from './services/artifacts';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -83,12 +101,18 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export type FleetStartDeps = object;
+export interface FleetStartDeps {
+  data: DataPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
+}
 
 export interface FleetAppContext {
-  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
+  encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  security?: SecurityPluginSetup;
+  security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
@@ -114,14 +138,23 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Fleet plugin
  */
-export type ExternalCallback = [
-  'packagePolicyCreate',
-  (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
-];
+export type ExternalCallback =
+  | [
+      'packagePolicyCreate',
+      (
+        newPackagePolicy: NewPackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'packagePolicyUpdate',
+      (
+        newPackagePolicy: UpdatePackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<UpdatePackagePolicy>
+    ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
@@ -129,6 +162,12 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  * Describes public Fleet plugin contract returned at the `startup` stage.
  */
 export interface FleetStartContract {
+  /**
+   * returns a promise that resolved when fleet setup has been completed regardless if it was successful or failed).
+   * Any consumer of fleet start services should first `await` for this promise to be resolved before using those
+   * services
+   */
+  fleetSetupCompleted: () => Promise<void>;
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -142,13 +181,18 @@ export interface FleetStartContract {
    * @param args
    */
   registerExternalCallback: (...args: ExternalCallback) => void;
+
+  /**
+   * Create a Fleet Artifact Client instance
+   * @param packageName
+   */
+  createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 }
 
 export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
-  private security: SecurityPluginSetup | undefined;
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
@@ -169,11 +213,12 @@ export class FleetPlugin
   public async setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
-    if (deps.security) {
-      this.security = deps.security;
-    }
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
+
+    const config = await this.config$.pipe(first()).toPromise();
+
+    appContextService.fleetServerEnabled = config.agents.fleetServerEnabled;
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -213,59 +258,58 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
-    const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
-    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+    registerFleetUsageCollector(core, config, deps.usageCollection);
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
-
+    // For all the routes we enforce the user to have role superuser
+    const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
-    if (this.security) {
-      registerSetupRoutes(router, config);
-      registerAgentPolicyRoutes(router);
-      registerPackagePolicyRoutes(router);
-      registerOutputRoutes(router);
-      registerSettingsRoutes(router);
-      registerDataStreamRoutes(router);
-      registerEPMRoutes(router);
+    if (deps.security) {
+      registerSetupRoutes(routerSuperuserOnly, config);
+      registerAgentPolicyRoutes(routerSuperuserOnly);
+      registerPackagePolicyRoutes(routerSuperuserOnly);
+      registerOutputRoutes(routerSuperuserOnly);
+      registerSettingsRoutes(routerSuperuserOnly);
+      registerDataStreamRoutes(routerSuperuserOnly);
+      registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey =
-          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
-        if (isESOUsingEphemeralEncryptionKey) {
+        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
+        if (!isESOCanEncrypt) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
             );
           }
         } else {
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router, config);
-          registerEnrollmentApiKeyRoutes(router);
+          registerAgentAPIRoutes(routerSuperuserOnly, config);
+          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
-            router,
+            router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
+          // Do not enforce superuser role for Elastic Agent routes
+          registerElasticAgentRoutes(router, config);
         }
       }
     }
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: {
-      encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-    }
-  ): Promise<FleetStartContract> {
+  public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
+      elasticsearch: core.elasticsearch,
+      data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      security: this.security,
+      security: plugins.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
@@ -278,7 +322,13 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
+    const fleetServerSetup = startFleetServerSetup();
+
     return {
+      fleetSetupCompleted: () =>
+        new Promise<void>((resolve) => {
+          Promise.all([fleetServerSetup]).finally(() => resolve());
+        }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstalledEsAssetReferences: async (
@@ -290,8 +340,8 @@ export class FleetPlugin
         },
       },
       agentService: {
-        getAgent,
-        listAgents,
+        getAgent: getAgentById,
+        listAgents: getAgentsByKuery,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
@@ -302,8 +352,11 @@ export class FleetPlugin
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
-      registerExternalCallback: (...args: ExternalCallback) => {
-        return appContextService.addExternalCallback(...args);
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
+        return appContextService.addExternalCallback(type, callback);
+      },
+      createArtifactsClient(packageName: string) {
+        return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
     };
   }

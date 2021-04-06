@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
+import { UiCounterMetricType } from '@kbn/analytics';
 
+import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
 
@@ -15,7 +17,7 @@ const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 interface Props {
   httpClient: HttpSetup;
   apiBasePath: string;
-  trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -28,7 +30,7 @@ interface Context {
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
-  trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
 }

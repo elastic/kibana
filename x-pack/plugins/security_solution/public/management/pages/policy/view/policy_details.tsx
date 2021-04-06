@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiText,
   EuiSpacer,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
-  EuiHideFor,
+  EuiBottomBar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -33,10 +33,6 @@ import {
 } from '../store/policy_details/selectors';
 import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
-import { VerticalDivider } from './vertical_divider';
-import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
-import { MalwareProtections } from './policy_forms/protections/malware';
-import { AntivirusRegistrationForm } from './policy_forms/antivirus_registration';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -48,7 +44,26 @@ import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { AdvancedPolicyForms } from './policy_advanced';
+import { PolicyDetailsForm } from './policy_details_form';
+
+const maxFormWidth = '770px';
+const PolicyDetailsHeader = styled.div`
+  padding: ${(props) => props.theme.eui.paddingSizes.xl} 0;
+  background-color: #fafbfd;
+  border-bottom: 1px solid #d3dae6;
+  .siemHeaderPage {
+    max-width: ${maxFormWidth};
+    margin: 0 auto;
+  }
+`;
+
+const PolicyDetailsFormDiv = styled.div`
+  background-color: ${(props) => props.theme.eui.euiHeaderBackgroundColor};
+  padding: ${(props) => props.theme.eui.paddingSizes.l} 0;
+  max-width: ${maxFormWidth};
+  flex: 1;
+  align-self: center;
+`;
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -71,9 +86,9 @@ export const PolicyDetails = React.memo(() => {
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
-  const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
+  const theme = useContext(ThemeContext);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -111,9 +126,11 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
 
+  const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
-  }, [hostListRouterPath, routeState?.onCancelNavigateTo]);
+    return routingOnCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
+  }, [hostListRouterPath, routingOnCancelNavigateTo]);
+
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
@@ -130,10 +147,6 @@ export const PolicyDetails = React.memo(() => {
   const handleSaveCancel = useCallback(() => {
     setShowConfirm(false);
   }, []);
-
-  const handleAdvancedPolicyClick = useCallback(() => {
-    setShowAdvancedPolicy(!showAdvancedPolicy);
-  }, [showAdvancedPolicy]);
 
   useEffect(() => {
     if (!routeState && locationRouteState) {
@@ -160,43 +173,12 @@ export const PolicyDetails = React.memo(() => {
   }
 
   const headerRightContent = (
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <AgentsSummary
-          total={policyAgentStatusSummary?.total ?? 0}
-          online={policyAgentStatusSummary?.online ?? 0}
-          offline={policyAgentStatusSummary?.offline ?? 0}
-          error={policyAgentStatusSummary?.error ?? 0}
-        />
-      </EuiFlexItem>
-      <EuiHideFor sizes={['xs', 's']}>
-        <EuiFlexItem>
-          <VerticalDivider spacing="l" />
-        </EuiFlexItem>
-      </EuiHideFor>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleCancelOnClick} data-test-subj="policyDetailsCancelButton">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.cancel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill={true}
-          iconType="save"
-          data-test-subj="policyDetailsSaveButton"
-          onClick={handleSaveOnClick}
-          isLoading={isPolicyLoading}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.save"
-            defaultMessage="Save"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AgentsSummary
+      total={policyAgentStatusSummary?.total ?? 0}
+      online={policyAgentStatusSummary?.online ?? 0}
+      offline={policyAgentStatusSummary?.offline ?? 0}
+      error={policyAgentStatusSummary?.error ?? 0}
+    />
   );
 
   return (
@@ -208,65 +190,68 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <WrapperPage noTimeline data-test-subj="policyDetailsPage">
-        <HeaderPage
-          hideSourcerer={true}
-          title={policyItem.name}
-          backOptions={{
-            text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
-              defaultMessage: 'Back to endpoint hosts',
-            }),
-            href: formatUrl(hostListRouterPath),
-            pageId: SecurityPageName.administration,
-            dataTestSubj: 'policyDetailsBackLink',
-          }}
-        >
-          {headerRightContent}
-        </HeaderPage>
+      <WrapperPage
+        noTimeline
+        data-test-subj="policyDetailsPage"
+        noPadding
+        style={{ 'background-color': theme.eui.euiHeaderBackgroundColor }}
+        className="policyDetailsPage"
+      >
+        <PolicyDetailsHeader>
+          <HeaderPage
+            hideSourcerer={true}
+            title={policyItem.name}
+            backOptions={{
+              text: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
+                {
+                  defaultMessage: 'Back to endpoint hosts',
+                }
+              ),
+              href: formatUrl(hostListRouterPath),
+              pageId: SecurityPageName.administration,
+              dataTestSubj: 'policyDetailsBackLink',
+            }}
+          >
+            {headerRightContent}
+          </HeaderPage>
+        </PolicyDetailsHeader>
 
-        <EuiText size="xs" color="subdued">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.protections"
-              defaultMessage="Protections"
-            />
-          </h4>
-        </EuiText>
-
-        <EuiSpacer size="xs" />
-        <MalwareProtections />
-        <EuiSpacer size="l" />
-
-        <EuiText size="xs" color="subdued">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.settings"
-              defaultMessage="Settings"
-            />
-          </h4>
-        </EuiText>
-
-        <EuiSpacer size="xs" />
-        <WindowsEvents />
-        <EuiSpacer size="l" />
-        <MacEvents />
-        <EuiSpacer size="l" />
-        <LinuxEvents />
-        <EuiSpacer size="l" />
-        <AntivirusRegistrationForm />
-
-        <EuiSpacer size="l" />
-        <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.advanced.show"
-            defaultMessage="{action} advanced settings"
-            values={{ action: showAdvancedPolicy ? 'Hide' : 'Show' }}
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="l" />
-        {showAdvancedPolicy && <AdvancedPolicyForms />}
+        <PolicyDetailsFormDiv>
+          <PolicyDetailsForm />
+        </PolicyDetailsFormDiv>
+        <EuiSpacer size="xxl" />
       </WrapperPage>
+      <EuiBottomBar paddingSize="s">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="ghost"
+              onClick={handleCancelOnClick}
+              data-test-subj="policyDetailsCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill={true}
+              iconType="save"
+              data-test-subj="policyDetailsSaveButton"
+              onClick={handleSaveOnClick}
+              isLoading={isPolicyLoading}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.save"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
 
       <SpyRoute pageName={SecurityPageName.administration} />
     </>
@@ -281,59 +266,54 @@ const ConfirmUpdate = React.memo<{
   onCancel: () => void;
 }>(({ hostCount, onCancel, onConfirm }) => {
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        data-test-subj="policyDetailsConfirmModal"
-        title={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.title',
-          {
-            defaultMessage: 'Save and deploy changes',
-          }
-        )}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        confirmButtonText={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
-          {
-            defaultMessage: 'Save and deploy changes',
-          }
-        )}
-        cancelButtonText={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-      >
-        {hostCount > 0 && (
-          <>
-            <EuiCallOut
-              data-test-subj="policyDetailsWarningCallout"
-              title={i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
-                {
-                  defaultMessage:
-                    'This action will update {hostCount, plural, one {# host} other {# hosts}}',
-                  values: { hostCount },
-                }
-              )}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
-              />
-            </EuiCallOut>
-            <EuiSpacer size="xl" />
-          </>
-        )}
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
-            defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
-          />
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      data-test-subj="policyDetailsConfirmModal"
+      title={i18n.translate('xpack.securitySolution.endpoint.policy.details.updateConfirm.title', {
+        defaultMessage: 'Save and deploy changes',
+      })}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      confirmButtonText={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
+        {
+          defaultMessage: 'Save and deploy changes',
+        }
+      )}
+      cancelButtonText={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+    >
+      {hostCount > 0 && (
+        <>
+          <EuiCallOut
+            data-test-subj="policyDetailsWarningCallout"
+            title={i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
+              {
+                defaultMessage:
+                  'This action will update {hostCount, plural, one {# host} other {# hosts}}',
+                values: { hostCount },
+              }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
+              defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="xl" />
+        </>
+      )}
+      <p>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
+          defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+        />
+      </p>
+    </EuiConfirmModal>
   );
 });
 

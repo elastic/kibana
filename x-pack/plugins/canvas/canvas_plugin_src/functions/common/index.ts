@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { alterColumn } from './alterColumn';
@@ -33,8 +34,6 @@ import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapCenter } from './map_center';
-import { mapColumn } from './mapColumn';
-import { math } from './math';
 import { metric } from './metric';
 import { neq } from './neq';
 import { ply } from './ply';
@@ -88,8 +87,6 @@ export const functions = [
   lte,
   joinRows,
   mapCenter,
-  mapColumn,
-  math,
   metric,
   neq,
   ply,

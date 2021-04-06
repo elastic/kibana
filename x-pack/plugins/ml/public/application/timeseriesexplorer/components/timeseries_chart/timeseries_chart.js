@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -18,6 +19,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
+  getFormattedSeverityScore,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
@@ -395,13 +397,7 @@ class TimeseriesChartIntl extends Component {
 
   contextChartInitialized = false;
   drawContextChartSelection() {
-    const {
-      contextChartData,
-      contextChartSelected,
-      contextForecastData,
-      zoomFrom,
-      zoomTo,
-    } = this.props;
+    const { contextChartData, contextForecastData, zoomFrom, zoomTo } = this.props;
 
     if (contextChartData === undefined) {
       return;
@@ -455,10 +451,6 @@ class TimeseriesChartIntl extends Component {
           new Date(contextXScaleDomain[0]),
           new Date(contextXScaleDomain[1])
         );
-        if (this.contextChartInitialized === false) {
-          this.contextChartInitialized = true;
-          contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
-        }
       }
     }
   }
@@ -699,7 +691,7 @@ class TimeseriesChartIntl extends Component {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization
-        yMax = yMax * (1 + (maxLevel + 1) / 5);
+        yMax += Math.abs(yMax - yMin) * ((maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
     } else {
@@ -1084,11 +1076,7 @@ class TimeseriesChartIntl extends Component {
       .defined((d) => d.lower !== null && d.upper !== null);
 
     if (modelPlotEnabled === true) {
-      cxtGroup
-        .append('path')
-        .datum(data)
-        .attr('class', 'area context')
-        .attr('d', contextBoundsArea);
+      cxtGroup.append('path').datum(data).attr('class', 'area bounds').attr('d', contextBoundsArea);
     }
 
     const contextValuesLine = d3.svg
@@ -1237,19 +1225,23 @@ class TimeseriesChartIntl extends Component {
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-left"><i class="fa fa-caret-left"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10).html(`
+        <div class="brush-handle-inner brush-handle-inner-left" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="5,0 5,8 0,4" />
+          </svg>
+        </div>`);
     const rightHandle = contextGroup
       .append('foreignObject')
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0).html(`
+        <div class="brush-handle-inner brush-handle-inner-right" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="0,0 0,8 5,4" />
+          </svg>
+        </div>`);
 
     function brushing() {
       const brushExtent = brush.extent();
@@ -1447,12 +1439,11 @@ class TimeseriesChartIntl extends Component {
 
     if (marker.anomalyScore !== undefined) {
       const score = parseInt(marker.anomalyScore);
-      const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
         label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
           defaultMessage: 'anomaly score',
         }),
-        value: displayScore,
+        value: getFormattedSeverityScore(score),
         color: anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,

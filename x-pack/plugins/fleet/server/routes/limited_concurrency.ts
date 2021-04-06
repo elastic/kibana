@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type { KibanaRequest } from 'kibana/server';
+import type {
   CoreSetup,
-  KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
+  OnPreAuthHandler,
 } from 'kibana/server';
+
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
-import { FleetConfigType } from '../index';
+import type { FleetConfigType } from '../index';
 
 export class MaxCounter {
   constructor(private readonly max: number = 1) {}
@@ -47,7 +50,7 @@ export function createLimitedPreAuthHandler({
 }: {
   isMatch: (request: KibanaRequest) => boolean;
   maxCounter: IMaxCounter;
-}) {
+}): OnPreAuthHandler {
   return function preAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,

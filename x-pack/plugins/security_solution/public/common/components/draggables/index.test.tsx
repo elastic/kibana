@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
 import { TestProviders } from '../../mock';
 import '../../mock/match_media';
 import { getEmptyString } from '../empty_value';
@@ -101,12 +103,16 @@ describe('draggables', () => {
 
   describe('DefaultDraggable', () => {
     test('it works with just an id, field, and value and is some value', () => {
+      const field = 'some-field';
+      const value = 'some value';
       const wrapper = mount(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field="some-field" value="some value" />
+          <DefaultDraggable id="draggable-id" field={field} value={value} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('some value');
+      expect(wrapper.text()).toEqual(
+        `${field}${value}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
+      );
     });
 
     test('it returns null if value is undefined', () => {
@@ -198,7 +204,9 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('some value');
+      expect(wrapper.text()).toEqual(
+        `some-fieldsome value${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
+      );
     });
 
     test('it returns null if value is undefined', () => {
@@ -239,7 +247,9 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyString());
+      expect(wrapper.text()).toEqual(
+        `some-field${getEmptyString()}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
+      );
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {

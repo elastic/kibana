@@ -12,12 +12,29 @@
     "urlForwarding",
     "visualizations",
     "dashboard",
-    "charts",
     "uiActions",
-    "embeddable"
+    "embeddable",
+    "share",
+    "presentationUtil",
+    "indexPatternFieldEditor"
   ],
-  "optionalPlugins": ["usageCollection", "taskManager", "globalSearch", "savedObjectsTagging"],
-  "configPath": ["xpack", "lens"],
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable", "lensOss"]
+  "optionalPlugins": [
+    "usageCollection",
+    "taskManager",
+    "globalSearch",
+    "savedObjectsTagging"
+  ],
+  "configPath": [
+    "xpack",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaUtils",
+    "kibanaReact",
+    "embeddable"
+  ]
 }

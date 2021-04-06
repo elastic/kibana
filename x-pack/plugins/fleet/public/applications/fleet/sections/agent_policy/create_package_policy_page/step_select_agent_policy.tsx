@@ -1,24 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiTextColor,
   EuiPortal,
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
+
 import { Error } from '../../../components';
-import { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
+import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
 import {
   useGetPackageInfoByKey,
@@ -91,15 +94,13 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicies = agentPoliciesData?.items || [];
-  const agentPoliciesById = agentPolicies.reduce(
-    (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
+  const agentPolicies = useMemo(() => agentPoliciesData?.items || [], [agentPoliciesData?.items]);
+  const agentPoliciesById = useMemo(() => {
+    return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
       acc[policy.id] = policy;
       return acc;
-    },
-    {}
-  );
+    }, {});
+  }, [agentPolicies]);
 
   // Update parent package state
   useEffect(() => {
@@ -132,21 +133,24 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }
   }, [selectedPolicyId, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = packageInfoData
-    ? agentPolicies.map((agentConf) => {
-        const alreadyHasLimitedPackage =
-          (isLimitedPackage &&
-            doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
-          false;
-        return {
-          label: agentConf.name,
-          value: agentConf.id,
-          disabled: alreadyHasLimitedPackage,
-          'data-test-subj': 'agentPolicyItem',
-        };
-      })
-    : [];
+  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
+      packageInfoData
+        ? agentPolicies.map((agentConf) => {
+            const alreadyHasLimitedPackage =
+              (isLimitedPackage &&
+                doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
+              false;
+            return {
+              label: agentConf.name,
+              value: agentConf.id,
+              disabled: alreadyHasLimitedPackage,
+              'data-test-subj': 'agentPolicyItem',
+            };
+          })
+        : [],
+    [agentPolicies, isLimitedPackage, packageInfoData]
+  );
 
   const selectedAgentPolicyOption = agentPolicyOptions.find(
     (option) => option.value === selectedPolicyId
@@ -246,7 +250,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
                   defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent policy."
                   values={{
-                    count: agentPoliciesById[selectedPolicyId].agents || 0,
+                    count: agentPoliciesById[selectedPolicyId]?.agents ?? 0,
                   }}
                 />
               ) : null
@@ -282,7 +286,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                             id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
                             defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
                             values={{
-                              count: agentPoliciesById[option.value!].agents || 0,
+                              count: agentPoliciesById[option.value!]?.agents ?? 0,
                             }}
                           />
                         </EuiTextColor>

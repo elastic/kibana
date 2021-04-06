@@ -1,30 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
-import {
-  ColumnHeaderOptions,
-  SubsetTimelineModel,
-  TimelineModel,
-} from '../../../timelines/store/timeline/model';
-import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
+import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { EventsViewer } from './events_viewer';
 import { InspectButtonContainer } from '../inspect';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { EventDetailsFlyout } from './event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
+import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -38,17 +37,24 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 export interface OwnProps {
   defaultModel: SubsetTimelineModel;
   end: string;
-  id: string;
+  id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
 
+/**
+ * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
+ * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
+ * NOTE: As of writting, it is not used in the Case_View component
+ */
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
@@ -65,15 +71,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   pageFilters,
-  query,
   onRuleChange,
-  removeColumn,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   scopeId,
   showCheckboxes,
   sort,
-  updateItemsPerPage,
-  upsertColumn,
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
@@ -85,7 +90,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -104,33 +109,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
-    [id, updateItemsPerPage]
-  );
-
-  const toggleColumn = useCallback(
-    (column: ColumnHeaderOptions) => {
-      const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
-
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    },
-    [columns, id, upsertColumn, removeColumn]
-  );
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
@@ -155,22 +133,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
-            onChangeItemsPerPage={onChangeItemsPerPage}
             query={query}
             onRuleChange={onRuleChange}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
             start={start}
             sort={sort}
-            toggleColumn={toggleColumn}
             utilityBar={utilityBar}
             graphEventId={graphEventId}
           />
         </InspectButtonContainer>
       </FullScreenContainer>
-      <EventDetailsFlyout
+      <DetailsPanel
         browserFields={browserFields}
         docValueFields={docValueFields}
+        isFlyoutView
         timelineId={id}
-        toggleColumn={toggleColumn}
       />
     </>
   );
@@ -180,22 +158,22 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getEvents = timelineSelectors.getEventsByIdSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       sort,
       showCheckboxes,
-    } = events;
+    } = timeline;
 
     return {
       columns,
@@ -213,7 +191,7 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
+      graphEventId,
     };
   };
   return mapStateToProps;
@@ -222,9 +200,6 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  updateItemsPerPage: timelineActions.updateItemsPerPage,
-  removeColumn: timelineActions.removeColumn,
-  upsertColumn: timelineActions.upsertColumn,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
@@ -234,6 +209,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       prevProps.scopeId === nextProps.scopeId &&
@@ -248,6 +224,8 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
+      prevProps.renderCellValue === nextProps.renderCellValue &&
+      prevProps.rowRenderers === nextProps.rowRenderers &&
       deepEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&

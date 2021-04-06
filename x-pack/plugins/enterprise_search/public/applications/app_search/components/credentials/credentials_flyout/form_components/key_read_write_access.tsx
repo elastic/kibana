@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiCheckbox, EuiText, EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -19,7 +22,7 @@ export const FormKeyReadWriteAccess: React.FC = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.formReadWrite.label', {

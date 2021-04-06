@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { ml } from '../../../../../services/ml_api_service';
@@ -14,18 +16,19 @@ import {
 } from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (
-  d: DataFrameAnalyticsListRow,
+  analyticsConfig: DataFrameAnalyticsListRow['config'],
+  analyticsStats: DataFrameAnalyticsListRow['stats'],
   toastNotificationService: ToastNotificationService
 ) => {
   try {
-    if (isDataFrameAnalyticsFailed(d.stats.state)) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
+    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
+      await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
     }
-    await ml.dataFrameAnalytics.deleteDataFrameAnalytics(d.config.id);
+    await ml.dataFrameAnalytics.deleteDataFrameAnalytics(analyticsConfig.id);
     toastNotificationService.displaySuccessToast(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
         defaultMessage: 'Request to delete data frame analytics job {analyticsId} acknowledged.',
-        values: { analyticsId: d.config.id },
+        values: { analyticsId: analyticsConfig.id },
       })
     );
   } catch (e) {
@@ -33,7 +36,7 @@ export const deleteAnalytics = async (
       e,
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
         defaultMessage: 'An error occurred deleting the data frame analytics job {analyticsId}',
-        values: { analyticsId: d.config.id },
+        values: { analyticsId: analyticsConfig.id },
       })
     );
   }
@@ -41,20 +44,21 @@ export const deleteAnalytics = async (
 };
 
 export const deleteAnalyticsAndDestIndex = async (
-  d: DataFrameAnalyticsListRow,
+  analyticsConfig: DataFrameAnalyticsListRow['config'],
+  analyticsStats: DataFrameAnalyticsListRow['stats'],
   deleteDestIndex: boolean,
   deleteDestIndexPattern: boolean,
   toastNotificationService: ToastNotificationService
 ) => {
-  const destinationIndex = Array.isArray(d.config.dest.index)
-    ? d.config.dest.index[0]
-    : d.config.dest.index;
+  const destinationIndex = Array.isArray(analyticsConfig.dest.index)
+    ? analyticsConfig.dest.index[0]
+    : analyticsConfig.dest.index;
   try {
-    if (isDataFrameAnalyticsFailed(d.stats.state)) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
+    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
+      await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
     }
     const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
-      d.config.id,
+      analyticsConfig.id,
       deleteDestIndex,
       deleteDestIndexPattern
     );
@@ -62,7 +66,7 @@ export const deleteAnalyticsAndDestIndex = async (
       toastNotificationService.displaySuccessToast(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
           defaultMessage: 'Request to delete data frame analytics job {analyticsId} acknowledged.',
-          values: { analyticsId: d.config.id },
+          values: { analyticsId: analyticsConfig.id },
         })
       );
     }
@@ -71,7 +75,7 @@ export const deleteAnalyticsAndDestIndex = async (
         status.analyticsJobDeleted.error,
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
           defaultMessage: 'An error occurred deleting the data frame analytics job {analyticsId}',
-          values: { analyticsId: d.config.id },
+          values: { analyticsId: analyticsConfig.id },
         })
       );
     }
@@ -122,7 +126,7 @@ export const deleteAnalyticsAndDestIndex = async (
       e,
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
         defaultMessage: 'An error occurred deleting the data frame analytics job {analyticsId}',
-        values: { analyticsId: d.config.id },
+        values: { analyticsId: analyticsConfig.id },
       })
     );
   }

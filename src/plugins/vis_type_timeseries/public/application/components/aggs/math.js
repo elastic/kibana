@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect } from 'react';
@@ -42,7 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 
 export function MathAgg(props) {
-  const { siblings, model } = props;
+  const { siblings, model, fields, indexPattern } = props;
   const htmlId = htmlIdGenerator();
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -95,6 +84,8 @@ export function MathAgg(props) {
           <CalculationVars
             id={htmlId('variables')}
             metrics={siblings}
+            fields={fields}
+            indexPattern={indexPattern}
             onChange={handleChange}
             name="variables"
             model={model}
@@ -123,7 +114,7 @@ export function MathAgg(props) {
                 values={{
                   link: (
                     <EuiLink
-                      href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                      href="https://github.com/elastic/kibana/blob/master/packages/kbn-tinymath/docs/functions.md"
                       target="_blank"
                     >
                       <FormattedMessage
@@ -159,6 +150,7 @@ export function MathAgg(props) {
 MathAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

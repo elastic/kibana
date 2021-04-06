@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiToolTip } from '@elastic/eui';
@@ -14,15 +15,15 @@ import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from 
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { HeaderToolTipContent } from '../header_tooltip_content';
-import { getSortDirection } from './helpers';
-
+import { getSortDirection, getSortIndex } from './helpers';
 interface HeaderContentProps {
   children: React.ReactNode;
   header: ColumnHeaderOptions;
   isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
-  sort: Sort;
+  showSortingCapability: boolean;
+  sort: Sort[];
 }
 
 const HeaderContentComponent: React.FC<HeaderContentProps> = ({
@@ -31,10 +32,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   isLoading,
   isResizing,
   onClick,
+  showSortingCapability,
   sort,
 }) => (
-  <EventsHeading data-test-subj="header" isLoading={isLoading}>
-    {header.aggregatable ? (
+  <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
+    {header.aggregatable && showSortingCapability ? (
       <EventsHeadingTitleButton
         data-test-subj="header-sort-button"
         onClick={!isResizing && !isLoading ? onClick : noop}
@@ -51,6 +53,7 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
         <SortIndicator
           data-test-subj="header-sort-indicator"
           sortDirection={getSortDirection({ header, sort })}
+          sortNumber={getSortIndex({ header, sort })}
         />
       </EventsHeadingTitleButton>
     ) : (

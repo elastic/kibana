@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions, Action } from 'redux-actions';
@@ -18,11 +19,12 @@ import {
 export interface JourneyState {
   checkGroup: string;
   steps: Ping[];
+  details?: SyntheticsJourneyApiResponse['details'];
   loading: boolean;
   error?: Error;
 }
 
-interface JourneyKVP {
+export interface JourneyKVP {
   [checkGroup: string]: JourneyState;
 }
 
@@ -56,13 +58,14 @@ export const journeyReducer = handleActions<JourneyKVP, Payload>(
 
     [String(getJourneyStepsSuccess)]: (
       state: JourneyKVP,
-      { payload: { checkGroup, steps } }: Action<SyntheticsJourneyApiResponse>
+      { payload: { checkGroup, steps, details } }: Action<SyntheticsJourneyApiResponse>
     ) => ({
       ...state,
       [checkGroup]: {
         loading: false,
         checkGroup,
         steps,
+        details,
       },
     }),
 

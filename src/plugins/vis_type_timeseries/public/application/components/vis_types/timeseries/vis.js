@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -30,28 +19,27 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
+import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
-export class TimeseriesVisualization extends Component {
+class TimeseriesVisualization extends Component {
   static propTypes = {
     model: PropTypes.object,
     onBrush: PropTypes.func,
     visData: PropTypes.object,
-    dateFormat: PropTypes.string,
     getConfig: PropTypes.func,
   };
 
+  scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+  dateFormat = this.props.getConfig('dateFormat');
+
   xAxisFormatter = (interval) => (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
-
-    if (!scaledDataFormat || !dateFormat) {
-      return val;
-    }
-
-    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
-
+    const formatter = createIntervalBasedFormatter(
+      interval,
+      this.scaledDataFormat,
+      this.dateFormat
+    );
     return formatter(val);
   };
 
@@ -148,7 +136,7 @@ export class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush } = this.props;
+    const { model, visData, onBrush, syncColors, palettesService } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -179,6 +167,13 @@ export class TimeseriesVisualization extends Component {
         seriesGroup,
         this.props.getConfig
       );
+      const palette = {
+        ...seriesGroup.palette,
+        name:
+          seriesGroup.split_color_mode === 'kibana'
+            ? 'kibana_palette'
+            : seriesGroup.split_color_mode || seriesGroup.palette?.name,
+      };
       const yScaleType = hasSeparateAxis
         ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
         : mainAxisScaleType;
@@ -198,7 +193,9 @@ export class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
+          seriesDataRow.palette = palette;
+          seriesDataRow.baseColor = seriesGroup.color;
+          seriesDataRow.isSplitByTerms = seriesGroup.split_mode === 'terms';
         });
 
       if (isCustomDomain) {
@@ -240,8 +237,14 @@ export class TimeseriesVisualization extends Component {
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}
+          syncColors={syncColors}
+          palettesService={palettesService}
         />
       </div>
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimeseriesVisualization as default };

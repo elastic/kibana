@@ -1,26 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { dashboardExpandPanelAction } from '../../dashboard_strings';
+import { IEmbeddable } from '../../services/embeddable';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import {
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
+  DashboardContainerInput,
+} from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
@@ -33,14 +26,16 @@ function isExpanded(embeddable: IEmbeddable) {
     throw new IncompatibleActionError();
   }
 
-  return embeddable.id === embeddable.parent.getInput().expandedPanelId;
+  return (
+    embeddable.id === (embeddable.parent.getInput() as DashboardContainerInput).expandedPanelId
+  );
 }
 
 export interface ExpandPanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANEL> {
+export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;
@@ -53,12 +48,8 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
     }
 
     return isExpanded(embeddable)
-      ? i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName', {
-          defaultMessage: 'Minimize',
-        })
-      : i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-          defaultMessage: 'Maximize panel',
-        });
+      ? dashboardExpandPanelAction.getMinimizeTitle()
+      : dashboardExpandPanelAction.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: ExpandPanelActionContext) {

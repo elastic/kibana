@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -21,7 +22,7 @@ import {
   deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../../utils';
 
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the ips from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -96,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -131,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -174,13 +175,13 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
       });
 
-      it('should filter a CIDR range of 127.0.0.1/30', async () => {
+      it('should filter a CIDR range of "127.0.0.1/30"', async () => {
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -192,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -213,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
@@ -231,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -258,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
@@ -278,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -297,7 +298,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -316,7 +317,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -335,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
@@ -355,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
@@ -373,7 +374,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -393,7 +394,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
@@ -412,7 +413,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -437,7 +438,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -460,7 +461,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -488,15 +489,18 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql([]);
       });
 
-      // TODO: Fix this bug and then unskip this test
-      it.skip('will return 1 result if we have a list which contains the CIDR range of 127.0.0.1/30', async () => {
-        await importFile(supertest, 'ip_range', ['127.0.0.1/30'], 'list_items.txt');
+      it('will return 1 result if we have a list which contains the CIDR range of "127.0.0.1/30"', async () => {
+        await importFile(supertest, 'ip_range', ['127.0.0.1/30'], 'list_items.txt', [
+          '127.0.0.1',
+          '127.0.0.2',
+          '127.0.0.3',
+        ]);
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -504,14 +508,70 @@ export default ({ getService }: FtrProviderContext) => {
               field: 'ip',
               list: {
                 id: 'list_items.txt',
-                type: 'ip',
+                type: 'ip_range',
               },
               operator: 'included',
               type: 'list',
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        expect(ips).to.eql(['127.0.0.4']);
+      });
+
+      it('will return 1 result if we have a list which contains the range syntax of "127.0.0.1-127.0.0.3"', async () => {
+        await importFile(supertest, 'ip_range', ['127.0.0.1-127.0.0.3'], 'list_items.txt', [
+          '127.0.0.1',
+          '127.0.0.2',
+          '127.0.0.3',
+        ]);
+        const rule = getRuleForSignalTesting(['ip']);
+        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          [
+            {
+              field: 'ip',
+              list: {
+                id: 'list_items.txt',
+                type: 'ip_range',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        expect(ips).to.eql(['127.0.0.4']);
+      });
+
+      it('will return 1 result if we have a list which contains the range mixed syntax of "127.0.0.1/32,127.0.0.2-127.0.0.3"', async () => {
+        await importFile(
+          supertest,
+          'ip_range',
+          ['127.0.0.1/32', '127.0.0.2-127.0.0.3'],
+          'list_items.txt',
+          ['127.0.0.1', '127.0.0.2', '127.0.0.3']
+        );
+        const rule = getRuleForSignalTesting(['ip']);
+        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          [
+            {
+              field: 'ip',
+              list: {
+                id: 'list_items.txt',
+                type: 'ip_range',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -536,7 +596,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
@@ -559,14 +619,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql(['127.0.0.1', '127.0.0.3']);
       });
 
-      it('will return 4 results if we have a list that excludes all ips', async () => {
+      // flaky https://github.com/elastic/kibana/issues/89389
+      it.skip('will return 4 results if we have a list that excludes all ips', async () => {
         await importFile(
           supertest,
           'ip',
@@ -587,16 +648,19 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
         expect(ips).to.eql(['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4']);
       });
 
-      // TODO: Fix this bug and then unskip this test
-      it.skip('will return 3 results if we have a list which contains the CIDR range of 127.0.0.1/30', async () => {
-        await importFile(supertest, 'ip_range', ['127.0.0.1/30'], 'list_items.txt');
+      it('will return 3 results if we have a list which contains the CIDR range of "127.0.0.1/30"', async () => {
+        await importFile(supertest, 'ip_range', ['127.0.0.1/30'], 'list_items.txt', [
+          '127.0.0.1',
+          '127.0.0.2',
+          '127.0.0.3',
+        ]);
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -604,14 +668,41 @@ export default ({ getService }: FtrProviderContext) => {
               field: 'ip',
               list: {
                 id: 'list_items.txt',
-                type: 'ip',
+                type: 'ip_range',
               },
-              operator: 'included',
+              operator: 'excluded',
               type: 'list',
             },
           ],
         ]);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        expect(ips).to.eql(['127.0.0.1', '127.0.0.2', '127.0.0.3']);
+      });
+
+      it('will return 3 results if we have a list which contains the range syntax of "127.0.0.1-127.0.0.3"', async () => {
+        await importFile(supertest, 'ip_range', ['127.0.0.1-127.0.0.3'], 'list_items.txt', [
+          '127.0.0.1',
+          '127.0.0.2',
+          '127.0.0.3',
+        ]);
+        const rule = getRuleForSignalTesting(['ip']);
+        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          [
+            {
+              field: 'ip',
+              list: {
+                id: 'list_items.txt',
+                type: 'ip_range',
+              },
+              operator: 'excluded',
+              type: 'list',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -27,8 +30,8 @@ export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_FROM = 'now-24h';
-export const DEFAULT_TO = 'now';
+export const DEFAULT_FROM = 'now/d';
+export const DEFAULT_TO = 'now/d';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
@@ -42,6 +45,12 @@ export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
+export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
+
+// Document path where threat indicator fields are expected. Fields are used
+// to enrich signals, and are copied to threat.indicator.
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
   detections = 'detections',
@@ -136,9 +145,13 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
  * Default signals index key for kibana.dev.yml
  */
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
+
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration`;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
+export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
 
 /**
  * Common naming convention for an unauthenticated user
@@ -168,7 +181,13 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.servicenow',
   '.jira',
   '.resilient',
+  '.teams',
 ];
+
+if (ENABLE_CASE_CONNECTOR) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
@@ -188,5 +207,3 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-export const ENABLE_NEW_TIMELINE = false;

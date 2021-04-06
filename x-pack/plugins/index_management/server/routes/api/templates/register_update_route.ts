@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -44,13 +46,17 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
         return res.ok({ body: response });
       } catch (e) {
         if (lib.isEsError(e)) {
+          const error = lib.parseEsError(e.response);
           return res.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: {
+              message: error.message,
+              attributes: error,
+            },
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

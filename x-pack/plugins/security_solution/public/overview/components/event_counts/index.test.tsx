@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -21,11 +22,16 @@ describe('EventCounts', () => {
   const to = '2020-01-21T20:49:57.080Z';
 
   const testProps = {
+    filters: [],
     from,
     indexNames: [],
     indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
+    query: {
+      query: '',
+      language: 'kuery',
+    },
   };
 
   test('it filters the `Host events` widget with a `host.name` `exists` filter', () => {

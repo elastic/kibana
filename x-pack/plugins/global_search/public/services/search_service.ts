@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { uniq } from 'lodash';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'src/core/public';
-import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
+import {
+  GlobalSearchFindParams,
+  GlobalSearchProviderResult,
+  GlobalSearchBatchedResults,
+} from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
@@ -20,6 +26,7 @@ import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchFindOptions } from './types';
 import { getDefaultPreference } from './utils';
 import { fetchServerResults } from './fetch_server_results';
+import { fetchServerSearchableTypes } from './fetch_server_searchable_types';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -52,7 +59,7 @@ export interface SearchServiceStart {
    *
    * @example
    * ```ts
-   * startDeps.globalSearch.find('some term').subscribe({
+   * startDeps.globalSearch.find({term: 'some term'}).subscribe({
    *  next: ({ results }) => {
    *   addNewResultsToList(results);
    *  },
@@ -67,7 +74,15 @@ export interface SearchServiceStart {
    * Emissions from the resulting observable will only contains **new** results. It is the consumer's
    * responsibility to aggregate the emission and sort the results if required.
    */
-  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
+  find(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions
+  ): Observable<GlobalSearchBatchedResults>;
+
+  /**
+   * Returns all the searchable types registered by the underlying result providers.
+   */
+  getSearchableTypes(): Promise<string[]>;
 }
 
 interface SetupDeps {
@@ -89,6 +104,7 @@ export class SearchService {
   private http?: HttpStart;
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
+  private serverTypes?: string[];
 
   setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
     this.config = config;
@@ -110,11 +126,27 @@ export class SearchService {
     this.licenseChecker = licenseChecker;
 
     return {
-      find: (term, options) => this.performFind(term, options),
+      find: (params, options) => this.performFind(params, options),
+      getSearchableTypes: () => this.getSearchableTypes(),
     };
   }
 
-  private performFind(term: string, options: GlobalSearchFindOptions) {
+  private async getSearchableTypes() {
+    const providerTypes = (
+      await Promise.all(
+        [...this.providers.values()].map((provider) => provider.getSearchableTypes())
+      )
+    ).flat();
+
+    // only need to fetch from server once
+    if (!this.serverTypes) {
+      this.serverTypes = await fetchServerSearchableTypes(this.http!);
+    }
+
+    return uniq([...providerTypes, ...this.serverTypes]);
+  }
+
+  private performFind(params: GlobalSearchFindParams, options: GlobalSearchFindOptions) {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
@@ -142,13 +174,13 @@ export class SearchService {
     const processResult = (result: GlobalSearchProviderResult) =>
       processProviderResult(result, this.http!.basePath);
 
-    const serverResults$ = fetchServerResults(this.http!, term, {
+    const serverResults$ = fetchServerResults(this.http!, params, {
       preference,
       aborted$,
     });
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(term, providerOptions).pipe(
+      provider.find(params, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -25,14 +26,13 @@ export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];
 type ThrottleSelectField = typeof SelectField;
 
 export const ThrottleSelectField: ThrottleSelectField = (props) => {
+  const { setValue } = props.field;
   const onChange = useCallback(
     (e) => {
       const throttle = e.target.value;
-      props.field.setValue(throttle);
-      props.handleChange(throttle);
+      setValue(throttle);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.field.setValue, props.handleChange]
+    [setValue]
   );
   const newEuiFieldProps = { ...props.euiFieldProps, onChange };
   return <SelectField {...props} euiFieldProps={newEuiFieldProps} />;

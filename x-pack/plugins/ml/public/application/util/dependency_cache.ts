@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { DataPublicPluginSetup } from 'src/plugins/data/public';
@@ -21,6 +22,8 @@ import type {
 import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
+import type { MapsStartApi } from '../../../../maps/public';
+import type { FileUploadPluginStart } from '../../../../file_upload/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -40,6 +43,8 @@ export interface DependencyCache {
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
+  maps: MapsStartApi | null;
+  fileUpload: FileUploadPluginStart | null;
 }
 
 const cache: DependencyCache = {
@@ -60,6 +65,8 @@ const cache: DependencyCache = {
   security: null,
   i18n: null,
   urlGenerators: null,
+  maps: null,
+  fileUpload: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -80,6 +87,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
+  cache.fileUpload = deps.fileUpload || null;
 }
 
 export function getTimefilter() {
@@ -204,4 +212,11 @@ export function clearCache() {
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
+}
+
+export function getFileUpload() {
+  if (cache.fileUpload === null) {
+    throw new Error("fileUpload hasn't been initialized");
+  }
+  return cache.fileUpload;
 }

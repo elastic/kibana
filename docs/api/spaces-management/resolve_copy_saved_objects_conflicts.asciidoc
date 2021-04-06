@@ -45,6 +45,10 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 `includeReferences`::
   (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects are copied into the target spaces. The `includeReferences` must be the same values used during the failed <<spaces-api-copy-saved-objects, copy saved objects to space API>> operation. The default value is `false`.
 
+`createNewCopies`::
+  (Optional, boolean) Creates new copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the
+  initial copy, also enable when resolving copy errors. The default value is `true`.
+
 `retries`::
   (Required, object) The retry operations to attempt, which can specify how to resolve different types of errors. Object keys represent the
   target space IDs.
@@ -148,6 +152,7 @@ $ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
     "id": "my-dashboard"
   }],
   "includeReferences": true,
+  "createNewCopies": false,
   "retries": {
     "sales": [
       {
@@ -246,6 +251,7 @@ $ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
     "id": "my-dashboard"
   }],
   "includeReferences": true,
+  "createNewCopies": false,
   "retries": {
     "marketing": [
       {

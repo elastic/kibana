@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { IRouter, KibanaRequest, Logger, RequestHandler, RouteConfig } from 'kibana/server';
-import { registerRoutes } from './index';
+import type { KibanaRequest } from 'kibana/server';
+import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { xpackMocks } from '../../../../../mocks';
-import { appContextService } from '../../services';
-import { createAppContextStartContractMock } from '../../mocks';
-import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
-import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import { packagePolicyService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
+import type { PackagePolicyServiceInterface, ExternalCallback } from '../..';
+import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+
+import { registerRoutes } from './index';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
@@ -22,10 +24,10 @@ jest.mock('../../services/package_policy', (): {
 } => {
   return {
     packagePolicyService: {
-      assignPackageStream: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
+      compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
-      create: jest.fn((soClient, callCluster, newData) =>
+      create: jest.fn((soClient, esClient, newData) =>
         Promise.resolve({
           ...newData,
           inputs: newData.inputs.map((input) => ({
@@ -47,7 +49,11 @@ jest.mock('../../services/package_policy', (): {
       get: jest.fn(),
       getByIDs: jest.fn(),
       list: jest.fn(),
+      listIds: jest.fn(),
       update: jest.fn(),
+      runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
+        Promise.resolve(newPackagePolicy)
+      ),
     },
   };
 });
@@ -164,50 +170,26 @@ describe('When calling package policy', () => {
 
       afterEach(() => (callbackCallingOrder.length = 0));
 
-      it('should call external callbacks in expected order', async () => {
+      it('should create with data from callback', async () => {
         const request = getCreateKibanaRequest();
-        await routeHandler(context, request, response);
-        expect(response.ok).toHaveBeenCalled();
-        expect(callbackCallingOrder).toEqual(['one', 'two']);
-      });
-
-      it('should feed package policy returned by last callback', async () => {
-        const request = getCreateKibanaRequest();
-        await routeHandler(context, request, response);
-        expect(response.ok).toHaveBeenCalled();
-        expect(callbackOne).toHaveBeenCalledWith(
-          {
-            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-            description: '',
-            enabled: true,
-            inputs: [],
-            name: 'endpoint-1',
-            namespace: 'default',
-            output_id: '',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.5.0',
-            },
-          },
-          context,
-          request
-        );
-        expect(callbackTwo).toHaveBeenCalledWith(
-          {
+        packagePolicyServiceMock.runExternalCallbacks.mockImplementationOnce(() =>
+          Promise.resolve({
             policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,
             inputs: [
               {
-                type: 'endpoint',
-                enabled: true,
-                streams: [],
                 config: {
                   one: {
                     value: 'inserted by callbackOne',
                   },
+                  two: {
+                    value: 'inserted by callbackTwo',
+                  },
                 },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
               },
             ],
             name: 'endpoint-1',
@@ -218,16 +200,11 @@ describe('When calling package policy', () => {
               title: 'Elastic Endpoint',
               version: '0.5.0',
             },
-          },
-          context,
-          request
+          })
         );
-      });
-
-      it('should create with data from callback', async () => {
-        const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
+
         expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
@@ -255,91 +232,6 @@ describe('When calling package policy', () => {
             title: 'Elastic Endpoint',
             version: '0.5.0',
           },
-        });
-      });
-
-      describe('and a callback throws an exception', () => {
-        const callbackThree: ExternalCallback[1] = jest.fn(async (ds) => {
-          callbackCallingOrder.push('three');
-          throw new Error('callbackThree threw error on purpose');
-        });
-
-        const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
-          callbackCallingOrder.push('four');
-          return {
-            ...ds,
-            inputs: [
-              {
-                ...ds.inputs[0],
-                config: {
-                  ...ds.inputs[0].config,
-                  four: {
-                    value: 'inserted by callbackFour',
-                  },
-                },
-              },
-            ],
-          };
-        });
-
-        beforeEach(() => {
-          appContextService.addExternalCallback('packagePolicyCreate', callbackThree);
-          appContextService.addExternalCallback('packagePolicyCreate', callbackFour);
-        });
-
-        it('should skip over callback exceptions and still execute other callbacks', async () => {
-          const request = getCreateKibanaRequest();
-          await routeHandler(context, request, response);
-          expect(response.ok).toHaveBeenCalled();
-          expect(callbackCallingOrder).toEqual(['one', 'two', 'three', 'four']);
-        });
-
-        it('should log errors', async () => {
-          const errorLogger = (appContextService.getLogger() as jest.Mocked<Logger>).error;
-          const request = getCreateKibanaRequest();
-          await routeHandler(context, request, response);
-          expect(response.ok).toHaveBeenCalled();
-          expect(errorLogger.mock.calls).toEqual([
-            ['An external registered [packagePolicyCreate] callback failed when executed'],
-            [new Error('callbackThree threw error on purpose')],
-          ]);
-        });
-
-        it('should create package policy with last successful returned package policy', async () => {
-          const request = getCreateKibanaRequest();
-          await routeHandler(context, request, response);
-          expect(response.ok).toHaveBeenCalled();
-          expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
-            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
-            description: '',
-            enabled: true,
-            inputs: [
-              {
-                config: {
-                  one: {
-                    value: 'inserted by callbackOne',
-                  },
-                  two: {
-                    value: 'inserted by callbackTwo',
-                  },
-                  four: {
-                    value: 'inserted by callbackFour',
-                  },
-                },
-                enabled: true,
-                streams: [],
-                type: 'endpoint',
-              },
-            ],
-            name: 'endpoint-1',
-            namespace: 'default',
-            output_id: '',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.5.0',
-            },
-          });
         });
       });
     });

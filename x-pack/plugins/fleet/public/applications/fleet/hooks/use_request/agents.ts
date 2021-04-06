@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 import { agentRouteService } from '../../services';
-import {
+
+import type {
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
   GetOneAgentEventsRequest,
@@ -26,7 +27,12 @@ import {
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
+  PostNewAgentActionRequest,
+  PostNewAgentActionResponse,
 } from '../../types';
+
+import { useRequest, sendRequest } from './use_request';
+import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
@@ -60,13 +66,10 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
   });
 }
 
-export function sendGetAgentStatus(
-  query: GetAgentStatusRequest['query'],
-  options?: RequestOptions
-) {
-  return sendRequest<GetAgentStatusResponse>({
+export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequest<GetAgentsResponse>({
     method: 'get',
-    path: agentRouteService.getStatusPath(),
+    path: agentRouteService.getListPath(),
     query,
     ...options,
   });
@@ -74,6 +77,18 @@ export function sendGetAgentStatus(
 
 export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options?: RequestOptions) {
   return useRequest<GetAgentStatusResponse>({
+    method: 'get',
+    path: agentRouteService.getStatusPath(),
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentStatus(
+  query: GetAgentStatusRequest['query'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetAgentStatusResponse>({
     method: 'get',
     path: agentRouteService.getStatusPath(),
     query,
@@ -138,6 +153,19 @@ export function sendPostAgentUpgrade(
 ) {
   return sendRequest<PostAgentUpgradeResponse>({
     path: agentRouteService.getUpgradePath(agentId),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendPostAgentAction(
+  agentId: string,
+  body: PostNewAgentActionRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostNewAgentActionResponse>({
+    path: agentRouteService.getCreateActionPath(agentId),
     method: 'post',
     body,
     ...options,

@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   asDuration,
   asPercent,
-  tpmUnit,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 
-export const ItemRow = styled('tr')`
+export const ItemRow = euiStyled('tr')`
   line-height: 2;
 `;
 
-export const ItemTitle = styled('td')`
-  color: ${({ theme }) => theme.eui.textColors.subdued};
+export const ItemTitle = euiStyled('td')`
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   padding-right: 1rem;
 `;
 
-export const ItemDescription = styled('td')`
+export const ItemDescription = euiStyled('td')`
   text-align: right;
 `;
 
@@ -41,7 +42,7 @@ export function ServiceStatsList({
       title: i18n.translate(
         'xpack.apm.serviceMap.avgTransDurationPopoverStat',
         {
-          defaultMessage: 'Trans. duration (avg.)',
+          defaultMessage: 'Latency (avg.)',
         }
       ),
       description: isNumber(transactionStats.avgTransactionDuration)
@@ -52,14 +53,10 @@ export function ServiceStatsList({
       title: i18n.translate(
         'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
         {
-          defaultMessage: 'Req. per minute (avg.)',
+          defaultMessage: 'Throughput (avg.)',
         }
       ),
-      description: isNumber(transactionStats.avgRequestsPerMinute)
-        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
-            'request'
-          )}`
-        : null,
+      description: asTransactionRate(transactionStats.avgRequestsPerMinute),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {

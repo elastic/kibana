@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry, find } from 'lodash';
@@ -39,11 +40,11 @@ const ParamsSchema = schema.object({
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
 });
 
-export const ES_INDEX_ACTION_TYPE_ID = '.index';
+export const ActionTypeId = '.index';
 // action type definition
 export function getActionType({ logger }: { logger: Logger }): ESIndexActionType {
   return {
-    id: ES_INDEX_ACTION_TYPE_ID,
+    id: ActionTypeId,
     minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
@@ -87,13 +88,13 @@ async function executor(
   };
 
   try {
-    const result = await services.callCluster('bulk', bulkParams);
+    const { body: result } = await services.scopedClusterClient.bulk(bulkParams);
 
     const err = find(result.items, 'index.error.reason');
     if (err) {
       return wrapErr(
-        `${err.index.error!.reason}${
-          err.index.error?.caused_by ? ` (${err.index.error?.caused_by?.reason})` : ''
+        `${err.index?.error?.reason}${
+          err.index?.error?.caused_by ? ` (${err.index?.error?.caused_by?.reason})` : ''
         }`,
         actionId,
         logger

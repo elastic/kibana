@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -11,6 +12,7 @@ import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 import { ResolverAction } from '../actions';
 import { RelatedEventsFetcher } from './related_events_fetcher';
 import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
+import { NodeDataFetcher } from './node_data_fetcher';
 
 type MiddlewareFactory<S = ResolverState> = (
   dataAccessLayer: DataAccessLayer
@@ -29,11 +31,13 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
     const resolverTreeFetcher = ResolverTreeFetcher(dataAccessLayer, api);
     const relatedEventsFetcher = RelatedEventsFetcher(dataAccessLayer, api);
     const currentRelatedEventFetcher = CurrentRelatedEventFetcher(dataAccessLayer, api);
+    const nodeDataFetcher = NodeDataFetcher(dataAccessLayer, api);
     return async (action: ResolverAction) => {
       next(action);
 
       resolverTreeFetcher();
       relatedEventsFetcher();
+      nodeDataFetcher();
       currentRelatedEventFetcher();
     };
   };

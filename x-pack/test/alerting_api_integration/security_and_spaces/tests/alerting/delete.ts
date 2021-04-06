@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,6 +20,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete', () => {
@@ -38,13 +40,13 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle delete alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -62,9 +64,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -73,7 +75,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -86,18 +88,18 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it('should handle delete alert request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -117,16 +119,16 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -139,15 +141,18 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it('should handle delete alert request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({ alertTypeId: 'test.unrestricted-noop', consumer: 'alertsFixture' })
+              getTestAlertData({
+                rule_type_id: 'test.unrestricted-noop',
+                consumer: 'alertsFixture',
+              })
             )
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -165,9 +170,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -181,16 +186,16 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -203,18 +208,18 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it('should handle delete alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alerts',
               })
             )
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -239,9 +244,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -250,7 +255,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -263,14 +268,14 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't delete alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix('other')}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -296,25 +301,27 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it('should still be able to delete alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
+          });
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -332,9 +339,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
+              await getScheduledTask(createdAlert.scheduled_task_id);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -343,7 +350,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);

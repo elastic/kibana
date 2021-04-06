@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* global jest */
@@ -14,18 +15,17 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
-  ESFilter,
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../typings/elasticsearch';
-import { EuiThemeProvider } from '../../../observability/public';
+} from '../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
 import { UIFilters } from '../../typings/ui_filters';
-import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -120,7 +120,6 @@ interface MockSetup {
   internalClient: any;
   config: APMConfig;
   uiFilters: UIFilters;
-  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -181,8 +180,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
-    esFilter: [{ term: { 'service.environment': 'test' } }],
+    uiFilters: {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

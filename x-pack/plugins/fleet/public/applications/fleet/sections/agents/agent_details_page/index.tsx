@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo, useCallback } from 'react';
 import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +17,12 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
-import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
+
+import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import {
@@ -33,16 +35,11 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
+import { AgentRefreshContext } from './hooks';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -78,6 +75,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
+  const host = agentData?.item?.local_metadata?.host;
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
@@ -95,13 +94,12 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText className="eui-textBreakWord">
             <h1>
               {isLoading && isInitialRequest ? (
                 <Loading />
-              ) : typeof agentData?.item?.local_metadata?.host === 'object' &&
-                typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
-                agentData.item.local_metadata.host.hostname
+              ) : typeof host === 'object' && typeof host?.hostname === 'string' ? (
+                host.hostname
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.agentDetailsTitle"
@@ -116,13 +114,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [agentData?.item?.local_metadata?.host, agentId, getHref, isInitialRequest, isLoading]
+    [host, agentId, getHref, isInitialRequest, isLoading]
   );
 
   const headerRightContent = useMemo(
     () =>
       agentData && agentData.item ? (
-        <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
+        <EuiFlexGroup justifyContent={'spaceBetween'} direction="row">
           {[
             {
               label: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
@@ -130,7 +128,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               }),
               content: <AgentHealth agent={agentData.item} />,
             },
-            { isDivider: true },
+            {
+              label: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
+                defaultMessage: 'Last activity',
+              }),
+              content: agentData.item.last_checkin ? (
+                <FormattedRelative value={new Date(agentData.item.last_checkin)} />
+              ) : (
+                '-'
+              ),
+            },
             {
               label: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
                 defaultMessage: 'Policy',
@@ -148,7 +155,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 agentData.item.policy_id || '-'
               ),
             },
-            { isDivider: true },
             {
               label: i18n.translate('xpack.fleet.agentDetails.agentVersionLabel', {
                 defaultMessage: 'Agent version',
@@ -187,7 +193,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                   '-'
                 ),
             },
-            { isDivider: true },
             {
               content: (
                 <AgentDetailsActionMenu
@@ -203,10 +208,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
           ].map((item, index) => (
             <EuiFlexItem grow={false} key={index}>
-              {item.isDivider ?? false ? (
-                <Divider />
-              ) : item.label ? (
-                <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+              {item.label ? (
+                <EuiDescriptionList compressed>
                   <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
                 </EuiDescriptionList>

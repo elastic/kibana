@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash';
@@ -11,18 +12,33 @@ import { SerializedActionWithAllocation } from '../../../../../../common/types';
 import { DataAllocationMetaFields } from '../../types';
 
 export const serializeMigrateAndAllocateActions = (
+  /**
+   * Form metadata about what tier allocation strategy to use and custom node
+   * allocation information.
+   */
   { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
-  newActions: SerializedActionWithAllocation = {},
-  originalActions: SerializedActionWithAllocation = {}
+  /**
+   * The new configuration merged with old configuration to ensure we don't lose
+   * any fields.
+   */
+  mergedActions: SerializedActionWithAllocation = {},
+  /**
+   * The actions from the policy for a given phase when it was loaded.
+   */
+  originalActions: SerializedActionWithAllocation = {},
+  /**
+   * The number of replicas value to set in the allocate action.
+   */
+  numberOfReplicas?: number
 ): SerializedActionWithAllocation => {
-  const { allocate, migrate, ...otherActions } = newActions;
+  const { allocate, migrate, ...otherActions } = mergedActions;
 
   // First copy over all non-allocate and migrate actions.
   const actions: SerializedActionWithAllocation = { ...otherActions };
 
-  // The UI only knows about include, exclude and require, so copy over all other values.
+  // The UI only knows about include, exclude, require and number_of_replicas so copy over all other values.
   if (allocate) {
-    const { include, exclude, require, ...otherSettings } = allocate;
+    const { include, exclude, require, number_of_replicas: __, ...otherSettings } = allocate;
     if (!isEmpty(otherSettings)) {
       actions.allocate = { ...otherSettings };
     }
@@ -69,5 +85,13 @@ export const serializeMigrateAndAllocateActions = (
       break;
     default:
   }
+
+  if (numberOfReplicas != null) {
+    actions.allocate = {
+      ...actions.allocate,
+      number_of_replicas: numberOfReplicas,
+    };
+  }
+
   return actions;
 };

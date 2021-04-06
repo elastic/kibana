@@ -1,10 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
+import {
+  MapElements,
+  AnalyticsMapNodeElement,
+  AnalyticsMapEdgeElement,
+} from '../../../common/types/data_frame_analytics';
+export {
+  MapElements,
+  AnalyticsMapReturnType,
+  AnalyticsMapNodeElement,
+  AnalyticsMapEdgeElement,
+} from '../../../common/types/data_frame_analytics';
 
 interface AnalyticsMapArg {
   analyticsId: string;
@@ -46,12 +58,6 @@ export type NextLinkReturnType =
   | JobDataLinkReturnType
   | TransformLinkReturnType
   | undefined;
-export type MapElements = AnalyticsMapNodeElement | AnalyticsMapEdgeElement;
-export interface AnalyticsMapReturnType {
-  elements: MapElements[];
-  details: Record<string, any>; // transform, job, or index details
-  error: null | any;
-}
 
 interface BasicInitialElementsReturnType {
   data: any;
@@ -70,29 +76,18 @@ interface CompleteInitialElementsReturnType extends BasicInitialElementsReturnTy
   nextType: JobMapNodeTypes;
   previousNodeId: string;
 }
-export interface AnalyticsMapNodeElement {
-  data: {
-    id: string;
-    label: string;
-    type: string;
-    analysisType?: string;
-  };
-}
-export interface AnalyticsMapEdgeElement {
-  data: {
-    id: string;
-    source: string;
-    target: string;
-  };
-}
+
 export const isCompleteInitialReturnType = (arg: any): arg is CompleteInitialElementsReturnType => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return (
     keys.length > 0 &&
     keys.includes('nextLinkId') &&
+    arg.nextLinkId !== undefined &&
     keys.includes('nextType') &&
-    keys.includes('previousNodeId')
+    arg.nextType !== undefined &&
+    keys.includes('previousNodeId') &&
+    arg.previousNodeId !== undefined
   );
 };
 export const isAnalyticsMapNodeElement = (arg: any): arg is AnalyticsMapNodeElement => {

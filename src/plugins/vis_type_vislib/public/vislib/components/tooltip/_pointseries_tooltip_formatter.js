@@ -1,30 +1,38 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
+
+function getMax(handler, config, isGauge) {
+  let max;
+  if (handler.pointSeries) {
+    const series = handler.pointSeries.getSeries();
+    const scale = series.getValueAxis().getScale();
+    max = scale.domain()[1];
+  } else {
+    max = last(config.get(isGauge ? 'gauge.colorsRange' : 'colorsRange', [{}])).to;
+  }
+
+  return max;
+}
 
 export function pointSeriesTooltipFormatter() {
-  return function tooltipFormatter({ datum, data }) {
+  return function tooltipFormatter({ datum, data, config, handler }, uiSettings) {
     if (!datum) return '';
 
     const details = [];
+    const isGauge = config.get('gauge', false);
+    const isPercentageMode = config.get(isGauge ? 'gauge.percentageMode' : 'percentageMode', false);
+    const isSetColorRange = config.get('setColorRange', false);
 
     const currentSeries =
       data.series && data.series.find((serie) => serie.rawId === datum.seriesId);
@@ -41,8 +49,20 @@ export function pointSeriesTooltipFormatter() {
     }
 
     if (datum.y !== null && datum.y !== undefined) {
-      const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-      addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+      let value = datum.yScale ? datum.yScale * datum.y : datum.y;
+      if (isPercentageMode && !isSetColorRange) {
+        const percentageFormatPattern = config.get(
+          isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern',
+          uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+        );
+        value = getValueForPercentageMode(
+          value / getMax(handler, config, isGauge),
+          percentageFormatPattern
+        );
+        addDetail(currentSeries.label, value);
+      } else {
+        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+      }
     }
 
     if (datum.z !== null && datum.z !== undefined) {

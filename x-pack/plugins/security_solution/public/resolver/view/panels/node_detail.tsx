@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -20,6 +21,7 @@ import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
+import * as nodeDataModel from '../../models/node_data';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
@@ -28,28 +30,35 @@ import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
+import { PanelContentError } from './panel_content_error';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
   top: 0.75em;
 `;
 
+const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
+  defaultMessage: 'Node details were unable to be retrieved',
+});
+
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
   );
-  return (
-    <>
-      {processEvent === null ? (
-        <StyledPanel>
-          <PanelLoading />
-        </StyledPanel>
-      ) : (
-        <StyledPanel data-test-subj="resolver:panel:node-detail">
-          <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
-        </StyledPanel>
-      )}
-    </>
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
+
+  return nodeStatus === 'loading' ? (
+    <StyledPanel>
+      <PanelLoading />
+    </StyledPanel>
+  ) : processEvent ? (
+    <StyledPanel data-test-subj="resolver:panel:node-detail">
+      <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+    </StyledPanel>
+  ) : (
+    <StyledPanel>
+      <PanelContentError translatedErrorMessage={nodeDetailError} />
+    </StyledPanel>
   );
 });
 
@@ -65,9 +74,7 @@ const NodeDetailView = memo(function ({
   nodeID: string;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
-  const isProcessTerminated = useSelector((state: ResolverState) =>
-    selectors.isProcessTerminated(state)(nodeID)
-  );
+  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });
@@ -115,8 +122,12 @@ const NodeDetailView = memo(function ({
       description: eventModel.argsForProcess(processEvent),
     };
 
-    // This is the data in {title, description} form for the EuiDescriptionList to display
-    const processDescriptionListData = [
+    const flattenedEntries: Array<{
+      title: string;
+      description: string | string[] | number | undefined;
+    }> = [];
+
+    const flattenedDescriptionListData = [
       createdEntry,
       pathEntry,
       pidEntry,
@@ -125,7 +136,21 @@ const NodeDetailView = memo(function ({
       parentPidEntry,
       md5Entry,
       commandLineEntry,
-    ]
+    ].reduce((flattenedList, entry) => {
+      if (Array.isArray(entry.description)) {
+        return [
+          ...flattenedList,
+          ...entry.description.map((value) => {
+            return { title: entry.title, description: value };
+          }),
+        ];
+      } else {
+        return [...flattenedList, entry];
+      }
+    }, flattenedEntries);
+
+    // This is the data in {title, description} form for the EuiDescriptionList to display
+    const processDescriptionListData = flattenedDescriptionListData
       .filter((entry) => {
         return entry.description !== undefined;
       })
@@ -171,7 +196,7 @@ const NodeDetailView = memo(function ({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { descriptionText } = useCubeAssets(isProcessTerminated, false);
+  const { descriptionText } = useCubeAssets(nodeState, false);
 
   const nodeDetailNavProps = useLinkProps({
     panelView: 'nodeEvents',
@@ -187,7 +212,7 @@ const NodeDetailView = memo(function ({
         <StyledTitle aria-describedby={titleID}>
           <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
-            running={!isProcessTerminated}
+            state={nodeState}
           />
           <span data-test-subj="resolver:node-detail:title">
             <GeneratedText>{processName}</GeneratedText>

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CreateDocumentResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { decodeVersion } from '../utils/decode_version';
 import { encodeHitVersion } from '../utils/encode_hit_version';
@@ -25,7 +25,7 @@ import { getList } from '.';
 export interface UpdateListOptions {
   _version: _VersionOrUndefined;
   id: Id;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
   user: string;
   name: NameOrUndefined;
@@ -40,7 +40,7 @@ export const updateList = async ({
   id,
   name,
   description,
-  callCluster,
+  esClient,
   listIndex,
   user,
   meta,
@@ -48,7 +48,7 @@ export const updateList = async ({
   version,
 }: UpdateListOptions): Promise<ListSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const list = await getList({ callCluster, id, listIndex });
+  const list = await getList({ esClient, id, listIndex });
   if (list == null) {
     return null;
   } else {
@@ -60,7 +60,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const response = await callCluster<CreateDocumentResponse>('update', {
+    const { body: response } = await esClient.update({
       ...decodeVersion(_version),
       body: { doc },
       id,

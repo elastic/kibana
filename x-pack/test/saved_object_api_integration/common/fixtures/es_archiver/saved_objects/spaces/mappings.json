@@ -1,10 +1,13 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
-    "index": ".kibana",
+    "aliases": {
+      ".kibana_$KIBANA_PACKAGE_VERSION": {},
+      ".kibana": {}
+    },
+    "index": ".kibana_$KIBANA_PACKAGE_VERSION_001",
     "mappings": {
-      "dynamic": "strict",
+      "dynamic": "false",
       "properties": {
         "config": {
           "dynamic": "true",
@@ -238,101 +241,13 @@
           }
         },
         "space": {
-          "properties": {
-            "_reserved": {
-              "type": "boolean"
-            },
-            "color": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "disabledFeatures": {
-              "type": "keyword"
-            },
-            "initials": {
-              "type": "keyword"
-            },
-            "name": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
+          "dynamic": false,
+          "type": "object"
         },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "updated_at": {
-          "type": "date"
-        },
-        "url": {
-          "properties": {
-            "accessCount": {
-              "type": "long"
-            },
-            "accessDate": {
-              "type": "date"
-            },
-            "createDate": {
-              "type": "date"
-            },
-            "url": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
+        "type": { "type": "keyword" },
+        "migrationVersion": {
+          "dynamic": "true",
+          "type": "object"
         }
       }
     },

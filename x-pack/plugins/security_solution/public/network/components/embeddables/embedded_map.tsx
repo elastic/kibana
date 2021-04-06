@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -10,7 +11,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { useSelector } from 'react-redux';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -30,6 +30,7 @@ import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -95,9 +96,8 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
   const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useSelector(
-    defaultSourcererScopeSelector,
-    deepEqual
+  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
+    defaultSourcererScopeSelector
   );
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(

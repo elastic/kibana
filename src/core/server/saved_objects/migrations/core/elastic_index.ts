@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -23,11 +12,12 @@
  */
 
 import _ from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { MigrationEsClient } from './migration_es_client';
 import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
+import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -57,6 +47,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
@@ -78,6 +69,20 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
+  // When migrating from the outdated index we use a read query which excludes
+  // saved objects which are no longer used. These saved objects will still be
+  // kept in the outdated index for backup purposes, but won't be availble in
+  // the upgraded index.
+  const excludeUnusedTypes = {
+    bool: {
+      must_not: {
+        term: {
+          type: 'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
+        },
+      },
+    },
+  };
+
   const nextBatch = () =>
     scrollId !== undefined
       ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
@@ -85,7 +90,10 @@ export function reader(
           scroll_id: scrollId,
         })
       : client.search<SearchResponse<SavedObjectsRawDocSource>>({
-          body: { size: batchSize },
+          body: {
+            size: batchSize,
+            query: excludeUnusedTypes,
+          },
           index,
           scroll,
         });
@@ -136,7 +144,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
     return;
   }
 
-  const exception: any = new Error(err.index.error!.reason);
+  const exception: any = new Error(err.index!.error!.reason);
   exception.detail = err;
   throw exception;
 }
@@ -158,6 +166,7 @@ export async function migrationsUpToDate(
   client: MigrationEsClient,
   index: string,
   migrationVersion: SavedObjectsMigrationVersion,
+  kibanaVersion: string,
   retryCount: number = 10
 ): Promise<boolean> {
   try {
@@ -176,18 +185,29 @@ export async function migrationsUpToDate(
       body: {
         query: {
           bool: {
-            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-              bool: {
-                must: [
-                  { exists: { field: type } },
-                  {
-                    bool: {
-                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+            should: [
+              ...Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+                bool: {
+                  must: [
+                    { exists: { field: type } },
+                    {
+                      bool: {
+                        must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                      },
+                    },
+                  ],
+                },
+              })),
+              {
+                bool: {
+                  must_not: {
+                    term: {
+                      coreMigrationVersion: kibanaVersion,
                     },
                   },
-                ],
+                },
               },
-            })),
+            ],
           },
         },
       },
@@ -205,7 +225,7 @@ export async function migrationsUpToDate(
 
     await new Promise((r) => setTimeout(r, 1000));
 
-    return await migrationsUpToDate(client, index, migrationVersion, retryCount - 1);
+    return await migrationsUpToDate(client, index, migrationVersion, kibanaVersion, retryCount - 1);
   }
 }
 
@@ -218,10 +238,6 @@ export async function createIndex(
     body: { mappings, settings },
     index,
   });
-}
-
-export async function deleteIndex(client: MigrationEsClient, index: string) {
-  await client.indices.delete({ index });
 }
 
 /**
@@ -308,7 +324,7 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * Object indices should only ever have a single shard. This is more to handle
  * instances where customers manually expand the shards of an index.
  */
-function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+function assertResponseIncludeAllShards({ _shards }: { _shards: estypes.ShardStatistics }) {
   if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
     return;
   }
@@ -361,11 +377,12 @@ async function reindex(
     await new Promise((r) => setTimeout(r, pollInterval));
 
     const { body } = await client.tasks.get({
-      task_id: task,
+      task_id: String(task),
     });
 
-    if (body.error) {
-      const e = body.error;
+    // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property
+    const e = body.error;
+    if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }
 

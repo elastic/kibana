@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,6 +26,8 @@ const moduleIds = [
   'nginx_ecs',
   'sample_data_ecommerce',
   'sample_data_weblogs',
+  'security_linux',
+  'security_windows',
   'siem_auditbeat',
   'siem_auditbeat_auth',
   'siem_cloudtrail',

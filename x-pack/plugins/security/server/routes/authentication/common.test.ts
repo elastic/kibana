@@ -1,53 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
 import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from '../../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
-import {
-  Authentication,
   AuthenticationResult,
   DeauthenticationResult,
   OIDCLogin,
   SAMLLogin,
 } from '../../authentication';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCommonRoutes } from './common';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
-
 describe('Common authentication routes', () => {
-  let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let router: jest.Mocked<SecurityRouter>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
-  let mockContext: RequestHandlerContext;
+  let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
     license = routeParamsMock.license;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     mockContext = ({
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as SecurityRequestHandlerContext;
 
     defineCommonRoutes(routeParamsMock);
   });
 
   describe('logout', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -148,7 +148,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('me', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -182,7 +182,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('login', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
@@ -410,11 +410,9 @@ describe('Common authentication routes', () => {
         body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
       });
 
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrow(
+        unhandledException
+      );
     });
 
     it('returns 401 if login fails.', async () => {
@@ -642,7 +640,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('acknowledge access agreement', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
@@ -680,11 +678,9 @@ describe('Common authentication routes', () => {
       authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrowError(
+        unhandledException
+      );
     });
 
     it('returns 204 if successfully acknowledged.', async () => {

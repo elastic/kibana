@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -23,9 +12,9 @@ import { get, toPath } from 'lodash';
 import { Cluster } from '@kbn/es';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
+import { Client } from '@elastic/elasticsearch';
 
 import { KIBANA_ROOT } from '../';
-import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
 
@@ -33,7 +22,7 @@ export function createLegacyEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
-    license = 'oss',
+    license = 'basic',
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
@@ -113,8 +102,8 @@ export function createLegacyEsTestCluster(options = {}) {
      * Returns an ES Client to the configured cluster
      */
     getClient() {
-      return new legacyElasticsearch.Client({
-        host: this.getUrl(),
+      return new Client({
+        node: this.getUrl(),
       });
     }
 

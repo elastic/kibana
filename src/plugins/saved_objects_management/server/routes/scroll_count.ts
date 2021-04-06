@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
+import { chain } from 'lodash';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -41,18 +31,27 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { client } = context.core.savedObjects;
+      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { typesToInclude, searchString, references } = req.body;
 
+      const includedHiddenTypes = chain(typesToInclude)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
+
+      const client = getClient({ includedHiddenTypes });
       const findOptions: SavedObjectsFindOptions = {
-        type: req.body.typesToInclude,
+        type: typesToInclude,
         perPage: 1000,
       };
-      if (req.body.searchString) {
-        findOptions.search = `${req.body.searchString}*`;
+      if (searchString) {
+        findOptions.search = `${searchString}*`;
         findOptions.searchFields = ['title'];
       }
-      if (req.body.references) {
-        findOptions.hasReference = req.body.references;
+      if (references) {
+        findOptions.hasReference = references;
         findOptions.hasReferenceOperator = 'OR';
       }
 
@@ -65,7 +64,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         return accum;
       }, {} as Record<string, number>);
 
-      for (const type of req.body.typesToInclude) {
+      for (const type of typesToInclude) {
         if (!counts[type]) {
           counts[type] = 0;
         }

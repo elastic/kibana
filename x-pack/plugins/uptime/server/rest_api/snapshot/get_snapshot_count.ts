@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -17,20 +18,19 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
       dateRangeStart: schema.string(),
       dateRangeEnd: schema.string(),
       filters: schema.maybe(schema.string()),
+      query: schema.maybe(schema.string()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
-    const { dateRangeStart, dateRangeEnd, filters } = request.query;
-    const result = await libs.requests.getSnapshotCount({
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+    const { dateRangeStart, dateRangeEnd, filters, query } = request.query;
+
+    return await libs.requests.getSnapshotCount({
       uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
       filters,
-    });
-    return response.ok({
-      body: {
-        ...result,
-      },
+      query,
     });
   },
 });

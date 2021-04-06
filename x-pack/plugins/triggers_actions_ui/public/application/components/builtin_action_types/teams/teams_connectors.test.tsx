@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { TeamsActionConnector } from '../types';
 import TeamsActionFields from './teams_connectors';
-import { DocLinksStart } from 'kibana/public';
+jest.mock('../../../../common/lib/kibana');
 
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
@@ -21,16 +23,12 @@ describe('TeamsActionFields renders', () => {
       name: 'teams',
       config: {},
     } as TeamsActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <TeamsActionFields
         action={actionConnector}
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -51,16 +49,12 @@ describe('TeamsActionFields renders', () => {
       config: {},
       secrets: {},
     } as TeamsActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <TeamsActionFields
         action={actionConnector}
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -78,16 +72,12 @@ describe('TeamsActionFields renders', () => {
       name: 'teams',
       config: {},
     } as TeamsActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <TeamsActionFields
         action={actionConnector}
         errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
