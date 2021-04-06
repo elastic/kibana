@@ -141,7 +141,7 @@ const geti18nTexts = (): {
 
 const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
   defaultMessage:
-    'Change name or type can break searches and visualizations that rely on this field.',
+    'Changing name or type can break searches and visualizations that rely on this field.',
 });
 
 const formDeserializer = (field: Field): FieldFormInternal => {
