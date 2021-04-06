@@ -52,7 +52,7 @@ import {
   eventCategoryOverrideOrUndefined,
   savedIdOrUndefined,
   saved_id,
-  threshold,
+  thresholdNormalized,
   anomaly_threshold,
   actionsCamel,
   throttleOrNull,
@@ -159,7 +159,7 @@ const thresholdSpecificRuleParams = t.type({
   query,
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
-  threshold,
+  threshold: thresholdNormalized,
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;

@@ -96,7 +96,14 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query,
         filters: params.filters,
         savedId: params.saved_id,
-        threshold: params.threshold,
+        threshold: {
+          field:
+            typeof params.threshold.field === 'string'
+              ? [params.threshold.field]
+              : params.threshold.field,
+          value: params.threshold.value,
+          cardinality: params.threshold.cardinality != null ? params.threshold.cardinality : [],
+        },
       };
     }
     case 'machine_learning': {
