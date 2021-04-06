@@ -6,13 +6,13 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
-import {
+import type {
   ClientRequestParamsOf,
   EndpointOf,
-  formatRequest,
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository/target/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

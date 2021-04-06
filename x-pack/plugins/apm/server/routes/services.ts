@@ -561,7 +561,7 @@ const serviceDependenciesRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({
-        numBuckets: t.number,
+        numBuckets: toNumberRt,
       }),
       environmentRt,
       rangeRt,

@@ -61,6 +61,11 @@ export function registerRoutes({
 
     const { method, pathname } = parseEndpoint(endpoint);
 
+    console.log({
+      method,
+      pathname,
+    });
+
     (router[method] as RouteRegistrar<
       typeof method,
       ApmPluginRequestHandlerContext

@@ -15,15 +15,23 @@ export function createServerRouteRepository<
   TRouteHandlerResources extends ServerRouteHandlerResources = never,
   TRouteCreateOptions extends ServerRouteCreateOptions = never
 >(): ServerRouteRepository<TRouteHandlerResources, TRouteCreateOptions, {}> {
-  const routes: Record<string, any> = {};
+  let routes: Record<string, any> = {};
 
   return {
     add(route) {
-      routes[route.endpoint] = route;
+      routes = {
+        ...routes,
+        [route.endpoint]: route,
+      };
+
       return this as any;
     },
     merge(repository) {
-      Object.assign(routes, repository.getRoutes());
+      routes = {
+        ...routes,
+        ...Object.fromEntries(repository.getRoutes().map((route) => [route.endpoint, route])),
+      };
+
       return this as any;
     },
     getRoutes: () => Object.values(routes),
