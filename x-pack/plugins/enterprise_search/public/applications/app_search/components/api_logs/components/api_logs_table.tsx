@@ -22,6 +22,7 @@ import { FormattedRelative } from '@kbn/i18n/react';
 
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
+import { ApiLogLogic } from '../api_log';
 import { ApiLogsLogic } from '../index';
 import { ApiLog } from '../types';
 import { getStatusColor } from '../utils';
@@ -34,6 +35,7 @@ interface Props {
 export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
   const { onPaginate } = useActions(ApiLogsLogic);
+  const { openFlyout } = useActions(ApiLogLogic);
 
   const columns: Array<EuiBasicTableColumn<ApiLog>> = [
     {
@@ -81,7 +83,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
           size="s"
           className="apiLogDetailButton"
           data-test-subj="ApiLogsTableDetailsButton"
-          // TODO: flyout onclick
+          onClick={() => openFlyout(apiLog)}
         >
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.detailsButtonLabel', {
             defaultMessage: 'Details',
