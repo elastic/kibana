@@ -57,6 +57,7 @@ export const type: SavedObjectsType = {
 export const ruleAssetSavedObjectType = 'security-rule';
 
 export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     name: {
       type: 'keyword',
@@ -72,7 +73,7 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const ruleAssetType: SavedObjectsType = {
   name: ruleAssetSavedObjectType,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: ruleAssetSavedObjectMappings,
 };

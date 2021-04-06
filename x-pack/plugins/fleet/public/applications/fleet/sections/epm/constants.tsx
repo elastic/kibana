@@ -33,7 +33,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
   lens: 'Lens',
-  security_rule: 'Detection Engine Rule',
+  security_rule: 'Security Rule',
   ml_module: 'ML Module',
 };
 
