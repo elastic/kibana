@@ -750,6 +750,10 @@ describe('7.13.0', () => {
           'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
         version: 1,
         exceptionsList: null,
+        threshold: {
+          field: null,
+          value: 5,
+        },
       },
     });
 
@@ -788,6 +792,11 @@ describe('7.13.0', () => {
             'In the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.',
           version: 1,
           exceptionsList: [],
+          threshold: {
+            field: [],
+            value: 5,
+            cardinality: [],
+          },
         },
       },
     });

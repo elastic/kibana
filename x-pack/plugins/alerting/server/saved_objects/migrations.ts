@@ -377,7 +377,7 @@ function removeNullsFromSecurityRules(
             ? {
                 field: Array.isArray(params.threshold.field)
                   ? params.threshold.field
-                  : params.threshold.field === ''
+                  : params.threshold.field === '' || params.threshold.field == null
                   ? []
                   : [params.threshold.field],
                 value: params.threshold.value,
