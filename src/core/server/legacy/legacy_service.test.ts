@@ -7,16 +7,12 @@
  */
 
 jest.mock('../../../legacy/server/kbn_server');
-jest.mock('./cli_dev_mode');
 
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
-// @ts-expect-error js file to remove TS dependency on cli
-import { CliDevMode as MockCliDevMode } from './cli_dev_mode';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
 import { getEnvOptions, configServiceMock } from '../config/mocks';
@@ -36,6 +32,7 @@ import { statusServiceMock } from '../status/status_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -84,6 +81,7 @@ beforeEach(() => {
       status: statusServiceMock.createInternalSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
+      deprecations: deprecationsServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {
@@ -93,6 +91,7 @@ beforeEach(() => {
           'plugin-id',
           {
             requiredBundles: [],
+            version: '8.0.0',
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },
@@ -228,7 +227,6 @@ describe('once LegacyService is set up with connection info', () => {
     );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
-    expect(MockCliDevMode).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -331,74 +329,6 @@ describe('once LegacyService is set up without connection info', () => {
 
     expect(mockKbnServer.applyLoggingConfiguration.mock.calls).toMatchSnapshot(
       `applyLoggingConfiguration params`
-    );
-  });
-});
-
-describe('once LegacyService is set up in `devClusterMaster` mode', () => {
-  beforeEach(() => {
-    configService.atPath.mockImplementation((path) => {
-      return new BehaviorSubject(
-        path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
-      );
-    });
-  });
-
-  test('creates CliDevMode without base path proxy.', async () => {
-    const devClusterLegacyService = new LegacyService({
-      coreId,
-      env: Env.createDefault(
-        REPO_ROOT,
-        getEnvOptions({
-          cliArgs: { silent: true, basePath: false },
-          isDevCliParent: true,
-        })
-      ),
-      logger,
-      configService: configService as any,
-    });
-
-    await devClusterLegacyService.setupLegacyConfig();
-    await devClusterLegacyService.setup(setupDeps);
-    await devClusterLegacyService.start(startDeps);
-
-    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
-    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
-      expect.objectContaining({ silent: true, basePath: false }),
-      expect.objectContaining({
-        get: expect.any(Function),
-        set: expect.any(Function),
-      }),
-      undefined
-    );
-  });
-
-  test('creates CliDevMode with base path proxy.', async () => {
-    const devClusterLegacyService = new LegacyService({
-      coreId,
-      env: Env.createDefault(
-        REPO_ROOT,
-        getEnvOptions({
-          cliArgs: { quiet: true, basePath: true },
-          isDevCliParent: true,
-        })
-      ),
-      logger,
-      configService: configService as any,
-    });
-
-    await devClusterLegacyService.setupLegacyConfig();
-    await devClusterLegacyService.setup(setupDeps);
-    await devClusterLegacyService.start(startDeps);
-
-    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
-    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
-      expect.objectContaining({ quiet: true, basePath: true }),
-      expect.objectContaining({
-        get: expect.any(Function),
-        set: expect.any(Function),
-      }),
-      expect.any(BasePathProxyServer)
     );
   });
 });

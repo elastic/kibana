@@ -7,6 +7,7 @@
 
 import { format } from 'url';
 import supertest from 'supertest';
+import request from 'superagent';
 import { MaybeParams } from '../../../plugins/apm/server/routes/typings';
 import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoint';
 import { APMAPI } from '../../../plugins/apm/server/routes/create_apm_api';
@@ -35,16 +36,24 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
 
     // supertest doesn't throw on http errors
     if (res.status !== 200) {
-      const e = new Error(
-        `Unhandled ApmApiSupertest error. Status: "${
-          res.status
-        }". Endpoint: "${endpoint}". ${JSON.stringify(res.body)}`
-      );
-      // @ts-expect-error
-      e.res = res;
-      throw e;
+      throw new ApmApiError(res, endpoint);
     }
 
     return res;
   };
+}
+
+export class ApmApiError extends Error {
+  res: request.Response;
+
+  constructor(res: request.Response, endpoint: string) {
+    super(
+      `Unhandled ApmApiError.
+Status: "${res.status}"
+Endpoint: "${endpoint}"
+Body: ${JSON.stringify(res.body)}`
+    );
+
+    this.res = res;
+  }
 }
