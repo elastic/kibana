@@ -85,7 +85,9 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     await root.start();
 
     // notify parent process know when we are ready for dev mode.
-    process.send!(['SERVER_LISTENING']);
+    if (process.send) {
+      process.send(['SERVER_LISTENING']);
+    }
   } catch (err) {
     await shutdown(err);
   }
