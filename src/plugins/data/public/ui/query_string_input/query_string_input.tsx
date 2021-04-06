@@ -37,6 +37,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -136,6 +137,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
    * @private
    */
   private isFocusWithin = false;
+
+  getDefaultProps() {
+    return {
+      storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+    };
+  }
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -504,9 +511,10 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    const storageKey = this.props.storageKey || 'kibana.userQueryLanguage';
-
-    this.services.storage.set(storageKey, language);
+    const storageKey = this.props.storageKey;
+    if (storageKey) {
+      this.services.storage.set(storageKey, language);
+    }
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
