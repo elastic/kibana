@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { identity } from 'fp-ts/function';
+import type { estypes } from '@elastic/elasticsearch';
 import { throwErrors } from './errors';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsErrorHelpers } from '../errors';
@@ -20,8 +21,11 @@ export const validateAndConvertAggregations = (
   allowedTypes: string[],
   aggs: Record<string, unknown>,
   indexMapping: IndexMapping
-) => {
-  return recurseNestedValidation(allowedTypes, aggs, indexMapping);
+): Record<string, estypes.AggregationContainer> => {
+  return recurseNestedValidation(allowedTypes, aggs, indexMapping) as Record<
+    string,
+    estypes.AggregationContainer
+  >;
 };
 
 const recurseNestedValidation = (

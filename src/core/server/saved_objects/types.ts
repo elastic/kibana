@@ -123,7 +123,7 @@ export interface SavedObjectsFindOptions {
    * aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
    * SavedObjects.find({ type: 'dashboard', aggs })
    */
-  aggs?: Record<string, unknown>;
+  aggs?: Record<string, estypes.AggregationContainer>;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved

@@ -885,7 +885,7 @@ export class SavedObjectsRepository {
     }
 
     return {
-      ...(body.aggregations != null ? { aggregations: body.aggregations } : {}),
+      ...(body.aggregations != null ? { aggregations: body.aggregations as any } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,
