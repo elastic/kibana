@@ -11,7 +11,9 @@ import uuid from 'uuid';
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 
 /**
- * A generic base class to assist in creating domain specific data generators
+ * A generic base class to assist in creating domain specific data generators. It includes
+ * several general purpose random data generators for use within the class and exposes one
+ * public method named `generate()` which should be implemented by sub-classes.
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   protected random: seedrandom.prng;
@@ -32,7 +34,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** generate random OS family value */
-  protected randomOS(): string {
+  protected randomOSFamily(): string {
     return this.randomChoice(OS_FAMILY);
   }
 

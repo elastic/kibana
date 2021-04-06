@@ -8,16 +8,23 @@
 import { BaseDataGenerator } from './base_data_generator';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../lists/common/constants';
 import { CreateExceptionListItemSchema } from '../../../../lists/common';
-import { getCreateEndpointListItemSchemaMock } from '../../../../lists/common/schemas/request/create_endpoint_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 
 export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
   generate(): CreateExceptionListItemSchema {
-    return Object.assign(getCreateEndpointListItemSchemaMock(), {
+    const overrides: Partial<CreateExceptionListItemSchema> = {
       name: `generator event ${this.randomString(5)}`,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
       item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
-      os_types: [this.randomOS()],
+      os_types: [this.randomOSFamily()] as CreateExceptionListItemSchema['os_types'],
       tags: ['policy:all'],
-    });
+      namespace_type: 'agnostic',
+      meta: undefined,
+    };
+
+    return Object.assign<CreateExceptionListItemSchema, Partial<CreateExceptionListItemSchema>>(
+      getCreateExceptionListItemSchemaMock(),
+      overrides
+    );
   }
 }
