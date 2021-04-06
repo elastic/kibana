@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataSeries } from '../types';
-import { FieldLabels } from '../constants/constants';
+import { DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
 
 interface Props {
   seriesId: string;

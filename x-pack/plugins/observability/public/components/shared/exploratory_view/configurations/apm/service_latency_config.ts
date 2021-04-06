@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../types';
-import { FieldLabels } from '../constants/constants';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import { OperationType } from '../../../../../../lens/public';
+import { OperationType } from '../../../../../../../lens/public';
 
 export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {

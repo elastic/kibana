@@ -36,7 +36,7 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
-import indexPatternData from './configurations/data/test_index_pattern.json';
+import indexPatternData from './configurations/test_data/test_index_pattern.json';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
