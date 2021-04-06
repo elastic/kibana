@@ -53,6 +53,7 @@ describe('ApiLogsTable', () => {
   };
   const actions = {
     onPaginate: jest.fn(),
+    openFlyout: jest.fn(),
   };
 
   beforeEach(() => {
@@ -86,7 +87,7 @@ describe('ApiLogsTable', () => {
 
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(3);
     wrapper.find('[data-test-subj="ApiLogsTableDetailsButton"]').first().simulate('click');
-    // TODO: API log details flyout
+    expect(actions.openFlyout).toHaveBeenCalled();
   });
 
   it('renders an empty prompt if no items are passed', () => {
