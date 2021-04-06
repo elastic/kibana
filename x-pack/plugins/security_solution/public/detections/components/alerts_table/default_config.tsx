@@ -39,47 +39,32 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
   },
 ];
 
-export const buildAlertsRuleIdFilter = (
-  ruleId: string,
-  showThreatMatchesOnly: boolean
-): Filter[] => {
-  const sharedMeta = { alias: null, negate: false, disabled: false };
-  const matchPhraseQuery = {
-    match_phrase: {
-      'signal.rule.id': ruleId,
-    },
-  };
-  const filter = showThreatMatchesOnly
-    ? {
-        meta: {
-          ...sharedMeta,
-          type: 'phrases',
-          key: 'signal.rule.threat_mapping',
-        },
-        query: {
-          bool: {
-            must: [matchPhraseQuery, { exists: { field: 'signal.rule.threat_mapping' } }],
+export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
+  ruleId
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'signal.rule.id',
+            params: {
+              query: ruleId,
+            },
+          },
+          query: {
+            match_phrase: {
+              'signal.rule.id': ruleId,
+            },
           },
         },
-      }
-    : {
-        meta: {
-          ...sharedMeta,
-          type: 'phrase',
-          key: 'signal.rule.id',
-          params: {
-            query: ruleId,
-          },
-        },
-        query: matchPhraseQuery,
-      };
-  return [filter];
-};
+      ]
+    : [];
 
-export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
-  ...(showBuildingBlockAlerts
-    ? []
-    : [
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
+  showBuildingBlockAlerts
+    ? [
         {
           meta: {
             alias: null,
@@ -92,8 +77,8 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
-      ]),
-];
+      ]
+    : [];
 
 export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[] =>
   showThreatMatchesOnly
@@ -102,11 +87,12 @@ export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[]
           meta: {
             alias: null,
             disabled: false,
+            negate: false,
             key: 'signal.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support BoolFilter[]
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.threat_mapping' },
         },
       ]

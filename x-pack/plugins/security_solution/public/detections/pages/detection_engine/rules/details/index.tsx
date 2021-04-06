@@ -59,6 +59,7 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
+  buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
 import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
@@ -287,8 +288,9 @@ const RuleDetailsPageComponent = () => {
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId, showThreatMatchesOnly) : []),
+      ...buildAlertsRuleIdFilter(ruleId),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showThreatMatchesOnly),
     ],
     [ruleId, showBuildingBlockAlerts, showThreatMatchesOnly]
   );

@@ -6,14 +6,14 @@
  */
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { buildAlertsRuleIdFilter } from './default_config';
+import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
 jest.mock('./actions');
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
-    test('given a rule id with showThreatMatchesOnly=false this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1', false);
+    test('given a rule id this will return an array with a single filter', () => {
+      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
       const expectedFilter: Filter = {
         meta: {
           alias: null,
@@ -35,33 +35,32 @@ describe('alerts default_config', () => {
       expect(filters[0]).toEqual(expectedFilter);
     });
 
-    test('given a rule id with showThreatMatchesOnly=true this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1', true);
-      const expectedFilter: Filter = {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          key: 'signal.rule.threat_mapping',
-          type: 'phrases',
-        },
-        query: {
-          bool: {
-            must: [
-              {
-                match_phrase: {
-                  'signal.rule.id': 'rule-id-1',
-                },
-              },
-              { exists: { field: 'signal.rule.threat_mapping' } },
-            ],
+    describe('buildThreatMatchFilter', () => {
+      test('given a showThreatMatchesOnly=true this will return an array with a single filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(true);
+        const expectedFilter: Filter = {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
           },
-        },
-      };
-      expect(filters).toHaveLength(1);
-      expect(filters[0]).toEqual(expectedFilter);
+          exists: {
+            field: 'signal.rule.threat_mapping',
+          },
+        };
+        expect(filters).toHaveLength(1);
+        expect(filters[0]).toEqual(expectedFilter);
+      });
+      test('given a showThreatMatchesOnly=false this will return an empty filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(false);
+        expect(filters).toHaveLength(0);
+      });
     });
   });
+
   // TODO: move these tests to ../timelines/components/timeline/body/events/event_column_view.tsx
   // describe.skip('getAlertActions', () => {
   //   let setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
