@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/utils';
-
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { EncryptionConfig } from './encryption_config';
 

@@ -11,7 +11,14 @@ import { getServices, chance } from './lib';
 export const docMissingSuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents
   beforeEach(async () => {
-    const { callCluster } = getServices();
+    const { kbnServer, callCluster } = getServices();
+
+    // write a setting to ensure kibana index is created
+    await kbnServer.inject({
+      method: 'POST',
+      url: '/api/kibana/settings/defaultIndex',
+      payload: { value: 'abc' },
+    });
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
@@ -24,11 +31,15 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('get route', () => {
     it('creates doc, returns a 200 with settings', async () => {
-      const { supertest } = getServices();
+      const { kbnServer } = getServices();
 
-      const { body } = await supertest('get', '/api/kibana/settings').expect(200);
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'GET',
+        url: '/api/kibana/settings',
+      });
 
-      expect(body).toMatchObject({
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -44,17 +55,17 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('set route', () => {
     it('creates doc, returns a 200 with value set', async () => {
-      const { supertest } = getServices();
+      const { kbnServer } = getServices();
 
       const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'POST',
+        url: '/api/kibana/settings/defaultIndex',
+        payload: { value: defaultIndex },
+      });
 
-      const { body } = await supertest('post', '/api/kibana/settings/defaultIndex')
-        .send({
-          value: defaultIndex,
-        })
-        .expect(200);
-
-      expect(body).toMatchObject({
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -73,17 +84,19 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('setMany route', () => {
     it('creates doc, returns 200 with updated values', async () => {
-      const { supertest } = getServices();
+      const { kbnServer } = getServices();
 
       const defaultIndex = chance.word();
-
-      const { body } = await supertest('post', '/api/kibana/settings')
-        .send({
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'POST',
+        url: '/api/kibana/settings',
+        payload: {
           changes: { defaultIndex },
-        })
-        .expect(200);
+        },
+      });
 
-      expect(body).toMatchObject({
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -102,11 +115,15 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('delete route', () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
-      const { supertest } = getServices();
+      const { kbnServer } = getServices();
 
-      const { body } = await supertest('delete', '/api/kibana/settings/defaultIndex').expect(200);
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'DELETE',
+        url: '/api/kibana/settings/defaultIndex',
+      });
 
-      expect(body).toMatchObject({
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),

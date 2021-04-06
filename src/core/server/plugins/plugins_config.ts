@@ -7,24 +7,20 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '../internal_types';
 import { Env } from '../config';
 
-const configSchema = schema.object({
-  initialize: schema.boolean({ defaultValue: true }),
+export type PluginsConfigType = TypeOf<typeof config.schema>;
 
-  /**
-   * Defines an array of directories where another plugin should be loaded from.
-   */
-  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
-});
-
-export type PluginsConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<PluginsConfigType> = {
+export const config = {
   path: 'plugins',
-  schema: configSchema,
-  deprecations: ({ unusedFromRoot }) => [unusedFromRoot('plugins.scanDirs')],
+  schema: schema.object({
+    initialize: schema.boolean({ defaultValue: true }),
+
+    /**
+     * Defines an array of directories where another plugin should be loaded from.
+     */
+    paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  }),
 };
 
 /** @internal */

@@ -14,7 +14,7 @@ const mockGetTranslationPaths = getTranslationPaths as jest.Mock;
 jest.mock('./get_translation_paths', () => ({
   getTranslationPaths: jest.fn().mockResolvedValue([]),
 }));
-jest.mock('@kbn/utils', () => ({
+jest.mock('../utils', () => ({
   fromRoot: jest.fn().mockImplementation((path: string) => path),
 }));
 

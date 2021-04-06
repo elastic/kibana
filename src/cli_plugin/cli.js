@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { listCommand } from './list';
 import { installCommand } from './install';

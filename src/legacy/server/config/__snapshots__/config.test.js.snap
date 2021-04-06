@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/config/config class Config() #getDefault(key) array key should throw exception for unknown key 1`] = `"Unknown config key: foo,bar."`;
+
+exports[`lib/config/config class Config() #getDefault(key) dot notation key should throw exception for unknown key 1`] = `"Unknown config key: foo.bar."`;

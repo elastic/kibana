@@ -88,7 +88,7 @@ export class LegacyLoggingServer {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
-    const loggingConfig = legacyLoggingConfigSchema.validate({
+    const { value: loggingConfig } = legacyLoggingConfigSchema.validate({
       ...legacyLoggingConfig,
       events: {
         ...legacyLoggingConfig.events,

@@ -9,7 +9,7 @@
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { Test } from '@kbn/test/types/ftr';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { pkg } from '../../../../src/core/server/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-ignore internal js that is passed to the browser as is
@@ -45,7 +45,6 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
   });
 
   const statsCache = new WeakMap<Test, { snapshotCount: number }>();
-
   function getStats(test: Test) {
     if (!statsCache.has(test)) {
       statsCache.set(test, {

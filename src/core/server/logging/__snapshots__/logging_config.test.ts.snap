@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`schema\` creates correct schema with defaults. 1`] = `
+Object {
+  "appenders": Map {},
+  "loggers": Array [],
+  "root": Object {
+    "appenders": Array [
+      "default",
+    ],
+    "level": "info",
+  },
+}
+`;
+
+exports[`\`schema\` throws if \`root\` logger does not have "default" appender configured. 1`] = `"[root]: \\"default\\" appender required for migration period till the next major release"`;
+
+exports[`\`schema\` throws if \`root\` logger does not have appenders configured. 1`] = `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`;
+
+exports[`fails if loggers use unknown appenders. 1`] = `"Logger \\"some.nested.context\\" contains unsupported appender key \\"unknown\\"."`;

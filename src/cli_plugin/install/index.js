@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getConfigPath, kibanaPackageJson as pkg } from '@kbn/utils';
+import { getConfigPath } from '@kbn/utils';
+import { pkg } from '../../core/server/utils';
 import { install } from './install';
 import { Logger } from '../lib/logger';
 import { parse, parseMilliseconds } from './settings';

@@ -12,7 +12,8 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
+import { getConfigPath, fromRoot } from '@kbn/utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -64,10 +65,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     delete rawConfig.xpack;
   }
 
-  // only used to set cliArgs.envName, we don't want to inject that into the config
-  delete extraCliOptions.env;
-
   if (opts.dev) {
+    set('env', 'development');
+
     if (!has('elasticsearch.username')) {
       set('elasticsearch.username', 'kibana_system');
     }
@@ -184,7 +184,7 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (!isKibanaDistributable()) {
+  if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
       .option(
