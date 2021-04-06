@@ -60,10 +60,12 @@ export enum TLSVersion {
 
 // values must match keys in the integration package
 export enum ConfigKeys {
+  APM_SERVICE_NAME = 'service.name',
   HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
   MONITOR_TYPE = 'type',
   NAME = 'name',
+  PASSWORD = 'password',
   PROXY_URL = 'proxy_url',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   RESPONSE_BODY_CHECK_NEGATIVE = 'check.response.body.negative',
@@ -78,7 +80,6 @@ export enum ConfigKeys {
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
-  APM_SERVICE_NAME = 'service.name',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -88,6 +89,7 @@ export enum ConfigKeys {
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   URLS = 'urls',
+  USERNAME = 'username',
   WAIT = 'wait',
 }
 
@@ -131,6 +133,7 @@ export interface ITLSFields {
 }
 
 export interface IHTTPAdvancedFields {
+  [ConfigKeys.PASSWORD]: string;
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: string[];
   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: string[];
@@ -141,6 +144,7 @@ export interface IHTTPAdvancedFields {
   [ConfigKeys.REQUEST_BODY_CHECK]: { value: string; type: Mode };
   [ConfigKeys.REQUEST_HEADERS_CHECK]: Record<string, string>;
   [ConfigKeys.REQUEST_METHOD_CHECK]: string;
+  [ConfigKeys.USERNAME]: string;
 }
 
 export interface ITCPAdvancedFields {

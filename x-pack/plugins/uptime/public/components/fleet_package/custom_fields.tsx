@@ -412,6 +412,7 @@ export const CustomFields = memo<Props>(
         {isHTTP && (
           <HTTPAdvancedFields
             defaultValues={{
+              [ConfigKeys.PASSWORD]: defaultValues[ConfigKeys.PASSWORD],
               [ConfigKeys.PROXY_URL]: defaultValues[ConfigKeys.PROXY_URL],
               [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]:
                 defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE],
@@ -424,6 +425,7 @@ export const CustomFields = memo<Props>(
               [ConfigKeys.REQUEST_BODY_CHECK]: defaultValues[ConfigKeys.REQUEST_BODY_CHECK],
               [ConfigKeys.REQUEST_HEADERS_CHECK]: defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK],
               [ConfigKeys.REQUEST_METHOD_CHECK]: defaultValues[ConfigKeys.REQUEST_METHOD_CHECK],
+              [ConfigKeys.USERNAME]: defaultValues[ConfigKeys.USERNAME],
             }}
             onChange={onChangeAdvancedFields}
             validate={validate}

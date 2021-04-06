@@ -68,6 +68,7 @@ const defaultValues = {
   [ConfigKeys.HOSTS]: '',
   [ConfigKeys.MAX_REDIRECTS]: 0,
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKeys.PASSWORD]: '',
   [ConfigKeys.PROXY_URL]: '',
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
@@ -116,6 +117,7 @@ const defaultValues = {
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 16,
   [ConfigKeys.URLS]: '',
+  [ConfigKeys.USERNAME]: '',
   [ConfigKeys.WAIT]: 1,
 };
 

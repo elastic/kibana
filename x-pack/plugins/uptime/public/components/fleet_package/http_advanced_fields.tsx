@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiFieldText,
+  EuiFieldPassword,
   EuiFormRow,
   EuiSelect,
   EuiDescribedFormGroup,
@@ -82,7 +83,58 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.label"
+              defaultMessage="Username"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.helpText"
+              defaultMessage="Optional username for authenticating with the server."
+            />
+          }
+        >
+          <EuiFieldText
+            value={fields[ConfigKeys.USERNAME]}
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.value,
+                configKey: ConfigKeys.USERNAME,
+              })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.label"
+              defaultMessage="Password"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText"
+              defaultMessage="Optional password for authenticating with the server."
+            />
+          }
+        >
+          <EuiFieldPassword
+            value={fields[ConfigKeys.PASSWORD]}
+            type="dual"
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.value,
+                configKey: ConfigKeys.PASSWORD,
+              })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.http.label"
               defaultMessage="Proxy URL"
             />
           }
