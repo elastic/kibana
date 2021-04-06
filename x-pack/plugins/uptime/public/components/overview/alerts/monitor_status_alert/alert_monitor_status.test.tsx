@@ -35,6 +35,27 @@ describe('alert monitor status component', () => {
           <OldAlertCallOut
             isOldAlert={true}
           />
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={
+              <span>
+                <FormattedMessage
+                  defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+                  id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+                  values={
+                    Object {
+                      "snapshotCount": 0,
+                    }
+                  }
+                />
+                 
+              </span>
+            }
+          />
+          <EuiSpacer
+            size="s"
+          />
           <AlertQueryBar
             onChange={[Function]}
             query="monitor.id: foo"
@@ -85,24 +106,6 @@ describe('alert monitor status component', () => {
             }
             isOldAlert={true}
             setAlertParams={[MockFunction]}
-          />
-          <EuiSpacer
-            size="l"
-          />
-          <EuiCallOut
-            iconType="iInCircle"
-            size="s"
-            title={
-              <FormattedMessage
-                defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-                id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
-                values={
-                  Object {
-                    "snapshotCount": 0,
-                  }
-                }
-              />
-            }
           />
           <EuiSpacer
             size="m"
