@@ -416,6 +416,34 @@
             "signature": [
               "string | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QueryStringInputProps.autoSubmit",
+            "type": "CompoundType",
+            "label": "autoSubmit",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 72
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QueryStringInputProps.storageKey",
+            "type": "string",
+            "label": "storageKey",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 76
+            },
+            "signature": [
+              "string | undefined"
+            ]
           }
         ],
         "source": {
@@ -461,7 +489,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, \"filters\" | \"query\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, any> & { WrappedComponent: React.ComponentType<Pick<",
+          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"storageKey\" | \"disableLanguageSwitcher\" | \"isInvalid\" | \"autoSubmit\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, \"filters\" | \"query\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"storageKey\" | \"disableLanguageSwitcher\" | \"isInvalid\" | \"autoSubmit\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, any> & { WrappedComponent: React.ComponentType<Pick<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -469,7 +497,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & ReactIntl.InjectedIntlProps>; }"
+          ", \"filters\" | \"query\" | \"intl\" | \"indexPatterns\" | \"isLoading\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"placeholder\" | \"isClearable\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"storageKey\" | \"disableLanguageSwitcher\" | \"isInvalid\" | \"autoSubmit\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & ReactIntl.InjectedIntlProps>; }"
         ],
         "initialIsOpen": false
       },
@@ -481,7 +509,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
-          "lineNumber": 80
+          "lineNumber": 84
         },
         "signature": [
           "SearchBarOwnProps & SearchBarInjectedDeps"
