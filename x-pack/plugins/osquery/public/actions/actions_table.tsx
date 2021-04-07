@@ -99,7 +99,7 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.totalCount,
+      totalItemCount: actionsData?.totalCount ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
     [actionsData?.totalCount, pageIndex, pageSize]
@@ -110,7 +110,6 @@ const ActionsTableComponent = () => {
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={actionsData?.actions ?? []}
       columns={columns}
-      // @ts-expect-error update types
       pagination={pagination}
       onChange={onTableChange}
     />

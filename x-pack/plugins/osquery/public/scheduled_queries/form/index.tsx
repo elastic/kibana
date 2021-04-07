@@ -18,10 +18,11 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
 import { produce } from 'immer';
 
+import { PackagePolicy } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
@@ -35,7 +36,7 @@ const FORM_ID = 'scheduledQueryForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface ScheduledQueryFormProps {
-  defaultValue?: Record<string, unknown>;
+  defaultValue?: PackagePolicy;
   editMode?: boolean;
 }
 
@@ -154,7 +155,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
 
   const { submit } = form;
 
-  // const [formData] = useFormData({ form, watch: ['policy_id'] });
+  const policyIdEuiFieldProps = useMemo(() => ({ isDisabled: !!defaultValue }), [defaultValue]);
 
   return (
     <>
@@ -178,7 +179,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
 
           <CommonUseField
             path="policy_id"
-            disabled={!!defaultValue}
+            euiFieldProps={policyIdEuiFieldProps}
             component={PolicyIdComboBoxField}
           />
 

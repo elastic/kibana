@@ -5,52 +5,66 @@
  * 2.0.
  */
 
-/* eslint-disable react-perf/jsx-no-new-object-as-prop */
-
 /* eslint-disable react/display-name */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+
+import { PackagePolicy, PackagePolicyInput, PackagePolicyInputStream } from '../../../fleet/common';
+import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
-interface ScheduledQueryQueriesTableProps {
-  data: unknown;
-  editMode?: boolean;
-  onDeleteClick?: () => void;
-  onEditClick?: () => void;
+interface ViewResultsInDiscoverActionProps {
+  item: PackagePolicyInputStream;
 }
 
-const ViewResultsInDiscoverAction = ({ item }) => {
-  const { createUrl } = useKibana().services.discover.urlGenerator;
-  const [discoverUrl, setDiscoverUrl] = useState<string | null>();
+const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = ({ item }) => {
+  const urlGenerator = useKibana().services.discover.urlGenerator;
+  const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      const newUrl = await createUrl({
+      if (!urlGenerator?.createUrl) return;
+
+      const newUrl = await urlGenerator.createUrl({
         indexPatternId: 'logs-*',
-        timeRange: {
-          to: 'now',
-          from: 'now-7d',
-          mode: 'relative',
-        },
+        filters: [
+          {
+            meta: {
+              index: 'logs-*',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'action_id',
+              params: { query: item.vars?.id.value },
+            },
+            query: { match_phrase: { action_id: item.vars?.id.value } },
+            $state: { store: FilterStateStore.APP_STATE },
+          },
+        ],
       });
       setDiscoverUrl(newUrl);
     };
     getDiscoverUrl();
-  }, [createUrl]);
+  }, [item.vars?.id.value, urlGenerator]);
 
   return (
     <EuiButtonIcon
-      // @ts-expect-error update types
-      // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-      onClick={() => onDeleteClick(item)}
       iconType="visTable"
       href={discoverUrl}
       target="_blank"
-      aria-label={`Check results of ${item.vars.id.value} in Discover`}
+      aria-label={`Check results of ${item.vars?.id.value} in Discover`}
     />
   );
 };
+
+interface ScheduledQueryQueriesTableProps {
+  data: PackagePolicy;
+  editMode?: boolean;
+  onDeleteClick?: (item: PackagePolicyInputStream) => void;
+  onEditClick?: (item: PackagePolicyInputStream) => void;
+}
 
 const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTableProps> = ({
   data,
@@ -58,63 +72,29 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
   onDeleteClick,
   onEditClick,
 }) => {
-  const services = useKibana().services;
-
-  console.error('data', data);
-
-  console.error('servic', services);
-
-  console.error('indexx', services.data.indexPatterns.find('logs-*'));
-
-  console.error('dicsover', services.discover.urlGenerator.createUrl({}));
-
-  // const url = await services.discover.urlGenerator.createUrl({
-  //   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-  //   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
-  //   timeRange: {
-  //     to: 'now',
-  //     from: 'now-15m',
-  //     mode: 'relative',
-  //   },
-  // });
-  // const handleDiscoverResultsClick = useCallback((item) => {}, []);
-
-  const renderViewResultsAction = useCallback(
-    (item) => (
-      <EuiButtonIcon
-        // @ts-expect-error update types
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick(item)}
-        iconType="visTable"
-        aria-label={`Check results of ${item.vars.id.value} in Discover`}
-      />
-    ),
-    [onDeleteClick]
-  );
-
   const renderDeleteAction = useCallback(
-    (item) => (
+    (item: PackagePolicyInputStream) => (
       <EuiButtonIcon
         color="danger"
         // @ts-expect-error update types
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onDeleteClick(item)}
         iconType="trash"
-        aria-label={`Delete ${item.vars.id.value}`}
+        aria-label={`Delete ${item.vars?.id.value}`}
       />
     ),
     [onDeleteClick]
   );
 
   const renderEditAction = useCallback(
-    (item) => (
+    (item: PackagePolicyInputStream) => (
       <EuiButtonIcon
         color="primary"
         // @ts-expect-error update types
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onEditClick(item)}
         iconType="pencil"
-        aria-label={`Edit ${item.vars.id.value}`}
+        aria-label={`Edit ${item.vars?.id.value}`}
       />
     ),
     [onEditClick]
@@ -160,16 +140,18 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
     [editMode, renderDeleteAction, renderEditAction]
   );
 
-  const sorting = {
-    sort: {
-      field: 'vars.id.value',
-      direction: 'asc' as const,
-    },
-  };
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: 'vars.id.value',
+        direction: 'asc' as const,
+      },
+    }),
+    []
+  );
 
   return (
-    <EuiInMemoryTable
-      // @ts-expect-error update types
+    <EuiInMemoryTable<PackagePolicyInputStream>
       items={data.inputs[0].streams}
       itemId="vars.id.value"
       isExpandable={true}

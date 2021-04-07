@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useState } from 'react';
 
+import { PackagePolicyInput, PackagePolicyInputStream } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryQueriesTable } from '../scheduled_query_queries_table';
@@ -18,7 +19,7 @@ import { EditQueryFlyout } from './edit_query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 
 interface QueriesFieldProps {
-  field: FieldHook;
+  field: FieldHook<PackagePolicyInput[]>;
 }
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
@@ -32,11 +33,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
   const { setValue } = field;
 
   const handleDeleteClick = useCallback(
-    (stream) => {
-      // @ts-expect-error update types
+    (stream: PackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
-        stream.vars.id.value,
+        stream.vars?.id.value,
       ]);
 
       if (streamIndex > -1) {
@@ -53,11 +53,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
   );
 
   const handleEditClick = useCallback(
-    (stream) => {
-      // @ts-expect-error update types
+    (stream: PackagePolicyInputStream) => {
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
-        stream.vars.id.value,
+        stream.vars?.id.value,
       ]);
 
       setShowEditQueryFlyout(streamIndex);
@@ -146,20 +145,15 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {
-        // @ts-expect-error update types
-        field.value && field.value[0].streams?.length && (
-          <ScheduledQueryQueriesTable
-            editMode={true}
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            data={{ inputs: field.value }}
-            // @ts-expect-error update types
-            onEditClick={handleEditClick}
-            // @ts-expect-error update types
-            onDeleteClick={handleDeleteClick}
-          />
-        )
-      }
+      {field.value && field.value[0].streams?.length ? (
+        <ScheduledQueryQueriesTable
+          editMode={true}
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          data={{ inputs: field.value }}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
+        />
+      ) : null}
       <EuiSpacer />
       {
         // @ts-expect-error update types
@@ -171,7 +165,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <EditQueryFlyout
-          // @ts-expect-error update types
           defaultValue={field.value[0].streams[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}

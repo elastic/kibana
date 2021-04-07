@@ -9,13 +9,18 @@ import { produce } from 'immer';
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { PACKAGE_POLICY_API_ROUTES, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import {
+  ListResult,
+  PackagePolicy,
+  PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const useScheduledQueries = () => {
   const { http } = useKibana().services;
 
-  return useQuery(
+  return useQuery<ListResult<PackagePolicy>>(
     ['scheduledQueries'],
     () =>
       http.get(PACKAGE_POLICY_API_ROUTES.LIST_PATTERN, {
@@ -27,9 +32,8 @@ export const useScheduledQueries = () => {
       }),
     {
       keepPreviousData: true,
-      select: produce((draft) => {
+      select: produce((draft: ListResult<PackagePolicy>) => {
         draft.items = draft.items.filter(
-          // @ts-expect-error update types
           (item) =>
             !(
               !item.inputs[0].streams.length ||

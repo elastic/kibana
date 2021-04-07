@@ -123,10 +123,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
         {policyType === 'scheduled_query' && newPolicy.inputs[0].streams.length ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              {
-                // @ts-expect-error update types
-                <ScheduledQueryQueriesTable data={newPolicy} handleChange={onChange} />
-              }
+              <ScheduledQueryQueriesTable data={newPolicy} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}

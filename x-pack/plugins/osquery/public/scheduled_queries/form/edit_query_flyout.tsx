@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
+import { PackagePolicyInput } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
-
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const FORM_ID = 'addQueryFlyoutForm';
@@ -29,7 +29,7 @@ const FORM_ID = 'addQueryFlyoutForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface EditQueryFlyoutProps {
-  defaultValue: Record<string, unknown>;
+  defaultValue: PackagePolicyInput;
   onSave: (payload: FormData) => void;
   onClose: () => void;
 }
@@ -51,16 +51,11 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
       return;
     },
     defaultValue,
-    deserializer: (payload) => {
-      return {
-        // @ts-expect-error update types
-        id: payload.vars.id.value,
-        // @ts-expect-error update types
-        query: payload.vars.query.value,
-        // @ts-expect-error update types
-        interval: payload.vars.interval.value,
-      };
-    },
+    deserializer: (payload) => ({
+      id: payload.vars.id.value,
+      query: payload.vars.query.value,
+      interval: payload.vars.interval.value,
+    }),
     schema: {
       id: {
         type: FIELD_TYPES.TEXT,

@@ -8,11 +8,15 @@
 /* eslint-disable react/display-name */
 
 import { find, uniq, map } from 'lodash/fp';
-import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useQueries } from 'react-query';
+import { UseQueryResult, useQueries } from 'react-query';
 
-import { agentPolicyRouteService } from '../../../fleet/common';
+import {
+  GetOneAgentPolicyResponse,
+  PackagePolicy,
+  agentPolicyRouteService,
+} from '../../../fleet/common';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { useScheduledQueries } from './use_scheduled_queries';
 
@@ -22,8 +26,7 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-// @ts-expect-error update types
-const renderName = (_, item) => <ScheduledQueryName id={item.id} name={item.name} />;
+const renderName = (_, item: PackagePolicy) => <ScheduledQueryName id={item.id} name={item.name} />;
 
 const ScheduledQueriesTableComponent = () => {
   const {
@@ -33,7 +36,7 @@ const ScheduledQueriesTableComponent = () => {
 
   const { data } = useScheduledQueries();
 
-  const uniqAgentPolicyIds = useMemo(() => {
+  const uniqAgentPolicyIds = useMemo<string[]>(() => {
     if (!data?.items) {
       return [];
     }
@@ -46,25 +49,25 @@ const ScheduledQueriesTableComponent = () => {
       queryKey: ['agentPolicy', policyId],
       queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
     }))
-  );
+  ) as Array<UseQueryResult<GetOneAgentPolicyResponse>>;
 
   const renderAgentPolicy = useCallback(
     (policyId) => {
-      const policyDetails = find(['data.item.id', policyId], agentPolicies);
+      const policyDetails: UseQueryResult<GetOneAgentPolicyResponse> | undefined = find(
+        ['data.item.id', policyId],
+        agentPolicies
+      );
 
       return (
         <EuiLink href={getUrlForApp('fleet', { path: `#/policies/${policyId}` })} target="_blank">
-          {
-            // @ts-expect-error update types
-            policyDetails?.data?.item?.name ?? policyId
-          }
+          {policyDetails?.data?.item?.name ?? policyId}
         </EuiLink>
       );
     },
     [agentPolicies, getUrlForApp]
   );
 
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
     () => [
       {
         field: 'name',
@@ -81,14 +84,12 @@ const ScheduledQueriesTableComponent = () => {
       {
         field: 'inputs[0].streams',
         name: '# queries',
-        // @ts-expect-error update types
-        render: (streams) => <>{streams.length}</>,
+        render: (streams: PackagePolicy['inputs'][0]['streams']) => <>{streams.length}</>,
       },
       {
         field: 'enabled',
         name: 'Active',
         sortable: true,
-        // @ts-expect-error update types
         render: (enabled, item) => <>{item.enabled ? 'True' : 'False'}</>,
       },
     ],
@@ -106,7 +107,7 @@ const ScheduledQueriesTableComponent = () => {
   );
 
   return (
-    <EuiInMemoryTable
+    <EuiInMemoryTable<PackagePolicy>
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data?.items ?? []}
       columns={columns}

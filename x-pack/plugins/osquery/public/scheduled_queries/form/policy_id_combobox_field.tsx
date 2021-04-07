@@ -31,11 +31,17 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
 `;
 
 interface PolicyIdComboBoxFieldProps {
+  euiFieldProps?: Record<string, any>;
   field: FieldHook<string[]>;
 }
 
-const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({ field }) => {
+const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
+  euiFieldProps,
+  field,
+}) => {
   const { value } = field;
+
+  console.error('field', field, euiFieldProps);
 
   const { data: agentPolicies = [] } = useAgentPolicies();
 
@@ -103,6 +109,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({ 
         'data-test-subj': 'searchableSnapshotCombobox',
         selectedOptions,
         renderOption,
+        ...euiFieldProps,
       }}
     />
   );
