@@ -124,7 +124,10 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                     <AdvancedRuntimeMappingsEditorSwitch {...props.runtimeMappingsEditor} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiCopy beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS} textToCopy={''}>
+                    <EuiCopy
+                      beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                      textToCopy={advancedRuntimeMappingsConfig ?? ''}
+                    >
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}
