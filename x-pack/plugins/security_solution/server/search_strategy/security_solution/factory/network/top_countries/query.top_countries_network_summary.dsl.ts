@@ -16,6 +16,7 @@ import {
   SortField,
 } from '../../../../../../common/search_strategy';
 
+// TODO: This is the same as the other one, so move this into helpers.
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_countries_count: {
     cardinality: {
@@ -124,6 +125,7 @@ const getFlowTargetAggs = (
   },
 });
 
+// TODO: This is the same as the other one, so move this to helpers and use it from there.
 export const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest => {
   switch (flowTarget) {
     case FlowTargetSourceDest.source:
@@ -134,6 +136,7 @@ export const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSo
   assertUnreachable(flowTarget);
 };
 
+// TODO: This is the same as the other one, so move this to helpers and use it from there.
 type QueryOrder =
   | { bytes_in: Direction }
   | { bytes_out: Direction }
@@ -141,6 +144,7 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
+// TODO: This is the same as the other one, so move this to helpers and use it from there.
 const getQueryOrder = (
   networkTopCountriesSortField: SortField<NetworkTopTablesFields>
 ): QueryOrder => {

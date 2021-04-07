@@ -96,24 +96,3 @@ const getFirstItem = (data: HostBuckets): string | null => {
   }
   return firstItem.key;
 };
-
-export const createTimeRangeForMaxMin = (from: string, to: string) => {
-  return [
-    {
-      range: {
-        '@timestamp.min': {
-          lte: to,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-    {
-      range: {
-        '@timestamp.max': {
-          gte: from,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
-};

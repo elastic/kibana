@@ -16,6 +16,7 @@ import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';
 import { getQueryOrder } from './helpers';
 
+// TODO: This is the same as the other one, so move this into helpers.
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_n_flow_count: {
     cardinality: {

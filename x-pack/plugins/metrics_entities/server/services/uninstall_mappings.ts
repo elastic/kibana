@@ -35,7 +35,7 @@ export const uninstallMappings = async ({
     return computeMappingId({ id: index, prefix, suffix });
   });
   logMappingDebug({
-    id: JSON.stringify(indices),
+    id: indices.join(),
     logger,
     message: 'deleting indices',
   });
@@ -48,7 +48,7 @@ export const uninstallMappings = async ({
   } catch (error) {
     logMappingError({
       error,
-      id: JSON.stringify(indices),
+      id: indices.join(),
       logger,
       message: 'could not delete index',
       postBody: undefined,

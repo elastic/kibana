@@ -42,6 +42,7 @@ export const installMappings = async ({
           ...mapping.mappings,
           _meta: {
             ...mapping.mappings._meta,
+            // TODO: Do we want to keep the version as 1.0.0 here? If so then this should be moved into constants
             ...{ created_by: 'metrics_entities', index: mappingId, version: { created: '1.0.0' } },
           },
         },
