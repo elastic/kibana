@@ -732,6 +732,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         : urlTemplate,
     };
   }
+
+  updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean {
+    return prevMeta.areResultsTrimmed === undefined || prevMeta.areResultsTrimmed
+      ? super.updateDueToTimeslice(prevMeta, nextMeta)
+      : // do not trigger data re-fetch for timeslice changes when results are complete.
+        // client side masking will only show results in timeslice.
+        false;
+  }
 }
 
 registerSource({

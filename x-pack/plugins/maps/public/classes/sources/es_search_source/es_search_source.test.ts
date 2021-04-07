@@ -16,18 +16,18 @@ import { SearchSource } from 'src/plugins/data/public';
 import { loadIndexSettings } from './load_index_settings';
 
 import { ESSearchSource } from './es_search_source';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import { DataMeta, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 const mockDescriptor = { indexPatternId: 'foo', geoField: 'bar' };
 
 describe('ESSearchSource', () => {
-  it('constructor', () => {
+  test('constructor', () => {
     const esSearchSource = new ESSearchSource(mockDescriptor);
     expect(esSearchSource instanceof ESSearchSource).toBe(true);
   });
 
   describe('ITiledSingleLayerVectorSource', () => {
-    it('mb-source params', () => {
+    test('mb-source params', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.getMinZoom()).toBe(0);
       expect(esSearchSource.getMaxZoom()).toBe(24);
@@ -108,7 +108,7 @@ describe('ESSearchSource', () => {
         applyGlobalTime: true,
       };
 
-      it('Should only include required props', async () => {
+      test('Should only include required props', async () => {
         const esSearchSource = new ESSearchSource({
           geoField: geoFieldName,
           indexPatternId: 'ipId',
@@ -119,7 +119,7 @@ describe('ESSearchSource', () => {
         );
       });
 
-      it('should include searchSourceId in urlTemplateWithMeta', async () => {
+      test('should include searchSourceId in urlTemplateWithMeta', async () => {
         const esSearchSource = new ESSearchSource({
           geoField: geoFieldName,
           indexPatternId: 'ipId',
@@ -136,11 +136,11 @@ describe('ESSearchSource', () => {
   });
 
   describe('isFilterByMapBounds', () => {
-    it('default', () => {
+    test('default', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.isFilterByMapBounds()).toBe(true);
     });
-    it('mvt', () => {
+    test('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
@@ -150,11 +150,11 @@ describe('ESSearchSource', () => {
   });
 
   describe('getJoinsDisabledReason', () => {
-    it('default', () => {
+    test('default', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
-    it('mvt', () => {
+    test('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
@@ -166,18 +166,108 @@ describe('ESSearchSource', () => {
   });
 
   describe('getFields', () => {
-    it('default', () => {
+    test('default', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
       const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(true);
     });
-    it('mvt', () => {
+    test('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
       const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(false);
+    });
+  });
+
+  describe('updateDueToTimeslice', () => {
+    test('should request re-fetch when areResultsTrimmed not provided and timeslice changes', () => {
+      const esSearchSource = new ESSearchSource(mockDescriptor);
+      const prevMeta = ({
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      const nextMeta = ({
+        timeslice: {
+          from: 1000,
+          to: 2000,
+        },
+      } as unknown) as DataMeta;
+      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(true);
+    });
+
+    test('should not request re-fetch when areResultsTrimmed not provided and timeslice does not change', () => {
+      const esSearchSource = new ESSearchSource(mockDescriptor);
+      const prevMeta = ({
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      const nextMeta = ({
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
+    });
+
+    test('should request re-fetch when results are trimmed and timeslice changes', () => {
+      const esSearchSource = new ESSearchSource(mockDescriptor);
+      const prevMeta = ({
+        areResultsTrimmed: true,
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      const nextMeta = ({
+        timeslice: {
+          from: 1000,
+          to: 2000,
+        },
+      } as unknown) as DataMeta;
+      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(true);
+    });
+
+    test('should not request re-fetch when results are trimmed and timeslice does not change', () => {
+      const esSearchSource = new ESSearchSource(mockDescriptor);
+      const prevMeta = ({
+        areResultsTrimmed: true,
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      const nextMeta = ({
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
+    });
+
+    test('should not request re-fetch when results are not trimmed and timeslice changes', () => {
+      const esSearchSource = new ESSearchSource(mockDescriptor);
+      const prevMeta = ({
+        areResultsTrimmed: false,
+        timeslice: {
+          from: 0,
+          to: 1000,
+        },
+      } as unknown) as DataMeta;
+      const nextMeta = ({
+        timeslice: {
+          from: 1000,
+          to: 2000,
+        },
+      } as unknown) as DataMeta;
+      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
     });
   });
 });

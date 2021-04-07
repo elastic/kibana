@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import _ from 'lodash';
 import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
