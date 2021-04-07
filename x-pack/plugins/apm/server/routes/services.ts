@@ -23,6 +23,7 @@ import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_g
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
 import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
 import { getServiceInstancesPrimaryStatistics } from '../lib/services/get_service_instances/primary_statistics';
+import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
@@ -553,7 +554,35 @@ const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceDependenciesRoute = createApmServerRoute({
+export const serviceInstancesMetadataDetails = createApmServerRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/service_overview_instances/{serviceNodeName}',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string,
+    }),
+    query: rangeRt,
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { serviceName, serviceNodeName } = resources.params.path;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return await getServiceInstanceMetadataDetails({
+      searchAggregatedTransactions,
+      setup,
+      serviceName,
+      serviceNodeName,
+    });
+  },
+});
+
+export const serviceDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
   params: t.type({
     path: t.type({

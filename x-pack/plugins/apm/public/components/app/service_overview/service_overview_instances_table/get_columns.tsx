@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
@@ -34,12 +38,16 @@ export function getColumns({
   latencyAggregationType,
   comparisonStatsData,
   comparisonEnabled,
+  toggleRowDetails,
+  itemIdToExpandedRowMap,
 }: {
   serviceName: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
   comparisonStatsData?: ServiceInstanceComparisonStatistics;
   comparisonEnabled?: boolean;
+  toggleRowDetails: (selectedServiceNodeName: string) => void;
+  itemIdToExpandedRowMap: Record<string, ReactNode>;
 }): Array<EuiBasicTableColumn<PrimaryStatsServiceInstanceItem>> {
   return [
     {
@@ -206,6 +214,28 @@ export function getColumns({
         );
       },
       sortable: true,
+    },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render: (instanceItem: PrimaryStatsServiceInstanceItem) => {
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
+            aria-label={
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'Collapse'
+                : 'Expand'
+            }
+            iconType={
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'arrowUp'
+                : 'arrowDown'
+            }
+          />
+        );
+      },
     },
   ];
 }

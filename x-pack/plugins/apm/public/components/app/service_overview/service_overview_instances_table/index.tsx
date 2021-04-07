@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -24,8 +24,8 @@ import {
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
+import { InstanceDetails } from './intance_details';
 
 type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
 
@@ -64,9 +64,27 @@ export function ServiceOverviewInstancesTable({
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
+    [serviceName: string]: ReactNode;
+  }>({});
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
+
+  const toggleRowDetails = (selectedServiceNodeName: string) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[selectedServiceNodeName]) {
+      delete itemIdToExpandedRowMapValues[selectedServiceNodeName];
+    } else {
+      itemIdToExpandedRowMapValues[selectedServiceNodeName] = (
+        <InstanceDetails
+          serviceNodeName={selectedServiceNodeName}
+          serviceName={serviceName}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   const columns = getColumns({
     agentName,
@@ -74,6 +92,8 @@ export function ServiceOverviewInstancesTable({
     latencyAggregationType,
     comparisonStatsData,
     comparisonEnabled,
+    toggleRowDetails,
+    itemIdToExpandedRowMap,
   });
 
   const pagination = {
@@ -96,18 +116,16 @@ export function ServiceOverviewInstancesTable({
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTableContainer
-            isEmptyAndLoading={primaryStatsItemCount === 0 && isLoading}
-          >
-            <EuiBasicTable
-              loading={isLoading}
-              items={primaryStatsItems}
-              columns={columns}
-              pagination={pagination}
-              sorting={{ sort: { field, direction } }}
-              onChange={onChangeTableOptions}
-            />
-          </ServiceOverviewTableContainer>
+          <EuiBasicTable
+            loading={isLoading}
+            items={primaryStatsItems}
+            columns={columns}
+            pagination={pagination}
+            sorting={{ sort: { field, direction } }}
+            onChange={onChangeTableOptions}
+            itemId="serviceNodeName"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          />
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
