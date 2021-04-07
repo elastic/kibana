@@ -16,6 +16,7 @@ jest.mock('fs', () => ({
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
 jest.mock('@kbn/legacy-logging', () => ({
+  ...(jest.requireActual('@kbn/legacy-logging') as any),
   setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
 }));
 

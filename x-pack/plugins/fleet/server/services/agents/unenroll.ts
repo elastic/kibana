@@ -102,7 +102,7 @@ export async function unenrollAgents(
 
     // Invalidate all API keys
     if (apiKeys.length) {
-      await APIKeyService.invalidateAPIKeys(soClient, apiKeys);
+      await APIKeyService.invalidateAPIKeys(apiKeys);
     }
   } else {
     // Create unenroll action for each agent
@@ -152,10 +152,10 @@ export async function forceUnenrollAgent(
 
   await Promise.all([
     agent.access_api_key_id
-      ? APIKeyService.invalidateAPIKeys(soClient, [agent.access_api_key_id])
+      ? APIKeyService.invalidateAPIKeys([agent.access_api_key_id])
       : undefined,
     agent.default_api_key_id
-      ? APIKeyService.invalidateAPIKeys(soClient, [agent.default_api_key_id])
+      ? APIKeyService.invalidateAPIKeys([agent.default_api_key_id])
       : undefined,
   ]);
 
