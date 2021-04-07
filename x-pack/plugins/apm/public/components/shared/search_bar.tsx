@@ -29,7 +29,6 @@ const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
 interface Props {
   prepend?: React.ReactNode | string;
   showTimeComparison?: boolean;
-  showCorrelations?: boolean;
 }
 
 function getRowDirection(showColumn: boolean) {
@@ -82,11 +81,7 @@ function DebugQueryCallout() {
   );
 }
 
-export function SearchBar({
-  prepend,
-  showTimeComparison = false,
-  showCorrelations = false,
-}: Props) {
+export function SearchBar({ prepend, showTimeComparison = false }: Props) {
   const { isMedium, isLarge } = useBreakPoints();
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
 
