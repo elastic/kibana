@@ -130,6 +130,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        role="dialog"
         title={
           isSingle
             ? i18n.translate(

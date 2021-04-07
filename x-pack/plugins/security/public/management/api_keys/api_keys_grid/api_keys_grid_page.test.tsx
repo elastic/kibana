@@ -43,7 +43,16 @@ apiClientMock.getApiKeys.mockResolvedValue({
       expiration: 1571408582082,
       id: '0QQZ2m0BO2XZwgJFuWTT',
       invalidated: false,
-      name: 'my-api-key',
+      name: 'first-api-key',
+      realm: 'reserved',
+      username: 'elastic',
+    },
+    {
+      creation: 1571322182082,
+      expiration: 1571408582082,
+      id: 'BO2XZwgJFuWTT0QQZ2m0',
+      invalidated: false,
+      name: 'second-api-key',
       realm: 'reserved',
       username: 'elastic',
     },
@@ -76,7 +85,8 @@ describe('APIKeysGridPage', () => {
     );
 
     await waitForElementToBeRemoved(() => getByText(/Loading API keys/));
-    getByText(/my-api-key/);
+    getByText(/first-api-key/);
+    getByText(/second-api-key/);
   });
 
   it('displays callout when API keys are disabled', async () => {
@@ -225,5 +235,63 @@ describe('APIKeysGridPage', () => {
     });
 
     await findByDisplayValue(btoa('1D:AP1_K3Y'));
+  });
+
+  it('invalidates api key using cta button', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+
+    const { getByText, findByRole, findAllByLabelText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
+
+    const [invalidateButton] = await findAllByLabelText(/Invalidate/i);
+    fireEvent.click(invalidateButton);
+
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Invalidate API key' }));
+
+    await waitFor(() => {
+      expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
+        [{ id: '0QQZ2m0BO2XZwgJFuWTT', name: 'first-api-key' }],
+        true
+      );
+    });
+  });
+
+  it('invalidates multiple api keys using bulk select', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+
+    const { getByText, findByRole, findAllByLabelText, debug, findAllByRole } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
+
+    const invalidateCheckboxes = await findAllByRole('checkbox', { name: 'Select this row' });
+    invalidateCheckboxes.forEach((checkbox) => fireEvent.click(checkbox));
+    fireEvent.click(await findByRole('button', { name: 'Invalidate API keys' }));
+
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Invalidate API keys' }));
+
+    await waitFor(() => {
+      expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
+        [
+          { id: '0QQZ2m0BO2XZwgJFuWTT', name: 'first-api-key' },
+          { id: 'BO2XZwgJFuWTT0QQZ2m0', name: 'second-api-key' },
+        ],
+        true
+      );
+    });
   });
 });
