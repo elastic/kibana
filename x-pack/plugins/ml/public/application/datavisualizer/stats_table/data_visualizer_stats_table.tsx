@@ -38,7 +38,6 @@ import {
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
 } from './types/field_vis_config';
-// import { FileBasedNumberContentPreview } from '../file_based/components/field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 
 const FIELD_NAME = 'fieldName';
