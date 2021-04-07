@@ -188,6 +188,13 @@ const getSummary = ({
               ? threatInfoItem.field.split('.').slice(1).join('.')
               : threatInfoItem.field
           }`;
+          if (
+            isArrayIndexPresentInFieldName &&
+            +threatInfoItem.field.split('.')[0] !== originalValueArrayIndex
+          ) {
+            items.push(getSeparatorRow(contextId, eventId, fieldName));
+            originalValueArrayIndex++;
+          }
           items.push({
             title: fieldName.substring('threat.indicator.'.length),
             description: {
@@ -198,13 +205,6 @@ const getSummary = ({
               isDraggingDisabled: true,
             },
           });
-          if (
-            isArrayIndexPresentInFieldName &&
-            +threatInfoItem.field.split('.')[0] !== originalValueArrayIndex
-          ) {
-            items.push(getSeparatorRow(contextId, eventId, fieldName));
-            originalValueArrayIndex++;
-          }
         });
         return items;
       } else if (
