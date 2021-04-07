@@ -16,7 +16,6 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import { estypes } from '@elastic/elasticsearch';
 
 const indexPattern = {
   id: '1234',
@@ -439,7 +438,7 @@ describe('Terms Agg Other bucket helper', () => {
           otherAggConfig()
         );
 
-        expect((mergedResponse!.aggregations!['1'].buckets as any)[1]['2'].buckets[3].key).toEqual(
+        expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(
           '__other__'
         );
       }
@@ -455,7 +454,7 @@ describe('Terms Agg Other bucket helper', () => {
         aggConfigs.aggs[0] as IBucketAggConfig
       );
       expect(
-        updatedResponse.aggregations['1'].buckets.find(
+        (updatedResponse!.aggregations!['1'] as any).buckets.find(
           (bucket: Record<string, any>) => bucket.key === '__missing__'
         )
       ).toBeDefined();

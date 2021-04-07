@@ -195,13 +195,10 @@ export const SearchExamplesApp = ({
         .setField('trackTotalHits', 100);
 
       if (selectedNumericField) {
-        searchSource.setField('aggs', () => {
-          return data.search.aggs
-            .createAggConfigs(indexPattern, [
-              { type: 'avg', params: { field: selectedNumericField.name } },
-            ])
-            .toDsl();
-        });
+        const ac = data.search.aggs.createAggConfigs(indexPattern, [
+          { type: 'avg', params: { field: selectedNumericField.name } },
+        ]);
+        searchSource.setField('aggs', ac);
       }
 
       setRequest(searchSource.getSearchRequestBody());

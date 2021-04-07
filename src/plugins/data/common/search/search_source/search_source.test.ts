@@ -11,6 +11,8 @@ import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
+import { AggConfigs } from '../../';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 jest.mock('./legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -37,6 +39,21 @@ const indexPattern2 = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
+} as unknown) as IndexPattern;
+
+const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
+const indexPattern3 = ({
+  title: 'foo',
+  fields: {
+    getByName: (name: string) => {
+      return fields3.find((field) => field.name === name);
+    },
+    filter: () => {
+      return fields3;
+    },
+  },
+  getComputedFields,
+  getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
 
 const runtimeFieldDef = {
@@ -81,17 +98,19 @@ describe('SearchSource', () => {
 
   describe('#getField()', () => {
     test('gets the value for the property', () => {
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getField('aggs')).toBe(5);
+      searchSource.setField('aggs', { i: 5 });
+      expect(searchSource.getField('aggs')).toStrictEqual({ i: 5 });
     });
   });
 
   describe('#getFields()', () => {
     test('gets the value for the property', () => {
-      searchSource.setField('aggs', 5);
+      searchSource.setField('aggs', { i: 5 });
       expect(searchSource.getFields()).toMatchInlineSnapshot(`
         Object {
-          "aggs": 5,
+          "aggs": Object {
+            "i": 5,
+          },
         }
       `);
     });
@@ -100,7 +119,7 @@ describe('SearchSource', () => {
   describe('#removeField()', () => {
     test('remove property', () => {
       searchSource = new SearchSource({}, searchSourceDependencies);
-      searchSource.setField('aggs', 5);
+      searchSource.setField('aggs', { i: 5 });
       searchSource.removeField('aggs');
       expect(searchSource.getField('aggs')).toBeFalsy();
     });
@@ -108,8 +127,20 @@ describe('SearchSource', () => {
 
   describe('#setField() / #flatten', () => {
     test('sets the value for the property', () => {
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getField('aggs')).toBe(5);
+      searchSource.setField('aggs', { i: 5 });
+      expect(searchSource.getField('aggs')).toStrictEqual({ i: 5 });
+    });
+
+    test('sets the value for the property with AggConfigs', () => {
+      const typesRegistry = mockAggTypesRegistry();
+
+      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
+        typesRegistry,
+      });
+
+      searchSource.setField('aggs', ac);
+      const request = searchSource.getSearchRequestBody();
+      expect(request.aggs).toStrictEqual({ '1': { avg: { field: 'field1' } } });
     });
 
     describe('computed fields handling', () => {

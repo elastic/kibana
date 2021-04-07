@@ -73,8 +73,8 @@ const getAggResultBuckets = (
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) {
-    return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg?.[aggWithOtherBucket.id]) {
+    return (responseAgg[aggWithOtherBucket.id] as any).buckets;
   }
   return [];
 };

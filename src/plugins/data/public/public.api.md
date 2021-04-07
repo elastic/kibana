@@ -46,6 +46,7 @@ import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup } from 'kibana/public';
+import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
 import { InjectedIntl } from '@kbn/i18n/react';
@@ -1669,13 +1670,13 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
     indexPattern?: IndexPattern;
+    // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    inspector?: IInspectorInfo;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "RequestResponder" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    requestResponder?: RequestResponder;
     sessionId?: string;
     strategy?: string;
 }
@@ -2419,9 +2420,9 @@ export class SearchSource {
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;
     destroy(): void;
-    fetch$(options?: ISearchOptions): import("rxjs").Observable<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
+    fetch$(options?: ISearchOptions): Observable<estypes.SearchResponse<any>>;
     // @deprecated
-    fetch(options?: ISearchOptions): Promise<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
+    fetch(options?: ISearchOptions): Promise<estypes.SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
     getFields(): SearchSourceFields;
     getId(): string;
@@ -2451,7 +2452,7 @@ export class SearchSource {
 // @public
 export interface SearchSourceFields {
     // (undocumented)
-    aggs?: any;
+    aggs?: object | IAggConfigs_2 | (() => object);
     // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
     fields?: SearchFieldValue[];
     // @deprecated

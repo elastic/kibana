@@ -26,12 +26,14 @@ import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
 import { estypes } from '@elastic/elasticsearch';
+import { EventEmitter } from 'events';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_formats/utils';
+import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { IScopedClusterClient } from 'src/core/server';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -998,13 +1000,13 @@ export interface IScopedSearchClient extends ISearchClient {
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
     indexPattern?: IndexPattern;
+    // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    inspector?: IInspectorInfo;
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "RequestResponder" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    requestResponder?: RequestResponder;
     sessionId?: string;
     strategy?: string;
 }
