@@ -7,13 +7,15 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiCard,
+  EuiPanel,
   EuiText,
+  EuiSpacer,
   EuiLink,
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -65,12 +67,33 @@ export function LinkPreview({ label, url, filters }: Props) {
   const { formattedUrl, error } = replaceTemplateVariables(url, transaction);
 
   return (
-    <EuiCard
-      betaBadgeLabel={i18n.translate(
-        'xpack.apm.settings.customizeUI.customLinkPreviewBadgeLabel',
-        { defaultMessage: 'Preview' }
-      )}
-      description={
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.apm.settings.customizeUI.customLink.previewSectionTitle',
+            {
+              defaultMessage: 'Preview',
+            }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiPanel paddingSize="l">
+        <EuiText
+          size="s"
+          color={getTextColor(label)}
+          className="eui-textBreakWord"
+          data-test-subj="preview-label"
+        >
+          {label
+            ? label
+            : i18n.translate(
+                'xpack.apm.settings.customizeUI.customLink.default.label',
+                { defaultMessage: 'Elastic.co' }
+              )}
+        </EuiText>
+
         <EuiText
           size="s"
           color={getTextColor(url)}
@@ -92,50 +115,33 @@ export function LinkPreview({ label, url, filters }: Props) {
             )
           )}
         </EuiText>
-      }
-      paddingSize="l"
-      textAlign="left"
-      title={
-        <EuiText
-          size="s"
-          color={getTextColor(label)}
-          className="eui-textBreakWord"
-          data-test-subj="preview-label"
-        >
-          {label
-            ? label
-            : i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.default.label',
-                { defaultMessage: 'Elastic.co' }
+        <EuiSpacer />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
+                {
+                  defaultMessage:
+                    'Test your link with values from an example transaction document based on the filters above.',
+                }
               )}
-        </EuiText>
-      }
-    >
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
-              {
-                defaultMessage:
-                  'Test your link with values from an example transaction document based on the filters above.',
-              }
-            )}
-          </EuiText>
-        </EuiFlexItem>
+            </EuiText>
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          {error && (
-            <EuiToolTip position="top" content={error}>
-              <EuiIcon
-                type="alert"
-                color="warning"
-                data-test-subj="preview-warning"
-              />
-            </EuiToolTip>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCard>
+          <EuiFlexItem grow={false}>
+            {error && (
+              <EuiToolTip position="top" content={error}>
+                <EuiIcon
+                  type="alert"
+                  color="warning"
+                  data-test-subj="preview-warning"
+                />
+              </EuiToolTip>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 }
