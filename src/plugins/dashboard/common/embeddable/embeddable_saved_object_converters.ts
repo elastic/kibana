@@ -34,11 +34,11 @@ export function convertPanelStateToSavedDashboardPanel(
   return {
     version,
     type: panelState.type,
-    panelRefName: panelState.panelRefName,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
     embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
     ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
+    ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
   };
 }
