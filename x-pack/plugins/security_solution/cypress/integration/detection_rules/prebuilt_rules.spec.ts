@@ -14,11 +14,7 @@ import {
   SHOWING_RULES_TEXT,
 } from '../../screens/alerts_detection_rules';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo300,
   deleteFirstRule,
