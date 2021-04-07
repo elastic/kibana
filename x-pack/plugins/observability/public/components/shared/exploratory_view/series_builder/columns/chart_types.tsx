@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiLoadingSpinner,
-  EuiPopover,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { useFetcher } from '../../../../..';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { SeriesType } from '../../../../../../../lens/public';
 
-export function SeriesChartTypes({
+export function SeriesChartTypesSelect({
   seriesId,
   defaultChartType,
 }: {
@@ -42,34 +34,32 @@ export function SeriesChartTypes({
   };
 
   return (
-    <XYChartTypes
+    <XYChartTypesSelect
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
       label={i18n.translate('xpack.observability.expView.chartTypes.label', {
         defaultMessage: 'Chart type',
       })}
+      includeChartTypes={['bar', 'bar_horizontal', 'line', 'area', 'bar_stacked', 'area_stacked']}
     />
   );
 }
 
 export interface XYChartTypesProps {
-  onChange: (value: SeriesType) => void;
-  value: SeriesType;
   label?: string;
-  includeChartTypes?: string[];
-  excludeChartTypes?: string[];
+  value: SeriesType;
+  includeChartTypes?: SeriesType[];
+  excludeChartTypes?: SeriesType[];
+  onChange: (value: SeriesType) => void;
 }
 
-export function XYChartTypes({
+export function XYChartTypesSelect({
   onChange,
   value,
-  label,
   includeChartTypes,
   excludeChartTypes,
 }: XYChartTypesProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const {
     services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
@@ -79,71 +69,35 @@ export function XYChartTypes({
   let vizTypes = data ?? [];
 
   if ((excludeChartTypes ?? []).length > 0) {
-    vizTypes = vizTypes.filter(({ id }) => !excludeChartTypes?.includes(id));
+    vizTypes = vizTypes.filter(({ id }) => !excludeChartTypes?.includes(id as SeriesType));
   }
 
   if ((includeChartTypes ?? []).length > 0) {
-    vizTypes = vizTypes.filter(({ id }) => includeChartTypes?.includes(id));
+    vizTypes = vizTypes.filter(({ id }) => includeChartTypes?.includes(id as SeriesType));
   }
 
-  return loading ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <EuiPopover
-      isOpen={isOpen}
-      anchorPosition="downCenter"
-      button={
-        label ? (
-          <EuiButton
-            size="s"
-            color="text"
-            iconType={vizTypes.find(({ id }) => id === value)?.icon}
-            onClick={() => {
-              setIsOpen((prevState) => !prevState);
-            }}
-          >
-            {label}
-          </EuiButton>
-        ) : (
-          <EuiButtonIcon
-            aria-label={vizTypes.find(({ id }) => id === value)?.label}
-            iconType={vizTypes.find(({ id }) => id === value)?.icon!}
-            onClick={() => {
-              setIsOpen((prevState) => !prevState);
-            }}
-          />
-        )
-      }
-      closePopover={() => setIsOpen(false)}
-    >
-      <ButtonGroup
-        isIconOnly
-        buttonSize="m"
-        legend={i18n.translate('xpack.observability.xyChart.chartTypeLegend', {
-          defaultMessage: 'Chart type',
-        })}
-        name="chartType"
-        className="eui-displayInlineBlock"
-        options={vizTypes.map((t) => ({
-          id: t.id,
-          label: t.label,
-          title: t.label,
-          iconType: t.icon || 'empty',
-          'data-test-subj': `lnsXY_seriesType-${t.id}`,
-        }))}
-        idSelected={value}
-        onChange={(valueN: string) => {
-          onChange(valueN as SeriesType);
-        }}
-      />
-    </EuiPopover>
+  const options = (vizTypes ?? []).map(({ id, fullLabel, label, icon }) => {
+    const LabelWithIcon = (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} />
+        </EuiFlexItem>
+        <EuiFlexItem>{fullLabel || label}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+    return {
+      value: id as SeriesType,
+      inputDisplay: LabelWithIcon,
+      dropdownDisplay: LabelWithIcon,
+    };
+  });
+
+  return (
+    <EuiSuperSelect
+      valueOfSelected={value}
+      isLoading={loading}
+      options={options}
+      onChange={onChange}
+    />
   );
 }
-
-const ButtonGroup = styled(EuiButtonGroup)`
-  &&& {
-    .euiButtonGroupButton-isSelected {
-      background-color: #a5a9b1 !important;
-    }
-  }
-`;

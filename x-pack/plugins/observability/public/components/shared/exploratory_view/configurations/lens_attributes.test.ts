@@ -8,9 +8,8 @@
 import { LensAttributes } from './lens_attributes';
 import { mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
-import { sampleAttribute } from './data/sample_attribute';
-import { LCP_FIELD, SERVICE_NAME } from './data/elasticsearch_fieldnames';
-import { USER_AGENT_NAME } from './data/elasticsearch_fieldnames';
+import { sampleAttribute } from './test_data/sample_attribute';
+import { LCP_FIELD, SERVICE_NAME, USER_AGENT_NAME } from './constants/elasticsearch_fieldnames';
 
 describe('Lens Attribute', () => {
   const reportViewConfig = getDefaultConfigs({

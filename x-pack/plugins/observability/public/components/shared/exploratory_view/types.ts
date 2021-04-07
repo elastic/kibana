@@ -41,14 +41,22 @@ export interface ReportDefinition {
   required?: boolean;
   custom?: boolean;
   defaultValue?: string;
-  options?: Array<{ field: string; label: string; description?: string }>;
+  options?: Array<{
+    field: string;
+    label: string;
+    description?: string;
+    columnType?: 'range' | 'operation';
+  }>;
 }
 
 export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<IndexPatternColumn>;
+  yAxisColumn:
+    | Partial<IndexPatternColumn>
+    | Partial<LastValueIndexPatternColumn>
+    | Partial<DateHistogramIndexPatternColumn>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;

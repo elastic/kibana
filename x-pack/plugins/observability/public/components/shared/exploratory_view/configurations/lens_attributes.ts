@@ -124,12 +124,12 @@ export class LensAttributes {
 
   getNumberOperationColumn(
     sourceField: string,
-    operationType?: 'median' | 'average'
+    operationType?: OperationType
   ): AvgIndexPatternColumn | MedianIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
       label: 'Median of transaction.marks.agent.firstContentfulPaint',
-      operationType: operationType || 'median',
+      operationType: operationType || ('median' as OperationType),
     };
   }
 
@@ -163,7 +163,7 @@ export class LensAttributes {
     return this.getColumnBasedOnType(xAxisColumn.sourceField!);
   }
 
-  getColumnBasedOnType(sourceField: string) {
+  getColumnBasedOnType(sourceField: string, operationType?: OperationType) {
     const { fieldMeta, columnType, fieldName } = this.getFieldMeta(sourceField);
     const { type: fieldType } = fieldMeta ?? {};
 
@@ -175,8 +175,8 @@ export class LensAttributes {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      if (columnType === 'operation') {
-        return this.getNumberOperationColumn(fieldName);
+      if (columnType === 'operation' || operationType) {
+        return this.getNumberOperationColumn(fieldName, operationType);
       }
       return this.getNumberRangeColumn(fieldName);
     }
@@ -218,13 +218,13 @@ export class LensAttributes {
   }
 
   getMainYAxis() {
-    const { sourceField } = this.reportViewConfig.yAxisColumn;
+    const { sourceField, operationType } = this.reportViewConfig.yAxisColumn;
 
     if (sourceField === 'Records' || !sourceField) {
       return this.getRecordsColumn();
     }
 
-    return this.getColumnBasedOnType(sourceField!);
+    return this.getColumnBasedOnType(sourceField!, operationType);
   }
 
   getRecordsColumn(): CountIndexPatternColumn {
