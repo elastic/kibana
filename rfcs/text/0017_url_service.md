@@ -163,10 +163,12 @@ execute the `.navigate()` method on it.
 In this example, lets create a short link using the Discover locator.
 
 ```ts
-const shortUrl = await plugins.discover.locator.createShortUrl({
-  slug: 'human-readable-slug',
-  indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-  highlightedField: 'foo',
+const shortUrl = await plugins.discover.locator.createShortUrl(
+  {
+    indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    highlightedField: 'foo',
+  }
+  'human-readable-slug',
 });
 ```
 
@@ -322,7 +324,8 @@ we cannot create a short URL using an URL generator.
 
 # Detailed design
 
-In general we will try to provide similar experience to pl
+In general we will try to provide as much as possible the same API on the
+server-side and the client-side.
 
 
 ## High level architecture
@@ -346,40 +349,65 @@ browser, wherever they choose to use the URL Service:
  * Common URL Service client interface for the server-side and the client-side.
  */
 interface IUrlService {
-  generators: IUrlGeneratorClient;
+  locators: ILocatorClient;
   shortUrls: IShortUrlClient;
 }
 ```
 
-The URL generator client will basically be a registry of URL generators:
+
+### Locators
+
+The locator business logic will be contained in `ILocatorClient` client and will
+provided two main functionalities:
+
+1. It will provide a facility to create locators.
+1. It will also be a registry of locators, every newly created locator is
+   automatically added to the registry.
 
 ```ts
-/**
- * URL generator registry.
- */
-interface IUrlGeneratorClient {
-  register<S>(urlGenerator: UrlGeneratorDefinition<S>): UrlGenerator;
-  get<S>(id: string): UrlGenerator<S>;
-}
-
-interface UrlGeneratorDefinition<State> {
-  id: string;
-  createUrl: (state: State) => Promise<string>;
-  isDeprecated?: boolean;
-  migrate?: (state: State) => Promise<{ state: unknown; id: string }>;
-}
-
-interface UrlGenerator<State> {
-  isDeprecated: boolean;
-  createUrl(state: State): Promise<URL>;
-  migrate(): Promise<never | { state: unknown; id: string }>;
+interface ILocatorClient {
+  create<P>(definition: LocatorDefinition<P>): Locator<P>;
+  get<P>(id: string): Locator<P>;
 }
 ```
+
+The `LocatorDefinition` interface is a developer-friendly interface for creating
+new locators. Mainly two things will be required from each new locator:
+
+1. Implement the `getLocation()` method, which give the locator specific `params`
+   object returns a Kibana location, see description of `KibanaLocation` below.
+2. Implement the `PersistableState` interface which we use in Kibana. This will
+   allow to migrate the locator `params`. Implementation of the `PersistableState`
+   interface will replace the `.isDeprecated` and `.migrate()` properties of URL
+   generators.
+
+
+```ts
+interface LocatorDefinition<P> extends PeristableState<P> {
+  id: string;
+  getLocation(params: P): KibanaLocation;
+}
+```
+
+Each constructed locator will have the following interface:
+
+```ts
+interface Locator<P> {
+  /** Creates a new short URL saved object using this locator. */
+  createShortUrl(params: P, slug?: string): Promise<ShortUrl>;
+  /** Returns a relative URL to the client-side redirect endpoint using this locator. */
+  getRedirectPath(params: P): string;
+  /** Navigate using core.application.navigateToApp() using this locator. */
+  navigate(params: P): void; // Only on browser.
+}
+```
+
+
+### Short URLs
 
 The short URL client `IShortUrlClient` which will be the same on the server and
 browser. However, the server and browser might add extra utility methods for
 convenience.
-
 
 ```ts
 /**
@@ -387,17 +415,14 @@ convenience.
  */
 interface IShortUrlClient {
   /**
-   * Create a new short URL from URL generator.
+   * Create a new short URL using a locator.
    *
-   * @param urlGeneratorId ID of the URL generator.
-   * @param state State object to provide to the URL generator.
+   * @param locator Locators to use for URL construction.
+   * @param params Locator params.
    * @param slug Optionally, provide a custom slug (ID) of the short URL.
+   *             This can be a human-readable URL slug of this short UR.
    */
-  create(
-    urlGeneratorId: string,
-    state: unknown,
-    slug?: string
-  ): Promise<{ slug: string; url: URL }>;
+  create<P>(locator: Locator<P>, params: P, slug?: string): Promise<ShortUrl>;
 
   /**
    * Delete a short URL.
@@ -412,7 +437,7 @@ interface IShortUrlClient {
    * 
    * @param slug The slug (ID) of the short URL.
    */
-  get(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
+  get(slug: string): Promise<ShortUrl>;
 
   /**
    * Same as `get()` but it also increments the "view" counter and the
@@ -420,30 +445,32 @@ interface IShortUrlClient {
    * 
    * @param slug The slug (ID) of the short URL.
    */
-  resolve(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
+  resolve(slug: string): Promise<ShortUrl>;
 }
 ```
 
-Note, that in the new service to generate a short URL the developer will have to
-use a URL generator.
+Note, that in this new service to create a short URL the developer will have to
+use a locator (instead of creating it directly from a long URL).
 
 ```ts
-const shortUrl = await share.url.shortUrls.create({
-  generator: 'DISCOVER_DEEP_LINKS',
-  state: {
-    indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx',
+const shortUrl = await plugins.share.shortUrls.create(
+  plugins.discover.locator,
+  {
+    indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    highlightedField: 'foo',
   },
-});
+  'optional-human-readable-slug',
+);
 ```
 
 These short URLs will be stored in saved objects of type `url` and will be
-automatically migrated once a URL generator becomes deprecated.
+automatically migrated using the locator.
 
 
 ### `KibanaLocation` interface
 
 The `KibanaLocation` interface is a simple interface to store a location in some
-kibana application.
+Kibana application.
 
 ```ts
 interface KibanaLocation {
@@ -457,6 +484,7 @@ It maps directly to a `.navigateToApp()` call.
 
 ```ts
 let location: KibanaLocation;
+
 core.application.navigateToApp(location.app, {
   route: location.route,
   state: location.state,
