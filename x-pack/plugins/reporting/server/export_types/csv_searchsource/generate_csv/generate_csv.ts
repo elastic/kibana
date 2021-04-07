@@ -163,8 +163,7 @@ export class CsvGenerator {
       columnIds.sort();
       return columnIds;
     };
-    const jobColumns = this.job.columns && this.job.columns.length > 0 && this.job.columns;
-    this._columns = jobColumns ? jobColumns : getFromSearchSource();
+    this._columns = this.job.columns?.length ? this.job.columns : getFromSearchSource();
 
     return this._columns;
   }
