@@ -78,8 +78,6 @@ export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesI
 
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
-export const PAGINATION_POPOVER = '[data-test-subj="tablePaginationPopoverButton"]';
-
 export const rowsPerPageSelector = (count: number) =>
   `[data-test-subj="tablePagination-${count}-rows"]`;
 
