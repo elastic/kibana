@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsOf } from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
@@ -33,8 +33,7 @@ export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
 
   const spaceImageUrl = getSpaceImageUrl(space);
 
-  // TODO: Replace `PropsOf<typeof EuiAvatar>` with `EuiAvatarProps` when available
-  const avatarConfig: Partial<PropsOf<typeof EuiAvatar>> = spaceImageUrl
+  const avatarConfig: Partial<EuiAvatarProps> = spaceImageUrl
     ? { imageUrl: spaceImageUrl }
     : { initials: spaceInitials, initialsLength: MAX_SPACE_INITIALS };
 
