@@ -70,7 +70,7 @@ const mockMappings = {
 };
 
 describe('validateAndConvertAggregations', () => {
-  it('Validates a simple aggregations', () => {
+  it('validates a simple aggregations', () => {
     expect(
       validateAndConvertAggregations(
         ['foo'],
@@ -182,7 +182,7 @@ describe('validateAndConvertAggregations', () => {
     });
   });
 
-  it('rewrites the `field` name when valid', () => {
+  it('rewrites type attributes when valid', () => {
     const aggregations: AggsMap = {
       average: {
         avg: {
@@ -195,6 +195,25 @@ describe('validateAndConvertAggregations', () => {
       average: {
         avg: {
           field: 'alert.actions.group',
+          missing: 10,
+        },
+      },
+    });
+  });
+
+  it('rewrites root attributes when valid', () => {
+    const aggregations: AggsMap = {
+      average: {
+        avg: {
+          field: 'alert.updated_at',
+          missing: 10,
+        },
+      },
+    };
+    expect(validateAndConvertAggregations(['alert'], aggregations, mockMappings)).toEqual({
+      average: {
+        avg: {
+          field: 'updated_at',
           missing: 10,
         },
       },
@@ -230,6 +249,22 @@ describe('validateAndConvertAggregations', () => {
       validateAndConvertAggregations(['alert'], aggregations, mockMappings)
     ).toThrowErrorMatchingInlineSnapshot(
       `"[average.avg.field] Invalid attribute path: alert.attributes.actions.non_existing"`
+    );
+  });
+
+  it('throws an error when the attribute path is referencing an invalid root field', () => {
+    const aggregations: AggsMap = {
+      average: {
+        avg: {
+          field: 'alert.bad_root',
+          missing: 10,
+        },
+      },
+    };
+    expect(() =>
+      validateAndConvertAggregations(['alert'], aggregations, mockMappings)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[average.avg.field] Invalid attribute path: alert.bad_root"`
     );
   });
 
