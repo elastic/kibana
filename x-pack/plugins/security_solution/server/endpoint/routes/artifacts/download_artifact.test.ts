@@ -171,7 +171,7 @@ describe('test alerts route', () => {
     // and this entire test file refactored to start using fleet's exposed FleetArtifactClient class.
     endpointAppContextService!
       .getManifestManager()!
-      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp);
+      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp.attributes);
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')

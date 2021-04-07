@@ -73,6 +73,7 @@ export const handleRequest = async ({
   const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
   aggs.setTimeRange(timeRange as TimeRange);
+  aggs.setTimeFields(timeFields);
 
   // For now we need to mirror the history of the passed search source, since
   // the request inspector wouldn't work otherwise.

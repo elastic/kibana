@@ -33,6 +33,7 @@ import {
   rangeFilterFunction,
   kibanaFilterFunction,
   phraseFilterFunction,
+  esRawResponse,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -40,7 +41,7 @@ import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { esdsl, esRawResponse, getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
@@ -126,7 +127,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
-    expressions.registerFunction(esdsl);
+    expressions.registerFunction(
+      getEsdsl({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
     expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({
