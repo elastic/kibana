@@ -248,19 +248,21 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       }}
       {...rest}
       search={{
-        toolsRight: [
-          <EuiButton
-            key="addPackagePolicyButton"
-            isDisabled={!hasWriteCapabilities}
-            iconType="plusInCircle"
-            href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
-              defaultMessage="Add integration"
-            />
-          </EuiButton>,
-        ],
+        toolsRight: agentPolicy.is_managed
+          ? []
+          : [
+              <EuiButton
+                key="addPackagePolicyButton"
+                isDisabled={!hasWriteCapabilities}
+                iconType="plusInCircle"
+                href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
+                  defaultMessage="Add integration"
+                />
+              </EuiButton>,
+            ],
         box: {
           incremental: true,
           schema: true,
