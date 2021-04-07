@@ -40,6 +40,7 @@ describe('ResultSettingsLogic', () => {
     stagedUpdates: false,
     nonTextResultFields: {},
     textResultFields: {},
+    queryPerformanceScore: 0,
   };
 
   // Values without selectors
@@ -484,6 +485,76 @@ describe('ResultSettingsLogic', () => {
         expect(ResultSettingsLogic.values.reducedServerResultFields).toEqual({
           // bar was filtered out because it has neither raw nor snippet data set
           foo: { raw: { size: 5 } },
+        });
+      });
+    });
+
+    describe('queryPerformanceScore', () => {
+      describe('returns a score for the current query performance based on the result settings', () => {
+        it('considers a text value with raw set (but no size) as worth 1.5', () => {
+          mount({
+            resultFields: { foo: { raw: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
+        });
+
+        it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
+          mount({
+            resultFields: { foo: { raw: true, rawSize: 251 } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
+        });
+
+        it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
+          mount({
+            resultFields: { foo: { raw: true, rawSize: 250 } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
+        });
+
+        it('considers a text value with a snippet set as worth 2', () => {
+          mount({
+            resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
+        });
+
+        it('will sum raw and snippet values if both are set', () => {
+          mount({
+            resultFields: { foo: { snippet: true, raw: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          // 1.5 (raw) + 2 (snippet) = 3.5
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
+        });
+
+        it('considers a non-text value with raw set as 0.2', () => {
+          mount({
+            resultFields: { foo: { raw: true } },
+            schema: { foo: 'number' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
+        });
+
+        it('can sum variations of all the prior', () => {
+          mount({
+            resultFields: {
+              foo: { raw: true },
+              bar: { raw: true, snippet: true },
+              baz: { raw: true },
+            },
+            schema: {
+              foo: 'text' as SchemaTypes,
+              bar: 'text' as SchemaTypes,
+              baz: 'number' as SchemaTypes,
+            },
+          });
+          // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(5.2);
         });
       });
     });

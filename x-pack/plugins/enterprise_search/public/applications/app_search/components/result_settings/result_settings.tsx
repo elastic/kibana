@@ -7,12 +7,14 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiPageHeader, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
+import { Loading } from '../../../shared/loading';
 
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
@@ -26,11 +28,14 @@ interface Props {
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
+  const { dataLoading } = useValues(ResultSettingsLogic);
   const { initializeResultSettingsData } = useActions(ResultSettingsLogic);
 
   useEffect(() => {
     initializeResultSettingsData();
   }, []);
+
+  if (dataLoading) return <Loading />;
 
   return (
     <>

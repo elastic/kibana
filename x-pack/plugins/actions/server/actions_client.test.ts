@@ -408,6 +408,8 @@ describe('create()', () => {
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration('60s'),
     });
