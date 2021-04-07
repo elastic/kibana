@@ -170,7 +170,7 @@ export const ColumnHeadersComponent = ({
         >
           <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
             <DragEffects>
-              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
+              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.initialWidth} />
             </DragEffects>
           </DraggableContainer>
         </EventsTh>
@@ -218,10 +218,10 @@ export const ColumnHeadersComponent = ({
 
   const myColumns = useMemo(
     () =>
-      columnHeaders.map(({ aggregatable, label, id, type }) => ({
+      columnHeaders.map(({ aggregatable, displayAsText, id, type }) => ({
         id,
         isSortable: aggregatable,
-        displayAsText: label,
+        displayAsText,
         schema: type,
       })),
     [columnHeaders]
@@ -254,7 +254,7 @@ export const ColumnHeadersComponent = ({
     [onSortColumns, sort]
   );
   const displayValues = useMemo(
-    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }), {}),
+    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}),
     [columnHeaders]
   );
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);

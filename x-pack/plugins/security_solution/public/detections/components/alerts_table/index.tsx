@@ -48,8 +48,8 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -311,7 +311,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     initializeTimeline({
-      defaultModel: alertsDefaultModel,
+      defaultModel: {
+        ...alertsDefaultModel,
+        columns,
+      },
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
@@ -346,7 +349,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
-      renderCellValue={DefaultCellRenderer}
+      renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}

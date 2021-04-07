@@ -28,6 +28,13 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
+export const INVESTIGATE = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.investigateLabel',
+  {
+    defaultMessage: 'Investigate',
+  }
+);
+
 export const UNPINNED = i18n.translate(
   'xpack.securitySolution.timeline.body.pinning.unpinnedTooltip',
   {
@@ -71,6 +78,13 @@ export const VIEW_DETAILS = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.viewDetailsAriaLabel',
   {
     defaultMessage: 'View details',
+  }
+);
+
+export const VIEW_SUMMARY = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.viewSummaryLabel',
+  {
+    defaultMessage: 'View summary',
   }
 );
 

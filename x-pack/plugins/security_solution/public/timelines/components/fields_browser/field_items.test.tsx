@@ -34,7 +34,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     id: '@timestamp',
     type: 'date',
     aggregatable: true,
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
 
@@ -207,7 +207,7 @@ describe('field_items', () => {
       expect(toggleColumn).toBeCalledWith({
         columnHeaderType: 'not-filtered',
         id: '@timestamp',
-        width: 180,
+        initialWidth: 180,
       });
     });
 
@@ -266,7 +266,7 @@ describe('field_items', () => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
           id: 'signal.rule.name',
-          width: 180,
+          initialWidth: 180,
         });
       });
     });

@@ -228,7 +228,7 @@ export const getFieldItems = ({
             toggleColumn({
               columnHeaderType: defaultColumnHeaderType,
               id: field.name ?? '',
-              width: DEFAULT_COLUMN_MIN_WIDTH,
+              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
               ...getAlertColumnHeader(timelineId, field.name ?? ''),
             })
           }

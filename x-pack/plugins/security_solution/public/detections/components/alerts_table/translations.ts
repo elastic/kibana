@@ -60,6 +60,13 @@ export const ALERTS_HEADERS_RULE = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_RULE_NAME = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleNameTitle',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+
 export const ALERTS_HEADERS_VERSION = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
   {
@@ -78,6 +85,13 @@ export const ALERTS_HEADERS_SEVERITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.severityTitle',
   {
     defaultMessage: 'Severity',
+  }
+);
+
+export const ALERTS_HEADERS_REASON = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.reasonTitle',
+  {
+    defaultMessage: 'Reason',
   }
 );
 
@@ -172,6 +186,13 @@ export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
+export const ALERT_DURATION = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.alertDurationTitle',
+  {
+    defaultMessage: 'Alert duration',
+  }
+);
+
 export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
     values: { totalAlerts },
@@ -214,5 +235,19 @@ export const MORE_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
   {
     defaultMessage: 'More actions',
+  }
+);
+
+export const STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const TRIGGERED = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
+  {
+    defaultMessage: 'Triggered',
   }
 );

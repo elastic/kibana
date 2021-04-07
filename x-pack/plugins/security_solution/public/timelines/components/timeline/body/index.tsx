@@ -12,6 +12,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { CellValueElementProps } from '../cell_rendering';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
@@ -162,7 +163,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const columnWidths = useMemo(
       () =>
-        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
+        columnHeaders.reduce(
+          (totalWidth, header) => totalWidth + (header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH),
+          actionsColumnWidth
+        ),
       [actionsColumnWidth, columnHeaders]
     );
 

@@ -98,7 +98,7 @@ export const getColumns = ({
               toggleColumn({
                 columnHeaderType: defaultColumnHeaderType,
                 id: field,
-                width: DEFAULT_COLUMN_MIN_WIDTH,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
               })
             }
             disabled={data.isObjectArray && data.type !== 'geo_point'}

@@ -465,43 +465,43 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "initialWidth": 190,
         "type": "number",
-        "width": 190,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "message",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "event.category",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "event.action",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "host.name",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "source.ip",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "destination.ip",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "user.name",
-        "width": 180,
+        "initialWidth": 180,
       },
     ]
   }
