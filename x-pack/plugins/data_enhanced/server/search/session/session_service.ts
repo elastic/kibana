@@ -37,7 +37,11 @@ import {
 } from '../../../common';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
-import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
+import {
+  registerSearchSessionsTask,
+  scheduleSearchSessionsTasks,
+  unscheduleSearchSessionsTask,
+} from './monitoring_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import { DataEnhancedStartDependencies } from '../../type';
 
@@ -101,6 +105,8 @@ export class SearchSessionService
         this.logger,
         this.sessionConfig.trackingInterval
       );
+    } else {
+      unscheduleSearchSessionsTask(deps.taskManager, this.logger);
     }
   };
 

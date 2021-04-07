@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { TaskManagerStartContract } from '../../../../task_manager/server';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -28,6 +29,7 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let service: SearchSessionService;
+  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
 
   const MOCK_STRATEGY = 'ese';
 
@@ -85,7 +87,7 @@ describe('SearchSessionService', () => {
       };
       service = new SearchSessionService(mockLogger, config);
       const coreStart = coreMock.createStart();
-      const mockTaskManager = taskManagerMock.createStart();
+      mockTaskManager = taskManagerMock.createStart();
       await flushPromises();
       await service.start(coreStart, {
         taskManager: mockTaskManager,
@@ -94,6 +96,10 @@ describe('SearchSessionService', () => {
 
     afterEach(() => {
       service.stop();
+    });
+
+    it('task is cleared, if exists', async () => {
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
     });
 
     it('trackId ignores', async () => {
@@ -158,7 +164,7 @@ describe('SearchSessionService', () => {
       };
       service = new SearchSessionService(mockLogger, config);
       const coreStart = coreMock.createStart();
-      const mockTaskManager = taskManagerMock.createStart();
+      mockTaskManager = taskManagerMock.createStart();
       await flushPromises();
       await service.start(coreStart, {
         taskManager: mockTaskManager,
@@ -167,6 +173,11 @@ describe('SearchSessionService', () => {
 
     afterEach(() => {
       service.stop();
+    });
+
+    it('task is cleared and re-created', async () => {
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalled();
     });
 
     describe('save', () => {

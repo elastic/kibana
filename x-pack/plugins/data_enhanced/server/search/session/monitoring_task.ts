@@ -34,10 +34,9 @@ function searchSessionRunner(
     return {
       async run() {
         const sessionConfig = config.search.sessions;
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         if (!sessionConfig.enabled) {
-          logger.info('Search sessions are disabled. Clearing task.');
-          await pluginsStart.taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
+          logger.debug('Search sessions are disabled. Skipping task.');
           return;
         }
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
@@ -71,6 +70,18 @@ export function registerSearchSessionsTask(
   });
 }
 
+export async function unscheduleSearchSessionsTask(
+  taskManager: TaskManagerStartContract,
+  logger: Logger
+) {
+  try {
+    await taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
+    logger.debug(`Search sessions cleared`);
+  } catch (e) {
+    logger.error(`Error clearing task, received ${e.message}`);
+  }
+}
+
 export async function scheduleSearchSessionsTasks(
   taskManager: TaskManagerStartContract,
   logger: Logger,
@@ -91,6 +102,6 @@ export async function scheduleSearchSessionsTasks(
 
     logger.debug(`Search sessions task, scheduled to run`);
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling task, received ${e.message}`);
   }
 }
