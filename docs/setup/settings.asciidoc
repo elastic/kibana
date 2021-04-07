@@ -433,7 +433,7 @@ override this parameter to use their own Tile Map Service. For example:
  | Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process will be performed at the cost of higher memory consumption. Should the migration fail with a `circuit_breaking_exception`, you need to set a smaller `batchSize` value. *Default: `1000`*
 
 | `migrations.enableV2:`
- | experimental[]. Enables the new Saved Objects migration algorithm. See <<upgrade-migrations>> for details. The setting is going to removed from `v8.0` when `migrations v2` becomes stable. *Default: `true`*
+ | experimental[]. Enables the new Saved Objects migration algorithm. See <<upgrade-migrations>> for details. The setting is going to removed from `v8.0` when `migrations v2` becomes stable. Setting the value to `false` will cause Kibana to use the legacy migration algorithm, which shipped in 7.11 and earlier versions. *Default: `true`*
 
 | `newsfeed.enabled:`
  | Controls whether to enable the newsfeed
