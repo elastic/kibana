@@ -15,7 +15,7 @@ import {
   MonitorSummary,
 } from '../../../../common/runtime_types';
 import { MonitorListComponent, noItemsMessage } from './monitor_list';
-import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../src/core/public';
