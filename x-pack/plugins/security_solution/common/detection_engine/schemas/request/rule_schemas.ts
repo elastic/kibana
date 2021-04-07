@@ -176,22 +176,25 @@ const baseParams = {
   },
 };
 const {
-  create: commonCreateParams,
-  patch: commonPatchParams,
-  response: commonResponseParams,
+  create: baseCreateParams,
+  patch: basePatchParams,
+  response: baseResponseParams,
 } = buildAPISchemas(baseParams);
-export type CommonResponseParams = t.TypeOf<typeof commonResponseParams>;
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
-// with some variations for each route
+// with some variations for each route. These intersect with type specific schemas below
+// to create the full schema for each route.
 export const sharedCreateSchema = t.intersection([
-  commonCreateParams,
+  baseCreateParams,
   t.exact(t.partial({ rule_id })),
 ]);
 export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
 
-// Update is almost identical to create so we build off of sharedCreateSchema instead of commonCreateParams
-export const sharedUpdateSchema = t.intersection([sharedCreateSchema, t.exact(t.partial({ id }))]);
+export const sharedUpdateSchema = t.intersection([
+  baseCreateParams,
+  t.exact(t.partial({ rule_id })),
+  t.exact(t.partial({ id })),
+]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
 const eqlRuleParams = {
@@ -376,7 +379,7 @@ export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdat
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
 export const fullPatchSchema = t.intersection([
-  commonPatchParams,
+  basePatchParams,
   patchTypeSpecific,
   t.exact(t.partial({ id })),
 ]);
@@ -400,7 +403,7 @@ const responseOptionalFields = {
 };
 
 export const fullResponseSchema = t.intersection([
-  commonResponseParams,
+  baseResponseParams,
   responseTypeSpecific,
   t.exact(t.type(responseRequiredFields)),
   t.exact(t.partial(responseOptionalFields)),
