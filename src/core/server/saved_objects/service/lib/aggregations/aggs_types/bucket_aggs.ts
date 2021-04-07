@@ -8,6 +8,40 @@
 
 import { schema as s, ObjectType } from '@kbn/config-schema';
 
+/**
+ * Schemas for the Bucket aggregations.
+ *
+ * Currently supported:
+ * - filter
+ * - histogram
+ * - terms
+ *
+ * Not implemented:
+ * - adjacency_matrix
+ * - auto_date_histogram
+ * - children
+ * - composite
+ * - date_histogram
+ * - date_range
+ * - diversified_sampler
+ * - filters
+ * - geo_distance
+ * - geohash_grid
+ * - geotile_grid
+ * - global
+ * - ip_range
+ * - missing
+ * - multi_terms
+ * - nested
+ * - parent
+ * - range
+ * - rare_terms
+ * - reverse_nested
+ * - sampler
+ * - significant_terms
+ * - significant_text
+ * - variable_width_histogram
+ */
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   filter: s.object({
     term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
