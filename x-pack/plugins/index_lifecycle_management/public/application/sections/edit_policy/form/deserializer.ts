@@ -51,6 +51,7 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
+      readonlyEnabled: Boolean(cold?.actions?.readonly),
     },
     frozen: {
       enabled: Boolean(frozen),
