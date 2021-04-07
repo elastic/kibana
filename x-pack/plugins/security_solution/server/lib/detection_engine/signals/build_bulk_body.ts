@@ -49,7 +49,7 @@ export const buildBulkBody = (
  * one signal for each event in the sequence, and a "shell" signal that ties them all together. All N+1 signals
  * share the same signal.group.id to make it easy to query them.
  * @param sequence The raw ES documents that make up the sequence
- * @param ruleAlert SavedObject representing the rule that found the sequence
+ * @param ruleSO SavedObject representing the rule that found the sequence
  * @param outputIndex Index to write the resulting signals to
  */
 export const buildSignalGroupFromSequence = (
