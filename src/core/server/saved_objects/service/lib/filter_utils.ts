@@ -234,7 +234,7 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
     return true;
   }
 
-  // If the path is for a flattned type field, we'll assume the mappings are defined.
+  // If the path is for a flattened type field, we'll assume the mappings are defined.
   const keys = key.split('.');
   for (let i = 0; i < keys.length; i++) {
     const path = `properties.${keys.slice(0, i + 1).join('.properties.')}`;
