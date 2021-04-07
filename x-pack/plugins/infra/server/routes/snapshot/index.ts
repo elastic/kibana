@@ -40,7 +40,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         requestContext.core.savedObjects.client,
         snapshotRequest.sourceId
       );
-      const compositeSize = libs.configuration.query.compositeSize;
+      const compositeSize = libs.configuration.inventory.compositeSize;
       const logQueryFields = await libs.getLogQueryFields(
         snapshotRequest.sourceId,
         requestContext.core.savedObjects.client

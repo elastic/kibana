@@ -57,7 +57,7 @@ export const initAlertPreviewRoute = ({
         sourceId || 'default'
       );
 
-      const compositeSize = configuration.query.compositeSize;
+      const compositeSize = configuration.inventory.compositeSize;
 
       try {
         switch (alertType) {

@@ -134,7 +134,7 @@ describe('the InfraSources lib', () => {
 
 const createMockStaticConfiguration = (sources: any) => ({
   enabled: true,
-  query: {
+  inventory: {
     compositeSize: 2000,
   },
   sources,

@@ -424,7 +424,7 @@ describe('The metric threshold alert type', () => {
 
 const createMockStaticConfiguration = (sources: any) => ({
   enabled: true,
-  query: {
+  inventory: {
     compositeSize: 2000,
   },
   sources,
