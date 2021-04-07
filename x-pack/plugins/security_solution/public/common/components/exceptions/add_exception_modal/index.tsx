@@ -23,19 +23,23 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+  ExceptionBuilder,
+} from '../../../../../public/shared_imports';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -50,6 +54,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   retrieveAlertOsTypes,
+  filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
@@ -393,13 +398,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
+              <ExceptionBuilder.ExceptionBuilderComponent
+                allowLargeValueLists={
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
+                }
                 httpService={http}
                 autocompleteService={data.autocomplete}
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
                 listId={ruleExceptionList.list_id}
                 listNamespaceType={ruleExceptionList.namespace_type}
+                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
                 ruleName={ruleName}
                 indexPatterns={indexPatterns}
                 isOrDisabled={false}
@@ -408,7 +417,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}
-                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />
