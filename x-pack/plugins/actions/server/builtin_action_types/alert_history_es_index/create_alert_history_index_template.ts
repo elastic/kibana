@@ -13,7 +13,8 @@ export function getAlertHistoryIndexTemplate() {
   return {
     index_patterns: [`${ALERT_HISTORY_PREFIX}*`],
     _meta: {
-      description: 'System generated mapping for preconfigured alert history ES index connector.',
+      description:
+        'System generated mapping for preconfigured alert history Elasticsearch index connector.',
     },
     template: {
       settings: {

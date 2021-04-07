@@ -12,6 +12,7 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { renderMustacheObject } from '../lib/mustache_renderer';
 import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';
+import { ALERT_HISTORY_PREFIX } from '../../common/alert_history_schema';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
 export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -42,8 +43,8 @@ const ParamsSchema = schema.object({
   indexOverride: schema.nullable(
     schema.string({
       validate: (pattern) => {
-        if (!pattern.startsWith('alert-history-')) {
-          return `index must start with "alert-history-"`;
+        if (!pattern.startsWith(ALERT_HISTORY_PREFIX)) {
+          return `index must start with "${ALERT_HISTORY_PREFIX}"`;
         }
       },
     })

@@ -121,7 +121,7 @@ export const IndexParamsFields = ({
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
           {
-            defaultMessage: 'ES index',
+            defaultMessage: 'Elasticsearch index',
           }
         )}
         labelAppend={resetDefaultIndex}
