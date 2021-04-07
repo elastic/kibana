@@ -70,9 +70,9 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -98,9 +98,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -306,9 +306,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.ITagsClient",
                 "text": "ITagsClient"
               }
@@ -328,10 +328,10 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.ITagsCache",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.ITagsCache",
                 "text": "ITagsCache"
               }
             ]
@@ -350,10 +350,10 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsTaggingApiUi",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.SavedObjectsTaggingApiUi",
                 "text": "SavedObjectsTaggingApiUi"
               }
             ]
@@ -383,9 +383,9 @@
             "signature": [
               "(tagId: string) => ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -432,10 +432,10 @@
               },
               ") => object is ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.TagDecoratedSavedObject",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.TagDecoratedSavedObject",
                 "text": "TagDecoratedSavedObject"
               }
             ],
@@ -478,10 +478,10 @@
             "signature": [
               "(options?: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.GetSearchBarFilterOptions",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.GetSearchBarFilterOptions",
                 "text": "GetSearchBarFilterOptions"
               },
               " | undefined) => ",
@@ -498,10 +498,10 @@
                 "isRequired": false,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-common.GetSearchBarFilterOptions",
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-public.GetSearchBarFilterOptions",
                     "text": "GetSearchBarFilterOptions"
                   },
                   " | undefined"
@@ -596,18 +596,18 @@
             "signature": [
               "(query: string, options?: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.ParseSearchQueryOptions",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.ParseSearchQueryOptions",
                 "text": "ParseSearchQueryOptions"
               },
               " | undefined) => ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.ParsedSearchQuery",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.ParsedSearchQuery",
                 "text": "ParsedSearchQuery"
               }
             ],
@@ -638,10 +638,10 @@
                 "isRequired": false,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-common.ParseSearchQueryOptions",
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-public.ParseSearchQueryOptions",
                     "text": "ParseSearchQueryOptions"
                   },
                   " | undefined"
@@ -844,10 +844,10 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsTaggingApiUiComponent",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.SavedObjectsTaggingApiUiComponent",
                 "text": "SavedObjectsTaggingApiUiComponent"
               }
             ]
@@ -885,10 +885,10 @@
             "signature": [
               "React.FunctionComponent<",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.TagListComponentProps",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.TagListComponentProps",
                 "text": "TagListComponentProps"
               },
               ">"
@@ -909,10 +909,10 @@
             "signature": [
               "React.FunctionComponent<",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.TagSelectorComponentProps",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.TagSelectorComponentProps",
                 "text": "TagSelectorComponentProps"
               },
               ">"
@@ -933,10 +933,10 @@
             "signature": [
               "React.FunctionComponent<",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectSaveModalTagSelectorComponentProps",
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
                 "text": "SavedObjectSaveModalTagSelectorComponentProps"
               },
               ">"
@@ -1101,10 +1101,10 @@
           "signature": [
             "(provider: Promise<",
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsTaggingApi",
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "public",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-public.SavedObjectsTaggingApi",
               "text": "SavedObjectsTaggingApi"
             },
             ">) => void"
@@ -1121,10 +1121,10 @@
               "signature": [
                 "Promise<",
                 {
-                  "pluginId": "savedObjects",
-                  "scope": "common",
-                  "docId": "kibSavedObjectsPluginApi",
-                  "section": "def-common.SavedObjectsTaggingApi",
+                  "pluginId": "savedObjectsTaggingOss",
+                  "scope": "public",
+                  "docId": "kibSavedObjectsTaggingOssPluginApi",
+                  "section": "def-public.SavedObjectsTaggingApi",
                   "text": "SavedObjectsTaggingApi"
                 },
                 ">"
@@ -1183,10 +1183,10 @@
           "signature": [
             "() => ",
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsTaggingApi",
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "public",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-public.SavedObjectsTaggingApi",
               "text": "SavedObjectsTaggingApi"
             },
             " | undefined"
@@ -1265,17 +1265,17 @@
             "signature": [
               "(attributes: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
               ") => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -1290,9 +1290,9 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.TagAttributes",
                     "text": "TagAttributes"
                   }
@@ -1318,9 +1318,9 @@
             "signature": [
               "(id: string) => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -1357,17 +1357,17 @@
             "signature": [
               "(options?: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.GetAllTagsOptions",
                 "text": "GetAllTagsOptions"
               },
               " | undefined) => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -1382,9 +1382,9 @@
                 "isRequired": false,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.GetAllTagsOptions",
                     "text": "GetAllTagsOptions"
                   },
@@ -1442,17 +1442,17 @@
             "signature": [
               "(id: string, attributes: ",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
               ") => Promise<",
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-common.Tag",
                 "text": "Tag"
               },
@@ -1481,9 +1481,9 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
+                    "pluginId": "savedObjectsTaggingOss",
                     "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
                     "section": "def-common.TagAttributes",
                     "text": "TagAttributes"
                   }

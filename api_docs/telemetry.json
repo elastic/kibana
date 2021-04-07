@@ -143,7 +143,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ optIn?: boolean | undefined; } & { enabled: boolean; url: string; allowChangingOptInStatus: boolean; config: string; banner: boolean; optInStatusUrl: string; sendUsageFrom: \"server\" | \"browser\"; }>>"
+                  "<Readonly<{ optIn?: boolean | undefined; } & { enabled: boolean; url: string; allowChangingOptInStatus: boolean; config: string; banner: boolean; optInStatusUrl: string; sendUsageFrom: \"browser\" | \"server\"; }>>"
                 ],
                 "description": [],
                 "source": {
@@ -322,10 +322,10 @@
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionConfig",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
                 "text": "StatsCollectionConfig"
               }
             ],
@@ -338,7 +338,13 @@
         ],
         "signature": [
           "({ esClient }: ",
-          "StatsCollectionConfig",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionConfig",
+            "text": "StatsCollectionConfig"
+          },
           ") => Promise<{ clusterUuid: string; }[]>"
         ],
         "description": [
@@ -364,10 +370,10 @@
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.ClusterDetails",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.ClusterDetails",
                 "text": "ClusterDetails"
               },
               "[]"
@@ -385,10 +391,10 @@
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionConfig",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
                 "text": "StatsCollectionConfig"
               }
             ],
@@ -405,10 +411,10 @@
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionContext",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionContext",
                 "text": "StatsCollectionContext"
               }
             ],
@@ -421,11 +427,29 @@
         ],
         "signature": [
           "(clustersDetails: ",
-          "ClusterDetails",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.ClusterDetails",
+            "text": "ClusterDetails"
+          },
           "[], config: ",
-          "StatsCollectionConfig",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionConfig",
+            "text": "StatsCollectionConfig"
+          },
           ", context: ",
-          "StatsCollectionContext",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionContext",
+            "text": "StatsCollectionContext"
+          },
           ") => Promise<{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: any; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",

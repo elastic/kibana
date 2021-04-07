@@ -9,7 +9,13 @@
         "label": "Plugin",
         "description": [],
         "signature": [
-          "Plugin",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
           " implements ",
           {
             "pluginId": "core",
@@ -19,9 +25,21 @@
             "text": "Plugin"
           },
           "<",
-          "PluginSetup",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginSetup",
+            "text": "PluginSetup"
+          },
           ", ",
-          "PluginStart",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginStart",
+            "text": "PluginStart"
+          },
           ", ",
           "SetupPlugins"
         ],
@@ -79,34 +97,34 @@
               },
               "<",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.StartPlugins",
                 "text": "StartPlugins"
               },
               ", ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginStart",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
                 "text": "PluginStart"
               },
               ">, plugins: ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SetupPlugins",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.SetupPlugins",
                 "text": "SetupPlugins"
               },
               ") => ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginSetup",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginSetup",
                 "text": "PluginSetup"
               }
             ],
@@ -127,18 +145,18 @@
                   },
                   "<",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.StartPlugins",
                     "text": "StartPlugins"
                   },
                   ", ",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.PluginStart",
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
                     "text": "PluginStart"
                   },
                   ">"
@@ -156,10 +174,10 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.SetupPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.SetupPlugins",
                     "text": "SetupPlugins"
                   }
                 ],
@@ -192,10 +210,10 @@
               },
               ", plugins: ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.StartPlugins",
                 "text": "StartPlugins"
               },
               ") => {}"
@@ -229,10 +247,10 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.StartPlugins",
                     "text": "StartPlugins"
                   }
                 ],
@@ -299,10 +317,10 @@
           "signature": [
             "() => Promise<",
             {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.ResolverPluginSetup",
+              "pluginId": "securitySolution",
+              "scope": "public",
+              "docId": "kibSecuritySolutionPluginApi",
+              "section": "def-public.ResolverPluginSetup",
               "text": "ResolverPluginSetup"
             },
             ">"
@@ -415,7 +433,13 @@
         "label": "Plugin",
         "description": [],
         "signature": [
-          "Plugin",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
           " implements ",
           {
             "pluginId": "core",
@@ -425,9 +449,21 @@
             "text": "Plugin"
           },
           "<",
-          "PluginSetup",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginSetup",
+            "text": "PluginSetup"
+          },
           ", ",
-          "PluginStart",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginStart",
+            "text": "PluginStart"
+          },
           ", ",
           "SetupPlugins"
         ],
@@ -485,26 +521,26 @@
               },
               "<",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.StartPlugins",
                 "text": "StartPlugins"
               },
               ", ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.PluginStart",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.PluginStart",
                 "text": "PluginStart"
               },
               ">, plugins: ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SetupPlugins",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.SetupPlugins",
                 "text": "SetupPlugins"
               },
               ") => {}"
@@ -526,18 +562,18 @@
                   },
                   "<",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.StartPlugins",
                     "text": "StartPlugins"
                   },
                   ", ",
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.PluginStart",
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.PluginStart",
                     "text": "PluginStart"
                   },
                   ">"
@@ -555,10 +591,10 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.SetupPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.SetupPlugins",
                     "text": "SetupPlugins"
                   }
                 ],
@@ -591,10 +627,10 @@
               },
               ", plugins: ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.StartPlugins",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.StartPlugins",
                 "text": "StartPlugins"
               },
               ") => {}"
@@ -628,10 +664,10 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "security",
-                    "scope": "common",
-                    "docId": "kibSecurityPluginApi",
-                    "section": "def-common.StartPlugins",
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.StartPlugins",
                     "text": "StartPlugins"
                   }
                 ],
@@ -1249,10 +1285,10 @@
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.CallWithRequest",
                 "text": "CallWithRequest"
               },
               "<{}, unknown>"
@@ -1500,10 +1536,10 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.AppClient",
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.AppClient",
                 "text": "AppClient"
               }
             ]

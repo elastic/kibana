@@ -79,8 +79,10 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<void, void, SetupDependencies, ",
-          "StartDependencies",
+          "<void, void, ",
+          "DataEnhancedSetupDependencies",
+          ", ",
+          "DataEnhancedStartDependencies",
           ">"
         ],
         "children": [
@@ -111,7 +113,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 48
+                  "lineNumber": 33
                 }
               }
             ],
@@ -119,7 +121,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 33
             }
           },
           {
@@ -137,13 +139,21 @@
               },
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "dataEnhanced",
                 "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
+                "docId": "kibDataEnhancedPluginApi",
+                "section": "def-server.DataEnhancedStartDependencies",
+                "text": "DataEnhancedStartDependencies"
               },
-              ", unknown>, deps: SetupDependencies) => void"
+              ", unknown>, deps: ",
+              {
+                "pluginId": "dataEnhanced",
+                "scope": "server",
+                "docId": "kibDataEnhancedPluginApi",
+                "section": "def-server.DataEnhancedSetupDependencies",
+                "text": "DataEnhancedSetupDependencies"
+              },
+              ") => void"
             ],
             "description": [],
             "children": [
@@ -162,18 +172,18 @@
                   },
                   "<",
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataEnhanced",
                     "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStart",
-                    "text": "DataPluginStart"
+                    "docId": "kibDataEnhancedPluginApi",
+                    "section": "def-server.DataEnhancedStartDependencies",
+                    "text": "DataEnhancedStartDependencies"
                   },
                   ", unknown>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               },
               {
@@ -182,12 +192,18 @@
                 "label": "deps",
                 "isRequired": true,
                 "signature": [
-                  "SetupDependencies"
+                  {
+                    "pluginId": "dataEnhanced",
+                    "scope": "server",
+                    "docId": "kibDataEnhancedPluginApi",
+                    "section": "def-server.DataEnhancedSetupDependencies",
+                    "text": "DataEnhancedSetupDependencies"
+                  }
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               }
             ],
@@ -195,7 +211,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 38
             }
           },
           {
@@ -216,8 +232,8 @@
                 "pluginId": "dataEnhanced",
                 "scope": "server",
                 "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.StartDependencies",
-                "text": "StartDependencies"
+                "section": "def-server.DataEnhancedStartDependencies",
+                "text": "DataEnhancedStartDependencies"
               },
               ") => void"
             ],
@@ -240,7 +256,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               },
               {
@@ -253,14 +269,14 @@
                     "pluginId": "dataEnhanced",
                     "scope": "server",
                     "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.StartDependencies",
-                    "text": "StartDependencies"
+                    "section": "def-server.DataEnhancedStartDependencies",
+                    "text": "DataEnhancedStartDependencies"
                   }
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               }
             ],
@@ -268,7 +284,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 80
             }
           },
           {
@@ -284,13 +300,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 101
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 42
+          "lineNumber": 27
         },
         "initialIsOpen": false
       }

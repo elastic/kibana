@@ -72,7 +72,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 63
+        "lineNumber": 65
       },
       "signature": [
         "CanvasApi"
@@ -88,7 +88,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 64
+        "lineNumber": 66
       },
       "signature": [
         "void"

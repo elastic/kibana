@@ -47,34 +47,34 @@
             "signature": [
               "{ name: string; description: string; icon: string; type: string; available?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => boolean) | undefined; enabled?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => boolean) | undefined; onClick?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => void) | undefined; render?: ((item: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => any) | undefined; }"
@@ -120,10 +120,10 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               " | null"
@@ -198,10 +198,10 @@
             "signature": [
               "(record: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ") => void"
@@ -215,10 +215,10 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "savedObjects",
-                    "scope": "common",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-common.SavedObjectsManagementRecord",
+                    "pluginId": "savedObjectsManagement",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsManagementPluginApi",
+                    "section": "def-public.SavedObjectsManagementRecord",
                     "text": "SavedObjectsManagementRecord"
                   }
                 ],
@@ -275,7 +275,13 @@
             "text": "SavedObjectsImportResponse"
           },
           ") => ",
-          "ProcessedImportResponse"
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.ProcessedImportResponse",
+            "text": "ProcessedImportResponse"
+          }
         ],
         "description": [],
         "children": [
@@ -417,10 +423,10 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.FailedImport",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.FailedImport",
                 "text": "FailedImport"
               },
               "[]"
@@ -671,9 +677,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectRelationKind",
                 "text": "SavedObjectRelationKind"
               }
@@ -691,9 +697,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
@@ -728,10 +734,10 @@
             "signature": [
               "(action: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementAction",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementAction",
                 "text": "SavedObjectsManagementAction"
               },
               ") => void"
@@ -782,10 +788,10 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementAction",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementAction",
                 "text": "SavedObjectsManagementAction"
               },
               "[]"
@@ -803,7 +809,13 @@
         "type": "Interface",
         "label": "SavedObjectsManagementColumn",
         "signature": [
-          "SavedObjectsManagementColumn",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.SavedObjectsManagementColumn",
+            "text": "SavedObjectsManagementColumn"
+          },
           "<T>"
         ],
         "description": [],
@@ -835,10 +847,10 @@
               "EuiTableFieldDataColumnType",
               "<",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementRecord",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
               ">, \"children\" | \"headers\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"description\" | \"title\" | \"id\" | \"name\" | \"field\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"width\" | \"render\" | \"align\" | \"abbr\" | \"footer\" | \"colSpan\" | \"rowSpan\" | \"scope\" | \"valign\" | \"dataType\" | \"isExpander\" | \"textOnly\" | \"truncateText\" | \"isMobileHeader\" | \"mobileOptions\" | \"hideForMobile\">"
@@ -873,10 +885,10 @@
             "signature": [
               "(column: ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementColumn",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementColumn",
                 "text": "SavedObjectsManagementColumn"
               },
               "<unknown>) => void"
@@ -911,10 +923,10 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "savedObjects",
-                "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-common.SavedObjectsManagementColumn",
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementColumn",
                 "text": "SavedObjectsManagementColumn"
               },
               "<unknown>[]"
@@ -1132,10 +1144,10 @@
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementActionServiceSetup",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementActionServiceSetup",
               "text": "SavedObjectsManagementActionServiceSetup"
             }
           ]
@@ -1152,10 +1164,10 @@
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementColumnServiceSetup",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementColumnServiceSetup",
               "text": "SavedObjectsManagementColumnServiceSetup"
             }
           ]
@@ -1173,10 +1185,10 @@
           "signature": [
             "Pick<",
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementServiceRegistry",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementServiceRegistry",
               "text": "SavedObjectsManagementServiceRegistry"
             },
             ", \"get\" | \"register\" | \"all\">"
@@ -1209,10 +1221,10 @@
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementActionServiceStart",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementActionServiceStart",
               "text": "SavedObjectsManagementActionServiceStart"
             }
           ]
@@ -1229,10 +1241,10 @@
           },
           "signature": [
             {
-              "pluginId": "savedObjects",
-              "scope": "common",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-common.SavedObjectsManagementColumnServiceStart",
+              "pluginId": "savedObjectsManagement",
+              "scope": "public",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-public.SavedObjectsManagementColumnServiceStart",
               "text": "SavedObjectsManagementColumnServiceStart"
             }
           ]
@@ -1277,9 +1289,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectRelation",
                 "text": "SavedObjectRelation"
               },
@@ -1298,9 +1310,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectInvalidRelation",
                 "text": "SavedObjectInvalidRelation"
               },
@@ -1355,9 +1367,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectRelationKind",
                 "text": "SavedObjectRelationKind"
               }
@@ -1510,9 +1522,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectRelationKind",
                 "text": "SavedObjectRelationKind"
               }
@@ -1530,9 +1542,9 @@
             },
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsManagement",
                 "scope": "common",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsManagementPluginApi",
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
