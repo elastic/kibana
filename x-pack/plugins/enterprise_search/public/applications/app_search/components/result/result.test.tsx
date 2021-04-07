@@ -100,7 +100,6 @@ describe('Result', () => {
       const buttons = renderedActions.find(EuiButtonIcon);
       expect(buttons).toHaveLength(2);
 
-      // console.log(buttons.first().props());
       expect(buttons.first().prop('iconType')).toEqual('eyeClosed');
       expect(buttons.first().prop('color')).toEqual('danger');
       buttons.first().simulate('click');
@@ -119,7 +118,7 @@ describe('Result', () => {
       const renderedActions = shallow(header.prop('actions') as any);
       const buttons = renderedActions.find(EuiButtonIcon);
 
-      // In addition to the 2 actions passed, we also have an action
+      // In addition to the 2 actions passed, we also have a link action
       expect(buttons).toHaveLength(3);
 
       expect(buttons.first().prop('data-test-subj')).toEqual('DocumentDetailLink');

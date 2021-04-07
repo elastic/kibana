@@ -60,7 +60,6 @@ export const ResultHeader: React.FC<Props> = ({
             />
           </EuiFlexItem>
         )}
-        {/* Engine Name */}
         {isMetaEngine && (
           <EuiFlexItem grow={false}>
             <ResultHeaderItem
