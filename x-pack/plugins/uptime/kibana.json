@@ -26,6 +26,7 @@
   "requiredBundles": [
     "observability",
     "kibanaReact",
+    "kibanaUtils",
     "home",
     "data",
     "ml",

@@ -30,6 +30,7 @@ import { alertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
+import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -47,6 +48,13 @@ export interface ClientPluginsStart {
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
+}
+
+export interface UptimePluginServices extends Partial<CoreStart> {
+  embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  storage: IStorageWrapper;
 }
 
 export type ClientSetup = void;
