@@ -381,7 +381,7 @@ export const CustomFields = memo<Props>(
                 helpText={
                   <FormattedMessage
                     id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
-                    defaultMessage="A list of tags that will be sent with the monitor event. Displayed in Uptime and enables searching by tag."
+                    defaultMessage="A list of tags that will be sent with the monitor event. Press enter to add a new tab. Displayed in Uptime and enables searching by tag."
                   />
                 }
               >

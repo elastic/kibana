@@ -367,7 +367,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
                 'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
                 {
                   defaultMessage:
-                    'A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered `up`.',
+                    'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered `up`.',
                 }
               )}
             />
@@ -442,7 +442,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
                 'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
                 {
                   defaultMessage:
-                    'A list of regular expressions to match the body output. Only a single expression needs to match.',
+                    'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
                 }
               )}
             />
@@ -474,7 +474,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
                 'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
                 {
                   defaultMessage:
-                    'A list of regular expressions to match the the body output negatively. Return match failed if single expression matches.',
+                    'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
                 }
               )}
             />
