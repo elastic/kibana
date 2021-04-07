@@ -24,6 +24,7 @@ import {
   SubCasesResponse,
   CasesResponse,
   CasesFindResponse,
+  CommentRequest,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -348,6 +349,7 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
     deleteCasesUserActions(es),
     deleteComments(es),
     deleteConfiguration(es),
+    deleteMappings(es),
   ]);
 };
 
@@ -404,6 +406,17 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
     index: '.kibana',
     // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-configure',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteMappings = async (es: KibanaClient): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
+    q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -467,4 +480,33 @@ export const ensureSavedObjectIsAuthorized = (
 ) => {
   expect(cases.length).to.eql(numberOfExpectedCases);
   cases.forEach((theCase) => expect(owners.includes(theCase.owner)).to.be(true));
+};
+
+export const createCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  params: CasePostRequest,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(CASES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const createComment = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  params: CommentRequest,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(`${CASES_URL}/${caseId}/comments`)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
 };

@@ -11,7 +11,12 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
+import {
+  CommentsResponse,
+  CommentType,
+  AttributesTypeUser,
+  AttributesTypeAlerts,
+} from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -28,6 +33,8 @@ import {
   deleteCases,
   deleteCasesUserActions,
   deleteComments,
+  createCase,
+  createComment,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -55,94 +62,71 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should post a comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+      const comment = patchedCase.comments![0] as AttributesTypeUser;
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      expect(patchedCase.comments[0].type).to.eql(postCommentUserReq.type);
-      expect(patchedCase.comments[0].comment).to.eql(postCommentUserReq.comment);
+      expect(comment.type).to.eql(postCommentUserReq.type);
+      expect(comment.comment).to.eql(postCommentUserReq.comment);
       expect(patchedCase.updated_by).to.eql(defaultUser);
     });
 
     it('should post an alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+      const comment = patchedCase.comments![0] as AttributesTypeAlerts;
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(200);
-
-      expect(patchedCase.comments[0].type).to.eql(postCommentAlertReq.type);
-      expect(patchedCase.comments[0].alertId).to.eql(postCommentAlertReq.alertId);
-      expect(patchedCase.comments[0].index).to.eql(postCommentAlertReq.index);
+      expect(comment.type).to.eql(postCommentAlertReq.type);
+      expect(comment.alertId).to.eql(postCommentAlertReq.alertId);
+      expect(comment.index).to.eql(postCommentAlertReq.index);
       expect(patchedCase.updated_by).to.eql(defaultUser);
     });
 
     it('unhappy path - 400s when type is missing', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment(
+        supertest,
+        postedCase.id,
+        {
+          // @ts-expect-error
           bad: 'comment',
-        })
-        .expect(400);
+        },
+        400
+      );
     });
 
     it('unhappy path - 400s when missing attributes for type user', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({ type: CommentType.user })
-        .expect(400);
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment(
+        supertest,
+        postedCase.id,
+        // @ts-expect-error
+        {
+          type: CommentType.user,
+        },
+        400
+      );
     });
 
     it('unhappy path - 400s when adding excess attributes for type user', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
 
       for (const attribute of ['alertId', 'index']) {
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({ type: CommentType.user, [attribute]: attribute, comment: 'a comment' })
-          .expect(400);
+        await createComment(
+          supertest,
+          postedCase.id,
+          {
+            type: CommentType.user,
+            [attribute]: attribute,
+            comment: 'a comment',
+          },
+          400
+        );
       }
     });
 
     it('unhappy path - 400s when missing attributes for type alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
 
       const allRequestAttributes = {
         type: CommentType.alert,
@@ -156,26 +140,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const attribute of ['alertId', 'index']) {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(requestAttributes)
-          .expect(400);
+        // @ts-expect-error
+        await createComment(supertest, postedCase.id, requestAttributes, 400);
       }
     });
 
     it('unhappy path - 400s when adding excess attributes for type alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
 
       for (const attribute of ['comment']) {
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
+        await createComment(
+          supertest,
+          postedCase.id,
+          {
             type: CommentType.alert,
             [attribute]: attribute,
             alertId: 'test-id',
@@ -184,27 +161,26 @@ export default ({ getService }: FtrProviderContext): void => {
               id: 'id',
               name: 'name',
             },
-          })
-          .expect(400);
+          },
+          400
+        );
       }
     });
 
     it('unhappy path - 400s when case is missing', async () => {
-      await supertest
-        .post(`${CASES_URL}/not-exists/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
+      await createComment(
+        supertest,
+        'not-exists',
+        {
+          // @ts-expect-error
           bad: 'comment',
-        })
-        .expect(400);
+        },
+        400
+      );
     });
 
     it('unhappy path - 400s when adding an alert to a closed case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
 
       await supertest
         .patch(CASES_URL)
@@ -220,34 +196,17 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(400);
+      await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('400s when adding an alert to a collection case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(400);
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
     });
 
     it('400s when adding a generated alert to an individual case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
 
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
@@ -270,12 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should change the status of the alert if sync alert is on', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        const postedCase = await createCase(supertest, postCaseReq);
 
         await supertest
           .patch(CASES_URL)
@@ -299,19 +253,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-            type: CommentType.alert,
-          })
-          .expect(200);
+        await createComment(supertest, 'not-exists', {
+          alertId: alert._id,
+          index: alert._index,
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
+          type: CommentType.alert,
+        });
 
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -353,19 +303,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-            type: CommentType.alert,
-          })
-          .expect(200);
+        await createComment(supertest, 'not-exists', {
+          alertId: alert._id,
+          index: alert._index,
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
+          type: CommentType.alert,
+        });
 
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
