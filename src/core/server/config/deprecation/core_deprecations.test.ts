@@ -6,27 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { getDeprecationsForGlobalSettings } from '../test_utils';
 import { coreDeprecationProvider } from './core_deprecations';
-
 const initialEnv = { ...process.env };
 
-const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = coreDeprecationProvider(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
-    settings,
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: '',
-    })),
-    () => ({ message }) => deprecationMessages.push(message)
-  );
-  return {
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+const applyCoreDeprecations = (settings?: Record<string, any>) =>
+  getDeprecationsForGlobalSettings({ provider: coreDeprecationProvider, settings });
 
 describe('core deprecations', () => {
   beforeEach(() => {
