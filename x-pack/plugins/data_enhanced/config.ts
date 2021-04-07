@@ -18,7 +18,7 @@ export const configSchema = schema.object({
        * pageSize controls how many search session objects we load at once while monitoring
        * session completion
        */
-      pageSize: schema.number({ defaultValue: 10000 }),
+      pageSize: schema.number({ defaultValue: 100 }),
       /**
        * trackingInterval controls how often we track search session objects progress
        */
