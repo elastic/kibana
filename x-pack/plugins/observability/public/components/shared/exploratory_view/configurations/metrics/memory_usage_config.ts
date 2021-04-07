@@ -27,7 +27,7 @@ export function getMemoryUsageLensConfig({ seriesId }: Props): DataSeries {
       sourceField: 'system.memory.used.pct',
       label: 'Memory Usage %',
     },
-    hasMetricType: true,
+    hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],
     filters: [],

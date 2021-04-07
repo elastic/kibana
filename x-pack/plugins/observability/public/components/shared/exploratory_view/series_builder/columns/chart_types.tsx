@@ -94,6 +94,7 @@ export function XYChartTypesSelect({
 
   return (
     <EuiSuperSelect
+      compressed
       valueOfSelected={value}
       isLoading={loading}
       options={options}

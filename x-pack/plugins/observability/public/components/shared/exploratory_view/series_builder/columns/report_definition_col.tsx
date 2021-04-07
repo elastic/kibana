@@ -13,7 +13,7 @@ import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { DataSeries } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
-import { OperationTypeSelect } from './metric_type_select';
+import { OperationTypeSelect } from './operation_type_select';
 
 export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   const { indexPattern } = useIndexPatternContext();
@@ -22,7 +22,14 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
 
   const { reportDefinitions: rtd = {} } = series;
 
-  const { reportDefinitions, labels, filters, defaultSeriesType, hasMetricType } = dataViewSeries;
+  const {
+    reportDefinitions,
+    labels,
+    filters,
+    defaultSeriesType,
+    hasOperationType,
+    yAxisColumn,
+  } = dataViewSeries;
 
   const onChange = (field: string, value?: string) => {
     if (!value) {
@@ -96,9 +103,12 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
       <EuiFlexItem style={{ width: 200 }}>
         <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
       </EuiFlexItem>
-      {hasMetricType && (
+      {hasOperationType && (
         <EuiFlexItem style={{ width: 200 }}>
-          <OperationTypeSelect seriesId={NEW_SERIES_KEY} />
+          <OperationTypeSelect
+            seriesId={NEW_SERIES_KEY}
+            defaultOperationType={yAxisColumn.operationType}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

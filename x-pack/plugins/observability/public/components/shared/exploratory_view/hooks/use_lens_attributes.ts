@@ -43,7 +43,7 @@ export const useLensAttributes = ({
 }: Props): TypedLensByValueInput['attributes'] | null => {
   const { series } = useUrlStorage(seriesId);
 
-  const { breakdown, seriesType, metric: metricType, reportType, reportDefinitions = {} } =
+  const { breakdown, seriesType, operationType: metricType, reportType, reportDefinitions = {} } =
     series ?? {};
 
   return useMemo(() => {

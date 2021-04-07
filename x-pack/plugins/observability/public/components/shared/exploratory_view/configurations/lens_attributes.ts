@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
-  LastValueIndexPatternColumn,
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
@@ -124,21 +124,30 @@ export class LensAttributes {
 
   getNumberOperationColumn(
     sourceField: string,
-    operationType?: OperationType
+    operationType: 'average' | 'median'
   ): AvgIndexPatternColumn | MedianIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: 'Median of transaction.marks.agent.firstContentfulPaint',
-      operationType: operationType || ('median' as OperationType),
+      label: i18n.translate('xpack.observability.expView.columns.label', {
+        defaultMessage: '{operationType} of {sourceField}',
+        values: { sourceField, operationType },
+      }),
+      operationType,
     };
   }
 
-  getPercentileNumberColumn(sourceField: string): PercentileIndexPatternColumn {
+  getPercentileNumberColumn(
+    sourceField: string,
+    percentileValue: string
+  ): PercentileIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: '95th percentile of transaction.marks.agent.firstContentfulPaint',
+      label: i18n.translate('xpack.observability.expView.columns.label', {
+        defaultMessage: '{percentileValue} percentile of {sourceField}',
+        values: { sourceField, percentileValue },
+      }),
       operationType: 'percentile',
-      params: { percentile: 95 },
+      params: { percentile: Number(percentileValue.split('th')[0]) },
     };
   }
 
@@ -154,10 +163,7 @@ export class LensAttributes {
     };
   }
 
-  getXAxis():
-    | LastValueIndexPatternColumn
-    | DateHistogramIndexPatternColumn
-    | RangeIndexPatternColumn {
+  getXAxis() {
     const { xAxisColumn } = this.reportViewConfig;
 
     return this.getColumnBasedOnType(xAxisColumn.sourceField!);
@@ -176,7 +182,12 @@ export class LensAttributes {
     }
     if (fieldType === 'number') {
       if (columnType === 'operation' || operationType) {
-        return this.getNumberOperationColumn(fieldName, operationType);
+        if (operationType === 'median' || operationType === 'average') {
+          return this.getNumberOperationColumn(fieldName, operationType);
+        }
+        if (operationType?.includes('th')) {
+          return this.getPercentileNumberColumn(sourceField, operationType);
+        }
       }
       return this.getNumberRangeColumn(fieldName);
     }

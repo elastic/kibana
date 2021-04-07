@@ -65,7 +65,7 @@ export interface DataSeries {
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
-  hasMetricType: boolean;
+  hasOperationType: boolean;
   palette?: PaletteOutput;
 }
 
@@ -78,7 +78,7 @@ export interface SeriesUrl {
   filters?: UrlFilter[];
   seriesType?: SeriesType;
   reportType: ReportViewTypeId;
-  metric?: OperationType;
+  operationType?: OperationType;
   dataType?: AppDataType;
   reportDefinitions?: Record<string, string>;
 }

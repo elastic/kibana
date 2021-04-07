@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { SeriesChartTypes, XYChartTypes } from './chart_types';
+import { SeriesChartTypes, XYChartTypes } from '../../series_editor/columns/chart_types';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 
 describe.skip('SeriesChartTypes', function () {

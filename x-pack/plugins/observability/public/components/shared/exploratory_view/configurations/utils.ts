@@ -13,7 +13,7 @@ import { URL_KEYS } from './constants/url_constants';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {
-    metric,
+    operationType,
     seriesType,
     reportType,
     breakdown,
@@ -23,7 +23,7 @@ export function convertToShortUrl(series: SeriesUrl) {
   } = series;
 
   return {
-    [URL_KEYS.METRIC_TYPE]: metric,
+    [URL_KEYS.OPERATION_TYPE]: operationType,
     [URL_KEYS.REPORT_TYPE]: reportType,
     [URL_KEYS.SERIES_TYPE]: seriesType,
     [URL_KEYS.BREAK_DOWN]: breakdown,

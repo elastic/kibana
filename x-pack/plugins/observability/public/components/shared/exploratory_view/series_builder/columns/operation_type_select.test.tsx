@@ -8,11 +8,11 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockUrlStorage, render } from '../../rtl_helpers';
-import { MetricSelection } from './metric_selection';
+import { OperationTypeSelect } from './operation_type_select';
 
 describe('MetricSelection', function () {
   it('should render properly', function () {
-    render(<MetricSelection seriesId={'series-id'} isDisabled={false} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />);
 
     screen.getByText('Average');
   });
@@ -22,19 +22,19 @@ describe('MetricSelection', function () {
       data: {
         'performance-distribution': {
           reportType: 'kpi',
-          metric: 'median',
+          operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
         },
       },
     });
 
-    render(<MetricSelection seriesId={'series-id'} isDisabled={false} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />);
 
     screen.getByText('Median');
   });
 
   it('should be disabled on disabled state', function () {
-    render(<MetricSelection seriesId={'series-id'} isDisabled={true} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />);
 
     const btn = screen.getByRole('button');
 
@@ -46,13 +46,13 @@ describe('MetricSelection', function () {
       data: {
         'performance-distribution': {
           reportType: 'kpi',
-          metric: 'median',
+          operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
         },
       },
     });
 
-    render(<MetricSelection seriesId={'series-id'} isDisabled={false} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />);
 
     fireEvent.click(screen.getByText('Median'));
 
@@ -75,18 +75,18 @@ describe('MetricSelection', function () {
       data: {
         'page-views': {
           reportType: 'kpi',
-          metric: 'median',
+          operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
         },
         'performance-distribution': {
           reportType: 'kpi',
-          metric: 'median',
+          operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
         },
       },
     });
 
-    render(<MetricSelection seriesId={'series-id'} isDisabled={false} />);
+    render(<OperationTypeSelect seriesId={'series-id'} />);
 
     fireEvent.click(screen.getByText('Median'));
 

@@ -26,7 +26,7 @@ export function getNetworkActivityLensConfig({ seriesId }: Props): DataSeries {
       operationType: 'average' as OperationType,
       sourceField: 'system.memory.used.pct',
     },
-    hasMetricType: true,
+    hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],
     filters: [],

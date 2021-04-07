@@ -40,7 +40,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       operationType: 'count',
       label: 'Pages loaded',
     },
-    hasMetricType: false,
+    hasOperationType: false,
     defaultFilters: [
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,

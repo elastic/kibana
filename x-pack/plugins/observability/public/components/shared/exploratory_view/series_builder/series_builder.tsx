@@ -49,7 +49,14 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
 export function SeriesBuilder() {
   const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { dataType, seriesType, reportType, reportDefinitions = {}, filters = [] } = series;
+  const {
+    dataType,
+    seriesType,
+    reportType,
+    reportDefinitions = {},
+    filters = [],
+    operationType,
+  } = series;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
 
@@ -124,6 +131,7 @@ export function SeriesBuilder() {
         seriesType,
         filters,
         reportDefinitions,
+        operationType,
         time: { from: 'now-30m', to: 'now' },
       } as SeriesUrl;
 

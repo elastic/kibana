@@ -27,7 +27,7 @@ export function getServiceThroughputLensConfig({
       sourceField: 'transaction.duration.us',
       label: 'Throughput',
     },
-    hasMetricType: true,
+    hasOperationType: true,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',

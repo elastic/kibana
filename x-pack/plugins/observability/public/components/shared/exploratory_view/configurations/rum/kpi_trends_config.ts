@@ -39,7 +39,7 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     yAxisColumn: {
       sourceField: 'business.kpi',
     },
-    hasMetricType: false,
+    hasOperationType: false,
     defaultFilters: [
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
