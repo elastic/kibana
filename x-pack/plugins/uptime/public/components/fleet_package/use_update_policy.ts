@@ -46,7 +46,6 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
       // enable only the input type and data stream that matches the monitor type.
       currentInput.enabled = true;
       dataStream.enabled = true;
-      const isTLSEnabled = false;
       configKeys.forEach((key) => {
         const configItem = dataStream.vars?.[key];
         if (configItem) {
