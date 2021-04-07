@@ -10,8 +10,10 @@ import Supertest from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { TimelineResult } from '../../../../../plugins/security_solution/public/graphql/types';
-import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
+import {
+  TimelineResult,
+  TimelineType,
+} from '../../../../../plugins/security_solution/common/types/timeline';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

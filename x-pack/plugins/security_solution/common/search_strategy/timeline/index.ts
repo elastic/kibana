@@ -195,9 +195,9 @@ export interface KueryFilterQueryInput {
 }
 
 export interface DateRangePickerInput {
-  start?: Maybe<string>;
+  start?: Maybe<number>;
 
-  end?: Maybe<string>;
+  end?: Maybe<number>;
 }
 
 export interface SortTimelineInput {
