@@ -85,6 +85,7 @@ const originalPolicy: SerializedPolicy = {
           exclude: { test: 'my_value' },
         },
         freeze: {},
+        readonly: {},
         set_priority: {
           priority: 12,
         },
@@ -204,6 +205,14 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in cold', () => {
+    formInternal._meta.cold.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.readonly).toBeUndefined();
   });
 
   it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {
