@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import { CasesClientArgs } from './types';
 import { CasesSubClient, createCasesSubClient } from './cases/client';
@@ -11,6 +12,7 @@ import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/
 import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
@@ -40,6 +42,9 @@ export class CasesClient {
   }
 
   public get subCases() {
+    if (!ENABLE_CASE_CONNECTOR) {
+      throw Boom.badRequest('The case connector feature is disabled');
+    }
     return this._subCases;
   }
 
