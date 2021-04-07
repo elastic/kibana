@@ -1,0 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export { FileDataVisualizerPage } from './file_datavisualizer';
+
+// export { FileDataVisualizerView } from './components/file_datavisualizer_view/index';

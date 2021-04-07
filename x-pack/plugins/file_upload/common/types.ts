@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
+import { ML_JOB_FIELD_TYPES } from './constants';
 
 export interface HasImportPermission {
   hasImportPermission: boolean;
@@ -126,4 +127,20 @@ export interface IngestPipelineWrapper {
 export interface IngestPipeline {
   description: string;
   processors: any[];
+}
+
+export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
+
+interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+}
+
+export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
+  visibleFieldTypes?: string[];
+  visibleFieldNames?: string[];
+  showDistributions?: boolean;
 }

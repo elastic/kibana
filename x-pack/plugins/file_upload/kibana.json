@@ -4,7 +4,20 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "usageCollection"],
-  "optionalPlugins": ["security"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredPlugins": [
+    "data",
+    "usageCollection",
+    "embeddable"
+  ],
+  "optionalPlugins": [
+    "security",
+    "maps"
+  ],
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
 }

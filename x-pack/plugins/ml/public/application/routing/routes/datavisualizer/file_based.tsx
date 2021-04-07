@@ -8,15 +8,17 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { CoreStart } from 'kibana/public';
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
+import { FileDataVisualizerPage } from '../../../../../../file_upload/public';
 
 import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
+import { useMlKibana } from '../../../contexts/kibana';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
@@ -47,9 +49,21 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     checkFindFileStructurePrivilege: () =>
       checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });
+
+  const {
+    services: { data, embeddable, /* maps,*/ security, savedObjects },
+  } = useMlKibana();
+  const coreStart = { savedObjects } as CoreStart;
+
   return (
     <PageLoader context={context}>
-      <FileDataVisualizerPage kibanaConfig={deps.config} />
+      <FileDataVisualizerPage
+        coreStart={coreStart}
+        data={data}
+        embeddable={embeddable}
+        // maps={maps}
+        security={security}
+      />
     </PageLoader>
   );
 };

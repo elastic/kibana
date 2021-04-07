@@ -11,6 +11,7 @@ import {
   getFileUploadComponent,
   importerFactory,
   hasImportPermission,
+  analyzeFile,
 } from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -43,6 +44,7 @@ export class FileUploadPlugin
       getMaxBytes,
       getMaxBytesFormatted,
       hasImportPermission,
+      analyzeFile,
     };
   }
 }

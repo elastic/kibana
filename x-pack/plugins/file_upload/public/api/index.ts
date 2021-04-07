@@ -16,6 +16,7 @@ export interface FileUploadStartApi {
   getMaxBytes(): number;
   getMaxBytesFormatted(): string;
   hasImportPermission(params: HasImportPermissionParams): Promise<boolean>;
+  analyzeFile(file: string, params: Record<string, string>): Promise<any>;
 }
 
 export async function getFileUploadComponent(): Promise<
@@ -51,4 +52,18 @@ export async function hasImportPermission(params: HasImportPermissionParams): Pr
   } catch (error) {
     return false;
   }
+}
+
+export async function analyzeFile(
+  file: string,
+  params: Record<string, string> = {}
+): Promise<boolean> {
+  const body = JSON.stringify(file);
+  const fileUploadModules = await lazyLoadFileUploadModules();
+  return await fileUploadModules.getHttp().fetch<any>({
+    path: `/api/file_upload/analyze_file`,
+    method: 'POST',
+    body,
+    query: params,
+  });
 }

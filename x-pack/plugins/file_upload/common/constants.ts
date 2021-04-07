@@ -17,3 +17,15 @@ export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 // Value to use in the Elasticsearch index mapping meta data to identify the
 // index as having been created by the ML File Data Visualizer.
 export const INDEX_META_DATA_CREATED_BY = 'ml-file-data-visualizer';
+
+export const ML_JOB_FIELD_TYPES = {
+  BOOLEAN: 'boolean',
+  DATE: 'date',
+  GEO_POINT: 'geo_point',
+  GEO_SHAPE: 'geo_shape',
+  IP: 'ip',
+  KEYWORD: 'keyword',
+  NUMBER: 'number',
+  TEXT: 'text',
+  UNKNOWN: 'unknown',
+} as const;
