@@ -175,4 +175,12 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  analyticsFields(indexPatternTitle: string, isRollup: boolean = false) {
+    const query = isRollup === true ? { rollup: true } : {};
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/fields/${indexPatternTitle}`,
+      method: 'GET',
+      query,
+    });
+  },
 };
