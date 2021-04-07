@@ -19,7 +19,9 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
-        "maxResponseContentLength": 1000000,
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {},
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
@@ -51,7 +53,9 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
-        "maxResponseContentLength": 1000000,
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {
           "mySlack1": Object {
             "actionTypeId": ".slack",

@@ -101,7 +101,7 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
 
 function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings {
   return {
-    maxResponseContentLength: config.maxResponseContentLength,
+    maxResponseContentLength: config.maxResponseContentLength.getValueInBytes(),
     responseTimeout: config.responseTimeout.asMilliseconds(),
   };
 }

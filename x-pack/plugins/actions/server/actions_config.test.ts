@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionsConfig } from './config';
 import {
   getActionsConfigurationUtilities,
@@ -20,7 +21,7 @@ const defaultActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyRejectUnauthorizedCertificates: true,
   rejectUnauthorized: true,
-  maxResponseContentLength: 1000000,
+  maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
 };
 
