@@ -73,25 +73,28 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
   return isMappable;
 }
 
-export function hasValidComposite(buckets: { [key: string]: any }) {
+/**
+ * Validates that composite definition only have sources that are only terms and date_histogram
+ * if composite is defined.
+ * @param buckets
+ */
+export function hasValidComposite(buckets: { [key: string]: object | undefined }) {
   if (
     isPopulatedObject(buckets, ['composite']) &&
     isPopulatedObject(buckets.composite, ['sources'])
   ) {
     const sources = buckets.composite.sources as Array<Record<string, object>>;
-    return sources
-      .map((source) => {
-        const sourceName = getFirstKeyInObject(source);
-        if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
-          const sourceTypes = Object.keys(source[sourceName]);
-          return (
-            sourceTypes.length === 1 &&
-            (sourceTypes[0] === 'date_histogram' || sourceTypes[0] === 'terms')
-          );
-        }
-        return false;
-      })
-      .every((isValidCompositeSource: boolean) => isValidCompositeSource === true);
+    return sources.some((source) => {
+      const sourceName = getFirstKeyInObject(source);
+      if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
+        const sourceTypes = Object.keys(source[sourceName]);
+        return (
+          sourceTypes.length === 1 &&
+          (sourceTypes[0] === 'date_histogram' || sourceTypes[0] === 'terms')
+        );
+      }
+      return false;
+    });
   }
   return true;
 }
@@ -194,7 +197,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
   const aggs = getDatafeedAggregations(job.datafeed_config);
   if (aggs !== undefined) {
     const aggBucketsName = getFirstKeyInObject(aggs);
-    if (aggBucketsName !== undefined) {
+    if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
       // if fieldName is a aggregated field under nested terms using bucket_script
 
       if (!hasValidComposite(aggs[aggBucketsName])) {
