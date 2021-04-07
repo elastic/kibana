@@ -9,16 +9,17 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { UsageCollectionPlugin } from './plugin';
 
-export { Collector } from './collector';
-export type {
+export {
   AllowedSchemaTypes,
   MakeSchemaFrom,
   SchemaField,
   CollectorOptions,
   UsageCollectorOptions,
+  Collector,
   CollectorFetchContext,
 } from './collector';
-export type { UsageCollectionSetup } from './plugin';
+
+export { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UsageCollectionPlugin(initializerContext);

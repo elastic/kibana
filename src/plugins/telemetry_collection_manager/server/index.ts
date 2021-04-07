@@ -16,7 +16,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new TelemetryCollectionManagerPlugin(initializerContext);
 }
 
-export type {
+export {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
   StatsCollectionConfig,
