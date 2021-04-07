@@ -22,6 +22,7 @@ import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
+  getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
   isCompressed,
@@ -196,6 +197,41 @@ export class ManifestManager {
     );
 
     return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of endpoint event filters (one per supported OS) based on the current state of the
+   * Event Filters list
+   * @protected
+   */
+  protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildEventFiltersForOs(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
+    );
   }
 
   /**

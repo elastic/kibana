@@ -142,6 +142,25 @@ export async function getEndpointTrustedAppsList(
   );
 }
 
+export async function getEndpointEventFiltersList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    'id-from-other-commit' // FIXME: update this
+  );
+}
+
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
