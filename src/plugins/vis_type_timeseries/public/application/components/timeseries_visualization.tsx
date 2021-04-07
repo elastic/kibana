@@ -98,15 +98,20 @@ function TimeseriesVisualization({
         const termArray = specId.split(':');
         const table = tables?.[termArray[0]];
         if (!table) return;
-
+        const layer = model.series.filter(({ id }) => id === termArray[0]);
+        let splitLabel: string | null = termArray.length > 1 ? termArray[1] : null;
+        if (layer.length && layer[0].split_mode === 'filters') {
+          const filter = layer[0]?.split_filters?.filter(({ id }) => id === termArray[1]);
+          splitLabel = filter?.[0].filter?.query;
+        }
         const index = table?.rows.findIndex((row) => {
           const condition =
             geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
           return termArray.length > 1
-            ? condition && row[X_ACCESSOR_INDEX + 2] === termArray[1]
+            ? condition && row[X_ACCESSOR_INDEX + 2].toString() === splitLabel
             : condition;
         });
-        if (!index) return;
+        if (index < 0) return;
 
         // Filter out the metric column
         const bucketCols = table?.columns.filter(
