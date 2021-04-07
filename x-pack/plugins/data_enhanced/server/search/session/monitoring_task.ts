@@ -6,10 +6,13 @@
  */
 
 import { Duration } from 'moment';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   RunContext,
+  TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
@@ -29,7 +32,8 @@ interface SearchSessionTaskDeps {
 function searchSessionRunner(
   core: CoreSetup<DataEnhancedStartDependencies>,
   { logger, config }: SearchSessionTaskDeps
-) {
+): TaskRunCreatorFunction {
+  const aborted$ = new Subject<void>();
   return ({ taskInstance }: RunContext) => {
     return {
       async run() {
@@ -48,11 +52,16 @@ function searchSessionRunner(
             logger,
           },
           sessionConfig
-        );
+        )
+          .pipe(takeUntil(aborted$))
+          .toPromise();
 
         return {
           state: {},
         };
+      },
+      cancel: async () => {
+        aborted$.next();
       },
     };
   };
@@ -66,6 +75,7 @@ export function registerSearchSessionsTask(
     [SEARCH_SESSIONS_TASK_TYPE]: {
       title: 'Search Sessions Monitor',
       createTaskRunner: searchSessionRunner(core, deps),
+      timeout: `${deps.config.search.sessions.trackingTimeout.asSeconds()}s`,
     },
   });
 }

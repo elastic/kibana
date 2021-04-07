@@ -13,8 +13,8 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import moment from 'moment';
-import { EMPTY, from } from 'rxjs';
-import { expand, concatMap } from 'rxjs/operators';
+import { EMPTY, from, Observable, of } from 'rxjs';
+import { catchError, concatMap, expand } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
@@ -146,101 +146,95 @@ function getAllSavedSearchSessions$(deps: CheckRunningSessionsDeps, config: Sear
   );
 }
 
-export async function checkRunningSessions(
+export function checkRunningSessions(
   deps: CheckRunningSessionsDeps,
   config: SearchSessionsConfig
-): Promise<void> {
+): Observable<void> {
   const { logger, client, savedObjectsClient } = deps;
-  try {
-    await getAllSavedSearchSessions$(deps, config)
-      .pipe(
-        concatMap(async (runningSearchSessionsResponse) => {
-          if (!runningSearchSessionsResponse.total) return;
+  return getAllSavedSearchSessions$(deps, config).pipe(
+    concatMap(async (runningSearchSessionsResponse) => {
+      if (!runningSearchSessionsResponse.total) return;
 
-          logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
+      logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
-          const updatedSessions = new Array<
-            SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
-          >();
+      const updatedSessions = new Array<
+        SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
+      >();
 
-          await Promise.all(
-            runningSearchSessionsResponse.saved_objects.map(async (session) => {
-              const updated = await updateSessionStatus(session, client, logger);
-              let deleted = false;
+      await Promise.all(
+        runningSearchSessionsResponse.saved_objects.map(async (session) => {
+          const updated = await updateSessionStatus(session, client, logger);
+          let deleted = false;
 
-              if (!session.attributes.persisted) {
-                if (isSessionStale(session, config, logger)) {
-                  // delete saved object to free up memory
-                  // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
-                  // Maybe we want to change state to deleted and cleanup later?
-                  logger.debug(`Deleting stale session | ${session.id}`);
+          if (!session.attributes.persisted) {
+            if (isSessionStale(session, config, logger)) {
+              // delete saved object to free up memory
+              // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
+              // Maybe we want to change state to deleted and cleanup later?
+              logger.debug(`Deleting stale session | ${session.id}`);
+              try {
+                await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id, {
+                  namespace: session.namespaces?.[0],
+                });
+                deleted = true;
+              } catch (e) {
+                logger.error(
+                  `Error while deleting stale search session ${session.id}: ${e.message}`
+                );
+              }
+
+              // Send a delete request for each async search to ES
+              Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
+                const searchInfo = session.attributes.idMapping[searchKey];
+                if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
                   try {
-                    await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id, {
-                      namespace: session.namespaces?.[0],
-                    });
-                    deleted = true;
+                    await client.asyncSearch.delete({ id: searchInfo.id });
                   } catch (e) {
                     logger.error(
-                      `Error while deleting stale search session ${session.id}: ${e.message}`
+                      `Error while deleting async_search ${searchInfo.id}: ${e.message}`
                     );
                   }
-
-                  // Send a delete request for each async search to ES
-                  Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
-                    const searchInfo = session.attributes.idMapping[searchKey];
-                    if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
-                      try {
-                        await client.asyncSearch.delete({ id: searchInfo.id });
-                      } catch (e) {
-                        logger.error(
-                          `Error while deleting async_search ${searchInfo.id}: ${e.message}`
-                        );
-                      }
-                    }
-                  });
                 }
-              }
+              });
+            }
+          }
 
-              if (updated && !deleted) {
-                updatedSessions.push(session);
-              }
-            })
-          );
-
-          // Do a bulk update
-          if (updatedSessions.length) {
-            // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
-            const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
-              updatedSessions.map((session) => ({
-                ...session,
-                namespace: session.namespaces?.[0],
-              }))
-            );
-
-            const success: Array<
-              SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>
-            > = [];
-            const fail: Array<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> = [];
-
-            updatedResponse.saved_objects.forEach((savedObjectResponse) => {
-              if ('error' in savedObjectResponse) {
-                fail.push(savedObjectResponse);
-                logger.error(
-                  `Error while updating search session ${savedObjectResponse?.id}: ${savedObjectResponse.error?.message}`
-                );
-              } else {
-                success.push(savedObjectResponse);
-              }
-            });
-
-            logger.debug(
-              `Updating search sessions: success: ${success.length}, fail: ${fail.length}`
-            );
+          if (updated && !deleted) {
+            updatedSessions.push(session);
           }
         })
-      )
-      .toPromise();
-  } catch (err) {
-    logger.error(err);
-  }
+      );
+
+      // Do a bulk update
+      if (updatedSessions.length) {
+        // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
+        const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
+          updatedSessions.map((session) => ({
+            ...session,
+            namespace: session.namespaces?.[0],
+          }))
+        );
+
+        const success: Array<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> = [];
+        const fail: Array<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> = [];
+
+        updatedResponse.saved_objects.forEach((savedObjectResponse) => {
+          if ('error' in savedObjectResponse) {
+            fail.push(savedObjectResponse);
+            logger.error(
+              `Error while updating search session ${savedObjectResponse?.id}: ${savedObjectResponse.error?.message}`
+            );
+          } else {
+            success.push(savedObjectResponse);
+          }
+        });
+
+        logger.debug(`Updating search sessions: success: ${success.length}, fail: ${fail.length}`);
+      }
+    }),
+    catchError((e) => {
+      logger.error(`Error while processing search sessions: ${e?.message}`);
+      return of(void 0);
+    })
+  );
 }

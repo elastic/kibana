@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { checkRunningSessions } from './check_running_sessions';
+import {
+  checkRunningSessions as checkRunningSessions$,
+  CheckRunningSessionsDeps,
+} from './check_running_sessions';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,
@@ -20,6 +23,11 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+const checkRunningSessions = (deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) =>
+  checkRunningSessions$(deps, config).toPromise();
 
 describe('getSearchStatus', () => {
   let mockClient: any;
@@ -32,6 +40,7 @@ describe('getSearchStatus', () => {
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
+    trackingTimeout: moment.duration(5, 'm'),
     management: {} as any,
   };
   const mockLogger: any = {
@@ -41,11 +50,13 @@ describe('getSearchStatus', () => {
   };
 
   const emptySO = {
-    persisted: false,
-    status: SearchSessionStatus.IN_PROGRESS,
-    created: moment().subtract(moment.duration(3, 'm')),
-    touched: moment().subtract(moment.duration(10, 's')),
-    idMapping: {},
+    attributes: {
+      persisted: false,
+      status: SearchSessionStatus.IN_PROGRESS,
+      created: moment().subtract(moment.duration(3, 'm')),
+      touched: moment().subtract(moment.duration(10, 's')),
+      idMapping: {},
+    },
   };
 
   beforeEach(() => {
@@ -169,6 +180,45 @@ describe('getSearchStatus', () => {
         config
       );
 
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+    });
+
+    test('fetching is abortable', async () => {
+      let i = 0;
+      const abort$ = new Subject();
+      savedObjectsClient.find.mockImplementation(() => {
+        return new Promise((resolve) => {
+          if (++i === 2) {
+            abort$.next();
+          }
+          resolve({
+            saved_objects: i <= 5 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [],
+            total: 25,
+            page: i,
+          } as any);
+        });
+      });
+
+      await checkRunningSessions$(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      )
+        .pipe(takeUntil(abort$))
+        .toPromise();
+
+      // wait a bit before final assertion
+      // to make sure that `find()` isn't called after the test is finished
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(void 0);
+        }, 1000);
+      });
+
+      // if not for `abort$` then this would be called 5 times!
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
     });
   });
