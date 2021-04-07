@@ -9,20 +9,19 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import { coreMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
+} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
+import { getEmptyValue } from '../../../common/empty_value';
 
-import { getEmptyValue } from '../../empty_value';
-
-import { ExceptionBuilderComponent } from './';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -47,21 +46,22 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -85,7 +85,7 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[
             {
@@ -95,18 +95,19 @@ describe('ExceptionBuilderComponent', () => {
               ],
             },
           ]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -129,21 +130,23 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
+
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -164,21 +167,22 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -220,21 +224,22 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -280,7 +285,7 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[
             {
@@ -290,18 +295,19 @@ describe('ExceptionBuilderComponent', () => {
               ],
             },
           ]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -334,21 +340,22 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -369,21 +376,22 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
-          httpService={mockKibanaHttpService}
+          allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
-          listType="detection"
-          listId="list_id"
-          listNamespaceType="single"
-          ruleName="Test rule"
+          httpService={mockKibanaHttpService}
           indexPatterns={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          isOrDisabled={false}
           isAndDisabled={false}
           isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listType="detection"
+          listNamespaceType="single"
+          ruleName="Test rule"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -407,21 +415,22 @@ describe('ExceptionBuilderComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <ExceptionBuilderComponent
-            httpService={mockKibanaHttpService}
+            allowLargeValueLists={true}
             autocompleteService={autocompleteStartMock}
             exceptionListItems={[]}
-            listType="detection"
-            listId="list_id"
-            listNamespaceType="single"
-            ruleName="Test rule"
+            httpService={mockKibanaHttpService}
             indexPatterns={{
+              fields,
               id: '1234',
               title: 'logstash-*',
-              fields,
             }}
-            isOrDisabled={false}
             isAndDisabled={false}
             isNestedDisabled={false}
+            isOrDisabled={false}
+            listId="list_id"
+            listType="detection"
+            listNamespaceType="single"
+            ruleName="Test rule"
             onChange={jest.fn()}
           />
         </ThemeProvider>
