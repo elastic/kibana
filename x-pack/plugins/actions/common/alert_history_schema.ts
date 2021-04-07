@@ -64,7 +64,7 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
     ...(tags && tags.length > 0 ? { tags } : {}),
     ...(context?.message ? { message: context.message } : {}),
     ...(!isEmpty(rule) ? { rule } : {}),
-    ...(!isEmpty(alert) ? { alert } : {}),
+    ...(!isEmpty(alert) ? { kibana: { alert } } : {}),
   };
 
   return !isEmpty(alertHistoryDoc) ? { ...alertHistoryDoc, event: { kind: 'alert' } } : null;

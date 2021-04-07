@@ -4,23 +4,27 @@
         "@timestamp": {
             "type": "date"
         },
-        "alert": {
+        "kibana": {
             "properties": {
-                "actionGroup": {
-                    "type": "keyword"
-                },
-                "actionGroupName": {
-                    "type": "keyword"
-                },
-                "actionSubgroup": {
-                    "type": "keyword"
-                },
-                "context": {
-                    "type": "object",
-                    "enabled": false
-                },
-                "id": {
-                    "type": "keyword"
+                "alert": {
+                    "properties": {
+                        "actionGroup": {
+                            "type": "keyword"
+                        },
+                        "actionGroupName": {
+                            "type": "keyword"
+                        },
+                        "actionSubgroup": {
+                            "type": "keyword"
+                        },
+                        "context": {
+                            "type": "object",
+                            "enabled": false
+                        },
+                        "id": {
+                            "type": "keyword"
+                        }
+                    }
                 }
             }
         },

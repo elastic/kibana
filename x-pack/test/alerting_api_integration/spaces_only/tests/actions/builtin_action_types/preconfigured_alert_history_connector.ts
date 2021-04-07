@@ -81,10 +81,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
         expect(indexedDoc.rule.params[ruleTypeId.replace('.', '__')]).to.eql(testRuleData.params);
         expect(indexedDoc.rule.space).to.eql(spaceId);
         expect(indexedDoc.rule.type).to.eql(ruleTypeId);
-        expect(indexedDoc.alert.id).to.eql(alertId);
-        expect(indexedDoc.alert.context[ruleTypeId.replace('.', '__')] != null).to.eql(true);
-        expect(indexedDoc.alert.actionGroup).to.eql('default');
-        expect(indexedDoc.alert.actionGroupName).to.eql('Default');
+        expect(indexedDoc.kibana.alert.id).to.eql(alertId);
+        expect(indexedDoc.kibana.alert.context[ruleTypeId.replace('.', '__')] != null).to.eql(true);
+        expect(indexedDoc.kibana.alert.actionGroup).to.eql('default');
+        expect(indexedDoc.kibana.alert.actionGroupName).to.eql('Default');
       });
     });
 
@@ -119,10 +119,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
         expect(indexedDoc.rule.params[ruleTypeId.replace('.', '__')]).to.eql(testRuleData.params);
         expect(indexedDoc.rule.space).to.eql(spaceId);
         expect(indexedDoc.rule.type).to.eql(ruleTypeId);
-        expect(indexedDoc.alert.id).to.eql(alertId);
-        expect(indexedDoc.alert.context[ruleTypeId.replace('.', '__')] != null).to.eql(true);
-        expect(indexedDoc.alert.actionGroup).to.eql('default');
-        expect(indexedDoc.alert.actionGroupName).to.eql('Default');
+        expect(indexedDoc.kibana.alert.id).to.eql(alertId);
+        expect(indexedDoc.kibana.alert.context[ruleTypeId.replace('.', '__')] != null).to.eql(true);
+        expect(indexedDoc.kibana.alert.actionGroup).to.eql('default');
+        expect(indexedDoc.kibana.alert.actionGroupName).to.eql('Default');
       });
     });
   });

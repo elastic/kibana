@@ -60,7 +60,7 @@ describe('buildAlertHistoryDocument', () => {
   it(`doesn't include context if context is empty`, () => {
     const alertHistoryDoc = buildAlertHistoryDocument(getVariables({ context: {} }));
     expect(alertHistoryDoc).not.toBeNull();
-    expect(alertHistoryDoc!.alert?.context).toBeFalsy();
+    expect(alertHistoryDoc!.kibana?.alert?.context).toBeFalsy();
   });
 
   it(`doesn't include params if params is empty`, () => {
@@ -88,16 +88,18 @@ describe('buildAlertHistoryDocument', () => {
   it('builds alert history document from variables', () => {
     expect(buildAlertHistoryDocument(getVariables())).toEqual({
       '@timestamp': '2021-01-01T00:00:00.000Z',
-      alert: {
-        actionGroup: 'action-group-id',
-        actionGroupName: 'Action Group',
-        context: {
-          'rule-type': {
-            contextVar1: 'contextValue1',
-            contextVar2: 'contextValue2',
+      kibana: {
+        alert: {
+          actionGroup: 'action-group-id',
+          actionGroupName: 'Action Group',
+          context: {
+            'rule-type': {
+              contextVar1: 'contextValue1',
+              contextVar2: 'contextValue2',
+            },
           },
+          id: 'alert-id',
         },
-        id: 'alert-id',
       },
       event: {
         kind: 'alert',
