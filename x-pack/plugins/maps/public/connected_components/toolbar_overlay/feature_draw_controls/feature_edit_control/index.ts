@@ -9,14 +9,15 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { FeatureEditControl } from './feature_edit_control';
-import { isDrawingFilter } from '../../../selectors/map_selectors';
-import { updateDrawFeatureState } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
-import { DRAW_TYPE } from '../../../../common';
+import { isDrawingFilter } from '../../../../selectors/map_selectors';
+import { updateDrawFeatureState } from '../../../../actions';
+import { MapStoreState } from '../../../../reducers/store';
+import { DRAW_TYPE } from '../../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isDrawingFilter: isDrawingFilter(state),
+    drawType: state.map.mapState.drawFeatureState,
   };
 }
 

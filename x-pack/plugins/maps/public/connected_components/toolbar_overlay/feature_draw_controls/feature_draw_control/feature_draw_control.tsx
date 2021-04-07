@@ -8,16 +8,16 @@
 import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../../common/constants';
+import { DRAW_TYPE } from '../../../../../common/constants';
 // @ts-expect-error
-import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { GeometryFilterForm } from '../../../../components/geometry_filter_form';
 
 export interface Props {
   cancelDraw: () => void;
   initiateDraw: (drawFeatureState: DRAW_TYPE) => void;
 }
 
-export function FeatureEditControl(props: Props) {
+export function FeatureDrawControl(props: Props) {
   return (
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
       <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
@@ -26,10 +26,10 @@ export function FeatureEditControl(props: Props) {
             className="mapToolbarOverlay__button"
             onClick={() => props.initiateDraw(DRAW_TYPE.LINE)}
             iconType="minus"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawLineLabel', {
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineLabel', {
               defaultMessage: 'Draw line',
             })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawLineTitle', {
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
               defaultMessage: 'Draw line',
             })}
           />
@@ -39,10 +39,10 @@ export function FeatureEditControl(props: Props) {
             className="mapToolbarOverlay__button"
             onClick={() => props.initiateDraw(DRAW_TYPE.POLYGON)}
             iconType="home"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawPolygonLabel', {
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
               defaultMessage: 'Draw polygon',
             })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawLineTitle', {
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
               defaultMessage: 'Draw polygon',
             })}
           />
@@ -52,10 +52,10 @@ export function FeatureEditControl(props: Props) {
             className="mapToolbarOverlay__button"
             onClick={() => props.initiateDraw(DRAW_TYPE.BOUNDS)}
             iconType="stop"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawBBoxLabel', {
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel', {
               defaultMessage: 'Draw bounding box',
             })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawBBoxTitle', {
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxTitle', {
               defaultMessage: 'Draw bounding box',
             })}
           />
@@ -65,10 +65,10 @@ export function FeatureEditControl(props: Props) {
             className="mapToolbarOverlay__button"
             onClick={() => props.initiateDraw(DRAW_TYPE.POINT)}
             iconType="dot"
-            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawPointLabel', {
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
               defaultMessage: 'Draw point',
             })}
-            title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawPointTitle', {
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointTitle', {
               defaultMessage: 'Draw point',
             })}
           />

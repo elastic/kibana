@@ -6,17 +6,18 @@
  */
 
 import _ from 'lodash';
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import {Map as MbMap} from 'mapbox-gl';
-import {Feature} from 'geojson';
-import {DRAW_TYPE} from '../../../../common/constants';
-import {DrawCircle} from './draw_circle';
-import {DrawTooltip} from './draw_tooltip';
+import { Map as MbMap } from 'mapbox-gl';
+import { Feature } from 'geojson';
+import { DRAW_TYPE } from '../../../../common/constants';
+import { DrawCircle } from './draw_circle';
+import { DrawTooltip } from './draw_tooltip';
 
+const SIMPLE_SELECT = 'simple_select';
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
 const DRAW_POLYGON = 'draw_polygon';
@@ -76,9 +77,16 @@ export class DrawControl extends Component<Props, {}> {
 
     this.props.mbMap.getCanvas().style.cursor = '';
     this.props.mbMap.off('draw.create', this.props.onDraw);
+    this.props.mbMap.off('draw.selectionchange', this._handleFeatureSelected);
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
   }
+
+  _handleFeatureSelected = () => {
+    if (this.props.drawType === DRAW_TYPE.TRASH) {
+      this._mbDrawControl.trash();
+    }
+  };
 
   _updateDrawControl() {
     if (!this.props.drawType) {
@@ -90,6 +98,7 @@ export class DrawControl extends Component<Props, {}> {
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.create', this.props.onDraw);
+      this.props.mbMap.on('draw.selectionchange', this._handleFeatureSelected);
     }
 
     const drawMode = this._mbDrawControl.getMode();
@@ -103,6 +112,8 @@ export class DrawControl extends Component<Props, {}> {
       this._mbDrawControl.changeMode(DRAW_POLYGON);
     } else if (drawMode !== DRAW_POINT && this.props.drawType === DRAW_TYPE.POINT) {
       this._mbDrawControl.changeMode(DRAW_POINT);
+    } else if (drawMode !== SIMPLE_SELECT && this.props.drawType === DRAW_TYPE.SIMPLE_SELECT) {
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
     } else if (
       drawMode !== this._mbDrawControl.modes.DRAW_POLYGON &&
       this.props.drawType === DRAW_TYPE.POLYGON

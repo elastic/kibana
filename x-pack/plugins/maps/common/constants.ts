@@ -158,6 +158,9 @@ export enum DRAW_TYPE {
   POLYGON = 'POLYGON',
   POINT = 'POINT',
   LINE = 'LINE',
+  DIRECT_SELECT = 'DIRECT_SELECT',
+  SIMPLE_SELECT = 'SIMPLE_SELECT',
+  TRASH = 'TRASH',
 }
 
 export const AGG_DELIMITER = '_of_';
