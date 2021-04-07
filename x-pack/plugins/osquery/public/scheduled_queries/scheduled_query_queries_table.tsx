@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 
-import { PackagePolicy, PackagePolicyInput, PackagePolicyInputStream } from '../../../fleet/common';
+import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
@@ -60,7 +60,7 @@ const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = 
 };
 
 interface ScheduledQueryQueriesTableProps {
-  data: PackagePolicy;
+  data: Pick<PackagePolicy, 'inputs'>;
   editMode?: boolean;
   onDeleteClick?: (item: PackagePolicyInputStream) => void;
   onEditClick?: (item: PackagePolicyInputStream) => void;

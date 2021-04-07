@@ -7,7 +7,7 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const useOsqueryPolicies = () => {
@@ -15,13 +15,12 @@ export const useOsqueryPolicies = () => {
 
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies } = useQuery(
     ['osqueryPolicies'],
-    async () => {
-      return await http.get('/api/fleet/package_policies', {
+    () =>
+      http.get(packagePolicyRouteService.getListPath(), {
         query: {
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         },
-      });
-    },
+      }),
     { select: (data) => data.items.map((p: { policy_id: string }) => p.policy_id) }
   );
 

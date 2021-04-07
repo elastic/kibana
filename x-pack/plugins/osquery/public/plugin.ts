@@ -25,6 +25,7 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
+import { epmRouteService } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
@@ -32,16 +33,18 @@ import {
 } from './fleet_integration';
 
 export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
-  http.fetch('/api/fleet/epm/packages', { query: { experimental: true } }).then(({ response }) => {
-    const installed = response.find(
-      // @ts-expect-error update types
-      (integration) =>
-        integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
-    );
-    updater$.next(() => ({
-      status: installed ? AppStatus.accessible : AppStatus.inaccessible,
-    }));
-  });
+  http
+    .fetch(epmRouteService.getListPath(), { query: { experimental: true } })
+    .then(({ response }) => {
+      const installed = response.find(
+        // @ts-expect-error update types
+        (integration) =>
+          integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
+      );
+      updater$.next(() => ({
+        status: installed ? AppStatus.accessible : AppStatus.inaccessible,
+      }));
+    });
 }
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {

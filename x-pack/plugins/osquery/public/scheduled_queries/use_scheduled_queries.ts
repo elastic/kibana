@@ -12,7 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 import {
   ListResult,
   PackagePolicy,
-  PACKAGE_POLICY_API_ROUTES,
+  packagePolicyRouteService,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -23,7 +23,7 @@ export const useScheduledQueries = () => {
   return useQuery<ListResult<PackagePolicy>>(
     ['scheduledQueries'],
     () =>
-      http.get(PACKAGE_POLICY_API_ROUTES.LIST_PATTERN, {
+      http.get(packagePolicyRouteService.getListPath(), {
         query: {
           page: 1,
           perPage: 10000,

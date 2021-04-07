@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 
+import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAllAgents {
@@ -17,16 +18,15 @@ interface UseAllAgents {
 export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents) => {
   // TODO: properly fetch these in an async manner
   const { http } = useKibana().services;
-  const { isLoading: agentsLoading, data: agentData } = useQuery(
+  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies],
-    async () => {
-      return await http.get('/api/fleet/agents', {
+    () =>
+      http.get(agentRouteService.getListPath(), {
         query: {
           kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
           perPage: 9000,
         },
-      });
-    },
+      }),
     {
       enabled: !osqueryPoliciesLoading,
     }

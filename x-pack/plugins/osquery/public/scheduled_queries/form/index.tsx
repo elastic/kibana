@@ -22,7 +22,7 @@ import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
 import { produce } from 'immer';
 
-import { PackagePolicy } from '../../../../fleet/common';
+import { PackagePolicy, packagePolicyRouteService } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
@@ -59,11 +59,11 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
     // error
   } = useMutation(
     (payload: Record<string, unknown>) =>
-      editMode
-        ? http.put(`/api/fleet/package_policies/${defaultValue?.id}`, {
+      editMode && defaultValue?.id
+        ? http.put(packagePolicyRouteService.getUpdatePath(defaultValue.id), {
             body: JSON.stringify(payload),
           })
-        : http.post('/api/fleet/package_policies', {
+        : http.post(packagePolicyRouteService.getCreatePath(), {
             body: JSON.stringify(payload),
           })
     // {

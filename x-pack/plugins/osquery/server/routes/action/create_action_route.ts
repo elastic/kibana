@@ -24,7 +24,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
       const selectedAgents = await parseAgentSelection(esClient, osqueryContext, agentSelection);
 

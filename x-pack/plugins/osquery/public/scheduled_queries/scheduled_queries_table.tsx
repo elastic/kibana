@@ -26,7 +26,9 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-const renderName = (_, item: PackagePolicy) => <ScheduledQueryName id={item.id} name={item.name} />;
+const renderName = (_: unknown, item: PackagePolicy) => (
+  <ScheduledQueryName id={item.id} name={item.name} />
+);
 
 const ScheduledQueriesTableComponent = () => {
   const {

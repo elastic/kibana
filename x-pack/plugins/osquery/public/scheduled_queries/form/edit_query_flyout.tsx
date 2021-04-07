@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { PackagePolicyInput } from '../../../../fleet/common';
+import { PackagePolicyInputStream } from '../../../../fleet/common';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
@@ -29,7 +29,7 @@ const FORM_ID = 'addQueryFlyoutForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface EditQueryFlyoutProps {
-  defaultValue: PackagePolicyInput;
+  defaultValue: PackagePolicyInputStream;
   onSave: (payload: FormData) => void;
   onClose: () => void;
 }

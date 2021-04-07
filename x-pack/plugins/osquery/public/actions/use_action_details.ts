@@ -35,7 +35,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseSch
   const { data } = useKibana().services;
 
   return useQuery(
-    ['scheduledQueries', {}],
+    ['actionDetails', { actionId, filterQuery }],
     async () => {
       const responseData = await data.search
         .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(

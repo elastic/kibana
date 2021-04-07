@@ -8,7 +8,11 @@
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { packagePolicyRouteService } from '../../../fleet/common';
+import {
+  GetOnePackagePolicyResponse,
+  PackagePolicy,
+  packagePolicyRouteService,
+} from '../../../fleet/common';
 
 interface UseScheduledQuery {
   scheduledQueryId: string;
@@ -18,7 +22,7 @@ interface UseScheduledQuery {
 export const useScheduledQuery = ({ scheduledQueryId, skip = false }: UseScheduledQuery) => {
   const { http } = useKibana().services;
 
-  return useQuery(
+  return useQuery<GetOnePackagePolicyResponse, unknown, PackagePolicy>(
     ['scheduledQuery', { scheduledQueryId }],
     () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryId)),
     {

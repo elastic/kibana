@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@ela
 import { useLocation } from 'react-router-dom';
 import { useQuery } from 'react-query';
 
-import { GetPackagesResponse, EPM_API_ROUTES } from '../../../fleet/common';
+import { GetPackagesResponse, epmRouteService } from '../../../fleet/common';
 
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
@@ -30,7 +30,7 @@ export const OsqueryAppComponent = () => {
   const { data: integrationUrl } = useQuery(
     'integrations',
     () =>
-      http.get(EPM_API_ROUTES.LIST_PATTERN, {
+      http.get(epmRouteService.getListPath(), {
         query: {
           experimental: true,
         },

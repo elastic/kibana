@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { PackagePolicy } from '../../../fleet/common';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../fleet/public';
 import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
 import { useKibana } from '../common/lib/kibana';
@@ -123,7 +124,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
         {policyType === 'scheduled_query' && newPolicy.inputs[0].streams.length ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ScheduledQueryQueriesTable data={newPolicy} />
+              <ScheduledQueryQueriesTable data={newPolicy as PackagePolicy} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
