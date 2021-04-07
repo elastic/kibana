@@ -1,0 +1,63 @@
+{
+  "id": "network",
+  "title": "Network",
+  "description": "Detect anomalous network activity in your ECS-compatable network logs.",
+  "type": "network data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "high-count-by-destination-country",
+      "file": "high_count_by_destination_country.json"
+    },
+    {
+      "id": "high-count-network-denies",
+      "file": "high_count_network_denies.json"
+    },
+    {
+      "id": "high-count-network-events",
+      "file": "high_count_network_events.json"
+    },
+    {
+      "id": "rare-destination-country",
+      "file": "rare_destination_country.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-high-count-by-destination-country",
+      "file": "datafeed_high_count_by_destination_country.json",
+      "job_id": "high-count-by-destination-country"
+    },
+    {
+      "id": "datafeed-high_count_network_denies",
+      "file": "datafeed_high_count_network_denies.json",
+      "job_id": "high-count-network-denies"
+    },
+    {
+      "id": "datafeed-high_count_network_events",
+      "file": "datafeed_high_count_network_events.json",
+      "job_id": "high-count-network-events"
+    },
+    {
+      "id": "datafeed-rare_destination_country",
+      "file": "datafeed_rare_destination_country.json",
+      "job_id": "rare-destination-country"
+    }
+  ]
+}
