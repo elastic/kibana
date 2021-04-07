@@ -115,6 +115,7 @@ export function registerRoutes({
 
           return response.ok({ body });
         } catch (error) {
+          logger.error(error);
           const opts = {
             statusCode: 500,
             body: {
