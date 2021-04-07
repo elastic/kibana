@@ -30,7 +30,7 @@ export const request = async <T = unknown>({
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, url);
 
   return await axios(url, {
     ...rest,
