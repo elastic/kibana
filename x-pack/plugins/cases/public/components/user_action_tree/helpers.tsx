@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
 
-// TODO: Timeline integration
 import {
   CaseFullExternalService,
   ActionConnector,

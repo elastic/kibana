@@ -10,23 +10,13 @@ import { EuiPanel } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
-
-// TO DO: Cases RAC UI, reimplement this shiz
-// import { useInsertTimeline } from '../use_insert_timeline';
-// import { fieldName as descriptionFieldName } from './description';
 import { useKibana } from '../../../common/lib/kibana';
-
-// TO DO: Cases RAC UI, reimplement this shiz
-// const InsertTimeline = () => {
-//   const { setFieldValue, getFormData } = useFormContext();
-//   const formData = getFormData();
-//   const onTimelineAttached = useCallback(
-//     (newValue: string) => setFieldValue(descriptionFieldName, newValue),
-//     [setFieldValue]
-//   );
-//   useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
-//   return null;
-// };
+import {
+  parsingPlugins,
+  processingPlugins,
+  uiPlugins,
+} from '../../../common/components/markdown_editor/plugins';
+import { useInsertTimeline } from '../use_insert_timeline';
 
 export const Create = React.memo(() => {
   const { cases } = useKibana().services;
@@ -47,6 +37,16 @@ export const Create = React.memo(() => {
       {cases.getCreateCase({
         onCancel: handleSetIsCancel,
         onSuccess,
+        timelineIntegration: {
+          editor_plugins: {
+            parsingPlugins,
+            processingPlugins,
+            uiPlugins,
+          },
+          hooks: {
+            useInsertTimeline,
+          },
+        },
       })}
     </EuiPanel>
   );

@@ -16,6 +16,9 @@ import { FormContext } from './form_context';
 import { SubmitCaseButton } from './submit_button';
 import { Case } from '../../containers/types';
 import { CaseType } from '../../../common/api/cases';
+import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
+import { fieldName as descriptionFieldName } from './description';
+import { InsertTimeline } from '../insert_timeline';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -31,6 +34,7 @@ export interface CreateCaseProps {
   hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  timelineIntegration?: CasesTimelineIntegration;
   withSteps?: boolean;
 }
 
@@ -40,33 +44,45 @@ export const CreateCase = ({
   hideConnectorServiceNowSir,
   onCancel,
   onSuccess,
+  timelineIntegration,
   withSteps,
 }: CreateCaseProps) => (
-  <FormContext
-    afterCaseCreated={afterCaseCreated}
-    caseType={caseType}
-    hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-    onSuccess={onSuccess}
-  >
-    <CreateCaseForm hideConnectorServiceNowSir={hideConnectorServiceNowSir} withSteps={withSteps} />
-    <Container>
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="create-case-cancel"
-            iconType="cross"
-            onClick={onCancel}
-            size="s"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SubmitCaseButton />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Container>
-  </FormContext>
+  <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+    <FormContext
+      afterCaseCreated={afterCaseCreated}
+      caseType={caseType}
+      hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+      onSuccess={onSuccess}
+    >
+      <CreateCaseForm
+        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+        withSteps={withSteps}
+      />
+      <Container>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexEnd"
+          gutterSize="xs"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="create-case-cancel"
+              iconType="cross"
+              onClick={onCancel}
+              size="s"
+            >
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SubmitCaseButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Container>
+      <InsertTimeline fieldName={descriptionFieldName} />
+    </FormContext>
+  </CasesTimelineIntegrationProvider>
 );
 
 // eslint-disable-next-line import/no-default-export

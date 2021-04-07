@@ -33,6 +33,12 @@ import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { buildAlertsQuery, formatAlertToEcsSignal, useFetchAlertData } from './helpers';
 import { SEND_ALERT_TO_TIMELINE } from './translations';
+import {
+  parsingPlugins,
+  processingPlugins,
+  uiPlugins,
+} from '../../../common/components/markdown_editor/plugins';
+import { useInsertTimeline } from '../use_insert_timeline';
 
 interface Props {
   caseId: string;
@@ -198,10 +204,22 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     onComponentInitialized,
     onConfigureCasesNavClick,
     onRuleDetailsClick: onDetectionsRuleDetailsClick,
-    renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
-    renderTimelineDetailsPanel: TimelineDetailsPanel,
     showAlertDetails,
     subCaseId,
+    timelineIntegration: {
+      editor_plugins: {
+        parsingPlugins,
+        processingPlugins,
+        uiPlugins,
+      },
+      hooks: {
+        useInsertTimeline,
+      },
+      ui: {
+        renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
+        renderTimelineDetailsPanel: TimelineDetailsPanel,
+      },
+    },
     useFetchAlertData,
     userCanCrud,
   });

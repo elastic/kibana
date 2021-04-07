@@ -19,18 +19,27 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
+import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { PluggableList } from 'unified';
 
 interface MarkdownEditorProps {
-  onChange: (content: string) => void;
-  value: string;
   ariaLabel: string;
-  editorId?: string;
   dataTestSubj?: string;
+  editorId?: string;
   height?: number;
+  onChange: (content: string) => void;
+  parsingPlugins?: PluggableList;
+  processingPlugins?: PluggableList;
+  uiPlugins?: Array<EuiMarkdownEditorUiPlugin<any>> | undefined;
+  value: string;
 }
 
 // create plugin stuff here
-export const { uiPlugins, parsingPlugins, processingPlugins } = {
+export const {
+  uiPlugins: defaultUiPlugins,
+  parsingPlugins: defaultParsingPlugins,
+  processingPlugins: defaultProcessingPlugins,
+} = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
   parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
   processingPlugins: getDefaultEuiMarkdownProcessingPlugins() as [
@@ -46,12 +55,15 @@ export const { uiPlugins, parsingPlugins, processingPlugins } = {
 };
 
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
-  onChange,
-  value,
   ariaLabel,
-  editorId,
   dataTestSubj,
+  editorId,
   height,
+  onChange,
+  parsingPlugins,
+  processingPlugins,
+  uiPlugins,
+  value,
 }) => {
   const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
   const onParse = useCallback((err, { messages }) => {
@@ -69,9 +81,9 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
       editorId={editorId}
       onChange={onChange}
       value={value}
-      uiPlugins={uiPlugins}
-      parsingPluginList={parsingPlugins}
-      processingPluginList={processingPlugins}
+      uiPlugins={uiPlugins ?? defaultUiPlugins}
+      parsingPluginList={parsingPlugins ?? defaultParsingPlugins}
+      processingPluginList={processingPlugins ?? defaultProcessingPlugins}
       onParse={onParse}
       errors={markdownErrorMessages}
       data-test-subj={dataTestSubj}

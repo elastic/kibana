@@ -39,6 +39,16 @@ cases: CasesUiStart;
   cases.getCreateCase({
     onCancel: handleSetIsCancel,
     onSuccess,
+    timelineIntegration?: {
+      plugins: {
+        parsingPlugins,
+        processingPlugins,
+        uiPlugins,
+      },
+      hooks: {
+        useInsertTimeline,
+      },
+    },
   })
 ```
 ##### Methods:
@@ -76,10 +86,15 @@ Arguments:
 |onComponentInitialized?|`() => void;` callback when component has initialized
 |onConfigureCasesNavClick|`(ev: React.MouseEvent) => void;` callback for configure case nav click
 |onRuleDetailsClick|`(ruleId: string, null, undefined) => void;` callback for rule details nav click
-|renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
-|renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
 |showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
 |subCaseId?|: `string;` subcase id
+|timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
+|timelineIntegration?.editor_plugins.parsingPlugins|: `PluggableList;`
+|timelineIntegration?.editor_plugins.processingPlugins|: `PluggableList`
+|timelineIntegration?.editor_plugins.uiPlugins?|: `Array<EuiMarkdownEditorUiPlugin<any>>`
+|timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
+|timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
+|timelineIntegration?.ui?renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
 |useFetchAlertData|: `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
 |userCanCrud|: `boolean;` user permissions to crud
 
@@ -94,6 +109,11 @@ Arguments:
 |afterCaseCreated?|`(theCase: Case) => Promise<void>;` callback passing newly created case before pushCaseToExternalService is called
 |onCancel|`() => void;` callback when create case is canceled
 |onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
+|timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
+|timelineIntegration?.editor_plugins.parsingPlugins|: `PluggableList;`
+|timelineIntegration?.editor_plugins.processingPlugins|: `PluggableList`
+|timelineIntegration?.editor_plugins.uiPlugins?|: `Array<EuiMarkdownEditorUiPlugin<any>>`
+|timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
 
 UI component:
  ![Create Component][create-img] 
