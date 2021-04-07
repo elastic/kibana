@@ -11,7 +11,7 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import { Logger, SavedObjectsErrorHelpers } from '../../../../../../../../../src/core/server';
+import { Logger } from 'kibana/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 
@@ -35,7 +35,7 @@ export async function retryIfConflicts<T>(
   try {
     return await operation();
   } catch (err) {
-    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+    if (!isConflictError(err)) {
       throw err;
     }
 
@@ -54,4 +54,8 @@ export async function retryIfConflicts<T>(
 
 async function waitBeforeNextRetry(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
+}
+
+function isConflictError(error: any): boolean {
+  return error.isBoom === true && error.output.statusCode === 409;
 }
