@@ -222,7 +222,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
               );
 
               const actualColorStats = await canvasElement.getColorStats(
-                `[data-test-subj="mlDataGridChart-${expected.id}-histogram"] .echCanvasRenderer`,
+                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats
               );
 
