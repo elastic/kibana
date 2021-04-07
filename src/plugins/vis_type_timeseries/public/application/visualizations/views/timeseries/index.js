@@ -16,7 +16,7 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
@@ -163,7 +163,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}
