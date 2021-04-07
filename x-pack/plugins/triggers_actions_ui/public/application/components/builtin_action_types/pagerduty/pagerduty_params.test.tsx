@@ -50,8 +50,28 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
   });
 
-  test('params select fields dont auto set values ', () => {
+  test('params select fields do not auto set values eventActionSelect', () => {
     const actionParams = {};
+
+    const wrapper = mountWithIntl(
+      <PagerDutyParamsFields
+        actionParams={actionParams}
+        errors={{ summary: [], timestamp: [], dedupKey: [] }}
+        editAction={() => {}}
+        index={0}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
+    ).toStrictEqual(undefined);
+  });
+
+  test('params select fields do not auto set values severitySelect', () => {
+    const actionParams = {
+      eventAction: EventActionOptions.TRIGGER,
+      dedupKey: 'test',
+    };
 
     const wrapper = mountWithIntl(
       <PagerDutyParamsFields
@@ -65,10 +85,6 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
       undefined
     );
-    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
-    ).toStrictEqual(undefined);
   });
 
   test('only eventActionSelect is available as a payload params for PagerDuty Resolve event', () => {
@@ -87,9 +103,12 @@ describe('PagerDutyParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
-      'resolve'
+      'test'
     );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
+    ).toStrictEqual('resolve');
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeFalsy();
     expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeFalsy();
