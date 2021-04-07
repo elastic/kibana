@@ -406,6 +406,8 @@ describe('create()', () => {
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
     });
 
     const localActionTypeRegistryParams = {
