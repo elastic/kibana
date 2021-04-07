@@ -41,14 +41,13 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 80 },
+            // some marker colors of the continuous color scale
+            { color: '#61AFA3', percentage: 2 },
+            { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { key: '#6A717D', value: 1 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
-            // because a continuous color scale is used for the scatterplot circles,
-            // none of the generated colors is above the 1% threshold.
+            { color: '#6A717D', percentage: 10 },
+            { color: '#F5F7FA', percentage: 10 },
+            { color: '#D3DAE6', percentage: 3 },
           ],
           row: {
             type: 'regression',
@@ -72,6 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -100,9 +103,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -224,10 +236,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {
