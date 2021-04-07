@@ -26,6 +26,7 @@ import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionTooltip, LogRetentionOptions } from '../log_retention';
 
+import { ApiLogFlyout } from './api_log';
 import { ApiLogsTable, NewApiEventsPrompt } from './components';
 import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
@@ -75,6 +76,7 @@ export const ApiLogs: React.FC<Props> = ({ engineBreadcrumb }) => {
           <EuiSpacer size="m" />
 
           <ApiLogsTable hasPagination />
+          <ApiLogFlyout />
         </EuiPageContentBody>
       </EuiPageContent>
     </>
