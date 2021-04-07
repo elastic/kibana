@@ -22,7 +22,7 @@ import { TestProviders } from '../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
@@ -143,7 +143,6 @@ describe('CaseView ', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
 
@@ -241,17 +240,15 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="case-view-status-dropdown-closed"]')
+      .first()
+      .simulate('click');
 
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
-      wrapper.update();
-      wrapper
-        .find('button[data-test-subj="case-view-status-dropdown-closed"]')
-        .first()
-        .simulate('click');
-
-      wrapper.update();
       const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateCaseProperty).toHaveBeenCalledTimes(1);
       expect(updateObject.updateKey).toEqual('status');
       expect(updateObject.updateValue).toEqual('closed');
     });
@@ -616,36 +613,29 @@ describe('CaseView ', () => {
       </TestProviders>
     );
 
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
-    });
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
 
     await waitFor(() => {
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-      wrapper.update();
     });
 
-    act(() => {
-      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-    });
+    wrapper.find(`button[data-test-subj="edit-connectors-submit"]`).first().simulate('click');
 
     await waitFor(() => {
       wrapper.update();
-    });
-
-    const updateObject = updateCaseProperty.mock.calls[0][0];
-    expect(updateObject.updateKey).toEqual('connector');
-    expect(updateObject.updateValue).toEqual({
-      id: 'resilient-2',
-      name: 'My Connector 2',
-      type: ConnectorTypes.resilient,
-      fields: {
-        incidentTypes: null,
-        severityCode: null,
-      },
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateCaseProperty).toHaveBeenCalledTimes(1);
+      expect(updateObject.updateKey).toEqual('connector');
+      expect(updateObject.updateValue).toEqual({
+        id: 'resilient-2',
+        name: 'My Connector 2',
+        type: ConnectorTypes.resilient,
+        fields: {
+          incidentTypes: null,
+          severityCode: null,
+        },
+      });
     });
   });
 

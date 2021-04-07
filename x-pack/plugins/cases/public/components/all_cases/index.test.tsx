@@ -308,13 +308,15 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper
+      .find(
+        '[data-test-subj="sub-cases-table-my-case-with-subcases"] [data-test-subj="euiCollapsedItemActionsButton"]'
+      )
+      .last()
+      .simulate('click');
+
     await waitFor(() => {
-      wrapper
-        .find(
-          '[data-test-subj="sub-cases-table-my-case-with-subcases"] [data-test-subj="euiCollapsedItemActionsButton"]'
-        )
-        .last()
-        .simulate('click');
       expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toEqual(true);
       expect(
         wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
@@ -355,8 +357,8 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
       expect(setQueryParams).toBeCalledWith({
         page: 1,
         perPage: 5,
@@ -372,9 +374,10 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -406,9 +409,11 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -426,9 +431,11 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -462,17 +469,20 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().simulate('click');
+
+    wrapper
+      .find(
+        '[data-test-subj="confirm-delete-case-modal"] [data-test-subj="confirmModalConfirmButton"]'
+      )
+      .last()
+      .simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().simulate('click');
       expect(handleToggleModal).toBeCalled();
 
-      wrapper
-        .find(
-          '[data-test-subj="confirm-delete-case-modal"] [data-test-subj="confirmModalConfirmButton"]'
-        )
-        .last()
-        .simulate('click');
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
         ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
         {
@@ -496,8 +506,10 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').exists()).toEqual(
         false
@@ -537,8 +549,8 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
       expect(
         wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
@@ -564,9 +576,10 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.closed);
     });
   });
@@ -586,9 +599,9 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.open);
     });
   });
@@ -605,9 +618,9 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(
         useGetCasesMockState.data.cases,
         CaseStatuses['in-progress']
@@ -708,8 +721,8 @@ describe('AllCases', () => {
         />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalled();
     });
   });
@@ -735,8 +748,8 @@ describe('AllCases', () => {
         />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
       expect(onCreateCaseNavClick).toHaveBeenCalled();
     });
   });
@@ -752,8 +765,8 @@ describe('AllCases', () => {
         />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalledWith({
         closedAt: null,
         closedBy: null,
@@ -807,8 +820,8 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).not.toHaveBeenCalled();
     });
   });
@@ -819,10 +832,9 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
         sortField: 'closedAt',
       });
@@ -835,10 +847,9 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
         sortField: 'updatedAt',
       });
@@ -851,10 +862,9 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
         sortField: 'createdAt',
       });
@@ -867,9 +877,8 @@ describe('AllCases', () => {
         <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
       expect(wrapper.find('button[data-test-subj="case-status-filter-open"]').text()).toBe(
         'Open (20)'
       );
