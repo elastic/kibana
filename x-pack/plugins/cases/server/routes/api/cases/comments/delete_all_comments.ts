@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import {
-  CASE_COMMENTS_URL,
-  ENABLE_CASE_CONNECTOR,
-  SAVED_OBJECT_TYPES,
-} from '../../../../../common/constants';
-import { AssociationType } from '../../../../../common/api';
+import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
-export function initDeleteAllCommentsApi({
-  attachmentService,
-  caseService,
-  router,
-  userActionService,
-  logger,
-}: RouteDeps) {
+export function initDeleteAllCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.delete(
     {
       path: CASE_COMMENTS_URL,
@@ -40,49 +27,19 @@ export function initDeleteAllCommentsApi({
     },
     async (context, request, response) => {
       try {
-        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
-          throw Boom.badRequest(
-            'The `subCaseId` is not supported when the case connector feature is disabled'
-          );
-        }
-
         const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request });
-        const deleteDate = new Date().toISOString();
 
-        const subCaseId = request.query?.subCaseId;
-        const id = subCaseId ?? request.params.case_id;
-        const comments = await caseService.getCommentsByAssociation({
+        const user = caseService.getUser({ request });
+
+        const client = await context.cases.getCasesClient();
+
+        await client.attachments.deleteAll({
+          caseID: request.params.case_id,
+          subCaseID: request.query?.subCaseId,
           soClient,
-          id,
-          associationType: subCaseId ? AssociationType.subCase : AssociationType.case,
-        });
-
-        await Promise.all(
-          comments.saved_objects.map((comment) =>
-            attachmentService.delete({
-              soClient,
-              attachmentId: comment.id,
-            })
-          )
-        );
-
-        await userActionService.bulkCreate({
-          soClient,
-          actions: comments.saved_objects.map((comment) =>
-            buildCommentUserActionItem({
-              action: 'delete',
-              actionAt: deleteDate,
-              actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
-              subCaseId,
-              commentId: comment.id,
-              fields: ['comment'],
-            })
-          ),
+          user,
         });
 
         return response.noContent();

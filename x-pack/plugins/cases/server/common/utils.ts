@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
 import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
@@ -14,6 +15,7 @@ import {
   CommentType,
   User,
 } from '../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { OperationDetails } from '../authorization';
 import { UpdateAlertRequest } from '../client/alerts/client';
 import { getAlertInfoFromComments } from '../routes/api/utils';
@@ -144,4 +146,15 @@ export function createAuditMsg({
       },
     }),
   };
+}
+
+/**
+ * If subCaseID is defined and the case connector feature is disabled this throws an error.
+ */
+export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) {
+  if (!ENABLE_CASE_CONNECTOR && subCaseID !== undefined) {
+    throw Boom.badRequest(
+      'The sub case parameters are not supported when the case connector feature is disabled'
+    );
+  }
 }
