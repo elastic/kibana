@@ -406,8 +406,6 @@ export type {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export type { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
-
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
