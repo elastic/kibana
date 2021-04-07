@@ -19,7 +19,6 @@ import {
   EuiFormLabel,
   EuiFormFieldset,
   EuiSpacer,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 const StyledFieldset = styled(EuiFormFieldset)`
@@ -55,7 +54,6 @@ interface Props {
 
 export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange }: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
-  const htmlId = htmlIdGenerator();
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
