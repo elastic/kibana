@@ -19,15 +19,14 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       endpoint: TEndpoint;
-    } & APIClientRequestParamsOf<TEndpoint>
+    } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
   ): Promise<{
     status: number;
     body: APIReturnType<TEndpoint>;
   }> => {
     const { endpoint } = options;
 
-    // @ts-expect-error
-    const params = 'params' in options ? options.params : {};
+    const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname } = parseEndpoint(endpoint, params?.path);
     const url = format({ pathname, query: params?.query });

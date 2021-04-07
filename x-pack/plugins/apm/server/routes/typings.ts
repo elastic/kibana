@@ -20,6 +20,14 @@ export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
 }
 
+export type InspectResponse = Array<{
+  response: any;
+  duration: number;
+  requestType: string;
+  requestParams: Record<string, unknown>;
+  esError: Error;
+}>;
+
 export interface APMRouteCreateOptions {
   options: {
     tags: Array<

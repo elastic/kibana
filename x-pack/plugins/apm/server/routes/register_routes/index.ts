@@ -19,7 +19,7 @@ import {
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources } from '../typings';
+import { APMRouteHandlerResources, InspectResponse } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const inspectRt = t.exact(
@@ -30,13 +30,7 @@ const inspectRt = t.exact(
 
 export const inspectableEsQueriesMap = new WeakMap<
   KibanaRequest,
-  Array<{
-    response: any;
-    duration: number;
-    requestType: string;
-    requestParams: Record<string, unknown>;
-    esError: Error;
-  }>
+  InspectResponse
 >();
 
 export function registerRoutes({
@@ -60,11 +54,6 @@ export function registerRoutes({
     const { params, endpoint, options, handler } = route;
 
     const { method, pathname } = parseEndpoint(endpoint);
-
-    console.log({
-      method,
-      pathname,
-    });
 
     (router[method] as RouteRegistrar<
       typeof method,

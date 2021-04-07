@@ -123,5 +123,6 @@ export const plugin = (initContext: PluginInitializerContext) =>
 export { APMPlugin } from './plugin';
 export { APMPluginSetup } from './types';
 export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+export { InspectResponse } from './routes/typings';
 
 export type { ProcessorEvent } from '../common/processor_event';

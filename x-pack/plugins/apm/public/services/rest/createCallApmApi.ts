@@ -15,8 +15,11 @@ import type {
 import { formatRequest } from '@kbn/server-route-repository/target/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { APMServerRouteRepository } from '../../../server';
+import type {
+  APMServerRouteRepository,
+  InspectResponse,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server';
 
 export type APMClientOptions = Omit<
   FetchOptions,
@@ -37,7 +40,9 @@ export type AutoAbortedAPMClient = RouteRepositoryClient<
 
 export type APIReturnType<
   TEndpoint extends EndpointOf<APMServerRouteRepository>
-> = ReturnOf<APMServerRouteRepository, TEndpoint>;
+> = ReturnOf<APMServerRouteRepository, TEndpoint> & {
+  _inspect?: InspectResponse;
+};
 
 export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
 
