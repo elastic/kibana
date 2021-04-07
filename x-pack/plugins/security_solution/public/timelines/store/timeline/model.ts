@@ -22,6 +22,7 @@ import type {
   RowRendererId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';

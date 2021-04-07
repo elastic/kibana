@@ -12,19 +12,20 @@ import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import {
+  AllTimelinesResponse,
+  ExportTimelineNotFoundError,
+  PageInfoTimeline,
+  ResponseTimelines,
+  ResponseFavoriteTimeline,
+  ResponseTimeline,
   SavedTimeline,
+  SortTimeline,
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
-  ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
-  AllTimelinesResponse,
-  ResponseTimelines,
-  PageInfoTimeline,
   TimelineType,
   TimelineStatus,
   TimelineResult,
-  ResponseFavoriteTimeline,
-  ResponseTimeline,
 } from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
