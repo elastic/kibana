@@ -13,9 +13,13 @@ import {
   EQL_SEARCH_STRATEGY,
 } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import type { SavedObjectsClientContract } from 'kibana/server';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import moment from 'moment';
+import {
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsDeleteOptions,
+  SavedObjectsClientContract,
+} from '../../../../../../src/core/server';
 
 describe('getSearchStatus', () => {
   let mockClient: any;
@@ -263,6 +267,45 @@ describe('getSearchStatus', () => {
       expect(savedObjectsClient.delete).not.toBeCalled();
     });
 
+    test('deletes in space', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '123',
+            namespaces: ['awesome'],
+            attributes: {
+              persisted: false,
+              status: SearchSessionStatus.IN_PROGRESS,
+              created: moment().subtract(moment.duration(3, 'm')),
+              touched: moment().subtract(moment.duration(2, 'm')),
+              idMapping: {
+                'map-key': {
+                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                  id: 'async-id',
+                },
+              },
+            },
+          },
+        ],
+        total: 1,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.delete).toBeCalled();
+
+      const [, id, opts] = savedObjectsClient.delete.mock.calls[0];
+      expect(id).toBe('123');
+      expect((opts as SavedObjectsDeleteOptions).namespace).toBe('awesome');
+    });
+
     test('deletes a non persisted, abandoned session', async () => {
       savedObjectsClient.find.mockResolvedValue({
         saved_objects: [
@@ -479,6 +522,50 @@ describe('getSearchStatus', () => {
       expect(savedObjectsClient.delete).not.toBeCalled();
     });
 
+    test('updates in space', async () => {
+      savedObjectsClient.bulkUpdate = jest.fn();
+      const so = {
+        namespaces: ['awesome'],
+        attributes: {
+          status: SearchSessionStatus.IN_PROGRESS,
+          touched: '123',
+          idMapping: {
+            'search-hash': {
+              id: 'search-id',
+              strategy: 'cool',
+              status: SearchStatus.IN_PROGRESS,
+            },
+          },
+        },
+      };
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [so],
+        total: 1,
+      } as any);
+
+      mockClient.asyncSearch.status.mockResolvedValue({
+        body: {
+          is_partial: false,
+          is_running: false,
+          completion_status: 200,
+        },
+      });
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
+      const updatedAttributes = updateInput[0] as SavedObjectsBulkUpdateObject;
+      expect(updatedAttributes.namespace).toBe('awesome');
+    });
+
     test('updates to complete if the search is done', async () => {
       savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
@@ -563,7 +650,6 @@ describe('getSearchStatus', () => {
         config
       );
       const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
-
       const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.ERROR);
       expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.ERROR);

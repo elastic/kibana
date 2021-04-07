@@ -73,7 +73,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, state.targetIndex, state.outdatedDocumentsQuery),
+      Actions.searchForOutdatedDocuments(client, {
+        batchSize: state.batchSize,
+        targetIndex: state.targetIndex,
+        outdatedDocumentsQuery: state.outdatedDocumentsQuery,
+      }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
