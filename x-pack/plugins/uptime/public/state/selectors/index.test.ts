@@ -31,15 +31,6 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
-    snapshot: {
-      count: {
-        up: 2,
-        down: 0,
-        total: 2,
-      },
-      errors: [],
-      loading: false,
-    },
     ui: {
       alertFlyoutVisible: false,
       basePath: 'yyz',
