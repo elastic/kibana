@@ -337,13 +337,13 @@ export class VisualizeEmbeddable
             };
           }
           // do not trigger the filter click event if the filter bar is not visible
-          if (
-            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
-            !this.input.id &&
-            !this.vis.type.options.showFilterBar
-          ) {
-            return;
-          }
+          // if (
+          //   triggerId === VIS_EVENT_TO_TRIGGER.filter &&
+          //   !this.input.id &&
+          //   !this.vis.type.options.showFilterBar
+          // ) {
+          //   return;
+          // }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }

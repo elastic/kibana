@@ -92,22 +92,32 @@ function TimeseriesVisualization({
         ? await convertSeriesToDataTable(model, series, indexPattern)
         : null;
 
-      // should find the table by the click event
-      const table = tables?.[model.series[0].id];
-
       points.forEach((point) => {
         const [geometry] = point;
-        // console.dir(point);
+        const { specId } = point[1];
+        const termArray = specId.split(':');
+        const table = tables?.[termArray[0]];
+        if (!table) return;
+
         const index = table?.rows.findIndex((row) => {
-          return geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
+          const condition =
+            geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
+          return termArray.length > 1
+            ? condition && row[X_ACCESSOR_INDEX + 2] === termArray[1]
+            : condition;
         });
         if (!index) return;
 
-        const newData = table?.columns.map(({ id }) => ({
+        // Filter out the metric column
+        const bucketCols = table?.columns.filter(
+          (col) => col?.meta?.sourceParams?.schema === 'group'
+        );
+
+        const newData = bucketCols?.map(({ id }) => ({
           table,
           column: parseInt(id, 10),
           row: index,
-          value: table.rows?.[index]?.[id] ?? null,
+          value: table?.rows?.[index]?.[id] ?? null,
         }));
         if (newData?.length) {
           data.push(...newData);

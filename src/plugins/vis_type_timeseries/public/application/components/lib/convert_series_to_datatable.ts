@@ -26,6 +26,7 @@ interface TSVBColumns {
   id: number;
   name: string;
   isSplit: boolean;
+  isMetric: boolean;
 }
 
 export const addMetaToColumns = (
@@ -44,16 +45,11 @@ export const addMetaToColumns = (
         field: column.name,
         index: indexPattern.title,
         source: 'esaggs',
-        params: {
-          id: column.isSplit ? 'terms' : type,
-          params: {
-            id: type,
-          },
-        },
         sourceParams: {
           enabled: true,
           indexPatternId: indexPattern?.id,
           type: type === 'date' ? 'date_histogram' : column.isSplit ? 'terms' : metricsType,
+          schema: column.isMetric ? 'metric' : 'group',
           params: {
             field: column.name,
           },
@@ -87,15 +83,20 @@ export const convertSeriesToDataTable = async (
     let id = X_ACCESSOR_INDEX;
 
     const columns: TSVBColumns[] = [
-      { id, name: usedIndexPattern.timeFieldName || '', isSplit: false },
+      { id, name: usedIndexPattern.timeFieldName || '', isSplit: false, isMetric: false },
     ];
     if (seriesPerLayer.length) {
       id++;
-      columns.push({ id, name: seriesPerLayer[0].splitByLabel, isSplit: false });
+      columns.push({
+        id,
+        name: layer.metrics[0].field || seriesPerLayer[0].splitByLabel,
+        isSplit: false,
+        isMetric: true,
+      });
       // Adds an extra column, if the layer is split by terms aggregation
       if (isGroupedByTerms) {
         id++;
-        columns.push({ id, name: layer.terms_field || '', isSplit: true });
+        columns.push({ id, name: layer.terms_field || '', isSplit: true, isMetric: false });
       }
     }
     const columnsWithMeta = addMetaToColumns(columns, usedIndexPattern, layer.metrics[0].type);
