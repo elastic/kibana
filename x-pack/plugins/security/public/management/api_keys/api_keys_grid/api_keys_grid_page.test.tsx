@@ -240,7 +240,7 @@ describe('APIKeysGridPage', () => {
   it('invalidates api key using cta button', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    const { getByText, findByRole, findAllByLabelText } = render(
+    const { findByRole, findAllByLabelText } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
@@ -267,7 +267,7 @@ describe('APIKeysGridPage', () => {
   it('invalidates multiple api keys using bulk select', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    const { getByText, findByRole, findAllByLabelText, debug, findAllByRole } = render(
+    const { findByRole, findAllByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
