@@ -24,8 +24,9 @@ export const getEnabledKibanaSpaceFeatures = async ({
   features: FeaturesPluginStart;
 }): Promise<Set<string>> => {
   try {
+    console.error('GETSPACE', getSpace);
     const disabledUserSpaceFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
-
+    console.error('DISABLED USER SPACE FEATURES', disabledUserSpaceFeatures);
     // Filter through all user Kibana features to find corresponding enabled
     // RAC feature owners like 'security-solution' or 'observability'
     const owners = await new Set(
@@ -34,11 +35,14 @@ export const getEnabledKibanaSpaceFeatures = async ({
         // get all the rac 'owners' that aren't disabled
         .filter(({ id }) => !disabledUserSpaceFeatures.has(id))
         .flatMap((feature) => {
+          console.error('FEATURE.RAC', feature.rac);
           return feature.rac ?? [];
         })
     );
+    console.error('INTERNAL OWNERS', owners);
     return owners;
   } catch (error) {
+    console.error('GETENABLEDKIBANASPACEFEAUTRES THREW AN ERROR');
     return new Set<string>();
   }
 };

@@ -113,10 +113,7 @@ export class RacClient {
   }
 
   public async get<Params>({ id }: { id: string }): Promise<unknown> {
-    console.error('\n\n\n\n\nHELLO WORLD!!!!\n\n\n\n\n');
     // TODO: type alert for the get method
-    const thing = await this.esClient.ping();
-    console.error('PING RESULT', JSON.stringify(thing, null, 2));
     const result = await this.esClient.search({
       index: '.siem*',
       body: { query: { match_all: {} } },
