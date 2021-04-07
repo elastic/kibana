@@ -237,7 +237,7 @@ SplitByTermsUI.propTypes = {
   intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   fields: PropTypes.object,
   uiRestrictions: PropTypes.object,
   seriesQuantity: PropTypes.object,
