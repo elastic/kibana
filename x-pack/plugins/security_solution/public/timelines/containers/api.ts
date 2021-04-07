@@ -340,7 +340,7 @@ export const persistFavorite = async ({
 export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
   const response = await KibanaServices.get().http.delete<boolean>(TIMELINE_URL, {
     method: 'DELETE',
-    body: JSON.stringify(savedObjectIds),
+    body: JSON.stringify({ savedObjectIds }),
   });
   return response;
 };
