@@ -6,101 +6,229 @@
  * Side Public License, v 1.
  */
 
-import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/pipeable';
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
 import type { estypes } from '@elastic/elasticsearch';
-import { throwErrors } from './errors';
+import { ObjectType } from '@kbn/config-schema';
+import { isPlainObject } from 'lodash';
+
 import { IndexMapping } from '../../../mappings';
-import { SavedObjectsErrorHelpers } from '../errors';
 import { hasFilterKeyError } from '../filter_utils';
-import { aggsTypes } from './aggs_types';
+import { aggregationSchemas } from './aggs_types';
+
+const aggregationKeys = ['aggs', 'aggregations'];
 
 export const validateAndConvertAggregations = (
   allowedTypes: string[],
   aggs: Record<string, unknown>,
   indexMapping: IndexMapping
 ): Record<string, estypes.AggregationContainer> => {
-  return recurseNestedValidation(allowedTypes, aggs, indexMapping) as Record<
-    string,
-    estypes.AggregationContainer
-  >;
+  return validateAggregations(aggs as any, {
+    // TODO: fix type
+    allowedTypes,
+    indexMapping,
+    currentPath: [],
+  });
 };
 
-const recurseNestedValidation = (
-  allowedTypes: string[],
-  aggs: any,
-  indexMapping: IndexMapping,
-  lastKey?: string,
-  aggType?: string
-): unknown => {
-  return Object.keys(aggs).reduce((acc, key) => {
-    if (key === 'script') {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'script attribute is not supported in saved objects aggregation'
-      );
-    }
-    if (typeof aggs[key] === 'object' && aggType === undefined && aggsTypes[key]) {
-      return {
-        ...acc,
-        [key]: recurseNestedValidation(allowedTypes, aggs[key], indexMapping, key, key),
-      };
-    } else if (
-      typeof aggs[key] === 'object' &&
-      (['aggs', 'aggregations'].includes(key) || aggType === undefined)
-    ) {
-      return {
-        ...acc,
-        [key]: recurseNestedValidation(allowedTypes, aggs[key], indexMapping, key, undefined),
-      };
-    } else if (
-      key !== 'field' &&
-      aggType &&
-      aggsTypes[aggType] !== undefined &&
-      aggsTypes[aggType][key] !== undefined
-    ) {
-      validateFieldValue(aggsTypes[aggType][key], aggs[key]);
-      return {
-        ...acc,
-        [key]: aggs[key],
-      };
-    } else {
-      if (aggType === undefined || aggsTypes[aggType] === undefined) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          `This aggregation ${lastKey} is not valid or we did not defined it yet`
-        );
-      }
-      const error = hasFilterKeyError(
-        key === 'field' ? aggs[key] : key,
-        allowedTypes,
-        indexMapping
-      );
-      if (error != null) {
-        if (
-          aggType !== undefined &&
-          aggsTypes[aggType] !== undefined &&
-          aggsTypes[aggType][key] === undefined
-        ) {
-          throw SavedObjectsErrorHelpers.createBadRequestError(
-            `${key} attribute is not supported in ${aggType} saved objects aggregation`
-          );
-        }
-        throw SavedObjectsErrorHelpers.createBadRequestError(error);
-      }
-      return {
-        ...acc,
-        ...(key === 'field'
-          ? { [key]: aggs[key].replace('.attributes', '') }
-          : { [key.replace('.attributes', '')]: aggs[key] }),
-      };
-    }
+interface ValidationContext {
+  allowedTypes: string[];
+  indexMapping: IndexMapping;
+  currentPath: string[];
+}
+
+/**
+ * Validates a record of aggregation containers,
+ * Which can either be the root level aggregations (`SearchRequest.body.aggs`)
+ * Or a nested record of aggregation (`SearchRequest.body.aggs.myAggregation.aggs`)
+ *
+ * @param aggregations
+ * @param context
+ */
+const validateAggregations = (
+  aggregations: Record<string, estypes.AggregationContainer>,
+  context: ValidationContext
+) => {
+  // console.log('validateAggregations', Object.keys(aggregations));
+
+  return Object.entries(aggregations).reduce((memo, [aggrName, aggrContainer]) => {
+    return {
+      ...memo,
+      [aggrName]: validateAggregation(aggrContainer, childContext(context, aggrName)),
+    };
   }, {});
 };
 
-const validateFieldValue = (rtType: rt.Any, aggObject: unknown) => {
-  pipe(
-    rtType.decode(aggObject),
-    fold(throwErrors(SavedObjectsErrorHelpers.createBadRequestError), identity)
-  );
+const childContext = (context: ValidationContext, path: string): ValidationContext => {
+  return {
+    ...context,
+    currentPath: [...context.currentPath, path],
+  };
 };
+
+/**
+ * Validates an aggregation container, e.g an entry of `SearchRequest.body.aggs`, or
+ * from a nested aggregation record.
+ *
+ * @param aggregation
+ * @param context
+ */
+const validateAggregation = (
+  aggregation: estypes.AggregationContainer,
+  context: ValidationContext
+) => {
+  const container = validateAggregationContainer(aggregation, context);
+
+  if (aggregation.aggregations) {
+    container.aggregations = validateAggregations(
+      aggregation.aggregations,
+      childContext(context, 'aggregations')
+    );
+  }
+  if (aggregation.aggs) {
+    container.aggs = validateAggregations(aggregation.aggs, childContext(context, 'aggs'));
+  }
+
+  return container;
+};
+
+const validateAggregationContainer = (
+  container: estypes.AggregationContainer,
+  context: ValidationContext
+) => {
+  return Object.entries(container).reduce((memo, [aggName, aggregation]) => {
+    if (aggregationKeys.includes(aggName)) {
+      return memo;
+    }
+    return {
+      ...memo,
+      [aggName]: validateAggregationType(aggName, aggregation, childContext(context, aggName)),
+    };
+  }, {} as estypes.AggregationContainer);
+};
+
+const validateAggregationType = (
+  aggregationType: string,
+  aggregation: Record<string, any>,
+  context: ValidationContext
+) => {
+  const aggregationSchema = aggregationSchemas[aggregationType];
+  if (!aggregationSchema) {
+    throw new Error(`${aggregationType} aggregation is not valid (or not registered yet)`);
+  }
+
+  // console.log('*** validateAggregationType', aggregationType, aggregation);
+
+  validateAggregationStructure(aggregationSchema, aggregation, context);
+  return validateAndRewriteFieldAttributes(aggregation, context);
+};
+
+/**
+ * Validate an aggregation structure against its declared schema.
+ */
+const validateAggregationStructure = (
+  schema: ObjectType,
+  aggObject: unknown,
+  context: ValidationContext
+) => {
+  return schema.validate(aggObject, {}, context.currentPath.join('.'));
+};
+
+/////
+/**
+ * List of fields that have an attribute path as value
+ *
+ * @example
+ * ```ts
+ * avg: {
+ *  field: 'alert.attributes.actions.group',
+ * },
+ * ```
+ */
+const attributeFields = ['field'];
+/**
+ * List of fields that have a Record<attribute path, value> as value
+ *
+ * @example
+ * ```ts
+ * filter: {
+ *  term: {
+ *    'alert.attributes.actions.group': 'value'
+ *  },
+ * },
+ * ```
+ */
+const attributeMaps = ['term'];
+
+const validateAndRewriteFieldAttributes = (
+  aggregation: Record<string, any>,
+  context: ValidationContext
+) => {
+  return recursiveRewrite(aggregation, context, []);
+};
+
+const recursiveRewrite = (
+  currentLevel: Record<string, any>,
+  context: ValidationContext,
+  parents: string[]
+): Record<string, any> => {
+  return Object.entries(currentLevel).reduce((memo, [key, value]) => {
+    const rewriteKey = isAttributeKey(parents);
+    const rewriteValue = isAttributeValue(key, value);
+
+    const newKey = rewriteKey ? validateAndRewriteKey(key, context) : key;
+    const newValue = rewriteValue
+      ? validateAndRewriteValue(key, value, context)
+      : isPlainObject(value)
+      ? recursiveRewrite(value, context, [...parents, key])
+      : value;
+
+    return {
+      ...memo,
+      [newKey]: newValue,
+    };
+  }, {});
+};
+
+const lastParent = (parents: string[]) => {
+  if (parents.length) {
+    return parents[parents.length - 1];
+  }
+  return undefined;
+};
+
+const isAttributeKey = (parents: string[]) => {
+  const last = lastParent(parents);
+  if (last) {
+    return attributeMaps.includes(last);
+  }
+  return false;
+};
+
+// hasFilterKeyError(key, types, mappings)
+const isAttributeValue = (fieldName: string, fieldValue: unknown): boolean => {
+  return attributeFields.includes(fieldName) && typeof fieldValue === 'string';
+};
+
+const validateAndRewriteValue = (
+  fieldName: string,
+  fieldValue: any,
+  { allowedTypes, indexMapping }: ValidationContext
+) => {
+  const error = hasFilterKeyError(fieldValue, allowedTypes, indexMapping);
+  if (error) {
+    throw new Error(error); // TODO: encapsulate
+  }
+  return stripAttributesPath(fieldValue);
+};
+
+const validateAndRewriteKey = (
+  fieldName: string,
+  { allowedTypes, indexMapping }: ValidationContext
+) => {
+  const error = hasFilterKeyError(fieldName, allowedTypes, indexMapping);
+  if (error) {
+    throw new Error(error); // TODO: encapsulate
+  }
+  return stripAttributesPath(fieldName);
+};
+
+const stripAttributesPath = (fieldName: string) => fieldName.replace('.attributes', '');

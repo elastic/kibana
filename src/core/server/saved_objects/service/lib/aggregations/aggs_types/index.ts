@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { bucketAggsType } from './bucket_aggs';
-import { metricsAggsType } from './metrics_aggs';
+import { bucketAggsSchemas } from './bucket_aggs';
+import { metricsAggsSchemas } from './metrics_aggs';
 
-export const aggsTypes = {
-  ...metricsAggsType,
-  ...bucketAggsType,
+export const aggregationSchemas = {
+  ...metricsAggsSchemas,
+  ...bucketAggsSchemas,
 };

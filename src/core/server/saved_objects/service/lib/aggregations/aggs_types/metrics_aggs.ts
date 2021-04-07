@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as rt from 'io-ts';
-import { fieldBasic, FieldBasicRT } from './base';
+import { schema as s, ObjectType } from '@kbn/config-schema';
 
 /*
  * Types for Metrics Aggregations
  *
- * TODO:
+ * Not implemented:
  * - Extended Stats Aggregation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-extendedstats-aggregation.html
  * - Geo Bounds Aggregation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-geobounds-aggregation.html
  * - Geo Centroid Aggregation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-geocentroid-aggregation.html
@@ -27,36 +26,54 @@ import { fieldBasic, FieldBasicRT } from './base';
  * - Median Absolute Deviation Aggregation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-median-absolute-deviation-aggregation.html
  */
 
-export const metricsAggsType: Record<string, Record<string, rt.Any>> = {
-  avg: fieldBasic,
-  weighted_avg: {
-    value: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
-    weight: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
-    format: rt.string,
-    value_type: rt.string,
-  },
-  cardinality: fieldBasic,
-  max: {
-    ...fieldBasic,
-    missing: rt.number,
-  },
-  min: {
-    ...fieldBasic,
-    missing: rt.number,
-  },
-  top_hits: {
-    explain: rt.boolean,
-    from: rt.string,
-    highlight: rt.any,
-    seq_no_primary_term: rt.boolean,
-    size: rt.number,
-    sort: rt.any,
-    stored_fields: rt.array(rt.string),
-    version: rt.boolean,
-    _name: rt.string,
-    _source: rt.partial({
-      includes: rt.array(rt.string),
-      excludes: rt.array(rt.string),
-    }),
-  },
+export const metricsAggsSchemas: Record<string, ObjectType> = {
+  avg: s.object({
+    field: s.maybe(s.string()),
+    missing: s.maybe(s.oneOf([s.string(), s.number(), s.boolean()])),
+  }),
+  cardinality: s.object({
+    field: s.maybe(s.string()),
+    precision_threshold: s.maybe(s.number()),
+    rehash: s.maybe(s.boolean()),
+    missing: s.maybe(s.oneOf([s.string(), s.number(), s.boolean()])),
+  }),
+  min: s.object({
+    field: s.maybe(s.string()),
+    missing: s.maybe(s.oneOf([s.string(), s.number(), s.boolean()])),
+    format: s.maybe(s.string()),
+  }),
+  max: s.object({
+    field: s.maybe(s.string()),
+    missing: s.maybe(s.oneOf([s.string(), s.number(), s.boolean()])),
+    format: s.maybe(s.string()),
+  }),
+  weighted_avg: s.object({
+    format: s.maybe(s.string()),
+    value_type: s.maybe(s.string()),
+    value: s.maybe(
+      s.object({
+        field: s.maybe(s.string()),
+        missing: s.maybe(s.number()),
+      })
+    ),
+    weight: s.maybe(
+      s.object({
+        field: s.maybe(s.string()),
+        missing: s.maybe(s.number()),
+      })
+    ),
+  }),
+  top_hits: s.object({
+    explain: s.maybe(s.boolean()),
+    docvalue_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+    stored_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+    from: s.maybe(s.number()),
+    size: s.maybe(s.number()),
+    sort: s.maybe(s.oneOf([s.literal('asc'), s.literal('desc')])),
+    seq_no_primary_term: s.maybe(s.boolean()),
+    version: s.maybe(s.boolean()),
+    track_scores: s.maybe(s.boolean()),
+    highlight: s.maybe(s.any()),
+    _source: s.maybe(s.oneOf([s.boolean(), s.string(), s.arrayOf(s.string())])),
+  }),
 };

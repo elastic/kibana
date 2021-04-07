@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { validateAndConvertAggregations } from './validation';
+
+type AggsMap = Record<string, estypes.AggregationContainer>;
 
 const mockMappings = {
   properties: {
@@ -85,7 +88,7 @@ const mockMappings = {
 
 describe('Aggregation Utils', () => {
   describe('#validateGetSavedObjectsAggs', () => {
-    test('Validate a simple aggregations', () => {
+    it('Validates a simple aggregations', () => {
       expect(
         validateAndConvertAggregations(
           ['foo'],
@@ -101,7 +104,7 @@ describe('Aggregation Utils', () => {
       });
     });
 
-    test('Validate a nested field in simple aggregations', () => {
+    it('validates a nested field in simple aggregations', () => {
       expect(
         validateAndConvertAggregations(
           ['alert'],
@@ -117,7 +120,7 @@ describe('Aggregation Utils', () => {
       });
     });
 
-    test('Validate a nested aggregations', () => {
+    it('validates a nested aggregations', () => {
       expect(
         validateAndConvertAggregations(
           ['alert'],
@@ -125,10 +128,10 @@ describe('Aggregation Utils', () => {
             aggName: {
               cardinality: {
                 field: 'alert.attributes.actions.group',
-                aggs: {
-                  aggName: {
-                    max: { field: 'alert.attributes.actions.group' },
-                  },
+              },
+              aggs: {
+                aggName: {
+                  max: { field: 'alert.attributes.actions.group' },
                 },
               },
             },
@@ -139,11 +142,11 @@ describe('Aggregation Utils', () => {
         aggName: {
           cardinality: {
             field: 'alert.actions.group',
-            aggs: {
-              aggName: {
-                max: {
-                  field: 'alert.actions.group',
-                },
+          },
+          aggs: {
+            aggName: {
+              max: {
+                field: 'alert.actions.group',
               },
             },
           },
@@ -151,7 +154,7 @@ describe('Aggregation Utils', () => {
       });
     });
 
-    test('Validate a deeply nested aggregations', () => {
+    it('validates a deeply nested aggregations', () => {
       expect(
         validateAndConvertAggregations(
           ['alert'],
@@ -159,14 +162,14 @@ describe('Aggregation Utils', () => {
             first: {
               cardinality: {
                 field: 'alert.attributes.actions.group',
-                aggs: {
-                  second: {
-                    max: { field: 'alert.attributes.actions.group' },
-                    aggs: {
-                      third: {
-                        min: {
-                          field: 'alert.attributes.actions.actionTypeId',
-                        },
+              },
+              aggs: {
+                second: {
+                  max: { field: 'alert.attributes.actions.group' },
+                  aggs: {
+                    third: {
+                      min: {
+                        field: 'alert.attributes.actions.actionTypeId',
                       },
                     },
                   },
@@ -180,14 +183,14 @@ describe('Aggregation Utils', () => {
         first: {
           cardinality: {
             field: 'alert.actions.group',
-            aggs: {
-              second: {
-                max: { field: 'alert.actions.group' },
-                aggs: {
-                  third: {
-                    min: {
-                      field: 'alert.actions.actionTypeId',
-                    },
+          },
+          aggs: {
+            second: {
+              max: { field: 'alert.actions.group' },
+              aggs: {
+                third: {
+                  min: {
+                    field: 'alert.actions.actionTypeId',
                   },
                 },
               },
@@ -197,161 +200,213 @@ describe('Aggregation Utils', () => {
       });
     });
 
-    test('Validate an aggregation without the attribute field', () => {
-      expect(
-        validateAndConvertAggregations(
-          ['alert'],
-          { aggName: { terms: { 'alert.attributes.actions.group': ['myFriend', 'snoopy'] } } },
-          mockMappings
-        )
-      ).toEqual({
-        aggName: {
-          terms: {
-            'alert.actions.group': ['myFriend', 'snoopy'],
+    it('rewrites the `field` name when valid', () => {
+      const aggregations: AggsMap = {
+        average: {
+          avg: {
+            field: 'alert.attributes.actions.group',
+            missing: 10,
+          },
+        },
+      };
+      expect(validateAndConvertAggregations(['alert'], aggregations, mockMappings)).toEqual({
+        average: {
+          avg: {
+            field: 'alert.actions.group',
+            missing: 10,
           },
         },
       });
     });
 
-    test('Validate a filter term aggregations', () => {
-      expect(
-        validateAndConvertAggregations(
-          ['foo'],
-          { aggName: { filter: { term: { 'foo.attributes.bytes': 10 } } } },
-          mockMappings
-        )
-      ).toEqual({
-        aggName: {
-          filter: {
-            term: { 'foo.attributes.bytes': 10 },
+    it('throws an error when the `field` name is not using attributes path', () => {
+      const aggregations: AggsMap = {
+        average: {
+          avg: {
+            field: 'alert.actions.group',
+            missing: 10,
           },
         },
-      });
-    });
-
-    test('Throw an error when types is not allowed', () => {
-      expect(() => {
-        validateAndConvertAggregations(
-          ['alert'],
-          {
-            aggName: {
-              max: { field: 'foo.attributes.bytes' },
-            },
-          },
-          mockMappings
-        );
-      }).toThrowErrorMatchingInlineSnapshot(`"This type foo is not allowed: Bad Request"`);
-    });
-
-    test('Throw an error when add an invalid attributes ', () => {
-      expect(() => {
-        validateAndConvertAggregations(
-          ['foo'],
-          {
-            aggName: {
-              max: { field: 'foo.attributes.bytes', notValid: 'yesIamNotValid' },
-            },
-          },
-          mockMappings
-        );
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"notValid attribute is not supported in max saved objects aggregation: Bad Request"`
-      );
-    });
-
-    test('Throw an error when an attributes is not defined correctly', () => {
+      };
       expect(() =>
-        validateAndConvertAggregations(
-          ['alert'],
-          {
-            aggName: {
-              terms: { 'alert.attributes.actions.group': ['myFriend', 'snoopy'], missing: 0 },
-            },
-          },
-          mockMappings
-        )
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid value 0 supplied to : string: Bad Request"`);
-    });
-
-    test('Throw an error when aggregation is not defined in SavedObjectsAggs', () => {
-      expect(() => {
-        validateAndConvertAggregations(
-          ['foo'],
-          {
-            aggName: {
-              MySuperAgg: { field: 'foo.attributes.bytes' },
-            },
-          },
-          mockMappings
-        );
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"This aggregation MySuperAgg is not valid or we did not defined it yet: Bad Request"`
+        validateAndConvertAggregations(['alert'], aggregations, mockMappings)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"This key 'alert.actions.group' does NOT match the filter proposition SavedObjectType.attributes.key"`
       );
     });
 
-    test('Throw an error when children aggregation is not defined in SavedObjectsAggs', () => {
+    it('throws an error when the `field` name is referencing an invalid field', () => {
+      const aggregations: AggsMap = {
+        average: {
+          avg: {
+            field: 'alert.attributes.actions.non_existing',
+            missing: 10,
+          },
+        },
+      };
+      expect(() =>
+        validateAndConvertAggregations(['alert'], aggregations, mockMappings)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"This key 'alert.attributes.actions.non_existing' does NOT exist in alert saved object index patterns"`
+      );
+    });
+
+    it('rewrites the `field` name even when nested', () => {
+      const aggregations: AggsMap = {
+        average: {
+          weighted_avg: {
+            value: {
+              field: 'alert.attributes.actions.group',
+              missing: 10,
+            },
+            weight: {
+              field: 'alert.attributes.actions.actionRef',
+            },
+          },
+        },
+      };
+      expect(validateAndConvertAggregations(['alert'], aggregations, mockMappings)).toEqual({
+        average: {
+          weighted_avg: {
+            value: {
+              field: 'alert.actions.group',
+              missing: 10,
+            },
+            weight: {
+              field: 'alert.actions.actionRef',
+            },
+          },
+        },
+      });
+    });
+
+    it('rewrites the entries of a filter term record', () => {
+      const aggregations: AggsMap = {
+        myFilter: {
+          filter: {
+            term: {
+              'foo.attributes.description': 'hello',
+              'foo.attributes.bytes': 10,
+            },
+          },
+        },
+      };
+      expect(validateAndConvertAggregations(['foo'], aggregations, mockMappings)).toEqual({
+        myFilter: {
+          filter: {
+            term: { 'foo.description': 'hello', 'foo.bytes': 10 },
+          },
+        },
+      });
+    });
+
+    it('throws an error when referencing non-allowed types', () => {
+      const aggregations: AggsMap = {
+        myFilter: {
+          max: {
+            field: 'foo.attributes.bytes',
+          },
+        },
+      };
+
       expect(() => {
-        validateAndConvertAggregations(
-          ['foo'],
-          {
-            aggName: {
-              cardinality: {
+        validateAndConvertAggregations(['alert'], aggregations, mockMappings);
+      }).toThrowErrorMatchingInlineSnapshot(`"This type foo is not allowed"`);
+    });
+
+    it('throws an error when an attributes is not respecting its schema definition', () => {
+      const aggregations: AggsMap = {
+        someAgg: {
+          terms: {
+            missing: 'expecting a number',
+          },
+        },
+      };
+
+      expect(() =>
+        validateAndConvertAggregations(['alert'], aggregations, mockMappings)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[someAgg.terms.missing]: expected value of type [number] but got [string]"`
+      );
+    });
+
+    it('throws an error when trying to validate an unknown aggregation type', () => {
+      const aggregations: AggsMap = {
+        someAgg: {
+          auto_date_histogram: {
+            field: 'foo.attributes.bytes',
+          },
+        },
+      };
+
+      expect(() => {
+        validateAndConvertAggregations(['foo'], aggregations, mockMappings);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"auto_date_histogram aggregation is not valid (or not registered yet)"`
+      );
+    });
+
+    it('throws an error when a child aggregation is unknown', () => {
+      const aggregations: AggsMap = {
+        someAgg: {
+          max: {
+            field: 'foo.attributes.bytes',
+          },
+          aggs: {
+            unknownAgg: {
+              cumulative_cardinality: {
+                format: 'format',
+              },
+            },
+          },
+        },
+      };
+
+      expect(() => {
+        validateAndConvertAggregations(['foo'], aggregations, mockMappings);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cumulative_cardinality aggregation is not valid (or not registered yet)"`
+      );
+    });
+
+    it('throws an error when using a script attribute', () => {
+      const aggregations: AggsMap = {
+        someAgg: {
+          max: {
+            field: 'foo.attributes.bytes',
+            script: 'This is a bad script',
+          },
+        },
+      };
+
+      expect(() => {
+        validateAndConvertAggregations(['foo'], aggregations, mockMappings);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"[someAgg.max.script]: definition for this key is missing"`
+      );
+    });
+
+    it('throws an error when using a script attribute in a nested aggregation', () => {
+      const aggregations: AggsMap = {
+        someAgg: {
+          min: {
+            field: 'foo.attributes.bytes',
+          },
+          aggs: {
+            nested: {
+              max: {
                 field: 'foo.attributes.bytes',
-                aggs: {
-                  aggName: {
-                    MySuperAgg: { field: 'alert.attributes.actions.group' },
-                  },
-                },
+                script: 'This is a bad script',
               },
             },
           },
-          mockMappings
-        );
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"This aggregation MySuperAgg is not valid or we did not defined it yet: Bad Request"`
-      );
-    });
+        },
+      };
 
-    test('Throw an error when you add the script attribute who are not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateAndConvertAggregations(
-          ['alert'],
-          {
-            aggName: {
-              cardinality: { field: 'alert.attributes.actions.group' },
-              script: 'I want to access that I should not',
-            },
-          },
-          mockMappings
-        );
+        validateAndConvertAggregations(['foo'], aggregations, mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"script attribute is not supported in saved objects aggregation: Bad Request"`
-      );
-    });
-
-    test('Throw an error when you add the script attribute in a nested aggregations who are not defined in SavedObjectsAggs', () => {
-      expect(() => {
-        validateAndConvertAggregations(
-          ['alert'],
-          {
-            aggName: {
-              cardinality: {
-                field: 'alert.attributes.actions.group',
-                aggs: {
-                  aggName: {
-                    max: {
-                      field: 'alert.attributes.actions.group',
-                      script: 'I want to access that I should not',
-                    },
-                  },
-                },
-              },
-            },
-          },
-          mockMappings
-        );
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"script attribute is not supported in saved objects aggregation: Bad Request"`
+        `"[someAgg.aggs.nested.max.script]: definition for this key is missing"`
       );
     });
   });
