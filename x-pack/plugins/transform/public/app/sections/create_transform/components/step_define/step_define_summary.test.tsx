@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, wait } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -87,6 +87,6 @@ describe('Transform: <DefinePivotSummary />', () => {
     // Assert
     expect(getByText('Group by')).toBeInTheDocument();
     expect(getByText('Aggregations')).toBeInTheDocument();
-    await wait();
+    await waitFor(() => undefined);
   });
 });
