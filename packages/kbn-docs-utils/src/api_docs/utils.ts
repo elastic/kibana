@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import path from 'path';
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import {
   AnchorLink,
@@ -28,14 +28,14 @@ export const snakeToCamel = (str: string): string =>
 
 /**
  * Returns the plugin that the file belongs to.
- * @param path An absolute file path that can point to a file nested inside a plugin
+ * @param filePath An absolute file path that can point to a file nested inside a plugin
  * @param plugins A list of plugins to search through.
  */
 export function getPluginForPath(
-  path: string,
+  filePath: string,
   plugins: KibanaPlatformPlugin[]
 ): KibanaPlatformPlugin | undefined {
-  return plugins.find((plugin) => path.startsWith(plugin.directory));
+  return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
 }
 
 /**
@@ -68,13 +68,13 @@ function escapeRegExp(regexp: string) {
  * name of the first nested folder in the plugin. For example a path of
  * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
  * 'src/plugin/data/server/file.ts' would return undefined.
- * @param path
+ * @param filePath
  */
-export function getServiceForPath(path: string, pluginDirectory: string): string | undefined {
+export function getServiceForPath(filePath: string, pluginDirectory: string): string | undefined {
   const dir = escapeRegExp(pluginDirectory);
-  const publicMatchGroups = path.match(`${dir}\/public\/([^\/]*)\/`);
-  const serverMatchGroups = path.match(`${dir}\/server\/([^\/]*)\/`);
-  const commonMatchGroups = path.match(`${dir}\/common\/([^\/]*)\/`);
+  const publicMatchGroups = filePath.match(`${dir}\/public\/([^\/]*)\/`);
+  const serverMatchGroups = filePath.match(`${dir}\/server\/([^\/]*)\/`);
+  const commonMatchGroups = filePath.match(`${dir}\/common\/([^\/]*)\/`);
 
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];

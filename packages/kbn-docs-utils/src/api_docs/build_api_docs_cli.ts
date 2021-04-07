@@ -17,6 +17,7 @@ import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi, TypeKind } from './types';
 import { findPlugins } from './find_plugins';
 import { removeBrokenLinks } from './utils';
+import { pathsOutsideScopes } from './build_api_declarations/utils';
 
 export interface PluginInfo {
   apiCount: number;
@@ -178,6 +179,10 @@ export function runBuildApiDocsCli() {
           writePluginDocs(outputFolder, pluginApi, log);
         }
       });
+      if (Object.values(pathsOutsideScopes).length > 0) {
+        log.warning(`Found paths outside of normal scope folders:`);
+        log.warning(pathsOutsideScopes);
+      }
     },
     {
       log: {
