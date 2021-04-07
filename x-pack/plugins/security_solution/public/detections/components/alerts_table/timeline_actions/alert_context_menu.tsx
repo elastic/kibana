@@ -303,7 +303,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         size="s"
         iconType="boxesHorizontal"
         onClick={onButtonClick}
-        disabled={disabled}
+        isDisabled={disabled}
       />
     </EuiToolTip>
   );
