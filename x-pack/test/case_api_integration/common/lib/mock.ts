@@ -92,11 +92,11 @@ export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
 };
 
 export const postCaseResp = (
-  id: string,
+  id?: string | null,
   req: CasePostRequest = postCaseReq
 ): Partial<CaseResponse> => ({
   ...req,
-  id,
+  ...(id != null ? { id } : {}),
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
