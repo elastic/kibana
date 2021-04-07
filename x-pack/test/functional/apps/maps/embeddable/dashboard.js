@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }) {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
       await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-      await filterBar.addFilter('runtime_shape_name', 'is', 'alpha');
+      await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
 
       const gridResponse = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
