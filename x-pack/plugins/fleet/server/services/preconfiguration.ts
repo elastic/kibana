@@ -7,10 +7,9 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy } from 'lodash';
+import { groupBy, omit } from 'lodash';
 
 import type {
-  PackagePolicyPackage,
   NewPackagePolicy,
   AgentPolicy,
   Installation,
@@ -18,8 +17,10 @@ import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
 } from '../../common';
 
+import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
@@ -32,7 +33,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
-  packages: Array<Omit<PackagePolicyPackage, 'title'>> = [],
+  packages: PreconfiguredPackage[] = [],
   defaultOutput: Output
 ) {
   // Validate configured packages to ensure there are no version conflicts
@@ -45,7 +46,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     // If there are multiple packages with duplicate versions, separate them with semicolons, e.g
     // package-a:1.0.0, package-a:2.0.0; package-b:1.0.0, package-b:2.0.0
     const duplicateList = duplicatePackages
-      .map(([, versions]) => versions.map((v) => `${v.name}:${v.version}`).join(', '))
+      .map(([, versions]) => versions.map((v) => pkgToPkgKey(v)).join(', '))
       .join('; ');
 
     throw new Error(
@@ -60,8 +61,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await Promise.all(
-    packages.map(({ name, version }) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
+    packages.map(({ name, version, force }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version, force)
     )
   );
 
@@ -71,7 +72,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
-        preconfiguredAgentPolicy
+        omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
 
       if (!created) return { created, policy };
@@ -101,12 +102,22 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         })
       );
 
-      return { created, policy, installedPackagePolicies };
+      return {
+        created,
+        policy,
+        installedPackagePolicies,
+        shouldAddIsManagedFlag: preconfiguredAgentPolicy.is_managed,
+      };
     })
   );
 
   for (const preconfiguredPolicy of preconfiguredPolicies) {
-    const { created, policy, installedPackagePolicies } = preconfiguredPolicy;
+    const {
+      created,
+      policy,
+      installedPackagePolicies,
+      shouldAddIsManagedFlag,
+    } = preconfiguredPolicy;
     if (created) {
       await addPreconfiguredPolicyPackages(
         soClient,
@@ -115,6 +126,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         installedPackagePolicies!,
         defaultOutput
       );
+      // Add the is_managed flag after configuring package policies to avoid errors
+      if (shouldAddIsManagedFlag) {
+        agentPolicyService.update(soClient, esClient, policy.id, { is_managed: true });
+      }
     }
   }
 
@@ -123,7 +138,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       id: p.policy.id,
       updated_at: p.policy.updated_at,
     })),
-    packages: preconfiguredPackages.map((pkg) => `${pkg.name}:${pkg.version}`),
+    packages: preconfiguredPackages.map((pkg) => pkgToPkgKey(pkg)),
   };
 }
 
@@ -160,13 +175,15 @@ async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  force?: boolean
 ) {
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,
     esClient,
     pkgVersion,
+    force,
   });
 }
 
