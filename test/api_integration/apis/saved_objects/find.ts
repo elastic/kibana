@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
             }));
       });
 
-      describe('TOTO with a aggs', () => {
+      describe('with a aggs', () => {
         it('should return 200 with a valid response', async () =>
           await supertest
             .get(
