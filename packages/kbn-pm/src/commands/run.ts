@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import dedent from 'dedent';
 import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -17,6 +18,12 @@ export const RunCommand: ICommand = {
   name: 'run',
 
   async run(projects, projectGraph, { extraArgs, options }) {
+    log.warning(dedent`
+      We are migrating packages into the Bazel build system and we will no longer support running npm scripts on
+      packages using 'yarn kbn run' on Bazel built packages. If the package you are trying to act on contains a
+      BUILD.bazel file please just use 'yarn kbn build-bazel' to build it or 'yarn kbn watch-bazel' to watch it
+    `);
+
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {

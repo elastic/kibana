@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import dedent from 'dedent';
 import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -38,6 +39,11 @@ export const WatchCommand: ICommand = {
   name: 'watch',
 
   async run(projects, projectGraph) {
+    log.warning(dedent`
+      We are migrating packages into the Bazel build system. If the package you are trying to watch
+      contains a BUILD.bazel file please just use 'yarn kbn watch-bazel'
+    `);
+
     const projectsToWatch: ProjectMap = new Map();
     for (const project of projects.values()) {
       // We can't watch project that doesn't have `kbn:watch` script.

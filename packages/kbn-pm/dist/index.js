@@ -59368,10 +59368,12 @@ const ResetCommand = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RunCommand", function() { return RunCommand; });
-/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(249);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(246);
-/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(247);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(249);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(246);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(247);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(248);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59379,6 +59381,7 @@ __webpack_require__.r(__webpack_exports__);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -59391,28 +59394,33 @@ const RunCommand = {
     extraArgs,
     options
   }) {
-    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projects, projectGraph);
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
+      We are migrating packages into the Bazel build system and we will no longer support running npm scripts on
+      packages using 'yarn kbn run' on Bazel built packages. If the package you are trying to act on contains a
+      BUILD.bazel file please just use 'yarn kbn build-bazel' to build it or 'yarn kbn watch-bazel' to watch it
+    `);
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
 
     if (extraArgs.length === 0) {
-      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"]('No script specified');
+      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_1__["CliError"]('No script specified');
     }
 
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
-    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async project => {
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async project => {
       if (!project.hasScript(scriptName)) {
         if (!!options['skip-missing']) {
           return;
         }
 
-        throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"](`[${project.name}] no "${scriptName}" script defined. To skip packages without the "${scriptName}" script pass --skip-missing`);
+        throw new _utils_errors__WEBPACK_IMPORTED_MODULE_1__["CliError"](`[${project.name}] no "${scriptName}" script defined. To skip packages without the "${scriptName}" script pass --skip-missing`);
       }
 
-      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running "${scriptName}" script`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].info(`[${project.name}] running "${scriptName}" script`);
       await project.runScriptStreaming(scriptName, {
         args: scriptArgs
       });
-      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${project.name}] complete`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`[${project.name}] complete`);
     });
   }
 
@@ -59425,11 +59433,13 @@ const RunCommand = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WatchCommand", function() { return WatchCommand; });
-/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(249);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(246);
-/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(247);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
-/* harmony import */ var _utils_watch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(513);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(249);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(246);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(247);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(248);
+/* harmony import */ var _utils_watch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(513);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59437,6 +59447,7 @@ __webpack_require__.r(__webpack_exports__);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -59468,6 +59479,10 @@ const WatchCommand = {
   name: 'watch',
 
   async run(projects, projectGraph) {
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
+      We are migrating packages into the Bazel build system. If the package you are trying to watch
+      contains a BUILD.bazel file please just use 'yarn kbn watch-bazel'
+    `);
     const projectsToWatch = new Map();
 
     for (const project of projects.values()) {
@@ -59478,26 +59493,26 @@ const WatchCommand = {
     }
 
     if (projectsToWatch.size === 0) {
-      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"](`There are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.`);
+      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_1__["CliError"](`There are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.`);
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`); // Kibana should always be run the last, so we don't rely on automatic
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`); // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
 
     const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
-    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projectsToWatch, projectGraph);
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projectsToWatch, projectGraph);
 
     if (shouldWatchKibanaProject) {
       batchedProjects.push([projects.get(kibanaProjectName)]);
     }
 
-    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
-      const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_4__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName, {
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async pkg => {
+      const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_5__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName, {
         debug: false
       }).stdout // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       );
-      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${pkg.name}] Initial build completed (${completionHint}).`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`[${pkg.name}] Initial build completed (${completionHint}).`);
     });
   }
 
