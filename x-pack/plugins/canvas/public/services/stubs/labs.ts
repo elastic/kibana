@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { createHostsResolvers } from './resolvers';
-export { hostsSchema } from './schema.gql';
+import { CanvasLabsService } from '../labs';
+
+const noop = (..._args: any[]): any => {};
+
+export const labsService: CanvasLabsService = {
+  getProject: noop,
+  getProjects: noop,
+};
