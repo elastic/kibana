@@ -17,7 +17,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { PackagePolicyCreateExtensionComponentProps } from '../../../fleet/public';
-import { ScheduledQueryQueriesTable } from './components/scheduled_queries_table';
+import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
 import { useKibana } from '../common/lib/kibana';
 
 /**

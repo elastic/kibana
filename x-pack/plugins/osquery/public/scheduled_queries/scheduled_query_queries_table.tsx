@@ -9,20 +9,89 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { useKibana } from '../common/lib/kibana';
 
 interface ScheduledQueryQueriesTableProps {
   data: unknown;
+  editMode?: boolean;
   onDeleteClick?: () => void;
   onEditClick?: () => void;
 }
 
-export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProps> = ({
+const ViewResultsInDiscoverAction = ({ item }) => {
+  const { createUrl } = useKibana().services.discover.urlGenerator;
+  const [discoverUrl, setDiscoverUrl] = useState<string | null>();
+
+  useEffect(() => {
+    const getDiscoverUrl = async () => {
+      const newUrl = await createUrl({
+        indexPatternId: 'logs-*',
+        timeRange: {
+          to: 'now',
+          from: 'now-7d',
+          mode: 'relative',
+        },
+      });
+      setDiscoverUrl(newUrl);
+    };
+    getDiscoverUrl();
+  }, [createUrl]);
+
+  return (
+    <EuiButtonIcon
+      // @ts-expect-error update types
+      // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+      onClick={() => onDeleteClick(item)}
+      iconType="visTable"
+      href={discoverUrl}
+      target="_blank"
+      aria-label={`Check results of ${item.vars.id.value} in Discover`}
+    />
+  );
+};
+
+const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTableProps> = ({
   data,
+  editMode = false,
   onDeleteClick,
   onEditClick,
 }) => {
+  const services = useKibana().services;
+
+  console.error('data', data);
+
+  console.error('servic', services);
+
+  console.error('indexx', services.data.indexPatterns.find('logs-*'));
+
+  console.error('dicsover', services.discover.urlGenerator.createUrl({}));
+
+  // const url = await services.discover.urlGenerator.createUrl({
+  //   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+  //   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+  //   timeRange: {
+  //     to: 'now',
+  //     from: 'now-15m',
+  //     mode: 'relative',
+  //   },
+  // });
+  // const handleDiscoverResultsClick = useCallback((item) => {}, []);
+
+  const renderViewResultsAction = useCallback(
+    (item) => (
+      <EuiButtonIcon
+        // @ts-expect-error update types
+        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+        onClick={() => onDeleteClick(item)}
+        iconType="visTable"
+        aria-label={`Check results of ${item.vars.id.value} in Discover`}
+      />
+    ),
+    [onDeleteClick]
+  );
+
   const renderDeleteAction = useCallback(
     (item) => (
       <EuiButtonIcon
@@ -74,6 +143,9 @@ export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProp
         name: 'Actions',
         actions: [
           {
+            render: (item) => <ViewResultsInDiscoverAction item={item} />,
+          },
+          {
             render: renderEditAction,
           },
           {
@@ -103,3 +175,5 @@ export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProp
     />
   );
 };
+
+export const ScheduledQueryQueriesTable = React.memo(ScheduledQueryQueriesTableComponent);

@@ -43,7 +43,7 @@ const EditScheduledQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editScheduledQuery.pageTitle"
-                defaultMessage="Edit Scheduled query"
+                defaultMessage="Edit scheduled query"
               />
             </h1>
           </EuiText>

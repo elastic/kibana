@@ -20,7 +20,7 @@ import { useParams } from 'react-router-dom';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_query';
-import { ScheduledQueryQueriesTable } from '../../../fleet_integration/components/scheduled_queries_table';
+import { ScheduledQueryQueriesTable } from '../../../scheduled_queries/scheduled_query_queries_table';
 
 const ScheduledQueryDetailsPageComponent = () => {
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();

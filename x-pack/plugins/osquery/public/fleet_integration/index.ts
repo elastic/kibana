@@ -6,7 +6,5 @@
  */
 
 export * from './lazy_osquery_managed_policy_create_import_extension';
-export * from './lazy_osquery_managed_policy_create_extension';
 export * from './lazy_osquery_managed_policy_edit_extension';
-export * from './lazy_osquery_managed_custom_extension';
 export * from './lazy_osquery_managed_custom_button_extension';

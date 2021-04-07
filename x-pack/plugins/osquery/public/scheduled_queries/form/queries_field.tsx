@@ -12,7 +12,7 @@ import React, { useCallback, useState } from 'react';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
-import { ScheduledQueryQueriesTable } from '../../fleet_integration/components/scheduled_queries_table';
+import { ScheduledQueryQueriesTable } from '../scheduled_query_queries_table';
 import { AddQueryFlyout } from './add_query_flyout';
 import { EditQueryFlyout } from './edit_query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
@@ -23,11 +23,11 @@ interface QueriesFieldProps {
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
-  const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number | null>(null);
+  const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
-  const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(null), []);
+  const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(-1), []);
 
   const { setValue } = field;
 
@@ -67,7 +67,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
 
   const handleEditQuery = useCallback(
     (updatedQuery) => {
-      if (showEditQueryFlyout) {
+      if (showEditQueryFlyout >= 0) {
         setValue(
           produce((draft) => {
             draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
@@ -95,7 +95,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
             vars: {
               id: { type: 'text', value: newQuery.id },
               interval: {
-                type: 'text',
+                type: 'integer',
                 value: newQuery.interval,
               },
               query: { type: 'text', value: newQuery.query },
@@ -121,7 +121,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
               vars: {
                 id: { type: 'text', value: newQueryId },
                 interval: {
-                  type: 'text',
+                  type: 'integer',
                   value: newQuery.interval,
                 },
                 query: { type: 'text', value: newQuery.query },
@@ -148,7 +148,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
       <EuiSpacer />
       {
         // @ts-expect-error update types
-        field.value?.streams?.length && (
+        field.value && field.value[0].streams?.length && (
           <ScheduledQueryQueriesTable
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             data={{ inputs: field.value }}
