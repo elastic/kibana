@@ -9,7 +9,7 @@
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IndexPattern } from '..';
-import type { RequestResponder } from '../../../inspector/common';
+import type { RequestAdapter } from '../../../inspector/common';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -81,6 +81,13 @@ export interface IKibanaSearchRequest<Params = any> {
   params?: Params;
 }
 
+export interface IInspectorInfo {
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
+}
+
 export interface ISearchOptions {
   /**
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
@@ -120,7 +127,7 @@ export interface ISearchOptions {
 
   indexPattern?: IndexPattern;
 
-  requestResponder?: RequestResponder;
+  inspector?: IInspectorInfo;
 }
 
 /**

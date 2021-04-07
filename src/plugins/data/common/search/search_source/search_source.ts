@@ -61,11 +61,12 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { defer, from } from 'rxjs';
+import { defer, from, Observable } from 'rxjs';
+import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { ISearchGeneric, ISearchOptions } from '../..';
+import { AggConfigs, ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -75,7 +76,14 @@ import type {
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  UI_SETTINGS,
+  isCompleteResponse,
+  IKibanaSearchResponse,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
@@ -256,9 +264,16 @@ export class SearchSource {
    */
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
+
+    const { id, title, description, adapter } = options.inspector || { title: '' };
+    const requestResponder = adapter?.start(title, {
+      id,
+      description,
+      searchSessionId: options.sessionId,
+    });
     return defer(() => this.requestIsStarting(options)).pipe(
       tap(() => {
-        options.requestResponder?.stats(getRequestInspectorStats(this));
+        requestResponder?.stats(getRequestInspectorStats(this));
       }),
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -276,16 +291,16 @@ export class SearchSource {
         if ((response as any).error) {
           throw new RequestFailure(null, response);
         } else {
-          options.requestResponder?.stats(getResponseInspectorStats(response, this));
-          options.requestResponder?.ok({ json: response });
+          requestResponder?.stats(getResponseInspectorStats(response, this));
+          requestResponder?.ok({ json: response });
         }
       }),
       catchError((e) => {
-        options.requestResponder?.error({ json: e });
+        requestResponder?.error({ json: e });
         throw e;
       }),
       finalize(() => {
-        options.requestResponder?.json(this.getSearchRequestBody());
+        requestResponder?.json(this.getSearchRequestBody());
       })
     );
   }
@@ -328,6 +343,37 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
+  private hasPostFlightRequests() {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.aggs.some(
+        (agg) => agg.enabled && typeof agg.type.postFlightRequest === 'function'
+      );
+    } else {
+      return false;
+    }
+  }
+
+  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      for (const agg of aggs.aggs) {
+        if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
+          response = await agg.type.postFlightRequest(
+            response,
+            aggs,
+            agg,
+            this,
+            options.inspector?.adapter,
+            options.abortSignal,
+            options.sessionId
+          );
+        }
+      }
+      return response;
+    }
+  }
+
   /**
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
@@ -340,6 +386,36 @@ export class SearchSource {
     });
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      switchMap((response) => {
+        return new Observable<IKibanaSearchResponse<any>>((obs) => {
+          if (!isCompleteResponse(response)) {
+            obs.next(response);
+          } else {
+            if (!this.hasPostFlightRequests()) {
+              obs.next(response);
+              obs.complete();
+            } else {
+              obs.next({
+                ...response,
+                isPartial: true,
+                isRunning: true,
+              });
+              const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
+                next: (responseWithOther) => {
+                  obs.next({
+                    ...response,
+                    rawResponse: responseWithOther,
+                  });
+                },
+                complete: () => {
+                  sub.unsubscribe();
+                  obs.complete();
+                },
+              });
+            }
+          }
+        });
+      }),
       map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
     );
   }
@@ -452,6 +528,12 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
+      case 'aggs':
+        if ((val as any) instanceof AggConfigs) {
+          return addToBody('aggs', val.toDsl(true));
+        } else {
+          return addToBody('aggs', val);
+        }
       default:
         return addToBody(key, val);
     }
