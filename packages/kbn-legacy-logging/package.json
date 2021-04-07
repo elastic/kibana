@@ -11,6 +11,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/utils": "link:../kbn-utils",
+    "@kbn/config-schema": "link:../kbn-config-schema"
   }
 }
