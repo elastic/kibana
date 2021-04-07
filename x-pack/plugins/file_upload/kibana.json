@@ -10,8 +10,7 @@
     "embeddable"
   ],
   "optionalPlugins": [
-    "security",
-    "maps"
+    "security"
   ],
   "requiredBundles": [
     "esUiShared",
