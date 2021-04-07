@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,5 +7,5 @@
  * 2.0.
  */
 
-export { ESLicense } from './get_license';
-export { getStatsWithXpack } from './get_stats_with_xpack';
+require('../../../../../src/setup_node_env');
+require('./event_filters').cli();

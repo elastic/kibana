@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ESLicense } from './get_license';
-export { getStatsWithXpack } from './get_stats_with_xpack';
+export { AccountHeader } from './account_header';
