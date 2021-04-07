@@ -7,21 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import { CoreSetup } from 'src/core/public';
+import type { CoreSetup } from 'src/core/public';
+import type {
+  ISearchEmbeddable,
+  ISharingData,
+  SavedSearch,
+} from '../../../../../src/plugins/discover/public';
 import {
   loadSharingDataHelpers,
-  ISearchEmbeddable,
-  SavedSearch,
   SEARCH_EMBEDDABLE_TYPE,
 } from '../../../../../src/plugins/discover/public';
-import { IEmbeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
-import {
-  IncompatibleActionError,
-  UiActionsActionDefinition as ActionDefinition,
-} from '../../../../../src/plugins/ui_actions/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
+import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import type { LicensingPluginSetup } from '../../../licensing/public';
 import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
-import { JobParamsDownloadCSV } from '../../server/export_types/csv_searchsource_immediate/types';
+import type { JobParamsDownloadCSV } from '../../server/export_types/csv_searchsource_immediate/types';
 import { checkLicense } from '../lib/license_check';
 
 function isSavedSearchEmbeddable(
@@ -62,7 +64,10 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+  public async getSearchSource(
+    savedSearch: SavedSearch,
+    embeddable: ISearchEmbeddable
+  ): Promise<ISharingData> {
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,

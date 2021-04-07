@@ -13,7 +13,7 @@ import type { SavedSearch, SortOrder } from '../../saved_searches/types';
 import { AppState } from '../angular/discover_state';
 import { getSortForSearchSource } from '../angular/doc_table';
 
-interface SharingData {
+export interface ISharingData {
   columns: string[];
   searchSource: SearchSourceFields;
 }
@@ -25,7 +25,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
   config: IUiSettingsClient
-): Promise<SharingData> {
+): Promise<ISharingData> {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 

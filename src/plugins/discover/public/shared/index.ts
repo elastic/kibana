@@ -12,3 +12,5 @@
 export async function loadSharingDataHelpers() {
   return await import('../application/helpers/get_sharing_data');
 }
+
+export { ISharingData } from '../application/helpers/get_sharing_data';
