@@ -86,6 +86,7 @@ export interface DetectionRuleMetric {
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
+  cases_count_daily: number;
 }
 
 export const defaultDetectionsUsage = {
@@ -118,7 +119,7 @@ export const fetchDetectionsMetrics = async (
 ): Promise<DetectionMetrics> => {
   const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
     getMlJobMetrics(ml, savedObjectClient),
-    getDetectionRuleMetrics(kibanaIndex, esClient),
+    getDetectionRuleMetrics(kibanaIndex, esClient, savedObjectClient),
   ]);
 
   return {

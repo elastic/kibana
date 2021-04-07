@@ -326,9 +326,21 @@ interface AlertsAggregationResponse {
   };
 }
 
+interface CasesSavedObject {
+  associationType: string;
+  type: string;
+  alertId: string;
+  index: string;
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
 export const getDetectionRuleMetrics = async (
   index: string,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionRuleMetric[]> => {
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
@@ -369,6 +381,26 @@ export const getDetectionRuleMetrics = async (
       },
     }));
 
+    const cases = await savedObjectClient.find<CasesSavedObject>({
+      type: 'cases-comments',
+      fields: [],
+      page: 1,
+      perPage: 10_000,
+      filter: 'cases-comments.attributes.type: alert',
+    });
+
+    const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
+      const ruleId = casesObject.rule.id;
+
+      const cacheCount = cache.get(ruleId);
+      if (cacheCount === undefined) {
+        cache.set(ruleId, 1);
+      } else {
+        cache.set(ruleId, cacheCount + 1);
+      }
+      return cache;
+    }, new Map() as Map<string, number>);
+
     const alertBuckets = detectionAlertsResp!.aggregations?.detectionAlerts?.buckets ?? [];
 
     const alertsCache = new Map();
@@ -380,7 +412,7 @@ export const getDetectionRuleMetrics = async (
       );
 
       return elasticRules.map((hit) => {
-        const ruleId = hit._source?.alert.params.ruleId;
+        const ruleId = hit._source?.alert.params.ruleId!;
         return {
           rule_name: hit._source?.alert.name,
           rule_id: ruleId,
@@ -390,6 +422,7 @@ export const getDetectionRuleMetrics = async (
           created_on: hit._source?.alert.createdAt,
           updated_on: hit._source?.alert.updatedAt,
           alert_count_daily: alertsCache.get(ruleId) || 0,
+          cases_count_daily: casesCache.get(ruleId) || 0,
         } as DetectionRuleMetric;
       });
     }
