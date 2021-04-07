@@ -20,7 +20,6 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { PluggableList } from 'unified';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
