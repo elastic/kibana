@@ -31,6 +31,112 @@ You do not need to configure any additional settings to use the
 |===
 
 [float]
+[[authentication-security-settings]]
+==== Authentication security settings
+
+You configure authentication settings in the `xpack.security.authc` namespace in `kibana.yml`.
+
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.security.authc:
+    providers:
+      basic.basic1: <1>
+          order: 0 <2>
+          ...
+      saml.saml1: <3>
+          order: 1
+          ...
+      saml.saml2: <4>
+          order: 2
+          ...
+      pki.realm3:
+          order: 3
+          ...
+    ...
+----------------------------------------
+<1> Specifies the type of authentication provider (for example, `basic`, `token`, `saml`, `oidc`, `kerberos`, `pki`) and the provider name. This setting is mandatory.
+<2> Specifies the order of the provider in the authentication chain and on the Login Selector UI. This setting is mandatory.
+<3> Specifies the settings for the SAML authentication provider with a `saml1` name.
+<4> Specifies the settings for the SAML authentication provider with a `saml2` name.
+
+The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<kibana-authentication>>.
+
+[float]
+[[authentication-provider-settings]]
+===== Valid settings for all authentication providers
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.enabled`
+| Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.order`
+| Order of the provider in the authentication chain and on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.description`
+| Custom description of the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.hint`
+| Custom hint for the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.icon`
+| Custom icon for the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.showInSelector`
+| Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
+
+2+a|
+[TIP]
+[NOTE]
+============
+You are unable to set this setting to `false` for `basic` and `token` authentication providers.
+============
+
+|===
+
+[float]
+[[saml-authentication-provider-settings]]
+===== SAML authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`saml.<provider-name>.realm`
+| SAML realm in {es} that provider should use.
+
+| `xpack.security.authc.providers.`
+`saml.<provider-name>.useRelayStateDeepLink`
+| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. 
+By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. 
+For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
+
+|===
+
+[float]
+[[oidc-authentication-provider-settings]]
+===== OpenID Connect authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`oidc.<provider-name>.realm`
+| OpenID Connect realm in {es} that the provider should use.
+
+|===
+
+[float]
 [[security-ui-settings]]
 ==== User interface security settings
 
