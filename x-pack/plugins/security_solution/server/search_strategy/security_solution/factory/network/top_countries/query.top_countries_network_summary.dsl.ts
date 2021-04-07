@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
@@ -38,9 +37,8 @@ export const buildTopCountriesQuerySummary = ({
     ...createQueryFilterClauses(filterQuery),
     {
       range: {
-        // TODO: Should the front end be doing the down rounding here?
         '@timestamp': {
-          gte: moment(from).startOf('hour'),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

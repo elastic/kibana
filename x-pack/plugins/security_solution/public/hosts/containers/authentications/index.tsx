@@ -171,10 +171,15 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.authentications,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
 
       const myRequest = {
@@ -184,11 +189,7 @@ export const useAuthentications = ({
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {

@@ -21,8 +21,7 @@ export const buildAuthenticationsHistogramQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Should the UI push this down?
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

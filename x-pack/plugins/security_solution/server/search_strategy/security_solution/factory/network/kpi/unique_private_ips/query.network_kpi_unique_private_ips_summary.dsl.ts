@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import {
   NetworkKpiUniquePrivateIpsRequestOptions,
   UniquePrivateAttributeQuery,
@@ -76,8 +75,7 @@ export const buildUniquePrivateIpsQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Should the front end push this down?
-          gte: moment(from).startOf('hour'),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

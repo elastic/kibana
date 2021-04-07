@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { HostsKpiUniqueIpsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
@@ -19,8 +18,7 @@ export const buildHostsKpiUniqueIpsQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Should the front end round down on this instead?
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

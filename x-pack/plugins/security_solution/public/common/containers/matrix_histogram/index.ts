@@ -72,11 +72,17 @@ export const useMatrixHistogram = ({
     indices: initialIndexName,
     factoryQueryType: initialFactoryQueryType,
     histogramType: initialHistogramType,
+    timerange: initialTimerange,
   } = getTransformChangesIfTheyExist({
     histogramType,
     factoryQueryType: MatrixHistogramQuery,
     indices: indexNames,
     filterQuery,
+    timerange: {
+      interval: '12h',
+      from: startDate,
+      to: endDate,
+    },
   });
 
   const [
@@ -87,11 +93,7 @@ export const useMatrixHistogram = ({
     factoryQueryType: initialFactoryQueryType,
     filterQuery: createFilter(filterQuery),
     histogramType: initialHistogramType ?? histogramType,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
+    timerange: initialTimerange,
     stackByField,
     threshold,
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
@@ -167,11 +169,17 @@ export const useMatrixHistogram = ({
       indices,
       factoryQueryType,
       histogramType: newHistogramType,
+      timerange,
     } = getTransformChangesIfTheyExist({
       histogramType,
       factoryQueryType: MatrixHistogramQuery,
       indices: indexNames,
       filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
     });
 
     setMatrixHistogramRequest((prevRequest) => {
@@ -181,11 +189,7 @@ export const useMatrixHistogram = ({
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
         histogramType: newHistogramType ?? histogramType,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),

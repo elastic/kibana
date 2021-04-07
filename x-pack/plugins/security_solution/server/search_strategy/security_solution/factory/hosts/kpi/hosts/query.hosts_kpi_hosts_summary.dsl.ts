@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
@@ -19,8 +18,7 @@ export const buildHostsKpiHostsQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Do we want to round down here (or at all? or do we want to push this responsibility up the stack?)
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

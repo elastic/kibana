@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { NetworkKpiTlsHandshakesRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
@@ -19,7 +18,7 @@ export const buildTlsHandshakeQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          gte: moment(from).startOf('hour'),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

@@ -129,10 +129,15 @@ export const useNetworkKpiDns = ({
 
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkKpiQueries.dns,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
 
       const myRequest = {
@@ -140,11 +145,7 @@ export const useNetworkKpiDns = ({
         defaultIndex: indices,
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

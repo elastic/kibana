@@ -167,10 +167,15 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.hosts,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
       const myRequest = {
         ...(prevRequest ?? {}),
@@ -179,11 +184,7 @@ export const useAllHost = ({
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
         sort: {
           direction,
           field: sortField,

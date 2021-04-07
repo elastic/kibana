@@ -132,10 +132,15 @@ export const useHostsKpiUniqueIps = ({
   );
 
   useEffect(() => {
-    const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+    const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
       factoryQueryType: HostsKpiQueries.kpiUniqueIps,
       indices: indexNames,
       filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
     });
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
@@ -143,11 +148,7 @@ export const useHostsKpiUniqueIps = ({
         defaultIndex: indices,
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

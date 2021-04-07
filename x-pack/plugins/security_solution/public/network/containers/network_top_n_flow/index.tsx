@@ -170,10 +170,15 @@ export const useNetworkTopNFlow = ({
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkQueries.topNFlow,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
       const myRequest = {
         ...(prevRequest ?? {}),
@@ -183,11 +188,7 @@ export const useNetworkTopNFlow = ({
         flowTarget,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
         sort,
       };
       if (!deepEqual(prevRequest, myRequest)) {

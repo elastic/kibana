@@ -135,21 +135,22 @@ export const useNetworkKpiNetworkEvents = ({
 
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkKpiQueries.networkEvents,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indices,
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

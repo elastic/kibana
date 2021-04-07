@@ -6,7 +6,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import moment from 'moment';
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
@@ -30,8 +29,7 @@ export const buildHostsQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // Round down to nearest hour since we are using an hourly summary
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

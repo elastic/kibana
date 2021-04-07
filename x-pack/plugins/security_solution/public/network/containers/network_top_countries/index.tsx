@@ -174,10 +174,15 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkQueries.topCountries,
         indices: indexNames,
         filterQuery,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       });
 
       const myRequest = {
@@ -189,11 +194,7 @@ export const useNetworkTopCountries = ({
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

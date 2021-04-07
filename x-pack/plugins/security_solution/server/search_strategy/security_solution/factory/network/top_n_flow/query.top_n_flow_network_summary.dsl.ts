@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import {
   SortField,
   FlowTargetSourceDest,
@@ -39,8 +38,7 @@ export const buildTopNFlowQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Should the UI push down the start of the hour?
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },

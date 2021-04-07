@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 import type { estypes } from '@elastic/elasticsearch';
 
-import moment from 'moment';
 import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
@@ -25,8 +24,7 @@ export const buildQuerySummary = ({
     {
       range: {
         '@timestamp': {
-          // TODO: Do we want to round down here or higher up in the UI?
-          gte: moment(from).startOf('hour').toISOString(),
+          gte: from,
           lte: to,
           format: 'strict_date_optional_time',
         },
