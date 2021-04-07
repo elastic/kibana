@@ -52,6 +52,14 @@ Sensitive properties, such as passwords, can also be stored in the <<creating-ke
 ==============================================
 
 [float]
+[[build-in-preconfigured-connectors]]
+==== Built-in preconfigured connectors
+
+{kib} provides one built-in preconfigured connector:
+
+* <<preconfigured-connector-alert-history, Alert history preconfigured {es} index connector>>
+
+[float]
 [[managing-pre-configured-connectors]]
 ==== View preconfigured connectors
 
@@ -64,27 +72,3 @@ Clicking a preconfigured connector shows the description, but not the configurat
 
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
-
-[float]
-[[preconfigured-connector-alert-history]]
-==== Alert history preconfigured connector
-
-{kib} offers a preconfigured <<index-action-type, Index>> connector to facilitate indexing active alert data into {es}.
-
-To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`. 
-
-```js
-  xpack.actions.preconfiguredAlertHistoryEsIndex: true
-```
-
-When creating a new rule, add an <<index-action-type, Index action>> and select the `Alert History ES Index (preconfigured)` connector.
-
-[role="screenshot"]
-image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
-
-Documents are indexed using a preconfigured schema that captures the <<defining-alerts-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `alert-history-default` index, but you can specify a different index. Index names must start with `alert-history-` to take advantage of the preconfigured Alert History index template.
-
-[IMPORTANT]
-==============================================
-To write documents to the preconfigured index, you must have `all` or `write` privileges to the `alert-history-*` indices. Refer to <<xpack-kibana-role-management>> for more information.
-==============================================
