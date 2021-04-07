@@ -33,7 +33,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
     features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,
       name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
-        defaultMessage: 'Example Rule Types',
+        defaultMessage: 'Alerting Examples',
       }),
       app: [],
       management: {
