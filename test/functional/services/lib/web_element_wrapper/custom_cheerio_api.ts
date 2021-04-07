@@ -236,7 +236,7 @@ export interface CustomCheerio {
 
   // Not Documented
 
-  toArray(): cheerio.Element[];
+  toArray(): CustomCheerio[];
 
   //
   // CUSTOM METHODS
