@@ -229,7 +229,7 @@ export class Execution<
    * N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  public start(input: Input = null as any) {
+  public start(input: Input = null as any): Observable<Output | ExpressionValueError> {
     if (this.hasStarted) throw new Error('Execution already started.');
     this.hasStarted = true;
     this.input = input;
@@ -439,9 +439,15 @@ export class Execution<
         argNames.map((argName) => {
           const interpretFns = resolveArgFns[argName];
 
+          // `combineLatest` does not emit a value on an empty collection
+          // @see https://github.com/ReactiveX/RxSwift/issues/1879
+          if (!interpretFns.length) {
+            return of([]);
+          }
+
           return argDefs[argName].resolve
             ? combineLatest(interpretFns.map((fn) => fn()))
-            : from([interpretFns]);
+            : of(interpretFns);
         })
       );
 
@@ -474,7 +480,7 @@ export class Execution<
       case 'boolean':
         return of(ast);
       default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+        return throwError(new Error(`Unknown AST object: ${JSON.stringify(ast)}`));
     }
   }
 }
