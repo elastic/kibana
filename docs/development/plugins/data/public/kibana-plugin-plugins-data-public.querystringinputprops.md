@@ -14,6 +14,7 @@ export interface QueryStringInputProps
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [autoSubmit](./kibana-plugin-plugins-data-public.querystringinputprops.autosubmit.md) | <code>boolean</code> |  |
 |  [bubbleSubmitEvent](./kibana-plugin-plugins-data-public.querystringinputprops.bubblesubmitevent.md) | <code>boolean</code> |  |
 |  [className](./kibana-plugin-plugins-data-public.querystringinputprops.classname.md) | <code>string</code> |  |
 |  [dataTestSubj](./kibana-plugin-plugins-data-public.querystringinputprops.datatestsubj.md) | <code>string</code> |  |
@@ -36,5 +37,6 @@ export interface QueryStringInputProps
 |  [query](./kibana-plugin-plugins-data-public.querystringinputprops.query.md) | <code>Query</code> |  |
 |  [screenTitle](./kibana-plugin-plugins-data-public.querystringinputprops.screentitle.md) | <code>string</code> |  |
 |  [size](./kibana-plugin-plugins-data-public.querystringinputprops.size.md) | <code>SuggestionsListSize</code> |  |
+|  [storageKey](./kibana-plugin-plugins-data-public.querystringinputprops.storagekey.md) | <code>string</code> |  |
 |  [submitOnBlur](./kibana-plugin-plugins-data-public.querystringinputprops.submitonblur.md) | <code>boolean</code> |  |
 
