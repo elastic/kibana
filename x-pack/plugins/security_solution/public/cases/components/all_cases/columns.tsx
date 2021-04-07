@@ -132,7 +132,6 @@ export const getCasesColumns = (
       align: RIGHT_ALIGNMENT,
       field: 'totalAlerts',
       name: ALERTS,
-      sortable: true,
       render: (totalAlerts: Case['totalAlerts']) =>
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
@@ -142,7 +141,6 @@ export const getCasesColumns = (
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
       name: i18n.COMMENTS,
-      sortable: true,
       render: (totalComment: Case['totalComment']) =>
         totalComment != null
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
