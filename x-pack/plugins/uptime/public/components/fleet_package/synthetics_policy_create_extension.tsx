@@ -66,7 +66,7 @@ SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
 const defaultValues = {
   [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: 0,
+  [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKeys.PASSWORD]: '',
   [ConfigKeys.PROXY_URL]: '',
@@ -115,10 +115,10 @@ const defaultValues = {
     isEnabled: false,
   },
   [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: 16,
+  [ConfigKeys.TIMEOUT]: '16',
   [ConfigKeys.URLS]: '',
   [ConfigKeys.USERNAME]: '',
-  [ConfigKeys.WAIT]: 1,
+  [ConfigKeys.WAIT]: '1',
 };
 
 export const defaultConfig: Config = {
