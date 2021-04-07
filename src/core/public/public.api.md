@@ -628,6 +628,7 @@ export interface DocLinksStart {
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
             putWatch: string;
+            simulatePipeline: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;

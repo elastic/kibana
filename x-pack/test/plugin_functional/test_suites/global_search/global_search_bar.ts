@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('TOTO GlobalSearchBar', function () {
+  describe('GlobalSearchBar', function () {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const esArchiver = getService('esArchiver');
     const browser = getService('browser');
