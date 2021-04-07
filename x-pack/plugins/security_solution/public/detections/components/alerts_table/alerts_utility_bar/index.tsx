@@ -58,11 +58,6 @@ const BuildingBlockContainer = styled(EuiFlexItem)`
     rgba(245, 167, 0, 0.05) 2px,
     rgba(245, 167, 0, 0.05) 10px
   );
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.xs}`};
-`;
-
-const ThreatMatchContainer = styled(EuiFlexItem)`
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.xs}`};
 `;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
@@ -152,7 +147,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   );
 
   const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
-    <UtilityBarFlexGroup direction="column">
+    <UtilityBarFlexGroup direction="column" gutterSize="m">
       <BuildingBlockContainer>
         <EuiCheckbox
           id="showBuildingBlockAlertsCheckbox"
@@ -167,7 +162,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
         />
       </BuildingBlockContainer>
-      <ThreatMatchContainer>
+      <EuiFlexItem>
         <EuiCheckbox
           id="showThreatMatchesOnlyCheckbox"
           aria-label="showThreatMatchesOnly"
@@ -180,7 +175,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           data-test-subj="showThreatMatchesOnlyCheckbox"
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_THREAT_MATCHES_ONLY}
         />
-      </ThreatMatchContainer>
+      </EuiFlexItem>
     </UtilityBarFlexGroup>
   );
 

@@ -45,7 +45,7 @@ export const ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK = i18n.translate(
 export const ADDITIONAL_FILTERS_ACTIONS_SHOW_THREAT_MATCHES_ONLY = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showThreatMatchesOnly',
   {
-    defaultMessage: 'Show threat indicator matches only',
+    defaultMessage: 'Show only threat indicator alerts',
   }
 );
 
