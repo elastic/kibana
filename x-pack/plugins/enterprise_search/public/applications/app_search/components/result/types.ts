@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
+import { EuiButtonIconColor } from '@elastic/eui';
 
-import { EuiIconProps } from '@elastic/eui';
+import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
 
 export type FieldType = InternalSchemaTypes | SchemaTypes;
 
@@ -40,5 +40,5 @@ export interface ResultAction {
   onClick(): void;
   title: string;
   iconType: string;
-  iconColor?: EuiIconProps['color'];
+  iconColor?: EuiButtonIconColor;
 }

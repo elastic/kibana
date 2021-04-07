@@ -16,6 +16,7 @@ import {
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
+  EuiButtonIconColor,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -78,7 +79,7 @@ export const Library: React.FC = () => {
       title: 'Fill this action button',
       onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
       iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
-      iconColor: 'primary',
+      iconColor: 'primary' as EuiButtonIconColor,
     },
   ];
 

@@ -11,6 +11,7 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 import './result.scss';
 
 import { EuiButtonIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
