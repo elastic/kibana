@@ -56,8 +56,10 @@ export default function ({ getPageObjects, getService }) {
     }
 
     it('should set "data-title" attribute', async () => {
-      const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
-      expect(title).to.be('join example');
+      await retry.try(async () => {
+        const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
+        expect(title).to.be('join example');
+      });
     });
 
     it('should pass index patterns to container', async () => {
