@@ -65,9 +65,7 @@ describe('MetricSelection', function () {
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
-    // FIXME This is a bug in EUI EuiButtonGroup calls on change multiple times
-    // This should be one https://github.com/elastic/eui/issues/4629
-    expect(setSeries).toHaveBeenCalledTimes(3);
+    expect(setSeries).toHaveBeenCalledTimes(1);
   });
 
   it('should call set series on change for all series', function () {
@@ -105,8 +103,6 @@ describe('MetricSelection', function () {
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
-    // FIXME This is a bug in EUI EuiButtonGroup calls on change multiple times
-    // This should be one https://github.com/elastic/eui/issues/4629
-    expect(setSeries).toHaveBeenCalledTimes(6);
+    expect(setSeries).toHaveBeenCalledTimes(2);
   });
 });

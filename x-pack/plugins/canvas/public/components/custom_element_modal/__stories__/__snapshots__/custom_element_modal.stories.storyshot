@@ -212,8 +212,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -521,8 +520,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned canvasElementCard"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
               >
                 <div
                   className="euiCard__top"
@@ -827,8 +825,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
@@ -1128,8 +1125,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
-                onClick={[Function]}
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
               >
                 <div
                   className="euiCard__top"
