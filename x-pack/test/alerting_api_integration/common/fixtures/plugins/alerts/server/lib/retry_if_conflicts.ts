@@ -56,6 +56,9 @@ async function waitBeforeNextRetry(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
 }
 
+// This is a workaround to avoid having to add more code to compile for tests via
+// packages/kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js
+// to use SavedObjectsErrorHelpers.isConflictError.
 function isConflictError(error: any): boolean {
   return error.isBoom === true && error.output.statusCode === 409;
 }
