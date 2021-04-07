@@ -1218,8 +1218,6 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsCreateOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
     coreMigrationVersion?: string;
