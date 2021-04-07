@@ -413,7 +413,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
       throw badRequest(
         `Received an alert comment with ids and indices arrays of different lengths ids: ${JSON.stringify(
           ids
-        )} indices: ${indices.join()}}`
+        )} indices: ${JSON.stringify(indices)}`
       );
     }
   }
