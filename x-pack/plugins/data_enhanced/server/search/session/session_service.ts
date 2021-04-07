@@ -225,7 +225,7 @@ export class SearchSessionService
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
   ) => {
-    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
@@ -325,7 +325,7 @@ export class SearchSessionService
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
-    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
@@ -363,7 +363,7 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     this.logger.debug(`delete | ${sessionId}`);
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
@@ -423,7 +423,7 @@ export class SearchSessionService
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
     if (!this.sessionConfig.enabled) {
-      throw new Error('Feature is disabled');
+      throw new Error('Search sessions are disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
