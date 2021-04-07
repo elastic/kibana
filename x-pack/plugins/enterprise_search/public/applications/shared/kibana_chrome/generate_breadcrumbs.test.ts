@@ -89,8 +89,7 @@ describe('useEuiBreadcrumbs', () => {
       },
       {
         text: 'World',
-        href: '/app/enterprise_search/world',
-        onClick: expect.any(Function),
+        // Per EUI best practices, the last breadcrumb is inactive/is not a link
       },
     ]);
   });
@@ -164,8 +163,6 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -174,8 +171,6 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs()).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -219,8 +214,6 @@ describe('useAppSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/app_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -234,8 +227,6 @@ describe('useAppSearchBreadcrumbs', () => {
       },
       {
         text: 'App Search',
-        href: '/app/enterprise_search/app_search/',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -279,8 +270,6 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/workplace_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -294,8 +283,6 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
       },
       {
         text: 'Workplace Search',
-        href: '/app/enterprise_search/workplace_search/',
-        onClick: expect.any(Function),
       },
     ]);
   });
