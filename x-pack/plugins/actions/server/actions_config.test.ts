@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionsConfig } from './config';
 import {
   getActionsConfigurationUtilities,
   AllowedHosts,
   EnabledActionTypes,
 } from './actions_config';
+import moment from 'moment';
 
 const defaultActionsConfig: ActionsConfig = {
   enabled: false,
@@ -19,6 +21,8 @@ const defaultActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyRejectUnauthorizedCertificates: true,
   rejectUnauthorized: true,
+  maxResponseContentLength: new ByteSizeValue(1000000),
+  responseTimeout: moment.duration(60000),
 };
 
 describe('ensureUriAllowed', () => {
@@ -251,6 +255,18 @@ describe('ensureActionTypeEnabled', () => {
       enabledActionTypes: ['ignore', 'foo'],
     };
     expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
+  });
+});
+
+describe('getResponseSettingsFromConfig', () => {
+  test('returns expected parsed values for default config for responseTimeout and maxResponseContentLength', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+    };
+    expect(getActionsConfigurationUtilities(config).getResponseSettings()).toEqual({
+      timeout: 60000,
+      maxContentLength: 1000000,
+    });
   });
 });
 
