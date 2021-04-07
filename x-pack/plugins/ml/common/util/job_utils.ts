@@ -8,9 +8,9 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
+import type { estypes } from '@elastic/elasticsearch';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-
 import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
@@ -78,12 +78,13 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
  * if composite is defined.
  * @param buckets
  */
-export function hasValidComposite(buckets: { [key: string]: object | undefined }) {
+export function hasValidComposite(buckets: estypes.AggregationContainer) {
   if (
     isPopulatedObject(buckets, ['composite']) &&
-    isPopulatedObject(buckets.composite, ['sources'])
+    isPopulatedObject(buckets.composite, ['sources']) &&
+    buckets.composite.sources !== undefined
   ) {
-    const sources = buckets.composite.sources as Array<Record<string, object>>;
+    const sources = buckets.composite.sources;
     return sources.some((source) => {
       const sourceName = getFirstKeyInObject(source);
       if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
@@ -142,7 +143,8 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
           // if fieldName is a aggregated field under nested terms using bucket_script
-          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          const aggregations =
+            getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
           if (foundField?.bucket_script !== undefined) {
             return false;
