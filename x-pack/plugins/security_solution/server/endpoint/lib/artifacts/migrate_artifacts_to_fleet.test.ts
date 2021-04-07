@@ -94,7 +94,7 @@ describe('When migrating artifacts to fleet', () => {
     const error = new Error('test: delete failed');
     soClient.delete.mockRejectedValue(error);
     await expect(migrateArtifactsToFleet(soClient, artifactClient, logger, true)).rejects.toThrow(
-      'Artifact SO migration to fleet failed'
+      'Artifact SO migration failed'
     );
   });
 });
