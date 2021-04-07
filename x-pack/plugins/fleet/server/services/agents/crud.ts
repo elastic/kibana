@@ -125,6 +125,7 @@ export async function getAgentsByKuery(
     size: perPage,
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
+    ignore_unavailable: true,
     body,
   });
 
@@ -180,6 +181,7 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    ignore_unavailable: true,
     body,
   });
   // @ts-expect-error value is number | TotalHits
@@ -249,6 +251,7 @@ export async function getAgentByAccessAPIKeyId(
 ): Promise<Agent> {
   const res = await esClient.search<FleetServerAgent>({
     index: AGENTS_INDEX,
+    ignore_unavailable: true,
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
 
