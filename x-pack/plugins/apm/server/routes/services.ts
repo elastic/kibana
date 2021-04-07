@@ -556,28 +556,32 @@ const serviceInstancesComparisonStatisticsRoute = createApmServerRoute({
 
 export const serviceInstancesMetadataDetails = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/{serviceNodeName}',
+    'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { serviceName, serviceNodeName } = resources.params.path;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const { transactionType, environment, kuery } = resources.params.query;
 
     return await getServiceInstanceMetadataDetails({
-      searchAggregatedTransactions,
       setup,
       serviceName,
       serviceNodeName,
+      transactionType,
+      environment,
+      kuery,
     });
   },
 });

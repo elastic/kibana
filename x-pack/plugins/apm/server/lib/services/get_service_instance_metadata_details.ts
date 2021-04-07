@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  AGENT_NAME,
   CLOUD_ACCOUNT_ID,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -21,11 +21,11 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { rangeQuery } from '../../utils/queries';
+import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface KeyValue {
@@ -52,28 +52,31 @@ export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,
   setup,
-  searchAggregatedTransactions,
+  transactionType,
+  environment,
+  kuery,
 }: {
   serviceName: string;
   serviceNodeName: string;
   setup: Setup & SetupTimeRange;
-  searchAggregatedTransactions: boolean;
+  transactionType: string;
+  environment?: string;
+  kuery?: string;
 }): Promise<ServiceInstanceMetadataDetails> {
   return withApmSpan('get_service_instance_metadata_details', async () => {
     const { start, end, apmEventClient } = setup;
     const filter = [
       { term: { [SERVICE_NAME]: serviceName } },
       { term: { [SERVICE_NODE_NAME]: serviceNodeName } },
+      { term: { [TRANSACTION_TYPE]: transactionType } },
       ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ];
 
     const response = await apmEventClient.search({
       apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
+        events: [ProcessorEvent.transaction],
       },
       body: {
         terminate_after: 1,

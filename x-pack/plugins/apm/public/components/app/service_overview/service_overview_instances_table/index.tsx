@@ -24,6 +24,7 @@ import {
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 
@@ -116,16 +117,20 @@ export function ServiceOverviewInstancesTable({
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <EuiBasicTable
-            loading={isLoading}
-            items={primaryStatsItems}
-            columns={columns}
-            pagination={pagination}
-            sorting={{ sort: { field, direction } }}
-            onChange={onChangeTableOptions}
-            itemId="serviceNodeName"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          />
+          <ServiceOverviewTableContainer
+            isEmptyAndLoading={primaryStatsItemCount === 0 && isLoading}
+          >
+            <EuiBasicTable
+              loading={isLoading}
+              items={primaryStatsItems}
+              columns={columns}
+              pagination={pagination}
+              sorting={{ sort: { field, direction } }}
+              onChange={onChangeTableOptions}
+              itemId="serviceNodeName"
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            />
+          </ServiceOverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

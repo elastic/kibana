@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -26,38 +28,51 @@ interface Props {
   serviceNodeName: string;
 }
 
+const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
+  margin-left: 50%;
+`;
+
 export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
   const theme = useTheme();
   const history = useHistory();
   const {
-    urlParams: { start, end, kuery },
+    urlParams: { start, end, kuery, environment },
   } = useUrlParams();
+  const { transactionType } = useApmServiceContext();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (!start || !end || !transactionType) {
         return;
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/{serviceNodeName}',
+          'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
         params: {
           path: {
             serviceName,
             serviceNodeName,
           },
-          query: { start, end },
+          query: { start, end, transactionType, environment, kuery },
         },
       });
     },
-    [serviceName, serviceNodeName, start, end]
+    [
+      serviceName,
+      serviceNodeName,
+      start,
+      end,
+      transactionType,
+      environment,
+      kuery,
+    ]
   );
 
   if (
     status === FETCH_STATUS.LOADING ||
     status === FETCH_STATUS.NOT_INITIATED
   ) {
-    return <EuiLoadingSpinner />;
+    return <StyledEuiLoadingSpinner />;
   }
 
   if (!data) {
