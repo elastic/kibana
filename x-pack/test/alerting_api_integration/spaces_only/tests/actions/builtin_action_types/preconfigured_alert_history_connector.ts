@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getTestAlertData, ObjectRemover } from '../../../../common/lib';
 import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
 
-const ALERT_HISTORY_OVERRIDE_INDEX = 'alert-history-not-the-default';
+const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
 
 // eslint-disable-next-line import/no-default-export
 export default function preconfiguredAlertHistoryConnectorTests({

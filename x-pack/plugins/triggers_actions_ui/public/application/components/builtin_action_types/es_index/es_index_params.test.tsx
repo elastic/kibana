@@ -27,7 +27,7 @@ const actionConnector = {
 const preconfiguredActionConnector = {
   actionTypeId: '.index',
   config: {
-    index: 'alert-history-default',
+    index: 'kibana-alert-history-default',
   },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
@@ -102,7 +102,7 @@ describe('IndexParamsFields renders', () => {
   test('all params fields are rendered correctly for preconfigured alert history connector when params are defined', async () => {
     const actionParams = {
       documents: undefined,
-      indexOverride: 'alert-history-not-the-default',
+      indexOverride: 'kibana-alert-history-not-the-default',
     };
     const wrapper = mountWithIntl(
       <ParamsFields

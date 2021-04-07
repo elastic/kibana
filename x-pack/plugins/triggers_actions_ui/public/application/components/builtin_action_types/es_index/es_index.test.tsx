@@ -97,7 +97,7 @@ describe('action params validation', () => {
     expect(
       actionTypeModel.validateParams({
         documents: [{ test: 1234 }],
-        indexOverride: 'alert-history-anything',
+        indexOverride: 'kibana-alert-history-anything',
       })
     ).toEqual({
       errors: {
@@ -129,7 +129,7 @@ describe('action params validation', () => {
     expect(
       actionTypeModel.validateParams({
         documents: [{}],
-        indexOverride: 'alert-history-',
+        indexOverride: 'kibana-alert-history-',
       })
     ).toEqual({
       errors: {
@@ -146,7 +146,7 @@ describe('action params validation', () => {
     ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
-        indexOverride: ['Alert history index must begin with "alert-history-".'],
+        indexOverride: ['Alert history index must begin with "kibana-alert-history-".'],
       },
     });
   });

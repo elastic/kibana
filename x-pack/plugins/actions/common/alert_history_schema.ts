@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 
-export const ALERT_HISTORY_PREFIX = 'alert-history-';
+export const ALERT_HISTORY_PREFIX = 'kibana-alert-history-';
 export const AlertHistoryDefaultIndexName = `${ALERT_HISTORY_PREFIX}default`;
 export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-index';
 

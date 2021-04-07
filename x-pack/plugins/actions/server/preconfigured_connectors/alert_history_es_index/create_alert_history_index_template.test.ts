@@ -33,7 +33,7 @@ describe('createAlertHistoryIndexTemplate', () => {
 
     await createAlertHistoryIndexTemplate({ client: clusterClient, logger });
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
-      name: `alert-history-template`,
+      name: `kibana-alert-history-template`,
       body: getAlertHistoryIndexTemplate(),
       create: true,
     });

@@ -129,7 +129,7 @@ export const IndexParamsFields = ({
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText"
-              defaultMessage="Documents are indexed into the {alertHistoryIndex} index. "
+              defaultMessage={`Documents are indexed into the "{alertHistoryIndex}" index. `}
               values={{ alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` }}
             />
             <EuiLink
