@@ -18,7 +18,7 @@ import * as i18n from './translations';
 
 export interface CasesNavigation {
   href: string;
-  onClick?: (arg: React.MouseEvent) => void;
+  onClick?: (arg: React.MouseEvent | MouseEvent) => void;
 }
 
 export interface CasesGetNavigation<T = React.MouseEvent> {
