@@ -68,8 +68,8 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
-import { getAlertHistoryEsIndex } from './builtin_action_types/alert_history_es_index/alert_history_es_index';
-import { createAlertHistoryIndexTemplate } from './builtin_action_types/alert_history_es_index/create_alert_history_index_template';
+import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
+import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { AlertHistoryEsIndexConnectorId } from '../common';
 
 const EVENT_LOG_PROVIDER = 'actions';

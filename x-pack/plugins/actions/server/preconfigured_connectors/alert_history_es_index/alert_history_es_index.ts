@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PreConfiguredAction } from '../../types';
-import { ActionTypeId as EsIndexActionTypeId } from '../es_index';
+import { ActionTypeId as EsIndexActionTypeId } from '../../builtin_action_types/es_index';
 import { AlertHistoryEsIndexConnectorId, AlertHistoryDefaultIndexName } from '../../../common';
 
 export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
