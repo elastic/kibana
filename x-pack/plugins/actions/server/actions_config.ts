@@ -11,17 +11,11 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig } from './config';
+import { ActionsConfig, AllowedHosts, EnabledActionTypes } from './config';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings } from './types';
 
-export enum AllowedHosts {
-  Any = '*',
-}
-
-export enum EnabledActionTypes {
-  Any = '*',
-}
+export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
   URL = 'url',
@@ -93,9 +87,16 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
 
   return {
     proxyUrl: config.proxyUrl,
+    proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
+    proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
     proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
   };
+}
+
+function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
+  if (!arr) return;
+  return new Set(arr);
 }
 
 export function getActionsConfigurationUtilities(
