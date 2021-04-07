@@ -73,7 +73,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     services.savedObjectsClient
   );
 
-  const compositeSize = libs.configuration.query.compositeSize;
+  const compositeSize = libs.configuration.inventory.compositeSize;
 
   const results = await Promise.all(
     criteria.map((condition) =>
