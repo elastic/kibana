@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
+import { Direction, HostsFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {

@@ -103,7 +103,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
       acc[so.id] = {
         success: !so.error,
-        error: so.error ? so.error.message || so.error.toString() : undefined,
+        error: so.error?.message,
       };
       return acc;
     }, {});

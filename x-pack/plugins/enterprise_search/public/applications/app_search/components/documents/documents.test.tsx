@@ -9,7 +9,9 @@ import { setMockValues } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { EuiPageHeader } from '@elastic/eui';
 
 import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
@@ -32,14 +34,40 @@ describe('Documents', () => {
     expect(wrapper.find(SearchExperience).exists()).toBe(true);
   });
 
-  it('renders a DocumentCreationButton if the user can manage engine documents', () => {
-    setMockValues({
-      ...values,
-      myRole: { canManageEngineDocuments: true },
+  describe('DocumentCreationButton', () => {
+    const getHeader = (wrapper: ShallowWrapper) =>
+      wrapper.find(EuiPageHeader).dive().children().dive();
+
+    it('renders a DocumentCreationButton if the user can manage engine documents', () => {
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineDocuments: true },
+      });
+
+      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(true);
     });
 
-    const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(DocumentCreationButton).exists()).toBe(true);
+    it('does not render a DocumentCreationButton if the user cannot manage engine documents', () => {
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineDocuments: false },
+      });
+
+      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+    });
+
+    it('does not render a DocumentCreationButton for meta engines even if the user can manage engine documents', () => {
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineDocuments: true },
+        isMetaEngine: true,
+      });
+
+      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
+      expect(getHeader(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+    });
   });
 
   describe('Meta Engines', () => {
@@ -61,17 +89,6 @@ describe('Documents', () => {
 
       const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
       expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(false);
-    });
-
-    it('does not render a DocumentCreationButton even if the user can manage engine documents', () => {
-      setMockValues({
-        ...values,
-        myRole: { canManageEngineDocuments: true },
-        isMetaEngine: true,
-      });
-
-      const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-      expect(wrapper.find(DocumentCreationButton).exists()).toBe(false);
     });
   });
 });

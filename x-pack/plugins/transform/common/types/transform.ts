@@ -7,7 +7,7 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import type { LatestFunctionConfig, PutTransformsRequestSchema } from '../api_schemas/transforms';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '../shared_imports';
 import { PivotGroupByDict } from './pivot_group_by';
 import { PivotAggDict } from './pivot_aggs';
 
@@ -46,11 +46,11 @@ export type TransformLatestConfig = Omit<TransformBaseConfig, 'pivot'> & {
 export type TransformConfigUnion = TransformPivotConfig | TransformLatestConfig;
 
 export function isPivotTransform(transform: unknown): transform is TransformPivotConfig {
-  return isPopulatedObject(transform) && transform.hasOwnProperty('pivot');
+  return isPopulatedObject(transform, ['pivot']);
 }
 
 export function isLatestTransform(transform: unknown): transform is TransformLatestConfig {
-  return isPopulatedObject(transform) && transform.hasOwnProperty('latest');
+  return isPopulatedObject(transform, ['latest']);
 }
 
 export interface LatestFunctionConfigUI {
