@@ -25,6 +25,12 @@ export const withSuspense = <P extends {}>(
   </EuiErrorBoundary>
 );
 
+export const LazyLabsBeakerButton = withSuspense(
+  React.lazy(() => import('./labs/labs_beaker_button'))
+);
+
+export const LazyLabsFlyout = withSuspense(React.lazy(() => import('./labs/labs_flyout')));
+
 export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker'));
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(
