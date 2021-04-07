@@ -118,7 +118,7 @@ export const CertsField: React.FunctionComponent<{
           <EuiScreenReaderOnly>
             <span>
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.certsField.legend"
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.legend"
                 defaultMessage="Certificate settings"
               />
             </span>
