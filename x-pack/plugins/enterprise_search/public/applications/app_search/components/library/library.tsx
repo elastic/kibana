@@ -221,7 +221,7 @@ export const Library: React.FC = () => {
             <h3>With custom actions and a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} actions={actions} shouldLinkToDetailPage />
+          <Result {...props} actions={actions} shouldLinkToDetailPage showScore isMetaEngine />
           <EuiSpacer />
 
           <EuiSpacer />

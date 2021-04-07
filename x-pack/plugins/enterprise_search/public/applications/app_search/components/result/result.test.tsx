@@ -10,9 +10,8 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 
-import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
 import { SchemaTypes } from '../../../shared/types';
 
 import { Result } from './result';
@@ -64,37 +63,18 @@ describe('Result', () => {
     ]);
   });
 
-  it('passes showScore, resultMeta, and isMetaEngine to ResultHeader', () => {
+  it('renders a header', () => {
     const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
-    expect(wrapper.find(ResultHeader).props()).toEqual({
-      isMetaEngine: true,
-      showScore: true,
-      resultMeta: {
-        id: '1',
-        score: 100,
-        engine: 'my-engine',
-      },
-    });
-  });
-
-  describe('document detail link', () => {
-    it('will render a link if shouldLinkToDetailPage is true', () => {
-      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
-      wrapper.find(ReactRouterHelper).forEach((link) => {
-        expect(link.prop('to')).toEqual('/engines/my-engine/documents/1');
-      });
-      expect(wrapper.hasClass('appSearchResult--link')).toBe(true);
-      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(true);
-      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(true);
-    });
-
-    it('will not render a link if shouldLinkToDetailPage is not set', () => {
-      const wrapper = shallow(<Result {...props} />);
-      expect(wrapper.find(ReactRouterHelper).exists()).toBe(false);
-      expect(wrapper.hasClass('appSearchResult--link')).toBe(false);
-      expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(false);
-      expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(false);
-    });
+    const header = wrapper.find(ResultHeader);
+    expect(header.exists()).toBe(true);
+    expect(header.prop('isMetaEngine')).toBe(true); // passed through from props
+    expect(header.prop('showScore')).toBe(true); // passed through from props
+    expect(header.prop('shouldLinkToDetailPage')).toBe(false); // passed through from props
+    expect(header.prop('resultMeta')).toEqual({
+      id: '1',
+      score: 100,
+      engine: 'my-engine',
+    }); // passed through from meta in result prop
   });
 
   describe('actions', () => {
@@ -109,24 +89,48 @@ describe('Result', () => {
         title: 'Bookmark',
         onClick: jest.fn(),
         iconType: 'starFilled',
-        iconColor: 'primary',
+        iconColor: '',
       },
     ];
 
-    it('will render an action button for each action passed', () => {
+    it('will render an action button in the header for each action passed', () => {
       const wrapper = shallow(<Result {...props} actions={actions} />);
-      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(2);
+      const header = wrapper.find(ResultHeader);
+      const renderedActions = shallow(header.prop('actions') as any);
+      const buttons = renderedActions.find(EuiButtonIcon);
+      expect(buttons).toHaveLength(2);
 
-      wrapper.find('.appSearchResult__actionButton').first().simulate('click');
+      // console.log(buttons.first().props());
+      expect(buttons.first().prop('iconType')).toEqual('eyeClosed');
+      expect(buttons.first().prop('color')).toEqual('danger');
+      buttons.first().simulate('click');
       expect(actions[0].onClick).toHaveBeenCalled();
 
-      wrapper.find('.appSearchResult__actionButton').last().simulate('click');
+      expect(buttons.last().prop('iconType')).toEqual('starFilled');
+      // Note that no iconColor was passed so it was defaulted to primary
+      expect(buttons.last().prop('color')).toEqual('primary');
+      buttons.last().simulate('click');
       expect(actions[1].onClick).toHaveBeenCalled();
     });
 
-    it('will render custom actions seamlessly next to the document detail link', () => {
+    it('will render a document detail link as the first action if shouldLinkToDetailPage is passed', () => {
       const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
-      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(3);
+      const header = wrapper.find(ResultHeader);
+      const renderedActions = shallow(header.prop('actions') as any);
+      const buttons = renderedActions.find(EuiButtonIcon);
+
+      // In addition to the 2 actions passed, we also have an action
+      expect(buttons).toHaveLength(3);
+
+      expect(buttons.first().prop('data-test-subj')).toEqual('DocumentDetailLink');
+    });
+
+    it('will not render anything if no actions are passed and shouldLinkToDetailPage is false', () => {
+      const wrapper = shallow(<Result {...props} actions={undefined} />);
+      const header = wrapper.find(ResultHeader);
+      const renderedActions = shallow(header.prop('actions') as any);
+      const buttons = renderedActions.find(EuiButtonIcon);
+      expect(buttons).toHaveLength(0);
     });
   });
 

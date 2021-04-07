@@ -74,6 +74,7 @@ export const Result: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="eye"
+                  data-test-subj="DocumentDetailLink"
                   aria-label={i18n.translate(
                     'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
                     { defaultMessage: 'Visit document details' }
@@ -87,7 +88,7 @@ export const Result: React.FC<Props> = ({
               <EuiButtonIcon
                 iconType={iconType}
                 onClick={onClick}
-                color={iconColor ? 'primary' : undefined}
+                color={iconColor ? iconColor : 'primary'}
                 aria-label={title}
               />
             </EuiFlexItem>
