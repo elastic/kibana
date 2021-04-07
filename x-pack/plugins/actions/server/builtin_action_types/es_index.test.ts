@@ -406,19 +406,21 @@ describe('execute()', () => {
         "documents": Array [
           Object {
             "@timestamp": "2021-01-01T00:00:00.000Z",
-            "alert": Object {
-              "actionGroup": "action-group-id",
-              "actionGroupName": "Action Group",
-              "context": Object {
-                "rule-type": Object {
-                  "contextVar1": "contextValue1",
-                  "contextVar2": "contextValue2",
-                },
-              },
-              "id": "alert-id",
-            },
             "event": Object {
               "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
             },
             "rule": Object {
               "id": "rule-id",
@@ -484,19 +486,21 @@ describe('execute()', () => {
         "documents": Array [
           Object {
             "@timestamp": "2021-01-01T00:00:00.000Z",
-            "alert": Object {
-              "actionGroup": "action-group-id",
-              "actionGroupName": "Action Group",
-              "context": Object {
-                "rule-type": Object {
-                  "contextVar1": "contextValue1",
-                  "contextVar2": "contextValue2",
-                },
-              },
-              "id": "alert-id",
-            },
             "event": Object {
               "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
             },
             "rule": Object {
               "id": "rule-id",
