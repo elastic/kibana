@@ -47,7 +47,6 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
@@ -79,7 +78,6 @@ describe('Deleting prebuilt rules', () => {
 
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
