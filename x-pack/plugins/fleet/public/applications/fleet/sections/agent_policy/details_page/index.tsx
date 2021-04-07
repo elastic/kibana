@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiTitle,
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
@@ -68,25 +69,8 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
   const { isReady: isFleetReady } = useFleetStatus();
 
-  const headerLeftContent = useMemo(() => {
-    const agentPolicyTitle = agentPolicy && agentPolicy.name && (
-      <>
-        {agentPolicy.name}{' '}
-        {agentPolicy.is_managed && (
-          <EuiIconTip
-            title="Managed agent policy"
-            content={i18n.translate('xpack.fleet.policyDetails.policyDetailsManagedPolicyTooltip', {
-              defaultMessage:
-                'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-            })}
-            type="lock"
-            size="l"
-            color="subdued"
-          />
-        )}
-      </>
-    );
-    return (
+  const headerLeftContent = useMemo(
+    () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
@@ -102,23 +86,42 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText className="eui-textBreakWord">
-            <h1>
-              {isLoading ? (
-                <Loading />
-              ) : (
-                agentPolicyTitle || (
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.policyDetailsTitle"
-                    defaultMessage="Policy '{id}'"
-                    values={{
-                      id: policyId,
-                    }}
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <EuiFlexGroup alignItems="center" wrap responsive={false} gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h1>
+                    {(agentPolicy && agentPolicy.name) || (
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.policyDetailsTitle"
+                        defaultMessage="Policy '{id}'"
+                        values={{ id: policyId }}
+                      />
+                    )}
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              {agentPolicy?.is_managed && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    title="Managed agent policy"
+                    content={i18n.translate(
+                      'xpack.fleet.policyDetails.policyDetailsManagedPolicyTooltip',
+                      {
+                        defaultMessage:
+                          'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+                      }
+                    )}
+                    type="lock"
+                    size="l"
+                    color="subdued"
                   />
-                )
+                </EuiFlexItem>
               )}
-            </h1>
-          </EuiText>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
 
         {agentPolicy && agentPolicy.description ? (
@@ -130,8 +133,9 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-    );
-  }, [getHref, isLoading, agentPolicy, policyId]);
+    ),
+    [getHref, isLoading, agentPolicy, policyId]
+  );
 
   const headerRightContent = useMemo(
     () =>
