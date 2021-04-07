@@ -22,8 +22,10 @@ describe('AddFilterButton component', () => {
           <EuiButtonEmpty
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
+            flush="left"
             iconType="plusInCircleFilled"
             onClick={[Function]}
+            size="s"
           >
             Add filter
           </EuiButtonEmpty>
@@ -86,8 +88,10 @@ describe('AddFilterButton component', () => {
           <EuiButtonEmpty
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
+            flush="left"
             iconType="plusInCircleFilled"
             onClick={[Function]}
+            size="s"
           >
             Add filter
           </EuiButtonEmpty>
@@ -137,8 +141,10 @@ describe('AddFilterButton component', () => {
           <EuiButtonEmpty
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={true}
+            flush="left"
             iconType="plusInCircleFilled"
             onClick={[Function]}
+            size="s"
           >
             Add filter
           </EuiButtonEmpty>

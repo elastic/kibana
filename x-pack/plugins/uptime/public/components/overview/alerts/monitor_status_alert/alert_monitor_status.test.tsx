@@ -21,8 +21,6 @@ describe('alert monitor status component', () => {
       enabled: true,
       hasFilters: false,
       isOldAlert: true,
-      locations: [],
-      shouldUpdateUrl: false,
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
@@ -37,15 +35,30 @@ describe('alert monitor status component', () => {
           <OldAlertCallOut
             isOldAlert={true}
           />
-          <EuiSpacer
-            size="m"
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={
+              <span>
+                <FormattedMessage
+                  defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+                  id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+                  values={
+                    Object {
+                      "snapshotCount": 0,
+                    }
+                  }
+                />
+                 
+              </span>
+            }
           />
-          <KueryBar
-            aria-label="Input that allows filtering criteria for the monitor status alert"
-            data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
-            defaultKuery="monitor.id: foo"
-            shouldUpdateUrl={false}
-            updateDefaultKuery={[Function]}
+          <EuiSpacer
+            size="s"
+          />
+          <AlertQueryBar
+            onChange={[Function]}
+            query="monitor.id: foo"
           />
           <EuiSpacer
             size="s"
@@ -93,24 +106,6 @@ describe('alert monitor status component', () => {
             }
             isOldAlert={true}
             setAlertParams={[MockFunction]}
-          />
-          <EuiSpacer
-            size="l"
-          />
-          <EuiCallOut
-            iconType="iInCircle"
-            size="s"
-            title={
-              <FormattedMessage
-                defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-                id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
-                values={
-                  Object {
-                    "snapshotCount": 0,
-                  }
-                }
-              />
-            }
           />
           <EuiSpacer
             size="m"
