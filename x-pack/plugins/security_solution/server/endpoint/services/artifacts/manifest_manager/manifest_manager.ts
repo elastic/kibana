@@ -35,6 +35,7 @@ import {
 } from '../../../schemas/artifacts';
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -82,6 +83,7 @@ export interface ManifestManagerContext {
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -100,11 +102,9 @@ export class ManifestManager {
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
+  protected experimentalFeatures: ExperimentalFeatures;
 
-  constructor(
-    context: ManifestManagerContext,
-    private readonly isFleetServerEnabled: boolean = false
-  ) {
+  constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -112,6 +112,7 @@ export class ManifestManager {
     this.logger = context.logger;
     this.cache = context.cache;
     this.schemaVersion = 'v1';
+    this.experimentalFeatures = context.experimentalFeatures;
   }
 
   /**
@@ -322,7 +323,7 @@ export class ManifestManager {
           semanticVersion: manifestSo.attributes.semanticVersion,
           soVersion: manifestSo.version,
         },
-        this.isFleetServerEnabled
+        this.experimentalFeatures.fleetServerEnabled
       );
 
       for (const entry of manifestSo.attributes.artifacts) {
@@ -363,7 +364,7 @@ export class ManifestManager {
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(
       this.schemaVersion,
-      this.isFleetServerEnabled
+      this.experimentalFeatures.fleetServerEnabled
     )
   ): Promise<Manifest> {
     const results = await Promise.all([
@@ -377,7 +378,7 @@ export class ManifestManager {
         semanticVersion: baselineManifest.getSemanticVersion(),
         soVersion: baselineManifest.getSavedObjectVersion(),
       },
-      this.isFleetServerEnabled
+      this.experimentalFeatures.fleetServerEnabled
     );
 
     for (const result of results) {

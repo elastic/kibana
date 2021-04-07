@@ -14,20 +14,21 @@ import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
-  InternalArtifactSchema,
-  TranslatedEntry,
-  WrappedTranslatedExceptionList,
-  wrappedTranslatedExceptionList,
-  TranslatedEntryNestedEntry,
-  translatedEntryNestedEntry,
-  translatedEntry as translatedEntryType,
-  TranslatedEntryMatcher,
-  translatedEntryMatchMatcher,
-  translatedEntryMatchAnyMatcher,
-  TranslatedExceptionListItem,
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
+  InternalArtifactSchema,
+  TranslatedEntry,
+  translatedEntry as translatedEntryType,
+  translatedEntryMatchAnyMatcher,
+  TranslatedEntryMatcher,
+  translatedEntryMatchMatcher,
+  TranslatedEntryNestedEntry,
+  translatedEntryNestedEntry,
+  TranslatedExceptionListItem,
+  WrappedTranslatedExceptionList,
+  wrappedTranslatedExceptionList,
 } from '../../schemas';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -77,7 +78,10 @@ export async function getFilteredEndpointExceptionList(
   eClient: ExceptionListClient,
   schemaVersion: string,
   filter: string,
-  listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+  listId:
+    | typeof ENDPOINT_LIST_ID
+    | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+    | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -153,11 +157,13 @@ export async function getEndpointEventFiltersList(
     policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
   })`;
 
+  await eClient.createEndpointEventFiltersList();
+
   return getFilteredEndpointExceptionList(
     eClient,
     schemaVersion,
     `${osFilter} and ${policyFilter}`,
-    'id-from-other-commit' // FIXME: update this
+    ENDPOINT_EVENT_FILTERS_LIST_ID
   );
 }
 
