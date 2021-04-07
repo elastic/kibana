@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import {
   commentsResp,
@@ -14,23 +14,23 @@ import {
   removeServerGeneratedPropertiesFromComments,
   removeServerGeneratedPropertiesFromSubCase,
   subCaseResp,
-} from '../../../../../common/lib/mock';
+} from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
   defaultCreateSubComment,
   deleteAllCaseItems,
   deleteCaseAction,
-} from '../../../../../common/lib/utils';
+} from '../../../../common/lib/utils';
 import {
   getCaseCommentsUrl,
   getSubCaseDetailsUrl,
-} from '../../../../../../../plugins/cases/common/api/helpers';
+} from '../../../../../../plugins/cases/common/api/helpers';
 import {
   AssociationType,
   CaseResponse,
   SubCaseResponse,
-} from '../../../../../../../plugins/cases/common/api';
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

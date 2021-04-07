@@ -7,11 +7,11 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../../plugins/cases/common/constants';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
+import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -19,7 +19,7 @@ import {
   postCommentAlertReq,
   postCollectionReq,
   postCommentGenAlertReq,
-} from '../../../../../common/lib/mock';
+} from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -28,7 +28,7 @@ import {
   deleteCases,
   deleteCasesUserActions,
   deleteComments,
-} from '../../../../../common/lib/utils';
+} from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -39,7 +39,7 @@ import {
   getSignalsByIds,
   createRule,
   getQuerySignalIds,
-} from '../../../../../../detection_engine_api_integration/utils';
+} from '../../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
