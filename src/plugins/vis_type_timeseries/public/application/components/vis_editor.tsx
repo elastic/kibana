@@ -221,13 +221,10 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       const indexPatterns = extractIndexPatternValues(this.props.vis.params, index);
       const visFields = await fetchFields(indexPatterns);
 
-      this.setState((state) => ({
+      this.setState({
         defaultIndex: index,
-        model: {
-          ...state.model,
-        },
         visFields,
-      }));
+      });
     });
 
     this.props.eventEmitter.on('updateEditor', this.updateModel);
