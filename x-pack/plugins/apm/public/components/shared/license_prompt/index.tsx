@@ -10,12 +10,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
 
-interface Props {
+export interface LicensePromptProps {
   text: string;
   showBetaBadge?: boolean;
 }
 
-export function LicensePrompt({ text, showBetaBadge = false }: Props) {
+export function LicensePrompt({
+  text,
+  showBetaBadge = false,
+}: LicensePromptProps) {
   const licensePageUrl = useKibanaUrl(
     '/app/management/stack/license_management'
   );

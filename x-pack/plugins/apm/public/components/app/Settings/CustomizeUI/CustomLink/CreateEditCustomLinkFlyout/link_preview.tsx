@@ -24,7 +24,7 @@ import { Transaction } from '../../../../../../../typings/es_schemas/ui/transact
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
 
-interface Props {
+export interface LinkPreviewProps {
   label: string;
   url: string;
   filters: Filter[];
@@ -44,7 +44,7 @@ const fetchTransaction = debounce(
 
 const getTextColor = (value?: string) => (value ? 'default' : 'subdued');
 
-export function LinkPreview({ label, url, filters }: Props) {
+export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
   const [transaction, setTransaction] = useState<Transaction | undefined>();
 
   useEffect(() => {
