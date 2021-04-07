@@ -1,21 +1,25 @@
-{    "job_id": "high-count-network-denies",
-   "indices": ["logs-*","filebeat-*","packetbeat-*"],
-    "max_empty_searches": 10,
-      "query": {
-      "bool": {
-        "filter": [
-          {
-            "term": {
-              "event.category": "network"
-            }
-          },
-          {
-            "term": {
-              "event.outcome": "deny"
-            }
-            }
-            ]
-            }
-            }
-            }
+{
+  "job_id": "high-count-network-denies",
+  "indices": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
           }
+        },
+        {
+          "term": {
+            "event.outcome": "deny"
+          }
+        }
+      ]
+    }
+  }
+}
