@@ -8,19 +8,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import {
-  commentsResp,
-  postCommentAlertReq,
-  removeServerGeneratedPropertiesFromComments,
-  removeServerGeneratedPropertiesFromSubCase,
-  subCaseResp,
-} from '../../../../common/lib/mock';
+import { commentsResp, postCommentAlertReq, subCaseResp } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
   defaultCreateSubComment,
   deleteAllCaseItems,
   deleteCaseAction,
+  removeServerGeneratedPropertiesFromComments,
+  removeServerGeneratedPropertiesFromSubCase,
 } from '../../../../common/lib/utils';
 import {
   getCaseCommentsUrl,

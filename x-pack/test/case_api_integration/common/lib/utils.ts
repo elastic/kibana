@@ -27,6 +27,8 @@ import {
   CasesFindResponse,
   CommentRequest,
   CaseUserActionResponse,
+  SubCaseResponse,
+  CommentResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -336,7 +338,7 @@ export const getResilientConnector = () => ({
   },
 });
 
-interface SavedObjectAttributes {
+interface CommonSavedObjectAttributes {
   id?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -344,22 +346,32 @@ interface SavedObjectAttributes {
   [key: string]: unknown;
 }
 
+const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'] as const;
+
 export const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
   object: T,
-  keys: string | readonly string[]
+  keys: readonly string[]
 ): Omit<T, K> => {
   // @ts-ignore
   return omit<T, K>(object, keys);
 };
 
-export const removeServerGeneratedPropertiesFromSavedObject = <T extends SavedObjectAttributes, K>(
-  attributes: T
-): Omit<T, 'created_at' | 'updated_at' | 'version' | 'id'> => {
-  const keysToRemove = ['created_at', 'updated_at', 'version', 'id'] as const;
-  return removeServerGeneratedPropertiesFromObject<T, typeof keysToRemove[number]>(
-    attributes,
-    keysToRemove
-  );
+export const removeServerGeneratedPropertiesFromSavedObject = <
+  T extends CommonSavedObjectAttributes
+>(
+  attributes: T,
+  keys?: readonly string[]
+): Omit<
+  T,
+  typeof keys extends string[]
+    ? typeof savedObjectCommonAttributes[number] & typeof keys[number]
+    : typeof savedObjectCommonAttributes[number]
+> => {
+  const typedKeys = keys != null ? keys : [];
+  return removeServerGeneratedPropertiesFromObject<
+    T,
+    typeof savedObjectCommonAttributes[number] & typeof typedKeys[number]
+  >(attributes, [...savedObjectCommonAttributes, ...typedKeys]);
 };
 
 export const removeServerGeneratedPropertiesFromUserAction = (
@@ -370,6 +382,32 @@ export const removeServerGeneratedPropertiesFromUserAction = (
     CaseUserActionResponse,
     typeof keysToRemove[number]
   >(attributes, keysToRemove);
+};
+
+export const removeServerGeneratedPropertiesFromSubCase = (
+  subCase: SubCaseResponse | undefined
+) => {
+  if (!subCase) {
+    return;
+  }
+
+  const keysToRemove = ['closed_at', 'comments'] as const;
+  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, keysToRemove);
+};
+
+export const removeServerGeneratedPropertiesFromCase = (
+  theCase: CaseResponse
+): Partial<CaseResponse> => {
+  const keysToRemove = ['closed_at'] as const;
+  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, keysToRemove);
+};
+
+export const removeServerGeneratedPropertiesFromComments = (
+  comments: CommentResponse[] | undefined
+): Array<Partial<CommentResponse>> | undefined => {
+  return comments?.map((comment) => {
+    return removeServerGeneratedPropertiesFromSavedObject<CommentResponse>(comment, []);
+  });
 };
 
 export const deleteAllCaseItems = async (es: KibanaClient) => {

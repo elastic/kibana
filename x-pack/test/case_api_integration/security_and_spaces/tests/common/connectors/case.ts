@@ -11,12 +11,11 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
+import { postCaseReq, postCaseResp } from '../../../../common/lib/mock';
 import {
-  postCaseReq,
-  postCaseResp,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromComments,
-} from '../../../../common/lib/mock';
+} from '../../../../common/lib/utils';
 import {
   createRule,
   createSignalsIndex,
