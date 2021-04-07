@@ -39,8 +39,8 @@ describe('request', () => {
       data: { incidentId: '123' },
     }));
     configurationUtilities.getResponseSettings.mockReturnValue({
-      maxResponseContentLength: 1000000,
-      responseTimeout: 360000,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
   });
 
@@ -161,8 +161,8 @@ describe('patch', () => {
       headers: { 'content-type': 'application/json' },
     }));
     configurationUtilities.getResponseSettings.mockReturnValue({
-      maxResponseContentLength: 1000000,
-      responseTimeout: 360000,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
   });
 

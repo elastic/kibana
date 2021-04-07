@@ -138,6 +138,6 @@ export interface ProxySettings {
 }
 
 export interface ResponseSettings {
-  maxResponseContentLength: number;
-  responseTimeout: number;
+  maxContentLength: number;
+  timeout: number;
 }

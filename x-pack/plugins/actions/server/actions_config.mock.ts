@@ -18,8 +18,8 @@ const createActionsConfigMock = () => {
     isRejectUnauthorizedCertificatesEnabled: jest.fn().mockReturnValue(true),
     getProxySettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn().mockReturnValue({
-      maxResponseContentLength: 1000000,
-      responseTimeout: 360000,
+      maxContentLength: 1000000,
+      timeout: 360000,
     }),
   };
   return mocked;

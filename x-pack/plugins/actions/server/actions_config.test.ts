@@ -264,8 +264,8 @@ describe('getResponseSettingsFromConfig', () => {
       ...defaultActionsConfig,
     };
     expect(getActionsConfigurationUtilities(config).getResponseSettings()).toEqual({
-      responseTimeout: 60000,
-      maxResponseContentLength: 1000000,
+      timeout: 60000,
+      maxContentLength: 1000000,
     });
   });
 });
