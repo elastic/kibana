@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { CASE_CONFIGURE_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   getConfiguration,
-  removeServerGeneratedPropertiesFromConfigure,
+  removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   deleteConfiguration,
 } from '../../../../common/lib/utils';
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(200);
 
-      const data = removeServerGeneratedPropertiesFromConfigure(body);
+      const data = removeServerGeneratedPropertiesFromSavedObject(body);
       expect(data).to.eql(getConfigurationOutput());
     });
   });

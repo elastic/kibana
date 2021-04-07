@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 
+import { omit } from 'lodash';
+import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
@@ -25,6 +26,7 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentRequest,
+  CaseUserActionResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -334,12 +336,40 @@ export const getResilientConnector = () => ({
   },
 });
 
-export const removeServerGeneratedPropertiesFromConfigure = (
-  config: Partial<CasesConfigureResponse>
-): Partial<CasesConfigureResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { created_at, updated_at, version, ...rest } = config;
-  return rest;
+interface SavedObjectAttributes {
+  id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  version?: string | null;
+  [key: string]: unknown;
+}
+
+export const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
+  object: T,
+  keys: string | readonly string[]
+): Omit<T, K> => {
+  // @ts-ignore
+  return omit<T, K>(object, keys);
+};
+
+export const removeServerGeneratedPropertiesFromSavedObject = <T extends SavedObjectAttributes, K>(
+  attributes: T
+): Omit<T, 'created_at' | 'updated_at' | 'version' | 'id'> => {
+  const keysToRemove = ['created_at', 'updated_at', 'version', 'id'] as const;
+  return removeServerGeneratedPropertiesFromObject<T, typeof keysToRemove[number]>(
+    attributes,
+    keysToRemove
+  );
+};
+
+export const removeServerGeneratedPropertiesFromUserAction = (
+  attributes: CaseUserActionResponse
+): Omit<CaseUserActionResponse, 'action_id' | 'action_at'> => {
+  const keysToRemove = ['action_id', 'action_at'] as const;
+  return removeServerGeneratedPropertiesFromObject<
+    CaseUserActionResponse,
+    typeof keysToRemove[number]
+  >(attributes, keysToRemove);
 };
 
 export const deleteAllCaseItems = async (es: KibanaClient) => {
@@ -509,4 +539,18 @@ export const createComment = async (
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getAllUserAction = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  expectedHttpCode: number = 200
+) => {
+  const { body: userActions } = await supertest
+    .get(`${CASES_URL}/${caseId}/user_actions`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return userActions;
 };

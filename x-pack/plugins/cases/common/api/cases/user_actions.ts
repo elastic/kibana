@@ -58,6 +58,7 @@ export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRT);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
+export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRT>;
 
 export type UserAction = rt.TypeOf<typeof UserActionRt>;
 export type UserActionField = rt.TypeOf<typeof UserActionFieldRt>;

@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
+  CaseResponse,
   CommentsResponse,
   CommentType,
   AttributesTypeUser,
@@ -35,6 +36,9 @@ import {
   deleteComments,
   createCase,
   createComment,
+  getAllUserAction,
+  removeServerGeneratedPropertiesFromUserAction,
+  removeServerGeneratedPropertiesFromSavedObject,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -64,22 +68,65 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should post a comment', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
-      const comment = patchedCase.comments![0] as AttributesTypeUser;
+      const comment = removeServerGeneratedPropertiesFromSavedObject(
+        patchedCase.comments![0] as AttributesTypeUser
+      );
 
-      expect(comment.type).to.eql(postCommentUserReq.type);
-      expect(comment.comment).to.eql(postCommentUserReq.comment);
+      expect(comment).to.eql({
+        type: postCommentUserReq.type,
+        comment: postCommentUserReq.comment,
+        associationType: 'case',
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
+
+      // updates the case correctly after adding a comment
+      expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
       expect(patchedCase.updated_by).to.eql(defaultUser);
     });
 
     it('should post an alert', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
-      const comment = patchedCase.comments![0] as AttributesTypeAlerts;
+      const comment = removeServerGeneratedPropertiesFromSavedObject(
+        patchedCase.comments![0] as AttributesTypeAlerts
+      );
 
-      expect(comment.type).to.eql(postCommentAlertReq.type);
-      expect(comment.alertId).to.eql(postCommentAlertReq.alertId);
-      expect(comment.index).to.eql(postCommentAlertReq.index);
+      expect(comment).to.eql({
+        type: postCommentAlertReq.type,
+        alertId: postCommentAlertReq.alertId,
+        index: postCommentAlertReq.index,
+        rule: postCommentAlertReq.rule,
+        associationType: 'case',
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
+
+      // updates the case correctly after adding a comment
+      expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
       expect(patchedCase.updated_by).to.eql(defaultUser);
+    });
+
+    it('creates a user action', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+      const userActions = await getAllUserAction(supertest, postedCase.id);
+      const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
+
+      expect(commentUserAction).to.eql({
+        action_field: ['comment'],
+        action: 'create',
+        action_by: defaultUser,
+        new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}"}`,
+        old_value: null,
+        case_id: `${postedCase.id}`,
+        comment_id: `${patchedCase.comments![0].id}`,
+        sub_case_id: '',
+      });
     });
 
     it('unhappy path - 400s when type is missing', async () => {
@@ -201,7 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('400s when adding an alert to a collection case', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
+      const postedCase = await createCase(supertest, postCollectionReq);
       await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
     });
 
@@ -253,7 +300,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await createComment(supertest, 'not-exists', {
+        await createComment(supertest, postedCase.id, {
           alertId: alert._id,
           index: alert._index,
           rule: {
@@ -274,12 +321,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should NOT change the status of the alert if sync alert is off', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, settings: { syncAlerts: false } })
-          .expect(200);
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          settings: { syncAlerts: false },
+        });
 
         await supertest
           .patch(CASES_URL)
@@ -303,7 +348,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const alert = signals.hits.hits[0];
         expect(alert._source.signal.status).eql('open');
 
-        await createComment(supertest, 'not-exists', {
+        await createComment(supertest, postedCase.id, {
           alertId: alert._id,
           index: alert._index,
           rule: {
@@ -330,6 +375,47 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(postCommentUserReq)
         .expect(400);
       expect(body.message).to.contain('subCaseId');
+    });
+
+    describe('alert format', () => {
+      type AlertComment = CommentType.alert | CommentType.generatedAlert;
+
+      for (const [alertId, index, type] of [
+        ['1', ['index1', 'index2'], CommentType.alert],
+        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], CommentType.generatedAlert],
+        [['1', '2'], 'index', CommentType.generatedAlert],
+      ]) {
+        it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await createComment(
+            supertest,
+            postedCase.id,
+            { ...postCommentAlertReq, alertId, index, type: type as AlertComment },
+            400
+          );
+        });
+      }
+
+      for (const [alertId, index, type] of [
+        ['1', ['index1'], CommentType.alert],
+        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+      ]) {
+        it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await createComment(
+            supertest,
+            postedCase.id,
+            {
+              ...postCommentAlertReq,
+              alertId,
+              index,
+              type: type as AlertComment,
+            },
+            200
+          );
+        });
+      }
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
