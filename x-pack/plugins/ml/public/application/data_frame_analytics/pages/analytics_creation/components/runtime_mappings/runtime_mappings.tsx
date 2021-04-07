@@ -38,6 +38,7 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
+export type XJsonModeType = ReturnType<typeof XJsonMode>;
 
 interface Props {
   actions: CreateAnalyticsFormProps['actions'];
