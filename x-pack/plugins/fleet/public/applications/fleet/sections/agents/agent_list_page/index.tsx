@@ -339,6 +339,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }, {} as { [k: string]: AgentPolicy });
   }, [agentPolicies]);
 
+  const isAgentSelectable = (agent: Agent) => {
+    if (!agent.active) return false;
+
+    const agentPolicy = agentPolicies.find((p) => p.id === agent.policy_id);
+    const isManaged = agent.policy_id && agentPolicy?.is_managed === true;
+    return !isManaged;
+  };
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -365,7 +373,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
-        const policyName = agentPolicies.find((p) => p.id === policyId)?.name;
+        const policyName = agentPoliciesIndexedById[policyId]?.name;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} className="eui-textTruncate">
@@ -561,7 +569,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         totalAgents={totalAgents}
         totalInactiveAgents={totalInactiveAgents}
         agentStatus={agentsStatus}
-        selectableAgents={agents?.filter((agent) => agent.active).length || 0}
+        selectableAgents={agents?.filter(isAgentSelectable).length || 0}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
         currentQuery={kuery}
@@ -625,7 +633,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   setSelectedAgents(newAgents);
                   setSelectionMode('manual');
                 },
-                selectable: (agent: Agent) => agent.active,
+                selectable: isAgentSelectable,
+                selectableMessage: (selectable, agent) => {
+                  if (selectable) return '';
+                  if (!agent.active) {
+                    return 'This agent is not active';
+                  }
+                  if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+                    return 'This action is not available for agents enrolled in an externally managed agent policy';
+                  }
+                  return '';
+                },
               }
             : undefined
         }
