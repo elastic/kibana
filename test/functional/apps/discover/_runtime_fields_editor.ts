@@ -11,6 +11,9 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
+  const docTable = getService('docTable');
+  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
@@ -96,6 +99,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.discover.getAllFieldNames()).includes('delete')).to.be(false);
+    });
+
+    it('doc view includes runtime fields', async function () {
+      // navigate to doc view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
+
+      const hasDocHit = await testSubjects.exists('doc-hit');
+      expect(hasDocHit).to.be(true);
+      const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
+      expect(runtimeFieldsRow).to.be(true);
     });
   });
 }
