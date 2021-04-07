@@ -90,14 +90,6 @@ const i18nTexts: {
       defaultMessage: 'TODO',
     }),
   },
-  geo_point_script_field_script_field: {
-    buttonLabel: i18n.translate('xpack.painlessLab.contextGeoPointLabel', {
-      defaultMessage: 'Geo point',
-    }),
-    dropdownDescription: i18n.translate('xpack.painlessLab.context.geoPointLabel', {
-      defaultMessage: 'TODO',
-    }),
-  },
 };
 
 const painlessContexts: ExecutionContext[] = [
@@ -110,7 +102,6 @@ const painlessContexts: ExecutionContext[] = [
   'ip_script_field_script_field',
   'long_script_field_script_field',
   'string_script_field_script_field',
-  'geo_point_script_field_script_field',
 ];
 
 export const painlessContextOptions: Array<

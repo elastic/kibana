@@ -25,8 +25,7 @@ export type PainlessContext =
   | 'ip_script_field_script_field'
   | 'long_script_field_script_field'
   | 'processor_conditional'
-  | 'string_script_field_script_field'
-  | 'geo_point_script_field_script_field';
+  | 'string_script_field_script_field';
 
 export interface PainlessCompletionItem {
   label: string;

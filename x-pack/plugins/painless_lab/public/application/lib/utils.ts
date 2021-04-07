@@ -18,7 +18,6 @@ const advancedContextTypes: ExecutionContext[] = [
   'boolean_script_field_script_field',
   'date_script_field',
   'double_script_field_script_field',
-  'geo_point_script_field_script_field',
   'ip_script_field_script_field',
   'long_script_field_script_field',
   'string_script_field_script_field',
