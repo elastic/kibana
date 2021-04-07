@@ -51,6 +51,16 @@ For large deployments with more than 10 {kib} instances and more than 10 000 sav
 This section highlights common causes of {kib} upgrade failures and how to prevent them.
 
 [float]
+===== timeout_exception or receive_timeout_transport_exception
+There is a known issue in v7.12.0 for users who tried the fleet beta. Upgrade migrations fail because of a large number of documents in the `.kibana` index.
+
+This can cause Kibana to log errors like:
+> Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [receive_timeout_transport_exception]: [instance-0000000002][10.32.1.112:19541][cluster:monitor/task/get] request_id [2648] timed out after [59940ms]
+> Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [timeout_exception]: Timed out waiting for completion of [org.elasticsearch.index.reindex.BulkByScrollTask@6a74c54]
+
+See https://github.com/elastic/kibana/issues/95321 for instructions to work around this issue.
+ 
+[float]
 ===== Corrupt saved objects
 We highly recommend testing your {kib} upgrade in a development cluster to discover and remedy problems caused by corrupt documents, especially when there are custom integrations creating saved objects in your environment. Saved objects that were corrupted through manual editing or integrations will cause migration failures with a log message like `Failed to transform document. Transform: index-pattern:7.0.0\n Doc: {...}` or `Unable to migrate the corrupt Saved Object document ...`. Corrupt documents will have to be fixed or deleted before an upgrade migration can succeed.
 
