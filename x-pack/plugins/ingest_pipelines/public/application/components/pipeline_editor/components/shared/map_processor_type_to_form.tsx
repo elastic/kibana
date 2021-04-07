@@ -253,8 +253,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Drop',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.drop', {
-      defaultMessage:
-        'Drops documents without returning an error. Used to only index documents that meet specified conditions.',
+      defaultMessage: 'Drops documents without returning an error.',
     }),
     getDefaultDescription: ({ if: value }) =>
       value
@@ -438,7 +437,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       target_field: targetField = 'ml.inference.<processor_tag>',
     }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.inference', {
-        defaultMessage: 'Runs the model "{modelId}" and stores result in "{target_field}"',
+        defaultMessage: 'Runs the model "{modelId}" and stores the result in "{target_field}"',
         values: {
           modelId,
           target_field: targetField,
@@ -474,7 +473,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.json', {
-        defaultMessage: 'Converts the string on "{field}" to JSON',
+        defaultMessage: 'Parses "{field}" to create a JSON object from a string',
         values: {
           field,
         },
@@ -492,7 +491,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: ({ field, field_split: fieldSplit, value_split: valueSplit }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.kv', {
         defaultMessage:
-          'Splits key-value pairs stored in "{field}", with field split "{field_split}" and value split "{value_split}"',
+          'Extracts key-value pairs from "{field}" and splits on "{field_split}" and "{value_split}"',
         values: {
           field,
           field_split: fieldSplit,
@@ -528,7 +527,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ name }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.pipeline', {
-        defaultMessage: 'Executes pipeline "{name}"',
+        defaultMessage: 'Runs the "{name}" ingest pipeline',
         values: {
           name,
         },
@@ -545,7 +544,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.remove', {
-        defaultMessage: 'Removes field(s) "{field}"',
+        defaultMessage: 'Removes "{field}"',
         values: {
           field: Array.isArray(field) ? field.map((v) => `"${v}"`).join(', ') : field,
         },
@@ -578,8 +577,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.script', {
       defaultMessage: 'Runs a script on incoming documents.',
     }),
-    // TODO: Decide whether requires user to provide a meaningful description
-    getDefaultDescription: () => undefined,
+    getDefaultDescription: () => 'Runs a script on incoming documents',
   },
   set: {
     FieldsComponent: SetProcessor,
@@ -612,8 +610,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           'Adds details about the current user, such user name and email address, to incoming documents. Requires an authenticated user for the indexing request.',
       }
     ),
-    // TODO: Decide whether meaningful description can only be provided by user?
-    getDefaultDescription: () => undefined,
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.setSecurityUser', {
+        defaultMessage: 'Adds details about the current user to "{field}".',
+        values: { field },
+      }),
   },
   sort: {
     FieldsComponent: Sort,
@@ -687,7 +688,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.uppercase', {
-        defaultMessage: 'Converts value stored in "{field}" to uppercase',
+        defaultMessage: 'Converts values in "{field}" to uppercase',
         values: {
           field,
         },
@@ -723,7 +724,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: ({ field, target_field: targetField = 'url' }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.uri_parts', {
         defaultMessage:
-          'Splits up the URL string in "{field}" and stores the result in "{target_field}"',
+          'Parses the URI string in "{field}" and stores the result in "{target_field}"',
         values: {
           field,
           target_field: targetField,

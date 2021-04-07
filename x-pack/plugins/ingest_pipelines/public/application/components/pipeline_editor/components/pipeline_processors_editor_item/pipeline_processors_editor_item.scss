@@ -68,8 +68,14 @@
   }
 
   // By default, flex sets the element width to "auto", we set this explicitly again to avoid the flex item growing beyond the width given
-  // by flex. This applies to both of the classes below
-  &__controlsFlexItem, &__descriptionContainer {
+  // by flex. This applies to both of the classes below.
+  &__controlsFlexItem {
     min-width: 0;
+  }
+  &__descriptionContainer {
+    min-width: 0;
+    &--displayNone {
+      display: none;
+    }
   }
 }

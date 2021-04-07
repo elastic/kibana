@@ -91,7 +91,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item__descriptionContainer',
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        'pipelineProcessorsEditor__item--displayNone':
+        'pipelineProcessorsEditor__item__descriptionContainer--displayNone':
           isInMoveMode && !processor.options.description,
       }
     );
