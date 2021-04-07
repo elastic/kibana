@@ -28,10 +28,10 @@ eight registered URL generators, which are used by ten plugins.)
 
 ```ts
 // You first register a URL generator.
-const myGenerator = share.registerUrlGenerator(/* ... */);
+const myGenerator = plugins.share.registerUrlGenerator(/* ... */);
 
 // You can fetch it from the registry (if you don't already have it).
-const myGenerator = share.getUrlGenerator(/* ... */);
+const myGenerator = plugins.share.getUrlGenerator(/* ... */);
 
 // Now you can use it to generate deep link into Kibana.
 const deepLink: string = myGenerator.createUrl({ /* ... */ });
@@ -55,6 +55,12 @@ and in addition will implement the following improvements:
 1. Will not use MD5 hashing algorithm.
 
 
+# Terminology
+
+In the proposed new service we introduce "locators". This is mostly a change
+in language, we are renaming "URL generators" to "locators".
+
+
 # Basic example
 
 The URL Service will have a client (`UrlServiceClient`) which will have the same
@@ -63,59 +69,141 @@ documented public set of HTTP API endpoints for use by: (1) the client-side
 client; (2) external users, Elastic Cloud, and Support.
 
 The following code examples will work, both, on the server-side and the
-client-side, as the base `UrlServiceClient` interface will be the same for both
+client-side, as the base `UrlServiceClient` interface will be similar in both
 environments.
 
-In this example let's consider a case where Discover app registers a URL
-generator, then another plugin uses that to create a short URL, and let's say
-Elastic Cloud uses that URL generator to navigate deeply within the Discover
-app.
+Below we consider four main examples of usage of the URL Service. All four
+examples are existing use cases we currently have in Kibana.
 
-First, the Discover app registers a URL generator (which it already does using
-the old URL Generator Service, it will just use the new URL Service):
+
+## Navigating within Kibana using locators
+
+In this example let's consider a case where Discover app creates a locator,
+then another plugin uses that locator to navigate to a deep link within the
+Discover app.
+
+First, the Discover plugin creates its locator (usually one per app).
 
 ```ts
-share.url.generators.create({
+const locator = plugins.share.locators.create({
   id: 'DISCOVER_DEEP_LINKS',
-  createUrl: ({indexPattern}) => `/app/discover/${indexPattern}`,
-});
-```
-
-Now, let's consider some alert that sends an e-mail or a user from the UI wants
-to generate a short URL for some deep link inside Discover, the developer would
-be able to generate a short URL as follows:
-
-```ts
-share.url.shortUrls.create({
-  slug: 'my-discover-query', // Optional human-readable URL slug.
-  generator: 'DISCOVER_DEEP_LINKS',
-  state: {
-    indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx',
+  getLocation: ({
+    indexPattern,
+    highlightedField,
+    filters: [],
+    query: {},
+    fields: [],
+    activeDoc: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx',
+  }) => {
+    app: 'discover',
+    route: `/${indexPatten}#_a=(${risonEncode({filters, query, fields})})`,
+    state: {
+      highlightedField,
+      activeDoc,
+    },
   },
 });
 ```
 
-Both of the code snippets above would look the same and work on the server and
-browser, wherever the developer needs those.
+Now, the Discover plugin exports this locator from its plugin contract.
 
-Finally, the Elastic Cloud would be able to use the redirect endpoint to
-navigate deeply within the Discover app. It could use the server-side HTTP
-endpoint:
-
-```
-POST /api/url/_redirect
-{
-  "generator": "DISCOVER_DEEP_LINKS",
-  "state": {
-    "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
+```ts
+class DiscoverPlugin() {
+  start() {
+    return {
+      locator,
+    };
   }
 }
 ```
 
-Or using the dedicated client-side "redirect" app:
+Finally, if any other app now wants to navigate to a deep link link withing the
+Discover application, they use this exported locator.
+
+```ts
+plugins.discover.locator.navigate({
+  indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  highlightedField: 'foo',
+});
+```
+
+Note, in this example the `highlightedField` parameter will not appear in the
+URL bar, it will be passed to the Discover app through [`history.pushState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
+mechanism (in Kibana case, using the [`history`](https://www.npmjs.com/package/history) package, which is used by `core.application.navigateToApp`).
+
+
+## Sending a deep link to Kibana
+
+We have use cases were a deep link to some Kibana app is sent out, for example,
+through e-mail or as a Slack message.
+
+In this example, lets consider some plugin gets hold of the Discover locator
+on the server-side.
+
+```ts
+const location = plugins.discover.locator.getRedirectPath({
+  indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  highlightedField: 'foo',
+});
+```
+
+This would return the location of the client-side redirect endpoint. The redirect
+endpoint could look like this:
 
 ```
-GET /app/goto/_redirect/DISCOVER_DEEP_LINKS?state=(indexPattern: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx")
+/app/goto/_redirect/DISCOVER_DEEP_LINKS?params={"indexPattern":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx","highlightedField":"foo"}&paramsVersion=7.x
+```
+
+This redirect client-side endpoint would find the Discover locator and and
+execute the `.navigate()` method on it.
+
+
+## Creating a short link
+
+In this example, lets create a short link using the Discover locator.
+
+```ts
+const shortUrl = await plugins.discover.locator.createShortUrl({
+  slug: 'human-readable-slug',
+  indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  highlightedField: 'foo',
+});
+```
+
+The above example create a short link and persists it in a saved object. The
+short URL can have a human-readable slug, which uniquely identifies that short
+URL.
+
+```ts
+shortUrl.slug === 'human-readable-slug'
+```
+
+The short URL can be used to navigate to the Discover app. The redirect
+client-side endpoint currently looks like this:
+
+```
+/app/goto/human-readable-slug
+```
+
+This persisted short URL would effectively work the same as the full version:
+
+```
+/app/goto/_redirect/DISCOVER_DEEP_LINKS?params={"indexPattern":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx","highlightedField":"foo"}&paramsVersion=7.x
+```
+
+
+## External users navigating to a Kibana deep link
+
+Currently Elastic Cloud and Support has main link linking into Kibana. Many of
+them are deep links into Discover and Dashboard apps where, for example, index
+pattern is selected, or filters and time range are set.
+
+The external users could use the above mentioned client-side redirect endpoint
+to navigate to their desired deep location within Kibana, for example, to the
+Discover application:
+
+```
+/app/goto/_redirect/DISCOVER_DEEP_LINKS?params={"indexPattern":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx","highlightedField":"foo"}&paramsVersion=7.x
 ```
 
 
@@ -157,11 +245,9 @@ the Short URL Service:
    destination page might have other state which affects the display of the page
    but is not present in the URL. Once the short URL is used to navigate to that
    page, any state that is kept only in memory is lost.
-   1. __Could do:__ We will not support storing additional, non-URL state in
-      short URLs in the initial implementation. However, it will be possible to
-      store addition non-URL state with each short URL. That state would be
-      provided to a Kibana app once user first navigates to that app using a
-      short URL. (This non-URL state might also need migration support.)
+   1. __Will do:__ The new implementation of the short URLs will also persist
+      the the location state of the URL. That state would be provided to a
+      Kibana app once user navigates to that app using a short URL.
 1. Short URLs are not automatically deleted when the target (say dashboard) is
    deleted. (#10450)
    1. __Could do:__ The URL Service will not provide such feature. Though the
@@ -235,6 +321,8 @@ we cannot create a short URL using an URL generator.
 
 
 # Detailed design
+
+In general we will try to provide similar experience to pl
 
 
 ## High level architecture
@@ -348,8 +436,32 @@ const shortUrl = await share.url.shortUrls.create({
 });
 ```
 
-These short URL will be stored in saved objects of type `url` and will be
+These short URLs will be stored in saved objects of type `url` and will be
 automatically migrated once a URL generator becomes deprecated.
+
+
+### `KibanaLocation` interface
+
+The `KibanaLocation` interface is a simple interface to store a location in some
+kibana application.
+
+```ts
+interface KibanaLocation {
+  app: string;
+  route: string;
+  state: object;
+}
+```
+
+It maps directly to a `.navigateToApp()` call.
+
+```ts
+let location: KibanaLocation;
+core.application.navigateToApp(location.app, {
+  route: location.route,
+  state: location.state,
+});
+```
 
 
 ## HTTP endpoints
