@@ -16,7 +16,7 @@ import { SecurityPluginSetup } from '../../../security/public';
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
-export interface FileDataVisualizerPageProps {
+export interface FileDataVisualizerProps {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   // maps?: MapsStartApi;
@@ -24,7 +24,7 @@ export interface FileDataVisualizerPageProps {
   coreStart: CoreStart;
 }
 
-export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({
+export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
   data,
   embeddable,
   // maps,

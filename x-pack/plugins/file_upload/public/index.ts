@@ -11,11 +11,9 @@ export function plugin() {
   return new FileUploadPlugin();
 }
 
-export * from '../common';
-
 export * from './importer/types';
 
 export { FileUploadPluginStart } from './plugin';
 export { FileUploadComponentProps } from './lazy_load_bundle';
 
-export { FileDataVisualizerPage } from './application';
+export { FileDataVisualizer } from './application';
