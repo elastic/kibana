@@ -229,6 +229,38 @@ export function DiscoverSidebar({
     return map;
   }, [fields, useNewFieldsApi, selectedFields]);
 
+  const deleteField = useMemo(
+    () =>
+      canEditIndexPatternField
+        ? async (fieldName: string) => {
+            const ref = indexPatternFieldEditor.openDeleteModal({
+              ctx: {
+                // @ts-ignore
+                indexPattern: selectedIndexPattern,
+              },
+              fieldName,
+              onDelete: async () => {
+                onEditRuntimeField();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
+    [
+      selectedIndexPattern,
+      canEditIndexPatternField,
+      setFieldEditorRef,
+      closeFlyout,
+      onEditRuntimeField,
+      indexPatternFieldEditor,
+    ]
+  );
+
   const getPaginated = useCallback(
     (list) => {
       return list.slice(0, fieldsToRender);
@@ -443,6 +475,7 @@ export function DiscoverSidebar({
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
+                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                               />
                             </li>
                           );
@@ -501,6 +534,7 @@ export function DiscoverSidebar({
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
+                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                               />
                             </li>
                           );
@@ -528,6 +562,7 @@ export function DiscoverSidebar({
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
+                            onDeleteField={canEditIndexPatternField ? deleteField : undefined}
                           />
                         </li>
                       );

@@ -72,7 +72,17 @@ export interface DiscoverFieldProps {
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
 
+  /**
+   * Callback to edit a runtime field from index pattern
+   * @param fieldName name of the field to edit
+   */
   onEditField?: (fieldName: string) => void;
+
+  /**
+   * Callback to delete a runtime field from index pattern
+   * @param fieldName name of the field to delete
+   */
+  onDeleteField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -87,6 +97,7 @@ export function DiscoverField({
   trackUiMetric,
   multiFields,
   onEditField,
+  onDeleteField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -289,7 +300,8 @@ export function DiscoverField({
   const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
   const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
   const canEditField = onEditField && (!isUnknownField || isRuntimeField);
-  const displayNameGrow = canEditField ? 9 : 10;
+  const canDeleteField = onDeleteField && isRuntimeField;
+  const displayNameGrow = canEditField ? (canDeleteField ? 8 : 9) : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup responsive={false}>
@@ -309,6 +321,29 @@ export function DiscoverField({
                 defaultMessage: 'Edit index pattern field',
               })}
             />
+          </EuiFlexItem>
+        )}
+        {canDeleteField && (
+          <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelDeleteItem">
+            <EuiToolTip
+              content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                defaultMessage: 'Delete index pattern field',
+              })}
+            >
+              <EuiButtonIcon
+                onClick={() => {
+                  if (onDeleteField) {
+                    onDeleteField(field.name);
+                  }
+                }}
+                iconType="trash"
+                data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
+                color="danger"
+                aria-label={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                  defaultMessage: 'Delete index pattern field',
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

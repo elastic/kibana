@@ -263,6 +263,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       });
     }
 
+    public async removeField(field: string) {
+      await testSubjects.click(`field-${field}`);
+      await testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+      await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    }
+
     public async clickIndexPatternActions() {
       await retry.try(async () => {
         await testSubjects.click('discoverIndexPatternActions');

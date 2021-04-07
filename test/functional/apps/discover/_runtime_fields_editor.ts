@@ -87,5 +87,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
     });
+
+    it('deletes a runtime field', async function () {
+      await createRuntimeField('delete');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.removeField('delete');
+      await fieldEditor.confirmDelete();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await PageObjects.discover.getAllFieldNames()).includes('delete')).to.be(false);
+    });
   });
 }
