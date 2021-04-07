@@ -20,6 +20,8 @@ import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
 
+import { ENGINES_TITLE } from './../constants';
+
 import { EnginesOverviewHeader } from './header';
 
 import './empty_state.scss';
@@ -32,7 +34,7 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome />
+      <SetPageChrome trail={[ENGINES_TITLE]} />
       <EnginesOverviewHeader />
       <EuiPageContent hasBorder className="emptyState">
         {canManageEngines ? (

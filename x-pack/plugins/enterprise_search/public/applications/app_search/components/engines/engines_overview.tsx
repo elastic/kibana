@@ -80,7 +80,7 @@ export const EnginesOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome />
+      <SetPageChrome trail={[ENGINES_TITLE]} />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
