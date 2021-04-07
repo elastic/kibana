@@ -5,7 +5,7 @@
 
 # Summary
 
-Currently in Kibana `share` plugin we have two services that deal with URLs.
+Currently in the Kibana `share` plugin we have two services that deal with URLs.
 
 One is *Short URL Service*: given a long internal Kibana URL it returns an ID.
 That ID can be used to "resolve" back to the long URL and redirect the user to
@@ -33,7 +33,7 @@ const myGenerator = plugins.share.registerUrlGenerator(/* ... */);
 // You can fetch it from the registry (if you don't already have it).
 const myGenerator = plugins.share.getUrlGenerator(/* ... */);
 
-// Now you can use it to generate deep link into Kibana.
+// Now you can use it to generate a deep link into Kibana.
 const deepLink: string = myGenerator.createUrl({ /* ... */ });
 ```
 
@@ -120,7 +120,7 @@ class DiscoverPlugin() {
 }
 ```
 
-Finally, if any other app now wants to navigate to a deep link link withing the
+Finally, if any other app now wants to navigate to a deep link within the
 Discover application, they use this exported locator.
 
 ```ts
@@ -175,7 +175,7 @@ const shortUrl = await plugins.discover.locator.createShortUrl(
 });
 ```
 
-The above example create a short link and persists it in a saved object. The
+The above example creates a short link and persists it in a saved object. The
 short URL can have a human-readable slug, which uniquely identifies that short
 URL.
 
@@ -199,7 +199,7 @@ This persisted short URL would effectively work the same as the full version:
 
 ## External users navigating to a Kibana deep link
 
-Currently Elastic Cloud and Support has main link linking into Kibana. Many of
+Currently Elastic Cloud and Support have many links linking into Kibana. Most of
 them are deep links into Discover and Dashboard apps where, for example, index
 pattern is selected, or filters and time range are set.
 
@@ -251,14 +251,14 @@ the Short URL Service:
    but is not present in the URL. Once the short URL is used to navigate to that
    page, any state that is kept only in memory is lost.
    1. __Will do:__ The new implementation of the short URLs will also persist
-      the the location state of the URL. That state would be provided to a
-      Kibana app once user navigates to that app using a short URL.
+      the location state of the URL. That state would be provided to a
+      Kibana app once a user navigates to that app using a short URL.
 1. Short URLs are not automatically deleted when the target (say dashboard) is
    deleted. (#10450)
    1. __Could do:__ The URL Service will not provide such feature. Though the
       short URLs will keep track of saved object references used in the params
       to generate a short URL. Maybe those saved references could somehow be
-      used in the future to provide such facility.
+      used in the future to provide such a facility.
       
       Currently, there are two possible avenues for deleting a short URL when
       the underlying dashboard is deleted:
@@ -308,8 +308,8 @@ the URL Generator Service:
 One major reason we want to "refresh" the Short URL Service and the URL
 Generator Service is their architecture.
 
-Currently, the Short URL Service is implemented on
-top of `url` type saved object on the server-side. However, it only exposes the
+Currently, the Short URL Service is implemented on top of the `url` type saved
+object on the server-side. However, it only exposes the
 HTTP endpoints, it does not expose any API on the server for the server-side
 plugins to consume; on the client-side there is no plugin API either, developers
 need to manually execute HTTP requests. 
@@ -320,7 +320,7 @@ team) where a server-side plugin wants to use a URL generator.
 
 ![Current Short URL Service and URL Generator Service architecture](../images/url_service/old_architecture.png)
 
-The current architecture does not allow both service to be conveniently used,
+The current architecture does not allow both services to be conveniently used,
 also as they are implemented in different locations, they are disjointed&mdash;
 we cannot create a short URL using an URL generator.
 
@@ -340,7 +340,7 @@ Below diagram shows the proposed architecture of the URL Service.
 
 ## Plugin contracts
 
-The is to provide developers the same experience on the server and browser.
+The aim is to provide developers the same experience on the server and browser.
 
 Below are preliminary interfaces of the new URL Service. `IUrlService` will be
 a shared interface defined in `/common` folder shared across server and browser.
@@ -361,7 +361,7 @@ interface IUrlService {
 ### Locators
 
 The locator business logic will be contained in `ILocatorClient` client and will
-provided two main functionalities:
+provide two main functionalities:
 
 1. It will provide a facility to create locators.
 1. It will also be a registry of locators, every newly created locator is
@@ -377,7 +377,7 @@ interface ILocatorClient {
 The `LocatorDefinition` interface is a developer-friendly interface for creating
 new locators. Mainly two things will be required from each new locator:
 
-1. Implement the `getLocation()` method, which give the locator specific `params`
+1. Implement the `getLocation()` method, which gives the locator specific `params`
    object returns a Kibana location, see description of `KibanaLocation` below.
 2. Implement the `PersistableState` interface which we use in Kibana. This will
    allow to migrate the locator `params`. Implementation of the `PersistableState`
@@ -541,9 +541,9 @@ plan of action for each endpoint:
 
 Why should we *not* do this?
 
-- Implementation cost will be few weeks, but the code complexity and quality
+- Implementation cost will be a few weeks, but the code complexity and quality
   will improve.
-- There is cost of migrating existing Kibana plugins to use the new API.
+- There is a cost of migrating existing Kibana plugins to use the new API.
 
 
 # Alternatives
@@ -577,7 +577,7 @@ will change, they will simply need to review a PR which stops using the URL
 Generator Service and uses the combined URL Service instead, which will provide
 a superset of features.
 
-Alternatively, we can deprecate the URL Generator Service and maintain it for
+Alternatively, we can deprecate the URL Generator Service and maintain it for a
 few minor releases.
 
 
@@ -587,4 +587,4 @@ For the existing short URL and URL generator functionality there is nothing to
 teach, as they will continue working with a largely similar API.
 
 Everything else in the new URL Service will have JSDoc comments and good
-documentation on or website.
+documentation on our website.
