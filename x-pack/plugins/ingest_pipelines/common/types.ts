@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Pipeline as ESPipeline } from '@elastic/elasticsearch/api/types';
+
 export interface ESProcessorConfig {
   on_failure?: Processor[];
   ignore_failure?: boolean;
@@ -17,19 +19,10 @@ export interface Processor {
   [typeName: string]: ESProcessorConfig;
 }
 
-export interface Pipeline {
+export interface Pipeline extends ESPipeline {
   name: string;
-  description: string;
-  version?: number;
-  processors: Processor[];
-  on_failure?: Processor[];
 }
 
 export interface PipelinesByName {
-  [key: string]: {
-    description: string;
-    version?: number;
-    processors: Processor[];
-    on_failure?: Processor[];
-  };
+  [key: string]: ESPipeline;
 }
