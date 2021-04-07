@@ -6,26 +6,23 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import * as labels from './translations';
-import { FiltersExpressionSelectContainer, StatusExpressionSelect } from './monitor_expressions';
+import { FiltersExpressionSelectContainer, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
-import { AvailabilityExpressionSelect } from './monitor_expressions/availability_expression_select';
-import { KueryBar } from '..';
+import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
+import { AlertQueryBar } from '../alert_query_bar/query_bar';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
   enabled: boolean;
   hasFilters: boolean;
   isOldAlert: boolean;
-  locations: string[];
   snapshotCount: number;
-  snapshotLoading: boolean;
+  snapshotLoading?: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
-  shouldUpdateUrl: boolean;
   timerange: {
     from: string;
     to: string;
@@ -38,7 +35,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     hasFilters,
     isOldAlert,
     setAlertParams,
-    shouldUpdateUrl,
     snapshotCount,
     snapshotLoading,
   } = props;
@@ -52,14 +48,26 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     <>
       <OldAlertCallOut isOldAlert={isOldAlert} />
 
-      <EuiSpacer size="m" />
+      <EuiCallOut
+        size="s"
+        title={
+          <span>
+            <FormattedMessage
+              id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+              defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+              values={{ snapshotCount: snapshotLoading ? '...' : snapshotCount }}
+            />{' '}
+            {snapshotLoading && <EuiLoadingSpinner />}
+          </span>
+        }
+        iconType="iInCircle"
+      />
 
-      <KueryBar
-        aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        defaultKuery={alertParams.search}
-        shouldUpdateUrl={shouldUpdateUrl}
-        updateDefaultKuery={(value: string) => setAlertParams('search', value)}
-        data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
+      <EuiSpacer size="s" />
+
+      <AlertQueryBar
+        query={alertParams.search || ''}
+        onChange={(value: string) => setAlertParams('search', value)}
       />
 
       <EuiSpacer size="s" />
@@ -81,7 +89,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
           }
         }}
         setAlertParams={setAlertParams}
-        shouldUpdateUrl={shouldUpdateUrl}
+        shouldUpdateUrl={false}
       />
 
       <EuiHorizontalRule />
@@ -98,20 +106,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         alertParams={alertParams}
         isOldAlert={isOldAlert}
         setAlertParams={setAlertParams}
-      />
-
-      <EuiSpacer size="l" />
-
-      <EuiCallOut
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
-            defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-            values={{ snapshotCount: snapshotLoading ? '...' : snapshotCount }}
-          />
-        }
-        iconType="iInCircle"
       />
 
       <EuiSpacer size="m" />

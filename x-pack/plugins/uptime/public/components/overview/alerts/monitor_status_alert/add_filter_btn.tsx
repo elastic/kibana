@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import * as labels from './translations';
+import * as labels from '../translations';
 
 interface Props {
   newFilters: string[];
@@ -60,6 +60,8 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
       disabled={items.length === 0}
       iconType="plusInCircleFilled"
       onClick={onButtonClick}
+      size="s"
+      flush="left"
     >
       {labels.ADD_FILTER}
     </EuiButtonEmpty>
