@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
-import { getTransactionCoordinates } from '../lib/observability_overview/get_transaction_coordinates';
+import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
 import { getHasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
@@ -39,18 +39,18 @@ export const observabilityOverviewRoute = createRoute({
     );
 
     return withApmSpan('observability_overview', async () => {
-      const [serviceCount, transactionCoordinates] = await Promise.all([
+      const [serviceCount, transactionPerMinute] = await Promise.all([
         getServiceCount({
           setup,
           searchAggregatedTransactions,
         }),
-        getTransactionCoordinates({
+        getTransactionsPerMinute({
           setup,
           bucketSize,
           searchAggregatedTransactions,
         }),
       ]);
-      return { serviceCount, transactionCoordinates };
+      return { serviceCount, transactionPerMinute };
     });
   },
 });
