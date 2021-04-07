@@ -10,6 +10,10 @@ import { createServerRouteRepository } from './create_server_route_repository';
 import { decodeRequestParams } from './decode_request_params';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';
 
+function assertType<TShape = never>(value: TShape) {
+  return value;
+}
+
 // Generic arguments for createServerRouteRepository should be set,
 // if not, registering routes should not be allowed
 createServerRouteRepository().add({
@@ -23,8 +27,10 @@ createServerRouteRepository().add({
 // the request handler.
 createServerRouteRepository<{}, {}>().add({
   endpoint: 'endpoint_without_params',
-  // @ts-expect-error params does not exist
-  handler: async ({ params }) => {},
+  handler: async (resources) => {
+    // @ts-expect-error Argument of type '{}' is not assignable to parameter of type '{ params: any; }'.
+    assertType<{ params: any }>(resources);
+  },
 });
 
 // If a params codec is set, its type _should_ be available in the
@@ -36,10 +42,8 @@ createServerRouteRepository<{}, {}>().add({
       serviceName: t.string,
     }),
   }),
-  handler: async ({ params }) => {
-    const {
-      path: { serviceName },
-    } = params;
+  handler: async (resources) => {
+    assertType<{ params: { path: { serviceName: string } } }>(resources);
   },
 });
 
@@ -53,6 +57,7 @@ createServerRouteRepository<{ context: { getSpaceId: () => string } }, {}>().add
   }),
   handler: async ({ context }) => {
     const spaceId = context.getSpaceId();
+    assertType<string>(spaceId);
   },
 });
 
@@ -67,7 +72,9 @@ createServerRouteRepository<{}, { options: { tags: string[] } }>().add({
   options: {
     tags: [],
   },
-  handler: async ({ params }) => {},
+  handler: async (resources) => {
+    assertType<{ params: { path: { serviceName: string } } }>(resources);
+  },
 });
 
 const repository = createServerRouteRepository<{}, {}>()
@@ -86,7 +93,7 @@ const repository = createServerRouteRepository<{}, {}>()
         serviceName: t.string,
       }),
     }),
-    handler: async ({ params }) => {
+    handler: async () => {
       return {
         yesParamsForMe: true,
       };
@@ -99,7 +106,7 @@ const repository = createServerRouteRepository<{}, {}>()
         serviceName: t.string,
       }),
     }),
-    handler: async ({ params }) => {
+    handler: async () => {
       return {
         someParamsForMe: true,
       };
@@ -110,20 +117,20 @@ type TestRepository = typeof repository;
 
 // EndpointOf should return all valid endpoints of a repository
 
-const validEndpoints: Array<EndpointOf<TestRepository>> = [
+assertType<Array<EndpointOf<TestRepository>>>([
   'endpoint_with_params',
   'endpoint_without_params',
   'endpoint_with_optional_params',
-];
+]);
 
 // @ts-expect-error Type '"this_endpoint_does_not_exist"' is not assignable to type '"endpoint_without_params" | "endpoint_with_params" | "endpoint_with_optional_params"'
-const invalidEndpoints: Array<EndpointOf<TestRepository>> = ['this_endpoint_does_not_exist'];
+assertType<Array<EndpointOf<TestRepository>>>(['this_endpoint_does_not_exist']);
 
 // ReturnOf should return the return type of a request handler.
 
-const noParamsValid: ReturnOf<TestRepository, 'endpoint_without_params'> = {
+assertType<ReturnOf<TestRepository, 'endpoint_without_params'>>({
   noParamsForMe: true,
-};
+});
 
 const noParamsInvalid: ReturnOf<TestRepository, 'endpoint_without_params'> = {
   // @ts-expect-error type '{ paramsForMe: boolean; }' is not assignable to type '{ noParamsForMe: boolean; }'.
@@ -192,36 +199,40 @@ client({
   },
   timeout: 1,
 }).then((res) => {
-  // @ts-expect-error Property 'noParamsForMe' is missing in type
-  const invalidType: {
+  assertType<{
     noParamsForMe: boolean;
-  } = res;
+    // @ts-expect-error Property 'noParamsForMe' is missing in type
+  }>(res);
 
-  const validType: {
+  assertType<{
     yesParamsForMe: boolean;
-  } = res;
+  }>(res);
 });
 
 // decodeRequestParams should return the type of the codec that is passed
-const validParams: { path: { serviceName: string } } = decodeRequestParams(
-  {
-    params: {
-      serviceName: 'serviceName',
+assertType<{ path: { serviceName: string } }>(
+  decodeRequestParams(
+    {
+      params: {
+        serviceName: 'serviceName',
+      },
+      body: undefined,
+      query: undefined,
     },
-    body: undefined,
-    query: undefined,
-  },
-  t.type({ path: t.type({ serviceName: t.string }) })
+    t.type({ path: t.type({ serviceName: t.string }) })
+  )
 );
 
-// @ts-expect-error The types of 'path.serviceName' are incompatible between these types.
-const invalidParams: { path: { serviceName: boolean } } = decodeRequestParams(
-  {
-    params: {
-      serviceName: 'serviceName',
+assertType<{ path: { serviceName: boolean } }>(
+  // @ts-expect-error The types of 'path.serviceName' are incompatible between these types.
+  decodeRequestParams(
+    {
+      params: {
+        serviceName: 'serviceName',
+      },
+      body: undefined,
+      query: undefined,
     },
-    body: undefined,
-    query: undefined,
-  },
-  t.type({ path: t.type({ serviceName: t.string }) })
+    t.type({ path: t.type({ serviceName: t.string }) })
+  )
 );
