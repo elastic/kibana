@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
-import { IndexPatternsService } from '../../data/common';
+import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
@@ -19,7 +19,7 @@ export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
 
 export const extractIndexPatternValues = (
   panel: PanelSchema,
-  defaultIndex?: PanelSchema['default_index_pattern']
+  defaultIndex: IIndexPattern | null
 ) => {
   const patterns: IndexPatternValue[] = [];
 
@@ -43,8 +43,8 @@ export const extractIndexPatternValues = (
     });
   }
 
-  if (patterns.length === 0 && defaultIndex) {
-    patterns.push(defaultIndex);
+  if (patterns.length === 0 && defaultIndex?.id) {
+    patterns.push({ id: defaultIndex.id });
   }
 
   return uniq<IndexPatternValue>(patterns).sort();

@@ -120,6 +120,7 @@ export function createApi() {
 
               return response.ok({ body });
             } catch (error) {
+              logger.error(error);
               const opts = {
                 statusCode: 500,
                 body: {

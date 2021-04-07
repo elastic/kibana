@@ -46,6 +46,7 @@ describe('migrations v2 model', () => {
     retryCount: 0,
     retryDelay: 0,
     retryAttempts: 15,
+    batchSize: 1000,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -1182,6 +1183,7 @@ describe('migrations v2 model', () => {
   describe('createInitialState', () => {
     const migrationsConfig = ({
       retryAttempts: 15,
+      batchSize: 1000,
     } as unknown) as SavedObjectsMigrationConfigType;
     it('creates the initial state for the model based on the passed in paramaters', () => {
       expect(
@@ -1197,6 +1199,7 @@ describe('migrations v2 model', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
+          "batchSize": 1000,
           "controlState": "INIT",
           "currentAlias": ".kibana_task_manager",
           "indexPrefix": ".kibana_task_manager",
