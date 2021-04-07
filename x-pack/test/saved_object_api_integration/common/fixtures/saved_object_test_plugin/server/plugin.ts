@@ -64,14 +64,7 @@ export class Plugin {
       hidden: false,
       namespaceType: 'agnostic',
       management,
-      mappings: {
-        properties: {
-          ...mappings.properties,
-          version: {
-            type: 'integer',
-          },
-        },
-      },
+      mappings,
     });
     core.savedObjects.registerType({
       name: 'hiddentype',

@@ -36,10 +36,9 @@ export interface FindTestCase {
     total?: number;
   };
   failure?: {
-    statusCode: 200 | 400 | 403; // if the user searches for types and/or namespaces they are not authorized for, they will get a 200 result with those types/namespaces omitted
+    statusCode: 200 | 400; // if the user searches for types and/or namespaces they are not authorized for, they will get a 200 result with those types/namespaces omitted
     reason: 'unauthorized' | 'cross_namespace_not_permitted' | 'bad_request';
   };
-  typeUseInQueryField?: string;
 }
 
 const TEST_CASES = [
@@ -52,7 +51,7 @@ export const getTestCases = (
     currentSpace: undefined,
     crossSpaceSearch: undefined,
   }
-): Record<string, FindTestCase> => {
+) => {
   const crossSpaceIds =
     crossSpaceSearch?.filter((s) => s !== (currentSpace ?? DEFAULT_SPACE_ID)) ?? []; // intentionally exclude the current space
   const isCrossSpaceSearch = crossSpaceIds.length > 0;
@@ -99,7 +98,7 @@ export const getTestCases = (
       successResult: {
         savedObjects: getExpectedSavedObjects((t) => t.type === 'isolatedtype'),
       },
-    },
+    } as FindTestCase,
     multiNamespaceType: {
       title: buildTitle('find multi-namespace type'),
       query: `type=sharedtype&fields=title${namespacesQueryParam}`,
@@ -119,15 +118,15 @@ export const getTestCases = (
       title: buildTitle('find namespace-agnostic type'),
       query: `type=globaltype&fields=title${namespacesQueryParam}`,
       successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
-    },
+    } as FindTestCase,
     hiddenType: {
       title: buildTitle('find hidden type'),
       query: `type=hiddentype&fields=name${namespacesQueryParam}`,
-    },
+    } as FindTestCase,
     unknownType: {
       title: buildTitle('find unknown type'),
       query: `type=wigwags${namespacesQueryParam}`,
-    },
+    } as FindTestCase,
     eachType: {
       title: buildTitle('find each type'),
       query: `type=isolatedtype&type=sharedtype&type=globaltype&type=hiddentype&type=wigwags${namespacesQueryParam}`,
@@ -136,7 +135,7 @@ export const getTestCases = (
           ['isolatedtype', 'sharedtype', 'globaltype'].includes(t.type)
         ),
       },
-    },
+    } as FindTestCase,
     pageBeyondTotal: {
       title: buildTitle('find page beyond total'),
       query: `type=isolatedtype&page=100&per_page=100${namespacesQueryParam}`,
@@ -146,27 +145,24 @@ export const getTestCases = (
         total: -1,
         savedObjects: [],
       },
-    },
+    } as FindTestCase,
     unknownSearchField: {
       title: buildTitle('find unknown search field'),
       query: `type=url&search_fields=a${namespacesQueryParam}`,
-    },
+    } as FindTestCase,
     filterWithNamespaceAgnosticType: {
       title: buildTitle('filter with namespace-agnostic type'),
       query: `type=globaltype&filter=globaltype.attributes.title:*global*${namespacesQueryParam}`,
       successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
-      typeUseInQueryField: 'globaltype',
-    },
+    } as FindTestCase,
     filterWithHiddenType: {
       title: buildTitle('filter with hidden type'),
       query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'${namespacesQueryParam}`,
-      typeUseInQueryField: 'hiddentype',
-    },
+    } as FindTestCase,
     filterWithUnknownType: {
       title: buildTitle('filter with unknown type'),
       query: `type=wigwags&filter=wigwags.attributes.title:'unknown'${namespacesQueryParam}`,
-      typeUseInQueryField: 'wigwags',
-    },
+    } as FindTestCase,
     filterWithDisallowedType: {
       title: buildTitle('filter with disallowed type'),
       query: `type=globaltype&filter=dashboard.title:'Requests'${namespacesQueryParam}`,
@@ -174,49 +170,7 @@ export const getTestCases = (
         statusCode: 400,
         reason: 'bad_request',
       },
-      typeUseInQueryField: 'dashboard',
-    },
-    aggsWithNamespaceAgnosticType: {
-      title: buildTitle('aggs with namespace-agnostic type'),
-      query: `type=globaltype&aggs=${encodeURIComponent(
-        JSON.stringify({
-          type_count: { max: { field: 'globaltype.attributes.version' } },
-        })
-      )}${namespacesQueryParam}`,
-      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
-      typeUseInQueryField: 'globaltype',
-    },
-    aggsWithHiddenType: {
-      title: buildTitle('aggs with hidden type'),
-      query: `type=hiddentype&fields=name&aggs=${encodeURIComponent(
-        JSON.stringify({
-          type_count: { max: { field: 'hiddentype.attributes.title' } },
-        })
-      )}${namespacesQueryParam}`,
-      typeUseInQueryField: 'hiddentype',
-    },
-    aggsWithUnknownType: {
-      title: buildTitle('aggs with unknown type'),
-      query: `type=wigwags&aggs=${encodeURIComponent(
-        JSON.stringify({
-          type_count: { max: { field: 'wigwags.attributes.version' } },
-        })
-      )}${namespacesQueryParam}`,
-      typeUseInQueryField: 'wigwags',
-    },
-    aggsWithDisallowedType: {
-      title: buildTitle('aggs with disallowed type'),
-      query: `type=globaltype&aggs=${encodeURIComponent(
-        JSON.stringify({
-          type_count: { max: { field: 'dashboard.attributes.version' } },
-        })
-      )}${namespacesQueryParam}`,
-      failure: {
-        statusCode: 400,
-        reason: 'bad_request',
-      },
-      typeUseInQueryField: 'dashboard',
-    },
+    } as FindTestCase,
   };
 };
 
@@ -250,7 +204,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       }
     } else if (failure?.statusCode === 400) {
       if (failure.reason === 'bad_request') {
-        const type = testCase.typeUseInQueryField ?? 'unknown type';
+        const type = (parsedQuery.filter as string).split('.')[0];
         expect(response.body.error).to.eql('Bad Request');
         expect(response.body.statusCode).to.eql(failure.statusCode);
         expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);
