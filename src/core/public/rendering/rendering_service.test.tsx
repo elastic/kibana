@@ -48,54 +48,55 @@ describe('RenderingService#start', () => {
 
   it('renders application service into provided DOM element', () => {
     startService();
-    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
-              <div
-                class="application class-name"
-              >
-                <div>
-                  Hello application!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
+      <div
+        class="kbnAppWrapper kbnAppWrapper--hiddenChrome class-name"
+      >
+        <div>
+          Hello application!
+        </div>
+      </div>
+    `);
   });
 
-  it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
+  it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', () => {
     const isVisible$ = new BehaviorSubject(true);
     chrome.getIsVisible$.mockReturnValue(isVisible$);
     startService();
 
-    const appWrapper = targetDomElement.querySelector('div.app-wrapper')!;
-    expect(appWrapper.className).toEqual('app-wrapper');
+    const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
+    expect(appWrapper.className).toEqual('kbnAppWrapper');
 
     act(() => isVisible$.next(false));
-    expect(appWrapper.className).toEqual('app-wrapper hidden-chrome');
+    expect(appWrapper.className).toEqual('kbnAppWrapper kbnAppWrapper--hiddenChrome');
 
     act(() => isVisible$.next(true));
-    expect(appWrapper.className).toEqual('app-wrapper');
+    expect(appWrapper.className).toEqual('kbnAppWrapper');
   });
 
-  it('adds the application classes to the AppContainer', () => {
+  it('adds the application classes to the AppWrapper', () => {
     const applicationClasses$ = new BehaviorSubject<string[]>([]);
+    const isVisible$ = new BehaviorSubject(true);
+    chrome.getIsVisible$.mockReturnValue(isVisible$);
     chrome.getApplicationClasses$.mockReturnValue(applicationClasses$);
     startService();
 
-    const appContainer = targetDomElement.querySelector('div.application')!;
-    expect(appContainer.className).toEqual('application');
+    const appContainer = targetDomElement.querySelector('div.kbnAppWrapper')!;
+    expect(appContainer.className).toEqual('kbnAppWrapper');
 
     act(() => applicationClasses$.next(['classA', 'classB']));
-    expect(appContainer.className).toEqual('application classA classB');
+    expect(appContainer.className).toEqual('kbnAppWrapper classA classB');
 
     act(() => applicationClasses$.next(['classC']));
-    expect(appContainer.className).toEqual('application classC');
+    expect(appContainer.className).toEqual('kbnAppWrapper classC');
 
     act(() => applicationClasses$.next([]));
-    expect(appContainer.className).toEqual('application');
+    expect(appContainer.className).toEqual('kbnAppWrapper');
   });
 
   it('contains wrapper divs', () => {
     startService();
-    expect(targetDomElement.querySelector('div.app-wrapper')).toBeDefined();
-    expect(targetDomElement.querySelector('div.app-wrapper-pannel')).toBeDefined();
+    expect(targetDomElement.querySelector('div.kbnAppWrapper')).toBeDefined();
   });
 
   it('renders the banner UI', () => {

@@ -15,10 +15,10 @@ export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
-  classes$: Observable<string[]>;
+  classes$?: Observable<string[]>;
 }> = ({ chromeVisible$, classes$, children }) => {
   const visible = useObservable(chromeVisible$);
-  const classes = useObservable(classes$);
+  const classes = useObservable(classes$, ['']);
   return (
     <div
       className={classNames(
@@ -32,9 +32,10 @@ export const AppWrapper: React.FunctionComponent<{
   );
 };
 
-export const AppContainer: React.FunctionComponent<{
-  classes$: Observable<string[]>;
-}> = ({ classes$, children }) => {
-  const classes = useObservable(classes$);
-  return <div className={classNames('application', classes)}>{children}</div>;
-};
+// TODO: Permanently delete
+// export const AppContainer: React.FunctionComponent<{
+//   classes$: Observable<string[]>;
+// }> = ({ classes$, children }) => {
+//   const classes = useObservable(classes$);
+//   return <div className={classNames(APP_WRAPPER_CLASS, classes)}>{children}</div>;
+// };
