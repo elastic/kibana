@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FieldValue } from '../result/types';
+
 export enum OpenModal {
   None,
   ConfirmResetModal,
@@ -35,3 +37,5 @@ export interface FieldResultSetting {
 }
 
 export type FieldResultSettingObject = Record<string, FieldResultSetting | {}>;
+
+export type SampleSearchResponse = Record<string, FieldValue>;
