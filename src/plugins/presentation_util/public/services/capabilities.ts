@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
-
-export * from './labs';
+export interface PresentationCapabilitiesService {
+  canAccessDashboards: () => boolean;
+  canCreateNewDashboards: () => boolean;
+  canSaveVisualizations: () => boolean;
+}
