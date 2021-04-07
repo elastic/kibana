@@ -42,6 +42,7 @@ export const defaultEmbeddableFactoryProvider = <
     inject: def.inject || ((state: EmbeddableStateWithType) => state),
     extract: def.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
     migrations: def.migrations || {},
+    grouping: def.grouping,
   };
   return factory;
 };

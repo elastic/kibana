@@ -16,6 +16,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [grouping](./kibana-plugin-plugins-embeddable-public.embeddablefactory.grouping.md) | <code>UiActionsPresentableGrouping</code> | Indicates the grouping this factory should appear in a sub-menu. Example, this is used for grouping options in the editors menu in Dashboard for creating new embeddables |
 |  [isContainerType](./kibana-plugin-plugins-embeddable-public.embeddablefactory.iscontainertype.md) | <code>boolean</code> | True if is this factory create embeddables that are Containers. Used in the add panel to conditionally show whether these can be added to another container. It's just not supported right now, but once nested containers are officially supported we can probably get rid of this interface. |
 |  [isEditable](./kibana-plugin-plugins-embeddable-public.embeddablefactory.iseditable.md) | <code>() =&gt; Promise&lt;boolean&gt;</code> | Returns whether the current user should be allowed to edit this type of embeddable. Most of the time this should be based off the capabilities service, hence it's async. |
 |  [savedObjectMetaData](./kibana-plugin-plugins-embeddable-public.embeddablefactory.savedobjectmetadata.md) | <code>SavedObjectMetaData&lt;TSavedObjectAttributes&gt;</code> |  |

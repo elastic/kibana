@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { StartServicesAccessor } from 'kibana/public';
 
+import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
 import type {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -26,6 +27,14 @@ export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
+  public readonly grouping = [
+    {
+      id: PLUGIN_ID,
+      getDisplayName: () => ML_APP_NAME,
+      getIconType: () => PLUGIN_ICON,
+    },
+  ];
+
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
   ) {}
@@ -36,7 +45,7 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML anomaly swim lane',
+      defaultMessage: 'Anomaly swim lane',
     });
   }
 

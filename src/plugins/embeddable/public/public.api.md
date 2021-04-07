@@ -380,6 +380,8 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
     getDefaultInput(partial: Partial<TEmbeddableInput>): Partial<TEmbeddableInput>;
     getDisplayName(): string;
     getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
+    // Warning: (ae-forgotten-export) The symbol "PresentableGrouping" needs to be exported by the entry point index.d.ts
+    readonly grouping?: PresentableGrouping;
     readonly isContainerType: boolean;
     readonly isEditable: () => Promise<boolean>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectMetaData" needs to be exported by the entry point index.d.ts
@@ -393,7 +395,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations'>>;
+export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations' | 'grouping'>>;
 
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -724,6 +726,7 @@ export function openAddPanelFlyout(options: {
     overlays: OverlayStart_2;
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
+    showCreateNewMenu?: boolean;
 }): OverlayRef_2;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

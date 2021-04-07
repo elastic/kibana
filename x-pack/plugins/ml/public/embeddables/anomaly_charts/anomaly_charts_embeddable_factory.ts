@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { StartServicesAccessor } from 'kibana/public';
 
+import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
 import type {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -27,6 +28,14 @@ export class AnomalyChartsEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput> {
   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
+  public readonly grouping = [
+    {
+      id: PLUGIN_ID,
+      getDisplayName: () => ML_APP_NAME,
+      getIconType: () => PLUGIN_ICON,
+    },
+  ];
+
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
   ) {}
@@ -37,7 +46,7 @@ export class AnomalyChartsEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
-      defaultMessage: 'ML anomaly chart',
+      defaultMessage: 'Anomaly chart',
     });
   }
 

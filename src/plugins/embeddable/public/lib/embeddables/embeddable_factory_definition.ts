@@ -33,5 +33,6 @@ export type EmbeddableFactoryDefinition<
         | 'extract'
         | 'inject'
         | 'migrations'
+        | 'grouping'
       >
     >;
