@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCard, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -20,12 +20,12 @@ export function FleetPanel() {
         defaultMessage: 'Beta',
       })}
       description={
-        <EuiText size="s" color="subdued" style={{ maxWidth: '700px' }}>
+        <EuiTextColor color="subdued">
           {i18n.translate('xpack.observability.fleet.text', {
             defaultMessage:
               'The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts. You no longer need to install multiple Beats and other agents, making it easier and faster to deploy configurations across your infrastructure.',
           })}
-        </EuiText>
+        </EuiTextColor>
       }
       footer={
         <EuiLink href={core.http.basePath.prepend('/app/fleet#/')}>
@@ -34,15 +34,9 @@ export function FleetPanel() {
           })}
         </EuiLink>
       }
-      title={
-        <EuiTitle size="s">
-          <h4>
-            {i18n.translate('xpack.observability.fleet.title', {
-              defaultMessage: 'Have you seen our new Fleet?',
-            })}
-          </h4>
-        </EuiTitle>
-      }
+      title={i18n.translate('xpack.observability.fleet.title', {
+        defaultMessage: 'Have you seen our new Fleet?',
+      })}
     />
   );
 }

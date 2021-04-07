@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiCard } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
@@ -20,19 +20,31 @@ export function LicensePrompt({ text, showBetaBadge = false }: Props) {
     '/app/management/stack/license_management'
   );
 
-  const renderLicenseBody = (
-    <EuiEmptyPrompt
-      iconType="iInCircle"
-      iconColor="subdued"
-      title={
-        <h2>
-          {i18n.translate('xpack.apm.license.title', {
-            defaultMessage: 'Start free 30-day trial',
-          })}
-        </h2>
+  return (
+    <EuiCard
+      display={showBetaBadge ? undefined : 'plain'}
+      paddingSize="l"
+      betaBadgeLabel={
+        showBetaBadge
+          ? i18n.translate('xpack.apm.license.betaBadge', {
+              defaultMessage: 'Beta',
+            })
+          : undefined
       }
-      body={<p>{text}</p>}
-      actions={
+      betaBadgeTooltipContent={
+        showBetaBadge
+          ? i18n.translate('xpack.apm.license.betaTooltipMessage', {
+              defaultMessage:
+                'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+            })
+          : undefined
+      }
+      title={i18n.translate('xpack.apm.license.title', {
+        defaultMessage: 'Start free 30-day trial',
+      })}
+      titleElement="h2"
+      description={<EuiTextColor color="subdued">{text}</EuiTextColor>}
+      footer={
         <EuiButton fill={true} href={licensePageUrl}>
           {i18n.translate('xpack.apm.license.button', {
             defaultMessage: 'Start trial',
@@ -41,25 +53,4 @@ export function LicensePrompt({ text, showBetaBadge = false }: Props) {
       }
     />
   );
-
-  const renderWithBetaBadge = (
-    <EuiCard
-      betaBadgeLabel={i18n.translate('xpack.apm.license.betaBadge', {
-        defaultMessage: 'Beta',
-      })}
-      betaBadgeTooltipContent={i18n.translate(
-        'xpack.apm.license.betaTooltipMessage',
-        {
-          defaultMessage:
-            'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-        }
-      )}
-      description={<></>}
-      title={<></>}
-    >
-      {renderLicenseBody}
-    </EuiCard>
-  );
-
-  return <>{showBetaBadge ? renderWithBetaBadge : renderLicenseBody}</>;
 }
