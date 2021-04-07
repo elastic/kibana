@@ -20,6 +20,7 @@ import {
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
+  SearchSourceFields,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
@@ -60,8 +61,8 @@ function isPlainStringArray(
 }
 
 export class CsvGenerator {
-  private _columns: string[] | null = null;
-  private _formatters: Record<string, FieldFormat> | null = null;
+  private _columns?: string[];
+  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -144,7 +145,7 @@ export class CsvGenerator {
     // if columns is not provided in job params,
     // default to use fields/fieldsFromSource from the searchSource to get the ordering of columns
     const getFromSearchSource = (): string[] => {
-      const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
+      const fieldValues: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
         fields: searchSource.getField('fields'),
         fieldsFromSource: searchSource.getField('fieldsFromSource'),
       };
