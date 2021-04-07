@@ -7,6 +7,7 @@
 
 import { getTransformChangesForHosts } from './get_transform_changes_for_hosts';
 import { getTransformChangesForKpi } from './get_transform_changes_for_kpi';
+import { getTransformChangesForMatrixHistogram } from './get_transform_changes_for_matrix_histogram';
 import { getTransformChangesForNetwork } from './get_transform_changes_for_network';
 import { GetTransformChanges } from './types';
 
@@ -16,20 +17,30 @@ export const getTransformChanges: GetTransformChanges = ({
   histogramType,
 }) => {
   const kpiTransform = getTransformChangesForKpi({ factoryQueryType, settings });
-  if (kpiTransform) {
+  if (kpiTransform != null) {
     return kpiTransform;
   }
+
   const hostTransform = getTransformChangesForHosts({ factoryQueryType, settings });
-  if (hostTransform) {
+  if (hostTransform != null) {
     return hostTransform;
   }
+
   const networkTransform = getTransformChangesForNetwork({
     factoryQueryType,
-    histogramType,
     settings,
   });
-  if (networkTransform) {
+  if (networkTransform != null) {
     return networkTransform;
+  }
+
+  const matrixHistogram = getTransformChangesForMatrixHistogram({
+    factoryQueryType,
+    settings,
+    histogramType,
+  });
+  if (matrixHistogram != null) {
+    return matrixHistogram;
   }
 
   // nothing matches
