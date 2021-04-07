@@ -31,6 +31,7 @@ mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 export interface Props {
   drawType?: DRAW_TYPE;
   onDraw: (event: { features: Feature[] }) => void;
+  onFeaturesSelected?: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
   mbMap: MbMap;
   drawActive: boolean;
 }
@@ -77,16 +78,12 @@ export class DrawControl extends Component<Props, {}> {
 
     this.props.mbMap.getCanvas().style.cursor = '';
     this.props.mbMap.off('draw.create', this.props.onDraw);
-    this.props.mbMap.off('draw.selectionchange', this._handleFeatureSelected);
+    if (this.props.onFeaturesSelected) {
+      this.props.mbMap.off('draw.selectionchange', this.props.onFeaturesSelected);
+    }
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
   }
-
-  _handleFeatureSelected = () => {
-    if (this.props.drawType === DRAW_TYPE.TRASH) {
-      this._mbDrawControl.trash();
-    }
-  };
 
   _updateDrawControl() {
     if (!this.props.drawType) {
@@ -98,7 +95,12 @@ export class DrawControl extends Component<Props, {}> {
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.create', this.props.onDraw);
-      this.props.mbMap.on('draw.selectionchange', this._handleFeatureSelected);
+      if (this.props.onFeaturesSelected) {
+        this.props.mbMap.on(
+          'draw.selectionchange',
+          this.props.onFeaturesSelected(this._mbDrawControl)
+        );
+      }
     }
 
     const drawMode = this._mbDrawControl.getMode();

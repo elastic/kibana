@@ -50,6 +50,7 @@ import {
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
   INDEX_DRAWN_LAYERS,
+  REMOVE_FEATURES_FROM_INDEX_QUEUE,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -125,6 +126,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           featuresToIndexQueue: [...state.mapState.featuresToIndexQueue, ...action.features],
+        },
+      };
+    case REMOVE_FEATURES_FROM_INDEX_QUEUE:
+      const newFeatureArr = state.mapState.featuresToIndexQueue.filter(({ id }: { id: string }) => !action.featureIds.includes(id))
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          featuresToIndexQueue: newFeatureArr,
         },
       };
     case SET_VECTOR_LAYER_INDEX_NAME:

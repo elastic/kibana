@@ -49,6 +49,7 @@ import {
   UPDATE_MAP_SETTING,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
+  REMOVE_FEATURES_FROM_INDEX_QUEUE,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
@@ -352,6 +353,13 @@ export function addFeaturesToIndexQueue(features: Feature[]) {
   return {
     type: ADD_FEATURES_TO_INDEX_QUEUE,
     features,
+  };
+}
+
+export function removeFeaturesFromIndexQueue(featureIds: string[]) {
+  return {
+    type: REMOVE_FEATURES_FROM_INDEX_QUEUE,
+    featureIds,
   };
 }
 

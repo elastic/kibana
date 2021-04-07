@@ -7,6 +7,8 @@
 
 import React, { Component } from 'react';
 import { Map as MbMap } from 'mapbox-gl';
+// @ts-expect-error
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { getToasts } from '../../../../kibana_services';
@@ -16,11 +18,19 @@ import { DRAW_TYPE } from '../../../../../common';
 export interface Props {
   disableDrawState: () => void;
   addFeaturesToIndexQueue: (features: Feature[]) => void;
+  removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
   mbMap: MbMap;
 }
 
 export class DrawFeatureControl extends Component<Props, {}> {
+  _onFeaturesSelected = (mbDrawControl: MapboxDraw) => (e: { features: Feature[] }) => {
+    if (this.props.drawType === DRAW_TYPE.TRASH) {
+      this.props.removeFeatures(e.features.map(({ id }: {id: string}) => id));
+      mbDrawControl.trash();
+    }
+  };
+
   _onDraw = async (e: { features: Feature[] }) => {
     try {
       console.log(e);
@@ -44,6 +54,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
       <DrawControl
         drawType={this.props.drawType}
         onDraw={this._onDraw}
+        onFeaturesSelected={this._onFeaturesSelected}
         mbMap={this.props.mbMap}
         drawActive={true}
       />
