@@ -7,7 +7,6 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "isolatedModules": true,
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-analytics/src",
     "types": [

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { CollectorSet } from './collector_set';
-export type { CollectorSetPublic } from './collector_set';
-export { Collector } from './collector';
-export type {
+export { CollectorSet, CollectorSetPublic } from './collector_set';
+export {
+  Collector,
   AllowedSchemaTypes,
   AllowedSchemaNumberTypes,
   SchemaField,
@@ -17,5 +16,4 @@ export type {
   CollectorOptions,
   CollectorFetchContext,
 } from './collector';
-export { UsageCollector } from './usage_collector';
-export type { UsageCollectorOptions } from './usage_collector';
+export { UsageCollector, UsageCollectorOptions } from './usage_collector';

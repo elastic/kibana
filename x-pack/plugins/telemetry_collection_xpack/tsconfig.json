@@ -5,8 +5,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
-    "isolatedModules": true
+    "declarationMap": true
   },
   "include": [
     "common/**/*",
