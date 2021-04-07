@@ -166,6 +166,8 @@ kibana_vars=(
     xpack.actions.proxyBypassHosts
     xpack.actions.proxyOnlyHosts
     xpack.actions.rejectUnauthorized
+    xpack.actions.maxResponseContentLength
+    xpack.actions.responseTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
