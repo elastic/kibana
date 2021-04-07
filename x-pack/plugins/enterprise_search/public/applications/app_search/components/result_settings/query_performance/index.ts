@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { WorkplaceSearchNav } from './nav';
-export { WorkplaceSearchHeaderActions } from './kibana_header_actions';
-export { AccountHeader } from './account_header';
+export { QueryPerformance } from './query_performance';
