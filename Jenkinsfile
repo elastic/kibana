@@ -6,10 +6,8 @@ kibanaPipeline(timeoutMinutes: 300) {
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
         workers.ci(ramDisk: false, name: "package-build", size: 's') {
-          withEnv(["GIT_COMMIT=${buildState.get('checkoutInfo').commit}"]) {
-            withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-              kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Build it")
-            }
+          withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+            kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Build it")
           }
         }
         def packageTypes = ['deb', 'docker', 'rpm']
