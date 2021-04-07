@@ -226,22 +226,24 @@ class TimeseriesVisualization extends Component {
 
     return (
       <div className="tvbVis">
-        <TimeSeries
-          series={series}
-          yAxis={yAxis}
-          onBrush={onBrush}
-          onFilterClick={onFilterClick}
-          backgroundColor={model.background_color}
-          showGrid={Boolean(model.show_grid)}
-          legend={Boolean(model.show_legend)}
-          legendPosition={model.legend_position}
-          tooltipMode={model.tooltip_mode}
-          xAxisLabel={getAxisLabelString(interval)}
-          xAxisFormatter={this.xAxisFormatter(interval)}
-          annotations={this.prepareAnnotations()}
-          syncColors={syncColors}
-          palettesService={palettesService}
-        />
+        <div className="tvbVisTimeSeries">
+          <TimeSeries
+            series={series}
+            yAxis={yAxis}
+            onBrush={onBrush}
+            onFilterClick={onFilterClick}
+            backgroundColor={model.background_color}
+            showGrid={Boolean(model.show_grid)}
+            legend={Boolean(model.show_legend)}
+            legendPosition={model.legend_position}
+            tooltipMode={model.tooltip_mode}
+            xAxisLabel={getAxisLabelString(interval)}
+            xAxisFormatter={this.xAxisFormatter(interval)}
+            annotations={this.prepareAnnotations()}
+            syncColors={syncColors}
+            palettesService={palettesService}
+          />
+        </div>
       </div>
     );
   }

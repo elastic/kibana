@@ -8,10 +8,15 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { Direction } from '../../../../../../common/search_strategy/common';
+import {
+  AggregationRequest,
+  HostAggEsItem,
+  HostBuckets,
+  HostItem,
+  HostValue,
+} from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
-
-import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
 
 export const HOST_FIELDS = [
   '_id',
@@ -34,6 +39,60 @@ export const HOST_FIELDS = [
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
 ];
+
+export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
+  esFields.reduce<AggregationRequest>(
+    (res, field) => ({
+      ...res,
+      ...getTermsAggregationTypeFromField(field),
+    }),
+    {}
+  );
+
+const getTermsAggregationTypeFromField = (field: string): AggregationRequest => {
+  if (field === 'host.ip') {
+    return {
+      host_ip: {
+        terms: {
+          script: {
+            source: "doc['host.ip']",
+            lang: 'painless',
+          },
+          size: 10,
+          order: {
+            timestamp: Direction.desc,
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+    };
+  }
+
+  return {
+    [field.replace(/\./g, '_')]: {
+      terms: {
+        field,
+        size: 10,
+        order: {
+          timestamp: Direction.desc,
+        },
+      },
+      aggs: {
+        timestamp: {
+          max: {
+            field: '@timestamp',
+          },
+        },
+      },
+    },
+  };
+};
 
 export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
   HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
