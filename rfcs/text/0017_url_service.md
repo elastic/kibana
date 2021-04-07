@@ -58,7 +58,8 @@ and in addition will implement the following improvements:
 # Terminology
 
 In the proposed new service we introduce "locators". This is mostly a change
-in language, we are renaming "URL generators" to "locators".
+in language, we are renaming "URL generators" to "locators". The old name would
+no longer make sense as we are not returning URLs from locators.
 
 
 # Basic example
@@ -82,7 +83,9 @@ In this example let's consider a case where Discover app creates a locator,
 then another plugin uses that locator to navigate to a deep link within the
 Discover app.
 
-First, the Discover plugin creates its locator (usually one per app).
+First, the Discover plugin creates its locator (usually one per app). It needs
+to do this on the client and server.
+
 
 ```ts
 const locator = plugins.share.locators.create({
