@@ -281,7 +281,7 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 |===
 
 |[[logging-root]] `logging.root:`
-| The `root` logger has a dedicated configuration node since this context name is special and is pre-configured for logging by default. 
+| The {kibana-ref}/logging-service.html#logging-service[`root` logger] has a dedicated configuration node since this context name is special and is pre-configured for logging by default. 
 // TODO: add link to the advanced logging documentation.
 
 |[[logging-root-appenders]] `logging.root.appenders:`
@@ -303,7 +303,7 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 | Specific appender format to apply for a particular logger context.
 
 | `logging.appenders:`
-| Define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
+| {kibana-ref}/logging-service.html#logging-appenders[Appenders] define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
 // TODO: add link to the advanced logging documentation.
 
 | `logging.appenders.console:`

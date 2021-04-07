@@ -96,7 +96,7 @@ CalculationVars.defaultProps = {
 
 CalculationVars.propTypes = {
   fields: PropTypes.object,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   metrics: PropTypes.array,
   model: PropTypes.object,
   name: PropTypes.string,

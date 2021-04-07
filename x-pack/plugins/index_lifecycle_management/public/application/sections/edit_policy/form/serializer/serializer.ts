@@ -230,6 +230,15 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       }
 
       /**
+       * COLD PHASE READ ONLY
+       */
+      if (_meta.cold.readonlyEnabled) {
+        coldPhase.actions.readonly = coldPhase.actions.readonly ?? {};
+      } else {
+        delete coldPhase.actions.readonly;
+      }
+
+      /**
        * COLD PHASE SET PRIORITY
        */
       if (!updatedPolicy.phases.cold?.actions?.set_priority) {
