@@ -435,6 +435,9 @@ override this parameter to use their own Tile Map Service. For example:
 | `migrations.enableV2:`
  | experimental[]. Enables the new Saved Objects migration algorithm. See <<upgrade-migrations>> for details. The setting is going to be removed in an upcoming release without any further notice when `migrations v2` becomes stable. Setting the value to `false` will cause Kibana to use the legacy migration algorithm, which shipped in 7.11 and earlier versions. *Default: `true`*
 
+| `migrations.retryAttempts:`
+ | The number of times migrations will retry temporary failures such as a network timeout, 503 status code or `snapshot_in_progress_exception`. If upgrade migrations frequently fail after exhausting all retry attempts with a message like "Unable to complete the [...] step after 15 attempts, terminating." you can try to increase this setting. *Default: `15`*
+
 | `newsfeed.enabled:`
  | Controls whether to enable the newsfeed
 system for the {kib} UI notification center. Set to `false` to disable the
