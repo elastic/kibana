@@ -554,12 +554,10 @@ export function updateCounts(layerId: string, mbMetaFeatures: any) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-
     if (!mbMetaFeatures) {
       return;
     }
 
-    console.log('update counts', layerId);
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
@@ -572,6 +570,5 @@ export function updateCounts(layerId: string, mbMetaFeatures: any) {
       newValue: mbMetaFeatures,
     });
     await dispatch(updateStyleMeta(layerId));
-
   };
 }

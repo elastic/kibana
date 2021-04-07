@@ -70,7 +70,7 @@ export class CountAggField implements IESAggField {
   }
 
   supportsFieldMeta(): boolean {
-    return false;
+    return true;
   }
 
   getBucketCount() {

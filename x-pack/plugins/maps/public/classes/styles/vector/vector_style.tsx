@@ -490,7 +490,6 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(foobar: any): Promise<StyleMetaDescriptor> {
-    console.log('get it from the tilemeta!', foobar);
     const styleMeta = {
       geometryTypes: {
         isPointsOnly: false,
@@ -508,10 +507,11 @@ export class VectorStyle implements IVectorStyle {
 
     dynamicProperties.forEach((dynamicProperty) => {
       const name = dynamicProperty.getFieldName();
-      console.log('na', name);
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }
+
+      // todo - should support ALL countable metrics
       if (name === 'doc_count') {
         styleMeta.fieldMeta[name] = {};
 
@@ -519,8 +519,6 @@ export class VectorStyle implements IVectorStyle {
         let max = -Infinity;
         for (let i = 0; i < foobar.length; i++) {
           const metaFromTiles = JSON.parse(foobar[i].properties.doc_count);
-          console.log('must parse', foobar[i], metaFromTiles);
-
           min = Math.min(metaFromTiles.min, min);
           max = Math.max(metaFromTiles.max, max);
         }
@@ -535,19 +533,13 @@ export class VectorStyle implements IVectorStyle {
       }
     });
 
-    console.log('form da tile', styleMeta);
     return styleMeta;
   }
 
   async pluckStyleMetaFromSourceDataRequest(
     sourceDataRequest: DataRequest
   ): Promise<StyleMetaDescriptor> {
-    console.log('pluck style meta', sourceDataRequest);
-
     const features = _.get(sourceDataRequest.getData(), 'features', []);
-
-    console.log('f', features);
-
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
       [VECTOR_SHAPE_TYPE.POINT]: false,
@@ -609,7 +601,6 @@ export class VectorStyle implements IVectorStyle {
       const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
       const name = dynamicProperty.getFieldName();
-      console.log('name', name);
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }
@@ -670,7 +661,6 @@ export class VectorStyle implements IVectorStyle {
   }
 
   getStyleMetaFromLocal() {
-    console.log('gsm', this._styleMeta);
     return this._styleMeta;
   }
 

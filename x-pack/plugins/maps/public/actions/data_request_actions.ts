@@ -90,7 +90,6 @@ export function cancelAllInFlightRequests() {
 
 export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    console.log('update style meta!', layerId);
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
@@ -102,7 +101,6 @@ export function updateStyleMeta(layerId: string | null) {
       layer.getType() === LAYER_TYPE.BLENDED_VECTOR
     ) {
       const sourceDataRequest = layer.getSourceDataRequest();
-      console.log('sdr', sourceDataRequest);
       const style = layer.getCurrentStyle();
       if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
         return;
@@ -116,15 +114,12 @@ export function updateStyleMeta(layerId: string | null) {
         styleMeta,
       });
     } else if (layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      console.log('do special tile thging here!!!');
       const style = layer.getCurrentStyle();
       if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
         return;
       }
 
       const metaFromTiles = layer.getMetaFromTiles();
-      console.log('got meta from tiles', metaFromTiles);
-
       const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromTileMeta(metaFromTiles);
       dispatch({
         type: SET_LAYER_STYLE_META,
