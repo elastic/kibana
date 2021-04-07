@@ -431,5 +431,17 @@ describe('Fleet - packageToPackagePolicy', () => {
         })
       ).toMatchSnapshot();
     });
+
+    it('only enables streams matching a particular policy template if given', () => {
+      expect(
+        packageToPackagePolicy({
+          name: 'aws-1',
+          packageInfo: packageWithPolicyTemplates,
+          agentPolicyId: 'some-policy-id',
+          outputId: 'some-output-id',
+          enablePolicyTemplate: 'dynamodb',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

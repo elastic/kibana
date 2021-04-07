@@ -18,38 +18,6 @@ import type {
 
 import { groupInputs } from './';
 
-export const findDataStreamsByNames = (
-  names: string[] = [],
-  dataStreams: PackageInfo['data_streams'] = []
-): PackageInfo['data_streams'] => {
-  return names.length
-    ? dataStreams.filter((dataStream) => names.includes(dataStream.path))
-    : dataStreams;
-};
-
-export const getStreamsForInputType = (
-  inputType: string,
-  dataStreams: PackageInfo['data_streams'] = []
-): Array<RegistryStream & Pick<NewPackagePolicyInputStream, 'data_stream'>> => {
-  const streams: Array<RegistryStream & Pick<NewPackagePolicyInputStream, 'data_stream'>> = [];
-
-  dataStreams.forEach((dataStream) => {
-    (dataStream.streams || []).forEach((stream) => {
-      if (stream.input === inputType) {
-        streams.push({
-          ...stream,
-          data_stream: {
-            type: dataStream.type,
-            dataset: dataStream.dataset,
-          },
-        });
-      }
-    });
-  });
-
-  return streams;
-};
-
 // Reduces registry var def into config object entry
 const varsReducer = (
   configObject: PackagePolicyConfigRecord,
@@ -69,8 +37,12 @@ const varsReducer = (
  * This service creates a package policy inputs definition from defaults provided in package info
  */
 export const packageToPackagePolicyInputs = (
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  options: {
+    enablePolicyTemplate?: string;
+  } = {}
 ): NewPackagePolicy['inputs'] => {
+  const { enablePolicyTemplate } = options;
   const inputs: NewPackagePolicy['inputs'] = [];
   const packageInputGroups = groupInputs(packageInfo);
 
@@ -78,7 +50,10 @@ export const packageToPackagePolicyInputs = (
     const streams: NewPackagePolicyInputStream[] = (inputGroup.streams || []).map(
       (packageStream) => {
         const stream: NewPackagePolicyInputStream = {
-          enabled: packageStream.enabled === false ? false : true,
+          enabled:
+            enablePolicyTemplate && packageStream.policyTemplate
+              ? packageStream.policyTemplate === enablePolicyTemplate
+              : packageStream.enabled !== false,
           data_stream: packageStream.data_stream,
         };
         if (packageStream.vars && packageStream.vars.length) {
@@ -116,17 +91,19 @@ export const packageToPackagePolicy = (options: {
   name?: string;
   description?: string;
   namespace?: string;
+  enablePolicyTemplate?: string;
   packageInfo: PackageInfo;
   agentPolicyId: string;
   outputId: string;
 }): NewPackagePolicy => {
   const {
     name,
+    description,
+    namespace = 'default',
+    enablePolicyTemplate,
     packageInfo,
     agentPolicyId,
     outputId,
-    namespace = 'default',
-    description,
   } = options;
 
   const packagePolicy: NewPackagePolicy = {
@@ -141,7 +118,9 @@ export const packageToPackagePolicy = (options: {
     enabled: true,
     policy_id: agentPolicyId,
     output_id: outputId,
-    inputs: packageToPackagePolicyInputs(packageInfo),
+    inputs: packageToPackagePolicyInputs(packageInfo, {
+      enablePolicyTemplate,
+    }),
   };
 
   if (packageInfo.vars?.length) {

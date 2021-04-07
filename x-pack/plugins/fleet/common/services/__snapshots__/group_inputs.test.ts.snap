@@ -14,6 +14,7 @@ Array [
         "description": "Collect AWS CloudTrail logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "cloudtrail",
         "template_path": "s3.yml.hbs",
         "title": "AWS CloudTrail logs",
         "vars": Array [
@@ -64,6 +65,7 @@ Array [
         "description": "Collect AWS CloudWatch logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "cloudwatch",
         "template_path": "s3.yml.hbs",
         "title": "AWS CloudWatch logs",
         "vars": Array [
@@ -114,6 +116,7 @@ Array [
         "description": "Collect AWS EC2 logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "ec2",
         "template_path": "s3.yml.hbs",
         "title": "AWS EC2 logs",
         "vars": Array [
@@ -164,6 +167,7 @@ Array [
         "description": "Collect AWS ELB logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "elb",
         "template_path": "s3.yml.hbs",
         "title": "AWS ELB logs",
         "vars": Array [
@@ -214,6 +218,7 @@ Array [
         "description": "Collect AWS s3access logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "s3",
         "template_path": "s3.yml.hbs",
         "title": "AWS s3access logs",
         "vars": Array [
@@ -264,6 +269,7 @@ Array [
         "description": "Collect AWS vpcflow logs using s3 input",
         "enabled": true,
         "input": "s3",
+        "policyTemplate": "vpcflow",
         "template_path": "s3.yml.hbs",
         "title": "AWS vpcflow logs",
         "vars": Array [
@@ -321,6 +327,7 @@ Array [
         "description": "Collect AWS billing metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "billing",
         "template_path": "stream.yml.hbs",
         "title": "AWS Billing metrics",
         "vars": Array [
@@ -375,6 +382,7 @@ Array [
         "description": "Collect AWS CloudWatch metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "cloudwatch",
         "template_path": "stream.yml.hbs",
         "title": "AWS CloudWatch metrics",
         "vars": Array [
@@ -436,6 +444,7 @@ Array [
         "description": "Collect AWS DynamoDB metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "dynamodb",
         "template_path": "stream.yml.hbs",
         "title": "AWS DynamoDB metrics",
         "vars": Array [
@@ -485,6 +494,7 @@ Array [
         "description": "Collect AWS EBS metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "ebs",
         "template_path": "stream.yml.hbs",
         "title": "AWS EBS metrics",
         "vars": Array [
@@ -534,6 +544,7 @@ Array [
         "description": "Collect AWS EC2 metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "ec2",
         "template_path": "stream.yml.hbs",
         "title": "AWS EC2 metrics",
         "vars": Array [
@@ -583,6 +594,7 @@ Array [
         "description": "Collect AWS ELB metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "elb",
         "template_path": "stream.yml.hbs",
         "title": "AWS ELB metrics",
         "vars": Array [
@@ -632,6 +644,7 @@ Array [
         "description": "Collect AWS Lambda metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "lambda",
         "template_path": "stream.yml.hbs",
         "title": "AWS Lambda metrics",
         "vars": Array [
@@ -681,6 +694,7 @@ Array [
         "description": "Collect AWS NAT gateway metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "natgateway",
         "template_path": "stream.yml.hbs",
         "title": "AWS NAT gateway metrics",
         "vars": Array [
@@ -719,6 +733,7 @@ Array [
         "description": "Collect AWS RDS metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "rds",
         "template_path": "stream.yml.hbs",
         "title": "AWS RDS metrics",
         "vars": Array [
@@ -768,6 +783,7 @@ Array [
         "description": "Collect AWS S3 daily storage metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "s3",
         "template_path": "stream.yml.hbs",
         "title": "AWS S3 daily storage metrics",
         "vars": Array [
@@ -806,6 +822,7 @@ Array [
         "description": "Collect AWS S3 request metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "s3",
         "template_path": "stream.yml.hbs",
         "title": "AWS S3 request metrics",
         "vars": Array [
@@ -844,6 +861,7 @@ Array [
         "description": "Collect AWS SNS metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "sns",
         "template_path": "stream.yml.hbs",
         "title": "AWS SNS metrics",
         "vars": Array [
@@ -893,6 +911,7 @@ Array [
         "description": "Collect AWS SQS metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "sqs",
         "template_path": "stream.yml.hbs",
         "title": "AWS SQS metrics",
         "vars": Array [
@@ -931,6 +950,7 @@ Array [
         "description": "Collect AWS Transit Gateway metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "transitgateway",
         "template_path": "stream.yml.hbs",
         "title": "AWS Transit Gateway metrics",
         "vars": Array [
@@ -969,6 +989,7 @@ Array [
         "description": "Collect AWS usage metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "usage",
         "template_path": "stream.yml.hbs",
         "title": "AWS usage metrics",
         "vars": Array [
@@ -1007,6 +1028,7 @@ Array [
         "description": "Collect AWS VPN metrics",
         "enabled": true,
         "input": "aws/metrics",
+        "policyTemplate": "vpn",
         "template_path": "stream.yml.hbs",
         "title": "AWS VPN metrics",
         "vars": Array [

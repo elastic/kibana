@@ -4,17 +4,59 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PackageInfo, RegistryInputGroup, RegistryVarsEntry } from '../types';
+import type {
+  PackageInfo,
+  RegistryInputGroup,
+  RegistryVarsEntry,
+  RegistryStream,
+  NewPackagePolicyInputStream,
+} from '../types';
 
-import { doesPackageHaveIntegrations, getStreamsForInputType, findDataStreamsByNames } from './';
-
-interface InputGroupWithStreams extends RegistryInputGroup {
+type InputGroupWithStreams = RegistryInputGroup & {
   vars?: RegistryVarsEntry[];
-  streams?: ReturnType<typeof getStreamsForInputType>;
-}
+  streams: Array<StreamWithDataStreamMeta & { policyTemplate?: string }>;
+};
+
+type StreamWithDataStreamMeta = RegistryStream & Pick<NewPackagePolicyInputStream, 'data_stream'>;
+
+import { doesPackageHaveIntegrations } from './';
+
+const findDataStreamsByNames = (
+  names: string[] = [],
+  dataStreams: PackageInfo['data_streams'] = []
+): PackageInfo['data_streams'] => {
+  return names.length
+    ? dataStreams.filter((dataStream) => names.includes(dataStream.path))
+    : dataStreams;
+};
+
+const getStreamsForInputType = (
+  inputType: string,
+  dataStreams: PackageInfo['data_streams'] = []
+): StreamWithDataStreamMeta[] => {
+  const streams: StreamWithDataStreamMeta[] = [];
+
+  dataStreams.forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          data_stream: {
+            type: dataStream.type,
+            dataset: dataStream.dataset,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
 
 export const groupInputs = (packageInfo: PackageInfo): InputGroupWithStreams[] => {
-  const inputGroups: InputGroupWithStreams[] = [...(packageInfo.input_groups || [])];
+  const inputGroups: InputGroupWithStreams[] = [
+    ...(packageInfo.input_groups?.map((inputGroup) => ({ ...inputGroup, streams: [] })) || []),
+  ];
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const { policy_templates: policyTemplates = [] } = packageInfo;
 
@@ -48,14 +90,17 @@ export const groupInputs = (packageInfo: PackageInfo): InputGroupWithStreams[] =
       const inputGroup = inputGroupName
         ? inputGroups.find((group) => group.name === inputGroupName)
         : undefined;
+
       if (!inputGroup) {
         return;
       }
 
-      inputGroup.streams = [
-        ...(inputGroup.streams || []),
-        ...getStreamsForInputType(type, policyTemplateDataStreams),
-      ];
+      inputGroup.streams.push(
+        ...getStreamsForInputType(type, policyTemplateDataStreams).map((stream) => ({
+          ...stream,
+          policyTemplate: policyTemplate.name,
+        }))
+      );
     });
   });
 

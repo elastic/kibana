@@ -67,8 +67,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
-    params: { policyId, pkgkey },
-  } = useRouteMatch<{ policyId: string; pkgkey: string }>();
+    params: { policyId, pkgkey, integration },
+  } = useRouteMatch<{ policyId: string; pkgkey: string; integration?: string }>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const handleNavigateTo = useNavigateToCallback();
@@ -331,6 +331,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             agentPolicy={agentPolicy}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
+            integration={integration}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
@@ -361,10 +362,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       agentPolicy,
       packageInfo,
       packagePolicy,
+      integration,
       updatePackagePolicy,
       validationResults,
-      formState,
       ExtensionView,
+      formState,
       handleExtensionViewOnChange,
     ]
   );

@@ -1,5 +1,627 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Fleet - packageToPackagePolicy packageToPackagePolicy only enables streams matching a particular policy template if given 1`] = `
+Object {
+  "description": undefined,
+  "enabled": true,
+  "inputs": Array [
+    Object {
+      "enabled": false,
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.cloudtrail",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.cloudwatch_logs",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.ec2_logs",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.elb_logs",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.s3access",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.vpcflow",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "api_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "fips_enabled": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "queue_url": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "visibility_timeout": Object {
+              "type": "text",
+              "value": undefined,
+            },
+          },
+        },
+      ],
+      "type": "logs",
+    },
+    Object {
+      "enabled": true,
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.billing",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "cost_explorer_config.group_by_dimension_keys": Object {
+              "type": "text",
+              "value": Array [
+                "AZ",
+                "INSTANCE_TYPE",
+                "SERVICE",
+              ],
+            },
+            "cost_explorer_config.group_by_tag_keys": Object {
+              "type": "text",
+              "value": Array [
+                "aws:createdBy",
+              ],
+            },
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "12h",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.cloudwatch_metrics",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "metrics": Object {
+              "type": "yaml",
+              "value": "- namespace: AWS/EC2
+  resource_type: ec2:instance
+  name:
+    - CPUUtilization
+    - DiskWriteOps
+  statistic:
+    - Average
+    - Maximum
+  # dimensions:
+   # - name: InstanceId
+      # value: i-123456
+  # tags:
+    # - key: created-by
+      # value: foo
+",
+            },
+            "period": Object {
+              "type": "text",
+              "value": "300s",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.dynamodb",
+            "type": "metrics",
+          },
+          "enabled": true,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.ebs",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.ec2_metrics",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.elb_metrics",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.lambda",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.natgateway",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.rds",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.s3_daily_storage",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "24h",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.s3_request",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.sns",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.sqs",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "5m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.transitgateway",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.usage",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "aws.vpn",
+            "type": "metrics",
+          },
+          "enabled": false,
+          "vars": Object {
+            "latency": Object {
+              "type": "text",
+              "value": undefined,
+            },
+            "period": Object {
+              "type": "text",
+              "value": "1m",
+            },
+            "regions": Object {
+              "type": "text",
+              "value": Array [],
+            },
+            "tags_filter": Object {
+              "type": "yaml",
+              "value": "# - key: \\"created-by\\"
+  # value: \\"foo\\"
+",
+            },
+          },
+        },
+      ],
+      "type": "metrics",
+    },
+  ],
+  "name": "aws-1",
+  "namespace": "default",
+  "output_id": "some-output-id",
+  "package": Object {
+    "name": "aws",
+    "title": "AWS",
+    "version": "0.5.2",
+  },
+  "policy_id": "some-policy-id",
+  "vars": Object {
+    "access_key_id": Object {
+      "type": "text",
+      "value": undefined,
+    },
+    "credential_profile_name": Object {
+      "type": "text",
+      "value": undefined,
+    },
+    "endpoint": Object {
+      "type": "text",
+      "value": "amazonaws.com",
+    },
+    "role_arn": Object {
+      "type": "text",
+      "value": undefined,
+    },
+    "secret_access_key": Object {
+      "type": "text",
+      "value": undefined,
+    },
+    "session_token": Object {
+      "type": "text",
+      "value": undefined,
+    },
+    "shared_credential_file": Object {
+      "type": "text",
+      "value": undefined,
+    },
+  },
+}
+`;
+
 exports[`Fleet - packageToPackagePolicy packageToPackagePolicy returns package policy with multiple policy templates correctly 1`] = `
 Object {
   "description": undefined,
