@@ -10,7 +10,7 @@ import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { interval } from 'rxjs';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
@@ -303,7 +303,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 <LineAnnotation
                   key={specId}
                   id={specId}
-                  domainType={AnnotationDomainTypes.YDomain}
+                  domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: threshold[thresholdIndex], details: specId }]}
                 />
               );
