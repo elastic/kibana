@@ -253,3 +253,82 @@ describe('ensureActionTypeEnabled', () => {
     expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
   });
 });
+
+describe('getProxySettings', () => {
+  test('returns undefined when no proxy URL set', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyHeaders: { someHeaderName: 'some header value' },
+      proxyBypassHosts: ['avoid-proxy.co'],
+    };
+
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings).toBeUndefined();
+  });
+
+  test('returns proxy url', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+    };
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
+  });
+
+  test('returns proxyRejectUnauthorizedCertificates', () => {
+    const configTrue: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyRejectUnauthorizedCertificates: true,
+    };
+    let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
+    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(true);
+
+    const configFalse: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyRejectUnauthorizedCertificates: false,
+    };
+    proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
+    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(false);
+  });
+
+  test('returns proxy headers', () => {
+    const proxyHeaders = {
+      someHeaderName: 'some header value',
+      someOtherHeader: 'some other header',
+    };
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyHeaders,
+    };
+
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings?.proxyHeaders).toEqual(config.proxyHeaders);
+  });
+
+  test('returns proxy bypass hosts', () => {
+    const proxyBypassHosts = ['proxy-bypass-1.elastic.co', 'proxy-bypass-2.elastic.co'];
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyBypassHosts,
+    };
+
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings?.proxyBypassHosts).toEqual(new Set(proxyBypassHosts));
+  });
+
+  test('returns proxy only hosts', () => {
+    const proxyOnlyHosts = ['proxy-only-1.elastic.co', 'proxy-only-2.elastic.co'];
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyOnlyHosts,
+    };
+
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings?.proxyOnlyHosts).toEqual(new Set(proxyOnlyHosts));
+  });
+});
