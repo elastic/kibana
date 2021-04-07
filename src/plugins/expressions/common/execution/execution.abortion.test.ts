@@ -84,7 +84,7 @@ describe('Execution abortion tests', () => {
     jest.useFakeTimers();
   });
 
-  test.skip('nested expressions are aborted when parent aborted', async () => {
+  test('nested expressions are aborted when parent aborted', async () => {
     jest.useRealTimers();
     const started = jest.fn();
     const completed = jest.fn();

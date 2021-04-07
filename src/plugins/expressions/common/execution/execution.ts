@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { combineLatest, defer, from, of, race, throwError, Observable } from 'rxjs';
-import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, defer, from, of, race, throwError, Observable, ReplaySubject } from 'rxjs';
+import { catchError, finalize, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
@@ -91,6 +91,11 @@ export class Execution<
   public input: Input = null as any;
 
   /**
+   * Input of the started execution.
+   */
+  private input$ = new ReplaySubject<Input>(1);
+
+  /**
    * Execution context - object that allows to do side-effects. Context is passed
    * to every function.
    */
@@ -121,7 +126,7 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  private firstResultFuture = new Observable<Output | ExpressionValueError>();
+  private result$: Observable<Output | ExpressionValueError>;
 
   /**
    * Keeping track of any child executions
@@ -143,7 +148,7 @@ export class Execution<
   public readonly expression: string;
 
   public get result(): Observable<Output | ExpressionValueError> {
-    return this.firstResultFuture;
+    return this.result$.pipe(take(1));
   }
 
   public get inspectorAdapters(): InspectorAdapters {
@@ -187,6 +192,28 @@ export class Execution<
       isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
     };
+
+    this.result$ = this.input$.pipe(
+      switchMap((input) => this.race(this.invokeChain(this.state.get().ast.chain, input))),
+      catchError((error) => {
+        if (this.abortController.signal.aborted) {
+          this.childExecutions.forEach((childExecution) => childExecution.cancel());
+
+          return of(createAbortErrorValue());
+        }
+
+        return throwError(error);
+      }),
+      tap({
+        next: (result) => {
+          this.context.inspectorAdapters.expression?.logAST(this.state.get().ast);
+          this.state.transitions.setResult(result);
+        },
+        error: (error) => this.state.transitions.setError(error),
+      }),
+      finalize(() => this.abortRejection.cleanup()),
+      shareReplay(1)
+    );
   }
 
   /**
@@ -207,29 +234,9 @@ export class Execution<
     this.hasStarted = true;
     this.input = input;
     this.state.transitions.start();
+    this.input$.next(input);
 
-    this.firstResultFuture = this.race(this.invokeChain(this.state.get().ast.chain, input)).pipe(
-      catchError((error) => {
-        if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((execution) => execution.cancel());
-
-          return of(createAbortErrorValue());
-        }
-
-        return throwError(error);
-      }),
-      tap({
-        next: (result) => {
-          this.context.inspectorAdapters.expression?.logAST(this.state.get().ast);
-          this.state.transitions.setResult(result);
-        },
-        error: (error) => this.state.transitions.setError(error),
-      }),
-      finalize(() => this.abortRejection.cleanup()),
-      shareReplay(1)
-    );
-
-    return this.firstResultFuture;
+    return this.result;
   }
 
   invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any> {
