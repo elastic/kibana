@@ -201,6 +201,10 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           defaultMessage: 'Freeze index',
         }),
       },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
+      },
       minAgeUnit: {
         defaultValue: 'd',
       },
