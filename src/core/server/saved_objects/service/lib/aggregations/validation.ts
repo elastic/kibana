@@ -11,28 +11,39 @@ import { ObjectType } from '@kbn/config-schema';
 import { isPlainObject } from 'lodash';
 
 import { IndexMapping } from '../../../mappings';
-import { hasFilterKeyError } from '../filter_utils';
+import {
+  isObjectTypeAttribute,
+  rewriteObjectTypeAttribute,
+  isRootLevelAttribute,
+  rewriteRootLevelAttribute,
+} from './validation_utils';
 import { aggregationSchemas } from './aggs_types';
 
 const aggregationKeys = ['aggs', 'aggregations'];
-
-export const validateAndConvertAggregations = (
-  allowedTypes: string[],
-  aggs: Record<string, estypes.AggregationContainer>,
-  indexMapping: IndexMapping
-): Record<string, estypes.AggregationContainer> => {
-  return validateAggregations(aggs as any, {
-    allowedTypes,
-    indexMapping,
-    currentPath: [],
-  });
-};
 
 interface ValidationContext {
   allowedTypes: string[];
   indexMapping: IndexMapping;
   currentPath: string[];
 }
+
+/**
+ * Validates an aggregation structure against the declared mapping and
+ * aggregation schema, and rewrite the attribute fields from the
+ * `{type}.attributes.{attribute}` (KQL-like) syntax to the underlying
+ * `{type}.{attribute} format.`
+ */
+export const validateAndConvertAggregations = (
+  allowedTypes: string[],
+  aggs: Record<string, estypes.AggregationContainer>,
+  indexMapping: IndexMapping
+): Record<string, estypes.AggregationContainer> => {
+  return validateAggregations(aggs, {
+    allowedTypes,
+    indexMapping,
+    currentPath: [],
+  });
+};
 
 /**
  * Validates a record of aggregation containers,
@@ -51,14 +62,7 @@ const validateAggregations = (
       ...memo,
       [aggrName]: validateAggregation(aggrContainer, childContext(context, aggrName)),
     };
-  }, {});
-};
-
-const childContext = (context: ValidationContext, path: string): ValidationContext => {
-  return {
-    ...context,
-    currentPath: [...context.currentPath, path],
-  };
+  }, {} as Record<string, estypes.AggregationContainer>);
 };
 
 /**
@@ -109,7 +113,11 @@ const validateAggregationType = (
 ) => {
   const aggregationSchema = aggregationSchemas[aggregationType];
   if (!aggregationSchema) {
-    throw new Error(`${aggregationType} aggregation is not valid (or not registered yet)`);
+    throw new Error(
+      `[${context.currentPath.join(
+        '.'
+      )}] ${aggregationType} aggregation is not valid (or not registered yet)`
+    );
   }
 
   validateAggregationStructure(aggregationSchema, aggregation, context);
@@ -168,11 +176,12 @@ const recursiveRewrite = (
     const rewriteKey = isAttributeKey(parents);
     const rewriteValue = isAttributeValue(key, value);
 
-    const newKey = rewriteKey ? validateAndRewriteKey(key, context) : key;
+    const nestedContext = childContext(context, key);
+    const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
     const newValue = rewriteValue
-      ? validateAndRewriteValue(key, value, context)
+      ? validateAndRewriteAttributePath(value, nestedContext)
       : isPlainObject(value)
-      ? recursiveRewrite(value, context, [...parents, key])
+      ? recursiveRewrite(value, nestedContext, [...parents, key])
       : value;
 
     return {
@@ -180,6 +189,13 @@ const recursiveRewrite = (
       [newKey]: newValue,
     };
   }, {});
+};
+
+const childContext = (context: ValidationContext, path: string): ValidationContext => {
+  return {
+    ...context,
+    currentPath: [...context.currentPath, path],
+  };
 };
 
 const lastParent = (parents: string[]) => {
@@ -201,27 +217,15 @@ const isAttributeValue = (fieldName: string, fieldValue: unknown): boolean => {
   return attributeFields.includes(fieldName) && typeof fieldValue === 'string';
 };
 
-const validateAndRewriteValue = (
-  fieldName: string,
-  fieldValue: any,
-  { allowedTypes, indexMapping }: ValidationContext
+const validateAndRewriteAttributePath = (
+  attributePath: string,
+  { allowedTypes, indexMapping, currentPath }: ValidationContext
 ) => {
-  const error = hasFilterKeyError(fieldValue, allowedTypes, indexMapping);
-  if (error) {
-    throw new Error(error); // TODO: encapsulate
+  if (isRootLevelAttribute(attributePath, indexMapping, allowedTypes)) {
+    return rewriteRootLevelAttribute(attributePath);
   }
-  return stripAttributesPath(fieldValue);
-};
-
-const validateAndRewriteKey = (
-  fieldName: string,
-  { allowedTypes, indexMapping }: ValidationContext
-) => {
-  const error = hasFilterKeyError(fieldName, allowedTypes, indexMapping);
-  if (error) {
-    throw new Error(error); // TODO: encapsulate
+  if (isObjectTypeAttribute(attributePath, indexMapping, allowedTypes)) {
+    return rewriteObjectTypeAttribute(attributePath);
   }
-  return stripAttributesPath(fieldName);
+  throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${attributePath}`);
 };
-
-const stripAttributesPath = (fieldName: string) => fieldName.replace('.attributes', '');

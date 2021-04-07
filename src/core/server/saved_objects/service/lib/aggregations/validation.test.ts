@@ -231,7 +231,7 @@ describe('Aggregation Utils', () => {
       expect(() =>
         validateAndConvertAggregations(['alert'], aggregations, mockMappings)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'alert.actions.group' does NOT match the filter proposition SavedObjectType.attributes.key"`
+        `"[average.avg.field] Invalid attribute path: alert.actions.group"`
       );
     });
 
@@ -247,7 +247,7 @@ describe('Aggregation Utils', () => {
       expect(() =>
         validateAndConvertAggregations(['alert'], aggregations, mockMappings)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'alert.attributes.actions.non_existing' does NOT exist in alert saved object index patterns"`
+        `"[average.avg.field] Invalid attribute path: alert.attributes.actions.non_existing"`
       );
     });
 
@@ -311,7 +311,9 @@ describe('Aggregation Utils', () => {
 
       expect(() => {
         validateAndConvertAggregations(['alert'], aggregations, mockMappings);
-      }).toThrowErrorMatchingInlineSnapshot(`"This type foo is not allowed"`);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"[myFilter.max.field] Invalid attribute path: foo.attributes.bytes"`
+      );
     });
 
     it('throws an error when an attributes is not respecting its schema definition', () => {
@@ -342,7 +344,7 @@ describe('Aggregation Utils', () => {
       expect(() => {
         validateAndConvertAggregations(['foo'], aggregations, mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"auto_date_histogram aggregation is not valid (or not registered yet)"`
+        `"[someAgg.auto_date_histogram] auto_date_histogram aggregation is not valid (or not registered yet)"`
       );
     });
 
@@ -365,7 +367,7 @@ describe('Aggregation Utils', () => {
       expect(() => {
         validateAndConvertAggregations(['foo'], aggregations, mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"cumulative_cardinality aggregation is not valid (or not registered yet)"`
+        `"[someAgg.aggs.unknownAgg.cumulative_cardinality] cumulative_cardinality aggregation is not valid (or not registered yet)"`
       );
     });
 
