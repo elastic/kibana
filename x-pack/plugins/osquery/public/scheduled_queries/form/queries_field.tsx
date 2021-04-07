@@ -150,6 +150,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
         // @ts-expect-error update types
         field.value && field.value[0].streams?.length && (
           <ScheduledQueryQueriesTable
+            editMode={true}
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             data={{ inputs: field.value }}
             // @ts-expect-error update types

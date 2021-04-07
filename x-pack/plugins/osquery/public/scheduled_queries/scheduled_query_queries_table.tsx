@@ -141,20 +141,23 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
       },
       {
         name: 'Actions',
-        actions: [
-          {
-            render: (item) => <ViewResultsInDiscoverAction item={item} />,
-          },
-          {
-            render: renderEditAction,
-          },
-          {
-            render: renderDeleteAction,
-          },
-        ],
+        actions: editMode
+          ? [
+              {
+                render: renderEditAction,
+              },
+              {
+                render: renderDeleteAction,
+              },
+            ]
+          : [
+              {
+                render: (item) => <ViewResultsInDiscoverAction item={item} />,
+              },
+            ],
       },
     ],
-    [renderDeleteAction, renderEditAction]
+    [editMode, renderDeleteAction, renderEditAction]
   );
 
   const sorting = {
