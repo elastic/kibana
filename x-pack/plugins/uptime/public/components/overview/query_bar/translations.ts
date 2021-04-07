@@ -18,21 +18,3 @@ export const SIMPLE_SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Search by monitor ID, name, or url (E.g. http:// )',
   }
 );
-
-export const CHANGE_SEARCH_BAR_SYNTAX = i18n.translate(
-  'xpack.uptime.kueryBar.options.syntax.changeLabel',
-  {
-    defaultMessage: 'Change search bar syntax to use Kibana Query Language',
-  }
-);
-
-export const CHANGE_SEARCH_BAR_SYNTAX_SIMPLE = i18n.translate(
-  'xpack.uptime.kueryBar.options.syntax.simple',
-  {
-    defaultMessage: 'Change search bar syntax to not use Kibana Query Language',
-  }
-);
-
-export const SYNTAX_OPTIONS_LABEL = i18n.translate('xpack.uptime.kueryBar.options.syntax', {
-  defaultMessage: 'SYNTAX OPTIONS',
-});
