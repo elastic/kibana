@@ -75,6 +75,8 @@ export class RacAuthorization {
       features,
     });
 
+    console.error('ARE THERE ANY OWNERS???', owners);
+
     return new RacAuthorization({ request, authorization, owners, isAuthEnabled, auditLogger });
   }
 
@@ -90,6 +92,8 @@ export class RacAuthorization {
 
     // Does the owner the client sent up match with the KibanaFeatures structure
     const isAvailableOwner = this.featureOwners.has(owner);
+    console.error('THIS.FEATUREOWNERS', this.featureOwners);
+    console.error('IS AVAILABLE OWNER', isAvailableOwner);
 
     if (authorization != null && this.shouldCheckAuthorization()) {
       const requiredPrivileges = [authorization.actions.rac.get(owner, operation)];

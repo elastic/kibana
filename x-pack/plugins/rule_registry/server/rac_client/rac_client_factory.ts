@@ -56,6 +56,7 @@ export class RacClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
     this.esClient = options.esClient;
+    this.getSpace = options.getSpace;
   }
 
   public async create(request: KibanaRequest): Promise<RacClient> {
