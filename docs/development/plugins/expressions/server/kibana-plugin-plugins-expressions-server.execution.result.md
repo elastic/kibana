@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-get result(): Promise<Output | ExpressionValueError>;
+get result(): Observable<Output | ExpressionValueError>;
 ```
