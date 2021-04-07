@@ -418,16 +418,6 @@ convenience.
  */
 interface IShortUrlClient {
   /**
-   * Create a new short URL using a locator.
-   *
-   * @param locator Locators to use for URL construction.
-   * @param params Locator params.
-   * @param slug Optionally, provide a custom slug (ID) of the short URL.
-   *             This can be a human-readable URL slug of this short UR.
-   */
-  create<P>(locator: Locator<P>, params: P, slug?: string): Promise<ShortUrl>;
-
-  /**
    * Delete a short URL.
    * 
    * @param slug The slug (ID) of the short URL.
