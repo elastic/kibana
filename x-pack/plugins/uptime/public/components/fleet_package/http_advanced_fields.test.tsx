@@ -9,14 +9,22 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { HTTPAdvancedFields } from './http_advanced_fields';
-import { ConfigKeys, DataStream, HTTPMethod, Mode, ResponseBodyIndexPolicy } from './types';
+import {
+  ConfigKeys,
+  DataStream,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+  IHTTPAdvancedFields,
+} from './types';
 import { validate as centralValidation } from './validation';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-const defaultConfig = {
+const defaultConfig: IHTTPAdvancedFields = {
+  [ConfigKeys.PASSWORD]: 'password',
   [ConfigKeys.PROXY_URL]: 'test',
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
@@ -30,6 +38,7 @@ const defaultConfig = {
   },
   [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
   [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
+  [ConfigKeys.USERNAME]: 'password',
 };
 
 const defaultValidation = centralValidation[DataStream.HTTP];
@@ -58,6 +67,8 @@ describe('<HTTPAdvancedFields />', () => {
     const responseStatusEquals = getByText('Check response status equals');
     const responseBodyContains = getByText('Check response body contains');
     const responseBodyDoesNotContain = getByText('Check response body does not contain');
+    const username = getByLabelText('Username') as HTMLInputElement;
+    const password = getByLabelText('Password') as HTMLInputElement;
     expect(requestMethod).toBeInTheDocument();
     expect(requestMethod.value).toEqual(defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK]);
     expect(requestHeaders).toBeInTheDocument();
@@ -74,6 +85,10 @@ describe('<HTTPAdvancedFields />', () => {
     expect(responseBodyContains).toBeInTheDocument();
     expect(responseBodyDoesNotContain).toBeInTheDocument();
     expect(responseHeadersContain).toBeInTheDocument();
+    expect(username).toBeInTheDocument();
+    expect(username.value).toBe(defaultConfig[ConfigKeys.USERNAME]);
+    expect(password).toBeInTheDocument();
+    expect(password.value).toBe(defaultConfig[ConfigKeys.PASSWORD]);
   });
 
   it('handles changing fields', () => {
