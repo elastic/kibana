@@ -27,11 +27,13 @@ jest.mock('react-router-dom', () => {
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
-    configureCasesHref: 'testHref',
+    configureCasesNavigation: {
+      href: 'testHref',
+      onClick: jest.fn(),
+    },
     isDisabled: false,
     label: 'My label',
     msgTooltip: <></>,
-    onConfigureCasesNavClick: jest.fn(),
     showToolTip: false,
     titleTooltip: '',
   };

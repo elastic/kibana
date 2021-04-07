@@ -25,7 +25,7 @@ import { CaseStatuses, CaseType } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink } from '../links';
+import { CaseDetailsLink, CaseDetailsNavigation } from '../links';
 import * as i18n from './translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
@@ -53,17 +53,15 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 interface GetCasesColumn {
   actions: Array<DefaultItemIconButtonAction<Case>>;
+  caseDetailsNavigation: CaseDetailsNavigation;
   filterStatus: string;
   isModal: boolean;
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
-  onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
 }
 export const getCasesColumns = ({
   actions,
+  caseDetailsNavigation,
   filterStatus,
   isModal,
-  getCaseDetailsHref,
-  onCaseDetailsNavClick,
 }: GetCasesColumn): CasesColumns[] => {
   const columns = [
     {
@@ -72,11 +70,10 @@ export const getCasesColumns = ({
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = !isModal ? (
             <CaseDetailsLink
+              caseDetailsNavigation={caseDetailsNavigation}
               detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-              getCaseDetailsHref={getCaseDetailsHref}
-              onCaseDetailsNavClick={onCaseDetailsNavClick}
-              title={theCase.title}
               subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+              title={theCase.title}
             >
               {theCase.title}
             </CaseDetailsLink>

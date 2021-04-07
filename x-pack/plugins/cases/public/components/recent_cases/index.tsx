@@ -9,27 +9,23 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import React, { useMemo, useState } from 'react';
 
 import * as i18n from './translations';
-import { CaseDetailsHrefSchema, LinkAnchor } from '../links';
+import { CaseDetailsNavigation, CasesNavigation, LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
 
 export interface RecentCasesProps {
-  allCasesHref: string;
-  createCaseHref: string;
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
-  goToAllCases: (ev: React.MouseEvent) => void;
-  onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
+  allCasesNavigation: CasesNavigation;
+  caseDetailsNavigation: CaseDetailsNavigation;
+  createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }
 
 const RecentCases = ({
-  allCasesHref,
-  createCaseHref,
-  getCaseDetailsHref,
-  goToAllCases,
-  onCaseDetailsNavClick,
+  allCasesNavigation,
+  caseDetailsNavigation,
+  createCaseNavigation,
   maxCasesToShow,
 }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
@@ -74,15 +70,14 @@ const RecentCases = ({
       </>
       <EuiText color="subdued" size="s">
         <RecentCasesComp
-          createCaseHref={createCaseHref}
+          caseDetailsNavigation={caseDetailsNavigation}
+          createCaseNavigation={createCaseNavigation}
           filterOptions={recentCasesFilterOptions}
-          getCaseDetailsHref={getCaseDetailsHref}
-          onCaseDetailsNavClick={onCaseDetailsNavClick}
           maxCasesToShow={maxCasesToShow}
         />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
-          <LinkAnchor onClick={goToAllCases} href={allCasesHref}>
+          <LinkAnchor onClick={allCasesNavigation.onClick} href={allCasesNavigation.href}>
             {' '}
             {i18n.VIEW_ALL_CASES}
           </LinkAnchor>

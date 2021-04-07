@@ -66,20 +66,26 @@ export const AllCases = React.memo<AllCasesProps>(
 
     return casesUi.getAllCases({
       alertData,
-      configureCasesHref: formatUrl(getConfigureCasesUrl()),
-      createCaseHref: formatUrl(getCreateCaseUrl()),
+      caseDetailsNavigation: {
+        getHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
+          return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
+        },
+        onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
+          navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
+          });
+        },
+      },
+      configureCasesNavigation: {
+        href: formatUrl(getConfigureCasesUrl()),
+        onClick: goToCaseConfigure,
+      },
+      createCaseNavigation: {
+        href: formatUrl(getCreateCaseUrl()),
+        onClick: goToCreateCase,
+      },
       disabledStatuses,
-      getCaseDetailsHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
-        return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
-      },
       isModal,
-      onCaseDetailsNavClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-          path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
-        });
-      },
-      onConfigureCasesNavClick: goToCaseConfigure,
-      onCreateCaseNavClick: goToCreateCase,
       onRowClick,
       updateCase,
       userCanCrud,

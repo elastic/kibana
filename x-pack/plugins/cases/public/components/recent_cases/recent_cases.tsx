@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
 import { useGetCases } from '../../containers/use_get_cases';
-import { CaseDetailsHrefSchema, CaseDetailsLink } from '../links';
+import { CaseDetailsLink, CaseDetailsNavigation, CasesNavigation } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
 import { isSubCase } from '../all_cases/helpers';
@@ -27,10 +27,9 @@ const MarkdownContainer = styled.div`
 `;
 
 export interface RecentCasesProps {
-  createCaseHref: string;
   filterOptions: Partial<FilterOptions>;
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
-  onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
+  caseDetailsNavigation: CaseDetailsNavigation;
+  createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }
 const usePrevious = (value: Partial<FilterOptions>) => {
@@ -41,10 +40,9 @@ const usePrevious = (value: Partial<FilterOptions>) => {
   return ref.current;
 };
 export const RecentCasesComp = ({
-  createCaseHref,
+  caseDetailsNavigation,
+  createCaseNavigation,
   filterOptions,
-  getCaseDetailsHref,
-  onCaseDetailsNavClick,
   maxCasesToShow,
 }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
@@ -64,7 +62,7 @@ export const RecentCasesComp = ({
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />
   ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases createCaseHref={createCaseHref} />
+    <NoCases createCaseHref={createCaseNavigation.href} />
   ) : (
     <>
       {data.cases.map((c, i) => (
@@ -72,9 +70,8 @@ export const RecentCasesComp = ({
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <CaseDetailsLink
+                caseDetailsNavigation={caseDetailsNavigation}
                 detailName={isSubCase(c) ? c.caseParentId : c.id}
-                getCaseDetailsHref={getCaseDetailsHref}
-                onCaseDetailsNavClick={onCaseDetailsNavClick}
                 title={c.title}
                 subCaseId={isSubCase(c) ? c.id : undefined}
               >

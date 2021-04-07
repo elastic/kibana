@@ -40,24 +40,22 @@ import {
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { Ecs } from '../../common/ecs_types';
+import { CasesGetNavigation, CasesNavigation } from '../links';
 
 // TODO: All below imports depend on Timeline or SecuritySolution in some form or another
 // import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewProps {
-  allCasesHref: string;
-  backToAllCasesOnClick: (ev: MouseEvent) => void;
-  caseDetailsHref: string;
+  allCasesNavigation: CasesNavigation;
+  caseDetailsNavigation: CasesNavigation;
   caseId: string;
-  configureCasesHref: string;
+  configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
   onComponentInitialized?: () => void;
-  onConfigureCasesNavClick: (ev: React.MouseEvent) => void;
-  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   renderTimelineDetailsPanel?: () => JSX.Element;
+  ruleDetailsNavigation: CasesGetNavigation<string | null | undefined>;
   showAlertDetails: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
@@ -95,20 +93,17 @@ export interface CaseComponentProps extends CaseViewProps {
 
 export const CaseComponent = React.memo<CaseComponentProps>(
   ({
-    allCasesHref,
-    backToAllCasesOnClick,
+    allCasesNavigation,
     caseData,
-    caseDetailsHref,
+    caseDetailsNavigation,
     caseId,
-    configureCasesHref,
-    fetchCase,
+    configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
-    getRuleDetailsHref,
+    fetchCase,
     onComponentInitialized,
-    onConfigureCasesNavClick,
-    onRuleDetailsClick,
     renderInvestigateInTimelineActionComponent,
     renderTimelineDetailsPanel,
+    ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
     updateCase,
@@ -251,7 +246,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
-      configureCasesHref,
+      configureCasesNavigation,
       connector: {
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
@@ -260,7 +255,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       caseId: caseData.id,
       caseStatus: caseData.status,
       connectors,
-      onConfigureCasesNavClick,
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector: isLoadingConnectors ? true : isValidConnector,
@@ -312,9 +306,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(caseDetailsHref),
+        body: i18n.EMAIL_BODY(caseDetailsNavigation.href),
       }),
-      [caseDetailsHref, caseData.title]
+      [caseDetailsNavigation.href, caseData.title]
     );
 
     useEffect(() => {
@@ -325,12 +319,12 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
     const backOptions = useMemo(
       () => ({
-        href: allCasesHref,
+        href: allCasesNavigation.href,
         text: i18n.BACK_TO_ALL,
         dataTestSubj: 'backToCases',
-        onClick: backToAllCasesOnClick,
+        onClick: allCasesNavigation.onClick,
       }),
-      [allCasesHref, backToAllCasesOnClick]
+      [allCasesNavigation]
     );
 
     const onShowAlertDetails = useCallback(
@@ -388,8 +382,8 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   <>
                     <UserActionTree
                       getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                      getRuleDetailsHref={getRuleDetailsHref}
-                      onRuleDetailsClick={onRuleDetailsClick}
+                      getRuleDetailsHref={ruleDetailsNavigation.getHref}
+                      onRuleDetailsClick={ruleDetailsNavigation.onClick}
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
@@ -486,18 +480,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
 export const CaseView = React.memo(
   ({
-    allCasesHref,
-    backToAllCasesOnClick,
-    caseDetailsHref,
+    allCasesNavigation,
+    caseDetailsNavigation,
     caseId,
-    configureCasesHref,
+    configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
-    getRuleDetailsHref,
     onComponentInitialized,
-    onConfigureCasesNavClick,
-    onRuleDetailsClick,
     renderInvestigateInTimelineActionComponent,
     renderTimelineDetailsPanel,
+    ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
     useFetchAlertData,
@@ -520,20 +511,17 @@ export const CaseView = React.memo(
     return (
       data && (
         <CaseComponent
-          allCasesHref={allCasesHref}
-          backToAllCasesOnClick={backToAllCasesOnClick}
+          allCasesNavigation={allCasesNavigation}
           caseData={data}
-          caseDetailsHref={caseDetailsHref}
+          caseDetailsNavigation={caseDetailsNavigation}
           caseId={caseId}
-          configureCasesHref={configureCasesHref}
-          fetchCase={fetchCase}
+          configureCasesNavigation={configureCasesNavigation}
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-          getRuleDetailsHref={getRuleDetailsHref}
+          fetchCase={fetchCase}
           onComponentInitialized={onComponentInitialized}
-          onConfigureCasesNavClick={onConfigureCasesNavClick}
-          onRuleDetailsClick={onRuleDetailsClick}
           renderInvestigateInTimelineActionComponent={renderInvestigateInTimelineActionComponent}
           renderTimelineDetailsPanel={renderTimelineDetailsPanel}
+          ruleDetailsNavigation={ruleDetailsNavigation}
           showAlertDetails={showAlertDetails}
           subCaseId={subCaseId}
           updateCase={updateCase}

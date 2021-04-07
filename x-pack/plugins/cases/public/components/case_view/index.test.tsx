@@ -69,16 +69,24 @@ const alertsHit = [
 ];
 
 export const caseProps: CaseComponentProps = {
-  allCasesHref: 'all-cases-href',
-  backToAllCasesOnClick: jest.fn(),
-  caseDetailsHref: 'case-details-href',
+  allCasesNavigation: {
+    href: 'all-cases-href',
+    onClick: jest.fn(),
+  },
+  caseDetailsNavigation: {
+    href: 'case-details-href',
+  },
   caseId: basicCase.id,
-  configureCasesHref: 'configure-cases-href',
+  configureCasesNavigation: {
+    href: 'configure-cases-href',
+    onClick: jest.fn(),
+  },
   getCaseDetailHrefWithCommentId: jest.fn(),
-  getRuleDetailsHref: jest.fn(),
   onComponentInitialized: jest.fn(),
-  onConfigureCasesNavClick: jest.fn(),
-  onRuleDetailsClick: jest.fn(),
+  ruleDetailsNavigation: {
+    getHref: jest.fn(),
+    onClick: jest.fn(),
+  },
   showAlertDetails: jest.fn(),
   useFetchAlertData: () => [
     false,
@@ -397,16 +405,24 @@ describe('CaseView ', () => {
         <Router history={mockHistory}>
           <CaseView
             {...{
-              allCasesHref: 'all-cases-href',
-              backToAllCasesOnClick: jest.fn(),
-              caseDetailsHref: 'case-details-href',
+              allCasesNavigation: {
+                href: 'all-cases-href',
+                onClick: jest.fn(),
+              },
+              caseDetailsNavigation: {
+                href: 'case-details-href',
+              },
               caseId: '1234',
-              configureCasesHref: 'configure-cases-href',
+              configureCasesNavigation: {
+                href: 'configure-cases-href',
+                onClick: jest.fn(),
+              },
               getCaseDetailHrefWithCommentId: jest.fn(),
-              getRuleDetailsHref: jest.fn(),
               onComponentInitialized: jest.fn(),
-              onConfigureCasesNavClick: jest.fn(),
-              onRuleDetailsClick: jest.fn(),
+              ruleDetailsNavigation: {
+                getHref: jest.fn(),
+                onClick: jest.fn(),
+              },
               showAlertDetails: jest.fn(),
               useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
               userCanCrud: true,
@@ -430,16 +446,24 @@ describe('CaseView ', () => {
         <Router history={mockHistory}>
           <CaseView
             {...{
-              allCasesHref: 'all-cases-href',
-              backToAllCasesOnClick: jest.fn(),
-              caseDetailsHref: 'case-details-href',
+              allCasesNavigation: {
+                href: 'all-cases-href',
+                onClick: jest.fn(),
+              },
+              caseDetailsNavigation: {
+                href: 'case-details-href',
+              },
               caseId: '1234',
-              configureCasesHref: 'configure-cases-href',
+              configureCasesNavigation: {
+                href: 'configure-cases-href',
+                onClick: jest.fn(),
+              },
               getCaseDetailHrefWithCommentId: jest.fn(),
-              getRuleDetailsHref: jest.fn(),
               onComponentInitialized: jest.fn(),
-              onConfigureCasesNavClick: jest.fn(),
-              onRuleDetailsClick: jest.fn(),
+              ruleDetailsNavigation: {
+                getHref: jest.fn(),
+                onClick: jest.fn(),
+              },
               showAlertDetails: jest.fn(),
               useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
               userCanCrud: true,
@@ -460,16 +484,24 @@ describe('CaseView ', () => {
         <Router history={mockHistory}>
           <CaseView
             {...{
-              allCasesHref: 'all-cases-href',
-              backToAllCasesOnClick: jest.fn(),
-              caseDetailsHref: 'case-details-href',
+              allCasesNavigation: {
+                href: 'all-cases-href',
+                onClick: jest.fn(),
+              },
+              caseDetailsNavigation: {
+                href: 'case-details-href',
+              },
               caseId: '1234',
-              configureCasesHref: 'configure-cases-href',
+              configureCasesNavigation: {
+                href: 'configure-cases-href',
+                onClick: jest.fn(),
+              },
               getCaseDetailHrefWithCommentId: jest.fn(),
-              getRuleDetailsHref: jest.fn(),
               onComponentInitialized: jest.fn(),
-              onConfigureCasesNavClick: jest.fn(),
-              onRuleDetailsClick: jest.fn(),
+              ruleDetailsNavigation: {
+                getHref: jest.fn(),
+                onClick: jest.fn(),
+              },
               showAlertDetails: jest.fn(),
               useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
               userCanCrud: true,
@@ -490,16 +522,24 @@ describe('CaseView ', () => {
         <Router history={mockHistory}>
           <CaseView
             {...{
-              allCasesHref: 'all-cases-href',
-              backToAllCasesOnClick: jest.fn(),
-              caseDetailsHref: 'case-details-href',
+              allCasesNavigation: {
+                href: 'all-cases-href',
+                onClick: jest.fn(),
+              },
+              caseDetailsNavigation: {
+                href: 'case-details-href',
+              },
               caseId: '1234',
-              configureCasesHref: 'configure-cases-href',
+              configureCasesNavigation: {
+                href: 'configure-cases-href',
+                onClick: jest.fn(),
+              },
               getCaseDetailHrefWithCommentId: jest.fn(),
-              getRuleDetailsHref: jest.fn(),
               onComponentInitialized: jest.fn(),
-              onConfigureCasesNavClick: jest.fn(),
-              onRuleDetailsClick: jest.fn(),
+              ruleDetailsNavigation: {
+                getHref: jest.fn(),
+                onClick: jest.fn(),
+              },
               showAlertDetails: jest.fn(),
               useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
               userCanCrud: true,

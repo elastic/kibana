@@ -16,6 +16,16 @@ import {
 import React, { useCallback } from 'react';
 import * as i18n from './translations';
 
+export interface CasesNavigation {
+  href: string;
+  onClick?: (arg: React.MouseEvent) => void;
+}
+
+export interface CasesGetNavigation<T = React.MouseEvent> {
+  getHref: (arg: T) => string;
+  onClick: (arg: T) => void;
+}
+
 export const LinkButton: React.FC<
   PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
 > = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
@@ -29,27 +39,35 @@ export interface CaseDetailsHrefSchema {
   search?: string;
   subCaseId?: string;
 }
+export interface CaseDetailsNavigation {
+  getHref: (caseDetails: CaseDetailsHrefSchema) => string;
+  onClick?: (caseDetails: CaseDetailsHrefSchema) => void;
+}
 
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
-  onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
+  caseDetailsNavigation: CaseDetailsNavigation;
   subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, getCaseDetailsHref, onCaseDetailsNavClick, subCaseId, title }) => {
+}> = ({ caseDetailsNavigation, children, detailName, subCaseId, title }) => {
+  const { getHref, onClick } = caseDetailsNavigation;
   const goToCaseDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      onCaseDetailsNavClick({ detailName, subCaseId });
+      if (onClick) {
+        onClick({ detailName, subCaseId });
+      }
     },
-    [detailName, onCaseDetailsNavClick, subCaseId]
+    [detailName, onClick, subCaseId]
   );
+
+  const href = getHref({ detailName, subCaseId });
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={getCaseDetailsHref({ detailName, subCaseId })}
+      href={href}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

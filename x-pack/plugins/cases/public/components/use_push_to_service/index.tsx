@@ -17,17 +17,16 @@ import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { LinkAnchor } from '../links';
+import { CasesNavigation, LinkAnchor } from '../links';
 import { ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
-  configureCasesHref: string;
+  configureCasesNavigation: CasesNavigation;
   connector: CaseConnector;
   caseServices: CaseServices;
   connectors: ActionConnector[];
-  onConfigureCasesNavClick: (ev: React.MouseEvent) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;
@@ -39,13 +38,12 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  configureCasesHref,
+  configureCasesNavigation: { onClick, href },
   connector,
   caseId,
   caseServices,
   caseStatus,
   connectors,
-  onConfigureCasesNavClick,
   updateCase,
   userCanCrud,
   isValidConnector,
@@ -84,11 +82,7 @@ export const usePushToService = ({
               id="xpack.cases.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
-                  <LinkAnchor
-                    onClick={onConfigureCasesNavClick}
-                    href={configureCasesHref}
-                    target="_blank"
-                  >
+                  <LinkAnchor onClick={onClick} href={href} target="_blank">
                     {i18n.LINK_CONNECTOR_CONFIGURE}
                   </LinkAnchor>
                 ),

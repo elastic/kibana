@@ -40,12 +40,18 @@ jest.mock('../../common/lib/kibana');
 
 describe('AllCases', () => {
   const defaultAllCasesProps = {
-    configureCasesHref: 'blah',
-    createCaseHref: 'bleh',
-    getCaseDetailsHref: jest.fn().mockReturnValue('testHref'), // string
-    onCaseDetailsNavClick: jest.fn(),
-    onConfigureCasesNavClick: jest.fn(),
-    onCreateCaseNavClick: jest.fn(),
+    configureCasesNavigation: {
+      href: 'blah',
+      onClick: jest.fn(),
+    },
+    caseDetailsNavigation: {
+      getHref: jest.fn().mockReturnValue('testHref'), // string
+      onClick: jest.fn(),
+    },
+    createCaseNavigation: {
+      href: 'bleh',
+      onClick: jest.fn(),
+    },
   };
 
   const dispatchResetIsDeleted = jest.fn();
@@ -250,8 +256,10 @@ describe('AllCases', () => {
         actions: [],
         filterStatus: CaseStatuses.open,
         isModal: false,
-        getCaseDetailsHref: jest.fn(),
-        onCaseDetailsNavClick: jest.fn(),
+        caseDetailsNavigation: {
+          getHref: jest.fn(),
+          onClick: jest.fn(),
+        },
       }).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
     });
   });
@@ -344,8 +352,10 @@ describe('AllCases', () => {
         actions: [],
         filterStatus: CaseStatuses.open,
         isModal: true,
-        getCaseDetailsHref: jest.fn(),
-        onCaseDetailsNavClick: jest.fn(),
+        caseDetailsNavigation: {
+          getHref: jest.fn(),
+          onClick: jest.fn(),
+        },
       }).map((i, key) => i.name != null && checkIt(`${i.name}`));
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
@@ -727,8 +737,8 @@ describe('AllCases', () => {
     });
   });
 
-  it('should call onCreateCaseNavClick with no cases and modal=false', async () => {
-    const onCreateCaseNavClick = jest.fn();
+  it('should call createCaseNavigation.onClick with no cases and modal=false', async () => {
+    const createCaseNavigation = { href: '', onClick: jest.fn() };
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
@@ -742,7 +752,7 @@ describe('AllCases', () => {
       <TestProviders>
         <AllCases
           {...defaultAllCasesProps}
-          onCreateCaseNavClick={onCreateCaseNavClick}
+          createCaseNavigation={createCaseNavigation}
           userCanCrud={true}
           isModal={false}
         />
@@ -750,7 +760,7 @@ describe('AllCases', () => {
     );
     wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
     await waitFor(() => {
-      expect(onCreateCaseNavClick).toHaveBeenCalled();
+      expect(createCaseNavigation.onClick).toHaveBeenCalled();
     });
   });
 
