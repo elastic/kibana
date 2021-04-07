@@ -8,7 +8,7 @@
 
 export { getTelemetrySavedObject } from './get_telemetry_saved_object';
 export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
-export type {
+export {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
 } from '../../common/telemetry_config/types';
