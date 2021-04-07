@@ -7,6 +7,7 @@
 import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
 
 export const digitsOnly = /^[0-9]*$/g;
+export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
 
 function validateHeaders<T>(headers: T): boolean {
   return Object.keys(headers).some((key) => {
@@ -52,7 +53,9 @@ const validateHTTP = {
 };
 
 const validateTCP = {
-  [ConfigKeys.HOSTS]: (value: unknown) => !value,
+  [ConfigKeys.HOSTS]: (value: unknown) => {
+    return !value || !`${value}`.match(includesValidPort);
+  },
   ...validateCommon,
 };
 

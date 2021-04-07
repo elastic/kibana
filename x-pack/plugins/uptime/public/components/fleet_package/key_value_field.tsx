@@ -132,7 +132,7 @@ export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange
         {pairs.map((pair, index) => {
           const [key, value] = pair;
           return (
-            <Fragment key={htmlId()}>
+            <Fragment key={index}>
               <EuiSpacer size="xs" />
               <EuiFormControlLayoutDelimited
                 fullWidth

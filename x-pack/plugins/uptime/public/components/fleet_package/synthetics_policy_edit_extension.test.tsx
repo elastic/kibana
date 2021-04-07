@@ -456,17 +456,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
       <WrappedComponent policy={currentPolicy} />
     );
 
-    const host = getByLabelText('Host') as HTMLInputElement;
+    const host = getByLabelText('Host:Port') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
-    fireEvent.change(host, { target: { value: '' } });
+    fireEvent.change(host, { target: { value: 'localhost' } }); // host without port
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
-      const hostError = getByText('Host is required');
+      const hostError = getByText('Host and port are required');
       const monitorIntervalError = getByText('Monitor interval is required');
       const timeoutError = getByText('Timeout must be 0 or greater');
 
@@ -677,7 +677,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
       <WrappedComponent policy={currentPolicy} />
     );
-    const url = getByLabelText('Host') as HTMLInputElement;
+    const url = getByLabelText('Host:Port') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;

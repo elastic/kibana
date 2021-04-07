@@ -279,7 +279,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     // expect tcp fields to be in the DOM
-    const host = getByLabelText('Host') as HTMLInputElement;
+    const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
     expect(host.value).toEqual(defaultConfig[ConfigKeys.HOSTS]);

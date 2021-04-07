@@ -389,7 +389,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     });
 
     // expect tcp fields to be in the DOM
-    const host = getByLabelText('Host') as HTMLInputElement;
+    const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
     expect(host.value).toEqual(defaultConfig[ConfigKeys.HOSTS]);
@@ -495,17 +495,17 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
-    const host = getByLabelText('Host') as HTMLInputElement;
+    const host = getByLabelText('Host:Port') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
-    fireEvent.change(host, { target: { value: '' } });
+    fireEvent.change(host, { target: { value: 'localhost' } }); // host without port
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
-      const hostError = getByText('Host is required');
+      const hostError = getByText('Host and port are required');
       const monitorIntervalError = getByText('Monitor interval is required');
       const timeoutError = getByText('Timeout must be 0 or greater');
 
@@ -525,7 +525,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     fireEvent.change(timeout, { target: { value: '1' } });
 
     await waitFor(() => {
-      expect(queryByText('Host is required')).not.toBeInTheDocument();
+      expect(queryByText('Host and port are required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be 0 or greater')).not.toBeInTheDocument();
