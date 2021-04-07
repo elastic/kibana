@@ -69,12 +69,7 @@ export class ObservabilityIndexPatterns {
 
     const pattern = appToPatternMap[app];
 
-    const fields = await this.data.indexPatterns.getFieldsForWildcard({
-      pattern,
-    });
-
     return await this.data.indexPatterns.createAndSave({
-      fields,
       title: pattern,
       id: indexPatternList[app],
       timeFieldName: '@timestamp',
