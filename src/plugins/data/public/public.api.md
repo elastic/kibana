@@ -2031,6 +2031,8 @@ export const QueryStringInput: (props: QueryStringInputProps) => JSX.Element;
 // @public (undocumented)
 export interface QueryStringInputProps {
     // (undocumented)
+    autoSubmit?: boolean;
+    // (undocumented)
     bubbleSubmitEvent?: boolean;
     // (undocumented)
     className?: string;
@@ -2078,6 +2080,8 @@ export interface QueryStringInputProps {
     //
     // (undocumented)
     size?: SuggestionsListSize;
+    // (undocumented)
+    storageKey?: string;
     // (undocumented)
     submitOnBlur?: boolean;
 }
