@@ -11,6 +11,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
   SavedObjectAttributes,
+  SavedObjectAttribute,
 } from '../../../../../src/core/server';
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -342,6 +343,10 @@ function restructureConnectorsThatSupportIncident(
   };
 }
 
+function convertNullToUndefined(attribute: SavedObjectAttribute) {
+  return attribute != null ? attribute : undefined;
+}
+
 function removeNullsFromSecurityRules(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
@@ -354,20 +359,20 @@ function removeNullsFromSecurityRules(
       ...doc.attributes,
       params: {
         ...params,
-        buildingBlockType: params.buildingBlockType != null ? params.buildingBlockType : undefined,
-        note: params.note != null ? params.note : undefined,
-        index: params.index != null ? params.index : undefined,
-        language: params.language != null ? params.language : undefined,
-        license: params.license != null ? params.license : undefined,
-        outputIndex: params.outputIndex != null ? params.outputIndex : undefined,
-        savedId: params.savedId != null ? params.savedId : undefined,
-        timelineId: params.timelineId != null ? params.timelineId : undefined,
-        timelineTitle: params.timelineTitle != null ? params.timelineTitle : undefined,
-        meta: params.meta != null ? params.meta : undefined,
-        query: params.query != null ? params.query : undefined,
-        filters: params.filters != null ? params.filters : undefined,
+        buildingBlockType: convertNullToUndefined(params.buildingBlockType),
+        note: convertNullToUndefined(params.note),
+        index: convertNullToUndefined(params.index),
+        language: convertNullToUndefined(params.language),
+        license: convertNullToUndefined(params.license),
+        outputIndex: convertNullToUndefined(params.outputIndex),
+        savedId: convertNullToUndefined(params.savedId),
+        timelineId: convertNullToUndefined(params.timelineId),
+        timelineTitle: convertNullToUndefined(params.timelineTitle),
+        meta: convertNullToUndefined(params.meta),
+        query: convertNullToUndefined(params.query),
+        filters: convertNullToUndefined(params.filters),
         riskScoreMapping: params.riskScoreMapping != null ? params.riskScoreMapping : [],
-        ruleNameOverride: params.ruleNameOverride != null ? params.ruleNameOverride : undefined,
+        ruleNameOverride: convertNullToUndefined(params.ruleNameOverride),
         severityMapping: params.severityMapping != null ? params.severityMapping : [],
         threat: params.threat != null ? params.threat : [],
         threshold:
@@ -385,7 +390,7 @@ function removeNullsFromSecurityRules(
                   params.threshold.cardinality != null ? params.threshold.cardinality : [],
               }
             : undefined,
-        timestampOverride: params.timestampOverride != null ? params.timestampOverride : undefined,
+        timestampOverride: convertNullToUndefined(params.timestampOverride),
         exceptionsList:
           params.exceptionsList != null
             ? params.exceptionsList
@@ -394,7 +399,7 @@ function removeNullsFromSecurityRules(
             : params.lists != null
             ? params.lists
             : [],
-        threatFilters: params.threatFilters != null ? params.threatFilters : undefined,
+        threatFilters: convertNullToUndefined(params.threatFilters),
       },
     },
   };
