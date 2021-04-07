@@ -7,7 +7,7 @@
 
 import classNames from 'classnames';
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { EuiFieldText, EuiText, keys } from '@elastic/eui';
+import { EuiFieldText, EuiText, keys, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
   placeholder: string;
@@ -89,13 +89,14 @@ function _InlineTextInput({
       className={containerClasses}
       tabIndex={disabled ? -1 : 0}
       onFocus={() => setIsShowingTextInput(true)}
-      title={text ?? placeholder}
     >
-      <EuiText size="s" color="subdued">
-        <div className="pipelineProcessorsEditor__item__description">
-          {text || <em>{placeholder}</em>}
-        </div>
-      </EuiText>
+      <EuiToolTip content={text ?? placeholder}>
+        <EuiText size="s" color="subdued">
+          <div className="pipelineProcessorsEditor__item__description">
+            {text || <em>{placeholder}</em>}
+          </div>
+        </EuiText>
+      </EuiToolTip>
     </div>
   );
 }
