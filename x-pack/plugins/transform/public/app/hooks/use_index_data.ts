@@ -87,6 +87,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setColumnCharts,
+    setCcsWarning,
     setErrorMessage,
     setRowCount,
     setRowCountRelation,
@@ -134,8 +135,12 @@ export const useIndexData = (
       return;
     }
 
+    const isCrossClusterSearch = indexPattern.title.includes(':');
+    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
+    setCcsWarning(isCrossClusterSearch && isMissingFields);
     setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
     setRowCountRelation(
       typeof resp.hits.total === 'number'
