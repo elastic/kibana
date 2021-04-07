@@ -17,7 +17,8 @@ export const checkAgentTypeMetric = (versions?: string[]) => {
   }
   versions.forEach((version) => {
     const [major, minor] = version.split('.');
-    if (Number(major) >= 7 && Number(minor) >= 13) {
+    const majorInt = Number(major);
+    if (majorInt > 7 || (majorInt === 7 && Number(minor) >= 13)) {
       return true;
     }
   });
