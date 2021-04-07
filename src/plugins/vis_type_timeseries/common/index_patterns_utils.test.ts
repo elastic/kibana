@@ -44,7 +44,7 @@ describe('extractIndexPatterns', () => {
   });
 
   test('should return index patterns', () => {
-    expect(extractIndexPatternValues(panel, '')).toEqual([
+    expect(extractIndexPatternValues(panel, null)).toEqual([
       '*',
       'example-1-*',
       'example-2-*',
