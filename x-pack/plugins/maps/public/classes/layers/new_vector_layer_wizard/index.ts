@@ -37,7 +37,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(indexDrawnLayers());
     },
     addNewLayer: async (layerDescriptor: LayerDescriptor) => {
-      dispatch(addLayer(layerDescriptor));
+      await dispatch(addLayer(layerDescriptor));
       await dispatch(setSelectedLayer(layerDescriptor.id));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
