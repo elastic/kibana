@@ -19,11 +19,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import { painlessContextOptions } from '../../constants';
 import { useAppContext } from '../../context';
+import { isAdvancedContext } from '../../lib/utils';
+import { ExecutionContext } from '../../types';
 
 export const ContextTab: FunctionComponent = () => {
   const {
@@ -66,14 +67,14 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={(nextContext: PainlessContext) => updatePayload({ context: nextContext })}
+          onChange={(nextContext: ExecutionContext) => updatePayload({ context: nextContext })}
           itemLayoutAlign="top"
           hasDividers
           fullWidth
         />
       </EuiFormRow>
 
-      {['filter', 'score'].indexOf(context) !== -1 && (
+      {isAdvancedContext(context) && (
         <EuiFormRow
           label={
             <EuiToolTip
@@ -160,7 +161,8 @@ export const ContextTab: FunctionComponent = () => {
           </EuiPanel>
         </EuiFormRow>
       )}
-      {['filter', 'score'].indexOf(context) !== -1 && (
+
+      {isAdvancedContext(context) && (
         <EuiFormRow
           label={
             <EuiToolTip

@@ -9,74 +9,125 @@ import React from 'react';
 
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PainlessContext } from '@kbn/monaco';
 import { EuiSuperSelectOption } from '@elastic/eui';
+import { ExecutionContext } from './types';
 
-const defaultLabel = i18n.translate('xpack.painlessLab.contextDefaultLabel', {
-  defaultMessage: 'Basic',
-});
-
-const filterLabel = i18n.translate('xpack.painlessLab.contextFilterLabel', {
-  defaultMessage: 'Filter',
-});
-
-const scoreLabel = i18n.translate('xpack.painlessLab.contextScoreLabel', {
-  defaultMessage: 'Score',
-});
-
-export const painlessContextOptions: Array<EuiSuperSelectOption<PainlessContext>> = [
-  {
-    value: 'painless_test',
-    inputDisplay: defaultLabel,
-    'data-test-subj': 'basicButtonDropdown',
-    dropdownDisplay: (
-      <>
-        <strong>{defaultLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            {i18n.translate('xpack.painlessLab.context.defaultLabel', {
-              defaultMessage: 'The script result will be converted to a string',
-            })}
-          </p>
-        </EuiText>
-      </>
-    ),
+const i18nTexts: {
+  [key in ExecutionContext]: {
+    buttonLabel: string;
+    dropdownDescription: string;
+  };
+} = {
+  painless_test: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextDefaultLabel', {
+      defaultMessage: 'Basic',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.defaultLabel', {
+      defaultMessage: 'The script result will be converted to a string',
+    }),
   },
-  {
-    value: 'filter',
-    inputDisplay: filterLabel,
-    'data-test-subj': 'filterButtonDropdown',
-    dropdownDisplay: (
-      <>
-        <strong>{filterLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            {i18n.translate('xpack.painlessLab.context.filterLabel', {
-              defaultMessage: "Use the context of a filter's script query",
-            })}
-          </p>
-        </EuiText>
-      </>
-    ),
+  filter: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextFilterLabel', {
+      defaultMessage: 'Filter',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.filterLabel', {
+      defaultMessage: "Use the context of a filter's script query",
+    }),
   },
-  {
-    value: 'score',
-    inputDisplay: scoreLabel,
-    'data-test-subj': 'scoreButtonDropdown',
-    dropdownDisplay: (
-      <>
-        <strong>{scoreLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
-              defaultMessage: 'Use the context of a script_score function in function_score query',
-            })}
-          </p>
-        </EuiText>
-      </>
-    ),
+  score: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextScoreLabel', {
+      defaultMessage: 'Score',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.scoreLabel', {
+      defaultMessage: 'Use the context of a script_score function in function_score query',
+    }),
   },
+  boolean_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextBooleanLabel', {
+      defaultMessage: 'Boolean',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.booleanLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  date_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextDateLabel', {
+      defaultMessage: 'Date',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.dateLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  double_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextDoubleLabel', {
+      defaultMessage: 'Double',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.doubleLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  ip_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextIpLabel', {
+      defaultMessage: 'IP',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.ipLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  long_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextLongLabel', {
+      defaultMessage: 'Long',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.longLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  string_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextStringLabel', {
+      defaultMessage: 'String',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.stringLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+  geo_point_script_field_script_field: {
+    buttonLabel: i18n.translate('xpack.painlessLab.contextGeoPointLabel', {
+      defaultMessage: 'Geo point',
+    }),
+    dropdownDescription: i18n.translate('xpack.painlessLab.context.geoPointLabel', {
+      defaultMessage: 'TODO',
+    }),
+  },
+};
+
+const painlessContexts: ExecutionContext[] = [
+  'painless_test',
+  'filter',
+  'score',
+  'boolean_script_field_script_field',
+  'date_script_field',
+  'double_script_field_script_field',
+  'ip_script_field_script_field',
+  'long_script_field_script_field',
+  'string_script_field_script_field',
+  'geo_point_script_field_script_field',
 ];
+
+export const painlessContextOptions: Array<
+  EuiSuperSelectOption<ExecutionContext>
+> = painlessContexts.map((context) => ({
+  value: context,
+  inputDisplay: i18nTexts[context].buttonLabel,
+  'data-test-subj': `${context}ButtonDropdown`,
+  dropdownDisplay: (
+    <>
+      <strong>{i18nTexts[context].buttonLabel}</strong>
+      <EuiText size="s" color="subdued">
+        <p className="euiTextColor--subdued">{i18nTexts[context].dropdownDescription}</p>
+      </EuiText>
+    </>
+  ),
+}));
 
 // Render a smiley face as an example.
 export const exampleScript = `boolean isInCircle(def posX, def posY, def circleX, def circleY, def radius) {

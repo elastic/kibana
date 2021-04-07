@@ -12,8 +12,10 @@ export interface Store {
   validation: Validation;
 }
 
+export type ExecutionContext = Exclude<PainlessContext, 'processor_conditional'>;
+
 export interface Payload {
-  context: PainlessContext;
+  context: ExecutionContext;
   code: string;
   parameters: string;
   index: string;
@@ -27,9 +29,6 @@ export interface Validation {
     index: boolean;
   };
 }
-
-// TODO: This should be an enumerated list
-export type Context = string;
 
 export enum PayloadFormat {
   UGLY = 'ugly',

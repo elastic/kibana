@@ -6,6 +6,7 @@
  */
 
 import { Response, ExecutionError, PayloadFormat, Payload } from '../types';
+import { isAdvancedContext } from './utils';
 
 function prettifyPayload(payload = '', indentationLevel = 0) {
   const indentation = new Array(indentationLevel + 1).join(' ');
@@ -20,8 +21,6 @@ export function formatRequestPayload(
   { code, context, parameters, index, document, query }: Partial<Payload>,
   format: PayloadFormat = PayloadFormat.UGLY
 ): string {
-  const isAdvancedContext = context === 'filter' || context === 'score';
-
   let formattedCode: string | undefined;
   let formattedParameters: string | undefined;
   let formattedContext: string | undefined;
@@ -55,7 +54,7 @@ export function formatRequestPayload(
       : ``
   }
   }${
-    isAdvancedContext
+    isAdvancedContext(context)
       ? `,
   "context": "${formattedContext}",
   "context_setup": {

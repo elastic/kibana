@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { PainlessLang, PainlessContext } from '@kbn/monaco';
+import { PainlessLang } from '@kbn/monaco';
 
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+import { ExecutionContext } from '../types';
 
 interface Props {
   code: string;
   onChange: (code: string) => void;
-  context: PainlessContext;
+  context: ExecutionContext;
 }
 
 export function Editor({ code, onChange, context }: Props) {
