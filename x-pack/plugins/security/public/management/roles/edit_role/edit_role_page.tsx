@@ -258,11 +258,11 @@ function useFeatures(
         // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
         // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
         // 404 here, and respond in a way that still allows the UI to render itself.
-        const unauthorizedForFeatures = err.response?.status === 404;
+        const unauthorizedForFeatures =
+          err.response?.status === 404 || err.response?.status === 403;
         if (unauthorizedForFeatures) {
           return [] as KibanaFeature[];
         }
-
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
@@ -296,7 +296,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
-
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
