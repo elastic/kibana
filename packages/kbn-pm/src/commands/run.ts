@@ -14,7 +14,8 @@ import { topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
 
 export const RunCommand: ICommand = {
-  description: 'Run script defined in package.json in each package that contains that script.',
+  description:
+    'Run script defined in package.json in each package that contains that script (only works on packages not using Bazel yet)',
   name: 'run',
 
   async run(projects, projectGraph, { extraArgs, options }) {

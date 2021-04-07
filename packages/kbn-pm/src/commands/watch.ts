@@ -35,7 +35,8 @@ const kibanaProjectName = 'kibana';
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
 export const WatchCommand: ICommand = {
-  description: 'Runs `kbn:watch` script for every project.',
+  description:
+    'Runs `kbn:watch` script for every project (only works on packages not using Bazel yet)',
   name: 'watch',
 
   async run(projects, projectGraph) {

@@ -14,7 +14,10 @@ import { observeLines } from '@kbn/dev-utils/stdio';
 import { spawn } from '../child_process';
 import { log } from '../log';
 
-export async function runBazel(
+type BazelCommandRunner = 'bazel' | 'ibazel';
+
+async function runBazelCommandWithRunner(
+  bazelCommandRunner: BazelCommandRunner,
   bazelArgs: string[],
   offline: boolean = false,
   runOpts: execa.Options = {}
@@ -29,7 +32,7 @@ export async function runBazel(
     bazelArgs.push('--config=offline');
   }
 
-  const bazelProc = spawn('bazel', bazelArgs, bazelOpts);
+  const bazelProc = spawn(bazelCommandRunner, bazelArgs, bazelOpts);
 
   const bazelLogs$ = new Rx.Subject<string>();
 
@@ -37,10 +40,10 @@ export async function runBazel(
   // Therefore we need to get both. In order to get errors we need to parse the actual text line
   const bazelLogSubscription = Rx.merge(
     observeLines(bazelProc.stdout!).pipe(
-      tap((line) => log.info(`${chalk.cyan('[bazel]')} ${line}`))
+      tap((line) => log.info(`${chalk.cyan(`[${bazelCommandRunner}]`)} ${line}`))
     ),
     observeLines(bazelProc.stderr!).pipe(
-      tap((line) => log.info(`${chalk.cyan('[bazel]')} ${line}`))
+      tap((line) => log.info(`${chalk.cyan(`[${bazelCommandRunner}]`)} ${line}`))
     )
   ).subscribe(bazelLogs$);
 
@@ -48,4 +51,20 @@ export async function runBazel(
   await bazelProc;
   await bazelLogs$.toPromise();
   await bazelLogSubscription.unsubscribe();
+}
+
+export async function runBazel(
+  bazelArgs: string[],
+  offline: boolean = false,
+  runOpts: execa.Options = {}
+) {
+  await runBazelCommandWithRunner('bazel', bazelArgs, offline, runOpts);
+}
+
+export async function runIBazel(
+  bazelArgs: string[],
+  offline: boolean = false,
+  runOpts: execa.Options = {}
+) {
+  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, runOpts);
 }
