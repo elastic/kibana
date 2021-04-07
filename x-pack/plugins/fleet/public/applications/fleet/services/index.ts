@@ -28,8 +28,6 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
-  getStreamsForInputType,
-  findDataStreamsByNames,
   groupInputs,
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,

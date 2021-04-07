@@ -8,7 +8,6 @@
 import type {
   PackageInfo,
   RegistryVarsEntry,
-  RegistryStream,
   PackagePolicyConfigRecord,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
