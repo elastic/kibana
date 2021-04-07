@@ -464,7 +464,9 @@ const shortUrl = await plugins.share.shortUrls.create(
 ```
 
 These short URLs will be stored in saved objects of type `url` and will be
-automatically migrated using the locator.
+automatically migrated using the locator. The long URL will NOT be stored in the
+saved object. The locator ID and locator params will be stored in the saved
+object, that will allow us to do the migrations for short URLs.
 
 
 ### `KibanaLocation` interface
