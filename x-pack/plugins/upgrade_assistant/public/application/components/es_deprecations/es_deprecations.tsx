@@ -99,7 +99,7 @@ export const EsDeprecationsContent = withRouter(
           name: (
             <span>
               {i18nTexts.clusterTab.tabName}
-              {tabName === 'indices' && checkupData && checkupData.cluster.length > 0 && (
+              {checkupData && checkupData.cluster.length > 0 && (
                 <>
                   {' '}
                   <EuiNotificationBadge>{checkupData.cluster.length}</EuiNotificationBadge>
@@ -122,7 +122,7 @@ export const EsDeprecationsContent = withRouter(
           name: (
             <span>
               {i18nTexts.indicesTab.tabName}
-              {tabName === 'cluster' && checkupData && checkupData.indices.length > 0 && (
+              {checkupData && checkupData.indices.length > 0 && (
                 <>
                   {' '}
                   <EuiNotificationBadge>{checkupData.indices.length}</EuiNotificationBadge>
@@ -140,7 +140,7 @@ export const EsDeprecationsContent = withRouter(
           ),
         },
       ];
-    }, [checkupData, error, history, isLoading, resendRequest, tabName]);
+    }, [checkupData, error, history, isLoading, resendRequest]);
 
     useEffect(() => {
       breadcrumbs.setBreadcrumbs('esDeprecations');

@@ -35,6 +35,7 @@ export enum LoadingState {
 export enum LevelFilterOption {
   all = 'all',
   critical = 'critical',
+  warning = 'warning',
 }
 
 export enum GroupByOption {
