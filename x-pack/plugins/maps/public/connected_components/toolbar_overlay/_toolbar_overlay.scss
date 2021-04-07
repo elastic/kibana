@@ -30,6 +30,12 @@
   .euiButtonIcon:hover {
     transform: translateY(0);
   }
+
+  // Removes the focus background state because it can induce users to think these buttons are "enabled".
+  // The buttons functionality are just applied once, so they shouldn't stay highlighted.
+  .euiButtonIcon:focus {
+    background: none;
+  }
 }
 
 .mapToolbarOverlay__buttonGroup {

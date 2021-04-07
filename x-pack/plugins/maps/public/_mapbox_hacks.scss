@@ -58,8 +58,7 @@
   .mapboxgl-ctrl button:not(:disabled) {
     transition: background $euiAnimSpeedNormal ease-in-out;
 
-    &:hover,
-    &:focus {
+    &:hover {
       background-color: transparentize($euiColorDarkShade, .9);
     }
   }
