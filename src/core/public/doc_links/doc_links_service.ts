@@ -216,6 +216,7 @@ export class DocLinksService {
         },
         maps: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
+          importGeospatialPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/import-geospatial-data.html#import-geospatial-privileges`,
         },
         monitoring: {
           alertsKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html`,

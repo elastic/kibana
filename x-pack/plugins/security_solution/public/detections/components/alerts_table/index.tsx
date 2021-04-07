@@ -48,6 +48,8 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -336,6 +338,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
+      renderCellValue={DefaultCellRenderer}
+      rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}

@@ -54,6 +54,21 @@ export interface BaseState extends ControlState {
    * max_retry_time = 11.7 minutes
    */
   readonly retryAttempts: number;
+
+  /**
+   * The number of documents to fetch from Elasticsearch server to run migration over.
+   *
+   * The higher the value, the faster the migration process will be performed since it reduces
+   * the number of round trips between Kibana and Elasticsearch servers.
+   * For the migration speed, we have to pay the price of increased memory consumption.
+   *
+   * Since batchSize defines the number of documents, not their size, it might happen that
+   * Elasticsearch fails a request with circuit_breaking_exception when it retrieves a set of
+   * saved objects of significant size.
+   *
+   * In this case, you should set a smaller batchSize value and restart the migration process again.
+   */
+  readonly batchSize: number;
   readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
   /**
    * The current alias e.g. `.kibana` which always points to the latest
