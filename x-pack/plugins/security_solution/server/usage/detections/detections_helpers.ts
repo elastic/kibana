@@ -361,7 +361,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.rule_id' },
+            terms: { field: 'signal.rule.id' },
           },
         },
         query: {
@@ -399,7 +399,7 @@ export const getDetectionRuleMetrics = async (
         cache.set(ruleId, cacheCount + 1);
       }
       return cache;
-    }, new Map() as Map<string, number>);
+    }, new Map<string, number>());
 
     const alertBuckets = detectionAlertsResp!.aggregations?.detectionAlerts?.buckets ?? [];
 
@@ -412,7 +412,7 @@ export const getDetectionRuleMetrics = async (
       );
 
       return elasticRules.map((hit) => {
-        const ruleId = hit._source?.alert.params.ruleId!;
+        const ruleId = hit._id.split(':')[1];
         return {
           rule_name: hit._source?.alert.name,
           rule_id: ruleId,
