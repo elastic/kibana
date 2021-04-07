@@ -430,7 +430,7 @@ override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
 | `migrations.batchSize:`
- | Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process will be performed at the cost of higher memory consumption. Should migration fail with the `circuit_breaking_exception` exception, you need to set a smaller `batchSize` value. *Default: `1000`*
+ | Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process will be performed at the cost of higher memory consumption. Should the migration fail with a `circuit_breaking_exception`, you need to set a smaller `batchSize` value. *Default: `1000`*
 
 | `migrations.enableV2:`
  | experimental[]. Enables the new Saved Objects migration algorithm. See <<upgrade-migrations>> for details. The setting is going to removed from `v8.0` when `migrations v2` becomes stable. *Default: `true`*
