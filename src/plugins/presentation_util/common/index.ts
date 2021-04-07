@@ -8,3 +8,5 @@
 
 export const PLUGIN_ID = 'presentationUtil';
 export const PLUGIN_NAME = 'presentationUtil';
+
+export * from './labs';
