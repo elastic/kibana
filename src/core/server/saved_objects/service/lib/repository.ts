@@ -820,19 +820,19 @@ export class SavedObjectsRepository {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
       } catch (e) {
         if (e.name === 'KQLSyntaxError') {
-          throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+          throw SavedObjectsErrorHelpers.createBadRequestError(`KQLSyntaxError: ${e.message}`);
         } else {
           throw e;
         }
       }
     }
 
-    let aggsObject = null;
+    let aggsObject;
     if (aggs) {
       try {
         aggsObject = validateAndConvertAggregations(allowedTypes, aggs, this._mappings);
       } catch (e) {
-        throw e;
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid aggregation: ${e.message}`);
       }
     }
 
@@ -850,7 +850,7 @@ export class SavedObjectsRepository {
         seq_no_primary_term: true,
         from: perPage * (page - 1),
         _source: includedFields(type, fields),
-        ...(aggsObject != null ? { aggs: aggsObject } : {}),
+        ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
@@ -885,7 +885,7 @@ export class SavedObjectsRepository {
     }
 
     return {
-      ...(body.aggregations != null ? { aggregations: body.aggregations as any } : {}),
+      ...(body.aggregations ? { aggregations: (body.aggregations as unknown) as A } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,

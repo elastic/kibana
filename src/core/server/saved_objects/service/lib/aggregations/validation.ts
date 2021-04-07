@@ -18,11 +18,10 @@ const aggregationKeys = ['aggs', 'aggregations'];
 
 export const validateAndConvertAggregations = (
   allowedTypes: string[],
-  aggs: Record<string, unknown>,
+  aggs: Record<string, estypes.AggregationContainer>,
   indexMapping: IndexMapping
 ): Record<string, estypes.AggregationContainer> => {
   return validateAggregations(aggs as any, {
-    // TODO: fix type
     allowedTypes,
     indexMapping,
     currentPath: [],
@@ -47,8 +46,6 @@ const validateAggregations = (
   aggregations: Record<string, estypes.AggregationContainer>,
   context: ValidationContext
 ) => {
-  // console.log('validateAggregations', Object.keys(aggregations));
-
   return Object.entries(aggregations).reduce((memo, [aggrName, aggrContainer]) => {
     return {
       ...memo,
@@ -115,8 +112,6 @@ const validateAggregationType = (
     throw new Error(`${aggregationType} aggregation is not valid (or not registered yet)`);
   }
 
-  // console.log('*** validateAggregationType', aggregationType, aggregation);
-
   validateAggregationStructure(aggregationSchema, aggregation, context);
   return validateAndRewriteFieldAttributes(aggregation, context);
 };
@@ -132,7 +127,6 @@ const validateAggregationStructure = (
   return schema.validate(aggObject, {}, context.currentPath.join('.'));
 };
 
-/////
 /**
  * List of fields that have an attribute path as value
  *
@@ -203,7 +197,6 @@ const isAttributeKey = (parents: string[]) => {
   return false;
 };
 
-// hasFilterKeyError(key, types, mappings)
 const isAttributeValue = (fieldName: string, fieldValue: unknown): boolean => {
   return attributeFields.includes(fieldName) && typeof fieldValue === 'string';
 };
