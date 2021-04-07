@@ -11,15 +11,16 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import { TemporaryProcessingPluginsType } from '../markdown_editor/types';
 jest.mock('../timeline_context');
 
 const mockTimelineComponent = (name: string) => <span data-test-subj={name}>{name}</span>;
 const defaultParsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
 const defaultUiPlugins = getDefaultEuiMarkdownUiPlugins();
 
 export const timelineIntegrationMock = {
-  plugins: {
+  editor_plugins: {
     parsingPlugins: defaultParsingPlugins,
     processingPlugins: defaultProcessingPlugins,
     uiPlugins: defaultUiPlugins,

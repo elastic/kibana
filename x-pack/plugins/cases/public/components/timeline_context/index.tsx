@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { PluggableList } from 'unified';
-
+import { TemporaryProcessingPluginsType } from '../markdown_editor';
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
  * @TODO - To better encapsulate the timeline logic needed by cases, we are managing it in this top level context.
@@ -23,7 +23,7 @@ interface UseInsertTimelineReturn {
 export interface CasesTimelineIntegration {
   editor_plugins: {
     parsingPlugins: PluggableList;
-    processingPlugins: PluggableList;
+    processingPlugins: TemporaryProcessingPluginsType;
     uiPlugins: Array<EuiMarkdownEditorUiPlugin<any>> | undefined;
   };
   hooks: {

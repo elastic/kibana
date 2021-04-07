@@ -7,22 +7,15 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import {
-  EuiMarkdownFormat,
-  EuiLinkAnchorProps,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-} from '@elastic/eui';
+import { EuiMarkdownFormat, EuiLinkAnchorProps } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import { defaultParsingPlugins, defaultProcessingPlugins } from './plugins';
 
 interface Props {
   children: string;
   disableLinks?: boolean;
 }
-
-const defaultParsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
   const timelinePlugins = useTimelineContext()?.editor_plugins;

@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useCallback, FunctionComponent } from 'react';
-import { Plugin, PluggableList } from 'unified';
-// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehype2react from 'rehype-react';
-import {
-  EuiLinkAnchorProps,
-  EuiMarkdownEditor,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-  getDefaultEuiMarkdownUiPlugins,
-} from '@elastic/eui';
+import React, { memo, useEffect, useState, useCallback } from 'react';
+import { PluggableList } from 'unified';
+import { EuiMarkdownEditor } from '@elastic/eui';
 import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { defaultParsingPlugins, defaultProcessingPlugins, defaultUiPlugins } from './plugins';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -32,26 +22,6 @@ interface MarkdownEditorProps {
   uiPlugins?: Array<EuiMarkdownEditorUiPlugin<any>> | undefined;
   value: string;
 }
-
-// create plugin stuff here
-export const {
-  uiPlugins: defaultUiPlugins,
-  parsingPlugins: defaultParsingPlugins,
-  processingPlugins: defaultProcessingPlugins,
-} = {
-  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
-  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins() as [
-    [Plugin, Remark2RehypeOptions],
-    [
-      typeof rehype2react,
-      Parameters<typeof rehype2react>[0] & {
-        components: { a: FunctionComponent<EuiLinkAnchorProps> };
-      }
-    ],
-    ...PluggableList
-  ],
-};
 
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   ariaLabel,
