@@ -12,7 +12,6 @@ import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
-import { GetAllTimeline, SortTimeline, TimelineResult } from '../../../graphql/types';
 import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
@@ -21,6 +20,9 @@ import {
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   PageInfoTimeline,
+  TimelineResult,
+  SortTimeline,
+  GetAllTimelineVariables,
 } from '../../../../common/types/timeline';
 import { getAllTimelines } from '../api';
 
@@ -126,7 +128,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             loading: true,
           }));
 
-          const variables: GetAllTimeline.Variables = {
+          const variables: GetAllTimelineVariables = {
             onlyUserFavorite,
             pageInfo,
             search,

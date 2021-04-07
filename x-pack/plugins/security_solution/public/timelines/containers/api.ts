@@ -30,7 +30,6 @@ import {
   SingleTimelineResponseType,
   TimelineType,
 } from '../../../common/types/timeline';
-import { TimelineInput } from '../../graphql/types';
 import {
   TIMELINE_URL,
   TIMELINE_DRAFT_URL,
@@ -49,6 +48,7 @@ import {
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
+import { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;

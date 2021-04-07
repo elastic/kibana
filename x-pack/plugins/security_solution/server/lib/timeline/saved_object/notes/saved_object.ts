@@ -22,8 +22,10 @@ import {
   NoteSavedObject,
   PageInfoNote,
   SortNote,
+  NoteResult,
+  ResponseNotes,
+  ResponseNote,
 } from '../../../../../common/types/timeline/note';
-import { ResponseNote, ResponseNotes, NoteResult } from '../../../../graphql/types';
 import { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { convertSavedObjectToSavedTimeline, pickSavedTimeline } from '../timelines';

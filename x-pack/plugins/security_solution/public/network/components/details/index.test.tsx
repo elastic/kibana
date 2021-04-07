@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
-import { FlowTarget } from '../../../graphql/types';
 import '../../../common/mock/match_media';
 import {
   mockGlobalState,
@@ -25,6 +24,7 @@ import { IpOverview } from './index';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { NarrowDateRange } from '../../../common/components/ml/types';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;

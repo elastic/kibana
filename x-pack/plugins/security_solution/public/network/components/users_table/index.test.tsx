@@ -12,7 +12,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
-import { FlowTarget } from '../../../graphql/types';
 import {
   mockGlobalState,
   TestProviders,
@@ -26,6 +25,7 @@ import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();

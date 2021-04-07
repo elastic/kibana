@@ -39,9 +39,10 @@ import {
   TimelineStatus,
   TimelineErrorResponse,
   TimelineType,
+  ResponseTimeline,
+  TimelineResult,
 } from '../../../../common/types/timeline';
 import { inputsModel } from '../../../common/store/inputs';
-import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 
 import { persistTimeline } from '../../containers/api';
@@ -88,6 +89,7 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineEpicDependencies } from './types';
+import { TimelineInput } from '../../../../common/search_strategy';
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,

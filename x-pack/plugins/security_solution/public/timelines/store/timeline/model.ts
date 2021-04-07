@@ -9,7 +9,6 @@ import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/pub
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import { PinnedEvent } from '../../../graphql/types';
 import {
   EqlOptionsSelected,
   TimelineNonEcsData,

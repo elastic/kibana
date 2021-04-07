@@ -11,14 +11,6 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
-import {
-  TimelineResult,
-  NoteResult,
-  FilterTimelineResult,
-  ColumnHeaderResult,
-  PinnedEvent,
-  DataProviderResult,
-} from '../../../graphql/types';
 
 import {
   DataProviderType,
@@ -26,6 +18,10 @@ import {
   TimelineStatus,
   TimelineType,
   TimelineTabs,
+  TimelineResult,
+  ColumnHeaderResult,
+  FilterTimelineResult,
+  DataProviderResult,
 } from '../../../../common/types/timeline';
 
 import {
@@ -64,6 +60,8 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { getTimeline } from '../../containers/api';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 

@@ -7,7 +7,6 @@
 
 import { mount } from 'enzyme';
 import React, { ReactElement } from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
@@ -51,13 +50,9 @@ describe('OpenTimelineModal', () => {
   beforeEach(() => {
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
-      timelines: getAllTimeline(
-        '',
-        mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
-      ),
+      timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
-      totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
-      refetch: jest.fn(),
+      totalCount: mockOpenTimelineQueryResults.totalCount,
     });
     ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
       timelineStatus: null,
@@ -74,9 +69,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the expected modal', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OpenTimelineModal onClose={jest.fn()} />
-        </MockedProvider>
+        <OpenTimelineModal onClose={jest.fn()} />
       </TestProviders>
     );
 
@@ -88,9 +81,7 @@ describe('OpenTimelineModal', () => {
   test('it installs elastic prebuilt templates', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OpenTimelineModal onClose={jest.fn()} />
-        </MockedProvider>
+        <OpenTimelineModal onClose={jest.fn()} />
       </TestProviders>
     );
 

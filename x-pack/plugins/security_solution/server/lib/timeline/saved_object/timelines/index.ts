@@ -20,16 +20,12 @@ import {
   AllTimelinesResponse,
   ResponseTimelines,
   PageInfoTimeline,
-} from '../../../../../common/types/timeline';
-import {
-  ResponseTimeline,
-  SortTimeline,
-  ResponseFavoriteTimeline,
-  TimelineResult,
   TimelineType,
   TimelineStatus,
-  Maybe,
-} from '../../../../graphql/types';
+  TimelineResult,
+  ResponseFavoriteTimeline,
+  ResponseTimeline,
+} from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
@@ -38,6 +34,7 @@ import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { AuthenticatedUser } from '../../../../../../security/server';
+import { Maybe } from '../../../../../common/search_strategy';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 

@@ -11,10 +11,9 @@ import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
-import { PinnedEvent } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 import { inputsModel } from '../../../common/store/inputs';
-
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import {
   pinEvent,
   endTimelineSaving,

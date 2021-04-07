@@ -11,7 +11,6 @@ import { Router, useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { FlowTarget } from '../../../graphql/types';
 import {
   mockGlobalState,
   TestProviders,
@@ -22,6 +21,7 @@ import {
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
 import { NetworkDetails } from './index';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

@@ -12,7 +12,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
-import { FlowTargetSourceDest } from '../../../graphql/types';
 import {
   mockGlobalState,
   TestProviders,
@@ -25,6 +24,7 @@ import { createStore, State } from '../../../common/store';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/link_to');
 

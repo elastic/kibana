@@ -13,7 +13,12 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineResult,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import {
   SendAlertToTimelineActionProps,
@@ -21,7 +26,6 @@ import {
   UpdateAlertStatusActionProps,
 } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { TimelineResult } from '../../../graphql/types';
 import {
   TimelineNonEcsData,
   TimelineEventsDetailsItem,

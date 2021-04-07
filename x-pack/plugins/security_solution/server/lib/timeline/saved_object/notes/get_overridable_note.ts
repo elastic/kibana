@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SavedNote } from '../../../../../common/types/timeline/note';
-import { NoteResult } from '../../../../graphql/types';
+import { NoteResult, SavedNote } from '../../../../../common/types/timeline/note';
 import { FrameworkRequest } from '../../../framework';
 import { getNote } from './saved_object';
 

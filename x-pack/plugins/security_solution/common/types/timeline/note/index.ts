@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
-import { Direction } from '../../../search_strategy/common';
+import { Direction, Maybe } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 
@@ -89,3 +89,39 @@ export const sortNoteRt = runtimeTypes.type({
 });
 
 export type SortNote = runtimeTypes.TypeOf<typeof sortNoteRt>;
+
+export interface NoteResult {
+  eventId?: Maybe<string>;
+
+  note?: Maybe<string>;
+
+  timelineId?: Maybe<string>;
+
+  noteId: string;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
+
+  timelineVersion?: Maybe<string>;
+
+  updated?: Maybe<number>;
+
+  updatedBy?: Maybe<string>;
+
+  version?: Maybe<string>;
+}
+
+export interface ResponseNotes {
+  notes: NoteResult[];
+
+  totalCount?: Maybe<number>;
+}
+
+export interface ResponseNote {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  note: NoteResult;
+}

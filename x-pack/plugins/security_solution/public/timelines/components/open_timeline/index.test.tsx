@@ -20,14 +20,13 @@ import { SecurityPageName } from '../../../app/types';
 import { TimelineType } from '../../../../common/types/timeline';
 
 import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
-import { getTimelineTabsUrl } from '../../../common/components/link_to';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
 import {
@@ -94,12 +93,9 @@ describe('StatefulOpenTimeline', () => {
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
-      timelines: getAllTimeline(
-        '',
-        mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
-      ),
+      timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
-      totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
+      totalCount: mockOpenTimelineQueryResults.totalCount,
       refetch: jest.fn(),
     });
     ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
@@ -112,23 +108,19 @@ describe('StatefulOpenTimeline', () => {
   });
 
   afterEach(() => {
-    (getTimelineTabsUrl as jest.Mock).mockClear();
-    (useParams as jest.Mock).mockClear();
-    (useHistory as jest.Mock).mockClear();
+    jest.clearAllMocks();
     mockHistory = [];
   });
 
   test('it has the expected initial state', () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          isModal={false}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={title}
+        />
       </TestProviders>
     );
 
@@ -183,14 +175,12 @@ describe('StatefulOpenTimeline', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
       wrapper
@@ -226,14 +216,12 @@ describe('StatefulOpenTimeline', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={true}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={true}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
       wrapper
@@ -252,14 +240,12 @@ describe('StatefulOpenTimeline', () => {
     test('it updates the query state with the expected trimmed value when the user enters a query', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
       wrapper
@@ -271,13 +257,11 @@ describe('StatefulOpenTimeline', () => {
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -295,13 +279,11 @@ describe('StatefulOpenTimeline', () => {
     test('echos (renders) the query when the user enters a query', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -321,13 +303,11 @@ describe('StatefulOpenTimeline', () => {
     test('focuses the input when the component mounts', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -347,13 +327,11 @@ describe('StatefulOpenTimeline', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -424,14 +402,12 @@ describe('StatefulOpenTimeline', () => {
     test('it updates the selection state when timelines are selected', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -455,14 +431,12 @@ describe('StatefulOpenTimeline', () => {
     test('it updates the sort state when the user clicks on a column to sort it', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -482,14 +456,12 @@ describe('StatefulOpenTimeline', () => {
     test('it updates the onlyFavorites state when the user clicks the Only Favorites button', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -509,14 +481,12 @@ describe('StatefulOpenTimeline', () => {
     test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -538,11 +508,11 @@ describe('StatefulOpenTimeline', () => {
           '10849df0-7b44-11e9-a608-ab3d811609': (
             <NotePreviews
               notes={
-                mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes !=
-                null
-                  ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                      (note) => ({ ...note, savedObjectId: note.noteId })
-                    )
+                mockOpenTimelineQueryResults.timeline[0].notes != null
+                  ? mockOpenTimelineQueryResults.timeline[0].notes.map((note) => ({
+                      ...note,
+                      savedObjectId: note.noteId,
+                    }))
                   : []
               }
             />
@@ -554,14 +524,12 @@ describe('StatefulOpenTimeline', () => {
     test('it renders the expanded notes when the expand button is clicked', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -577,14 +545,12 @@ describe('StatefulOpenTimeline', () => {
     test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -594,14 +560,12 @@ describe('StatefulOpenTimeline', () => {
     test('it has the expected initial state for openTimelineModalBody - templateTimelineFilter', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={true}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={true}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
 
@@ -619,14 +583,12 @@ describe('StatefulOpenTimeline', () => {
     test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
       const getSelectedItem = (): [] =>
@@ -665,62 +627,51 @@ describe('StatefulOpenTimeline', () => {
     });
   });
 
-  // TODO - Have been skip because we need to re-implement the test as the component changed
-  test.skip('it invokes onOpenTimeline with the expected parameters when the hyperlink is clicked', async () => {
-    const onOpenTimeline = jest.fn();
-
+  test('it invokes onOpenTimeline with the expected parameters when the hyperlink is clicked', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isModal={false}
+          title={title}
+        />
       </TestProviders>
     );
 
     await waitFor(() => {
       wrapper
-        .find(
-          `[data-test-subj="title-${
-            mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
-          }"]`
-        )
+        .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
         .first()
         .simulate('click');
 
-      expect(onOpenTimeline).toHaveBeenCalledWith({
-        duplicate: false,
-        timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
-          .savedObjectId,
-      });
+      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+        mockOpenTimelineQueryResults.timeline[0].savedObjectId
+      );
+      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
     });
   });
 
-  // TODO - Have been skip because we need to re-implement the test as the component changed
-  test.skip('it invokes onOpenTimeline with the expected params when the button is clicked', async () => {
-    const onOpenTimeline = jest.fn();
-
+  test('it invokes onOpenTimeline with the expected params when the button is clicked', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          isModal={false}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={title}
+        />
       </TestProviders>
     );
 
     await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
-      expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+        mockOpenTimelineQueryResults.timeline[0].savedObjectId
+      );
+      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
     });
   });
 });
