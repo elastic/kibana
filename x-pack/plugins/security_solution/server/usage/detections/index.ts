@@ -81,6 +81,7 @@ export interface MlJobMetric {
 export interface DetectionRuleMetric {
   rule_name: string;
   rule_id: string;
+  rule_type: string;
   enabled: boolean;
   created_on: string;
   updated_on: string;

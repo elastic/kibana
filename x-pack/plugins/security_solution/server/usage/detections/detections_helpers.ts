@@ -51,6 +51,7 @@ interface RuleSearchResult {
 interface DetectionRuleParms {
   ruleId: string;
   version: string;
+  type: string;
 }
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
@@ -383,6 +384,7 @@ export const getDetectionRuleMetrics = async (
         return {
           rule_name: hit._source?.alert.name,
           rule_id: ruleId,
+          rule_type: hit._source?.alert.params.type,
           rule_version: hit._source?.alert.params.version,
           enabled: hit._source?.alert.enabled,
           created_on: hit._source?.alert.createdAt,
