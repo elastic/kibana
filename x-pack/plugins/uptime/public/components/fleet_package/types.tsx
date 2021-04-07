@@ -95,14 +95,14 @@ export enum ConfigKeys {
 
 export interface ISimpleFields {
   [ConfigKeys.HOSTS]: string;
-  [ConfigKeys.MAX_REDIRECTS]: number;
+  [ConfigKeys.MAX_REDIRECTS]: string;
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.APM_SERVICE_NAME]: string;
-  [ConfigKeys.TIMEOUT]: number;
+  [ConfigKeys.TIMEOUT]: string;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];
-  [ConfigKeys.WAIT]: number;
+  [ConfigKeys.WAIT]: string;
 }
 
 export interface ITLSFields {
@@ -160,7 +160,7 @@ export type Config = {
   [ConfigKeys.NAME]: string;
 } & ICustomFields;
 
-export type Validation = Partial<Record<ConfigKeys, (value: unknown) => void>>;
+export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => void>>;
 
 export const contentTypesToMode = {
   [ContentType.FORM]: Mode.FORM,

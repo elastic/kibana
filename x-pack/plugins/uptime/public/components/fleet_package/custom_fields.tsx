@@ -337,11 +337,17 @@ export const CustomFields = memo<Props>(
                     defaultMessage="Timeout in seconds"
                   />
                 }
-                isInvalid={fields[ConfigKeys.TIMEOUT] < 0}
+                isInvalid={
+                  !!validate[ConfigKeys.TIMEOUT]?.(
+                    fields[ConfigKeys.TIMEOUT],
+                    fields[ConfigKeys.SCHEDULE].number,
+                    fields[ConfigKeys.SCHEDULE].unit
+                  )
+                }
                 error={
                   <FormattedMessage
                     id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
-                    defaultMessage="Timeout must be 0 or greater"
+                    defaultMessage="Timeout must be 0 or greater and less than schedule interval"
                   />
                 }
                 labelAppend={<OptionalLabel />}

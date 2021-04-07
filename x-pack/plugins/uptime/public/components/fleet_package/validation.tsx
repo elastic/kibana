@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
+import { ConfigKeys, DataStream, ICustomFields, Validation, ScheduleUnit } from './types';
 
 export const digitsOnly = /^[0-9]*$/g;
 export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
 
+// returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
   return Object.keys(headers).some((key) => {
     if (key) {
@@ -20,19 +21,54 @@ function validateHeaders<T>(headers: T): boolean {
   });
 }
 
+// returns true if invalid
+function validateTimeout({
+  scheduleNumber,
+  scheduleUnit,
+  timeout,
+}: {
+  scheduleNumber: string;
+  scheduleUnit: ScheduleUnit;
+  timeout: string;
+}): boolean {
+  let schedule: number;
+  switch (scheduleUnit) {
+    case ScheduleUnit.SECONDS:
+      schedule = parseFloat(scheduleNumber);
+      break;
+    case ScheduleUnit.MINUTES:
+      schedule = parseFloat(scheduleNumber) * 60;
+      break;
+    default:
+      schedule = parseFloat(scheduleNumber);
+  }
+
+  return parseFloat(timeout) > schedule;
+}
+
 // validation functions return true when invalid
 const validateCommon = {
   [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
     (!!value && !`${value}`.match(digitsOnly)) ||
-    (value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
+    parseFloat(value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
   [ConfigKeys.MONITOR_TYPE]: (value: unknown) => !value,
   [ConfigKeys.SCHEDULE]: (value: unknown) => {
     const { number, unit } = value as ICustomFields[ConfigKeys.SCHEDULE];
     const parsedFloat = parseFloat(number);
     return !parsedFloat || !unit || parsedFloat < 1;
   },
-  [ConfigKeys.TIMEOUT]: (value: unknown) =>
-    !!value && !digitsOnly.test(`${value}`) && (value as ICustomFields[ConfigKeys.TIMEOUT]) < 0,
+  [ConfigKeys.TIMEOUT]: (
+    timeoutValue: unknown,
+    scheduleNumber: string,
+    scheduleUnit: ScheduleUnit
+  ) =>
+    !timeoutValue ||
+    parseFloat(timeoutValue as ICustomFields[ConfigKeys.TIMEOUT]) < 0 ||
+    validateTimeout({
+      timeout: timeoutValue as ICustomFields[ConfigKeys.TIMEOUT],
+      scheduleNumber,
+      scheduleUnit,
+    }),
 };
 
 const validateHTTP = {
@@ -62,7 +98,9 @@ const validateTCP = {
 const validateICMP = {
   [ConfigKeys.HOSTS]: (value: unknown) => !value,
   [ConfigKeys.WAIT]: (value: unknown) =>
-    !!value && !digitsOnly.test(`${value}`) && (value as ICustomFields[ConfigKeys.WAIT]) < 0,
+    !!value &&
+    !digitsOnly.test(`${value}`) &&
+    parseFloat(value as ICustomFields[ConfigKeys.WAIT]) < 0,
   ...validateCommon,
 };
 
