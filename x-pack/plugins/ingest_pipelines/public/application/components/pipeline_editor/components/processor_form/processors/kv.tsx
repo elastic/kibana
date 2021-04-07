@@ -19,7 +19,7 @@ import {
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
+import { FieldsConfig, from, to, isEmptyString } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -45,7 +45,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: emptyField(
+        validator: isEmptyString(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitRequiredError', {
             defaultMessage: 'A value is required.',
           })
@@ -70,7 +70,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: emptyField(
+        validator: isEmptyString(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitRequiredError', {
             defaultMessage: 'A value is required.',
           })
