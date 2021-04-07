@@ -9,7 +9,35 @@
 import { LoggingConfig, config } from './logging_config';
 
 test('`schema` creates correct schema with defaults.', () => {
-  expect(config.schema.validate({})).toMatchSnapshot();
+  expect(config.schema.validate({})).toMatchInlineSnapshot(
+    { json: expect.any(Boolean) }, // default value depends on TTY
+    `
+    Object {
+      "appenders": Map {},
+      "dest": "stdout",
+      "events": Object {},
+      "filter": Object {},
+      "json": Any<Boolean>,
+      "loggers": Array [],
+      "quiet": false,
+      "root": Object {
+        "appenders": Array [
+          "default",
+        ],
+        "level": "info",
+      },
+      "rotate": Object {
+        "enabled": false,
+        "everyBytes": 10485760,
+        "keepFiles": 7,
+        "pollingInterval": 10000,
+        "usePolling": false,
+      },
+      "silent": false,
+      "verbose": false,
+    }
+  `
+  );
 });
 
 test('`schema` throws if `root` logger does not have appenders configured.', () => {
@@ -19,7 +47,9 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
         appenders: [],
       },
     })
-  ).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`
+  );
 });
 
 test('`schema` throws if `root` logger does not have "default" appender configured.', () => {
@@ -29,7 +59,9 @@ test('`schema` throws if `root` logger does not have "default" appender configur
         appenders: ['console'],
       },
     })
-  ).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[root]: \\"default\\" appender required for migration period till the next major release"`
+  );
 });
 
 test('`getParentLoggerContext()` returns correct parent context name.', () => {
@@ -157,7 +189,9 @@ test('fails if loggers use unknown appenders.', () => {
     ],
   });
 
-  expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingSnapshot();
+  expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingInlineSnapshot(
+    `"Logger \\"some.nested.context\\" contains unsupported appender key \\"unknown\\"."`
+  );
 });
 
 describe('extend', () => {
