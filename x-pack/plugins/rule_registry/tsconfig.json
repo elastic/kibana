@@ -7,7 +7,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "server/**/*" ],
+  "include": ["common/**/*", "server/**/*", "../../../typings/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
