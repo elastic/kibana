@@ -21,7 +21,6 @@ describe('EngineOverviewLogic', () => {
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const mockEngineMetrics = {
-    apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
@@ -32,7 +31,6 @@ describe('EngineOverviewLogic', () => {
 
   const DEFAULT_VALUES = {
     dataLoading: true,
-    apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
     operationsPerDay: [],
