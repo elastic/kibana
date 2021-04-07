@@ -24,7 +24,7 @@ import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
  * Types
  */
 
-interface Breadcrumb {
+export interface Breadcrumb {
   text: string;
   path?: string;
   // Used to navigate outside of the React Router basename,
