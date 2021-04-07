@@ -232,8 +232,8 @@ the Short URL Service:
    every possible URL that might be generated should be supported forever. A
    migration could be written inside the app itself, on page load, but this is a
    risky path for URLs with many possibilities.
-   1. __Will do:__ Short URLs will be created using URL generators. We will use
-      migrations provided by the URL generators to migrate the stored parameters
+   1. __Will do:__ Short URLs will be created using locators. We will use
+      migrations provided by the locators to migrate the stored parameters
       in the short URL saved object.
 1. There is not much documentation for developers.
    1. __Will do:__ The new service will have a much nicer API and docs.
@@ -290,14 +290,14 @@ the URL Generator Service:
 
 1. URL generators are available only on the client-side. There is no way to use
    them together with short URLs.
-   1. __Will do:__ We will implement URL generators also on the server-side
+   1. __Will do:__ We will implement locators also on the server-side
       (they will be available in both environments) and we will combine them
       with the Short URL Service.
 1. URL generators are not exposed externally, thus Cloud and Support cannot use
    them to generate deep links into Kibana.
    1. __Will do:__ We will expose HTTP endpoints on the server-side and the
       "redirect" app on the client-side which external users will be able to use
-      to deep link into Kibana using URL generators.
+      to deep link into Kibana using locators.
 
 
 ## Limitations of the architecture
@@ -549,7 +549,12 @@ One alternative is still do the short URL improvements outlined above. But
 reconsider URL generators:
 
 - Do we need URL generators at all?
+  - Kibana URLs are not stable and have changed in our past experience. Hence,
+    the URL generators were created to make the URL generator parameters stable
+    unless a migration is available.
 - Do we want to put migration support in URL generators?
+  - Alternative would be for each app to support URLs forever or do the
+    migrations on the fly for old URLs.
 - Should Kibana URLs be stable and break only during major releases?
 - Should the Kibana application interface be extended such that some version of
   URL generators is built in?
