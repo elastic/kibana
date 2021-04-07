@@ -20,7 +20,6 @@
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
     "x-pack/plugins/metrics_entities/**/*",
-
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
