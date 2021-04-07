@@ -30,6 +30,7 @@ type SavedObjectsFindOptions = Omit<
 
 type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
 
+/** @public */
 export interface SavedObjectsCreateOptions {
   /**
    * (Not recommended) Specify an id instead of having the saved objects service generate one for you.

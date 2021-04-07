@@ -117,11 +117,17 @@ export interface SavedObjectsFindOptions {
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
   /**
-   * Specify an Elasticsearch aggregation to perform. This alpha API only supports a limited set of aggregation types: metrics, bucket. Additional aggregation types can be contributed to Core.
-   * @alpha
+   * Specify an Elasticsearch aggregation to perform.
+   * The API currently only supports a limited set of metrics and bucket aggregation types.
+   * Additional aggregation types can be contributed to Core.
+   *
    * @example
-   * aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
-   * SavedObjects.find({ type: 'dashboard', aggs })
+   * ```ts
+   * const aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @alpha
    */
   aggs?: Record<string, estypes.AggregationContainer>;
   namespaces?: string[];
