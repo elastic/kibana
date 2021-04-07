@@ -41,6 +41,9 @@ describe('useGenerateBreadcrumbs', () => {
       { text: 'Groups', path: '/groups' },
       { text: 'Example Group Name', path: '/groups/{id}' },
       { text: 'Source Prioritization', path: '/groups/{id}/source_prioritization' },
+      // Note: We're still generating a path for the last breadcrumb even though useEuiBreadcrumbs
+      // will not render a link for it. This is because it's easier to keep our last-breadcrumb-specific
+      // logic in one place, & this way we still have a current path if (for some reason) we need it later.
     ]);
   });
 
