@@ -190,13 +190,10 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       }),
       value: DEFAULT_TRANSFORMS_SETTING,
       type: 'json',
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.ipReputationLinksDescription',
-        {
-          // TODO: Add a hyperlink to documentation about this feature
-          defaultMessage: 'Transforms to use within the application',
-        }
-      ),
+      description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
+        // TODO: Add a hyperlink to documentation about this feature
+        defaultMessage: 'Experimental: Enable an application cache through transforms',
+      }),
       sensitive: true,
       category: [APP_ID],
       requiresPageReload: false,
