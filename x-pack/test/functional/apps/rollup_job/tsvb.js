@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -49,9 +49,8 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: rollupSourceIndexName,
             rollup_index: rollupTargetIndexName,
