@@ -71,27 +71,6 @@ describe('getNetworkEvents', () => {
           http: {
             response: {
               from_service_worker: false,
-              security_details: {
-                protocol: 'TLS 1.2',
-                key_exchange: 'ECDHE_RSA',
-                valid_to: 1638230399,
-                certificate_transparency_compliance: 'unknown',
-                cipher: 'AES_128_GCM',
-                issuer: 'DigiCert TLS RSA SHA256 2020 CA1',
-                subject_name: 'syndication.twitter.com',
-                valid_from: 1606694400,
-                signed_certificate_timestamp_list: [],
-                key_exchange_group: 'P-256',
-                san_list: [
-                  'syndication.twitter.com',
-                  'syndication.twimg.com',
-                  'cdn.syndication.twitter.com',
-                  'cdn.syndication.twimg.com',
-                  'syndication-o.twitter.com',
-                  'syndication-o.twimg.com',
-                ],
-                certificate_id: 0,
-              },
               security_state: 'secure',
               connection_reused: true,
               remote_port: 443,
@@ -159,6 +138,20 @@ describe('getNetworkEvents', () => {
                   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/88.0.4324.0 Safari/537.36',
               },
               mixed_content_type: 'none',
+            },
+          },
+          tls: {
+            server: {
+              x509: {
+                subject: {
+                  common_name: 'syndication.twitter.com',
+                },
+                issuer: {
+                  common_name: 'DigiCert TLS RSA SHA256 2020 CA1',
+                },
+                not_before: '2021-02-22T18:35:26.000Z',
+                not_after: '2021-04-05T22:28:43.000Z',
+              },
             },
           },
           url: {
@@ -253,8 +246,8 @@ describe('getNetworkEvents', () => {
             "certificates": Object {
               "issuer": "DigiCert TLS RSA SHA256 2020 CA1",
               "subjectName": "syndication.twitter.com",
-              "validFrom": 1606694400000,
-              "validTo": 1638230399000,
+              "validFrom": "2021-02-22T18:35:26.000Z",
+              "validTo": "2021-04-05T22:28:43.000Z",
             },
             "ip": "104.244.42.200",
             "loadEndTime": 3287298.251,
@@ -265,7 +258,6 @@ describe('getNetworkEvents', () => {
               "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/88.0.4324.0 Safari/537.36",
             },
             "requestSentTime": 3287154.973,
-            "requestStartTime": 3287155.502,
             "responseHeaders": Object {
               "cache_control": "no-cache, no-store, must-revalidate, pre-check=0, post-check=0",
               "content_encoding": "gzip",

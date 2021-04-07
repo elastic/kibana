@@ -47,11 +47,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
     }
     const requestSentTime = secondsToMillis(event._source.synthetics.payload.request_sent_time);
     const loadEndTime = secondsToMillis(event._source.synthetics.payload.load_end_time);
-    const requestStartTime =
-      typeof event._source.http?.response?.timing?.request_time === 'number'
-        ? secondsToMillis(event._source.http.response.timing.request_time)
-        : undefined;
-    const securityDetails = event._source.http?.response?.security_details;
+    const securityDetails = event._source.tls?.server?.x509;
 
     return {
       timestamp: event._source['@timestamp'],
@@ -60,20 +56,15 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
       status: event._source.http?.response?.status,
       mimeType: event._source.http?.response?.mime_type,
       requestSentTime,
-      requestStartTime,
       loadEndTime,
       timings: event._source.synthetics.payload.timings,
       bytesDownloadedCompressed: event._source.http?.response?.encoded_data_length,
       certificates: securityDetails
         ? {
-            issuer: securityDetails.issuer,
-            subjectName: securityDetails.subject_name,
-            validFrom: securityDetails.valid_from
-              ? secondsToMillis(securityDetails.valid_from)
-              : undefined,
-            validTo: securityDetails.valid_to
-              ? secondsToMillis(securityDetails.valid_to)
-              : undefined,
+            issuer: securityDetails.issuer?.common_name,
+            subjectName: securityDetails.subject.common_name,
+            validFrom: securityDetails.not_before,
+            validTo: securityDetails.not_after,
           }
         : undefined,
       requestHeaders: event._source.http?.request?.headers,
