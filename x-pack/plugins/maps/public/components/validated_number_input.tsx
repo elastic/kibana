@@ -6,8 +6,8 @@
  */
 
 import React, { Component, ChangeEvent, ReactNode } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import type { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
+// @ts-expect-error
+import { EuiFieldNumber, EuiFormRow, EuiFormRowDisplayKeys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
