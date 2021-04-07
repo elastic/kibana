@@ -925,6 +925,24 @@ By default, the Upgrade Assistant flaw is mitigated in all {kib} instances acces
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
+[[deprecations-7.7.0]]
+=== Deprecation
+
+The following functionality is deprecated in 7.7.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.7.0.
+
+[discrete]
+[[deprecation-86474]]
+==== Deprecates `xpack.security.authc.saml.realm`
+
+*Details* +
+Deprecates the `xpack.security.authc.saml.realm` setting used for {kib} SAML authentication. For more information, refer to {kibana-pull}53010[#53010].
+
+*Impact* +
+Use `xpack.security.authc.providers`.
+
+[float]
 [[known-issues-7.7.0]]
 === Known issues
 
