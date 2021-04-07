@@ -109,8 +109,6 @@ export async function sendUpgradeAgentsActions(
   } else if ('kuery' in options) {
     givenAgents = await getAgents(esClient, options);
   }
-  const givenOrder =
-    'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
 
   // get any policy ids from upgradable agents
   const policyIdsToGet = new Set(
@@ -125,25 +123,33 @@ export async function sendUpgradeAgentsActions(
     acc[policy.id] = policy.is_managed;
     return acc;
   }, {});
+  const isManagedAgent = (agent: Agent) => agent.policy_id && managedPolicies[agent.policy_id];
 
-  // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
+  // results from getAgents with options.kuery '' (or even 'active:false') may include managed agents
+  // filter them out unless options.force
+  const agentsToCheckUpgradeable =
+    'kuery' in options && !options.force
+      ? givenAgents.filter((agent: Agent) => !isManagedAgent(agent))
+      : givenAgents;
+
   const kibanaVersion = appContextService.getKibanaVersion();
-  const agentResults = await Promise.allSettled(
-    givenAgents.map(async (agent) => {
+  const upgradeableResults = await Promise.allSettled(
+    agentsToCheckUpgradeable.map(async (agent) => {
+      // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
       const isAllowed = options.force || isAgentUpgradeable(agent, kibanaVersion);
       if (!isAllowed) {
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (!options.force && agent.policy_id && managedPolicies[agent.policy_id]) {
+      if (!options.force && isManagedAgent(agent)) {
         throw new IngestManagerError(`Cannot upgrade agent in managed policy ${agent.policy_id}`);
       }
       return agent;
     })
   );
 
-  // Filter to agents that do not already use the new agent policy ID
-  const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
+  // Filter & record errors from results
+  const agentsToUpdate = upgradeableResults.reduce<Agent[]>((agents, result, index) => {
     if (result.status === 'fulfilled') {
       agents.push(result.value);
     } else {
@@ -182,6 +188,10 @@ export async function sendUpgradeAgentsActions(
       },
     }))
   );
+
+  const givenOrder =
+    'agentIds' in options ? options.agentIds : agentsToCheckUpgradeable.map((agent) => agent.id);
+
   const orderedOut = givenOrder.map((agentId) => {
     const hasError = agentId in outgoingErrors;
     const result: BulkActionResult = {

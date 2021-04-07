@@ -9,7 +9,7 @@ import React from 'react';
 import { EmptyStateComponent } from './empty_state';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
 import { HttpFetchError, IHttpFetchError } from 'src/core/public';
-import { mountWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { mountWithRouter, shallowWithRouter } from '../../../lib';
 
 describe('EmptyState component', () => {
   let statesIndexStatus: StatesIndexStatus;
