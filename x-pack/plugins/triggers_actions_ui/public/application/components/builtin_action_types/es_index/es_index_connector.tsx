@@ -57,6 +57,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
       setShowTimeFieldCheckboxState(true);
       setTimeFieldOptions([firstFieldOption, ...fields]);
     } else {
+      setHasTimeFieldCheckboxState(false);
       setShowTimeFieldCheckboxState(false);
       setTimeFieldOptions([]);
     }
