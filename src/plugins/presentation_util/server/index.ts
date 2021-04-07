@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { PresentationUtilPlugin } from './plugin';
 
-export * from './labs';
+export const plugin = () => new PresentationUtilPlugin();
