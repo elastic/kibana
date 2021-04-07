@@ -6,13 +6,11 @@
  */
 
 import type { RequestHandler } from 'src/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager, setupFleet } from '../../services/setup';
+import { setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
-import type { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
@@ -30,7 +28,6 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     if (!canEncrypt) {
       missingRequirements.push('encrypted_saved_object_encryption_key_required');
     }
-    // const hasFleetServers = false;
     if (!isFleetServerSetup) {
       missingRequirements.push('fleet_server');
     }
@@ -42,27 +39,6 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
 
     return response.ok({
       body,
-    });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const createFleetSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PostFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
-  try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    await setupIngestManager(soClient, esClient);
-    await setupFleet(soClient, esClient, {
-      forceRecreate: request.body?.forceRecreate ?? false,
-    });
-
-    return response.ok({
-      body: { isInitialized: true },
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

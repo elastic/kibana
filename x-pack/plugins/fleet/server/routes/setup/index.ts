@@ -11,7 +11,7 @@ import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../const
 import type { FleetConfigType } from '../../../common';
 import { PostFleetSetupRequestSchema } from '../../types';
 
-import { getFleetStatusHandler, createFleetSetupHandler, FleetSetupHandler } from './handlers';
+import { getFleetStatusHandler, FleetSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: IRouter) => {
   router.post(
@@ -26,6 +26,7 @@ export const registerFleetSetupRoute = (router: IRouter) => {
   );
 };
 
+// This API is now the same as /api/fleet/setup
 export const registerCreateFleetSetupRoute = (router: IRouter) => {
   router.post(
     {
@@ -33,7 +34,7 @@ export const registerCreateFleetSetupRoute = (router: IRouter) => {
       validate: PostFleetSetupRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    createFleetSetupHandler
+    FleetSetupHandler
   );
 };
 
