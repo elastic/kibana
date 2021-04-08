@@ -122,7 +122,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time',
+      label: 'Page load time (Seconds)',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -158,7 +158,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getXAxis()).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time',
+      label: 'Page load time (Seconds)',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -183,7 +183,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time',
+          label: 'Page load time (Seconds)',
           operationType: 'range',
           params: {
             maxBars: 'auto',
@@ -347,7 +347,7 @@ describe('Lens Attribute', () => {
           'x-axis-column': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Page load time',
+            label: 'Page load time (Seconds)',
             operationType: 'range',
             params: {
               maxBars: 'auto',
@@ -392,7 +392,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time',
+          label: 'Page load time (Seconds)',
           operationType: 'range',
           params: {
             maxBars: 'auto',

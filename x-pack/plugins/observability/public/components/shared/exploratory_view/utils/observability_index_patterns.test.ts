@@ -40,7 +40,6 @@ const fieldFormats = {
 describe('ObservabilityIndexPatterns', function () {
   const { data } = mockCore();
   data!.indexPatterns.get = jest.fn().mockReturnValue({ title: 'index-*' });
-  data!.indexPatterns.getFieldsForWildcard = jest.fn().mockReturnValue([]);
   data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: indexPatternList.rum });
   data!.indexPatterns.updateSavedObject = jest.fn();
 
@@ -68,7 +67,6 @@ describe('ObservabilityIndexPatterns', function () {
 
     expect(data?.indexPatterns.createAndSave).toHaveBeenCalledWith({
       fieldFormats,
-      fields: [],
       id: 'rum_static_index_pattern_id',
       timeFieldName: '@timestamp',
       title: '(rum-data-view)*,apm-*',

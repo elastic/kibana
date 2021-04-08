@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
-import { alertingFrameworkHealth } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
+import { alertingFrameworkHealth } from '../lib/alert_api';
 
 interface Props {
   inFlyout?: boolean;
