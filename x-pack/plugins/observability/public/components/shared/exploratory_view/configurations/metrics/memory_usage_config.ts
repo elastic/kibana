@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { DataSeries } from '../types';
-import { FieldLabels } from './constants';
-import { OperationType } from '../../../../../../lens/public';
+import { DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { OperationType } from '../../../../../../../lens/public';
 
 interface Props {
   seriesId: string;
 }
 
-export function getNetworkActivityLensConfig({ seriesId }: Props): DataSeries {
+export function getMemoryUsageLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
-    reportType: 'network-activity',
+    reportType: 'memory-usage',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'avg' as OperationType,
+      operationType: 'average' as OperationType,
       sourceField: 'system.memory.used.pct',
+      label: 'Memory Usage %',
     },
     hasMetricType: true,
     defaultFilters: [],

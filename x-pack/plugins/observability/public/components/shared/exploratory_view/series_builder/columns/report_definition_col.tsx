@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { DataSeries } from '../../types';
@@ -67,6 +67,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                 {rtd?.[field] && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge
+                      className="globalFilterItem"
                       iconSide="right"
                       iconType="cross"
                       color="hollow"
