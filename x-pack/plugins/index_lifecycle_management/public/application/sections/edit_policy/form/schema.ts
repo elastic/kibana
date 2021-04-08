@@ -11,6 +11,7 @@ import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
 import { i18nTexts } from '../i18n_texts';
+import { FormInternal } from '../types';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
@@ -131,7 +132,8 @@ const getMinAgeField = (defaultValue: string = '0') => ({
     },
   ],
 });
-export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
+
+export const getSchema = (isCloudEnabled: boolean): FormSchema<FormInternal> => ({
   _meta: {
     hot: {
       isUsingDefaultRollover: {
@@ -148,6 +150,9 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           }),
         },
         maxStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        maxPrimaryShardSizeUnit: {
           defaultValue: 'gb',
         },
         maxAgeUnit: {
@@ -294,6 +299,20 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
               },
             ],
             serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
+          },
+          max_primary_shard_size: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
+              defaultMessage: 'Maximum primary shard size',
+            }),
+            validations: [
+              {
+                validator: rolloverThresholdsValidator,
+              },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {

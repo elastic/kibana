@@ -23,7 +23,7 @@ import { useFormData, SelectField, NumericField } from '../../../../../../shared
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfiguration, UseField } from '../../../form';
+import { ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE, useConfiguration, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -107,7 +107,7 @@ export const HotPhase: FunctionComponent = () => {
                   <EuiSpacer size="s" />
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                    defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
+                    defaultMessage="Rollover when an index is 30 days old or the primary shard reaches 50 gigabytes."
                   />
                 </>
               )}
@@ -145,10 +145,10 @@ export const HotPhase: FunctionComponent = () => {
                 )}
                 <EuiFlexGroup>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
-                    <UseField path={ROLLOVER_FORM_PATHS.maxSize}>
+                    <UseField path={ROLLOVER_FORM_PATHS.maxPrimaryShardSize}>
                       {(field) => {
                         const showErrorCallout = field.errors.some(
-                          (e) => e.code === ROLLOVER_EMPTY_VALIDATION
+                          (e) => e.code === ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE
                         );
                         if (showErrorCallout !== showEmptyRolloverFieldsError) {
                           setShowEmptyRolloverFieldsError(showErrorCallout);
@@ -157,7 +157,7 @@ export const HotPhase: FunctionComponent = () => {
                           <NumericField
                             field={field}
                             euiFieldProps={{
-                              'data-test-subj': `hot-selectedMaxSizeStored`,
+                              'data-test-subj': `hot-selectedMaxPrimaryShardSize`,
                               min: 1,
                             }}
                           />
@@ -167,35 +167,20 @@ export const HotPhase: FunctionComponent = () => {
                   </EuiFlexItem>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <UseField
-                      key="_meta.hot.customRollover.maxStorageSizeUnit"
-                      path="_meta.hot.customRollover.maxStorageSizeUnit"
+                      key="_meta.hot.customRollover.maxPrimaryShardSizeUnit"
+                      path="_meta.hot.customRollover.maxPrimaryShardSizeUnit"
                       component={SelectField}
                       componentProps={{
-                        'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
+                        'data-test-subj': `hot-selectedMaxPrimaryShardSizeUnits`,
                         hasEmptyLabelSpace: true,
                         euiFieldProps: {
                           options: maxSizeStoredUnits,
                           'aria-label': i18n.translate(
-                            'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                            'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeAriaLabel',
                             {
-                              defaultMessage: 'Maximum index size units',
+                              defaultMessage: 'Maximum primary shard size units',
                             }
                           ),
-                        },
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-                <EuiFlexGroup>
-                  <EuiFlexItem style={{ maxWidth: 188 }}>
-                    <UseField
-                      path={ROLLOVER_FORM_PATHS.maxDocs}
-                      component={NumericField}
-                      componentProps={{
-                        euiFieldProps: {
-                          'data-test-subj': `hot-selectedMaxDocuments`,
-                          min: 1,
                         },
                       }}
                     />
@@ -231,6 +216,53 @@ export const HotPhase: FunctionComponent = () => {
                             }
                           ),
                           options: maxAgeUnits,
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      path={ROLLOVER_FORM_PATHS.maxDocs}
+                      component={NumericField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'data-test-subj': `hot-selectedMaxDocuments`,
+                          min: 1,
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      path={ROLLOVER_FORM_PATHS.maxSize}
+                      component={NumericField}
+                      componentProps={{
+                        euiFieldProps: { 'data-test-subj': `hot-selectedMaxSizeStored`, min: 1 },
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem style={{ maxWidth: 188 }}>
+                    <UseField
+                      key="_meta.hot.customRollover.maxStorageSizeUnit"
+                      path="_meta.hot.customRollover.maxStorageSizeUnit"
+                      component={SelectField}
+                      componentProps={{
+                        'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
+                        hasEmptyLabelSpace: true,
+                        euiFieldProps: {
+                          options: maxSizeStoredUnits,
+                          'aria-label': i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                            {
+                              defaultMessage: 'Maximum index size units',
+                            }
+                          ),
                         },
                       }}
                     />
