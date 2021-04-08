@@ -13,6 +13,7 @@ import * as indexNotFoundException from '../../../../common/search/test_data/ind
 import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
+import { createSearchSessionsClientMock } from '../../mocks';
 
 const mockAsyncResponse = {
   body: {
@@ -61,6 +62,7 @@ describe('ES search strategy', () => {
         transport: { request: mockApiCaller },
       },
     },
+    searchSessionsClient: createSearchSessionsClientMock(),
   } as unknown) as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
