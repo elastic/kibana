@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  CriteriaWithPagination,
-  EuiTableActionsColumnType,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -34,21 +29,8 @@ import {
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
 } from './shared_columns';
+import { EnginesTableProps } from './types';
 import { getConflictingEnginesSet } from './utils';
-
-interface EnginesTableProps {
-  items: EngineDetails[];
-  loading: boolean;
-  noItemsMessage?: ReactNode;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-    totalItemCount: number;
-    hidePerPageOptions: boolean;
-  };
-  onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
-  onDeleteEngine(engine: EngineDetails): void;
-}
 
 interface IItemIdToExpandedRowMap {
   [id: string]: ReactNode;
@@ -66,35 +48,39 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
   onChange,
   onDeleteEngine,
 }) => {
-  const metaEnginesTableLogic = MetaEnginesTableLogic({ metaEngines: items });
-  const { expandedSourceEngines } = useValues(metaEnginesTableLogic);
-  const { hideRow, fetchOrDisplayRow } = useActions(metaEnginesTableLogic);
+  const { expandedSourceEngines } = useValues(MetaEnginesTableLogic);
+  const { hideRow, fetchOrDisplayRow } = useActions(MetaEnginesTableLogic);
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const {
     myRole: { canManageMetaEngines },
   } = useValues(AppLogic);
 
-  const conflictingEnginesSets: ConflictingEnginesSets = items.reduce((accumulator, metaEngine) => {
-    return {
-      ...accumulator,
-      [metaEngine.name]: getConflictingEnginesSet(metaEngine),
-    };
-  }, {});
+  const conflictingEnginesSets: ConflictingEnginesSets = useMemo(
+    () =>
+      items.reduce((accumulator, metaEngine) => {
+        return {
+          ...accumulator,
+          [metaEngine.name]: getConflictingEnginesSet(metaEngine),
+        };
+      }, {}),
+    [items]
+  );
 
-  const itemIdToExpandedRowMap: IItemIdToExpandedRowMap = Object.keys(expandedSourceEngines).reduce(
-    (accumulator, engineName) => {
-      return {
-        ...accumulator,
-        [engineName]: (
-          <MetaEnginesTableExpandedRow
-            sourceEngines={expandedSourceEngines[engineName]}
-            conflictingEngines={conflictingEnginesSets[engineName]}
-          />
-        ),
-      };
-    },
-    {}
+  const itemIdToExpandedRowMap: IItemIdToExpandedRowMap = useMemo(
+    () =>
+      Object.keys(expandedSourceEngines).reduce((accumulator, engineName) => {
+        return {
+          ...accumulator,
+          [engineName]: (
+            <MetaEnginesTableExpandedRow
+              sourceEngines={expandedSourceEngines[engineName]}
+              conflictingEngines={conflictingEnginesSets[engineName]}
+            />
+          ),
+        };
+      }, {}),
+    [expandedSourceEngines, conflictingEnginesSets]
   );
 
   const sendEngineTableLinkClickTelemetry = () =>

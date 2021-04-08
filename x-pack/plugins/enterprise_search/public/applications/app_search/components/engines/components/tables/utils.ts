@@ -10,11 +10,13 @@ import { flatten } from 'lodash';
 import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/types';
 import { EngineDetails } from '../../../engine/types';
 
-const getConflictingEnginesFromConflictingField = (
+export const getConflictingEnginesFromConflictingField = (
   conflictingField: SchemaConflictFieldTypes
-): string[] => flatten(Object.values(conflictingField));
+): string[] => Object.values(conflictingField).flat();
 
-const getConflictingEnginesFromSchemaConflicts = (schemaConflicts: SchemaConflicts): string[] =>
+export const getConflictingEnginesFromSchemaConflicts = (
+  schemaConflicts: SchemaConflicts
+): string[] =>
   flatten(Object.values(schemaConflicts).map(getConflictingEnginesFromConflictingField));
 
 // Given a meta-engine (represented by IEngineDetails), generate a Set of all source engines

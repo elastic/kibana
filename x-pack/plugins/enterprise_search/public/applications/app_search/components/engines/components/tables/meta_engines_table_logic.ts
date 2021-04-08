@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../../../common/types';
@@ -22,11 +23,11 @@ interface MetaEnginesTableValues {
 interface MetaEnginesTableActions {
   addSourceEngines(
     sourceEngines: MetaEnginesTableValues['sourceEngines']
-  ): MetaEnginesTableValues['sourceEngines'];
-  displayRow(itemId: string): string;
-  fetchOrDisplayRow(itemId: string): string;
-  fetchSourceEngines(engineName: string): string;
-  hideRow(itemId: string): string;
+  ): { sourceEngines: MetaEnginesTableValues['sourceEngines'] };
+  displayRow(itemId: string): { itemId: string };
+  fetchOrDisplayRow(itemId: string): { itemId: string };
+  fetchSourceEngines(engineName: string): { engineName: string };
+  hideRow(itemId: string): { itemId: string };
 }
 
 interface EnginesAPIResponse {
@@ -34,30 +35,26 @@ interface EnginesAPIResponse {
   meta: Meta;
 }
 
-interface MetaEnginesTableProps {
-  metaEngines: EngineDetails[];
-}
-
 export const MetaEnginesTableLogic = kea<
-  MakeLogicType<MetaEnginesTableValues, MetaEnginesTableActions, MetaEnginesTableProps>
+  MakeLogicType<MetaEnginesTableValues, MetaEnginesTableActions>
 >({
   path: ['enterprise_search', 'app_search', 'meta_engines_table_logic'],
   actions: () => ({
-    addSourceEngines: (sourceEngines: object) => sourceEngines,
-    displayRow: (itemId: string) => itemId,
-    hideRow: (itemId: string) => itemId,
-    fetchOrDisplayRow: (itemId) => itemId,
-    fetchSourceEngines: (engineName) => engineName,
+    addSourceEngines: (sourceEngines) => ({ sourceEngines }),
+    displayRow: (itemId) => ({ itemId }),
+    hideRow: (itemId) => ({ itemId }),
+    fetchOrDisplayRow: (itemId) => ({ itemId }),
+    fetchSourceEngines: (engineName) => ({ engineName }),
   }),
   reducers: () => ({
     expandedRows: [
       {},
       {
-        displayRow: (expandedRows, itemId) => ({
+        displayRow: (expandedRows, { itemId }) => ({
           ...expandedRows,
           [itemId]: true,
         }),
-        hideRow: (expandedRows, itemId) => {
+        hideRow: (expandedRows, { itemId }) => {
           const newRows = { ...expandedRows };
           delete newRows[itemId];
           return newRows;
@@ -67,9 +64,9 @@ export const MetaEnginesTableLogic = kea<
     sourceEngines: [
       {},
       {
-        addSourceEngines: (sourceEngines, newEngines) => ({
-          ...sourceEngines,
-          ...newEngines,
+        addSourceEngines: (currentSourceEngines, { sourceEngines: newSourceEngines }) => ({
+          ...currentSourceEngines,
+          ...newSourceEngines,
         }),
       },
     ],
@@ -86,7 +83,7 @@ export const MetaEnginesTableLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    fetchOrDisplayRow: (itemId) => {
+    fetchOrDisplayRow: ({ itemId }) => {
       const sourceEngines = values.sourceEngines;
       if (sourceEngines[itemId]) {
         actions.displayRow(itemId);
@@ -94,7 +91,7 @@ export const MetaEnginesTableLogic = kea<
         actions.fetchSourceEngines(itemId);
       }
     },
-    fetchSourceEngines: (engineName) => {
+    fetchSourceEngines: ({ engineName }) => {
       const { http } = HttpLogic.values;
 
       let enginesAccumulator: EngineDetails[] = [];

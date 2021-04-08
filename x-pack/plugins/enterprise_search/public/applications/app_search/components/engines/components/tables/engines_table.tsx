@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  CriteriaWithPagination,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
@@ -34,6 +33,7 @@ import {
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
 } from './shared_columns';
+import { EnginesTableProps } from './types';
 
 export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'language',
@@ -43,20 +43,6 @@ export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   dataType: 'string',
   render: (language: string) => language || UNIVERSAL_LANGUAGE,
 };
-
-interface EnginesTableProps {
-  items: EngineDetails[];
-  loading: boolean;
-  noItemsMessage?: ReactNode;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-    totalItemCount: number;
-    hidePerPageOptions: boolean;
-  };
-  onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
-  onDeleteEngine(engine: EngineDetails): void;
-}
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
   items,
