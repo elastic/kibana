@@ -27,9 +27,7 @@ export const registerGetRoutes = ({
       const { client: clusterClient } = ctx.core.elasticsearch;
 
       try {
-        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline({
-          id: '_all',
-        });
+        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline();
 
         return res.ok({ body: deserializePipelines(pipelines) });
       } catch (error) {
