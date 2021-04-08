@@ -31,7 +31,11 @@ export const registerGetRoutes = ({
 
         return res.ok({ body: deserializePipelines(pipelines) });
       } catch (error) {
-        return handleEsError({ error, response: res });
+        const errorResponse = handleEsError({ error, response: res });
+        if (errorResponse.status === 404) {
+          return res.ok({ body: [] });
+        }
+        return errorResponse;
       }
     })
   );
