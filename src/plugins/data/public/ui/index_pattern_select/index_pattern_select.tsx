@@ -132,7 +132,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
               return;
             }
             const hasRequiredFieldTypes = indexPattern.fields.some((field) => {
-              return this.props.fieldTypes.includes(field.type);
+              return this.props.fieldTypes!.includes(field.type);
             });
             if (!hasRequiredFieldTypes) {
               continue;
