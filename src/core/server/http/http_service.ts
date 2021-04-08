@@ -94,7 +94,18 @@ export class HttpService
     let notReadyServer: InternalNotReadyHttpServiceSetup | undefined;
     if (notReadySetup) {
       // We cannot use the real context container since the core services may not yet be ready
-      const fakeContext: RequestHandlerContextContainer = deps.context.createContextContainer();
+      const fakeContext: RequestHandlerContextContainer = new Proxy(
+        deps.context.createContextContainer(),
+        {
+          get: (target, property, receiver) => {
+            if (property === 'createHandler') {
+              return Reflect.get(target, property, receiver);
+            }
+            throw new Error(`Unexpected access from fake context: ${String(property)}`);
+          },
+        }
+      );
+
       notReadyServer = {
         registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
           const router = new Router(
