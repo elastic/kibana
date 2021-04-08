@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, tap, filter } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
@@ -390,12 +390,11 @@ function discoverController($route, $scope) {
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.opts.fetch = $scope.fetch = function () {
+  $scope.opts.fetch = $scope.fetch = async function () {
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
-      return;
     }
 
     // Abort any in-progress requests before fetching again
@@ -485,11 +484,19 @@ function discoverController($route, $scope) {
     showUnmappedFields,
   };
 
+  // handler emitted by `timefilter.getAutoRefreshFetch$()`
+  // to notify when data completed loading and to start a new autorefresh loop
+  let autoRefreshDoneCb;
   const fetch$ = merge(
     refetch$,
     filterManager.getFetches$(),
     timefilter.getFetch$(),
-    timefilter.getAutoRefreshFetch$(),
+    timefilter.getAutoRefreshFetch$().pipe(
+      tap((done) => {
+        autoRefreshDoneCb = done;
+      }),
+      filter(() => $scope.fetchStatus !== fetchStatuses.LOADING)
+    ),
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$
   ).pipe(debounceTime(100));
@@ -499,7 +506,16 @@ function discoverController($route, $scope) {
       $scope,
       fetch$,
       {
-        next: $scope.fetch,
+        next: async () => {
+          try {
+            await $scope.fetch();
+          } finally {
+            // if there is a saved `autoRefreshDoneCb`, notify auto refresh service that
+            // the last fetch is completed so it starts the next auto refresh loop if needed
+            autoRefreshDoneCb?.();
+            autoRefreshDoneCb = undefined;
+          }
+        },
       },
       (error) => addFatalError(core.fatalErrors, error)
     )
