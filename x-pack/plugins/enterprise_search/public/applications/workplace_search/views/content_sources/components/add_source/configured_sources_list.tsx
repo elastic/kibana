@@ -56,7 +56,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   }: {
     accountContextOnly: boolean;
     addPath: string;
-    connected: boolean;
+    connected?: boolean;
     name: string;
     serviceType: string;
   }) => {

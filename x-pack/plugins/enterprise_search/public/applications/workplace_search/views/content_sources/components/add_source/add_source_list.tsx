@@ -31,9 +31,6 @@ import { SourcesLogic } from '../../sources_logic';
 import { AvailableSourcesList } from './available_sources_list';
 import { ConfiguredSourcesList } from './configured_sources_list';
 import {
-  ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
-  ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
-  ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
   ADD_SOURCE_NO_SOURCES_TITLE,
   ADD_SOURCE_ORG_SOURCES_TITLE,
   ADD_SOURCE_PRIVATE_SOURCES_TITLE,
