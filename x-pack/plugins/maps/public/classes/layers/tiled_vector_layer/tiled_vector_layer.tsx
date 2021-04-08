@@ -19,6 +19,7 @@ import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -202,7 +203,7 @@ export class TiledVectorLayer extends VectorLayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: MbMap) {
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);

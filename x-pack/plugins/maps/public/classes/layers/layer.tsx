@@ -34,6 +34,7 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  Timeslice,
 } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
@@ -75,7 +76,7 @@ export interface ILayer {
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   canShowTooltip(): boolean;
-  syncLayerWithMB(mbMap: MbMap): void;
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
@@ -442,7 +443,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: MbMap) {
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 

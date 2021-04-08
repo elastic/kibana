@@ -67,6 +67,11 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+
+  /*
+   * Determine whether source needs to trigger data re-fetch for timeslice changes.
+   * Returning false means that the source can handle client side masking to show results in timeslice.
+   */
   updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean;
 }
 

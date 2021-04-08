@@ -10,7 +10,7 @@ import { FeatureCollection } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
-import { HeatmapLayerDescriptor, MapQuery } from '../../../../common/descriptor_types';
+import { HeatmapLayerDescriptor, MapQuery, Timeslice } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
@@ -119,7 +119,7 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  syncLayerWithMB(mbMap: MbMap) {
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
 
     const heatmapLayerId = this._getHeatmapLayerId();

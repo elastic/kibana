@@ -130,9 +130,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
               defaultMessage: 'Select index pattern',
             })}
-            fieldTypes={
-              this.props?.isGeoPointsOnly ? [ES_GEO_FIELD_TYPE.GEO_POINT] : ES_GEO_FIELD_TYPES
-            }
+            fieldTypes={[ES_GEO_FIELD_TYPE.GEO_SHAPE]}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
           />

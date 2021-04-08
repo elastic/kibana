@@ -381,6 +381,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return geoField;
   }
 
+  async getDateFieldName(): Promise<string | undefined> {
+    const indexPattern = await this.getIndexPattern();
+    return indexPattern.timeFieldName;
+  }
+
   async getDisplayName(): Promise<string> {
     try {
       const indexPattern = await this.getIndexPattern();

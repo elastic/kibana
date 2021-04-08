@@ -180,7 +180,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getFieldNames(): string[] {
-    return [this._descriptor.geoField];
+    return [this._descriptor.geoField, 'timestamp'];
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -734,11 +734,20 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean {
-    return prevMeta.areResultsTrimmed === undefined || prevMeta.areResultsTrimmed
-      ? super.updateDueToTimeslice(prevMeta, nextMeta)
-      : // do not trigger data re-fetch for timeslice changes when results are complete.
-        // client side masking will only show results in timeslice.
-        false;
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+      // Clustered ESSearchSource never has trimmed results.
+      return false;
+    }
+
+    if (
+      this._descriptor.scalingType === SCALING_TYPES.LIMIT &&
+      prevMeta.areResultsTrimmed !== undefined &&
+      !prevMeta.areResultsTrimmed
+    ) {
+      return false;
+    }
+
+    return super.updateDueToTimeslice(prevMeta, nextMeta);
   }
 }
 
