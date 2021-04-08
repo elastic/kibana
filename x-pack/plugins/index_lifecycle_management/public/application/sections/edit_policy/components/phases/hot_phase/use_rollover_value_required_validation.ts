@@ -10,6 +10,9 @@ import { ROLLOVER_FORM_PATHS } from '../../../constants';
 import { ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE } from '../../../form';
 
 export const useRolloverValueRequiredValidation = (): boolean => {
+  // We track just the ROLLOVER_FORM_PATHS.maxPrimaryShardSize field because if
+  // it has the ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE error, all the other rollover
+  // fields should too.
   const [formData] = useFormData({ watch: ROLLOVER_FORM_PATHS.maxPrimaryShardSize });
   const rolloverFieldErrors: ValidationError[] =
     get(formData, ROLLOVER_FORM_PATHS.maxPrimaryShardSize)?.errors ?? [];
