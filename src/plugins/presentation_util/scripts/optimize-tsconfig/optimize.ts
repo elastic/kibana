@@ -100,7 +100,7 @@ export const optimize = async () => {
   await addFilesToRootTsConfig();
   await addFilesToTestTsConfig();
   await deleteTsConfigs();
-  // await setIgnoreChanges();
+  await setIgnoreChanges();
 
   // eslint-disable-next-line no-console
   console.log(

@@ -19,27 +19,15 @@ run(
     const { revert } = flags;
 
     if (revert) {
-      deoptimize()
-        .catch((err) => {
-          log.error(err);
-          // eslint-disable-next-line no-process-exit
-          process.exit(1);
-        })
-        .finally(() => {
-          log.info('Reverted Presentation TypeScript optimization changes.');
-        });
+      deoptimize().finally(() => {
+        log.info('Reverted Presentation TypeScript optimization changes.');
+      });
     } else {
-      optimize()
-        .catch((err) => {
-          console.error(err);
-          // eslint-disable-next-line no-process-exit
-          process.exit(1);
-        })
-        .finally(() => {
-          log.info(
-            'Optimized tsconfig.json file(s) in Kibana for Presentation Team development. To undo these changes, run `./scripts/optimize_tsconfig --revert`'
-          );
-        });
+      optimize().finally(() => {
+        log.info(
+          'Optimized tsconfig.json file(s) in Kibana for Presentation Team development. To undo these changes, run `./scripts/optimize_tsconfig --revert`'
+        );
+      });
     }
   },
   {
