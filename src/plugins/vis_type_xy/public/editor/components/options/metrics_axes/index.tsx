@@ -283,11 +283,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     const updatedSeries = metrics.map((agg) => {
       const params = stateParams.seriesParams.find((param) => param.data.id === agg.id);
       const label = agg.makeLabel();
-      let series: SeriesParam;
 
       // update labels for existing params or create new one
       if (params) {
-        series = {
+        return {
           ...params,
           data: {
             ...params.data,
@@ -295,15 +294,14 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
           },
         };
       } else {
-        series = makeSerie(
+        const series = makeSerie(
           agg.id,
           label,
           firstValueAxesId,
           stateParams.seriesParams[stateParams.seriesParams.length - 1]
         );
+        return series;
       }
-
-      return series;
     });
 
     setValue('seriesParams', updatedSeries);
