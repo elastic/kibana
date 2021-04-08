@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from './lib/collection_actions';
+import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
@@ -50,6 +51,8 @@ function newAnnotation() {
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 export class AnnotationsEditor extends Component {
+  static contextType = DefaultIndexPatternContext;
+
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -131,6 +134,7 @@ export class AnnotationsEditor extends Component {
                     indexPattern={model.index_pattern}
                     fields={this.props.fields}
                     fullWidth
+                    placeholder={this.context?.timeFieldName}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

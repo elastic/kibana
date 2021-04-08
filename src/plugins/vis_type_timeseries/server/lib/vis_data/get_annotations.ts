@@ -19,14 +19,7 @@ import { getLastSeriesTimestamp } from './helpers/timestamp';
 import { VisTypeTimeseriesVisDataRequest } from '../../types';
 
 function validAnnotation(annotation: AnnotationItemsSchema) {
-  return (
-    annotation.index_pattern &&
-    annotation.time_field &&
-    annotation.fields &&
-    annotation.icon &&
-    annotation.template &&
-    !annotation.hidden
-  );
+  return annotation.fields && annotation.icon && annotation.template && !annotation.hidden;
 }
 
 interface GetAnnotationsParams {
@@ -42,7 +35,7 @@ export async function getAnnotations({ req, panel, series, services }: GetAnnota
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
   const bodiesPromises = annotations.map((annotation) =>
-    getAnnotationRequestParams(req, panel, annotation, services)
+    getAnnotationRequestParams(req, panel, series, annotation, services)
   );
 
   const searches = (await Promise.all(bodiesPromises)).reduce(
