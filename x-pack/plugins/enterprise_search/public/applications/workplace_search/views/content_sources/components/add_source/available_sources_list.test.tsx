@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard, EuiToolTip, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiToolTip, EuiTitle } from '@elastic/eui';
 
 import { AvailableSourcesList } from './available_sources_list';
 
@@ -25,9 +25,8 @@ describe('AvailableSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<AvailableSourcesList sources={mergedAvailableSources} />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(11);
+    expect(wrapper.find(EuiPanel)).toHaveLength(11);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="CustomAPISourceLink"]')).toHaveLength(1);
   });
 
   it('handles disabled federated sources for platinum licenses', () => {

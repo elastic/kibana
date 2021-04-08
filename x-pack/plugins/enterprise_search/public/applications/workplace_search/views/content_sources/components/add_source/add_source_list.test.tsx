@@ -25,11 +25,7 @@ import { ViewContentHeader } from '../../../../components/shared/view_content_he
 import { AddSourceList } from './add_source_list';
 import { AvailableSourcesList } from './available_sources_list';
 import { ConfiguredSourcesList } from './configured_sources_list';
-import {
-  ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
-  ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
-  ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
-} from './constants';
+import { ADD_SOURCE_NO_SOURCES_TITLE, ADD_SOURCE_ORG_SOURCES_TITLE } from './constants';
 
 describe('AddSourceList', () => {
   const initializeSources = jest.fn();
@@ -67,7 +63,10 @@ describe('AddSourceList', () => {
   describe('filters sources', () => {
     it('filters available sources', () => {
       const wrapper = shallow(<AddSourceList />);
-      const input = wrapper.find('[data-test-subj="FilterSourcesInput"]');
+      const input = wrapper
+        .find(ViewContentHeader)
+        .dive()
+        .find('[data-test-subj="FilterSourcesInput"]');
       input.simulate('change', { target: { value: 'jira' } });
 
       expect(wrapper.find(AvailableSourcesList).prop('sources')).toHaveLength(2);
@@ -76,7 +75,11 @@ describe('AddSourceList', () => {
 
     it('filters configured sources', () => {
       const wrapper = shallow(<AddSourceList />);
-      const input = wrapper.find('[data-test-subj="FilterSourcesInput"]');
+      const input = wrapper
+        .find(ViewContentHeader)
+        .dive()
+        .find('[data-test-subj="FilterSourcesInput"]');
+
       input.simulate('change', { target: { value: 'confluence' } });
 
       expect(wrapper.find(ConfiguredSourcesList).prop('sources')).toHaveLength(2);
@@ -89,7 +92,10 @@ describe('AddSourceList', () => {
         configuredSources: [{ ...configuredSources[0], name: undefined }],
       });
       const wrapper = shallow(<AddSourceList />);
-      const input = wrapper.find('[data-test-subj="FilterSourcesInput"]');
+      const input = wrapper
+        .find(ViewContentHeader)
+        .dive()
+        .find('[data-test-subj="FilterSourcesInput"]');
       input.simulate('change', { target: { value: 'not a real connector' } });
 
       expect(wrapper.find(ConfiguredSourcesList).prop('sources')).toHaveLength(0);
@@ -100,9 +106,7 @@ describe('AddSourceList', () => {
     it('should render correct organization heading with sources', () => {
       const wrapper = shallow(<AddSourceList />);
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
+      expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(ADD_SOURCE_ORG_SOURCES_TITLE);
     });
 
     it('should render correct organization heading without sources', () => {
@@ -112,9 +116,7 @@ describe('AddSourceList', () => {
       });
       const wrapper = shallow(<AddSourceList />);
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
+      expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(ADD_SOURCE_NO_SOURCES_TITLE);
     });
 
     it('should render correct account heading with sources', () => {
@@ -124,9 +126,7 @@ describe('AddSourceList', () => {
         isOrganization: false,
       });
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
+      expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(ADD_SOURCE_ORG_SOURCES_TITLE);
     });
 
     it('should render correct account heading without sources', () => {
@@ -137,9 +137,7 @@ describe('AddSourceList', () => {
       });
       const wrapper = shallow(<AddSourceList />);
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION
-      );
+      expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(ADD_SOURCE_NO_SOURCES_TITLE);
     });
   });
 
