@@ -77,7 +77,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       },
     };
 
-    const { getByText } = render(
+    const { queryByText } = render(
       <MlSharedContext.Provider value={mlSharedImports}>
         <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
       </MlSharedContext.Provider>
@@ -85,8 +85,9 @@ describe('Transform: <DefinePivotSummary />', () => {
 
     // Act
     // Assert
-    expect(getByText('Group by')).toBeInTheDocument();
-    expect(getByText('Aggregations')).toBeInTheDocument();
-    await waitFor(() => undefined);
+    await waitFor(() => {
+      expect(queryByText('Group by')).toBeInTheDocument();
+      expect(queryByText('Aggregations')).toBeInTheDocument();
+    });
   });
 });
