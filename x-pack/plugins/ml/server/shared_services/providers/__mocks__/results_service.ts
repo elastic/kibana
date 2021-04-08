@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const MAP_TITLE = i18n.translate(
-  'xpack.uptime.components.embeddables.embeddedMap.embeddablePanelTitle',
-  {
-    defaultMessage: 'Monitor Observer Location Map',
-  }
-);
+export const createResultsServiceProviderMock = () =>
+  jest.fn(() => ({
+    getAnomaliesTableData: jest.fn(),
+  }));
