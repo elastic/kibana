@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
+import { indexOf } from 'lodash';
 
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -47,6 +48,7 @@ import { ExceptionListType } from '../../../../../common/shared_imports';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
+import { EventFilteringModal } from '../../../../management/pages/event_filter/view/components/event_filtering_modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -81,6 +83,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       '',
     [ecsRowData]
   );
+
+  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
   const ruleIndices = useMemo((): string[] => {
     if (
       ecsRowData.signal?.rule &&
@@ -107,6 +111,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
+  const [openExceptionModal, setOpenAddEventExceptionModal] = useState<boolean>(false);
   const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
@@ -122,6 +127,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const closeAddExceptionModal = useCallback((): void => {
     setOpenAddExceptionModal(null);
+  }, []);
+
+  const closeAddEventFilterModal = useCallback((): void => {
+    setOpenAddEventExceptionModal(false);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
@@ -355,6 +364,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [handleAddExceptionClick, canUserCRUD, hasIndexWrite]);
 
+  const handleAddEventExceptionClick = useCallback((): void => {
+    closePopover();
+    setOpenAddEventExceptionModal(true);
+  }, [closePopover]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const addEventExceptionComponent = (
+    <EuiContextMenuItem
+      key="add-event-exception-menu-item"
+      aria-label="Add Event Exception"
+      data-test-subj="add-event-exception-menu-item"
+      id="addEventException"
+      onClick={handleAddEventExceptionClick}
+    >
+      <EuiText data-test-subj="addEventExceptionButton" size="m">
+        {i18n.ACTION_ADD_EVENT_EXCEPTION}
+      </EuiText>
+    </EuiContextMenuItem>
+  );
+
   const statusFilters = useMemo(() => {
     if (!alertStatus) {
       return [];
@@ -378,8 +407,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ]);
 
   const items = useMemo(
-    () => [...statusFilters, addEndpointExceptionComponent, addExceptionComponent],
-    [addEndpointExceptionComponent, addExceptionComponent, statusFilters]
+    () =>
+      !isEvent && ruleId
+        ? [...statusFilters, addEndpointExceptionComponent, addExceptionComponent]
+        : [addEventExceptionComponent],
+    [
+      addEndpointExceptionComponent,
+      addExceptionComponent,
+      addEventExceptionComponent,
+      statusFilters,
+      ruleId,
+      isEvent,
+    ]
   );
 
   return (
@@ -411,6 +450,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           alertStatus={alertStatus}
           onRuleChange={onRuleChange}
         />
+      )}
+      {openExceptionModal && ecsRowData != null && (
+        <EventFilteringModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
     </>
   );
