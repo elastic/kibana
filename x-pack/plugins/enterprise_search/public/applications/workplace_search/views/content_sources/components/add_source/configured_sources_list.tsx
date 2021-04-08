@@ -40,31 +40,37 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   sources,
   isOrganization,
 }) => {
-  const ButtonConnect = ({addPath}: {addPath: string}) => (
+  const ButtonConnect = ({ addPath }: { addPath: string }) => (
     <EuiButtonTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
       {CONFIGURED_SOURCES_CONNECT_BUTTON}
     </EuiButtonTo>
-  )
-  const ButtonDisabled = () => <EuiButton disabled>Available in personal dashboard</EuiButton>
+  );
+  const ButtonDisabled = () => <EuiButton disabled>Available in personal dashboard</EuiButton>;
 
   const ConfiguredSource = ({
     accountContextOnly,
-    addPath, 
+    addPath,
     connected,
     name,
-    serviceType
+    serviceType,
   }: {
-    accountContextOnly: boolean,
-    addPath: string,
-    connected: boolean,
-    name: string,
-    serviceType: string
+    accountContextOnly: boolean;
+    addPath: string;
+    connected: boolean;
+    name: string;
+    serviceType: string;
   }) => {
-    const privateSource = (!isOrganization || (isOrganization && !accountContextOnly))
+    const privateSource = !isOrganization || (isOrganization && !accountContextOnly);
     return (
       <EuiFlexItem>
         <EuiCard
-          description={!privateSource ? 'Private Source' : connected ? 'At least one source connected' : 'No sources connected'}
+          description={
+            !privateSource
+              ? 'Private Source'
+              : connected
+              ? 'At least one source connected'
+              : 'No sources connected'
+          }
           display={'plain'}
           icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
           paddingSize={'l'}
@@ -73,11 +79,11 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
           footer={privateSource ? <ButtonConnect addPath={addPath} /> : <ButtonDisabled />}
         />
       </EuiFlexItem>
-    )
-  }
+    );
+  };
 
-  const sourcesPrivate = sources.filter(i => i.privateSourcesEnabled)
-  const sourcesShared = sources.filter(i => !i.privateSourcesEnabled)
+  const sourcesPrivate = sources.filter((i) => i.privateSourcesEnabled);
+  const sourcesShared = sources.filter((i) => !i.privateSourcesEnabled);
 
   const visibleSources = (
     <>
@@ -89,7 +95,14 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
         <EuiSpacer />
         <EuiFlexGrid columns={3} responsive={false} className="source-grid-configured">
           {sourcesShared.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
-            <ConfiguredSource accountContextOnly={accountContextOnly} addPath={addPath} connected={connected} name={name} serviceType={serviceType} key={i} />
+            <ConfiguredSource
+              accountContextOnly={accountContextOnly}
+              addPath={addPath}
+              connected={connected}
+              name={name}
+              serviceType={serviceType}
+              key={i}
+            />
           ))}
         </EuiFlexGrid>
       </EuiPanel>
@@ -101,9 +114,18 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
         </EuiText>
         <EuiSpacer />
         <EuiFlexGrid columns={3} responsive={false} className="source-grid-configured">
-          {sourcesPrivate.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
-            <ConfiguredSource accountContextOnly={accountContextOnly} addPath={addPath} connected={connected} name={name} serviceType={serviceType} key={i} />
-          ))}
+          {sourcesPrivate.map(
+            ({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
+              <ConfiguredSource
+                accountContextOnly={accountContextOnly}
+                addPath={addPath}
+                connected={connected}
+                name={name}
+                serviceType={serviceType}
+                key={i}
+              />
+            )
+          )}
         </EuiFlexGrid>
       </EuiPanel>
     </>

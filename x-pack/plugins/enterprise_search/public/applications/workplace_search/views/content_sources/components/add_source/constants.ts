@@ -211,7 +211,8 @@ export const CONFIGURED_PRIVATE_SOURCES_TITLE = i18n.translate(
 export const CONFIGURED_PRIVATE_SOURCES_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
   {
-    defaultMessage: 'These sources allow your organization\'s users to use their own accounts and content in the search experience.',
+    defaultMessage:
+      "These sources allow your organization's users to use their own accounts and content in the search experience.",
   }
 );
 

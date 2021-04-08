@@ -27,10 +27,7 @@ import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
-import {
-  AVAILABLE_SOURCE_EMPTY_STATE,
-  AVAILABLE_SOURCE_TITLE,
-} from './constants';
+import { AVAILABLE_SOURCE_EMPTY_STATE, AVAILABLE_SOURCE_TITLE } from './constants';
 
 interface AvailableSourcesListProps {
   sources: SourceDataItem[];
@@ -48,7 +45,9 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s"><p>{name}</p></EuiText>
+            <EuiText size="s">
+              <p>{name}</p>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLinkTo to={getSourcesPath(addPath, true)}>Configure</EuiLinkTo>

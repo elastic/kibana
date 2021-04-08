@@ -115,9 +115,7 @@ export const AddSourceList: React.FC = () => {
               sources={visibleConfiguredSources}
             />
           )}
-          {isOrganization && (
-            <AvailableSourcesList sources={visibleAvailableSources} />
-          )}
+          {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
         </ContentSection>
       ) : (
         <ContentSection>
