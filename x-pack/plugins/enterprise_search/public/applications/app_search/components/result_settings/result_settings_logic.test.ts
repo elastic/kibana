@@ -504,6 +504,12 @@ describe('ResultSettingsLogic', () => {
   describe('listeners', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors } = mockFlashMessageHelpers;
+    let confirmSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      confirmSpy = jest.spyOn(window, 'confirm');
+    });
+    afterAll(() => confirmSpy.mockRestore());
 
     const serverFieldResultSettings = {
       foo: {
@@ -806,19 +812,32 @@ describe('ResultSettingsLogic', () => {
     });
 
     describe('saveResultSettings', () => {
+      beforeEach(() => {
+        confirmSpy.mockImplementation(() => true);
+      });
+
       it('should make an API call to update result settings and update state accordingly', async () => {
+        const resultFields = {
+          foo: { raw: true, rawSize: 100 },
+        };
+
+        const serverResultFields = {
+          foo: { raw: { size: 100 } },
+        };
+
         mount({
           schema,
+          resultFields,
         });
         http.put.mockReturnValueOnce(
           Promise.resolve({
-            result_fields: serverFieldResultSettings,
+            result_fields: serverResultFields,
           })
         );
         jest.spyOn(ResultSettingsLogic.actions, 'saving');
         jest.spyOn(ResultSettingsLogic.actions, 'initializeResultFields');
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
 
         expect(ResultSettingsLogic.actions.saving).toHaveBeenCalled();
 
@@ -828,12 +847,12 @@ describe('ResultSettingsLogic', () => {
           '/api/app_search/engines/test-engine/result_settings',
           {
             body: JSON.stringify({
-              result_fields: serverFieldResultSettings,
+              result_fields: serverResultFields,
             }),
           }
         );
         expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
-          serverFieldResultSettings,
+          serverResultFields,
           schema
         );
       });
@@ -842,10 +861,20 @@ describe('ResultSettingsLogic', () => {
         mount();
         http.put.mockReturnValueOnce(Promise.reject('error'));
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+
+      it('does nothing if the user does not confirm', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+
+        ResultSettingsLogic.actions.saveResultSettings();
+        await nextTick();
+
+        expect(http.put).not.toHaveBeenCalled();
       });
     });
   });

@@ -58,9 +58,7 @@ interface ResultSettingsActions {
   updateRawSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   updateSnippetSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   initializeResultSettingsData(): void;
-  saveResultSettings(
-    resultFields: ServerFieldResultSettingObject
-  ): { resultFields: ServerFieldResultSettingObject };
+  saveResultSettings(): void;
 }
 
 interface ResultSettingsValues {
@@ -80,6 +78,14 @@ interface ResultSettingsValues {
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
 }
+
+const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmSaveMessage',
+  {
+    defaultMessage:
+      'The changes will start immediately. Make sure your applications are ready to accept the new search results!',
+  }
+);
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
@@ -105,7 +111,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     updateRawSizeForField: (fieldName, size) => ({ fieldName, size }),
     updateSnippetSizeForField: (fieldName, size) => ({ fieldName, size }),
     initializeResultSettingsData: () => true,
-    saveResultSettings: (resultFields) => ({ resultFields }),
+    saveResultSettings: () => true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -289,35 +295,37 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         flashAPIErrors(e);
       }
     },
-    saveResultSettings: async ({ resultFields }) => {
-      actions.saving();
+    saveResultSettings: async () => {
+      if (window.confirm(SAVE_CONFIRMATION_MESSAGE)) {
+        actions.saving();
 
-      const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
-      const url = `/api/app_search/engines/${engineName}/result_settings`;
+        const { http } = HttpLogic.values;
+        const { engineName } = EngineLogic.values;
+        const url = `/api/app_search/engines/${engineName}/result_settings`;
 
-      actions.saving();
+        actions.saving();
 
-      let response;
-      try {
-        response = await http.put(url, {
-          body: JSON.stringify({
-            result_fields: resultFields,
-          }),
-        });
-      } catch (e) {
-        flashAPIErrors(e);
+        let response;
+        try {
+          response = await http.put(url, {
+            body: JSON.stringify({
+              result_fields: values.reducedServerResultFields,
+            }),
+          });
+        } catch (e) {
+          flashAPIErrors(e);
+        }
+
+        actions.initializeResultFields(response.result_fields, values.schema);
+        setSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
+            {
+              defaultMessage: 'Result settings have been saved successfully.',
+            }
+          )
+        );
       }
-
-      actions.initializeResultFields(response.result_fields, values.schema);
-      setSuccessMessage(
-        i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
-          {
-            defaultMessage: 'Result settings have been saved successfully.',
-          }
-        )
-      );
     },
   }),
 });
