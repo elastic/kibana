@@ -76,6 +76,8 @@ describe('send_email module', () => {
       {
         proxyUrl: 'https://example.com',
         proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
       }
     );
 
@@ -221,6 +223,138 @@ describe('send_email module', () => {
     sendMailMock.mockRejectedValue(new Error('wops'));
 
     await expect(sendEmail(mockLogger, sendEmailOptions)).rejects.toThrow('wops');
+  });
+
+  test('it bypasses with proxyBypassHosts when expected', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://proxy.com',
+        proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: new Set(['example.com']),
+        proxyOnlyHosts: undefined,
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "host": "example.com",
+          "port": 1025,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('it does not bypass with proxyBypassHosts when expected', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://proxy.com',
+        proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: new Set(['not-example.com']),
+        proxyOnlyHosts: undefined,
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": undefined,
+          "host": "example.com",
+          "port": 1025,
+          "proxy": "https://proxy.com",
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('it proxies with proxyOnlyHosts when expected', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://proxy.com',
+        proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['example.com']),
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": undefined,
+          "host": "example.com",
+          "port": 1025,
+          "proxy": "https://proxy.com",
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('it does not proxy with proxyOnlyHosts when expected', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://proxy.com',
+        proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['not-example.com']),
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "host": "example.com",
+          "port": 1025,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
   });
 });
 
