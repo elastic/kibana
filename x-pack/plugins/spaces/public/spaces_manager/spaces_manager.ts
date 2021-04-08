@@ -12,7 +12,11 @@ import { skipWhile } from 'rxjs/operators';
 import type { HttpSetup } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
+import type {
+  GetAllSpacesOptions,
+  GetShareableReferencesResponse,
+  GetSpaceResult,
+} from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
@@ -145,6 +149,26 @@ export class SpacesManager {
   public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_remove`, {
       body: JSON.stringify({ object, spaces }),
+    });
+  }
+
+  public async getShareableReferences(
+    objects: SavedObjectTarget[]
+  ): Promise<GetShareableReferencesResponse> {
+    return this.http.post(`/api/spaces/_get_shareable_references`, {
+      body: JSON.stringify({ objects }),
+    });
+  }
+
+  public async updateSavedObjectsSpaces(
+    objects: SavedObjectTarget[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: { excludeTags?: boolean } = {}
+  ): Promise<void> {
+    const { excludeTags } = options;
+    return this.http.post(`/api/spaces/_update_objects_spaces`, {
+      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove, excludeTags }),
     });
   }
 
