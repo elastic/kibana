@@ -575,7 +575,12 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
     const { serviceName, serviceNodeName } = resources.params.path;
     const { transactionType, environment, kuery } = resources.params.query;
 
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return await getServiceInstanceMetadataDetails({
+      searchAggregatedTransactions,
       setup,
       serviceName,
       serviceNodeName,

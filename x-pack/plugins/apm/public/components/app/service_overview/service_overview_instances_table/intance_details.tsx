@@ -7,62 +7,74 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React from 'react';
-import { isEmpty } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { pct } from '../../../../style/variables';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import {
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_ID,
+  CLOUD_INSTANCE_NAME,
+  CLOUD_MACHINE_TYPE,
+  CLOUD_PROVIDER,
+  CONTAINER_ID,
+  HOST_NAME,
+  POD_NAME,
+  SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { pct } from '../../../../style/variables';
 import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
+import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
+import { pushNewItemToKueryBar } from '../../../shared/KueryBar/utils';
 import {
   getCloudIcon,
   getContainerIcon,
 } from '../../service_details/service_icons';
-import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
-import { push } from '../../../shared/Links/url_helpers';
+import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
+
+type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 interface Props {
   serviceName: string;
   serviceNodeName: string;
 }
 
+function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
+  return keys.map((key) => ({ key, value: get(data, key) }));
+}
+
+const serviceDetailsKeys = [
+  SERVICE_NODE_NAME,
+  SERVICE_VERSION,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+];
+const containerDetailsKeys = [CONTAINER_ID, HOST_NAME, POD_NAME];
+const cloudDetailsKeys = [
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_ID,
+  CLOUD_INSTANCE_NAME,
+  CLOUD_MACHINE_TYPE,
+  CLOUD_PROVIDER,
+];
+
 export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
   const theme = useTheme();
   const history = useHistory();
   const {
-    urlParams: { start, end, kuery, environment },
+    urlParams: { kuery },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (!start || !end || !transactionType) {
-        return;
-      }
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
-        params: {
-          path: {
-            serviceName,
-            serviceNodeName,
-          },
-          query: { start, end, transactionType, environment, kuery },
-        },
-      });
-    },
-    [
-      serviceName,
-      serviceNodeName,
-      start,
-      end,
-      transactionType,
-      environment,
-      kuery,
-    ]
-  );
+  const { data, status } = useInstanceDetailsFetcher({
+    serviceName,
+    serviceNodeName,
+  });
 
   if (
     status === FETCH_STATUS.LOADING ||
@@ -80,16 +92,17 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
   }
 
   const addKueryBarFilter = ({ key, value }: { key: string; value: any }) => {
-    const newKueryOption = `${key} :"${value}"`;
-    const nextKueryFilter = isEmpty(kuery)
-      ? newKueryOption
-      : `${kuery} and ${newKueryOption}`;
-
-    push(history, {
-      query: { kuery: encodeURIComponent(nextKueryFilter) },
-    });
+    pushNewItemToKueryBar({ kuery, history, key, value });
   };
 
+  const serviceDetailsKeyValuePairs = toKeyValuePairs(serviceDetailsKeys, data);
+  const containerDetailsKeyValuePairs = toKeyValuePairs(
+    containerDetailsKeys,
+    data
+  );
+  const cloudDetailsKeyValuePairs = toKeyValuePairs(cloudDetailsKeys, data);
+
+  const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
   return (
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
@@ -99,8 +112,8 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
             'xpack.apm.serviceOverview.instanceTable.details.serviceTitle',
             { defaultMessage: 'Service' }
           )}
-          icon={getAgentIcon(data.service.icon, theme.darkMode)}
-          keyValueList={data.service.details}
+          icon={getAgentIcon(data.agent?.name, theme.darkMode)}
+          keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>
@@ -110,8 +123,8 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
             'xpack.apm.serviceOverview.instanceTable.details.containerTitle',
             { defaultMessage: 'Container' }
           )}
-          icon={getContainerIcon(data.container.icon)}
-          keyValueList={data.container.details}
+          icon={getContainerIcon(containerType)}
+          keyValueList={containerDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>
@@ -121,8 +134,8 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
             'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
             { defaultMessage: 'Cloud' }
           )}
-          icon={getCloudIcon(data.cloud.icon)}
-          keyValueList={data.cloud.details}
+          icon={getCloudIcon(data.cloud?.provider)}
+          keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>

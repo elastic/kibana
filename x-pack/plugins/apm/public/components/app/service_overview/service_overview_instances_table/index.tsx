@@ -65,26 +65,42 @@ export function ServiceOverviewInstancesTable({
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
-    [serviceName: string]: ReactNode;
-  }>({});
+
+  const [
+    itemIdToOpenActionMenuRowMap,
+    setItemIdToOpenActionMenuRowMap,
+  ] = useState<Record<string, boolean>>({});
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactNode>
+  >({});
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
-  const toggleRowDetails = (selectedServiceNodeName: string) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    if (itemIdToExpandedRowMapValues[selectedServiceNodeName]) {
-      delete itemIdToExpandedRowMapValues[selectedServiceNodeName];
+  const toggleRowActionMenu = (selectedServiceNodeName: string) => {
+    const actionMenuRowMapValues = { ...itemIdToOpenActionMenuRowMap };
+    if (actionMenuRowMapValues[selectedServiceNodeName]) {
+      delete actionMenuRowMapValues[selectedServiceNodeName];
     } else {
-      itemIdToExpandedRowMapValues[selectedServiceNodeName] = (
+      actionMenuRowMapValues[selectedServiceNodeName] = true;
+    }
+    setItemIdToOpenActionMenuRowMap(actionMenuRowMapValues);
+  };
+
+  const toggleRowDetails = (selectedServiceNodeName: string) => {
+    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (expandedRowMapValues[selectedServiceNodeName]) {
+      delete expandedRowMapValues[selectedServiceNodeName];
+    } else {
+      expandedRowMapValues[selectedServiceNodeName] = (
         <InstanceDetails
           serviceNodeName={selectedServiceNodeName}
           serviceName={serviceName}
         />
       );
     }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    setItemIdToExpandedRowMap(expandedRowMapValues);
   };
 
   const columns = getColumns({
@@ -95,6 +111,8 @@ export function ServiceOverviewInstancesTable({
     comparisonEnabled,
     toggleRowDetails,
     itemIdToExpandedRowMap,
+    toggleRowActionMenu,
+    itemIdToOpenActionMenuRowMap,
   });
 
   const pagination = {

@@ -7,14 +7,16 @@
 
 import {
   EuiBasicTableColumn,
+  EuiButtonEmpty,
   EuiButtonIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { ActionMenu } from '../../../../../../observability/public';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
@@ -29,6 +31,7 @@ import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/Service
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
 import { PrimaryStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
+import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
 
@@ -40,6 +43,8 @@ export function getColumns({
   comparisonEnabled,
   toggleRowDetails,
   itemIdToExpandedRowMap,
+  toggleRowActionMenu,
+  itemIdToOpenActionMenuRowMap,
 }: {
   serviceName: string;
   agentName?: string;
@@ -48,6 +53,8 @@ export function getColumns({
   comparisonEnabled?: boolean;
   toggleRowDetails: (selectedServiceNodeName: string) => void;
   itemIdToExpandedRowMap: Record<string, ReactNode>;
+  toggleRowActionMenu: (selectedServiceNodeName: string) => void;
+  itemIdToOpenActionMenuRowMap: Record<string, boolean>;
 }): Array<EuiBasicTableColumn<PrimaryStatsServiceInstanceItem>> {
   return [
     {
@@ -214,6 +221,37 @@ export function getColumns({
         );
       },
       sortable: true,
+    },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render: (instanceItem: PrimaryStatsServiceInstanceItem) => {
+        return (
+          <ActionMenu
+            id="instanceActionMenu"
+            closePopover={() =>
+              toggleRowActionMenu(instanceItem.serviceNodeName)
+            }
+            isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
+            anchorPosition="leftCenter"
+            button={
+              <EuiButtonEmpty
+                iconType="boxesHorizontal"
+                onClick={() =>
+                  toggleRowActionMenu(instanceItem.serviceNodeName)
+                }
+              />
+            }
+          >
+            <InstanceActionsMenu
+              serviceName={serviceName}
+              serviceNodeName={instanceItem.serviceNodeName}
+              onClose={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
+            />
+          </ActionMenu>
+        );
+      },
     },
     {
       align: RIGHT_ALIGNMENT,
