@@ -82,16 +82,17 @@ export function hasValidComposite(buckets: estypes.AggregationContainer) {
   if (
     isPopulatedObject(buckets, ['composite']) &&
     isPopulatedObject(buckets.composite, ['sources']) &&
-    buckets.composite.sources !== undefined
+    Array.isArray(buckets.composite.sources)
   ) {
     const sources = buckets.composite.sources;
-    return sources.some((source) => {
+    return !sources.some((source) => {
       const sourceName = getFirstKeyInObject(source);
       if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
         const sourceTypes = Object.keys(source[sourceName]);
         return (
           sourceTypes.length === 1 &&
-          (sourceTypes[0] === 'date_histogram' || sourceTypes[0] === 'terms')
+          sourceTypes[0] !== 'date_histogram' &&
+          sourceTypes[0] !== 'terms'
         );
       }
       return false;
