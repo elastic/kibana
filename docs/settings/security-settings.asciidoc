@@ -53,7 +53,7 @@ xpack.security.authc.providers: [saml, basic, oidc]
 `xpack.security.authc.providers.saml.<provider-name>.realm`::
 The SAML realm in {es} that the provider should use.
 
-`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`::
+`xpack.security.authc.saml.maxRedirectURLSize`::
 Specifies the maximum size of the URL that {kib} is allowed to store during the SAML handshake.
 
 [float]
