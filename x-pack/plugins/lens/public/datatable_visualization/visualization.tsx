@@ -182,7 +182,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         {
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
-            defaultMessage: 'Split rows',
+            defaultMessage: 'Rows',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
             defaultMessage:
@@ -209,7 +209,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Split columns',
+            defaultMessage: 'Columns',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
