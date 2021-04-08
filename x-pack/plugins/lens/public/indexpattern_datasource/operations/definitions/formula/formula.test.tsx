@@ -210,7 +210,7 @@ describe('formula', () => {
         scale: 'ratio',
         params: {
           isFormulaBroken: false,
-          formula: `terms(category, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
+          formula: `average(bytes, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
         },
         references: [],
       });
@@ -222,6 +222,7 @@ describe('formula', () => {
           previousColumn: {
             ...layer.columns.col1,
             operationType: 'count',
+            sourceField: undefined,
             filter: {
               language: 'lucene',
               query: `*`,

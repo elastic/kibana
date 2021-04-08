@@ -10,7 +10,7 @@ import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -19,6 +19,8 @@ import {
   EuiModal,
   EuiModalHeader,
   EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import {
@@ -286,10 +288,9 @@ function FormulaEditor({
       let errors: ErrorWrapper[] = [];
 
       const { root, error } = tryToParse(text);
-      if (!root) return;
       if (error) {
         errors = [error];
-      } else {
+      } else if (root) {
         const validationErrors = runASTValidation(
           root,
           layer,
@@ -305,23 +306,42 @@ function FormulaEditor({
         monaco.editor.setModelMarkers(
           editorModel.current,
           'LENS',
-          errors.flatMap((innerError) =>
-            innerError.locations.map((location) => {
-              const startPosition = offsetToRowColumn(text, location.min);
-              const endPosition = offsetToRowColumn(text, location.max);
-              return {
-                message: innerError.message,
-                startColumn: startPosition.column + 1,
-                startLineNumber: startPosition.lineNumber,
-                endColumn: endPosition.column + 1,
-                endLineNumber: endPosition.lineNumber,
-                severity:
-                  innerError.severity === 'warning'
-                    ? monaco.MarkerSeverity.Warning
-                    : monaco.MarkerSeverity.Error,
-              };
-            })
-          )
+          errors.flatMap((innerError) => {
+            if (innerError.locations.length) {
+              return innerError.locations.map((location) => {
+                const startPosition = offsetToRowColumn(text, location.min);
+                const endPosition = offsetToRowColumn(text, location.max);
+                return {
+                  message: innerError.message,
+                  startColumn: startPosition.column + 1,
+                  startLineNumber: startPosition.lineNumber,
+                  endColumn: endPosition.column + 1,
+                  endLineNumber: endPosition.lineNumber,
+                  severity:
+                    innerError.severity === 'warning'
+                      ? monaco.MarkerSeverity.Warning
+                      : monaco.MarkerSeverity.Error,
+                };
+              });
+            } else {
+              // Parse errors return no location info
+              const startPosition = offsetToRowColumn(text, 0);
+              const endPosition = offsetToRowColumn(text, text.length - 1);
+              return [
+                {
+                  message: innerError.message,
+                  startColumn: startPosition.column + 1,
+                  startLineNumber: startPosition.lineNumber,
+                  endColumn: endPosition.column + 1,
+                  endLineNumber: endPosition.lineNumber,
+                  severity:
+                    innerError.severity === 'warning'
+                      ? monaco.MarkerSeverity.Warning
+                      : monaco.MarkerSeverity.Error,
+                },
+              ];
+            }
+          })
         );
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
@@ -626,29 +646,232 @@ function FormulaEditor({
     };
   }, [provideCompletionItems, provideSignatureHelp, provideHover]);
 
-  const helpComponent = (
-    <div style={{ height: 250, overflow: 'auto' }}>
-      <EuiText size="s">
-        <Markdown
-          markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-            defaultMessage: `
+  // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
+  // in the behavior of Monaco when it's first loaded and then reloaded.
+  return (
+    <>
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top">
+        <EuiFlexGroup>
+          <EuiFlexItem />
+
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              onClick={() => setIsOpen(!isOpen)}
+              iconType="fullScreen"
+              size="s"
+              color="text"
+              flush="right"
+            >
+              {i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+                defaultMessage: 'View full screen',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+        <CodeEditor
+          {...codeEditorOptions}
+          height={50}
+          width={'100%'}
+          options={{
+            ...codeEditorOptions.options,
+            // Shared model and overflow node
+            overflowWidgetsDomNode: overflowDiv1.current,
+            model: editorModel.current,
+          }}
+          editorDidMount={(editor) => {
+            editor1.current = editor;
+            registerOnTypeHandler(editor);
+          }}
+        />
+        <EuiSpacer />
+      </div>
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top lnsIndexPatternDimensionEditor__section--bottom">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPopover
+              isOpen={isHelpOpen}
+              closePopover={() => setIsHelpOpen(false)}
+              button={
+                <EuiButtonEmpty
+                  onClick={() => setIsHelpOpen(!isHelpOpen)}
+                  iconType="help"
+                  size="s"
+                  color="text"
+                >
+                  {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
+                    defaultMessage: 'Function reference',
+                  })}
+                </EuiButtonEmpty>
+              }
+              anchorPosition="leftDown"
+            >
+              <MemoizedFormulaHelp
+                indexPattern={indexPattern}
+                operationDefinitionMap={operationDefinitionMap}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+
+          <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
+        </EuiFlexGroup>
+
+        {isOpen ? (
+          <EuiModal
+            onClose={() => {
+              setIsOpen(false);
+              setText(currentColumn.params.formula);
+            }}
+          >
+            <EuiModalHeader>
+              <h1>
+                {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
+                  defaultMessage: 'Formula editor',
+                })}
+              </h1>
+            </EuiModalHeader>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+                  <CodeEditor
+                    {...codeEditorOptions}
+                    height={280}
+                    width={400}
+                    options={{
+                      ...codeEditorOptions.options,
+                      // Shared model and overflow node
+                      overflowWidgetsDomNode: overflowDiv2.current,
+                      model: editorModel?.current,
+                    }}
+                    editorDidMount={(editor) => {
+                      editor2.current = editor;
+                      registerOnTypeHandler(editor);
+                    }}
+                  />
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+                  <EuiText>
+                    {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
+                      defaultMessage: 'Function reference',
+                    })}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <MemoizedFormulaHelp
+                    indexPattern={indexPattern}
+                    operationDefinitionMap={operationDefinitionMap}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModal>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+function FormulaHelp({
+  indexPattern,
+  operationDefinitionMap,
+}: {
+  indexPattern: IndexPattern;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
+}) {
+  const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
+
+  const helpItems: Array<EuiSelectableOption & { description?: JSX.Element }> = [];
+
+  helpItems.push({ label: 'Math', isGroupLabel: true });
+
+  helpItems.push(
+    ...getPossibleFunctions(indexPattern)
+      .filter((key) => key in tinymathFunctions)
+      .map((key) => ({
+        label: `${key}`,
+        description: <Markdown markdown={tinymathFunctions[key].help} />,
+        checked: selectedFunction === key ? ('on' as const) : undefined,
+      }))
+  );
+
+  helpItems.push({ label: 'Elasticsearch', isGroupLabel: true });
+
+  // Es aggs
+  helpItems.push(
+    ...getPossibleFunctions(indexPattern)
+      .filter((key) => key in operationDefinitionMap)
+      .map((key) => ({
+        label: `${key}: ${operationDefinitionMap[key].displayName}`,
+        description: getHelpText(key, operationDefinitionMap),
+        checked:
+          selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
+            ? ('on' as const)
+            : undefined,
+      }))
+  );
+
+  return (
+    <div style={{ height: 250, overflow: 'auto', width: 678 }}>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiSelectable
+            options={helpItems}
+            singleSelection={true}
+            searchable
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+              if (!chosenType) {
+                setSelectedFunction(undefined);
+              } else {
+                setSelectedFunction(chosenType.label);
+              }
+            }}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            {selectedFunction ? (
+              helpItems.find(({ label }) => label === selectedFunction)?.description
+            ) : (
+              <Markdown
+                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                  defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
 math functions. There are three main types of functions:
 
-* Elasticsearch metrics, like sum(bytes)
-* Time series functions use Elasticsearch metrics as input, like cumulative_sum()
-* Math functions like round()
+* Elasticsearch metrics, like \`sum(bytes)\`
+* Time series functions use Elasticsearch metrics as input, like \`cumulative_sum()\`
+* Math functions like \`round()\`
 
 An example formula that uses all of these:
 
-round(100 * moving_average(avg(cpu.load.pct), window=10))
+\`\`\`
+round(100 * moving_average(
+  average(cpu.load.pct),
+  window=10,
+  kql='datacenter.name: east*'
+))
+\`\`\`
 
-Elasticsearch functions take a field name, which can be in quotes. sum(bytes) is the same
-as sum("bytes").
+Elasticsearch functions take a field name, which can be in quotes. \`sum(bytes)\` is the same
+as \`sum("bytes")\`.
 
 Some functions take named arguments, like moving_average(count(), window=5)
+
+Elasticsearch metrics can be filtered using KQL or Lucene syntax. To add a filter, use the named
+parameter \`kql='field: value'\` or \`lucene=''\`. Always use single quotes when writing KQL or Lucene
+queries. If your search has a single quote in it, use a backslash to escape, like: \`kql='Women's'\'
 
 Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
 
@@ -656,139 +879,19 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-            description:
-              'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-          })}
-        />
-
-        <EuiDescriptionList
-          compressed
-          listItems={getPossibleFunctions(indexPattern)
-            .filter((key) => key in tinymathFunctions)
-            .map((key) => ({
-              title: `${key}`,
-              description: <Markdown markdown={tinymathFunctions[key].help} />,
-            }))}
-        />
-      </EuiText>
-
-      <EuiSpacer />
-
-      <EuiText>
-        {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
-          defaultMessage: 'Elasticsearch aggregations',
-          description: 'Do not translate Elasticsearch',
-        })}
-      </EuiText>
-      <EuiDescriptionList
-        compressed
-        listItems={getPossibleFunctions(indexPattern)
-          .filter((key) => key in operationDefinitionMap)
-          .map((key) => ({
-            title: `${key}: ${operationDefinitionMap[key].displayName}`,
-            description: getHelpText(key, operationDefinitionMap),
-          }))}
-      />
-    </div>
-  );
-
-  // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
-  // in the behavior of Monaco when it's first loaded and then reloaded.
-  return (
-    <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-      <CodeEditor
-        {...codeEditorOptions}
-        height={50}
-        width={'100%'}
-        options={{
-          ...codeEditorOptions.options,
-          // Shared model and overflow node
-          overflowWidgetsDomNode: overflowDiv1.current,
-          model: editorModel.current,
-        }}
-        editorDidMount={(editor) => {
-          editor1.current = editor;
-          registerOnTypeHandler(editor);
-        }}
-      />
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPopover
-            isOpen={isHelpOpen}
-            closePopover={() => setIsHelpOpen(false)}
-            button={
-              <EuiButton onClick={() => setIsHelpOpen(!isHelpOpen)} iconType="help" size="s">
-                {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
-                  defaultMessage: 'Function reference',
+                  description:
+                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
                 })}
-              </EuiButton>
-            }
-          >
-            {helpComponent}
-          </EuiPopover>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiButton onClick={() => setIsOpen(!isOpen)} iconType="expand" size="s">
-            {i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-              defaultMessage: 'Full screen',
-            })}
-          </EuiButton>
+              />
+            )}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {isOpen ? (
-        <EuiModal
-          onClose={() => {
-            setIsOpen(false);
-            setText(currentColumn.params.formula);
-          }}
-        >
-          <EuiModalHeader>
-            <h1>
-              {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
-                defaultMessage: 'Formula editor',
-              })}
-            </h1>
-          </EuiModalHeader>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-                <CodeEditor
-                  {...codeEditorOptions}
-                  height={280}
-                  width={400}
-                  options={{
-                    ...codeEditorOptions.options,
-                    // Shared model and overflow node
-                    overflowWidgetsDomNode: overflowDiv2.current,
-                    model: editorModel?.current,
-                  }}
-                  editorDidMount={(editor) => {
-                    editor2.current = editor;
-                    registerOnTypeHandler(editor);
-                  }}
-                />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-                <EuiText>
-                  {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
-                    defaultMessage: 'Function reference',
-                  })}
-                </EuiText>
-                <EuiSpacer size="s" />
-                {helpComponent}
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModal>
-      ) : null}
     </div>
   );
 }
+
+const MemoizedFormulaHelp = React.memo(FormulaHelp);
 
 function parseAndExtract(
   text: string,

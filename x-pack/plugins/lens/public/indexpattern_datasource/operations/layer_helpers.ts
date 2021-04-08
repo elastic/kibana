@@ -1133,7 +1133,7 @@ export function getManagedColumnsFrom(
 ): Array<[string, IndexPatternColumn]> {
   const allNodes: Record<string, string[]> = {};
   Object.entries(columns).forEach(([id, col]) => {
-    allNodes[id] = 'references' in col ? col.references : [];
+    allNodes[id] = 'references' in col ? [...col.references] : [];
   });
   const queue: string[] = allNodes[columnId];
   const store: Array<[string, IndexPatternColumn]> = [];
