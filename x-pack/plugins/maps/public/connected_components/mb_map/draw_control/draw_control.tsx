@@ -121,6 +121,14 @@ export class DrawControl extends Component<Props> {
       }
     }
 
+    if (this.props.drawType === DRAW_TYPE.TRASH) {
+      // There is no way to deselect shapes other than changing modes,
+      // this deselects shapes to avoid leaving shapes in an unwanted
+      // edit mode
+      this._mbDrawControl.changeMode('simple_select');
+      return;
+    }
+
     const drawMode = this._mbDrawControl.getMode();
     if (drawMode !== DRAW_RECTANGLE && this.props.drawType === DRAW_TYPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);

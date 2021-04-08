@@ -22,6 +22,7 @@ export interface Props {
 export function FeatureEditControl(props: Props) {
   const editFeaturesSelected = props.drawType === DRAW_TYPE.SIMPLE_SELECT;
   const deleteFeaturesSelected = props.drawType === DRAW_TYPE.TRASH;
+
   return (
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
       <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
