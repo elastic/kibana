@@ -290,8 +290,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
       },
     });
-    // Temporarily exposing alerting client from rule-registry to allow registering of legacy rules
-    this.setupPlugins.alerting = this.setupPlugins.ruleRegistry.alertingPluginSetupContract;
 
     // Register reference rule types via rule-registry
     this.setupPlugins.ruleRegistry.registerType(referenceRuleAlertType);
