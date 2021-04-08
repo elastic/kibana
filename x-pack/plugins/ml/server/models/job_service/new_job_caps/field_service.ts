@@ -80,7 +80,7 @@ class FieldsService {
         if (firstKey !== undefined) {
           const field = fc[firstKey];
           // add to the list of fields if the field type can be used by ML
-          if (supportedTypes.includes(field.type) === true) {
+          if (supportedTypes.includes(field.type) === true && field.metadata_field !== true) {
             fields.push({
               id: k,
               name: k,

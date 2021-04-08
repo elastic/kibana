@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { createRoute } from '../create_route';
+import { createApmServerRoute } from '../create_apm_server_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -18,15 +18,17 @@ import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { notifyFeatureUsage } from '../../feature';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 
 // get ML anomaly detection jobs for each environment
-export const anomalyDetectionJobsRoute = createRoute({
+const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { context, logger } = resources;
 
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
@@ -34,7 +36,7 @@ export const anomalyDetectionJobsRoute = createRoute({
 
     const [jobs, legacyJobs] = await withApmSpan('get_available_ml_jobs', () =>
       Promise.all([
-        getAnomalyDetectionJobs(setup, context.logger),
+        getAnomalyDetectionJobs(setup, logger),
         hasLegacyJobs(setup),
       ])
     );
@@ -47,7 +49,7 @@ export const anomalyDetectionJobsRoute = createRoute({
 });
 
 // create new ML anomaly detection jobs for each given environment
-export const createAnomalyDetectionJobsRoute = createRoute({
+const createAnomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
@@ -57,15 +59,17 @@ export const createAnomalyDetectionJobsRoute = createRoute({
       environments: t.array(t.string),
     }),
   }),
-  handler: async ({ context, request }) => {
-    const { environments } = context.params.body;
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const { params, context, logger } = resources;
+    const { environments } = params.body;
+
+    const setup = await setupRequest(resources);
 
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    await createAnomalyDetectionJobs(setup, environments, context.logger);
+    await createAnomalyDetectionJobs(setup, environments, logger);
 
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
@@ -77,11 +81,11 @@ export const createAnomalyDetectionJobsRoute = createRoute({
 });
 
 // get all available environments to create anomaly detection jobs for
-export const anomalyDetectionEnvironmentsRoute = createRoute({
+const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/anomaly-detection/environments',
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -96,3 +100,8 @@ export const anomalyDetectionEnvironmentsRoute = createRoute({
     return { environments };
   },
 });
+
+export const anomalyDetectionRouteRepository = createApmServerRouteRepository()
+  .add(anomalyDetectionJobsRoute)
+  .add(createAnomalyDetectionJobsRoute)
+  .add(anomalyDetectionEnvironmentsRoute);
