@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { QueryContainer } from '@elastic/elasticsearch/api/types';
+
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsSerializer } from '../../serialization';
+import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
@@ -68,6 +71,8 @@ export interface SavedObjectReferenceWithContext {
   }>;
   /** Whether or not this object or reference is missing */
   isMissing?: boolean;
+  /** The space(s) that legacy URL aliases matching this type/id exist in */
+  spacesWithMatchingAliases?: string[];
 }
 
 /**
@@ -90,6 +95,17 @@ export interface CollectMultiNamespaceReferencesParams {
 }
 
 /**
+ * Additional options exposed for unit tests.
+ *
+ * @internal
+ */
+export interface CollectMultiNamespaceReferencesParamsInternal
+  extends CollectMultiNamespaceReferencesParams {
+  /** Default: 1000 */
+  searchPerPage?: number;
+}
+
+/**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
  */
@@ -101,7 +117,11 @@ export async function collectMultiNamespaceReferences({
   getIndexForType,
   objects,
   options = {},
-}: CollectMultiNamespaceReferencesParams): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+  searchPerPage,
+}: CollectMultiNamespaceReferencesParamsInternal): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+  if (!objects.length) {
+    return { objects: [] };
+  }
   const { namespace, purpose, typesToExclude = [] } = options;
   const inboundReferencesMap = objects.reduce(
     // Add the input objects to the references map so they are returned with the results, even if they have no inbound references
@@ -161,21 +181,120 @@ export async function collectMultiNamespaceReferences({
     bulkGetObjects = Array.from(newObjectsToGet).map((key) => parseKey(key));
   }
 
-  const results = Array.from(inboundReferencesMap.entries()).map<SavedObjectReferenceWithContext>(
-    ([referenceKey, referenceVal]) => {
-      const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
-        const { type, id } = parseKey(objectKey);
-        return { type, id, name };
-      });
-      const { type, id } = parseKey(referenceKey);
-      const object = objectMap.get(referenceKey);
-      const spaces = object?.namespaces ?? [];
-      return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
-    }
+  const objectsWithContext = Array.from(
+    inboundReferencesMap.entries()
+  ).map<SavedObjectReferenceWithContext>(([referenceKey, referenceVal]) => {
+    const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
+      const { type, id } = parseKey(objectKey);
+      return { type, id, name };
+    });
+    const { type, id } = parseKey(referenceKey);
+    const object = objectMap.get(referenceKey);
+    const spaces = object?.namespaces ?? [];
+    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
+  });
+
+  const aliasesMap = await checkLegacyUrlAliases(
+    client,
+    serializer,
+    getIndexForType,
+    objectsWithContext,
+    searchPerPage
   );
+  const results = objectsWithContext.map((obj) => {
+    const key = `${obj.type}:${obj.id}`;
+    const val = aliasesMap.get(key);
+    const spacesWithMatchingAliases = val && Array.from(val);
+    return { ...obj, spacesWithMatchingAliases };
+  });
 
   return {
     objects: results,
+  };
+}
+
+const PIT_KEEP_ALIVE = '1m';
+
+async function checkLegacyUrlAliases(
+  client: RepositoryEsClient,
+  serializer: SavedObjectsSerializer,
+  getIndexForType: (type: string) => string,
+  objects: SavedObjectReferenceWithContext[],
+  perPage = 1000
+) {
+  const filteredObjects = objects.filter(({ spaces }) => spaces.length !== 0);
+  if (!filteredObjects.length) {
+    return new Map<string, Set<string>>();
+  }
+  let pitId: string | undefined;
+  const index = getIndexForType(LEGACY_URL_ALIAS_TYPE);
+  let returnValue: Map<string, Set<string>> | null = null;
+  try {
+    const { body } = await client.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
+    pitId = body.id;
+
+    const query = createAliasQuery(filteredObjects);
+    let lastResultsCount = 0;
+    let from = 0;
+    const aliasesMap = new Map<string, Set<string>>();
+    do {
+      const results = await client.search<SavedObjectsRawDocSource>({
+        // don't specify index, since we are using the pit
+        body: {
+          pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+          query,
+          from,
+        },
+        size: perPage,
+      });
+      const hits = results.body.hits.hits;
+
+      // @ts-expect-error Hit._source may be undefined
+      const aliases = hits.map((hit) => serializer.rawToSavedObject<LegacyUrlAlias>(hit));
+      for (const alias of aliases) {
+        const { sourceId, targetType, targetNamespace } = alias.attributes;
+        const key = `${targetType}:${sourceId}`;
+        const val = aliasesMap.get(key) ?? new Set<string>();
+        val.add(targetNamespace);
+        aliasesMap.set(key, val);
+      }
+
+      lastResultsCount = hits.length;
+      from += lastResultsCount;
+    } while (lastResultsCount >= perPage); // end the loop when there are fewer hits than our perPage size
+    returnValue = aliasesMap;
+  } catch (e) {
+    // do nothing
+  }
+
+  if (pitId) {
+    try {
+      await client.closePointInTime({ body: { id: pitId } });
+    } catch (e) {
+      // do nothing
+    }
+  }
+
+  if (!returnValue) {
+    throw new Error('Failed to retrieve legacy URL aliases');
+  }
+  return returnValue;
+}
+
+function createAliasQuery(objects: SavedObjectReferenceWithContext[]): QueryContainer {
+  return {
+    bool: {
+      minimum_should_match: 1,
+      must: [{ term: { type: LEGACY_URL_ALIAS_TYPE } }],
+      should: objects.map(({ type, id }) => ({
+        bool: {
+          must: [
+            { term: { [`${LEGACY_URL_ALIAS_TYPE}.targetType`]: type } },
+            { term: { [`${LEGACY_URL_ALIAS_TYPE}.sourceId`]: id } },
+          ],
+        },
+      })),
+    },
   };
 }
 

@@ -559,6 +559,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
       id: `${namespace}:${type}:${originId}`,
       type: LEGACY_URL_ALIAS_TYPE,
       attributes: {
+        sourceId: originId,
         targetNamespace: namespace,
         targetType: type,
         targetId: id,

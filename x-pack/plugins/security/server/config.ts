@@ -413,6 +413,9 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
         return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
       });
 
+      if (idleTimeout) {
+        idleTimeout.asMilliseconds();
+      }
       return {
         idleTimeout,
         lifespan,

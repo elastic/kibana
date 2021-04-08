@@ -13,15 +13,19 @@ import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import type {
+  CollectMultiNamespaceReferencesParamsInternal,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import { Hit } from '@elastic/elasticsearch/api/types';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
+const PIT_ID = 'pit-id';
 
 const MULTI_NAMESPACE_OBJ_TYPE_1 = 'type-a';
 const MULTI_NAMESPACE_OBJ_TYPE_2 = 'type-b';
@@ -39,8 +43,9 @@ describe('collectMultiNamespaceReferences', () => {
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `collectMultiNamespaceReferences` */
   function setup(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
-    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
-  ) {
+    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {},
+    internalOptions: { searchPerPage?: number } = {}
+  ): CollectMultiNamespaceReferencesParamsInternal {
     const registry = typeRegistryMock.create();
     registry.isMultiNamespace.mockImplementation(
       (type) =>
@@ -54,6 +59,24 @@ describe('collectMultiNamespaceReferences', () => {
       (type) => [MULTI_NAMESPACE_OBJ_TYPE_1, MULTI_NAMESPACE_HIDDEN_OBJ_TYPE].includes(type) // MULTI_NAMESPACE_OBJ_TYPE_2 and NON_MULTI_NAMESPACE_TYPE are omitted
     );
     client = elasticsearchClientMock.createElasticsearchClient();
+
+    // mock some default results for PIT and search APIs
+    client.openPointInTime.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ id: PIT_ID })
+    );
+    client.search.mockReturnValue(
+      // @ts-expect-error SearchResponse contains other fields, but they are irrelevant for this test suite
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: { hits: [] },
+      })
+    );
+    client.closePointInTime.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        succeeded: true,
+        num_freed: 1,
+      })
+    );
+
     const serializer = new SavedObjectsSerializer(registry);
     return {
       registry,
@@ -67,6 +90,7 @@ describe('collectMultiNamespaceReferences', () => {
       getIndexForType: (type: string) => `index-for-${type}`,
       objects,
       options,
+      ...internalOptions,
     };
   }
 
@@ -316,5 +340,180 @@ describe('collectMultiNamespaceReferences', () => {
       { ...obj2, spaces: [], inboundReferences: [] },
       // obj3 is excluded from the results
     ]);
+  });
+
+  describe('legacy URL aliases', () => {
+    it('uses the point-in-time API to search for legacy URL aliases', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-2' };
+      const obj3 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-3' };
+      const params = setup([obj1, obj2], {}, { searchPerPage: 1 });
+      mockMgetResults({ found: true, references: [obj3] }, { found: true, references: [] }); // results for obj1 and obj2
+      mockMgetResults({ found: true, references: [] }); // results for obj3
+      // mock search results for four aliases for obj1, and none for obj2 or obj3
+      for (let i = 1; i <= 4; i++) {
+        const sourceId = obj1.id;
+        const targetType = obj1.type;
+        const targetNamespace = `space-${i}`;
+        const doc: Hit<SavedObjectsRawDocSource> = {
+          _id: `${LEGACY_URL_ALIAS_TYPE}:${targetNamespace}:${targetType}:${sourceId}`,
+          _index: 'doesnt-matter',
+          _source: {
+            type: LEGACY_URL_ALIAS_TYPE,
+            [LEGACY_URL_ALIAS_TYPE]: {
+              sourceId,
+              targetId: 'doesnt-matter',
+              targetType,
+              targetNamespace,
+            } as LegacyUrlAlias,
+          },
+        };
+        client.search.mockReturnValueOnce(
+          // @ts-expect-error SearchResponse contains other fields, but they are irrelevant for this test suite
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [doc] } })
+        );
+      }
+
+      const result = await collectMultiNamespaceReferences(params);
+      expect(client.mget).toHaveBeenCalledTimes(2);
+      expectMgetArgs(1, obj1, obj2);
+      expectMgetArgs(2, obj3); // obj3 is retrieved in a second cluster call
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(5);
+      for (let i = 0; i < 5; i++) {
+        // It searched for aliases five times (and ended there because the fifth search result had no hits)
+        expect(client.search).toHaveBeenNthCalledWith(i + 1, {
+          body: {
+            from: i,
+            pit: { id: 'pit-id', keep_alive: '1m' }, // pit-id is mocked above
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { type: LEGACY_URL_ALIAS_TYPE } }],
+                should: [obj1, obj2, obj3].map(({ type, id }) => ({
+                  bool: {
+                    must: [
+                      { term: { [`${LEGACY_URL_ALIAS_TYPE}.targetType`]: type } },
+                      { term: { [`${LEGACY_URL_ALIAS_TYPE}.sourceId`]: id } },
+                    ],
+                  },
+                })),
+              },
+            },
+          },
+          size: 1, // because we set searchPerPage to 1 above,
+        });
+      }
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(result.objects).toEqual([
+        {
+          ...obj1,
+          spaces: SPACES,
+          inboundReferences: [],
+          spacesWithMatchingAliases: ['space-1', 'space-2', 'space-3', 'space-4'],
+        },
+        { ...obj2, spaces: SPACES, inboundReferences: [] },
+        { ...obj3, spaces: SPACES, inboundReferences: [{ ...obj1, name: 'ref-name' }] },
+      ]);
+    });
+
+    it('does not use the point-in-time API or search if no objects are passed in', async () => {
+      const params = setup([]);
+
+      await collectMultiNamespaceReferences(params);
+      expect(client.openPointInTime).not.toHaveBeenCalled();
+      expect(client.search).not.toHaveBeenCalled();
+      expect(client.closePointInTime).not.toHaveBeenCalled();
+    });
+
+    it('does not search for objects that have an empty spaces array (the object does not exist, or we are not sure)', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-2' };
+      const params = setup([obj1, obj2]);
+      mockMgetResults({ found: true }, { found: false }); // results for obj1 and obj2
+
+      await collectMultiNamespaceReferences(params);
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledWith({
+        body: {
+          from: 0,
+          pit: { id: 'pit-id', keep_alive: '1m' }, // pit-id is mocked above
+          query: {
+            bool: expect.objectContaining({
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { [`${LEGACY_URL_ALIAS_TYPE}.targetType`]: obj1.type } },
+                      { term: { [`${LEGACY_URL_ALIAS_TYPE}.sourceId`]: obj1.id } },
+                    ],
+                  },
+                },
+              ],
+            }),
+          },
+        },
+        size: 1000,
+      });
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not search at all if all objects that have an empty spaces array (the object does not exist, or we are not sure)', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const params = setup([obj1]);
+      mockMgetResults({ found: false }); // results for obj1
+
+      await collectMultiNamespaceReferences(params);
+      expect(client.openPointInTime).not.toHaveBeenCalled();
+      expect(client.search).not.toHaveBeenCalled();
+      expect(client.closePointInTime).not.toHaveBeenCalled();
+    });
+
+    it('handles client.openPointInTime errors', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const params = setup([obj1]);
+      mockMgetResults({ found: true }); // results for obj1
+      client.openPointInTime.mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Oh no!'))
+      );
+
+      await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
+        'Failed to retrieve legacy URL aliases'
+      );
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.search).not.toHaveBeenCalled();
+      expect(client.closePointInTime).not.toHaveBeenCalled();
+    });
+
+    it('handles client.search errors', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const params = setup([obj1]);
+      mockMgetResults({ found: true }); // results for obj1
+      client.search.mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Oh no!'))
+      );
+
+      await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
+        'Failed to retrieve legacy URL aliases'
+      );
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1); // we still close the point-in-time, even though the search failed
+    });
+
+    it('handles client.closePointInTime errors', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const params = setup([obj1]);
+      mockMgetResults({ found: true }); // results for obj1
+      client.closePointInTime.mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Oh no!'))
+      );
+
+      await collectMultiNamespaceReferences(params); // does not throw because the search completed successfully
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+    });
   });
 });

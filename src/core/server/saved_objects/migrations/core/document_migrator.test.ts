@@ -980,6 +980,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:loud',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'loud',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1044,6 +1045,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:cute',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'cute',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1166,6 +1168,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:hungry',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'hungry',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1238,6 +1241,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:pretty',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'pretty',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',

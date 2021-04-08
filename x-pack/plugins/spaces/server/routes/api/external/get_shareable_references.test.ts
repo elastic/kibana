@@ -112,20 +112,21 @@ describe('share to space', () => {
         { type: 'foo-type', id: 'id-2' },
       ];
       const payload = { objects };
+      const collectedObjects = [
+        // When mocking these results, they must have the 'spaces' and 'inboundReferences' fields, but the 'inboundReferences' fields can be empty arrays for this unit test
+        ...objects.map((x) => ({ ...x, spaces: ['space-1'], inboundReferences: [] })),
+        // the return value of collectMultiNamespaceReferences includes the 2 requested objects, along with the 3 related tags/references
+        {
+          type: tagSavedObjectTypeName,
+          id: 'id-3',
+          spaces: ['space-1', '?'],
+          inboundReferences: [],
+        },
+        { type: 'bar-type', id: 'id-4', spaces: ['space-1', '?', '?'], inboundReferences: [] },
+        { type: 'baz-type', id: 'id-5', spaces: ['space-1', 'space-2'], inboundReferences: [] },
+      ];
       savedObjectsClient.collectMultiNamespaceReferences.mockResolvedValue({
-        objects: [
-          // When mocking these results, they must have the 'spaces' and 'inboundReferences' fields, but the 'inboundReferences' fields can be empty arrays for this unit test
-          ...objects.map((x) => ({ ...x, spaces: ['space-1'], inboundReferences: [] })),
-          // the return value of collectMultiNamespaceReferences includes the 2 requested objects, along with the 3 related tags/references
-          {
-            type: tagSavedObjectTypeName,
-            id: 'id-3',
-            spaces: ['space-1', '?'],
-            inboundReferences: [],
-          },
-          { type: 'bar-type', id: 'id-4', spaces: ['space-1', '?', '?'], inboundReferences: [] },
-          { type: 'baz-type', id: 'id-5', spaces: ['space-1', 'space-2'], inboundReferences: [] },
-        ],
+        objects: collectedObjects,
       });
 
       const request = httpServerMock.createKibanaRequest({ body: payload, method: 'post' });
@@ -142,6 +143,7 @@ describe('share to space', () => {
         selectedSpaces: ['space-1'], // every object is in 'space-1', so that is included in selectedSpaces
         partiallySelectedSpaces: ['space-2'], // some but not all objects are in 'space-2', so that is included in partiallySelectedSpaces
         unknownSpacesCount: 2, // this is derived from the max unknown spaces count of any individual object (in this case, id-4 is in 2 unknown spaces)
+        objects: collectedObjects,
       });
       expect(savedObjectsClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, {

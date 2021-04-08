@@ -88,6 +88,7 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
           selectedSpaces,
           partiallySelectedSpaces,
           unknownSpacesCount,
+          objects: collectedObjects.objects,
         };
         return response.ok({ body: getShareableReferencesResponse });
       } catch (error) {

@@ -10,6 +10,7 @@
  * @internal
  */
 export interface LegacyUrlAlias {
+  sourceId: string;
   targetNamespace: string;
   targetType: string;
   targetId: string;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsCollectMultiNamespaceReferencesObject } from 'kibana/server';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 export interface GetAllSpacesOptions {
@@ -33,4 +34,6 @@ export interface GetShareableReferencesResponse {
   partiallySelectedSpaces: string[];
   /** The spaces that are unknown */
   unknownSpacesCount: number;
+  /** The references that were found, with additional context -- including the input objects */
+  objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
 }

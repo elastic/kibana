@@ -663,8 +663,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const response = await this.baseClient.collectMultiNamespaceReferences(objects, options);
     const uniqueTypes = this.getUniqueObjectTypes(response.objects);
     const uniqueSpaces = this.getUniqueSpaces(
-      ...currentSpaceId,
-      ...response.objects.flatMap(({ spaces }) => spaces)
+      currentSpaceId,
+      ...response.objects.flatMap(({ spaces, spacesWithMatchingAliases = [] }) =>
+        spaces.concat(spacesWithMatchingAliases)
+      )
     );
 
     const { typeActionMap } = await this.ensureAuthorizedV2<'bulk_get' | 'share_to_space'>(
@@ -700,7 +702,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       new Set<string>()
     );
     const filteredAndRedactedObjectsMap = response.objects.reduce(
-      (acc, { type, id, spaces, inboundReferences }) => {
+      (acc, { type, id, spaces, spacesWithMatchingAliases, inboundReferences }) => {
         if (!spaces.length) {
           return acc;
         }
@@ -725,7 +727,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
             })
           );
           const redactedSpaces = getRedactedSpaces(type, 'bulk_get', typeActionMap, spaces);
-          return acc.set(`${type}:${id}`, { type, id, spaces: redactedSpaces, inboundReferences });
+          const redactedSpacesWithMatchingAliases =
+            spacesWithMatchingAliases &&
+            getRedactedSpaces(type, 'bulk_get', typeActionMap, spacesWithMatchingAliases);
+          return acc.set(`${type}:${id}`, {
+            type,
+            id,
+            spaces: redactedSpaces,
+            ...(redactedSpacesWithMatchingAliases && {
+              spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
+            }),
+            inboundReferences,
+          });
         }
         return acc;
       },
