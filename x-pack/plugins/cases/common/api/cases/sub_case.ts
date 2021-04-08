@@ -79,3 +79,4 @@ export type SubCasesResponse = rt.TypeOf<typeof SubCasesResponseRt>;
 export type SubCasesFindResponse = rt.TypeOf<typeof SubCasesFindResponseRt>;
 export type SubCasePatchRequest = rt.TypeOf<typeof SubCasePatchRequestRt>;
 export type SubCasesPatchRequest = rt.TypeOf<typeof SubCasesPatchRequestRt>;
+export type SubCasesFindRequest = rt.TypeOf<typeof SubCasesFindRequestRt>;
