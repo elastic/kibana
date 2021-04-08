@@ -69,11 +69,7 @@ export const SetupPage: React.FunctionComponent<{
     }
   };
 
-  if (
-    !missingRequirements.includes('tls_required') &&
-    !missingRequirements.includes('api_keys') &&
-    !missingRequirements.includes('encrypted_saved_object_encryption_key_required')
-  ) {
+  if (!missingRequirements.includes('api_keys')) {
     return (
       <WithoutHeaderLayout>
         <EuiPageBody restrictWidth={648}>

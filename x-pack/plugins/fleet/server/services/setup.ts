@@ -30,9 +30,6 @@ import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 
-const FLEET_ENROLL_USERNAME = 'fleet_enroll';
-const FLEET_ENROLL_ROLE = 'fleet_enroll';
-
 export interface SetupStatus {
   isIntialized: true | undefined;
 }
@@ -148,12 +145,14 @@ async function createSetupSideEffects(
     }
   }
 
+  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+
   await ensureAgentActionPolicyChangeExists(soClient);
 
   return { isIntialized: true };
 }
 
-export async function setupFleet(
+export async function ensureDefaultEnrollmentAPIKeysExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
@@ -171,14 +170,4 @@ export async function setupFleet(
       });
     })
   );
-
-  await Promise.all(
-    agentPolicies.map((agentPolicy) =>
-      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
-    )
-  );
-}
-
-function generateRandomPassword() {
-  return Buffer.from(uuid.v4()).toString('base64');
 }
