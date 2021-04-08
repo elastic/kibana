@@ -47,6 +47,13 @@ describe('IndexParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         actionConnector={actionConnector}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(``);
@@ -67,6 +74,13 @@ describe('IndexParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         actionConnector={actionConnector}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{
@@ -88,6 +102,13 @@ describe('IndexParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         actionConnector={preconfiguredActionConnector}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();
@@ -111,6 +132,13 @@ describe('IndexParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         actionConnector={preconfiguredActionConnector}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();

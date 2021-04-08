@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
@@ -39,6 +41,8 @@ describe('Actions Plugin', () => {
         preconfigured: {},
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
+        maxResponseContentLength: new ByteSizeValue(1000000),
+        responseTimeout: moment.duration(60000),
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -201,6 +205,8 @@ describe('Actions Plugin', () => {
         },
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
+        maxResponseContentLength: new ByteSizeValue(1000000),
+        responseTimeout: moment.duration(60000),
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

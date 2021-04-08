@@ -137,6 +137,13 @@ export interface ActionTaskExecutorParams {
 
 export interface ProxySettings {
   proxyUrl: string;
+  proxyBypassHosts: Set<string> | undefined;
+  proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
   proxyRejectUnauthorizedCertificates: boolean;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
 }
