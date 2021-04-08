@@ -87,3 +87,22 @@ export interface ConfigProps {
 }
 
 export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+
+type FormatType = 'duration' | 'number';
+type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+
+export interface FieldFormatParams {
+  inputFormat: InputFormat;
+  outputFormat: OutputFormat;
+  outputPrecision?: number;
+  showSuffix?: boolean;
+}
+
+export interface FieldFormat {
+  field: string;
+  format: {
+    id: FormatType;
+    params: FieldFormatParams;
+  };
+}
