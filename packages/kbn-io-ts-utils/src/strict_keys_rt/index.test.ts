@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as t from 'io-ts';
@@ -14,10 +15,7 @@ describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {
     const checks: Array<{ type: t.Type<any>; passes: any[]; fails: any[] }> = [
       {
-        type: t.intersection([
-          t.type({ foo: t.string }),
-          t.partial({ bar: t.string }),
-        ]),
+        type: t.intersection([t.type({ foo: t.string }), t.partial({ bar: t.string })]),
         passes: [{ foo: '' }, { foo: '', bar: '' }],
         fails: [
           { foo: '', unknownKey: '' },
@@ -26,15 +24,9 @@ describe('strictKeysRt', () => {
       },
       {
         type: t.type({
-          path: t.union([
-            t.type({ serviceName: t.string }),
-            t.type({ transactionType: t.string }),
-          ]),
+          path: t.union([t.type({ serviceName: t.string }), t.type({ transactionType: t.string })]),
         }),
-        passes: [
-          { path: { serviceName: '' } },
-          { path: { transactionType: '' } },
-        ],
+        passes: [{ path: { serviceName: '' } }, { path: { transactionType: '' } }],
         fails: [
           { path: { serviceName: '', unknownKey: '' } },
           { path: { transactionType: '', unknownKey: '' } },
@@ -62,9 +54,7 @@ describe('strictKeysRt', () => {
 
         if (!isRight(result)) {
           throw new Error(
-            `Expected ${JSON.stringify(
-              value
-            )} to be allowed, but validation failed with ${
+            `Expected ${JSON.stringify(value)} to be allowed, but validation failed with ${
               result.left[0].message
             }`
           );
@@ -76,9 +66,7 @@ describe('strictKeysRt', () => {
 
         if (!isLeft(result)) {
           throw new Error(
-            `Expected ${JSON.stringify(
-              value
-            )} to be disallowed, but validation succeeded`
+            `Expected ${JSON.stringify(value)} to be disallowed, but validation succeeded`
           );
         }
       });
