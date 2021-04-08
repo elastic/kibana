@@ -29,7 +29,6 @@ import {
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
-  useFormData,
 } from '../../shared_imports';
 import { Field, InternalFieldType, PluginStart } from '../../types';
 
