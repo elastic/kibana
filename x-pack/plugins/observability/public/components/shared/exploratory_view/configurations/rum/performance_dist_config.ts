@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../types';
-import { FieldLabels } from './constants';
-import { buildPhraseFilter } from './utils';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -24,7 +24,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-} from './data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -80,7 +80,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     labels: {
       ...FieldLabels,
       [SERVICE_NAME]: 'Web Application',
-      [TRANSACTION_DURATION]: 'Page load time',
+      [TRANSACTION_DURATION]: 'Page load time (Seconds)',
     },
   };
 }
