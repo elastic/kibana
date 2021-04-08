@@ -66,11 +66,13 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-  useEffect(() => {
-    const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
-    const isOrganization = !pathname.match(personalSourceUrlRegex); // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
 
-    setContext(isOrganization);
+  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+  const isOrganization = !pathname.match(personalSourceUrlRegex); // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
+
+  setContext(isOrganization);
+
+  useEffect(() => {
     setChromeIsVisible(isOrganization);
   }, [pathname]);
 

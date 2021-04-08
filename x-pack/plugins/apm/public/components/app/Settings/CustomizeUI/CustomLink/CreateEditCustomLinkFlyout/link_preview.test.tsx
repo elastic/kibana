@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { LinkPreview } from '../CreateEditCustomLinkFlyout/LinkPreview';
+import { LinkPreview } from '../CreateEditCustomLinkFlyout/link_preview';
 import {
   render,
   getNodeText,
