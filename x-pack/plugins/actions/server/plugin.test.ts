@@ -269,7 +269,11 @@ describe('Actions Plugin', () => {
             },
           },
           proxyRejectUnauthorizedCertificates: true,
+          proxyBypassHosts: undefined,
+          proxyOnlyHosts: undefined,
           rejectUnauthorized: true,
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration('60s'),
           ...overrides,
         };
       }
