@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, FC } from 'react';
+import React, { useMemo, FC, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse } from '../../../../common';
+import type { FindFileStructureResponse, DataVisualizeTableState } from '../../../../common';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import type { FileBasedFieldVisConfig } from '../stats_table/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
@@ -21,7 +21,8 @@ import { MetricFieldsCount, TotalFieldsCount } from '../stats_table/components/f
 interface Props {
   results: FindFileStructureResponse;
 }
-export const getDefaultDataVisualizerListState = () => ({
+
+export const getDefaultDataVisualizerListState = (): DataVisualizeTableState => ({
   pageIndex: 0,
   pageSize: 10,
   sortField: 'fieldName',
@@ -47,8 +48,10 @@ function getItemIdToExpandedRowMap(
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
-  const dataVisualizerListState = restorableDefaults;
-  const setDataVisualizerListState = (a: any) => {};
+  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizeTableState>(
+    restorableDefaults
+  );
+
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
   const setVisibleFieldTypes = (values: string[]) => {

@@ -21,11 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import {
-  ML_JOB_FIELD_TYPES,
-  MlJobFieldType,
-  DataVisualizerFileBasedAppState,
-} from '../../../../common';
+import { ML_JOB_FIELD_TYPES, MlJobFieldType, DataVisualizeTableState } from '../../../../common';
 import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
@@ -43,17 +39,13 @@ import { BooleanContentPreview } from './components/field_data_row';
 
 const FIELD_NAME = 'fieldName';
 
-type DataVisualizerIndexBasedAppState = any; // REMOVE
-
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
 interface DataVisualizerTableProps<T> {
   items: T[];
-  pageState: DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState;
-  updatePageState: (
-    update: Partial<DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState>
-  ) => void;
+  pageState: DataVisualizeTableState;
+  updatePageState: (update: DataVisualizeTableState) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
 }

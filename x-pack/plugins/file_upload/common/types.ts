@@ -131,16 +131,26 @@ export interface IngestPipeline {
 
 export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
 
-interface ListingPageUrlState {
+// interface ListingPageUrlState {
+//   pageSize: number;
+//   pageIndex: number;
+//   sortField: string;
+//   sortDirection: string;
+//   queryText?: string;
+// }
+
+// export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
+//   visibleFieldTypes?: string[];
+//   visibleFieldNames?: string[];
+//   showDistributions?: boolean;
+// }
+
+export interface DataVisualizeTableState {
   pageSize: number;
   pageIndex: number;
   sortField: string;
   sortDirection: string;
-  queryText?: string;
-}
-
-export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
-  visibleFieldTypes?: string[];
-  visibleFieldNames?: string[];
-  showDistributions?: boolean;
+  visibleFieldTypes: string[];
+  visibleFieldNames: string[];
+  showDistributions: boolean;
 }
