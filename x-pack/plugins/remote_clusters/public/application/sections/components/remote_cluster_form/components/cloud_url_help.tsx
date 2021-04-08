@@ -52,7 +52,7 @@ export const CloudUrlHelp: FunctionComponent = () => {
                 />
               </EuiLink>
             ),
-            elasticsearch: (<strong> Elasticsearch</strong>),
+            elasticsearch: <strong> Elasticsearch</strong>,
           }}
         />
       </EuiText>
