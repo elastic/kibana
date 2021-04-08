@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
 
@@ -148,4 +149,120 @@ export const createPolicyNameValidations = ({
       },
     },
   ];
+};
+
+type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
+
+/**
+ * This validator guarantees that the user does not specify a min_age
+ * value smaller that the min_age of a previous phase.
+ * For example, the user can't define '5 days' for cold phase if the
+ * warm phase is set to '10 days'.
+ */
+export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
+  formData,
+}: {
+  formData: Record<string, number>;
+}) => {
+  if (phase === 'warm') {
+    return;
+  }
+
+  const getValueFor = (_phase: MinAgePhase) => {
+    const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
+
+    const esFormat =
+      milli >= 0
+        ? formData[`phases.${_phase}.min_age`] + formData[`_meta.${_phase}.minAgeUnit`]
+        : undefined;
+
+    return {
+      milli,
+      esFormat,
+    };
+  };
+
+  const minAgeValues = {
+    warm: getValueFor('warm'),
+    cold: getValueFor('cold'),
+    frozen: getValueFor('frozen'),
+    delete: getValueFor('delete'),
+  };
+
+  const i18nErrors = {
+    greaterThanWarmPhase: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanWarmPhaseError',
+      {
+        defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
+        values: {
+          value: minAgeValues.warm.esFormat,
+        },
+      }
+    ),
+    greaterThanColdPhase: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
+      {
+        defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
+        values: {
+          value: minAgeValues.cold.esFormat,
+        },
+      }
+    ),
+    greaterThanFrozenPhase: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
+      {
+        defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
+        values: {
+          value: minAgeValues.frozen.esFormat,
+        },
+      }
+    ),
+  };
+
+  if (phase === 'cold') {
+    if (minAgeValues.warm.milli >= 0 && minAgeValues.cold.milli < minAgeValues.warm.milli) {
+      return {
+        message: i18nErrors.greaterThanWarmPhase,
+      };
+    }
+    return;
+  }
+
+  if (phase === 'frozen') {
+    if (minAgeValues.cold.milli >= 0 && minAgeValues.frozen.milli < minAgeValues.cold.milli) {
+      return {
+        message: i18nErrors.greaterThanColdPhase,
+      };
+    } else if (
+      minAgeValues.warm.milli >= 0 &&
+      minAgeValues.frozen.milli < minAgeValues.warm.milli
+    ) {
+      return {
+        message: i18nErrors.greaterThanWarmPhase,
+      };
+    }
+    return;
+  }
+
+  if (phase === 'delete') {
+    if (minAgeValues.frozen.milli >= 0 && minAgeValues.delete.milli < minAgeValues.frozen.milli) {
+      return {
+        message: i18nErrors.greaterThanFrozenPhase,
+      };
+    } else if (
+      minAgeValues.cold.milli >= 0 &&
+      minAgeValues.delete.milli < minAgeValues.cold.milli
+    ) {
+      return {
+        message: i18nErrors.greaterThanColdPhase,
+      };
+    } else if (
+      minAgeValues.warm.milli >= 0 &&
+      minAgeValues.delete.milli < minAgeValues.warm.milli
+    ) {
+      return {
+        message: i18nErrors.greaterThanWarmPhase,
+      };
+    }
+  }
 };

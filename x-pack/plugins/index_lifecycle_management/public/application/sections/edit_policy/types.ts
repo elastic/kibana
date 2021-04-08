@@ -15,6 +15,7 @@ export interface DataAllocationMetaFields {
 
 export interface MinAgeField {
   minAgeUnit?: string;
+  minAgeToMilliSeconds: number;
 }
 
 export interface ForcemergeFields {
