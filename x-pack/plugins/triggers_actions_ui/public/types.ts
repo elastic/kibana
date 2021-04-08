@@ -33,7 +33,7 @@ import {
 // so the `Params` is a black-box of Record<string, unknown>
 type Alert = SanitizedAlert<AlertTypeParams>;
 
-export {
+export type {
   Alert,
   AlertAction,
   AlertAggregations,
@@ -45,7 +45,7 @@ export {
   AlertNotifyWhenType,
   AlertTypeParams,
 };
-export { ActionType };
+export type { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;

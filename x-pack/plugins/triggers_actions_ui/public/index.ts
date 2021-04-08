@@ -7,13 +7,10 @@
 
 import { Plugin } from './plugin';
 
-export { AlertAdd } from './application/sections/alert_form';
-export {
-  AlertEdit,
-  AlertConditions,
-  AlertConditionsGroup,
-  ActionGroupWithCondition,
-} from './application/sections';
+// export { AlertAdd } from './application/sections/alert_form';
+export { /* AlertEdit,*/ AlertConditions, AlertConditionsGroup } from './application/sections';
+
+export type { ActionGroupWithCondition } from './application/sections';
 
 export type {
   AlertAction,
@@ -49,4 +46,4 @@ export * from './plugin';
 
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from '../public/application/app';
+// export type { TriggersAndActionsUiServices } from '../public/application/app';
