@@ -9,4 +9,7 @@ import { EventFiltersListPageState } from '../state';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
+  form: {
+    entry: undefined,
+  },
 });

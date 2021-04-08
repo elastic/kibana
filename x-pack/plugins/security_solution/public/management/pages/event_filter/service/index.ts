@@ -6,19 +6,25 @@
  */
 
 import { HttpStart } from 'kibana/public';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../../../public/shared_imports';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 // TODO: pending to add Types
 export interface EventFiltersService {
-  addEventFilter(params: {}): Promise<{}>;
+  addEventFilter(
+    exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  ): Promise<ExceptionListItemSchema>;
 }
 
 export class EventFiltersHttpService implements EventFiltersService {
   constructor(private http: HttpStart) {}
 
-  // TODO: pending to add const with api namespace
-  async addEventFilter(request: {}) {
-    return this.http.post<{}>('apiCall', {
-      body: JSON.stringify(request),
+  async addEventFilter(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
+    return this.http.post<ExceptionListItemSchema>('apiCall', {
+      body: JSON.stringify(exception),
     });
   }
 }

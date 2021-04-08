@@ -6,10 +6,21 @@
  */
 
 import { Action } from 'redux';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../../../public/shared_imports';
+
+export type EventFilterInitForm = Action<'eventFilterInitForm'> & {
+  payload: {
+    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+  };
+};
 
 export type EventFilterCreateStart = Action<'eventFilterCreateStart'> & {
   payload: {
-    entry: {}; // TODO: Add entry type
+    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
   };
 };
-export type EventFiltersPageAction = EventFilterCreateStart;
+
+export type EventFiltersPageAction = EventFilterCreateStart | EventFilterInitForm;

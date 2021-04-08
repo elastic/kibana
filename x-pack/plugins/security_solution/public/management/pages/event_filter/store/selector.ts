@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Immutable } from '../../../../../common/endpoint/types';
+import { EventFiltersListPageState } from '../state';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
-export interface EventFiltersListPageState {
-  entries: ExceptionListItemSchema[];
-  form: {
-    entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
-  };
-}
+
+export const getFormEntry = (
+  state: Immutable<EventFiltersListPageState>
+): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
+  return state.form.entry;
+};

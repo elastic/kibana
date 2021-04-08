@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled, { css } from 'styled-components';
@@ -17,6 +17,13 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import uuid from 'uuid';
+import { addIdToItem } from '../../../../../../../common';
+
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../../../../../public/shared_imports';
 
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
@@ -53,9 +60,48 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
   ({ data, onCancel }) => {
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const [isSuccessButtonDisabled, setIsSuccessButtonDisabled] = useState(false);
+    const [exception, setException] = useState<
+      ExceptionListItemSchema | CreateExceptionListItemSchema
+    >();
     const handleOnFormChange = useCallback((arg: OnChangeProps) => {
       setIsSuccessButtonDisabled(arg.hasError);
+      setException(arg.item);
     }, []);
+
+    useEffect(() => {
+      const entry: CreateExceptionListItemSchema = {
+        comments: [],
+        description: '',
+        entries:
+          data.event && data.process
+            ? [
+                addIdToItem({
+                  field: 'event.category',
+                  operator: 'included',
+                  type: 'match',
+                  value: (data.event.category ?? [])[0],
+                }),
+                addIdToItem({
+                  field: 'process.executable',
+                  operator: 'included',
+                  type: 'match',
+                  value: (data.process.executable ?? [])[0],
+                }),
+              ]
+            : [],
+        item_id: undefined,
+        list_id: 'as',
+        meta: {
+          temporaryUuid: uuid.v4(),
+        },
+        name: '',
+        namespace_type: 'agnostic',
+        tags: [],
+        type: 'simple',
+      };
+      dispatch({ type: 'eventFilterInitForm', payload: { entry } });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data]);
 
     return (
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -64,7 +110,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
         </ModalHeader>
 
         <ModalBodySection className="builder-section">
-          <EventFilteringForm eventData={data} onFormChange={handleOnFormChange} />
+          <EventFilteringForm onFormChange={handleOnFormChange} />
         </ModalBodySection>
 
         <EuiModalFooter>
@@ -77,7 +123,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
             fill
             disabled={isSuccessButtonDisabled}
             onClick={() => {
-              dispatch({ type: 'eventFilterCreateStart', payload: { entry: {} } });
+              dispatch({ type: 'eventFilterCreateStart', payload: { entry: exception } });
               onCancel();
             }}
           >

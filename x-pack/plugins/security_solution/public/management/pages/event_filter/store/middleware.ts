@@ -11,6 +11,11 @@ import {
   ImmutableMiddlewareAPI,
   ImmutableMiddlewareFactory,
 } from '../../../../common/store';
+import { Immutable } from '../../../../../common/endpoint/types';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../../../public/shared_imports';
 
 import { EventFiltersHttpService, EventFiltersService } from '../service';
 
@@ -19,7 +24,7 @@ import { EventFiltersListPageState } from '../state';
 const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
   trustedAppsService: EventFiltersService,
-  entry: {}
+  entry: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   try {
     await trustedAppsService.addEventFilter(entry);
@@ -35,7 +40,7 @@ export const createEventFiltersPageMiddleware = (
     next(action);
 
     if (action.type === 'eventFilterCreateStart') {
-      await eventFilterCreate(store, eventFiltersService, action.payload);
+      await eventFilterCreate(store, eventFiltersService, action.payload.entry);
     }
   };
 };

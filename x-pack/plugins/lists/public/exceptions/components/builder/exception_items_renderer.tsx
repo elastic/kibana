@@ -62,7 +62,6 @@ const initialState: State = {
 };
 
 export interface OnChangeProps {
-  errorExists: boolean;
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   exceptionsToDelete: ExceptionListItemSchema[];
 }
