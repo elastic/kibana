@@ -7,7 +7,6 @@
 
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
-import { OperationType } from '../../../../../../../lens/public';
 
 interface Props {
   seriesId: string;
@@ -23,7 +22,7 @@ export function getNetworkActivityLensConfig({ seriesId }: Props): DataSeries {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'average' as OperationType,
+      operationType: 'average',
       sourceField: 'system.memory.used.pct',
     },
     hasOperationType: true,

@@ -6,8 +6,7 @@
  */
 
 import { DataSeries } from '../../types';
-import { FieldLabels } from '../constants/constants';
-import { OperationType } from '../../../../../../../lens/public';
+import { FieldLabels } from '../constants';
 
 interface Props {
   seriesId: string;
@@ -23,7 +22,7 @@ export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'average' as OperationType,
+      operationType: 'average',
       sourceField: 'monitor.duration.us',
       label: 'Monitor duration (ms)',
     },

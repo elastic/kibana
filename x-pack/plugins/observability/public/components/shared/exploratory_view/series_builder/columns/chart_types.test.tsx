@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { SeriesChartTypes, XYChartTypes } from '../../series_editor/columns/chart_types';
 import { mockUrlStorage, render } from '../../rtl_helpers';
+import { SeriesChartTypesSelect, XYChartTypesSelect } from './chart_types';
 
-describe.skip('SeriesChartTypes', function () {
+describe.skip('SeriesChartTypesSelect', function () {
   it('should render properly', async function () {
     mockUrlStorage({});
 
-    render(<SeriesChartTypes seriesId={'series-id'} defaultChartType={'line'} />);
+    render(<SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />);
 
     await waitFor(() => {
       screen.getByText(/chart type/i);
@@ -24,7 +24,7 @@ describe.skip('SeriesChartTypes', function () {
   it('should call set series on change', async function () {
     const { setSeries } = mockUrlStorage({});
 
-    render(<SeriesChartTypes seriesId={'series-id'} defaultChartType={'line'} />);
+    render(<SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />);
 
     await waitFor(() => {
       screen.getByText(/chart type/i);
@@ -42,11 +42,11 @@ describe.skip('SeriesChartTypes', function () {
     expect(setSeries).toHaveBeenCalledTimes(3);
   });
 
-  describe('XYChartTypes', function () {
+  describe('XYChartTypesSelect', function () {
     it('should render properly', async function () {
       mockUrlStorage({});
 
-      render(<XYChartTypes value={'line'} onChange={jest.fn()} label={'Chart type'} />);
+      render(<XYChartTypesSelect value={'line'} onChange={jest.fn()} label={'Chart type'} />);
 
       await waitFor(() => {
         screen.getByText(/chart type/i);

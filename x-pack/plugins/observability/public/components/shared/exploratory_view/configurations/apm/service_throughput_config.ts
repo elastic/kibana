@@ -8,7 +8,6 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants/constants';
 import { buildPhraseFilter } from '../utils';
-import { OperationType } from '../../../../../../../lens/public';
 
 export function getServiceThroughputLensConfig({
   seriesId,
@@ -16,14 +15,14 @@ export function getServiceThroughputLensConfig({
 }: ConfigProps): DataSeries {
   return {
     id: seriesId,
-    reportType: 'service-latency',
+    reportType: 'service-throughput',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'average' as OperationType,
+      operationType: 'average',
       sourceField: 'transaction.duration.us',
       label: 'Throughput',
     },

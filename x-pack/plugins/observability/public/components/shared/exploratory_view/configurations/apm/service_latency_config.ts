@@ -8,7 +8,6 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import { OperationType } from '../../../../../../../lens/public';
 
 export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -20,7 +19,7 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'average' as OperationType,
+      operationType: 'average',
       sourceField: 'transaction.duration.us',
       label: 'Latency',
     },

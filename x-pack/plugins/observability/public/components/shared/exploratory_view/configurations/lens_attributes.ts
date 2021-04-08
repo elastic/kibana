@@ -234,20 +234,20 @@ export class LensAttributes {
   }
 
   getMainYAxis() {
-    const { sourceField, operationType } = this.reportViewConfig.yAxisColumn;
+    const { sourceField, operationType, label } = this.reportViewConfig.yAxisColumn;
 
     if (sourceField === 'Records' || !sourceField) {
-      return this.getRecordsColumn();
+      return this.getRecordsColumn(label);
     }
 
     return this.getColumnBasedOnType(sourceField!, operationType);
   }
 
-  getRecordsColumn(): CountIndexPatternColumn {
+  getRecordsColumn(label?: string): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
-      label: 'Count of records',
+      label: label || 'Count of records',
       operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',

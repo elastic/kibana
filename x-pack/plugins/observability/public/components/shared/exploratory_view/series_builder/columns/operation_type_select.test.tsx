@@ -10,11 +10,11 @@ import { fireEvent, screen } from '@testing-library/react';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 import { OperationTypeSelect } from './operation_type_select';
 
-describe('MetricSelection', function () {
+describe('OperationTypeSelect', function () {
   it('should render properly', function () {
     render(<OperationTypeSelect seriesId={'series-id'} />);
 
-    screen.getByText('Average');
+    screen.getByText('Select an option: , is selected');
   });
 
   it('should display selected value', function () {
@@ -33,18 +33,10 @@ describe('MetricSelection', function () {
     screen.getByText('Median');
   });
 
-  it('should be disabled on disabled state', function () {
-    render(<OperationTypeSelect seriesId={'series-id'} />);
-
-    const btn = screen.getByRole('button');
-
-    expect(btn.classList).toContain('euiButton-isDisabled');
-  });
-
   it('should call set series on change', function () {
     const { setSeries } = mockUrlStorage({
       data: {
-        'performance-distribution': {
+        'series-id': {
           reportType: 'kpi',
           operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
@@ -54,59 +46,19 @@ describe('MetricSelection', function () {
 
     render(<OperationTypeSelect seriesId={'series-id'} />);
 
-    fireEvent.click(screen.getByText('Median'));
+    fireEvent.click(screen.getByTestId('operationTypeSelect'));
 
-    screen.getByText('Chart metric group');
+    expect(setSeries).toHaveBeenCalledWith('series-id', {
+      operationType: 'median',
+      reportType: 'kpi',
+      time: { from: 'now-15m', to: 'now' },
+    });
 
     fireEvent.click(screen.getByText('95th Percentile'));
-
-    expect(setSeries).toHaveBeenNthCalledWith(1, 'performance-distribution', {
-      metric: '95th',
+    expect(setSeries).toHaveBeenCalledWith('series-id', {
+      operationType: '95th',
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
-    // FIXME This is a bug in EUI EuiButtonGroup calls on change multiple times
-    // This should be one https://github.com/elastic/eui/issues/4629
-    expect(setSeries).toHaveBeenCalledTimes(3);
-  });
-
-  it('should call set series on change for all series', function () {
-    const { setSeries } = mockUrlStorage({
-      data: {
-        'page-views': {
-          reportType: 'kpi',
-          operationType: 'median',
-          time: { from: 'now-15m', to: 'now' },
-        },
-        'performance-distribution': {
-          reportType: 'kpi',
-          operationType: 'median',
-          time: { from: 'now-15m', to: 'now' },
-        },
-      },
-    });
-
-    render(<OperationTypeSelect seriesId={'series-id'} />);
-
-    fireEvent.click(screen.getByText('Median'));
-
-    screen.getByText('Chart metric group');
-
-    fireEvent.click(screen.getByText('95th Percentile'));
-
-    expect(setSeries).toHaveBeenNthCalledWith(1, 'page-views', {
-      metric: '95th',
-      reportType: 'kpi',
-      time: { from: 'now-15m', to: 'now' },
-    });
-
-    expect(setSeries).toHaveBeenNthCalledWith(2, 'performance-distribution', {
-      metric: '95th',
-      reportType: 'kpi',
-      time: { from: 'now-15m', to: 'now' },
-    });
-    // FIXME This is a bug in EUI EuiButtonGroup calls on change multiple times
-    // This should be one https://github.com/elastic/eui/issues/4629
-    expect(setSeries).toHaveBeenCalledTimes(6);
   });
 });

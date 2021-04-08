@@ -59,6 +59,7 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
+      data-test-subj="operationTypeSelect"
       compressed
       valueOfSelected={operationType || defaultOperationType}
       options={options}

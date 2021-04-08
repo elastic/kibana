@@ -52,6 +52,7 @@ describe('Lens Attribute', () => {
           aggregatable: true,
           readFromDocValues: true,
         },
+        fieldName: 'transaction.type',
         columnType: null,
       })
     );
@@ -70,6 +71,7 @@ describe('Lens Attribute', () => {
           aggregatable: true,
           readFromDocValues: true,
         },
+        fieldName: 'transaction.duration.us',
         columnType: null,
       })
     );
@@ -92,6 +94,7 @@ describe('Lens Attribute', () => {
           aggregatable: true,
           readFromDocValues: true,
         },
+        fieldName: LCP_FIELD,
       })
     );
   });
@@ -100,7 +103,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time',
+      label: 'Page load time (Seconds)',
       operationType: 'range',
       params: {
         maxBars: 'auto',
