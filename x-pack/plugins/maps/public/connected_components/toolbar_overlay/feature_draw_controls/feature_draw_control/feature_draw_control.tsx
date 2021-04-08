@@ -14,16 +14,22 @@ import { GeometryFilterForm } from '../../../../components/geometry_filter_form'
 
 export interface Props {
   cancelDraw: () => void;
+  drawType: string;
   initiateDraw: (drawFeatureState: DRAW_TYPE) => void;
 }
 
 export function FeatureDrawControl(props: Props) {
+  const drawLineSelected = props.drawType === DRAW_TYPE.LINE;
+  const drawPolygonSelected = props.drawType === DRAW_TYPE.POLYGON;
+  const drawBBoxSelected = props.drawType === DRAW_TYPE.BOUNDS;
+  const drawPointSelected = props.drawType === DRAW_TYPE.POINT;
+
   return (
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
       <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
         <EuiFlexItem key={'line'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${drawLineSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.LINE)}
             iconType="minus"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineLabel', {
@@ -32,11 +38,13 @@ export function FeatureDrawControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
               defaultMessage: 'Draw line',
             })}
+            aria-pressed={drawLineSelected}
+            isSelected={drawLineSelected}
           />
         </EuiFlexItem>
         <EuiFlexItem key={'polygon'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${drawPolygonSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.POLYGON)}
             iconType="home"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
@@ -45,11 +53,13 @@ export function FeatureDrawControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineTitle', {
               defaultMessage: 'Draw polygon',
             })}
+            aria-pressed={drawPolygonSelected}
+            isSelected={drawPolygonSelected}
           />
         </EuiFlexItem>
         <EuiFlexItem key={'boundingBox'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${drawBBoxSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.BOUNDS)}
             iconType="stop"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel', {
@@ -58,11 +68,13 @@ export function FeatureDrawControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxTitle', {
               defaultMessage: 'Draw bounding box',
             })}
+            aria-pressed={drawBBoxSelected}
+            isSelected={drawBBoxSelected}
           />
         </EuiFlexItem>
         <EuiFlexItem key={'point'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${drawPointSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.POINT)}
             iconType="dot"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
@@ -71,6 +83,8 @@ export function FeatureDrawControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointTitle', {
               defaultMessage: 'Draw point',
             })}
+            aria-pressed={drawPointSelected}
+            isSelected={drawPointSelected}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

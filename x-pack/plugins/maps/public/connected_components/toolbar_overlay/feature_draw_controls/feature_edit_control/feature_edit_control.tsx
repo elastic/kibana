@@ -20,12 +20,14 @@ export interface Props {
 }
 
 export function FeatureEditControl(props: Props) {
+  const editFeaturesSelected = props.drawType === DRAW_TYPE.SIMPLE_SELECT;
+  const deleteFeaturesSelected = props.drawType === DRAW_TYPE.TRASH;
   return (
     <EuiPanel paddingSize="none" style={{ display: 'inline-block' }}>
       <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
         <EuiFlexItem key={'line'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${editFeaturesSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.SIMPLE_SELECT)}
             iconType="documentEdit"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.editFeaturesLabel', {
@@ -34,13 +36,13 @@ export function FeatureEditControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.editFeaturesTitle', {
               defaultMessage: 'Edit features',
             })}
-            aria-pressed={props.drawType === DRAW_TYPE.SIMPLE_SELECT}
-            isSelected={props.drawType === DRAW_TYPE.SIMPLE_SELECT}
+            aria-pressed={editFeaturesSelected}
+            isSelected={editFeaturesSelected}
           />
         </EuiFlexItem>
         <EuiFlexItem key={'polygon'} grow={false}>
           <EuiButtonIcon
-            className="mapToolbarOverlay__button"
+            className={`mapToolbarOverlay__button${deleteFeaturesSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.TRASH)}
             iconType="trash"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteLabel', {
@@ -49,8 +51,8 @@ export function FeatureEditControl(props: Props) {
             title={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.deleteTitle', {
               defaultMessage: 'Remove feature',
             })}
-            aria-pressed={props.drawType === DRAW_TYPE.TRASH}
-            isSelected={props.drawType === DRAW_TYPE.TRASH}
+            aria-pressed={deleteFeaturesSelected}
+            isSelected={deleteFeaturesSelected}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

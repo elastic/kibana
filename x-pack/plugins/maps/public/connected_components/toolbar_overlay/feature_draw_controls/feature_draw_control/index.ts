@@ -17,6 +17,7 @@ import { DRAW_TYPE } from '../../../../../common';
 function mapStateToProps(state: MapStoreState) {
   return {
     isDrawingFilter: isDrawingFilter(state),
+    drawType: state.map.mapState.drawFeatureState,
   };
 }
 

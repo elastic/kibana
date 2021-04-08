@@ -12,7 +12,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../draw_control';
+import { DrawControl } from '../';
 import { DRAW_TYPE } from '../../../../../common';
 
 export interface Props {
@@ -26,7 +26,7 @@ export interface Props {
 export class DrawFeatureControl extends Component<Props, {}> {
   _onFeaturesSelected = (mbDrawControl: MapboxDraw) => (e: { features: Feature[] }) => {
     if (this.props.drawType === DRAW_TYPE.TRASH) {
-      this.props.removeFeatures(e.features.map(({ id }: {id: string}) => id));
+      this.props.removeFeatures(e.features.map(({ id }: { id: string }) => id));
       mbDrawControl.trash();
     }
   };

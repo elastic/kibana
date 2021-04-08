@@ -24,7 +24,7 @@ import {
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../draw_control';
+import { DrawControl } from '../';
 import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
