@@ -302,9 +302,12 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema<FormInternal> => 
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_primary_shard_size: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-              defaultMessage: 'Maximum primary shard size',
-            }),
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
+              {
+                defaultMessage: 'Maximum primary shard size',
+              }
+            ),
             validations: [
               {
                 validator: rolloverThresholdsValidator,
