@@ -7,7 +7,7 @@
 
 import { CoreSetup, KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { inspect } from 'util';
-import { getSpaceIdFromPath } from '../../../spaces/common';
+import { SpacesServiceStart } from '../../../spaces/server';
 import {
   ActionVariable,
   AlertInstanceState,
@@ -30,7 +30,8 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   kibanaVersion: string;
   name: string;
   logger: Logger;
-  core: CoreSetup;
+  coreSetup: CoreSetup;
+  spacesStart?: SpacesServiceStart;
   fieldMap: TFieldMap;
   ilmPolicy: ILMPolicy;
   alertingPluginSetupContract: AlertingPluginSetupContract;
@@ -45,7 +46,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   private readonly children: Array<RuleRegistry<TFieldMap>> = [];
 
   constructor(private readonly options: RuleRegistryOptions<TFieldMap>) {
-    const { logger, core } = options;
+    const { logger, coreSetup } = options;
 
     const { wait, signal } = createReadySignal<boolean>();
 
@@ -54,7 +55,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
       index: string;
     }>({
       wait,
-      elasticsearchClientPromise: core
+      elasticsearchClientPromise: coreSetup
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       logger: logger.get('esAdapter'),
@@ -128,15 +129,16 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     }
   }
 
-  createScopedRuleRegistryClient(
-    request: KibanaRequest,
-    context: RequestHandlerContext
-  ): ScopedRuleRegistryClient<TFieldMap> | undefined {
+  createScopedRuleRegistryClient({
+    context,
+    request,
+  }: {
+    request: KibanaRequest;
+    context: RequestHandlerContext;
+  }): ScopedRuleRegistryClient<TFieldMap> | undefined {
     if (!this.options.writeEnabled) {
       return undefined;
     }
-
-    const { spaceId: namespace } = getSpaceIdFromPath(request.url.pathname);
 
     return createScopedRuleRegistryClient({
       savedObjectsClient: context.core.savedObjects.client,
@@ -144,7 +146,6 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
       clusterClientAdapter: this.esAdapter,
       fieldMap: this.options.fieldMap,
       index: this.getEsNames().indexAliasName,
-      namespace,
       logger: this.options.logger,
     });
   }

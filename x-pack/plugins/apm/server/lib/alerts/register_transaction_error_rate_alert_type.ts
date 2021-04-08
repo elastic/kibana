@@ -70,7 +70,7 @@ export function registerTransactionErrorRateAlertType({
 
         const searchParams = {
           index: indices['apm_oss.transactionIndices'],
-          size: 0,
+          size: 1,
           body: {
             query: {
               bool: {
@@ -112,7 +112,7 @@ export function registerTransactionErrorRateAlertType({
                 multi_terms: {
                   terms: [
                     { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT },
+                    { field: SERVICE_ENVIRONMENT, missing: '' },
                     { field: TRANSACTION_TYPE },
                   ],
                   size: 10000,

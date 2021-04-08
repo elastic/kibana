@@ -29,11 +29,11 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
     const logger = this.initContext.logger.get();
 
     const rootRegistry = new RuleRegistry({
-      core,
+      coreSetup: core,
       ilmPolicy: defaultIlmPolicy,
       fieldMap: defaultFieldMap,
       kibanaIndex: globalConfig.kibana.index,
-      name: 'alert-history',
+      name: 'alerts',
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: logger.get('root'),
       alertingPluginSetupContract: plugins.alerting,
