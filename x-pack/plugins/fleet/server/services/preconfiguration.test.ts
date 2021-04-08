@@ -24,6 +24,19 @@ const mockDefaultOutput: Output = {
   hosts: ['http://127.0.0.1:9201'],
 };
 
+const createMockESClient = () => {
+  const esClient = elasticsearchServiceMock.createInternalClient();
+  esClient.search.mockResolvedValue({
+    body: {
+      hits: {
+        // @ts-ignore
+        total: 0,
+      },
+    },
+  });
+  return esClient;
+};
+
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
@@ -126,7 +139,7 @@ describe('policy preconfiguration', () => {
 
   it('should perform a no-op when passed no policies or packages', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = createMockESClient();
 
     const { policies, packages } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
@@ -142,7 +155,7 @@ describe('policy preconfiguration', () => {
 
   it('should install packages successfully', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = createMockESClient();
 
     const { policies, packages } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
@@ -158,8 +171,14 @@ describe('policy preconfiguration', () => {
 
   it('should install packages and configure agent policies successfully', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    esClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          total: 0,
+        },
+      },
+    });
     const { policies, packages } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
       esClient,
@@ -187,7 +206,7 @@ describe('policy preconfiguration', () => {
 
   it('should throw an error when trying to install duplicate packages', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = createMockESClient();
 
     await expect(
       ensurePreconfiguredPackagesAndPolicies(
@@ -207,8 +226,14 @@ describe('policy preconfiguration', () => {
 
   it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    esClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          total: 0,
+        },
+      },
+    });
     const { policies: policiesA } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
       esClient,

@@ -140,10 +140,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             id: p.policy.id,
             updated_at: p.policy.updated_at,
           }
-        : i18n.translate('xpack.fleet.preconfiguration.policyDeleted', {
-            defaultMessage: 'Preconfigured policy {id} was deleted; skipping creation',
-            values: { id: p.deleted },
-          })
+        : {
+            id: p.deleted,
+            updated_at: i18n.translate('xpack.fleet.preconfiguration.policyDeleted', {
+              defaultMessage: 'Preconfigured policy {id} was deleted; skipping creation',
+              values: { id: p.deleted },
+            }),
+          }
     ),
     packages: preconfiguredPackages.map((pkg) => pkgToPkgKey(pkg)),
   };
