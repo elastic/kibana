@@ -14,10 +14,15 @@ import {
   EuiIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { PackagePolicy } from '../../../fleet/common';
-import { PackagePolicyCreateExtensionComponentProps } from '../../../fleet/public';
+import {
+  pagePathGetters,
+  CreatePackagePolicyRouteState,
+  PackagePolicyCreateExtensionComponentProps,
+} from '../../../fleet/public';
 import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
 import { useKibana } from '../common/lib/kibana';
 
@@ -31,6 +36,22 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
       application: { navigateToApp },
     } = useKibana().services;
     const [policyType, setPolicyType] = useState('live_query');
+    const history = useHistory();
+
+    useEffect(() => {
+      history.replace({
+        state: {
+          onSaveNavigateTo: (newPackagePolicy) => [
+            'fleet',
+            {
+              path: `#${pagePathGetters.integration_policy_edit({
+                packagePolicyId: newPackagePolicy.id,
+              })}`,
+            },
+          ],
+        } as CreatePackagePolicyRouteState,
+      });
+    }, []);
 
     const detailsClicked = useCallback((e) => {
       e.stopPropagation();
