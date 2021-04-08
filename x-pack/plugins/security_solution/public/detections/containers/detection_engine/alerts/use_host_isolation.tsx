@@ -9,18 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { isSecurityAppError } from '../../../../common/utils/api';
-import { someAPICall } from './api';
+import { createHostIsolation } from './api';
 
-interface HostIsolationIndex {
+interface HostIsolationStatus {
   loading: boolean;
   isIsolated: boolean;
 }
 
-interface UseSomeHookProps {
+interface UseHostIsolationProps {
   hostId: string;
 }
 
-export const useSomeHook = ({ hostId }: UseSomeHookProps): HostIsolationIndex => {
+export const useHostIsolation = ({ hostId }: UseHostIsolationProps): HostIsolationStatus => {
   const [loading, setLoading] = useState(true);
   const [isolated, setIsolated] = useState(false);
   const [, dispatchToaster] = useStateToaster();
@@ -31,7 +31,7 @@ export const useSomeHook = ({ hostId }: UseSomeHookProps): HostIsolationIndex =>
     const fetchData = async () => {
       try {
         setLoading(true);
-        const isolationStatus = await someAPICall({ hostId });
+        const isolationStatus = await createHostIsolation({ hostId });
 
         if (isSubscribed && isolationStatus != null) {
           setIsolated(true);

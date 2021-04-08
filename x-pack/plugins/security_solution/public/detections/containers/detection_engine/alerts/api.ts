@@ -11,7 +11,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
-  DANPANSAPI,
+  HOST_ISOLATION_URL,
 } from '../../../../../common/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
@@ -21,6 +21,7 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
+  HostIsolationIndex,
 } from './types';
 
 /**
@@ -104,14 +105,18 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   });
 
 /**
- * Get an API!
+ * Get Host Isolation index
  *
  * @param hostId
  *
  * @throws An error if response is not OK
  */
-export const someAPICall = async ({ hostId }: { hostId: string }): Promise<SomeType> =>
-  KibanaServices.get().http.fetch<SomeType>(DANPANSAPI, {
+export const createHostIsolation = async ({
+  hostId,
+}: {
+  hostId: string;
+}): Promise<HostIsolationIndex> =>
+  KibanaServices.get().http.fetch<HostIsolationIndex>(HOST_ISOLATION_URL, {
     method: 'POST',
     body: JSON.stringify({
       hostId,
