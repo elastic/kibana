@@ -308,14 +308,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
 
     setValue('seriesParams', updatedSeries);
     updateAxisTitle(updatedSeries);
-  }, [
-    metrics,
-    firstValueAxesId,
-    setValue,
-    stateParams.seriesParams,
-    stateParams.valueAxes,
-    updateAxisTitle,
-  ]);
+  }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
 
   return isTabSelected ? (
     <>
