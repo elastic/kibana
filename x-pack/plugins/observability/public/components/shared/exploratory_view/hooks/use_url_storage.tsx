@@ -10,7 +10,7 @@ import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_
 import type { AppDataType, ReportViewTypeId, SeriesUrl, UrlFilter } from '../types';
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
-import { URL_KEYS } from '../configurations/url_constants';
+import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export const UrlStorageContext = createContext<IKbnUrlStateStorage | null>(null);
 

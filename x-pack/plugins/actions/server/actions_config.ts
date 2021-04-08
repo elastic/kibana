@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { ActionsConfig, AllowedHosts, EnabledActionTypes } from './config';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings } from './types';
+import { ProxySettings, ResponseSettings } from './types';
 
 export { AllowedHosts, EnabledActionTypes } from './config';
 
@@ -31,6 +31,7 @@ export interface ActionsConfigurationUtilities {
   ensureActionTypeEnabled: (actionType: string) => void;
   isRejectUnauthorizedCertificatesEnabled: () => boolean;
   getProxySettings: () => undefined | ProxySettings;
+  getResponseSettings: () => ResponseSettings;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -99,6 +100,13 @@ function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
   return new Set(arr);
 }
 
+function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings {
+  return {
+    maxContentLength: config.maxResponseContentLength.getValueInBytes(),
+    timeout: config.responseTimeout.asMilliseconds(),
+  };
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsConfig
 ): ActionsConfigurationUtilities {
@@ -110,6 +118,7 @@ export function getActionsConfigurationUtilities(
     isUriAllowed,
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
+    getResponseSettings: () => getResponseSettingsFromConfig(config),
     isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
