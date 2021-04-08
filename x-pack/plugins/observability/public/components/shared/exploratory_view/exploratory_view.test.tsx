@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { within } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { render, mockUrlStorage, mockCore } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
-import * as obsvInd from '../../../utils/observability_index_patterns';
+import * as obsvInd from './utils/observability_index_patterns';
 
 describe('ExploratoryView', () => {
   beforeEach(() => {
@@ -56,10 +55,10 @@ describe('ExploratoryView', () => {
 
     await waitFor(() => {
       screen.getByText(/open in lens/i);
+    });
+
+    await waitFor(() => {
       screen.getByText(/select a data type to start building a series\./i);
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-      const button = screen.getByRole('button', { name: /add/i });
-      within(button).getByText(/add/i);
     });
 
     await fireEvent.click(screen.getByText(/cancel/i));
