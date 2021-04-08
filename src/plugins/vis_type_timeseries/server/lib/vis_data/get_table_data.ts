@@ -18,7 +18,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { extractFieldLabel } from '../../../common/calculate_label';
+import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
@@ -68,7 +68,6 @@ export async function getTableData(
 
   const meta = {
     type: panel.type,
-    pivot_label: panel.pivot_label || (await calculatePivotLabel()),
     uiRestrictions: capabilities.uiRestrictions,
   };
 
@@ -84,7 +83,10 @@ export async function getTableData(
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
-        body,
+        body: {
+          ...body,
+          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+        },
         index: panelIndex.indexPatternString,
       },
     ]);
@@ -101,6 +103,7 @@ export async function getTableData(
 
     return {
       ...meta,
+      pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };
   } catch (err) {

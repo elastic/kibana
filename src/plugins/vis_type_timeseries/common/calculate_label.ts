@@ -10,6 +10,7 @@ import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { lookup } from './agg_lookup';
 import { MetricsItemsSchema, SanitizedFieldType } from './types';
+import { extractFieldLabel } from './fields_utils';
 
 const paths = [
   'cumulative_sum',
@@ -25,10 +26,6 @@ const paths = [
   'serial_diff',
   'positive_only',
 ];
-
-export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
-  return fields.find((f) => f.name === name)?.label ?? name;
-};
 
 export const calculateLabel = (
   metric: MetricsItemsSchema,
