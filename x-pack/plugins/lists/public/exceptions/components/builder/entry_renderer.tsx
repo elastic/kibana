@@ -46,7 +46,10 @@ export interface EntryItemProps {
   httpService: HttpStart;
   indexPattern: IIndexPattern;
   listType: ExceptionListType;
-  listTypeSpecificFilter?: (pattern: IIndexPattern, type: ExceptionListType) => IIndexPattern;
+  listTypeSpecificIndexPatternFilter?: (
+    pattern: IIndexPattern,
+    type: ExceptionListType
+  ) => IIndexPattern;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
@@ -60,7 +63,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   httpService,
   indexPattern,
   listType,
-  listTypeSpecificFilter,
+  listTypeSpecificIndexPatternFilter,
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
@@ -123,7 +126,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         indexPattern,
         entry,
         listType,
-        listTypeSpecificFilter
+        listTypeSpecificIndexPatternFilter
       );
       const comboBox = (
         <FieldComponent
@@ -157,7 +160,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       }
     },
-    [indexPattern, entry, listType, listTypeSpecificFilter, handleFieldChange]
+    [indexPattern, entry, listType, listTypeSpecificIndexPatternFilter, handleFieldChange]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
