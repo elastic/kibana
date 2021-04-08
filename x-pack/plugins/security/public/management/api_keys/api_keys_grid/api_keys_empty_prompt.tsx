@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiAccordion, EuiEmptyPrompt, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DocLink } from '../../../components/doc_link';
+import { useHtmlId } from '../../../components/use_html_id';
 
 export interface ApiKeysEmptyPromptProps {
   error?: Error;
@@ -21,6 +22,8 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   error,
   children,
 }) => {
+  const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
+
   if (error) {
     if (doesErrorIndicateAPIKeysAreDisabled(error)) {
       return (
@@ -64,6 +67,10 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
       );
     }
 
+    const ThrowError = () => {
+      throw error;
+    };
+
     return (
       <EuiEmptyPrompt
         iconType="alert"
@@ -75,7 +82,34 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
             />
           </p>
         }
-        actions={children}
+        actions={
+          <>
+            {children}
+
+            <EuiSpacer size="xl" />
+            <EuiAccordion
+              id={accordionId}
+              buttonClassName="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+              buttonContent={
+                <FormattedMessage
+                  id="xpack.security.management.apiKeysEmptyPrompt.technicalDetailsButton"
+                  defaultMessage="Technical details"
+                />
+              }
+              buttonProps={{
+                style: { display: 'flex', justifyContent: 'center' },
+              }}
+              arrowDisplay="right"
+              paddingSize="m"
+            >
+              <EuiText textAlign="left">
+                <EuiErrorBoundary>
+                  <ThrowError />
+                </EuiErrorBoundary>
+              </EuiText>
+            </EuiAccordion>
+          </>
+        }
       />
     );
   }

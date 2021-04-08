@@ -9,20 +9,16 @@ import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiHideFor,
   EuiIcon,
   EuiInMemoryTable,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiShowFor,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -46,6 +42,7 @@ import { SelectableTokenField } from '../../../components/token_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
+import type { InvalidateApiKeys } from './invalidate_provider';
 import { InvalidateProvider } from './invalidate_provider';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
@@ -62,7 +59,7 @@ interface State {
   isAdmin: boolean;
   canManage: boolean;
   areApiKeysEnabled: boolean;
-  apiKeys: ApiKey[];
+  apiKeys?: ApiKey[];
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
@@ -79,7 +76,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       isAdmin: false,
       canManage: false,
       areApiKeysEnabled: false,
-      apiKeys: [],
+      apiKeys: undefined,
       selectedItems: [],
       error: undefined,
     };
@@ -125,44 +122,46 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys,
     } = this.state;
 
-    if (isLoadingApp) {
-      return (
-        <EuiPageContent>
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-              defaultMessage="Loading API keys…"
-            />
-          </SectionLoading>
-        </EuiPageContent>
-      );
-    }
-
-    if (!canManage) {
-      return <PermissionDenied />;
-    }
-
-    if (error) {
-      return (
-        <EuiPageContent>
-          <ApiKeysEmptyPrompt error={error}>
-            <EuiButton iconType="refresh" onClick={this.loadApiKeys}>
+    if (!apiKeys) {
+      if (isLoadingApp) {
+        return (
+          <EuiPageContent>
+            <SectionLoading>
               <FormattedMessage
-                id="xpack.security.accountManagement.apiKeys.retryButton"
-                defaultMessage="Try again"
+                id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+                defaultMessage="Loading API keys…"
               />
-            </EuiButton>
-          </ApiKeysEmptyPrompt>
-        </EuiPageContent>
-      );
-    }
+            </SectionLoading>
+          </EuiPageContent>
+        );
+      }
 
-    if (!areApiKeysEnabled) {
-      return (
-        <EuiPageContent>
-          <NotEnabled />
-        </EuiPageContent>
-      );
+      if (!canManage) {
+        return <PermissionDenied />;
+      }
+
+      if (error) {
+        return (
+          <EuiPageContent>
+            <ApiKeysEmptyPrompt error={error}>
+              <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.apiKeys.retryButton"
+                  defaultMessage="Try again"
+                />
+              </EuiButton>
+            </ApiKeysEmptyPrompt>
+          </EuiPageContent>
+        );
+      }
+
+      if (!areApiKeysEnabled) {
+        return (
+          <EuiPageContent>
+            <NotEnabled />
+          </EuiPageContent>
+        );
+      }
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
@@ -199,12 +198,12 @@ export class APIKeysGridPage extends Component<Props, State> {
                 {isAdmin ? (
                   <FormattedMessage
                     id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                    defaultMessage="View and invalidate API keys. An API key sends requests on behalf of a user."
+                    defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                    defaultMessage="View and invalidate your API keys. An API key sends requests on your behalf."
+                    defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
                   />
                 )}
               </p>
@@ -307,7 +306,7 @@ export class APIKeysGridPage extends Component<Props, State> {
   }
 
   private renderTable = () => {
-    const { apiKeys, selectedItems, isLoadingTable, isAdmin } = this.state;
+    const { apiKeys, selectedItems, isLoadingTable, isAdmin, error } = this.state;
 
     const message = isLoadingTable ? (
       <FormattedMessage
@@ -357,7 +356,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                  defaultMessage="Invalidate {count, plural, one {API key} other {API keys}}"
+                  defaultMessage="Delete {count, plural, one {API key} other {API keys}}"
                   values={{
                     count: selectedItems.length,
                   }}
@@ -380,10 +379,10 @@ export class APIKeysGridPage extends Component<Props, State> {
               }),
               multiSelect: false,
               options: Object.keys(
-                apiKeys.reduce((apiKeysMap: any, apiKey) => {
+                apiKeys?.reduce((apiKeysMap: any, apiKey) => {
                   apiKeysMap[apiKey.username] = true;
                   return apiKeysMap;
-                }, {})
+                }, {}) ?? {}
               ).map((username) => {
                 return {
                   value: username,
@@ -408,10 +407,10 @@ export class APIKeysGridPage extends Component<Props, State> {
               }),
               multiSelect: false,
               options: Object.keys(
-                apiKeys.reduce((apiKeysMap: any, apiKey) => {
+                apiKeys?.reduce((apiKeysMap: any, apiKey) => {
                   apiKeysMap[apiKey.realm] = true;
                   return apiKeysMap;
-                }, {})
+                }, {}) ?? {}
               ).map((realm) => {
                 return {
                   value: realm,
@@ -441,24 +440,38 @@ export class APIKeysGridPage extends Component<Props, State> {
           </>
         ) : undefined}
 
-        <EuiInMemoryTable
-          items={apiKeys}
-          itemId="id"
-          columns={this.getColumnConfig()}
-          search={search}
-          sorting={sorting}
-          selection={selection}
-          pagination={pagination}
-          loading={isLoadingTable}
-          message={message}
-          isSelectable={true}
-        />
+        <InvalidateProvider
+          isAdmin={isAdmin}
+          notifications={this.props.notifications}
+          apiKeysAPIClient={this.props.apiKeysAPIClient}
+        >
+          {(invalidateApiKeyPrompt) => (
+            <EuiInMemoryTable
+              items={apiKeys ?? []}
+              itemId="id"
+              columns={this.getColumnConfig(invalidateApiKeyPrompt)}
+              search={search}
+              sorting={sorting}
+              selection={selection}
+              pagination={pagination}
+              loading={isLoadingTable}
+              error={
+                error &&
+                i18n.translate('xpack.security.management.apiKeysEmptyPrompt.errorMessage', {
+                  defaultMessage: 'Could not load API keys.',
+                })
+              }
+              message={message}
+              isSelectable={true}
+            />
+          )}
+        </InvalidateProvider>
       </>
     );
   };
 
-  private getColumnConfig = () => {
-    const { isAdmin, isLoadingTable, createdApiKey } = this.state;
+  private getColumnConfig = (invalidateApiKeyPrompt: InvalidateApiKeys) => {
+    const { isAdmin, createdApiKey } = this.state;
 
     let config: Array<EuiBasicTableColumn<ApiKey>> = [];
 
@@ -571,60 +584,20 @@ export class APIKeysGridPage extends Component<Props, State> {
       {
         actions: [
           {
-            render: ({ name, id }: any) => {
-              return (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <InvalidateProvider
-                      isAdmin={isAdmin}
-                      notifications={this.props.notifications}
-                      apiKeysAPIClient={this.props.apiKeysAPIClient}
-                    >
-                      {(invalidateApiKeyPrompt) => {
-                        return (
-                          <>
-                            <EuiShowFor sizes={['xs', 's', 'm', 'l']}>
-                              <EuiButtonIcon
-                                iconType="minusInCircle"
-                                color="danger"
-                                aria-label={i18n.translate(
-                                  'xpack.security.management.apiKeys.table.invalidateButton',
-                                  {
-                                    defaultMessage: 'Invalidate',
-                                  }
-                                )}
-                                disabled={isLoadingTable}
-                                onClick={() =>
-                                  invalidateApiKeyPrompt([{ id, name }], this.onApiKeysInvalidated)
-                                }
-                                data-test-subj="invalidateApiKeyButton"
-                              />
-                            </EuiShowFor>
-                            <EuiHideFor sizes={['xs', 's', 'm', 'l']}>
-                              <EuiButtonEmpty
-                                iconType="minusInCircle"
-                                color="danger"
-                                flush="right"
-                                disabled={isLoadingTable}
-                                onClick={() =>
-                                  invalidateApiKeyPrompt([{ id, name }], this.onApiKeysInvalidated)
-                                }
-                                data-test-subj="invalidateApiKeyButton"
-                              >
-                                <FormattedMessage
-                                  id="xpack.security.management.apiKeys.table.invalidateButton"
-                                  defaultMessage="Invalidate"
-                                />
-                              </EuiButtonEmpty>
-                            </EuiHideFor>
-                          </>
-                        );
-                      }}
-                    </InvalidateProvider>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              );
-            },
+            name: i18n.translate('xpack.security.management.apiKeys.table.deleteAction', {
+              defaultMessage: 'Delete',
+            }),
+            description: i18n.translate(
+              'xpack.security.management.apiKeys.table.deleteDescription',
+              {
+                defaultMessage: 'Delete this API key',
+              }
+            ),
+            icon: 'trash',
+            type: 'icon',
+            color: 'danger',
+            onClick: (item) =>
+              invalidateApiKeyPrompt([{ id: item.id, name: item.name }], this.onApiKeysInvalidated),
           },
         ],
       },
@@ -651,7 +624,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       if (!canManage || !areApiKeysEnabled) {
         this.setState({ isLoadingApp: false });
       } else {
-        this.initiallyLoadApiKeys();
+        this.loadApiKeys();
       }
     } catch (e) {
       this.props.notifications.toasts.addDanger(
@@ -663,16 +636,12 @@ export class APIKeysGridPage extends Component<Props, State> {
     }
   }
 
-  private initiallyLoadApiKeys = () => {
-    this.setState({ isLoadingApp: true, isLoadingTable: false });
-    this.loadApiKeys();
-  };
-
   private reloadApiKeys = () => {
     this.setState({
       isLoadingApp: false,
       isLoadingTable: true,
       createdApiKey: undefined,
+      error: undefined,
     });
     this.loadApiKeys();
   };
