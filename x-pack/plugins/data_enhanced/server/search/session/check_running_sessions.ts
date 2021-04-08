@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY, from } from 'rxjs';
-import { expand, mergeMap } from 'rxjs/operators';
+import { expand, concatMap } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
   SearchSessionStatus,
@@ -148,7 +148,7 @@ export async function checkRunningSessions(
   try {
     await getAllSavedSearchSessions$(deps, config)
       .pipe(
-        mergeMap(async (runningSearchSessionsResponse) => {
+        concatMap(async (runningSearchSessionsResponse) => {
           if (!runningSearchSessionsResponse.total) return;
 
           logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);

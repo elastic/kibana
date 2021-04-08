@@ -37,6 +37,8 @@ export const configSchema = schema.object({
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
+  responseTimeout: schema.duration({ defaultValue: '60s' }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
