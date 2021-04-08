@@ -13,6 +13,7 @@ interface ElasticsearchErrorClause {
   type: string;
   reason: string;
   caused_by?: ElasticsearchErrorClause;
+  failed_shards?: Array<{ reason: ElasticsearchErrorClause & { script?: string; lang?: string } }>;
 }
 
 interface RequestError extends Error {
@@ -26,22 +27,30 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
-interface ESError extends Error {
-  attributes?: { caused_by?: ElasticsearchErrorClause };
-}
-
-const isEsError = (e: Error | ESError): e is ESError => {
-  if ('attributes' in e) {
-    return e.attributes?.caused_by?.caused_by !== undefined;
+const isScriptedFieldError = (e: ElasticsearchErrorClause) => {
+  if ('failed_shards' in e) {
+    return e.failed_shards?.some(({ reason }) => reason?.type === 'script_exception');
   }
   return false;
 };
 
-function getNestedErrorClause({
-  type,
-  reason,
-  caused_by: causedBy,
-}: ElasticsearchErrorClause): { type: string; reason: string } {
+interface ESError extends Error {
+  attributes?: ElasticsearchErrorClause;
+}
+
+const isEsError = (e: Error | ESError): e is ESError => {
+  if ('attributes' in e) {
+    return e.attributes?.caused_by !== undefined;
+  }
+  return false;
+};
+
+function getNestedErrorClause(e: ElasticsearchErrorClause): { type: string; reason: string } {
+  if (isScriptedFieldError(e)) {
+    const nestedError = e.failed_shards![0].reason;
+    return { type: nestedError.type, reason: `${nestedError.reason}: ${nestedError.script}` };
+  }
+  const { type, reason, caused_by: causedBy } = e;
   if (causedBy) {
     return getNestedErrorClause(causedBy);
   }
@@ -53,7 +62,10 @@ function getErrorSource(e: Error | RequestError | ESError) {
     return e.body!.attributes!.error;
   }
   if (isEsError(e)) {
-    return e.attributes!.caused_by;
+    if (e.attributes?.reason) {
+      return e.attributes;
+    }
+    return e.attributes?.caused_by;
   }
 }
 
