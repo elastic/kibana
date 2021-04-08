@@ -18,11 +18,15 @@ import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import {
+  MlAnomalyDetectionAlertAdvancedSettings,
+  MlAnomalyDetectionAlertParams,
+} from '../../common/types/alerts';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
+import { AdvancedSettings } from './advanced_settings';
 
 interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
@@ -114,6 +118,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     }
   });
 
+  const advancedSettings = useMemo(() => {
+    return {
+      lookbackInterval: alertParams.lookbackInterval,
+      topNBuckets: alertParams.topNBuckets,
+    };
+  }, [alertParams.lookbackInterval, alertParams.topNBuckets]);
+
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'}>
@@ -155,6 +166,17 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         value={alertParams.includeInterim}
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
+      <EuiSpacer size="m" />
+
+      <AdvancedSettings
+        value={advancedSettings}
+        onChange={useCallback((update) => {
+          Object.keys(update).forEach((k) => {
+            setAlertParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
+          });
+        }, [])}
+      />
+
       <EuiSpacer size="m" />
 
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
