@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
   ImmutableMiddlewareAPI,
   ImmutableMiddlewareFactory,
 } from '../../../../common/store';
-import { Immutable } from '../../../../../common/endpoint/types';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../public/shared_imports';
 
 import { EventFiltersHttpService, EventFiltersService } from '../service';
 
 import { EventFiltersListPageState } from '../state';
-import { EventFilterChangeForm } from './action';
 
 const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
-  eventFiltersService: EventFiltersService,
-  entry: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  eventFiltersService: EventFiltersService
 ) => {
   try {
-    await eventFiltersService.addEventFilter(entry);
+    const formEntry = store.getState().form.entry;
+    if (!formEntry) return;
+    const exception = await eventFiltersService.addEventFilter(formEntry);
+    store.dispatch({ type: 'eventFilterCreateSuccess', payload: { exception } });
   } catch (error) {
-    if (error) throw error;
+    store.dispatch({ type: 'eventFilterCreateError' });
   }
 };
 
@@ -42,7 +37,7 @@ export const createEventFiltersPageMiddleware = (
     next(action);
 
     if (action.type === 'eventFilterCreateStart') {
-      await eventFilterCreate(store, eventFiltersService, action.payload.entry);
+      await eventFilterCreate(store, eventFiltersService);
     }
   };
 };

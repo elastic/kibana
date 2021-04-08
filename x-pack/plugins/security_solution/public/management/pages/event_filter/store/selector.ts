@@ -20,3 +20,7 @@ export const getFormEntry = (
 export const getFormHasError = (state: EventFiltersListPageState): boolean => {
   return state.form.hasError;
 };
+
+export const getFormIsLoadingAction = (state: EventFiltersListPageState): boolean => {
+  return state.form.isLoadingAction;
+};

@@ -17,12 +17,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
 import { EventFilteringForm } from '../event_filtering_form';
 import { useGetInitialExceptionFromEvent, useEventFiltersSelector } from '../../hooks';
-import { getFormHasError, getFormEntry } from '../../../store/selector';
+import { getFormHasError, getFormIsLoadingAction } from '../../../store/selector';
+import { ACTIONS_TITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
 export interface EventFilteringModalProps {
   data: Ecs;
@@ -55,10 +55,9 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
   ({ data, onCancel }) => {
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const formHasError = useEventFiltersSelector(getFormHasError);
-    const formEntry = useEventFiltersSelector(getFormEntry);
+    const formIsLoadingAction = useEventFiltersSelector(getFormIsLoadingAction);
 
     const entry = useGetInitialExceptionFromEvent(data);
-
     useEffect(() => {
       dispatch({ type: 'eventFilterInitForm', payload: { entry } });
     }, [dispatch, entry]);
@@ -68,17 +67,16 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError}
+          disabled={formHasError || formIsLoadingAction}
           onClick={() => {
-            if (formEntry)
-              dispatch({ type: 'eventFilterCreateStart', payload: { entry: formEntry } });
-            onCancel();
+            dispatch({ type: 'eventFilterCreateStart' });
           }}
+          isLoading={formIsLoadingAction}
         >
-          {'Confirm'}
+          {ACTIONS_CONFIRM}
         </EuiButton>
       ),
-      [dispatch, formEntry, formHasError, onCancel]
+      [dispatch, formHasError, formIsLoadingAction]
     );
 
     const modalBodyMemo = useMemo(
@@ -93,14 +91,14 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     return (
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{'Add event filter'}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{ACTIONS_TITLE}</EuiModalHeaderTitle>
         </ModalHeader>
 
         {modalBodyMemo}
 
         <EuiModalFooter>
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
-            {'cancel'}
+            {ACTIONS_CANCEL}
           </EuiButtonEmpty>
           {confirmButtonMemo}
         </EuiModalFooter>

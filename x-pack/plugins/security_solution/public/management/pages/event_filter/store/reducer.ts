@@ -9,7 +9,13 @@ import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 
-import { EventFilterCreateStart, EventFilterInitForm, EventFilterChangeForm } from './action';
+import {
+  EventFilterInitForm,
+  EventFilterChangeForm,
+  EventFilterCreateStart,
+  EventFilterCreateSuccess,
+  EventFilterCreateError,
+} from './action';
 
 import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
@@ -19,10 +25,6 @@ type CaseReducer<T extends AppAction> = (
   state: Immutable<EventFiltersListPageState>,
   action: Immutable<T>
 ) => Immutable<EventFiltersListPageState>;
-
-const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
-  return { ...state };
-};
 
 const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) => {
   return { ...state, form: { ...state.form, entry: action.payload.entry } };
@@ -35,17 +37,43 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
   };
 };
 
+const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
+  return {
+    ...state,
+    form: { ...state.form, isLoadingAction: true },
+  };
+};
+
+const eventFilterCreateSuccess: CaseReducer<EventFilterCreateSuccess> = (state, action) => {
+  return {
+    ...state,
+    entries: [action.payload.exception, ...state.entries],
+    form: { ...state.form, isLoadingAction: false, entry: undefined, hasError: false },
+  };
+};
+
+const eventFilterCreateError: CaseReducer<EventFilterCreateError> = (state, action) => {
+  return {
+    ...state,
+    form: { ...state.form, isLoadingAction: false },
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
 ) => {
   switch (action.type) {
-    case 'eventFilterCreateStart':
-      return eventFilterCreateStart(state, action);
     case 'eventFilterInitForm':
       return eventFilterInitForm(state, action);
     case 'eventFilterChangeForm':
       return eventFilterChangeForm(state, action);
+    case 'eventFilterCreateStart':
+      return eventFilterCreateStart(state, action);
+    case 'eventFilterCreateSuccess':
+      return eventFilterCreateSuccess(state, action);
+    case 'eventFilterCreateError':
+      return eventFilterCreateError(state, action);
   }
 
   return state;

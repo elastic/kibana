@@ -15,7 +15,6 @@ import { EventFiltersListPageState } from '../state';
 
 import { CreateExceptionListItemSchema } from '../../../../../public/shared_imports';
 import { Ecs } from '../../../../../common/ecs';
-import { addIdToItem } from '../../../../../common';
 
 import {
   MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE as EVENT_FILTERS_NS,
@@ -36,22 +35,22 @@ export function useGetInitialExceptionFromEvent(data: Ecs): CreateExceptionListI
       entries:
         data.event && data.process
           ? [
-              addIdToItem({
+              {
                 field: 'event.category',
                 operator: 'included',
                 type: 'match',
                 value: (data.event.category ?? [])[0],
-              }),
-              addIdToItem({
+              },
+              {
                 field: 'process.executable',
                 operator: 'included',
                 type: 'match',
                 value: (data.process.executable ?? [])[0],
-              }),
+              },
             ]
           : [],
       item_id: undefined,
-      list_id: 'as',
+      list_id: 'eventFiltersList',
       meta: {
         temporaryUuid: uuid.v4(),
       },
@@ -59,6 +58,8 @@ export function useGetInitialExceptionFromEvent(data: Ecs): CreateExceptionListI
       namespace_type: 'agnostic',
       tags: [],
       type: 'simple',
+      // TODO: Try to fix this type casting
+      os_types: [(data.host ? data.host.os?.family ?? [] : [])[0] as 'windows' | 'linux' | 'macos'],
     }),
     [data]
   );

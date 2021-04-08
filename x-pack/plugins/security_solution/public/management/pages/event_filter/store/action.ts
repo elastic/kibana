@@ -24,13 +24,18 @@ export type EventFilterChangeForm = Action<'eventFilterChangeForm'> & {
   };
 };
 
-export type EventFilterCreateStart = Action<'eventFilterCreateStart'> & {
+export type EventFilterCreateStart = Action<'eventFilterCreateStart'>;
+export type EventFilterCreateSuccess = Action<'eventFilterCreateSuccess'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    exception: ExceptionListItemSchema;
   };
 };
+export type EventFilterCreateError = Action<'eventFilterCreateError'>;
 
 export type EventFiltersPageAction =
   | EventFilterCreateStart
   | EventFilterInitForm
-  | EventFilterChangeForm;
+  | EventFilterChangeForm
+  | EventFilterCreateStart
+  | EventFilterCreateSuccess
+  | EventFilterCreateError;

@@ -5,63 +5,90 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiSpacer,
+  EuiForm,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+} from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
 import {
   ExceptionBuilderComponent,
   OnChangeProps as OnChangeBuilderProps,
 } from '../../../../../../common/components/exceptions/builder';
+import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../../../public/shared_imports';
+import { ExceptionListItemSchema } from '../../../../../../../public/shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntry } from '../../../store/selector';
+import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL } from './translations';
+import { OS_TITLES } from '../../../../../common/translations';
 
-export const EventFilteringForm: React.FC = memo(() => {
-  const { http, data } = useKibana().services;
-  const dispatch = useDispatch<Dispatch<AppAction>>();
-  const exception = useEventFiltersSelector(getFormEntry);
+const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
+  OperatingSystem.MAC,
+  OperatingSystem.WINDOWS,
+  OperatingSystem.LINUX,
+];
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
-  const [item, setItem] = useState<ExceptionListItemSchema | CreateExceptionListItemSchema>();
-  const [name, setName] = useState<string>('');
-  const [hasNameError, setHasNameError] = useState(!name);
-  const [hasItemsError, setHasItemsError] = useState(false);
-  const [comment, setComment] = useState<string>('');
+interface EventFilteringFormProps {
+  allowSelectOs?: boolean;
+}
+export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
+  ({ allowSelectOs = false }) => {
+    const { http, data } = useKibana().services;
+    const dispatch = useDispatch<Dispatch<AppAction>>();
+    const exception = useEventFiltersSelector(getFormEntry);
 
-  const handleOnBuilderChange = useCallback((arg: OnChangeBuilderProps) => {
-    if (isEmpty(arg.exceptionItems)) return;
-    setItem(arg.exceptionItems[0]);
-    setHasItemsError(arg.errorExists);
-  }, []);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
 
-  const handleOnChangeName = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    setHasNameError(!e.target.value);
-  }, []);
+    const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
+      () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
+      []
+    );
 
-  useEffect(() => {
-    if (item)
-      dispatch({
-        type: 'eventFilterChangeForm',
-        payload: { entry: { ...item, name }, hasError: hasNameError || hasItemsError },
-      });
-  }, [item, name, comment, hasNameError, hasItemsError, dispatch]);
+    const [hasNameError, setHasNameError] = useState(!exception || !exception.name);
+    const [hasItemsError, setHasItemsError] = useState(false);
+    const [comment, setComment] = useState<string>('');
+    const handleOnBuilderChange = useCallback(
+      (arg: OnChangeBuilderProps) => {
+        if (isEmpty(arg.exceptionItems)) return;
+        setHasItemsError(arg.errorExists);
+        dispatch({
+          type: 'eventFilterChangeForm',
+          payload: { entry: arg.exceptionItems[0], hasError: hasNameError || hasItemsError },
+        });
+      },
+      [dispatch, hasItemsError, hasNameError]
+    );
 
-  const exceptionBuilderComponentMemo = useMemo(
-    () => (
-      <>
+    const handleOnChangeName = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!exception) return;
+        setHasNameError(!e.target.value);
+        dispatch({
+          type: 'eventFilterChangeForm',
+          payload: {
+            entry: { ...exception, name: e.target.value.toString() },
+            hasError: hasNameError || hasItemsError,
+          },
+        });
+      },
+      [dispatch, exception, hasItemsError, hasNameError]
+    );
+
+    const exceptionBuilderComponentMemo = useMemo(
+      () => (
         <ExceptionBuilderComponent
           httpService={http}
           autocompleteService={data.autocomplete}
@@ -78,42 +105,68 @@ export const EventFilteringForm: React.FC = memo(() => {
           id-aria="alert-exception-builder"
           onChange={handleOnBuilderChange}
         />
+      ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [data, handleOnBuilderChange, http, indexPatterns, exception?.entries]
+    );
+
+    const nameInputMemo = useMemo(
+      () => (
+        <EuiFormRow label={NAME_LABEL} fullWidth isInvalid={hasNameError} error={NAME_ERROR}>
+          <EuiFieldText
+            placeholder={NAME_PLACEHOLDER}
+            defaultValue={exception?.name ?? ''}
+            onChange={handleOnChangeName}
+            fullWidth
+            aria-label={NAME_PLACEHOLDER}
+            required
+            maxLength={256}
+          />
+        </EuiFormRow>
+      ),
+      [hasNameError, exception?.name, handleOnChangeName]
+    );
+
+    const osInputMemo = useMemo(
+      () => (
+        <EuiFormRow label={OS_LABEL} fullWidth>
+          <EuiSuperSelect
+            name="os"
+            options={osOptions}
+            valueOfSelected={
+              exception?.os_types ? exception.os_types[0] : OS_TITLES[OperatingSystem.WINDOWS]
+            }
+            // TODO: To be implemented when adding update/create from scratch action
+            // onChange={}}
+          />
+        </EuiFormRow>
+      ),
+      [exception?.os_types, osOptions]
+    );
+
+    const commentsInputMemo = useMemo(
+      () => <AddExceptionComments newCommentValue={comment} newCommentOnChange={setComment} />,
+      [comment, setComment]
+    );
+
+    return !isIndexPatternLoading && exception ? (
+      <EuiForm component="div">
+        {nameInputMemo}
         <EuiSpacer />
-      </>
-    ),
-    [data, handleOnBuilderChange, http, indexPatterns, exception]
-  );
-
-  const nameInputMemo = useMemo(
-    () => (
-      <>
-        <EuiFieldText
-          placeholder="Event exception name"
-          value={name}
-          onChange={handleOnChangeName}
-          fullWidth
-          aria-label="Event exception name"
-        />
+        {allowSelectOs ? (
+          <>
+            {osInputMemo}
+            <EuiSpacer />
+          </>
+        ) : null}
+        {exceptionBuilderComponentMemo}
         <EuiSpacer />
-      </>
-    ),
-    [name, handleOnChangeName]
-  );
-
-  const commentsInputMemo = useMemo(
-    () => <AddExceptionComments newCommentValue={comment} newCommentOnChange={setComment} />,
-    [comment, setComment]
-  );
-
-  return !isIndexPatternLoading && exception ? (
-    <>
-      {nameInputMemo}
-      {exceptionBuilderComponentMemo}
-      {commentsInputMemo}
-    </>
-  ) : (
-    <Loader size="xl" />
-  );
-});
+        {commentsInputMemo}
+      </EuiForm>
+    ) : (
+      <Loader size="xl" />
+    );
+  }
+);
 
 EventFilteringForm.displayName = 'EventFilteringForm';

@@ -12,5 +12,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   form: {
     entry: undefined,
     hasError: false,
+    isLoadingAction: false,
+    isLoadingEntry: false,
   },
 });
