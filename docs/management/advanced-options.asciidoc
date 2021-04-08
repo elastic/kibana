@@ -120,7 +120,7 @@ number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
 Limits the density of date and number histograms across Kibana
-for better performance using a test query. If the test query would too many buckets,
+using a test query. When the test query contains too many buckets,
 the interval between buckets increases. This setting applies separately
 to each histogram aggregation, and does not apply to other types of aggregations.
 To find the maximum value of this setting, divide the {es} `search.max_buckets`
