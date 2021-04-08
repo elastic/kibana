@@ -20,7 +20,7 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 ];
 
 export function DataTypesCol() {
-  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
+  const { series, setSeries, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
   const { loadIndexPattern } = useIndexPatternContext();
 
@@ -28,7 +28,11 @@ export function DataTypesCol() {
     if (dataType) {
       loadIndexPattern(dataType);
     }
-    setSeries(NEW_SERIES_KEY, { dataType } as any);
+    if (!dataType) {
+      removeSeries(NEW_SERIES_KEY);
+    } else {
+      setSeries(NEW_SERIES_KEY, { dataType } as any);
+    }
   };
 
   const selectedDataType = series.dataType;

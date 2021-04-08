@@ -37,7 +37,7 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [buildPhraseFilter('transaction.type', 'request', indexPattern)],
+    filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
     labels: { ...FieldLabels },
     reportDefinitions: [
       {

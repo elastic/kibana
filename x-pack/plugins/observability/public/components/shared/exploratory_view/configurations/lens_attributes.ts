@@ -21,6 +21,7 @@ import {
   XYCurveType,
   DataType,
   OperationMetadata,
+  FieldBasedIndexPatternColumn,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
@@ -57,7 +58,7 @@ export class LensAttributes {
     reportViewConfig: DataSeries,
     seriesType?: SeriesType,
     filters?: UrlFilter[],
-    metricType?: OperationType,
+    operationType?: OperationType,
     reportDefinitions?: Record<string, string>
   ) {
     this.indexPattern = indexPattern;
@@ -65,8 +66,8 @@ export class LensAttributes {
     this.filters = filters ?? [];
     this.reportDefinitions = reportDefinitions ?? {};
 
-    if (typeof reportViewConfig.yAxisColumn.operationType !== undefined && metricType) {
-      reportViewConfig.yAxisColumn.operationType = metricType;
+    if (typeof reportViewConfig.yAxisColumn.operationType !== undefined && operationType) {
+      reportViewConfig.yAxisColumn.operationType = operationType as FieldBasedIndexPatternColumn['operationType'];
     }
     this.seriesType = seriesType ?? reportViewConfig.defaultSeriesType;
     this.reportViewConfig = reportViewConfig;

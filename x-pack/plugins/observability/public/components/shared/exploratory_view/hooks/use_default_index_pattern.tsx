@@ -11,6 +11,7 @@ import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ReportToDataTypeMap } from '../configurations/constants';
 
 export interface IIndexPatternContext {
   indexPattern: IndexPattern;
@@ -39,6 +40,7 @@ export function IndexPatternContextProvider({
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const loadIndexPattern = async (dataType: AppDataType) => {
+    setIndexPattern(undefined);
     const obsvIndexP = new ObservabilityIndexPatterns(data);
     const indPattern = await obsvIndexP.getIndexPattern(dataType);
     setIndexPattern(indPattern!);

@@ -49,6 +49,9 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
 }
 
 export function buildPhraseFilter(field: string, value: any, indexPattern: IIndexPattern) {
-  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field)!;
-  return esFilters.buildPhraseFilter(fieldMeta, value, indexPattern);
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
 }

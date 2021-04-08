@@ -76,8 +76,8 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       },
     ],
     filters: [
-      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: {
       ...FieldLabels,

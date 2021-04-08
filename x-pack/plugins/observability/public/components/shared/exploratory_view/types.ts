@@ -9,9 +9,9 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
-  IndexPatternColumn,
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
@@ -53,10 +53,7 @@ export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn:
-    | Partial<IndexPatternColumn>
-    | Partial<LastValueIndexPatternColumn>
-    | Partial<DateHistogramIndexPatternColumn>;
+  yAxisColumn: Partial<FieldBasedIndexPatternColumn>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;

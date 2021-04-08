@@ -35,7 +35,6 @@ export function ExploratoryView() {
 
   const lensAttributesT = useLensAttributes({
     seriesId,
-    indexPattern,
   });
 
   useEffect(() => {
