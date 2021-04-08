@@ -31,11 +31,13 @@ export const registerGetRoutes = ({
 
         return res.ok({ body: deserializePipelines(pipelines) });
       } catch (error) {
-        const errorResponse = handleEsError({ error, response: res });
-        if (errorResponse.status === 404) {
+        const esErrorResponse = handleEsError({ error, response: res });
+        if (esErrorResponse.status === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we return an empty array and 200 status back to the client
           return res.ok({ body: [] });
         }
-        return errorResponse;
+        return esErrorResponse;
       }
     })
   );
