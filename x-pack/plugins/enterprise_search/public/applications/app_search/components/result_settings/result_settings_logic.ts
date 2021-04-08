@@ -71,18 +71,19 @@ interface ResultSettingsValues {
   dataLoading: boolean;
   saving: boolean;
   openModal: OpenModal;
-  nonTextResultFields: FieldResultSettingObject;
-  textResultFields: FieldResultSettingObject;
   resultFields: FieldResultSettingObject;
-  serverResultFields: ServerFieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
   schema: Schema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  textResultFields: FieldResultSettingObject;
+  nonTextResultFields: FieldResultSettingObject;
+  serverResultFields: ServerFieldResultSettingObject;
   resultFieldsAtDefaultSettings: boolean;
   resultFieldsEmpty: boolean;
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
+  queryPerformanceScore: number;
 }
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
@@ -220,6 +221,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           },
           {}
         ),
+    ],
+    queryPerformanceScore: [
+      () => [selectors.serverResultFields, selectors.schema],
+      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+        return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
+          let newAcc = acc;
+          if (resultField.raw) {
+            if (schema[fieldName] !== 'text') {
+              newAcc += 0.2;
+            } else if (
+              typeof resultField.raw === 'object' &&
+              resultField.raw.size &&
+              resultField.raw.size <= 250
+            ) {
+              newAcc += 1.0;
+            } else {
+              newAcc += 1.5;
+            }
+          }
+          if (resultField.snippet) {
+            newAcc += 2.0;
+          }
+          return newAcc;
+        }, 0);
+      },
     ],
   }),
   listeners: ({ actions, values }) => ({
