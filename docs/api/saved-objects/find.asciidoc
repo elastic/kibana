@@ -60,7 +60,7 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 `aggs`::
   (Optional, string) **experimental** An aggregation structure, serialized as a string. The field format is similar to `filter`, meaning
   that to use a saved object type attribute in the aggregation, the `savedObjectType.attributes.title`: "myTitle"` format
-  must be used.
+  must be used. For root fields, the syntax is `savedObjectType.rootField`
 
 NOTE: As objects change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
