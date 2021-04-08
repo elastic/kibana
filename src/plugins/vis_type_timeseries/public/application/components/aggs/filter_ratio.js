@@ -13,6 +13,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 import {
   htmlIdGenerator,
@@ -29,7 +30,7 @@ import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {
-  const indexFields = fields[indexPattern];
+  const indexFields = fields[getIndexPatternKey(indexPattern)];
   if (!indexFields) return false;
   const fieldObject = indexFields.find((f) => f.name === field);
   if (!fieldObject) return false;

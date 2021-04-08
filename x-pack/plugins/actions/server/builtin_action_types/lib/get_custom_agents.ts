@@ -19,7 +19,8 @@ interface GetCustomAgentsResponse {
 
 export function getCustomAgents(
   configurationUtilities: ActionsConfigurationUtilities,
-  logger: Logger
+  logger: Logger,
+  url: string
 ): GetCustomAgentsResponse {
   const proxySettings = configurationUtilities.getProxySettings();
   const defaultAgents = {
@@ -33,6 +34,28 @@ export function getCustomAgents(
     return defaultAgents;
   }
 
+  let targetUrl: URL;
+  try {
+    targetUrl = new URL(url);
+  } catch (err) {
+    logger.warn(`error determining proxy state for invalid url "${url}", using default agents`);
+    return defaultAgents;
+  }
+
+  // filter out hostnames in the proxy bypass or only lists
+  const { hostname } = targetUrl;
+
+  if (proxySettings.proxyBypassHosts) {
+    if (proxySettings.proxyBypassHosts.has(hostname)) {
+      return defaultAgents;
+    }
+  }
+
+  if (proxySettings.proxyOnlyHosts) {
+    if (!proxySettings.proxyOnlyHosts.has(hostname)) {
+      return defaultAgents;
+    }
+  }
   logger.debug(`Creating proxy agents for proxy: ${proxySettings.proxyUrl}`);
   let proxyUrl: URL;
   try {
