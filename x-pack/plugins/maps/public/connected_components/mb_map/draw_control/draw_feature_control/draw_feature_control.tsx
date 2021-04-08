@@ -11,9 +11,13 @@ import { Map as MbMap } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
+import * as jsts from 'jsts';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
 import { DRAW_TYPE } from '../../../../../common';
+
+const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface Props {
   disableDrawState: () => void;
@@ -31,9 +35,15 @@ export class DrawFeatureControl extends Component<Props, {}> {
     }
   };
 
-  _onDraw = async (e: { features: Feature[] }) => {
+  _onDraw = (mbDrawControl: MapboxDraw) => async (e: { features: Feature[] }) => {
     try {
-      console.log(e);
+      e.features.forEach((feature: Feature) => {
+        const { geometry } = geoJSONReader.read(feature);
+        if (!geometry.isSimple() || !geometry.isValid()) {
+          mbDrawControl.delete(feature.id);
+          throw new Error('Invalid geometry detected');
+        }
+      });
       this.props.addFeaturesToIndexQueue(e.features);
     } catch (error) {
       getToasts().addWarning(

@@ -39,7 +39,7 @@ mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
 export interface Props {
   drawType?: DRAW_TYPE;
-  onDraw: (event: { features: Feature[] }) => void;
+  onDraw: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
   onFeaturesSelected?: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
   mbMap: MbMap;
   drawActive: boolean;
@@ -112,7 +112,7 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);
-      this.props.mbMap.on('draw.create', this.props.onDraw);
+      this.props.mbMap.on('draw.create', this.props.onDraw(this._mbDrawControl));
       if (this.props.onFeaturesSelected) {
         this.props.mbMap.on(
           'draw.selectionchange',
