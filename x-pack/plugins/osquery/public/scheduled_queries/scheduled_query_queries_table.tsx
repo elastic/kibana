@@ -19,7 +19,7 @@ interface ViewResultsInDiscoverActionProps {
 }
 
 const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = ({ item }) => {
-  const urlGenerator = useKibana().services.discover.urlGenerator;
+  const urlGenerator = useKibana().services.discover?.urlGenerator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {

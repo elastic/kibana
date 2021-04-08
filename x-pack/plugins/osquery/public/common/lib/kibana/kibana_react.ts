@@ -24,6 +24,11 @@ export interface WithKibanaProps {
 
 const useTypedKibana = () => useKibana<StartServices>();
 
+const isModifiedEvent = (event: any) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
+const isLeftClickEvent = (event: any) => event.button === 0;
+
 const useRouterNavigate = (
   to: Parameters<typeof reactRouterNavigate>[1],
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
@@ -35,6 +40,8 @@ const useRouterNavigate = (
 export {
   KibanaContextProvider,
   useRouterNavigate,
+  isLeftClickEvent,
+  isModifiedEvent,
   useTypedKibana as useKibana,
   useUiSetting,
   useUiSetting$,

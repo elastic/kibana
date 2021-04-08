@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,23 +21,61 @@ import {
   pagePathGetters,
   CreatePackagePolicyRouteState,
   PackagePolicyCreateExtensionComponentProps,
+  PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
 import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
-import { useKibana } from '../common/lib/kibana';
+import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 
 /**
  * Exports Osquery-specific package policy instructions
  * for use in the Fleet app create / edit package policy
  */
-export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ onChange, newPolicy }) => {
-    const {
-      application: { navigateToApp },
-    } = useKibana().services;
-    const [policyType, setPolicyType] = useState('live_query');
-    const history = useHistory();
 
-    useEffect(() => {
+export const OsqueryManagedPolicyCreateImportExtension = React.memo<
+  PackagePolicyCreateExtensionComponentProps & {
+    policy?: PackagePolicyEditExtensionComponentProps['policy'];
+  }
+>(({ onChange, policy, newPolicy }) => {
+  const [editMode] = useState(!!policy);
+  const {
+    application: { getUrlForApp, navigateToApp },
+  } = useKibana().services;
+  const history = useHistory();
+
+  const liveQueryHref = getUrlForApp('osquery', {
+    path: `/live_query/new?agentPolicyId=${policy?.policy_id}`,
+  });
+
+  const liveQueryClick = useCallback(
+    (event) => {
+      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
+        event.preventDefault();
+        navigateToApp('osquery', {
+          path: `/live_query/new?agentPolicyId=${policy?.policy_id}`,
+        });
+      }
+    },
+    [navigateToApp, policy?.policy_id]
+  );
+
+  const scheduleQueriesHref = getUrlForApp('osquery', {
+    path: `/scheduled_queries/${policy?.id}/edit`,
+  });
+
+  const scheduleQueriesClick = useCallback(
+    (event) => {
+      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
+        event.preventDefault();
+        navigateToApp('osquery', {
+          path: `/scheduled_queries/${policy?.id}/edit`,
+        });
+      }
+    },
+    [navigateToApp, policy?.id]
+  );
+
+  useEffect(() => {
+    if (!editMode) {
       history.replace({
         state: {
           onSaveNavigateTo: (newPackagePolicy) => [
@@ -51,106 +88,68 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
           ],
         } as CreatePackagePolicyRouteState,
       });
-    }, []);
+    }
+  }, [editMode, history]);
 
-    const detailsClicked = useCallback((e) => {
-      e.stopPropagation();
-    }, []);
+  const detailsClicked = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
 
-    const handleSetPolicyType = useCallback(
-      (newPolicyType) => {
-        setPolicyType((currentPolicyType) => {
-          if (currentPolicyType === newPolicyType) return currentPolicyType;
+  return (
+    <>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xl" type="console" />}
+            title="Run Live query"
+            isDisabled={!editMode}
+            href={liveQueryHref}
+            onClick={liveQueryClick}
+            description="This option will deploy Osquery to the agents, so you can issue live queries"
+            footer={
+              <EuiButtonEmpty
+                iconType="iInCircle"
+                size="xs"
+                onClick={detailsClicked}
+                aria-label="See more details about Osquery live queries"
+              >
+                {'More details'}
+              </EuiButtonEmpty>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xl" type="clock" />}
+            title="Schedule queries"
+            isDisabled={!editMode}
+            description="Run queries on defined interval"
+            href={scheduleQueriesHref}
+            onClick={scheduleQueriesClick}
+            footer={
+              <EuiButtonEmpty
+                iconType="iInCircle"
+                size="xs"
+                onClick={detailsClicked}
+                aria-label="See more details about Scheduled queries"
+              >
+                {'More details'}
+              </EuiButtonEmpty>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
 
-          if (newPolicyType === 'live_query') {
-            const updatedPolicy = produce(newPolicy, (draft) => {
-              draft.inputs[0].streams = [];
-              return draft;
-            });
-
-            onChange({
-              isValid: true,
-              updatedPolicy,
-            });
-          }
-
-          if (newPolicyType === 'scheduled_query') {
-            navigateToApp('osquery', { path: 'scheduled_queries/new' });
-          }
-
-          return newPolicyType;
-        });
-      },
-      [navigateToApp, newPolicy, onChange]
-    );
-
-    const liveQuerySelectable = useMemo(
-      () => ({
-        onClick: () => handleSetPolicyType('live_query'),
-        isSelected: policyType === 'live_query',
-      }),
-      [handleSetPolicyType, policyType]
-    );
-
-    const scheduledQuerySelectable = useMemo(
-      () => ({
-        onClick: () => handleSetPolicyType('scheduled_query'),
-        isSelected: policyType === 'scheduled_query',
-      }),
-      [handleSetPolicyType, policyType]
-    );
-
-    return (
-      <>
-        <EuiFlexGroup gutterSize="l">
+      {policy?.inputs[0].streams.length ? (
+        <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xl" type="console" />}
-              title="Live query only"
-              description="This option will deploy Osquery to the agents, so you can issue live queries"
-              footer={
-                <EuiButtonEmpty
-                  iconType="iInCircle"
-                  size="xs"
-                  onClick={detailsClicked}
-                  aria-label="See more details about Osquery live queries"
-                >
-                  {'More details'}
-                </EuiButtonEmpty>
-              }
-              selectable={liveQuerySelectable}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xl" type="clock" />}
-              title="Full integration"
-              description="This option will deploy Osquery to the agents and allow to schedule queries"
-              footer={
-                <EuiButtonEmpty
-                  iconType="iInCircle"
-                  size="xs"
-                  onClick={detailsClicked}
-                  aria-label="See more details about Scheduled queries"
-                >
-                  More details
-                </EuiButtonEmpty>
-              }
-              selectable={scheduledQuerySelectable}
-            />
+            <ScheduledQueryQueriesTable data={newPolicy as PackagePolicy} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer />
+      ) : null}
+    </>
+  );
+});
 
-        {policyType === 'scheduled_query' && newPolicy.inputs[0].streams.length ? (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <ScheduledQueryQueriesTable data={newPolicy as PackagePolicy} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
-      </>
-    );
-  }
-);
 OsqueryManagedPolicyCreateImportExtension.displayName = 'OsqueryManagedPolicyCreateImportExtension';

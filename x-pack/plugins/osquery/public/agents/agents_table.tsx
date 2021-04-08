@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiComboBox,
   EuiSpacer,
@@ -13,6 +13,7 @@ import {
   EuiHealth,
   EuiHighlight,
 } from '@elastic/eui';
+import { find } from 'lodash/fp';
 
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
@@ -51,7 +52,7 @@ type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
 const getColor = generateColorPicker();
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   const osqueryPolicyData = useOsqueryPolicies();
   const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
     osqueryPolicyData
@@ -61,6 +62,26 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
+  const defaultValueInitialized = useRef(false);
+
+  useEffect(() => {
+    if (agentSelection && !defaultValueInitialized.current && options.length) {
+      if (agentSelection.policiesSelected) {
+        const policyOptions = find(['label', 'Policy'], options);
+
+        if (policyOptions) {
+          const defaultOptions = policyOptions.options?.filter((option) =>
+            agentSelection.policiesSelected.includes(option.label)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+          }
+          defaultValueInitialized.current = true;
+        }
+      }
+    }
+  }, [agentSelection, options]);
 
   useEffect(() => {
     const allAgentsLabel = ALL_AGENTS_LABEL;
@@ -211,6 +232,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
       </span>
     );
   }, []);
+
   return (
     <div>
       <EuiComboBox

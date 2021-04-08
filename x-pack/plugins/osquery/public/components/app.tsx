@@ -6,7 +6,7 @@
  */
 
 import { find } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
@@ -16,18 +16,23 @@ import { GetPackagesResponse, epmRouteService } from '../../../fleet/common';
 
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
-import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import {
+  useKibana,
+  useRouterNavigate,
+  isModifiedEvent,
+  isLeftClickEvent,
+} from '../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const OsqueryAppComponent = () => {
   const {
-    application: { getUrlForApp },
+    application: { getUrlForApp, navigateToApp },
     http,
   } = useKibana().services;
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
 
-  const { data: integrationUrl } = useQuery(
+  const { data: osqueryIntegration } = useQuery(
     'integrations',
     () =>
       http.get(epmRouteService.getListPath(), {
@@ -36,16 +41,31 @@ export const OsqueryAppComponent = () => {
         },
       }),
     {
-      select: ({ response }: GetPackagesResponse) => {
-        const osqueryIntegration = find(['name', OSQUERY_INTEGRATION_NAME], response);
-
-        if (!osqueryIntegration) return null;
-
-        return getUrlForApp('fleet', {
-          path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
-        });
-      },
+      select: ({ response }: GetPackagesResponse) =>
+        find(['name', OSQUERY_INTEGRATION_NAME], response),
     }
+  );
+
+  const integrationHref = useMemo(() => {
+    if (osqueryIntegration) {
+      return getUrlForApp('fleet', {
+        path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
+      });
+    }
+  }, [getUrlForApp, osqueryIntegration]);
+
+  const integrationClick = useCallback(
+    (event) => {
+      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
+        event.preventDefault();
+        if (osqueryIntegration) {
+          return navigateToApp('fleet', {
+            path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
+          });
+        }
+      }
+    },
+    [navigateToApp, osqueryIntegration]
   );
 
   return (
@@ -92,14 +112,21 @@ export const OsqueryAppComponent = () => {
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                {integrationUrl && (
+                {integrationHref && (
                   <EuiFlexItem>
-                    <EuiButtonEmpty iconType="gear" href={integrationUrl} target="_blank">
-                      <FormattedMessage
-                        id="xpack.osquery.appNavigation.manageIntegrationButton"
-                        defaultMessage="Manage integration"
-                      />
-                    </EuiButtonEmpty>
+                    {
+                      // eslint-disable-next-line @elastic/eui/href-or-on-click
+                      <EuiButtonEmpty
+                        iconType="gear"
+                        href={integrationHref}
+                        onClick={integrationClick}
+                      >
+                        <FormattedMessage
+                          id="xpack.osquery.appNavigation.manageIntegrationButton"
+                          defaultMessage="Manage integration"
+                        />
+                      </EuiButtonEmpty>
+                    }
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

@@ -13,8 +13,8 @@ interface LiveQueryProps {
   onSuccess?: () => void;
 }
 
-const LiveQueryComponent: React.FC<LiveQueryProps> = ({ onSuccess }) => {
-  return <LiveQueryForm onSuccess={onSuccess} />;
-};
+const LiveQueryComponent: React.FC<LiveQueryProps> = ({ defaultValue, onSuccess }) => (
+  <LiveQueryForm defaultValue={defaultValue} onSuccess={onSuccess} />
+);
 
 export const LiveQuery = React.memo(LiveQueryComponent);

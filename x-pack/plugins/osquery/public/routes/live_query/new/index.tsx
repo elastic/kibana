@@ -8,13 +8,33 @@
 import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import qs from 'query-string';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { LiveQuery } from '../../../live_query';
 
 const NewLiveQueryPageComponent = () => {
+  const location = useLocation();
   const liveQueryListProps = useRouterNavigate('live_query');
+
+  const formDefaultValue = useMemo(() => {
+    const queryParams = qs.parse(location.search);
+
+    if (queryParams?.agentPolicyId) {
+      return {
+        agentSelection: {
+          allAgentsSelected: false,
+          agents: [],
+          platformsSelected: [],
+          policiesSelected: [queryParams?.agentPolicyId],
+        },
+      };
+    }
+
+    return null;
+  }, [location.search]);
 
   const LeftColumn = useMemo(
     () => (
@@ -54,7 +74,7 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery />
+      <LiveQuery defaultValue={formDefaultValue} />
     </WithHeaderLayout>
   );
 };

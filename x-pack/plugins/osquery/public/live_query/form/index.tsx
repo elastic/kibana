@@ -59,8 +59,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    defaultValue: {
-      query: defaultValue ?? {
+    defaultValue: defaultValue ?? {
+      query: {
         id: null,
         query: '',
       },
@@ -78,9 +78,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       agentSelection &&
       !!(
         agentSelection.allAgentsSelected ||
-        agentSelection.agents.length ||
-        agentSelection.platformsSelected.length ||
-        agentSelection.policiesSelected.length
+        agentSelection.agents?.length ||
+        agentSelection.platformsSelected?.length ||
+        agentSelection.policiesSelected?.length
       ),
     [agentSelection]
   );
