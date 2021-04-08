@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SchemaConflicts } from '../../../shared/types';
-import { EngineDetails } from '../engine/types';
+import { SchemaConflicts } from '../../../../../shared/types';
+import { EngineDetails } from '../../../engine/types';
 
 import { getConflictingEnginesSet } from './utils';
 

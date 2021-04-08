@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { EngineDetails } from '../engine/types';
+import { EngineDetails } from '../../../engine/types';
 
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 

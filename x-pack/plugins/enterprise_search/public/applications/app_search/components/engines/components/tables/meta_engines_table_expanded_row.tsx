@@ -9,13 +9,14 @@ import React from 'react';
 
 import { EuiBasicTable, EuiHealth, EuiTextAlign, EuiTitle } from '@elastic/eui';
 
-import { EngineDetails } from '../../engine/types';
+import { EngineDetails } from '../../../engine/types';
+
 import {
   CREATED_AT_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
-} from '../engines_table';
+} from './engines_table';
 
 import './meta_engines_table_expanded_row.scss';
 

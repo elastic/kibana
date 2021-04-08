@@ -6,12 +6,12 @@
  */
 import { kea, MakeLogicType } from 'kea';
 
-import { Meta } from '../../../../../common/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { Meta } from '../../../../../../../common/types';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
 
-import { HttpLogic } from '../../../shared/http';
+import { HttpLogic } from '../../../../../shared/http';
 
-import { EngineDetails } from '../engine/types';
+import { EngineDetails } from '../../../engine/types';
 
 interface MetaEnginesTableValues {
   expandedRows: { [id: string]: boolean };

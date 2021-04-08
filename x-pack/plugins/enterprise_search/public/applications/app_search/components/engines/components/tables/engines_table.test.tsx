@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import '../../../__mocks__/enterprise_search_url.mock';
-import { mockTelemetryActions, mountWithIntl, setMockValues } from '../../../__mocks__';
+import '../../../../../__mocks__/enterprise_search_url.mock';
+import { mockTelemetryActions, mountWithIntl, setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
 
@@ -14,13 +14,12 @@ import { ReactWrapper, shallow } from 'enzyme';
 
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiIcon, EuiTableRow } from '@elastic/eui';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../../../shared/telemetry';
+import { EngineDetails } from '../../../engine/types';
+import { EnginesLogic } from '../../engines_logic';
 
-import { TelemetryLogic } from '../../../shared/telemetry';
-import { EngineDetails } from '../engine/types';
-
-import { EnginesLogic } from './engines_logic';
 import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {

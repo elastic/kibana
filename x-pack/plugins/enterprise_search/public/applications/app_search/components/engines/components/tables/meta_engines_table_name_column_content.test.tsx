@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../__mocks__';
+import { mountWithIntl } from '../../../../../__mocks__';
 
 import React from 'react';
 
@@ -13,8 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiHealth } from '@elastic/eui';
 
-import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../shared/types';
-import { EngineDetails } from '../../engine/types';
+import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/types';
+import { EngineDetails } from '../../../engine/types';
 
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
 

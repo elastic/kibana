@@ -7,8 +7,8 @@
 
 import { flatten } from 'lodash';
 
-import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../shared/types';
-import { EngineDetails } from '../engine/types';
+import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/types';
+import { EngineDetails } from '../../../engine/types';
 
 const getConflictingEnginesFromConflictingField = (
   conflictingField: SchemaConflictFieldTypes

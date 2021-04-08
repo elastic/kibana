@@ -15,9 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { LoadingState, EmptyState } from './components';
-import { EnginesTable } from './engines_table';
-
-import { MetaEnginesTable } from './meta_engines_table';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
 import { EnginesOverview } from './';
 

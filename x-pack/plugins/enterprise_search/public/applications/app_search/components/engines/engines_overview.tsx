@@ -30,6 +30,8 @@ import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
@@ -39,10 +41,8 @@ import {
   META_ENGINES_TITLE,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
-import { EnginesTable } from './engines_table';
 
 import './engines_overview.scss';
-import { MetaEnginesTable } from './meta_engines_table';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);

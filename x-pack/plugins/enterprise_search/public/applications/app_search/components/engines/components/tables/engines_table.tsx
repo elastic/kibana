@@ -19,16 +19,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
-import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../shared/constants';
-import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { TelemetryLogic } from '../../../shared/telemetry';
-import { AppLogic } from '../../app_logic';
-import { UNIVERSAL_LANGUAGE } from '../../constants';
-import { ENGINE_PATH } from '../../routes';
-import { generateEncodedPath } from '../../utils/encode_path_params';
-import { FormattedDateTime } from '../../utils/formatted_date_time';
-import { EngineDetails } from '../engine/types';
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../../../shared/telemetry';
+import { AppLogic } from '../../../../app_logic';
+import { UNIVERSAL_LANGUAGE } from '../../../../constants';
+import { ENGINE_PATH } from '../../../../routes';
+import { generateEncodedPath } from '../../../../utils/encode_path_params';
+import { FormattedDateTime } from '../../../../utils/formatted_date_time';
+import { EngineDetails } from '../../../engine/types';
 
 export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'name',

@@ -9,10 +9,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiIcon, EuiHealth, EuiFlexItem } from '@elastic/eui';
 
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
-import { ENGINE_PATH } from '../../../routes';
-import { generateEncodedPath } from '../../../utils/encode_path_params';
-import { EngineDetails } from '../../engine/types';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { ENGINE_PATH } from '../../../../routes';
+import { generateEncodedPath } from '../../../../utils/encode_path_params';
+import { EngineDetails } from '../../../engine/types';
 
 interface MetaEnginesTableNameContentProps {
   name: string;

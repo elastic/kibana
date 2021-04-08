@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../__mocks__';
+import { mountWithIntl } from '../../../../../__mocks__';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiBasicTable, EuiHealth } from '@elastic/eui';
 
-import { EngineDetails } from '../../engine/types';
+import { EngineDetails } from '../../../engine/types';
 
 import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 
