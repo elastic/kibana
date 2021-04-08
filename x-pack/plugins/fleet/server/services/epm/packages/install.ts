@@ -115,8 +115,9 @@ export async function ensureInstalledPackage(options: {
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
+  force?: boolean;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+  const { savedObjectsClient, pkgName, esClient, pkgVersion, force } = options;
   const installedPackage = await isPackageVersionInstalled({
     savedObjectsClient,
     pkgName,
@@ -136,7 +137,7 @@ export async function ensureInstalledPackage(options: {
       savedObjectsClient,
       pkgkey,
       esClient,
-      force: true,
+      force,
     });
   } else {
     await installLatestPackage({
