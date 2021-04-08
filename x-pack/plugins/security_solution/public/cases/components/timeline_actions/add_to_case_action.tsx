@@ -156,7 +156,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           size="s"
           iconType="folderClosed"
           onClick={openPopover}
-          disabled={isDisabled}
+          isDisabled={isDisabled}
         />
       </EuiToolTip>
     ),

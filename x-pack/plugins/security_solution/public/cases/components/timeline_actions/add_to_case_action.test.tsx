@@ -190,7 +190,7 @@ describe('AddToCaseAction', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().prop('disabled')
+      wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 
@@ -207,7 +207,7 @@ describe('AddToCaseAction', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().prop('disabled')
+      wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 });
