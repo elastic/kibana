@@ -88,7 +88,7 @@ describe('Create Remote cluster', () => {
         expect(actions.saveButton.isDisabled()).toBe(true);
       });
 
-      test('renders no switch for cloud and manual modes', () => {
+      test('renders no switch for cloud url input and proxy address + server name input modes', () => {
         expect(actions.cloudUrlSwitch.exists()).toBe(false);
       });
     });
@@ -241,7 +241,7 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('cloud url is required', () => {
+      test('cloud url is required since cloud url input is enabled by default', () => {
         actions.saveButton.click();
         expect(actions.getErrorMessages()).toContain('A url is required.');
       });
