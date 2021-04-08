@@ -76,6 +76,7 @@ export function FieldValueSelection({
     <EuiButton
       style={width ? { width } : {}}
       size="s"
+      color="text"
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
