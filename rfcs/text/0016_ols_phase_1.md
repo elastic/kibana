@@ -272,6 +272,11 @@ A more rudimentary approach would be to provide callbacks via each saved object 
 
 This is a very simplistic approach, and probably not an architecture that we want to encourage or support long-term.
 
+### 5.2.4 Pass down preflight objects
+
+Any client wrapper could fetch the object/s on its own and pass that down to the repository in an `options` field (preflightObject/s?) so the repository can reuse that result if it's defined, instead of initiating an entire additional preflight check. That resolves our problem without much additional complexity.
+Of course we don't want consumers (mis)using this field, we can either mark it as `@internal` or we could explore creating a separate "internal SOC" interface that is only meant to be used by the SOC wrappers.
+
 
 # 6. Adoption strategy
 
