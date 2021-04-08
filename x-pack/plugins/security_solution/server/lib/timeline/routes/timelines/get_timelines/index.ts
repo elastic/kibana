@@ -45,7 +45,7 @@ export const getTimelinesRoute = (
           fold(throwErrors(Boom.badRequest), identity)
         );
         const onlyUserFavorite = queryParams?.onlyUserFavorite === 'true' ? true : false;
-        const pageSize = queryParams.pageSize ? parseInt(queryParams.pageSize, 10) : null;
+        const pageSize = queryParams?.pageSize ? parseInt(queryParams.pageSize, 10) : null;
         const pageIndex = queryParams?.pageIndex ? parseInt(queryParams.pageIndex, 10) : null;
         const search = queryParams?.search ?? null;
         const sortField = queryParams?.sortField ?? null;

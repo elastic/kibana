@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import Supertest from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import {
   TimelineResult,
   TimelineType,
 } from '../../../../../plugins/security_solution/common/types/timeline';
+
+import { createBasicTimeline } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -421,18 +421,3 @@ const omitTypename = (key: string, value: keyof TimelineResult) =>
 
 const omitTypenameInTimeline = (timeline: TimelineResult) =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
-
-export const createBasicTimeline = async (
-  supertest: Supertest.SuperTest<supertestAsPromised.Test>,
-  titleToSaved: string
-) =>
-  await supertest
-    .post('/api/timeline')
-    .set('kbn-xsrf', 'true')
-    .send({
-      timelineId: null,
-      version: null,
-      timeline: {
-        title: titleToSaved,
-      },
-    });
