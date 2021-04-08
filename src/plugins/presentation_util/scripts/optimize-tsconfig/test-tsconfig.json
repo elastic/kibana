@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "noErrorTruncation": true
+  },
+  "include": [
+    "../../packages/kbn-test/types/**/*",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*"
+  ]
+}

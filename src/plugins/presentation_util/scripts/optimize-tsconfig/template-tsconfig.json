@@ -1,0 +1,15 @@
+{
+  "include": [
+    "./src/plugins/dashboard/**/*",
+    "./src/plugins/presentation_util/**/*",
+    "./src/plugins/visualize/**/*",
+    "./x-pack/plugins/canvas/**/*",
+    "./typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*"
+  ],
+  "compilerOptions": {
+    "noErrorTruncation": true
+  }
+}
