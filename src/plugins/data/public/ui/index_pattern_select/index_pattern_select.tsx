@@ -113,10 +113,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
     const options = [];
     for (let i = 0; i < idsAndTitles.length; i++) {
-      if (
-        searchValue.length &&
-        !idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())
-      ) {
+      if (!idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
         // index pattern excluded due to title not matching search
         continue;
       }
