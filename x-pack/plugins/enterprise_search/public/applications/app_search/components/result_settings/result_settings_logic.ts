@@ -58,6 +58,7 @@ interface ResultSettingsActions {
   updateRawSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   updateSnippetSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   initializeResultSettingsData(): void;
+  confirmResetAllFields(): void;
   saveResultSettings(): void;
 }
 
@@ -111,6 +112,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     updateRawSizeForField: (fieldName, size) => ({ fieldName, size }),
     updateSnippetSizeForField: (fieldName, size) => ({ fieldName, size }),
     initializeResultSettingsData: () => true,
+    confirmResetAllFields: () => true,
     saveResultSettings: () => true,
   }),
   reducers: () => ({
@@ -293,6 +295,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         actions.initializeResultFields(serverFieldResultSettings, schema, schemaConflicts);
       } catch (e) {
         flashAPIErrors(e);
+      }
+    },
+    confirmResetAllFields: () => {
+      if (window.confirm(SAVE_CONFIRMATION_MESSAGE)) {
+        actions.resetAllFields();
       }
     },
     saveResultSettings: async () => {

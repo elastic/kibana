@@ -811,6 +811,28 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('confirmResetAllFields', () => {
+      it('will reset all fields as long as the user confirms the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).toHaveBeenCalled();
+      });
+
+      it('will do nothing if the user cancels the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).not.toHaveBeenCalled();
+      });
+    });
+
     describe('saveResultSettings', () => {
       beforeEach(() => {
         confirmSpy.mockImplementation(() => true);
