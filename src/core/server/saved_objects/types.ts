@@ -122,8 +122,16 @@ export interface SavedObjectsFindOptions {
    * Additional aggregation types can be contributed to Core.
    *
    * @example
+   * Aggregating on SO attribute field
    * ```ts
    * const aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @example
+   * Aggregating on SO root field
+   * ```ts
+   * const aggs = { latest_update: { max: { field: 'dashboard.updated_at' } } };
    * return client.find({ type: 'dashboard', aggs })
    * ```
    *
