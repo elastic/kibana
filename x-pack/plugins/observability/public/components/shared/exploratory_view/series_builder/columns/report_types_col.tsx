@@ -11,6 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
+import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 
 interface Props {
   reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
@@ -22,6 +23,8 @@ export function ReportTypesCol({ reportTypes }: Props) {
     setSeries,
   } = useUrlStorage(NEW_SERIES_KEY);
 
+  const { indexPattern } = useIndexPatternContext();
+
   return reportTypes?.length > 0 ? (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
@@ -32,6 +35,7 @@ export function ReportTypesCol({ reportTypes }: Props) {
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
+            isDisabled={!indexPattern}
             onClick={() => {
               if (reportType === selectedReportType) {
                 setSeries(NEW_SERIES_KEY, {
