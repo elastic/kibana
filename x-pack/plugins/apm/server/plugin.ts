@@ -43,6 +43,8 @@ import {
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
 
+export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
+
 export class APMPlugin
   implements
     Plugin<
