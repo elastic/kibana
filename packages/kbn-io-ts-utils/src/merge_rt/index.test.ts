@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/lib/Either';
-import { merge } from './';
+import { mergeRt } from '.';
 import { jsonRt } from '../json_rt';
 
 describe('merge', () => {
   it('fails on one or more errors', () => {
-    const type = merge([t.type({ foo: t.string }), t.type({ bar: t.number })]);
+    const type = mergeRt(t.type({ foo: t.string }), t.type({ bar: t.number }));
 
     const result = type.decode({ foo: '' });
 
@@ -20,10 +21,7 @@ describe('merge', () => {
   });
 
   it('merges left to right', () => {
-    const typeBoolean = merge([
-      t.type({ foo: t.string }),
-      t.type({ foo: jsonRt.pipe(t.boolean) }),
-    ]);
+    const typeBoolean = mergeRt(t.type({ foo: t.string }), t.type({ foo: jsonRt.pipe(t.boolean) }));
 
     const resultBoolean = typeBoolean.decode({
       foo: 'true',
@@ -34,10 +32,7 @@ describe('merge', () => {
       foo: true,
     });
 
-    const typeString = merge([
-      t.type({ foo: jsonRt.pipe(t.boolean) }),
-      t.type({ foo: t.string }),
-    ]);
+    const typeString = mergeRt(t.type({ foo: jsonRt.pipe(t.boolean) }), t.type({ foo: t.string }));
 
     const resultString = typeString.decode({
       foo: 'true',
@@ -50,10 +45,10 @@ describe('merge', () => {
   });
 
   it('deeply merges values', () => {
-    const type = merge([
+    const type = mergeRt(
       t.type({ foo: t.type({ baz: t.string }) }),
-      t.type({ foo: t.type({ bar: t.string }) }),
-    ]);
+      t.type({ foo: t.type({ bar: t.string }) })
+    );
 
     const result = type.decode({
       foo: {
