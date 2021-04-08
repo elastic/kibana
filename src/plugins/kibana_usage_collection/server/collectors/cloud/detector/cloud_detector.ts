@@ -32,9 +32,6 @@ export class CloudDetector {
   constructor(options: CloudDetectorOptions = {}) {
     this.cloudServices =
       options.cloudServices ?? SUPPORTED_SERVICES.map((Service) => new Service());
-    // Explicitly undefined. If the value is never updated, then
-    // the property will be dropped when the data is serialized.
-    this.cloudDetails = undefined;
   }
 
   /**
@@ -52,20 +49,20 @@ export class CloudDetector {
    * determine it.
    */
   async detectCloudService() {
-    this.cloudDetails = await this._getCloudService(this.cloudServices);
+    this.cloudDetails = await this.getCloudService();
   }
 
   /**
    * Check every cloud service until the first one reports success from detection.
    */
-  async _getCloudService(cloudServices: CloudService[]) {
+  private async getCloudService() {
     // check each service until we find one that is confirmed to match;
     // order is assumed to matter
-    for (const service of cloudServices) {
+    for (const service of this.cloudServices) {
       try {
         const serviceResponse = await service.checkIfService();
 
-        if (serviceResponse?.isConfirmed()) {
+        if (serviceResponse.isConfirmed()) {
           return serviceResponse.toJSON();
         }
       } catch (ignoredError) {

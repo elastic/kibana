@@ -60,42 +60,34 @@ describe('CloudDetector', () => {
   });
 
   describe('detectCloudService', () => {
-    it('awaits _getCloudService', async () => {
+    it('returns first match', async () => {
       const detector = new CloudDetector({ cloudServices });
 
-      expect(detector.getCloudDetails()).toBe(undefined);
+      expect(detector.getCloudDetails()).toBeUndefined();
       await detector.detectCloudService();
-      expect(detector.getCloudDetails()).toEqual({ name: 'good-match' });
-    });
-  });
-
-  describe('_getCloudService', () => {
-    it('returns first match', async () => {
-      const detector = new CloudDetector();
-
       // note: should never use better-match
-      expect(await detector._getCloudService(cloudServices)).toEqual({ name: 'good-match' });
+      expect(detector.getCloudDetails()).toEqual({ name: 'good-match' });
     });
 
     it('returns undefined if none match', async () => {
-      const detector = new CloudDetector();
+      const services = ([cloudService1, cloudService2] as unknown) as CloudService[];
 
-      expect(
-        await detector._getCloudService(([
-          cloudService1,
-          cloudService2,
-        ] as unknown) as CloudService[])
-      ).toBe(undefined);
-      expect(await detector._getCloudService([])).toBe(undefined);
+      const detector1 = new CloudDetector({ cloudServices: services });
+      await detector1.detectCloudService();
+      expect(detector1.getCloudDetails()).toBeUndefined();
+
+      const detector2 = new CloudDetector({ cloudServices: [] });
+      await detector2.detectCloudService();
+      expect(detector2.getCloudDetails()).toBeUndefined();
     });
 
     // this is already tested above, but this just tests it explicitly
     it('ignores exceptions from cloud services', async () => {
-      const detector = new CloudDetector();
+      const services = ([cloudService2] as unknown) as CloudService[];
+      const detector = new CloudDetector({ cloudServices: services });
 
-      expect(await detector._getCloudService(([cloudService2] as unknown) as CloudService[])).toBe(
-        undefined
-      );
+      await detector.detectCloudService();
+      expect(detector.getCloudDetails()).toBeUndefined();
     });
   });
 });

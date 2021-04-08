@@ -7,7 +7,7 @@
  */
 
 import fs from 'fs';
-import { isObject, isString } from 'lodash';
+import { isObject, isString, isPlainObject } from 'lodash';
 import defaultRequest from 'request';
 import type { OptionsWithUri, Response as DefaultResponse } from 'request';
 import { CloudServiceResponse } from './cloud_response';
@@ -84,12 +84,16 @@ export abstract class CloudService {
     // note: this will throw an error if this is not a string
     value = value.trim();
 
-    // we don't want to return scalar values, arrays, etc.
-    if (value.startsWith('{') && value.endsWith('}')) {
-      return JSON.parse(value);
+    try {
+      const json = JSON.parse(value);
+      // we don't want to return scalar values, arrays, etc.
+      if (!isPlainObject(json)) {
+        throw new Error('not a plain object');
+      }
+      return json;
+    } catch (e) {
+      throw new Error(`'${value}' is not a JSON object`);
     }
-
-    throw new Error(`'${value}' is not a JSON object`);
   }
 
   /**

@@ -43,28 +43,6 @@ export class AWSCloudService extends CloudService {
   private readonly _isWindows: boolean;
   private readonly _fs: typeof fs;
 
-  constructor(options: CloudServiceOptions = {}) {
-    super('aws', options);
-
-    // Allow the file system handler to be swapped out for tests
-    const { _fs = fs, _isWindows = process.platform.startsWith('win') } = options;
-
-    this._fs = _fs;
-    this._isWindows = _isWindows;
-  }
-
-  async _checkIfService(request: Request) {
-    const req: RequestOptions = {
-      method: 'GET',
-      uri: SERVICE_ENDPOINT,
-      json: true,
-    };
-
-    return promisify(request)(req)
-      .then((response) => this._parseResponse(response.body, (body) => this._parseBody(body)))
-      .catch(() => this._tryToDetectUuid());
-  }
-
   /**
    * Parse the AWS response, if possible.
    *
@@ -86,7 +64,7 @@ export class AWSCloudService extends CloudService {
    *   "version" : "2010-08-31",
    * }
    */
-  _parseBody(body: AWSResponse): CloudServiceResponse | null {
+  static parseBody(name: string, body: AWSResponse): CloudServiceResponse | null {
     const id: string | undefined = get(body, 'instanceId');
     const vmType: string | undefined = get(body, 'instanceType');
     const region: string | undefined = get(body, 'region');
@@ -106,10 +84,36 @@ export class AWSCloudService extends CloudService {
 
     // ensure we actually have some data
     if (id || vmType || region || zone) {
-      return new CloudServiceResponse(this._name, true, { id, vmType, region, zone, metadata });
+      return new CloudServiceResponse(name, true, { id, vmType, region, zone, metadata });
     }
 
     return null;
+  }
+
+  constructor(options: CloudServiceOptions = {}) {
+    super('aws', options);
+
+    // Allow the file system handler to be swapped out for tests
+    const { _fs = fs, _isWindows = process.platform.startsWith('win') } = options;
+
+    this._fs = _fs;
+    this._isWindows = _isWindows;
+  }
+
+  async _checkIfService(request: Request) {
+    const req: RequestOptions = {
+      method: 'GET',
+      uri: SERVICE_ENDPOINT,
+      json: true,
+    };
+
+    return promisify(request)(req)
+      .then((response) =>
+        this._parseResponse(response.body, (body) =>
+          AWSCloudService.parseBody(this.getName(), body)
+        )
+      )
+      .catch(() => this._tryToDetectUuid());
   }
 
   /**
@@ -123,11 +127,12 @@ export class AWSCloudService extends CloudService {
       const pathsToCheck = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];
       const promises = pathsToCheck.map((path) => promisify(this._fs.readFile)(path, 'utf8'));
 
-      return Promise.all(promises).then((uuids) => {
-        for (let uuid of uuids) {
-          if (isString(uuid)) {
+      return Promise.allSettled(promises).then((responses) => {
+        for (const response of responses) {
+          let uuid;
+          if (response.status === 'fulfilled' && isString(response.value)) {
             // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
-            uuid = uuid.trim().toLowerCase();
+            uuid = response.value.trim().toLowerCase();
 
             // There is a small chance of a false positive here in the unlikely event that a uuid which doesn't
             // belong to ec2 happens to be generated with `ec2` as the first three characters.

@@ -106,7 +106,7 @@ describe('CloudService', () => {
       }).rejects.toMatchInlineSnapshot(`[Error: 'raw string' is not a JSON object]`);
       expect(async () => {
         await service._parseResponse('{{}');
-      }).rejects.toMatchInlineSnapshot(`[SyntaxError: Unexpected token { in JSON at position 1]`);
+      }).rejects.toMatchInlineSnapshot(`[Error: '{{}' is not a JSON object]`);
     });
 
     it('expects unusable bodies', async () => {

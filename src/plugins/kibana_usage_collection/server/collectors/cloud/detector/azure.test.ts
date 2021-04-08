@@ -119,11 +119,12 @@ describe('Azure', () => {
         },
       };
 
-      const response = AZURE._parseBody(body);
+      const response = AzureCloudService.parseBody(AZURE.getName(), body)!;
+      expect(response).not.toBeNull();
 
-      expect(response?.getName()).toEqual(AZURE.getName());
-      expect(response?.isConfirmed()).toEqual(true);
-      expect(response?.toJSON()).toEqual({
+      expect(response.getName()).toEqual(AZURE.getName());
+      expect(response.isConfirmed()).toEqual(true);
+      expect(response.toJSON()).toEqual({
         name: 'azure',
         id: 'd4c57456-2b3b-437a-9f1f-7082cf123456',
         vm_type: 'Standard_A1',
@@ -171,11 +172,12 @@ describe('Azure', () => {
         },
       };
 
-      const response = AZURE._parseBody(body);
+      const response = AzureCloudService.parseBody(AZURE.getName(), body)!;
+      expect(response).not.toBeNull();
 
-      expect(response?.getName()).toEqual(AZURE.getName());
-      expect(response?.isConfirmed()).toEqual(true);
-      expect(response?.toJSON()).toEqual({
+      expect(response.getName()).toEqual(AZURE.getName());
+      expect(response.isConfirmed()).toEqual(true);
+      expect(response.toJSON()).toEqual({
         name: 'azure',
         id: undefined,
         vm_type: undefined,
@@ -189,13 +191,13 @@ describe('Azure', () => {
 
     it('ignores unexpected response body', () => {
       // @ts-expect-error
-      expect(AZURE._parseBody(undefined)).toBe(null);
+      expect(AzureCloudService.parseBody(AZURE.getName(), undefined)).toBe(null);
       // @ts-expect-error
-      expect(AZURE._parseBody(null)).toBe(null);
+      expect(AzureCloudService.parseBody(AZURE.getName(), null)).toBe(null);
       // @ts-expect-error
-      expect(AZURE._parseBody({})).toBe(null);
+      expect(AzureCloudService.parseBody(AZURE.getName(), {})).toBe(null);
       // @ts-expect-error
-      expect(AZURE._parseBody({ privateIp: 'a.b.c.d' })).toBe(null);
+      expect(AzureCloudService.parseBody(AZURE.getName(), { privateIp: 'a.b.c.d' })).toBe(null);
     });
   });
 });

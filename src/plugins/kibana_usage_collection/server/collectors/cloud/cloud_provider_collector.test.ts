@@ -38,7 +38,13 @@ describe('registerCloudProviderUsageCollector', () => {
     expect(collector).not.toBeUndefined();
   });
 
-  test('isReady() => true', () => {
+  test('isReady() => false when cloud details are not available', () => {
+    cloudDetailsMock.mockReturnValueOnce(undefined);
+    expect(collector.isReady()).toBe(false);
+  });
+
+  test('isReady() => true when cloud details are available', () => {
+    cloudDetailsMock.mockReturnValueOnce({ foo: true });
     expect(collector.isReady()).toBe(true);
   });
 
@@ -49,7 +55,6 @@ describe('registerCloudProviderUsageCollector', () => {
   describe('fetch()', () => {
     test('returns undefined when no details are available', async () => {
       cloudDetailsMock.mockReturnValueOnce(undefined);
-
       await expect(collector.fetch(mockedFetchContext)).resolves.toBeUndefined();
     });
 
@@ -62,7 +67,6 @@ describe('registerCloudProviderUsageCollector', () => {
       };
 
       cloudDetailsMock.mockReturnValueOnce(mockDetails);
-
       await expect(collector.fetch(mockedFetchContext)).resolves.toEqual(mockDetails);
     });
 

@@ -25,31 +25,6 @@ interface AzureResponse {
  * @internal
  */
 export class AzureCloudService extends CloudService {
-  constructor(options = {}) {
-    super('azure', options);
-  }
-
-  async _checkIfService(request: Request) {
-    const req = {
-      method: 'GET',
-      uri: SERVICE_ENDPOINT,
-      headers: {
-        // Azure requires this header
-        Metadata: 'true',
-      },
-      json: true,
-    };
-
-    const response = await promisify(request)(req);
-
-    // Note: there is no fallback option for Azure
-    if (!response || response.statusCode === 404) {
-      throw new Error('Azure request failed');
-    }
-
-    return this._parseResponse(response.body, (body) => this._parseBody(body));
-  }
-
   /**
    * Parse the Azure response, if possible.
    *
@@ -76,7 +51,7 @@ export class AzureCloudService extends CloudService {
    *   }
    * }
    */
-  _parseBody(body: AzureResponse): CloudServiceResponse | null {
+  static parseBody(name: string, body: AzureResponse): CloudServiceResponse | null {
     const compute: Record<string, string> | undefined = get(body, 'compute');
     const id = get<Record<string, string>, string>(compute, 'vmId');
     const vmType = get<Record<string, string>, string>(compute, 'vmSize');
@@ -90,12 +65,39 @@ export class AzureCloudService extends CloudService {
 
     // ensure we actually have some data
     if (id || vmType || region) {
-      return new CloudServiceResponse(this._name, true, { id, vmType, region, metadata });
+      return new CloudServiceResponse(name, true, { id, vmType, region, metadata });
     } else if (network) {
       // classic-managed VMs in Azure don't provide compute so we highlight the lack of info
-      return new CloudServiceResponse(this._name, true, { metadata: { classic: true } });
+      return new CloudServiceResponse(name, true, { metadata: { classic: true } });
     }
 
     return null;
+  }
+
+  constructor(options = {}) {
+    super('azure', options);
+  }
+
+  async _checkIfService(request: Request) {
+    const req = {
+      method: 'GET',
+      uri: SERVICE_ENDPOINT,
+      headers: {
+        // Azure requires this header
+        Metadata: 'true',
+      },
+      json: true,
+    };
+
+    const response = await promisify(request)(req);
+
+    // Note: there is no fallback option for Azure
+    if (!response || response.statusCode === 404) {
+      throw new Error('Azure request failed');
+    }
+
+    return this._parseResponse(response.body, (body) =>
+      AzureCloudService.parseBody(this.getName(), body)
+    );
   }
 }

@@ -124,7 +124,7 @@ describe('AWS', () => {
     });
   });
 
-  describe('_parseBody', () => {
+  describe('parseBody', () => {
     it('parses object in expected format', () => {
       const body: AWSResponse = {
         devpayProductCodes: null,
@@ -144,11 +144,12 @@ describe('AWS', () => {
         marketplaceProductCodes: null,
       };
 
-      const response = AWS._parseBody(body);
+      const response = AWSCloudService.parseBody(AWS.getName(), body)!;
+      expect(response).not.toBeNull();
 
-      expect(response?.getName()).toEqual(AWS.getName());
-      expect(response?.isConfirmed()).toEqual(true);
-      expect(response?.toJSON()).toEqual({
+      expect(response.getName()).toEqual(AWS.getName());
+      expect(response.isConfirmed()).toEqual(true);
+      expect(response.toJSON()).toEqual({
         name: 'aws',
         id: 'i-0c7a5b7590a4d811c',
         vm_type: 't2.micro',
@@ -168,13 +169,13 @@ describe('AWS', () => {
 
     it('ignores unexpected response body', () => {
       // @ts-expect-error
-      expect(AWS._parseBody(undefined)).toBe(null);
+      expect(AWSCloudService.parseBody(AWS.getName(), undefined)).toBe(null);
       // @ts-expect-error
-      expect(AWS._parseBody(null)).toBe(null);
+      expect(AWSCloudService.parseBody(AWS.getName(), null)).toBe(null);
       // @ts-expect-error
-      expect(AWS._parseBody({})).toBe(null);
+      expect(AWSCloudService.parseBody(AWS.getName(), {})).toBe(null);
       // @ts-expect-error
-      expect(AWS._parseBody({ privateIp: 'a.b.c.d' })).toBe(null);
+      expect(AWSCloudService.parseBody(AWS.getName(), { privateIp: 'a.b.c.d' })).toBe(null);
     });
   });
 
@@ -231,6 +232,49 @@ describe('AWS', () => {
           metadata: undefined,
         });
       });
+
+      it('returns confirmed if only one file exists', async () => {
+        let callCount = 0;
+        const awsCheckedFileSystem = new AWSCloudService({
+          _fs: {
+            readFile: (filename: string, encoding: string, callback: Callback) => {
+              if (callCount === 0) {
+                callCount++;
+                throw new Error('oops');
+              }
+              callback(null, ec2Uuid);
+            },
+          } as typeof fs,
+          _isWindows: false,
+        });
+
+        const response = await awsCheckedFileSystem._tryToDetectUuid();
+
+        expect(response.isConfirmed()).toEqual(true);
+        expect(response.toJSON()).toEqual({
+          name: AWS.getName(),
+          id: ec2Uuid.trim().toLowerCase(),
+          region: undefined,
+          zone: undefined,
+          vm_type: undefined,
+          metadata: undefined,
+        });
+      });
+
+      it('returns unconfirmed if all files return errors', async () => {
+        const awsFailedFileSystem = new AWSCloudService({
+          _fs: ({
+            readFile: () => {
+              throw new Error('oops');
+            },
+          } as unknown) as typeof fs,
+          _isWindows: false,
+        });
+
+        const response = await awsFailedFileSystem._tryToDetectUuid();
+
+        expect(response.isConfirmed()).toEqual(false);
+      });
     });
 
     it('ignores UUID if it does not start with ec2', async () => {
@@ -262,22 +306,6 @@ describe('AWS', () => {
       const response = await awsUncheckedFileSystem._tryToDetectUuid();
 
       expect(response.isConfirmed()).toEqual(false);
-    });
-
-    it('does NOT handle file system exceptions', async () => {
-      const fileDNE = new Error('File DNE');
-      const awsFailedFileSystem = new AWSCloudService({
-        _fs: ({
-          readFile: () => {
-            throw fileDNE;
-          },
-        } as unknown) as typeof fs,
-        _isWindows: false,
-      });
-
-      expect(async () => {
-        await awsFailedFileSystem._tryToDetectUuid();
-      }).rejects.toThrow(fileDNE);
     });
   });
 });
