@@ -515,13 +515,13 @@ you make the necessary updates after you upgrade to 7.7.0.
 
 [discrete]
 [[deprecation-86474]]
-==== Deprecates `xpack.security.authc.saml.realm`
+==== Deprecates `xpack.security.authc.saml.realm` and `xpack.security.authc.oidc.realm`
 
 *Details* +
-Deprecates the `xpack.security.authc.saml.realm` setting used for {kib} SAML authentication. For more information, refer to {kibana-pull}53010[#53010].
+Deprecates the `xpack.security.authc.saml.realm` and  `xpack.security.authc.oidc.realm` settings used for {kib} SAML and OpenID Connect authentication. For more information, refer to {kibana-pull}53010[#53010].
 
 *Impact* +
-Use `xpack.security.authc.providers`.
+Use `xpack.security.authc.providers.saml.<provider-name>.realm` and `xpack.security.authc.providers.oidc.<provider-name>.realm`.
 
 [float]
 [[known-issues-7.7.0]]
