@@ -110,9 +110,6 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 `saml.<provider-name>.realm`
 | SAML realm in {es} that provider should use.
 
-| `xpack.security.authc.providers.`
-`saml.<provider-name>.useRelayStateDeepLink`
-| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
 |===
 
