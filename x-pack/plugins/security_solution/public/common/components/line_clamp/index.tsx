@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
-const LINE_CLAMP_HEIGHT = 4.5;
+const LINE_CLAMP_HEIGHT = 5.5;
 
 const StyledLineClamp = styled.div`
   display: -webkit-box;
