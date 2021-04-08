@@ -104,7 +104,7 @@ export class HttpService
           );
 
           registerCallback(router);
-          notReadySetup.registerRouter(router, true);
+          notReadySetup.registerRouterAfterListening(router);
         },
       };
     }

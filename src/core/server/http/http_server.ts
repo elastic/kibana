@@ -49,7 +49,14 @@ export interface HttpServerSetup {
    * Add all the routes registered with `router` to HTTP server request listeners.
    * @param router {@link IRouter} - a router with registered route handlers.
    */
-  registerRouter: (router: IRouter, allowAfterListening?: boolean) => void;
+  registerRouter: (router: IRouter) => void;
+  /**
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * Unlike `registerRouter`, this function allows routes to be registered even after the server
+   * has started listening for requests.
+   * @param router {@link IRouter} - a router with registered route handlers.
+   */
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -99,19 +106,21 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  private registerRouter(router: IRouter, allowAfterListening = false) {
+  private registerRouter(router: IRouter) {
     if (this.isListening()) {
-      if (!allowAfterListening) {
-        throw new Error('Routers can be registered only when HTTP server is stopped.');
-      }
+      throw new Error('Routers can be registered only when HTTP server is stopped.');
+    }
 
-      this.registeredRouters.add(router);
+    this.registeredRouters.add(router);
+  }
+
+  private registerRouterAfterListening(router: IRouter) {
+    this.registeredRouters.add(router);
+    if (this.isListening()) {
       for (const route of router.getRoutes()) {
         this.configureRoute(route);
       }
     }
-
-    this.registeredRouters.add(router);
   }
 
   public async setup(config: HttpConfig): Promise<HttpServerSetup> {
@@ -129,6 +138,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
