@@ -380,6 +380,7 @@ export const setup = async (arg?: {
         setReplicas: setReplicas('cold'),
         setFreeze: createSetFreeze('cold'),
         freezeExists: createFreezeExists('cold'),
+        ...createReadonlyActions('cold'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
