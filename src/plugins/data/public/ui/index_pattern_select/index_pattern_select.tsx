@@ -158,15 +158,13 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
     }
   }, 300);
 
-  fetchOptions = (searchValue: string) => {
+  fetchOptions = (searchValue = '') => {
     this.setState(
       {
         isLoading: true,
         searchValue,
       },
-      () => {
-        this.debouncedFetch(searchValue);
-      }
+      this.debouncedFetch.bind(null, searchValue)
     );
   };
 
