@@ -52,4 +52,5 @@ export {
   // Fleet Server index
   ENROLLMENT_API_KEYS_INDEX,
   AGENTS_INDEX,
+  PRECONFIGURATION_METADATA_INDEX,
 } from '../../common';

@@ -69,13 +69,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
     policies.map(async (preconfiguredAgentPolicy) => {
-      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
+      const { created, policy, deleted } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
         omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
 
-      if (!created) return { created, policy };
+      if (!created) return { created, policy, deleted };
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
       const installedPackagePolicies = await Promise.all(
@@ -122,22 +122,29 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
-        policy,
+        policy!,
         installedPackagePolicies!,
         defaultOutput
       );
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        agentPolicyService.update(soClient, esClient, policy.id, { is_managed: true });
+        agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
       }
     }
   }
 
   return {
-    policies: preconfiguredPolicies.map((p) => ({
-      id: p.policy.id,
-      updated_at: p.policy.updated_at,
-    })),
+    policies: preconfiguredPolicies.map((p) =>
+      p.policy
+        ? {
+            id: p.policy.id,
+            updated_at: p.policy.updated_at,
+          }
+        : i18n.translate('xpack.fleet.preconfiguration.policyDeleted', {
+            defaultMessage: 'Preconfigured policy {id} was deleted; skipping creation',
+            values: { id: p.deleted },
+          })
+    ),
     packages: preconfiguredPackages.map((pkg) => pkgToPkgKey(pkg)),
   };
 }

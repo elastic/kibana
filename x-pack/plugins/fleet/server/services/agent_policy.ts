@@ -19,6 +19,7 @@ import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_METADATA_INDEX,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -150,7 +151,8 @@ class AgentPolicyService {
     config: PreconfiguredAgentPolicy
   ): Promise<{
     created: boolean;
-    policy: AgentPolicy;
+    policy?: AgentPolicy;
+    deleted?: string;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
     const preconfigurationId = String(id);
@@ -158,6 +160,29 @@ class AgentPolicyService {
       searchFields: ['preconfiguration_id'],
       search: escapeSearchQueryPhrase(preconfigurationId),
     };
+
+    // Check to see if a preconfigured policy with te same preconfigurationId was already deleted by the user
+    try {
+      const deletionRecord = await esClient.search({
+        index: PRECONFIGURATION_METADATA_INDEX,
+        body: {
+          query: {
+            match: {
+              deleted_preconfiguration_id: preconfigurationId,
+            },
+          },
+        },
+      });
+
+      const { total } = deletionRecord.body.hits;
+      const wasDeleted = (typeof total === 'number' ? total : total.value) > 0;
+      if (wasDeleted) {
+        return { created: false, deleted: preconfigurationId };
+      }
+    } catch (e) {
+      // If ES failed on an index not found error, ignore it. This means nothing has been deleted yet.
+      if (e.body.status !== 404) throw e;
+    }
 
     const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
       namespace: 'default',
@@ -580,6 +605,16 @@ class AgentPolicyService {
         }
       );
     }
+
+    if (agentPolicy.preconfiguration_id) {
+      await esClient.index({
+        index: PRECONFIGURATION_METADATA_INDEX,
+        body: {
+          deleted_preconfiguration_id: String(agentPolicy.preconfiguration_id),
+        },
+      });
+    }
+
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
     return {
