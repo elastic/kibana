@@ -18,7 +18,7 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
-import { UrlStorageContextProvider } from './hooks/use_url_strorage';
+import { UrlStorageContextProvider } from './hooks/use_url_storage';
 import { useInitExploratoryView } from './hooks/use_init_exploratory_view';
 import { WithHeaderLayout } from '../../app/layout/with_header';
 

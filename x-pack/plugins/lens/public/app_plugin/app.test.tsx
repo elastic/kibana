@@ -155,11 +155,7 @@ function createMockTimefilter() {
     getBounds: jest.fn(() => timeFilter),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
-    getAutoRefreshFetch$: () => ({
-      subscribe: ({ next }: { next: () => void }) => {
-        return next;
-      },
-    }),
+    getAutoRefreshFetch$: () => new Observable(),
   };
 }
 
