@@ -505,6 +505,11 @@ Below HTTP endpoints are designed to work specifically with short URLs:
 
 ### The client-side navigate endpoint
 
+__NOTE.__ We are currently investigating if we really need this endpoint. The
+main user of it was expected to be Cloud and Support to deeply link into Kibana,
+but we are now reconsidering if we want to support this endpoint and possibly
+find a different solution.
+
 The `/app/goto/_redirect/<locatorId>?params=...&paramsVersion=...` client-side
 endpoint will receive the locator ID and locator params, it will use those to
 find the locator and execute `locator.navigate(params)` method.
@@ -522,7 +527,7 @@ plan of action for each endpoint:
 
 | HTTP method           | Path                                | Description                                                                                                                              |
 |-----------------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| __ANY__               | `/goto/<slug>`                      | Legacy endpoint for redirecting short URLs. We will remove it or deprecate this endpoint and maintain it until 8.0 major release.        |
+| __ANY__               | `/goto/<slug>`                      | Endpoint for redirecting short URLs, we will keep it to redirect short URLs.                                                             |
 | __GET__               | `/api/short_url/<slug>`             | The new `GET /api/short_url/<slug>` endpoint will return a superset of the payload that the legacy endpoint now returns.                 |
 | __POST__              | `/api/shorten_url`                  | The legacy endpoints for creating short URLs. We will remove it or deprecate this endpoint and maintain it until 8.0 major release.      |
 
