@@ -55,7 +55,6 @@ export function resultsServiceProvider(
     influencersFilterQuery: InfluencersFilterQuery
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
-  getRecordsForInfluencer(): Promise<RecordForInfluencer[]>;
   getRecordsForDetector(): Promise<any>;
   getRecords(): Promise<any>;
   getEventRateData(

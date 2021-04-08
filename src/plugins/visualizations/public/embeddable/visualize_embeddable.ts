@@ -150,8 +150,9 @@ export class VisualizeEmbeddable
     }
 
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getUpdated$().subscribe((value) => {
         const isDirty = this.handleChanges();
+
         if (isDirty && this.handler) {
           this.updateHandler();
         }
@@ -368,8 +369,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
@@ -396,13 +397,13 @@ export class VisualizeEmbeddable
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {
