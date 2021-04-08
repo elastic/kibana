@@ -23,13 +23,14 @@ const i18nTexts = {
     defaultMessage: 'Loading deprecations…',
   }),
 };
+
 export interface CheckupTabProps extends UpgradeAssistantTabProps {
   checkupLabel: string;
 }
 
 /**
- * Displays a list of deprecations that filterable and groupable. Can be used for cluster,
- * nodes, or indices checkups.
+ * Displays a list of deprecations that are filterable and groupable. Can be used for cluster,
+ * nodes, or indices deprecations.
  */
 export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   checkupLabel,

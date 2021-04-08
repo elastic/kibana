@@ -33,7 +33,7 @@ const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
     defaultMessage: 'Upgrade Assistant',
   }),
-  pageDescription: (nextMajor: string) =>
+  getPageDescription: (nextMajor: string) =>
     i18n.translate('xpack.upgradeAssistant.pageDescription', {
       defaultMessage:
         'The Upgrade Assistant identifies deprecated settings in your cluster and helps you resolve issues before you upgrade to Elastic {nextMajor}.',
@@ -41,7 +41,7 @@ const i18nTexts = {
         nextMajor,
       },
     }),
-  deprecationLoggingLabel: (href: string) => (
+  getDeprecationLoggingLabel: (href: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.deprecationLoggingDescription"
       defaultMessage="Deprecation logs may identify additional deprecations that should be addressed. {learnMore}"
@@ -103,7 +103,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
         <EuiPageContentBody>
           <>
             <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.pageDescription(`${nextMajor}.x`)}</p>
+              <p>{i18nTexts.getPageDescription(`${nextMajor}.x`)}</p>
             </EuiText>
 
             <EuiSpacer />
@@ -120,7 +120,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
                 <EuiSpacer />
 
                 <EuiFormRow
-                  label={i18nTexts.deprecationLoggingLabel(
+                  label={i18nTexts.getDeprecationLoggingLabel(
                     docLinks.links.elasticsearch.deprecationLogging
                   )}
                   hasChildLabel={false}
