@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -131,7 +132,10 @@ export class LensAttributes {
       ...buildNumberColumn(sourceField),
       label: i18n.translate('xpack.observability.expView.columns.label', {
         defaultMessage: '{operationType} of {sourceField}',
-        values: { sourceField, operationType },
+        values: {
+          sourceField: this.reportViewConfig.labels[sourceField],
+          operationType: capitalize(operationType),
+        },
       }),
       operationType,
     };

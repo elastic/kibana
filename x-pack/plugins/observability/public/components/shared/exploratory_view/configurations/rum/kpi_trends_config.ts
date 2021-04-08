@@ -38,6 +38,7 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     },
     yAxisColumn: {
       sourceField: 'business.kpi',
+      operationType: 'median',
     },
     hasOperationType: false,
     defaultFilters: [
