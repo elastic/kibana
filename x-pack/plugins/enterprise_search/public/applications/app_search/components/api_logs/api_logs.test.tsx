@@ -17,6 +17,8 @@ import { EuiPageHeader } from '@elastic/eui';
 import { Loading } from '../../../shared/loading';
 import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
+import { ApiLogsTable, NewApiEventsPrompt } from './components';
+
 import { ApiLogs } from './';
 
 describe('ApiLogs', () => {
@@ -41,7 +43,8 @@ describe('ApiLogs', () => {
 
   it('renders', () => {
     expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('API Logs');
-    // TODO: Check for ApiLogsTable + NewApiEventsPrompt when those get added
+    expect(wrapper.find(ApiLogsTable)).toHaveLength(1);
+    expect(wrapper.find(NewApiEventsPrompt)).toHaveLength(1);
 
     expect(wrapper.find(LogRetentionCallout).prop('type')).toEqual('api');
     expect(wrapper.find(LogRetentionTooltip).prop('type')).toEqual('api');

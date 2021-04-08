@@ -177,6 +177,7 @@ async function migrateAgentPolicies() {
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
         track_total_hits: true,
+        ignore_unavailable: true,
       });
 
       // @ts-expect-error value is number | TotalHits
