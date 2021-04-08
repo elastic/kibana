@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isNumber } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -30,12 +31,7 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
-import {
-  RenderRuleName,
-  renderEventModule,
-  renderUrl,
-  NotDraggable,
-} from './formatted_field_helpers';
+import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 
@@ -48,12 +44,10 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   fieldFormat?: string;
   fieldName: string;
-  fieldType: string;
+  fieldType?: string;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
-  isDraggingDisabled?: boolean;
-  isRoleSeparator?: boolean;
 }> = ({
   contextId,
   eventId,
@@ -64,8 +58,6 @@ const FormattedFieldValueComponent: React.FC<{
   truncate,
   value,
   linkValue,
-  isDraggingDisabled = false,
-  isRoleSeparator,
 }) => {
   if (isObjectArray) {
     return <>{value}</>;
@@ -127,15 +119,27 @@ const FormattedFieldValueComponent: React.FC<{
     [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
   ) {
     return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
-  } else if (columnNamesNotDraggable.includes(fieldName) || isDraggingDisabled || isRoleSeparator) {
-    return (
-      <NotDraggable
-        fieldName={fieldName}
-        isDraggingDisabled={isDraggingDisabled}
-        truncate={truncate}
-        value={value}
-        isRoleSeparator={isRoleSeparator}
-      />
+  } else if (columnNamesNotDraggable.includes(fieldName)) {
+    return truncate && !isEmpty(value) ? (
+      <TruncatableText data-test-subj="truncatable-message">
+        <EuiToolTip
+          data-test-subj="message-tool-tip"
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{fieldName}</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span>{value}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <>{value}</>
+        </EuiToolTip>
+      </TruncatableText>
+    ) : (
+      <>{value}</>
     );
   } else {
     const contentValue = getOrEmptyTagFromValue(value);

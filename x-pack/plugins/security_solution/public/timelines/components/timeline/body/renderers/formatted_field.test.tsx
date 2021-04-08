@@ -165,22 +165,6 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
 
-  test('it renders a tooltip as usual when dragging is disabled with isDraggingDisabled', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FormattedFieldValue
-          contextId="test"
-          eventId={mockTimelineData[0].ecs._id}
-          fieldName="message"
-          fieldType="text"
-          isDraggingDisabled
-          value={'123'}
-        />
-      </TestProviders>
-    );
-    expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(true);
-  });
-
   test('it does NOT render a tooltip for truncatable message when it is undefined', () => {
     const wrapper = mount(
       <TestProviders>

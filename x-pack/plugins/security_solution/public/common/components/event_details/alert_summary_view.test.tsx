@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { SummaryViewComponent } from './summary_view';
+import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -30,7 +30,7 @@ const props = {
   timelineId: 'detections-page',
 };
 
-describe('SummaryViewComponent', () => {
+describe('AlertSummaryViewComponent', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('SummaryViewComponent', () => {
   test('render correct items', () => {
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
@@ -53,43 +53,12 @@ describe('SummaryViewComponent', () => {
   test('render investigation guide', async () => {
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
     });
-  });
-
-  test('render threat details', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SummaryViewComponent {...props} isDisplayingThreatDetails />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="threat-details-view"]').exists()).toEqual(true);
-    });
-  });
-
-  test('render threat summary', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SummaryViewComponent {...props} isDisplayingThreatSummary />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="threat-summary-view"]').exists()).toEqual(true);
-    });
-  });
-
-  test('renders multiple items in a row for multiple values', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SummaryViewComponent {...props} isDisplayingThreatSummary />
-      </TestProviders>
-    );
-    expect(wrapper.find('[data-test-subj^="threat.indicator.matched"]')).toHaveLength(2);
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
@@ -100,7 +69,7 @@ describe('SummaryViewComponent', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {

@@ -7,6 +7,8 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import React from 'react';
+import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
@@ -50,6 +52,40 @@ export interface Item {
   type: string;
   values: ToStringArray;
 }
+
+export interface AlertSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    value: string;
+    fieldType: string;
+    linkValue: string | undefined;
+  };
+}
+
+export interface ThreatSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    values: string[];
+  };
+}
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}
+
+export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
+
+export type Summary = SummaryRow[];
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -171,4 +207,34 @@ export const onEventDetailsTabKeyPressed = ({
       skipFocus: eventFieldsTableSkipFocus,
     });
   }
+};
+
+const getTitle = (title: string) => (
+  <EuiTitle size="xxs">
+    <h5>{title}</h5>
+  </EuiTitle>
+);
+getTitle.displayName = 'getTitle';
+
+export const getSummaryColumns = (
+  getDescription:
+    | ((description: ThreatSummaryRow['description']) => JSX.Element)
+    | ((description: AlertSummaryRow['description']) => JSX.Element)
+    | ((description: ThreatDetailsRow['description']) => JSX.Element)
+): Array<EuiBasicTableColumn<SummaryRow>> => {
+  return [
+    {
+      field: 'title',
+      truncateText: false,
+      render: getTitle,
+      width: '120px',
+      name: '',
+    },
+    {
+      field: 'description',
+      truncateText: false,
+      render: getDescription,
+      name: '',
+    },
+  ];
 };

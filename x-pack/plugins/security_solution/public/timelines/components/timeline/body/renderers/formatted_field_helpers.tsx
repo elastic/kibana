@@ -45,50 +45,6 @@ interface RenderRuleNameProps {
   value: string | number | null | undefined;
 }
 
-interface NotDraggableProps {
-  truncate?: boolean;
-  isDraggingDisabled: boolean;
-  fieldName: string;
-  value: string | number | null | undefined;
-  isRoleSeparator?: boolean;
-}
-
-export const NotDraggable: React.FC<NotDraggableProps> = ({
-  truncate,
-  isDraggingDisabled,
-  fieldName,
-  value,
-  isRoleSeparator,
-}) => {
-  return (truncate || isDraggingDisabled) && !isEmpty(value) && !isRoleSeparator ? (
-    <>
-      <TruncatableText data-test-subj="truncatable-message">
-        <EuiToolTip
-          data-test-subj="message-tool-tip"
-          content={
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <span>{fieldName}</span>
-              </EuiFlexItem>
-              {!isDraggingDisabled && (
-                <EuiFlexItem grow={false}>
-                  <span>{value}</span>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          }
-        >
-          <div>{value}</div>
-        </EuiToolTip>
-      </TruncatableText>
-    </>
-  ) : isRoleSeparator ? (
-    <Separator role={'separator'} />
-  ) : (
-    <div>{value}</div>
-  );
-};
-
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   contextId,
   eventId,
