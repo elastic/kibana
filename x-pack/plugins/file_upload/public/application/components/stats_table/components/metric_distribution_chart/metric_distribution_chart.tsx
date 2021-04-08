@@ -57,9 +57,12 @@ export const MetricDistributionChart: FC<Props> = ({
   // This value is shown to label the y axis values in the tooltip.
   // Ideally we wouldn't show these values at all in the tooltip,
   // but this is not yet possible with Elastic charts.
-  const seriesName = i18n.translate('xpack.ml.fieldDataCard.metricDistributionChart.seriesName', {
-    defaultMessage: 'distribution',
-  });
+  const seriesName = i18n.translate(
+    'xpack.fileUpload.fieldDataCard.metricDistributionChart.seriesName',
+    {
+      defaultMessage: 'distribution',
+    }
+  );
 
   const theme = useDataVizChartTheme();
 

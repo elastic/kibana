@@ -69,7 +69,7 @@ export const AdvancedSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameLabel"
+            id="xpack.fileUpload.advancedImportSettings.indexNameLabel"
             defaultMessage="Index name"
           />
         }
@@ -78,7 +78,7 @@ export const AdvancedSettings: FC<Props> = ({
       >
         <EuiFieldText
           placeholder={i18n.translate(
-            'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
+            'xpack.fileUpload.advancedImportSettings.indexNamePlaceholder',
             {
               defaultMessage: 'index name',
             }
@@ -87,12 +87,9 @@ export const AdvancedSettings: FC<Props> = ({
           disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
-          aria-label={i18n.translate(
-            'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
-            {
-              defaultMessage: 'Index name, required field',
-            }
-          )}
+          aria-label={i18n.translate('xpack.fileUpload.advancedImportSettings.indexNameAriaLabel', {
+            defaultMessage: 'Index name, required field',
+          })}
         />
       </EuiFormRow>
 
@@ -102,7 +99,7 @@ export const AdvancedSettings: FC<Props> = ({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.createIndexPatternLabel"
+            id="xpack.fileUpload.advancedImportSettings.createIndexPatternLabel"
             defaultMessage="Create index pattern"
           />
         }
@@ -116,7 +113,7 @@ export const AdvancedSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexPatternNameLabel"
+            id="xpack.fileUpload.advancedImportSettings.indexPatternNameLabel"
             defaultMessage="Index pattern name"
           />
         }
@@ -184,7 +181,7 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexSettingsLabel"
+            id="xpack.fileUpload.advancedImportSettings.indexSettingsLabel"
             defaultMessage="Index settings"
           />
         }
@@ -209,7 +206,7 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.mappingsLabel"
+            id="xpack.fileUpload.advancedImportSettings.mappingsLabel"
             defaultMessage="Mappings"
           />
         }
@@ -234,7 +231,7 @@ const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) =>
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.ingestPipelineLabel"
+            id="xpack.fileUpload.advancedImportSettings.ingestPipelineLabel"
             defaultMessage="Ingest pipeline"
           />
         }

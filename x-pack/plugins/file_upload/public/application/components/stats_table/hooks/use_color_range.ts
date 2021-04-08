@@ -51,19 +51,19 @@ export enum COLOR_RANGE_SCALE {
 export const colorRangeScaleOptions = [
   {
     value: COLOR_RANGE_SCALE.LINEAR,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.linearScaleLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.linearScaleLabel', {
       defaultMessage: 'Linear',
     }),
   },
   {
     value: COLOR_RANGE_SCALE.INFLUENCER,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.influencerScaleLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.influencerScaleLabel', {
       defaultMessage: 'Influencer custom scale',
     }),
   },
   {
     value: COLOR_RANGE_SCALE.SQRT,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.sqrtScaleLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.sqrtScaleLabel', {
       defaultMessage: 'Sqrt',
     }),
   },
@@ -83,33 +83,36 @@ export enum COLOR_RANGE {
 export const colorRangeOptions = [
   {
     value: COLOR_RANGE.BLUE,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.blueColorRangeLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.blueColorRangeLabel', {
       defaultMessage: 'Blue',
     }),
   },
   {
     value: COLOR_RANGE.RED,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.redColorRangeLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.redColorRangeLabel', {
       defaultMessage: 'Red',
     }),
   },
   {
     value: COLOR_RANGE.RED_GREEN,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.redGreenColorRangeLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.redGreenColorRangeLabel', {
       defaultMessage: 'Red - Green',
     }),
   },
   {
     value: COLOR_RANGE.GREEN_RED,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.greenRedColorRangeLabel', {
+    text: i18n.translate('xpack.fileUpload.components.colorRangeLegend.greenRedColorRangeLabel', {
       defaultMessage: 'Green - Red',
     }),
   },
   {
     value: COLOR_RANGE.YELLOW_GREEN_BLUE,
-    text: i18n.translate('xpack.ml.components.colorRangeLegend.yellowGreenBlueColorRangeLabel', {
-      defaultMessage: 'Yellow - Green - Blue',
-    }),
+    text: i18n.translate(
+      'xpack.fileUpload.components.colorRangeLegend.yellowGreenBlueColorRangeLabel',
+      {
+        defaultMessage: 'Yellow - Green - Blue',
+      }
+    ),
   },
 ];
 

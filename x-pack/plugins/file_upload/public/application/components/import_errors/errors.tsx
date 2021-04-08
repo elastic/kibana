@@ -38,56 +38,56 @@ function title(statuses: Statuses) {
     case statuses.readStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.readingFileErrorMessage"
+          id="xpack.fileUpload.importErrors.readingFileErrorMessage"
           defaultMessage="Error reading file"
         />
       );
     case statuses.parseJSONStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.parsingJSONErrorMessage"
+          id="xpack.fileUpload.importErrors.parsingJSONErrorMessage"
           defaultMessage="Error parsing JSON"
         />
       );
     case statuses.indexCreatedStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.creatingIndexErrorMessage"
+          id="xpack.fileUpload.importErrors.creatingIndexErrorMessage"
           defaultMessage="Error creating index"
         />
       );
     case statuses.ingestPipelineCreatedStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.creatingIngestPipelineErrorMessage"
+          id="xpack.fileUpload.importErrors.creatingIngestPipelineErrorMessage"
           defaultMessage="Error creating ingest pipeline"
         />
       );
     case statuses.uploadStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.uploadingDataErrorMessage"
+          id="xpack.fileUpload.importErrors.uploadingDataErrorMessage"
           defaultMessage="Error uploading data"
         />
       );
     case statuses.indexPatternCreatedStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.creatingIndexPatternErrorMessage"
+          id="xpack.fileUpload.importErrors.creatingIndexPatternErrorMessage"
           defaultMessage="Error creating index pattern"
         />
       );
     case statuses.permissionCheckStatus:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.checkingPermissionErrorMessage"
+          id="xpack.fileUpload.importErrors.checkingPermissionErrorMessage"
           defaultMessage="Import permissions error"
         />
       );
     default:
       return (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importErrors.defaultErrorMessage"
+          id="xpack.fileUpload.importErrors.defaultErrorMessage"
           defaultMessage="Error"
         />
       );
@@ -105,7 +105,7 @@ const ImportError: FC<{ error: any }> = ({ error }) => {
           id="more"
           buttonContent={
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.importErrors.moreButtonLabel"
+              id="xpack.fileUpload.importErrors.moreButtonLabel"
               defaultMessage="More"
             />
           }
@@ -151,7 +151,7 @@ function toString(error: any): ImportError {
   }
 
   return {
-    msg: i18n.translate('xpack.ml.fileDatavisualizer.importErrors.unknownErrorMessage', {
+    msg: i18n.translate('xpack.fileUpload.importErrors.unknownErrorMessage', {
       defaultMessage: 'Unknown error',
     }),
   };

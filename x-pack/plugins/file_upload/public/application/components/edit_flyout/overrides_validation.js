@@ -41,7 +41,7 @@ export function isTimestampFormatValid(timestampFormat) {
   if (timestampFormat.indexOf('?') >= 0) {
     result.isValid = false;
     result.errorMessage = i18n.translate(
-      'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage',
+      'xpack.fileUpload.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage',
       {
         defaultMessage:
           'Timestamp format {timestampFormat} not supported because it contains a question mark character ({fieldPlaceholder})',
@@ -86,7 +86,7 @@ export function isTimestampFormatValid(timestampFormat) {
           result.isValid = false;
 
           result.errorMessage = i18n.translate(
-            'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampLetterValidationErrorMessage',
+            'xpack.fileUpload.editFlyout.overrides.timestampLetterValidationErrorMessage',
             {
               defaultMessage:
                 'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported',
@@ -101,9 +101,10 @@ export function isTimestampFormatValid(timestampFormat) {
           if (curChar === 'S') {
             // disable exceeds maximum line length error so i18n check passes
             result.errorMessage = i18n.translate(
-              'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampLetterSValidationErrorMessage',
+              'xpack.fileUpload.editFlyout.overrides.timestampLetterSValidationErrorMessage',
               {
-                defaultMessage: 'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported because it is not preceded by ss and a separator from {sep}', // eslint-disable-line
+                defaultMessage:
+                  'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported because it is not preceded by ss and a separator from {sep}', // eslint-disable-line
                 values: {
                   length,
                   lg: letterGroup,
@@ -127,7 +128,7 @@ export function isTimestampFormatValid(timestampFormat) {
   if (prevLetterGroup == null) {
     result.isValid = false;
     result.errorMessage = i18n.translate(
-      'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampEmptyValidationErrorMessage',
+      'xpack.fileUpload.editFlyout.overrides.timestampEmptyValidationErrorMessage',
       {
         defaultMessage: 'No time format letter groups in timestamp format {timestampFormat}',
         values: {

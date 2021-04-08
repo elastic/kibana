@@ -41,7 +41,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
           defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
           exceeds the maximum permitted size of {maxFileSizeFormatted}"
           values={{
@@ -56,7 +56,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
           defaultMessage="The size of the file you selected for upload exceeds the maximum
           permitted size of {maxFileSizeFormatted} by {diffFormatted}"
           values={{
@@ -72,7 +72,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileSizeTooLargeTitle"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeTooLargeTitle"
           defaultMessage="File size is too large"
         />
       }
@@ -102,7 +102,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileCouldNotBeReadTitle"
+            id="xpack.fileUpload.fileErrorCallouts.fileCouldNotBeReadTitle"
             defaultMessage="File structure cannot be determined"
           />
         }
@@ -113,13 +113,13 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
         {loaded === false && (
           <>
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.applyOverridesDescription"
+              id="xpack.fileUpload.fileErrorCallouts.applyOverridesDescription"
               defaultMessage="If you know something about this data, such as the file format or timestamp format, adding initial overrides may help us to infer the rest of the structure."
             />
             <br />
             <EuiButtonEmpty onClick={showEditFlyout} flush="left" size="xs">
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.fileErrorCallouts.overrideButton"
+                id="xpack.fileUpload.fileErrorCallouts.overrideButton"
                 defaultMessage="Apply override settings"
               />
             </EuiButtonEmpty>
@@ -132,7 +132,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
           <>
             <EuiSpacer size="s" />
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
+              id="xpack.fileUpload.fileErrorCallouts.revertingToPreviousSettingsDescription"
               defaultMessage="Reverting to previous settings"
             />
           </>

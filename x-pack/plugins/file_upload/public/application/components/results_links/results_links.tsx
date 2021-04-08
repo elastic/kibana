@@ -175,7 +175,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
+                id="xpack.fileUpload.resultsLinks.viewIndexInDiscoverTitle"
                 defaultMessage="View index in Discover"
               />
             }
@@ -191,7 +191,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
+                id="xpack.fileUpload.resultsLinks.indexManagementTitle"
                 defaultMessage="Index Management"
               />
             }
@@ -207,7 +207,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
+                id="xpack.fileUpload.resultsLinks.indexPatternManagementTitle"
                 defaultMessage="Index Pattern Management"
               />
             }
@@ -221,7 +221,7 @@ export const ResultsLinks: FC<Props> = ({
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
           title={
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfig"
+              id="xpack.fileUpload.resultsLinks.fileBeatConfig"
               defaultMessage="Create Filebeat configuration"
             />
           }

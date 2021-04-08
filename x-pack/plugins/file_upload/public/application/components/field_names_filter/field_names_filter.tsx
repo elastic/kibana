@@ -26,7 +26,7 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
 }) => {
   const fieldNameTitle = useMemo(
     () =>
-      i18n.translate('xpack.ml.dataVisualizer.fileBased.fieldNameSelect', {
+      i18n.translate('xpack.fileUpload.fieldNameSelect', {
         defaultMessage: 'Field name',
       }),
     []

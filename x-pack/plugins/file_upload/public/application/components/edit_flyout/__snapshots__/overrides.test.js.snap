@@ -13,7 +13,7 @@ exports[`Overrides render overrides 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Number of lines to sample"
-        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.linesToSampleFormRowLabel"
+        id="xpack.fileUpload.editFlyout.overrides.linesToSampleFormRowLabel"
         values={Object {}}
       />
     }
@@ -33,7 +33,7 @@ exports[`Overrides render overrides 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Data format"
-        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.dataFormatFormRowLabel"
+        id="xpack.fileUpload.editFlyout.overrides.dataFormatFormRowLabel"
         values={Object {}}
       />
     }
@@ -94,7 +94,7 @@ exports[`Overrides render overrides 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Timestamp format"
-        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
+        id="xpack.fileUpload.editFlyout.overrides.timestampFormatFormRowLabel"
         values={Object {}}
       />
     }
@@ -335,7 +335,7 @@ exports[`Overrides render overrides 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Time field"
-        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timeFieldFormRowLabel"
+        id="xpack.fileUpload.editFlyout.overrides.timeFieldFormRowLabel"
         values={Object {}}
       />
     }

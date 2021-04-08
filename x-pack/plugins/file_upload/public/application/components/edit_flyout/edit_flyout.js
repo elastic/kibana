@@ -69,7 +69,7 @@ export class EditFlyout extends Component {
               <EuiTitle>
                 <h2>
                   <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.editFlyout.overrideSettingsTitle"
+                    id="xpack.fileUpload.editFlyout.overrideSettingsTitle"
                     defaultMessage="Override settings"
                   />
                 </h2>
@@ -96,7 +96,7 @@ export class EditFlyout extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left">
                     <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.editFlyout.closeOverrideSettingsButtonLabel"
+                      id="xpack.fileUpload.editFlyout.closeOverrideSettingsButtonLabel"
                       defaultMessage="Close"
                     />
                   </EuiButtonEmpty>
@@ -108,7 +108,7 @@ export class EditFlyout extends Component {
                     fill
                   >
                     <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.editFlyout.applyOverrideSettingsButtonLabel"
+                      id="xpack.fileUpload.editFlyout.applyOverrideSettingsButtonLabel"
                       defaultMessage="Apply"
                     />
                   </EuiButton>

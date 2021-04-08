@@ -103,12 +103,18 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           onClick={() => toggleExpandAll(!expandAll)}
           aria-label={
             !expandAll
-              ? i18n.translate('xpack.ml.datavisualizer.dataGrid.expandDetailsForAllAriaLabel', {
-                  defaultMessage: 'Expand details for all fields',
-                })
-              : i18n.translate('xpack.ml.datavisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
-                  defaultMessage: 'Collapse details for all fields',
-                })
+              ? i18n.translate(
+                  'xpack.fileUpload.datavisualizer.dataGrid.expandDetailsForAllAriaLabel',
+                  {
+                    defaultMessage: 'Expand details for all fields',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.fileUpload.datavisualizer.dataGrid.collapseDetailsForAllAriaLabel',
+                  {
+                    defaultMessage: 'Collapse details for all fields',
+                  }
+                )
           }
           iconType={expandAll ? 'arrowUp' : 'arrowDown'}
         />
@@ -125,11 +131,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             onClick={() => toggleDetails(item)}
             aria-label={
               expandedRowItemIds.includes(item.fieldName)
-                ? i18n.translate('xpack.ml.datavisualizer.dataGrid.rowCollapse', {
+                ? i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
                     values: { fieldName: item.fieldName },
                   })
-                : i18n.translate('xpack.ml.datavisualizer.dataGrid.rowExpand', {
+                : i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.rowExpand', {
                     defaultMessage: 'Show details for {fieldName}',
                     values: { fieldName: item.fieldName },
                   })
@@ -145,7 +151,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       expanderColumn,
       {
         field: 'type',
-        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.typeColumnName', {
+        name: i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
         render: (fieldType: MlJobFieldType) => {
@@ -158,7 +164,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'fieldName',
-        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.nameColumnName', {
+        name: i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.nameColumnName', {
           defaultMessage: 'Name',
         }),
         sortable: true,
@@ -173,7 +179,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'docCount',
-        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
+        name: i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.documentsCountColumnName', {
           defaultMessage: 'Documents (%)',
         }),
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
@@ -185,7 +191,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'stats.cardinality',
-        name: i18n.translate('xpack.ml.datavisualizer.dataGrid.distinctValuesColumnName', {
+        name: i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
         render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
@@ -197,7 +203,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
-            {i18n.translate('xpack.ml.datavisualizer.dataGrid.distributionsColumnName', {
+            {i18n.translate('xpack.fileUpload.datavisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
             <EuiButtonIcon
@@ -206,7 +212,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
               iconType={showDistributions ? 'eye' : 'eyeClosed'}
               onClick={() => toggleShowDistribution()}
               aria-label={i18n.translate(
-                'xpack.ml.datavisualizer.dataGrid.showDistributionsAriaLabel',
+                'xpack.fileUpload.datavisualizer.dataGrid.showDistributionsAriaLabel',
                 {
                   defaultMessage: 'Show distributions',
                 }

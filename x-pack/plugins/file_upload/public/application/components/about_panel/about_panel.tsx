@@ -43,7 +43,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
                 <EuiFilePicker
                   id="filePicker"
                   initialPromptText={i18n.translate(
-                    'xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                    'xpack.fileUpload.aboutPanel.selectOrDragAndDropFileDescription',
                     {
                       defaultMessage: 'Select or drag and drop a file',
                     }
@@ -70,7 +70,7 @@ export const LoadingPanel: FC = () => {
             <EuiTitle size="s">
               <h1 role="alert">
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
+                  id="xpack.fileUpload.aboutPanel.analyzingDataTitle"
                   defaultMessage="Analyzing data"
                 />
               </h1>

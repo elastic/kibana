@@ -36,7 +36,7 @@ export function createFilebeatConfig(
 }
 
 function getPaths() {
-  const txt = i18n.translate('xpack.ml.fileDatavisualizer.fileBeatConfig.paths', {
+  const txt = i18n.translate('xpack.fileUpload.fileBeatConfig.paths', {
     defaultMessage: 'add path to your files here',
   });
   return ['  paths:', `  - '<${txt}>'`];

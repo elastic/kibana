@@ -20,10 +20,10 @@ export function CombinedFieldsReadOnlyForm({
 }) {
   return combinedFields.length ? (
     <EuiFormRow
-      label={i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsReadOnlyLabel', {
+      label={i18n.translate('xpack.fileUpload.combinedFieldsReadOnlyLabel', {
         defaultMessage: 'Combined fields',
       })}
-      helpText={i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsReadOnlyHelpTextLabel', {
+      helpText={i18n.translate('xpack.fileUpload.combinedFieldsReadOnlyHelpTextLabel', {
         defaultMessage: 'Edit combined fields in advanced tab',
       })}
     >

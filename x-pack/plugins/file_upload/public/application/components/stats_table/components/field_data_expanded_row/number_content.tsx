@@ -52,7 +52,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'min',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.minLabel"
+          id="xpack.fileUpload.fieldDataCardExpandedRow.numberContent.minLabel"
           defaultMessage="min"
         />
       ),
@@ -62,7 +62,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'median',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.medianLabel"
+          id="xpack.fileUpload.fieldDataCardExpandedRow.numberContent.medianLabel"
           defaultMessage="median"
         />
       ),
@@ -72,7 +72,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'max',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.maxLabel"
+          id="xpack.fileUpload.fieldDataCardExpandedRow.numberContent.maxLabel"
           defaultMessage="max"
         />
       ),
@@ -93,7 +93,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   const summaryTableTitle = i18n.translate(
-    'xpack.ml.fieldDataCardExpandedRow.numberContent.summaryTableTitle',
+    'xpack.fileUpload.fieldDataCardExpandedRow.numberContent.summaryTableTitle',
     {
       defaultMessage: 'Summary',
     }
@@ -121,7 +121,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
-                id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
+                id="xpack.fileUpload.fieldDataCardExpandedRow.numberContent.distributionTitle"
                 defaultMessage="Distribution"
               />
             </ExpandedRowFieldHeader>
@@ -138,7 +138,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <FormattedMessage
-                id="xpack.ml.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
+                id="xpack.fileUpload.fieldDataCardExpandedRow.numberContent.displayingPercentilesLabel"
                 defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
                 values={{
                   minPercent: numberAsOrdinal(distribution.minPercentile),

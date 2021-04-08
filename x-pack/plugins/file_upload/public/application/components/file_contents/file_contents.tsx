@@ -31,7 +31,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle"
+            id="xpack.fileUpload.fileContents.fileContentsTitle"
             defaultMessage="File contents"
           />
         </h2>
@@ -39,7 +39,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 
       <div>
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription"
+          id="xpack.fileUpload.fileContents.firstLinesDescription"
           defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
           values={{
             numberOfLines,

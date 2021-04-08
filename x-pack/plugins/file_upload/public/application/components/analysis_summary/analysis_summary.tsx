@@ -19,7 +19,7 @@ export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ re
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.analysisSummary.summaryTitle"
+            id="xpack.fileUpload.analysisSummary.summaryTitle"
             defaultMessage="Summary"
           />
         </h2>
@@ -37,7 +37,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
     {
       title: (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.analyzedLinesNumberTitle"
+          id="xpack.fileUpload.analysisSummary.analyzedLinesNumberTitle"
           defaultMessage="Number of lines analyzed"
         />
       ),
@@ -53,7 +53,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
     items.push({
       title: (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.formatTitle"
+          id="xpack.fileUpload.analysisSummary.formatTitle"
           defaultMessage="Format"
         />
       ),
@@ -64,7 +64,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
       items.push({
         title: (
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.analysisSummary.delimiterTitle"
+            id="xpack.fileUpload.analysisSummary.delimiterTitle"
             defaultMessage="Delimiter"
           />
         ),
@@ -74,7 +74,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
       items.push({
         title: (
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.analysisSummary.hasHeaderRowTitle"
+            id="xpack.fileUpload.analysisSummary.hasHeaderRowTitle"
             defaultMessage="Has header row"
           />
         ),
@@ -87,7 +87,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
     items.push({
       title: (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.grokPatternTitle"
+          id="xpack.fileUpload.analysisSummary.grokPatternTitle"
           defaultMessage="Grok pattern"
         />
       ),
@@ -99,7 +99,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
     items.push({
       title: (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFieldTitle"
+          id="xpack.fileUpload.analysisSummary.timeFieldTitle"
           defaultMessage="Time field"
         />
       ),
@@ -111,7 +111,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
     items.push({
       title: (
         <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle"
+          id="xpack.fileUpload.analysisSummary.timeFormatTitle"
           defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}}"
           values={{
             timestampFormats: results.java_timestamp_formats.length,

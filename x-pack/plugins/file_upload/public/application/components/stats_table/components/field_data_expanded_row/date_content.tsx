@@ -29,15 +29,18 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
 
   const { earliest, latest } = stats;
 
-  const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardDate.summaryTableTitle', {
-    defaultMessage: 'Summary',
-  });
+  const summaryTableTitle = i18n.translate(
+    'xpack.fileUpload.fieldDataCard.cardDate.summaryTableTitle',
+    {
+      defaultMessage: 'Summary',
+    }
+  );
   const summaryTableItems = [
     {
       function: 'earliest',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
+          id="xpack.fileUpload.fieldDataCard.cardDate.earliestLabel"
           defaultMessage="earliest"
         />
       ),
@@ -47,7 +50,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.latestLabel"
+          id="xpack.fileUpload.fieldDataCard.cardDate.latestLabel"
           defaultMessage="latest"
         />
       ),

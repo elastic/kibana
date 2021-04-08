@@ -41,7 +41,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
 }) => {
   const fieldNameTitle = useMemo(
     () =>
-      i18n.translate('xpack.ml.dataVisualizer.fileBased.fieldTypeSelect', {
+      i18n.translate('xpack.fileUpload.fieldTypeSelect', {
         defaultMessage: 'Field type',
       }),
     []

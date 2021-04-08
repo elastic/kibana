@@ -130,7 +130,7 @@ export class ImportView extends Component {
             })) === false
           ) {
             errors.push(
-              i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
+              i18n.translate('xpack.fileUpload.importView.importPermissionError', {
                 defaultMessage:
                   'You do not have permission to create or import data into index {index}.',
                 values: {
@@ -170,7 +170,7 @@ export class ImportView extends Component {
                 } catch (error) {
                   success = false;
                   const parseError = i18n.translate(
-                    'xpack.ml.fileDatavisualizer.importView.parseSettingsError',
+                    'xpack.fileUpload.importView.parseSettingsError',
                     {
                       defaultMessage: 'Error parsing settings:',
                     }
@@ -183,7 +183,7 @@ export class ImportView extends Component {
                 } catch (error) {
                   success = false;
                   const parseError = i18n.translate(
-                    'xpack.ml.fileDatavisualizer.importView.parseMappingsError',
+                    'xpack.fileUpload.importView.parseMappingsError',
                     {
                       defaultMessage: 'Error parsing mappings:',
                     }
@@ -198,7 +198,7 @@ export class ImportView extends Component {
                 } catch (error) {
                   success = false;
                   const parseError = i18n.translate(
-                    'xpack.ml.fileDatavisualizer.importView.parsePipelineError',
+                    'xpack.fileUpload.importView.parsePipelineError',
                     {
                       defaultMessage: 'Error parsing ingest pipeline:',
                     }
@@ -355,7 +355,7 @@ export class ImportView extends Component {
     const { exists } = await checkIndexExists(index);
     const indexNameError = exists ? (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        id="xpack.fileUpload.importView.indexNameAlreadyExistsErrorMessage"
         defaultMessage="Index name already exists"
       />
     ) : (
@@ -508,14 +508,14 @@ export class ImportView extends Component {
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.importView.importDataTitle"
+                  id="xpack.fileUpload.importView.importDataTitle"
                   defaultMessage="Import data"
                 />
                 &nbsp;
                 <ExperimentalBadge
                   tooltipContent={
                     <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureTooltip"
+                      id="xpack.fileUpload.importView.experimentalFeatureTooltip"
                       defaultMessage="Experimental feature. We'd love to hear your feedback."
                     />
                   }
@@ -556,7 +556,7 @@ export class ImportView extends Component {
                 data-test-subj="mlFileDataVisImportButton"
               >
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.importView.importButtonLabel"
+                  id="xpack.fileUpload.importView.importButtonLabel"
                   defaultMessage="Import"
                 />
               </EuiButton>
@@ -565,7 +565,7 @@ export class ImportView extends Component {
             {initialized === true && importing === false && (
               <EuiButton onClick={this.clickReset}>
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.importView.resetButtonLabel"
+                  id="xpack.fileUpload.importView.resetButtonLabel"
                   defaultMessage="Reset"
                 />
               </EuiButton>
@@ -697,7 +697,7 @@ function isIndexNameValid(name) {
   ) {
     return (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameContainsIllegalCharactersErrorMessage"
+        id="xpack.fileUpload.importView.indexNameContainsIllegalCharactersErrorMessage"
         defaultMessage="Index name contains illegal characters"
       />
     );
@@ -714,7 +714,7 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexPatternNameAlreadyExistsErrorMessage"
+        id="xpack.fileUpload.importView.indexPatternNameAlreadyExistsErrorMessage"
         defaultMessage="Index pattern name already exists"
       />
     );
@@ -730,7 +730,7 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     // name should match index
     return (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
+        id="xpack.fileUpload.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
         defaultMessage="Index pattern does not match index name"
       />
     );

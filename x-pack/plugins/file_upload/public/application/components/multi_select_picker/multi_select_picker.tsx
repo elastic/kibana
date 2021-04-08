@@ -32,7 +32,7 @@ const NoFilterItems = () => {
         <EuiSpacer size="xs" />
         <p>
           <FormattedMessage
-            id="xpack.ml.multiSelectPicker.NoFiltersFoundMessage"
+            id="xpack.fileUpload.multiSelectPicker.NoFiltersFoundMessage"
             defaultMessage="No filters found"
           />
         </p>

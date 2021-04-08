@@ -139,7 +139,7 @@ export class FileDataVisualizerView extends Component {
         throw {
           message: (
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
+              id="xpack.fileUpload.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
               defaultMessage="XML not currently supported"
             />
           ),
