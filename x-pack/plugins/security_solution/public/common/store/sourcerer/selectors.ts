@@ -82,7 +82,7 @@ export const getAllExistingIndexNamesSelector = () => {
 };
 
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-const ALERTS_AS_DATA_INDEX = '*alert-history-security-solution*';
+const ALERTS_AS_DATA_INDEX = '*alerts-security-solution*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();

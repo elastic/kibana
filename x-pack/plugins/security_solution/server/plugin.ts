@@ -285,7 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
     this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
-      namespace: 'security-solution',
+      name: 'security-solution',
       fieldMap: {
         ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
       },

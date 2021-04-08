@@ -323,6 +323,7 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
       name: [this.options.name, name].filter(Boolean).join('-'),
       fieldMap: mergedFieldMap,
       ...(ilmPolicy ? { ilmPolicy } : {}),
+      writeEnabled: true,
     });
 
     this.children.push(child);
