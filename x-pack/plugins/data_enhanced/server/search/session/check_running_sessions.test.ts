@@ -6,7 +6,6 @@
  */
 
 import { checkRunningSessions } from './check_running_sessions';
-import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import moment from 'moment';
@@ -18,6 +17,8 @@ import {
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  SearchSessionStatus,
+  SearchSessionSavedObjectAttributes,
 } from '../../../../../../src/plugins/data/common';
 
 describe('getSearchStatus', () => {
