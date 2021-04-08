@@ -6,7 +6,7 @@
  */
 
 import { SubCasesPatchRequest } from '../../../../../common/api';
-import { SUB_CASES_PATCH_DEL_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError } from '../../utils';
 
@@ -20,16 +20,10 @@ export function initPatchSubCasesApi({ router, caseService, logger }: RouteDeps)
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-
-        const user = caseService.getUser({ request });
-
         const casesClient = await context.cases.getCasesClient();
         const subCases = request.body as SubCasesPatchRequest;
         return response.ok({
-          body: await casesClient.subCases.update({ soClient, subCases, user }),
+          body: await casesClient.subCases.update(subCases),
         });
       } catch (error) {
         logger.error(`Failed to patch sub cases in route: ${error}`);

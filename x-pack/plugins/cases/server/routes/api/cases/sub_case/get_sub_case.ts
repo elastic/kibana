@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { SUB_CASE_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { SUB_CASE_DETAILS_URL } from '../../../../../common/constants';
 
 export function initGetSubCaseApi({ router, logger }: RouteDeps) {
   router.get(
@@ -27,16 +27,11 @@ export function initGetSubCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-
         const client = await context.cases.getCasesClient();
 
         return response.ok({
           body: await client.subCases.get({
             id: request.params.sub_case_id,
-            soClient,
             includeComments: request.query.includeComments,
           }),
         });

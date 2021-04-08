@@ -43,7 +43,7 @@ export class CasesClient {
 
   public get subCases() {
     if (!ENABLE_CASE_CONNECTOR) {
-      throw Boom.badRequest('The case connector feature is disabled');
+      throw new Error('The case connector feature is disabled');
     }
     return this._subCases;
   }

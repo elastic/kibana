@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import {
   caseStatuses,
   SubCaseResponse,
@@ -15,8 +14,8 @@ import {
   SubCasesFindRequest,
   SubCasesFindResponse,
   SubCasesFindResponseRt,
+  SubCasesPatchRequest,
   SubCasesResponse,
-  User,
 } from '../../../common/api';
 import { CasesClientArgs } from '..';
 import { flattenSubCaseSavedObject, transformSubCases } from '../../routes/api/utils';
@@ -27,16 +26,9 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../../routes/api/cases/helpers';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClient } from '../client';
-import { update, UpdateArgs } from './update';
-
-interface DeleteArgs {
-  soClient: SavedObjectsClientContract;
-  ids: string[];
-  user: User;
-}
+import { update } from './update';
 
 interface FindArgs {
-  soClient: SavedObjectsClientContract;
   caseID: string;
   queryParams: SubCasesFindRequest;
 }
@@ -44,17 +36,16 @@ interface FindArgs {
 interface GetArgs {
   includeComments: boolean;
   id: string;
-  soClient: SavedObjectsClientContract;
 }
 
 /**
  * The API routes for interacting with sub cases.
  */
 export interface SubCasesClient {
-  delete(deleteArgs: DeleteArgs): Promise<void>;
+  delete(ids: string[]): Promise<void>;
   find(findArgs: FindArgs): Promise<SubCasesFindResponse>;
   get(getArgs: GetArgs): Promise<SubCaseResponse>;
-  update(updateArgs: UpdateArgs): Promise<SubCasesResponse>;
+  update(subCases: SubCasesPatchRequest): Promise<SubCasesResponse>;
 }
 
 /**
@@ -65,21 +56,26 @@ export function createSubCasesClient(
   casesClient: CasesClient
 ): SubCasesClient {
   return Object.freeze({
-    delete: (deleteArgs: DeleteArgs) => deleteSubCase(deleteArgs, clientArgs),
+    delete: (ids: string[]) => deleteSubCase(ids, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
-    update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs, casesClient),
+    update: (subCases: SubCasesPatchRequest) => update(subCases, clientArgs, casesClient),
   });
 }
 
-async function deleteSubCase(
-  { soClient, ids, user }: DeleteArgs,
-  clientArgs: CasesClientArgs
-): Promise<void> {
+async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
+    const {
+      savedObjectsClient: soClient,
+      user,
+      userActionService,
+      caseService,
+      attachmentService,
+    } = clientArgs;
+
     const [comments, subCases] = await Promise.all([
-      clientArgs.caseService.getAllSubCaseComments({ soClient, id: ids }),
-      clientArgs.caseService.getSubCases({ soClient, ids }),
+      caseService.getAllSubCaseComments({ soClient, id: ids }),
+      caseService.getSubCases({ soClient, ids }),
     ]);
 
     const subCaseErrors = subCases.saved_objects.filter((subCase) => subCase.error !== undefined);
@@ -100,15 +96,15 @@ async function deleteSubCase(
 
     await Promise.all(
       comments.saved_objects.map((comment) =>
-        clientArgs.attachmentService.delete({ soClient, attachmentId: comment.id })
+        attachmentService.delete({ soClient, attachmentId: comment.id })
       )
     );
 
-    await Promise.all(ids.map((id) => clientArgs.caseService.deleteSubCase(soClient, id)));
+    await Promise.all(ids.map((id) => caseService.deleteSubCase(soClient, id)));
 
     const deleteDate = new Date().toISOString();
 
-    await clientArgs.userActionService.bulkCreate({
+    await userActionService.bulkCreate({
       soClient,
       actions: ids.map((id) =>
         buildCaseUserActionItem({
@@ -133,17 +129,19 @@ async function deleteSubCase(
 }
 
 async function find(
-  { soClient, caseID, queryParams }: FindArgs,
+  { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
 ): Promise<SubCasesFindResponse> {
   try {
+    const { savedObjectsClient: soClient, caseService } = clientArgs;
+
     const ids = [caseID];
     const { subCase: subCaseQueryOptions } = constructQueryOptions({
       status: queryParams.status,
       sortByField: queryParams.sortField,
     });
 
-    const subCases = await clientArgs.caseService.findSubCasesGroupByCase({
+    const subCases = await caseService.findSubCasesGroupByCase({
       soClient,
       ids,
       options: {
@@ -161,7 +159,7 @@ async function find(
           status,
           sortByField: queryParams.sortField,
         });
-        return clientArgs.caseService.findSubCaseStatusStats({
+        return caseService.findSubCaseStatusStats({
           soClient,
           options: statusQueryOptions ?? {},
           ids,
@@ -190,11 +188,13 @@ async function find(
 }
 
 async function get(
-  { includeComments, id, soClient }: GetArgs,
+  { includeComments, id }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<SubCaseResponse> {
   try {
-    const subCase = await clientArgs.caseService.getSubCase({
+    const { savedObjectsClient: soClient, caseService } = clientArgs;
+
+    const subCase = await caseService.getSubCase({
       soClient,
       id,
     });
@@ -207,7 +207,7 @@ async function get(
       );
     }
 
-    const theComments = await clientArgs.caseService.getAllSubCaseComments({
+    const theComments = await caseService.getAllSubCaseComments({
       soClient,
       id,
       options: {

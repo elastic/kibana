@@ -47,15 +47,6 @@ import { createCaseError } from '../../common/error';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 import { CasesClientArgs } from '../types';
 
-/**
- * The parameters that come from the API route itself.
- */
-export interface UpdateArgs {
-  soClient: SavedObjectsClientContract;
-  user: User;
-  subCases: SubCasesPatchRequest;
-}
-
 function checkNonExistingOrConflict(
   toUpdate: SubCasePatchRequest[],
   fromStorage: Map<string, SavedObject<SubCaseAttributes>>
@@ -266,7 +257,7 @@ async function updateAlerts({
  * Handles updating the fields in a sub case.
  */
 export async function update(
-  { soClient, user, subCases }: UpdateArgs,
+  subCases: SubCasesPatchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<SubCasesResponse> {
@@ -276,7 +267,9 @@ export async function update(
   );
 
   try {
-    const bulkSubCases = await clientArgs.caseService.getSubCases({
+    const { savedObjectsClient: soClient, user, caseService, userActionService } = clientArgs;
+
+    const bulkSubCases = await caseService.getSubCases({
       soClient,
       ids: query.subCases.map((q) => q.id),
     });
@@ -296,13 +289,13 @@ export async function update(
 
     const subIDToParentCase = await getParentCases({
       soClient,
-      caseService: clientArgs.caseService,
+      caseService,
       subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
       subCasesMap,
     });
 
     const updatedAt = new Date().toISOString();
-    const updatedCases = await clientArgs.caseService.patchSubCases({
+    const updatedCases = await caseService.patchSubCases({
       soClient,
       subCases: nonEmptySubCaseRequests.map((thisCase) => {
         const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
@@ -354,7 +347,7 @@ export async function update(
     });
 
     await updateAlerts({
-      caseService: clientArgs.caseService,
+      caseService,
       soClient,
       casesClient,
       subCasesToSync: subCasesToSyncAlertsFor,
@@ -382,7 +375,7 @@ export async function update(
       []
     );
 
-    await clientArgs.userActionService.bulkCreate({
+    await userActionService.bulkCreate({
       soClient,
       actions: buildSubCaseUserActions({
         originalSubCases: bulkSubCases.saved_objects,

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { SUB_CASES_PATCH_DEL_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 
 export function initDeleteSubCasesApi({ caseService, router, logger }: RouteDeps) {
   router.delete(
@@ -22,14 +22,8 @@ export function initDeleteSubCasesApi({ caseService, router, logger }: RouteDeps
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-
-        const user = caseService.getUser({ request });
-
         const client = await context.cases.getCasesClient();
-        await client.subCases.delete({ soClient, ids: request.query.ids, user });
+        await client.subCases.delete(request.query.ids);
 
         return response.noContent();
       } catch (error) {
