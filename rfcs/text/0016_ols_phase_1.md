@@ -300,6 +300,9 @@ In addition to the object owner, we also need to allow administrators to manage 
 We have historically used the `Saved Objects Management` feature for these administrative tasks. This feature grants access to all saved objects, even if you're not authorized to access the "owning" application. Do we consider this privilege sufficient to see and potentially manipulate private saved objects?
 
 ## 8.3 Behavior when security is disabled
+
+This has been [resolved](#93-behavior-when-security-is-disabled).
+
 When security is disabled, should `private` saved objects still be accessible via the Saved Objects Client?
 
 
@@ -309,3 +312,7 @@ When security is disabled, should `private` saved objects still be accessible vi
 
 Users with the `Saved Objects Management` privilege will be authorized to access private saved objects belonging to other users.
 Additionally, we will introduce a sub-feature privilege which will allow administrators to control which of their users with `Saved Objects Management` access are authorized to access these private objects.
+
+## 9.3 Behavior when security is disabled
+
+When security is disabled, `private` objects will still be accessible via the Saved Objects Client.
