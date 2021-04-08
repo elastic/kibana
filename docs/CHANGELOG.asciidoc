@@ -79,8 +79,7 @@ To display the cluster data in *Discover*, load documents directly from `_source
 *Details* +
 In 7.12.0, *Discover* uses the {ref}/search-fields.html#search-fields-param[fields API] by default.
 Reading from `_source` is still supported through a switch in *Advanced Settings*.
-This change stems from updates made to {es} in 7.11 with the extension of
-the search API to include the new {ref}/search-fields.html#search-fields-param[fields] parameter.
+With the fields API, *Discover* now shows all fields, including runtime fields, multi-mapped fields like `.keyword`, and alias fields.
 
 *Impact* +
 Refer to https://www.elastic.co/blog/discover-uses-fields-api-in-7-12[this blog]
