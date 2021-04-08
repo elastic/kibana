@@ -136,10 +136,37 @@ export class MbMap extends Component<Props, State> {
     this.props.onMapDestroyed();
   }
 
-  _queryForMeta = _.debounce((layerId, layer) => {
-    const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
-    this.props.updateCounts(layerId, mbFeatures);
-  }, 1000);
+  // This keeps track of the latest update calls, per layerId
+  _queryForMeta = (() => {
+    const callMap = new Map<string, ILayer>();
+
+    let timerId: number | null = null;
+
+    const updateAllLayers = () => {
+      callMap.forEach((layer: ILayer, layerId: string) => {
+        if (this.state.mbMap) {
+          if (layer.isVisible()) {
+            const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
+            this.props.updateCounts(layerId, mbFeatures);
+          }
+        }
+      });
+      callMap.clear();
+      timerId = null;
+    };
+
+    return (layerId: string, layer: ILayer) => {
+      callMap.set(layerId, layer);
+      if (!timerId) {
+        timerId = setTimeout(updateAllLayers, 1200);
+      }
+    };
+  })();
+
+  // _queryForMeta = _.debounce((layerId, layer) => {
+  //   const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
+  //   this.props.updateCounts(layerId, mbFeatures);
+  // }, 1000);
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {

@@ -109,7 +109,6 @@ export async function getGridTile({
             if (feature.properties.hasOwnProperty(key)) {
               if (key !== 'key' && key !== 'gridCentroid') {
                 const rawValue = feature.properties[key];
-                logger.warn(`${key}  : ${JSON.stringify(rawValue)}`);
                 let numberValue: number;
                 if (key === COUNT_PROP_NAME) {
                   numberValue = parseFloat(rawValue);
@@ -133,8 +132,6 @@ export async function getGridTile({
           }
         }
       }
-
-      logger.warn(`tile ${z}/${x}/${y} ${JSON.stringify(rangeMeta)}`);
 
       const metaDataFeature = {
         type: 'Feature',

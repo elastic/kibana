@@ -98,6 +98,7 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  queryForTileMeta(mbMap: MbMap): any;
 }
 
 export type CustomIconAndTooltipContent = {
@@ -155,7 +156,7 @@ export class AbstractLayer implements ILayer {
     return mbStyle.sources[sourceId].data;
   }
 
-  queryForTileMeta(mbMap) {
+  queryForTileMeta(mbMap: MbMap): any {
     return null;
   }
 
