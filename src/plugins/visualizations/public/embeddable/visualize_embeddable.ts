@@ -151,9 +151,8 @@ export class VisualizeEmbeddable
     this.subscriptions.push(
       this.getUpdated$().subscribe((value) => {
         const isDirty = this.handleChanges();
-        // we shouldn't try to update handler if we have error
-        // because it can lead to show error twice
-        if (isDirty && this.handler && !get(value, 'error.stack')) {
+
+        if (isDirty && this.handler) {
           this.updateHandler();
         }
       })

@@ -57,7 +57,7 @@ export class SavedFieldNotFound extends KbnError {
 }
 
 /**
- * A saved field type doesn't compatible with aggregation
+ * A saved field type isn't compatible with aggregation
  */
 export class SavedFieldTypeInvalidForAgg extends KbnError {
   constructor(message: string) {
