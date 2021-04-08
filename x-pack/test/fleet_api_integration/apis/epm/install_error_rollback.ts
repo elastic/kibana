@@ -29,13 +29,11 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('package installation error handling and rollback', async () => {
     skipIfNoDockerRegistry(providerContext);
-    before(async () => {
+    beforeEach(async () => {
       await esArchiver.load('empty_kibana');
-      await esArchiver.load('fleet/empty_fleet_server');
     });
-    after(async () => {
+    afterEach(async () => {
       await esArchiver.unload('empty_kibana');
-      await esArchiver.unload('fleet/empty_fleet_server');
     });
 
     it('on a fresh install, it should uninstall a broken package during rollback', async function () {
@@ -48,19 +46,15 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(pkgInfoResponse.text).response.status).to.be('not_installed');
     });
 
-    it.skip('on an upgrade, it should fall back to the previous good version during rollback', async function () {
+    it('on an upgrade, it should fall back to the previous good version during rollback', async function () {
       await installPackage(goodPackage);
       await supertest
         .post(`/api/fleet/epm/packages/${badPackage}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(422); // the broken package contains a broken visualization triggering a 422 from Kibana
 
-      const badPkgInfoResponse = await getPackageInfo(badPackage);
-      expect(JSON.parse(badPkgInfoResponse.text).response.status).to.be('not_installed');
-
       const goodPkgInfoResponse = await getPackageInfo(goodPackage);
-      // TODO: status is not_installed here which looks like a bug
-      // expect(JSON.parse(goodPkgInfoResponse.text).response.status).to.be('installed');
+      expect(JSON.parse(goodPkgInfoResponse.text).response.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).response.version).to.be('0.1.0');
     });
   });

@@ -9,6 +9,6 @@
   "id": "sample_visualization",
   "type": "visualization",
   "migrationVersion": {
-    "visualization": "12.7.0"
+    "visualization": "7.7.0"
   }
 }
