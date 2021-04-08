@@ -256,10 +256,9 @@ function useFeatures(
         // possible that a user with `manage_security` will attempt to visit the role management page without the
         // correct Kibana privileges. If that's the case, then they receive a partial view of the role, and the UI does
         // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
-        // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
-        // 404 here, and respond in a way that still allows the UI to render itself.
-        const unauthorizedForFeatures =
-          err.response?.status === 404 || err.response?.status === 403;
+        // this API endpoint will throw a 403, which causes view to fail completely. So we instead attempt to detect the
+        // 403 here, and respond in a way that still allows the UI to render itself.
+        const unauthorizedForFeatures = err.response?.status === 403;
         if (unauthorizedForFeatures) {
           return [] as KibanaFeature[];
         }

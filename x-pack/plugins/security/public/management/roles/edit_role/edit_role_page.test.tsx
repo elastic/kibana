@@ -491,19 +491,6 @@ describe('<EditRolePage />', () => {
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
   });
 
-  it('can render if features endpoint could not be found', async () => {
-    const error = { response: { status: 404 } };
-    const getFeatures = jest.fn().mockRejectedValue(error);
-    const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
-
-    await waitForRender(wrapper);
-    expect(props.fatalErrors.add).not.toHaveBeenCalled();
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-    expectSaveFormButtons(wrapper);
-  });
-
   it('can render if features call is not allowed', async () => {
     const error = { response: { status: 403 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
