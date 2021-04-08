@@ -34,6 +34,7 @@ import {
   UseTimelineTypesArgs,
   UseTimelineTypesResult,
 } from './use_timeline_types';
+import { deleteTimelinesByIds } from '../../containers/api';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -78,6 +79,10 @@ jest.mock('./use_timeline_status', () => {
     useTimelineStatus: jest.fn(),
   };
 });
+
+jest.mock('../../containers/api', () => ({
+  deleteTimelinesByIds: jest.fn(),
+}));
 
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
@@ -361,41 +366,24 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#onDeleteSelected', () => {
-    // TODO - Have been skip because we need to re-implement the test as the component changed
-    test.skip('it invokes deleteTimelines with the selected timelines when the button is clicked', async () => {
-      const deleteTimelines = jest.fn();
-
+    test('it invokes deleteTimelines with the selected timelines when the button is clicked', async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
         </TestProviders>
       );
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="delete-timeline"]').first().simulate('click');
+      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
       await waitFor(() => {
-        wrapper
-          .find('.euiCheckbox__input')
-          .first()
-          .simulate('change', { target: { checked: true } });
+        wrapper.update();
 
-        wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
-
-        expect(deleteTimelines).toHaveBeenCalledWith([
-          'saved-timeline-11',
-          'saved-timeline-10',
-          'saved-timeline-9',
-          'saved-timeline-8',
-          'saved-timeline-6',
-          'saved-timeline-5',
-          'saved-timeline-4',
-          'saved-timeline-3',
-          'saved-timeline-2',
-        ]);
+        expect(deleteTimelinesByIds).toHaveBeenCalled();
       });
     });
   });
@@ -665,10 +653,10 @@ describe('StatefulOpenTimeline', () => {
         />
       </TestProviders>
     );
-
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
+      wrapper.update();
 
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
