@@ -11,6 +11,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiPageHeader, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
@@ -40,7 +42,13 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, RESULT_SETTINGS_TITLE]} />
-      <EuiPageHeader pageTitle={RESULT_SETTINGS_TITLE} />
+      <EuiPageHeader
+        pageTitle={RESULT_SETTINGS_TITLE}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.resultSettings.pageDescription',
+          { defaultMessage: 'Enrich search results and select which fields will appear.' }
+        )}
+      />
       <FlashMessages />
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={5}>
