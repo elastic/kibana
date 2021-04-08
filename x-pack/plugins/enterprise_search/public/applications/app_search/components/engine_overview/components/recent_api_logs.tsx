@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_API_LOGS_PATH } from '../../../routes';
-import { ApiLogsLogic, ApiLogsTable, NewApiEventsPrompt } from '../../api_logs';
+import { ApiLogsLogic, ApiLogsTable, NewApiEventsPrompt, ApiLogFlyout } from '../../api_logs';
 import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
@@ -46,6 +46,7 @@ export const RecentApiLogs: React.FC = () => {
       hasBorder
     >
       <ApiLogsTable />
+      <ApiLogFlyout />
     </DataPanel>
   );
 };
