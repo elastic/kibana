@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPageHeader, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,13 +25,33 @@ import { SampleResponse } from './sample_response';
 
 import { ResultSettingsLogic } from '.';
 
+const CLEAR_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.clearButtonLabel',
+  { defaultMessage: 'Clear all values' }
+);
+
+const RESTORE_DEFAULTS_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.restoreDefaultsButtonLabel',
+  { defaultMessage: 'Restore defaults' }
+);
+
+const SAVE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveButtonLabel',
+  { defaultMessage: 'Save' }
+);
+
 interface Props {
   engineBreadcrumb: string[];
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
   const { dataLoading } = useValues(ResultSettingsLogic);
-  const { initializeResultSettingsData } = useActions(ResultSettingsLogic);
+  const {
+    initializeResultSettingsData,
+    saveResultSettings,
+    confirmResetAllFields,
+    clearAllFields,
+  } = useActions(ResultSettingsLogic);
 
   useEffect(() => {
     initializeResultSettingsData();
@@ -48,6 +68,26 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.pageDescription',
           { defaultMessage: 'Enrich search results and select which fields will appear.' }
         )}
+        rightSideItems={[
+          <EuiButton
+            data-test-subj="SaveResultSettings"
+            color="primary"
+            fill
+            onClick={saveResultSettings}
+          >
+            {SAVE_BUTTON_LABEL}
+          </EuiButton>,
+          <EuiButton
+            data-test-subj="ResetResultSettings"
+            color="danger"
+            onClick={confirmResetAllFields}
+          >
+            {RESTORE_DEFAULTS_BUTTON_LABEL}
+          </EuiButton>,
+          <EuiButtonEmpty data-test-subj="ClearResultSettings" onClick={clearAllFields}>
+            {CLEAR_BUTTON_LABEL}
+          </EuiButtonEmpty>,
+        ]}
       />
       <FlashMessages />
       <EuiFlexGroup alignItems="flexStart">
