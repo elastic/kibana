@@ -118,10 +118,7 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-const getMinAgeField = (
-  phase: 'warm' | 'cold' | 'frozen' | 'delete',
-  defaultValue: string = '0'
-) => ({
+const getMinAgeField = (phase: 'warm' | 'cold' | 'frozen' | 'delete', defaultValue?: string) => ({
   defaultValue,
   // By passing an empty array we make sure to *not* trigger the validation when the field value changes.
   // The validation will be triggered when the millisecond version (in the _meta) is updated (in sync)
