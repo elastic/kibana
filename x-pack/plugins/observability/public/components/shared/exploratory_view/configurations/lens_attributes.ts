@@ -130,7 +130,7 @@ export class LensAttributes {
   ): AvgIndexPatternColumn | MedianIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.label', {
+      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
         defaultMessage: '{operationType} of {sourceField}',
         values: {
           sourceField: this.reportViewConfig.labels[sourceField],
