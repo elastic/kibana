@@ -84,13 +84,6 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 `<provider-type>.<provider-name>.description`
 | Custom description of the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint`
-| Custom hint for the provider entry displayed on the Login Selector UI.
-
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon`
-| Custom icon for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.<provider-type>.`
 `<provider-name>.showInSelector`
