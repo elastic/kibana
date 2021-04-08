@@ -1,0 +1,39 @@
+[[save-load-delete-query]]
+== Save a query
+A saved query is a collection of query text and filters that you can
+reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
+
+* Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
+* View the results of the same query in multiple apps
+* Share your query
+
+Saved queries don't include information specific to *Discover*,
+such as the currently selected columns in the document table, the sort order, and the index pattern.
+To save your current view of *Discover* for later retrieval and reuse,
+create a <<save-open-search, saved search>> instead.
+
+NOTE::
+
+If you have insufficient privileges to save queries, the *Save current query*
+button isn't visible in the saved query management popover.
+For more information, see <<xpack-security-authorization, Granting access to Kibana>>
+
+. Click *#* in the query bar.
+. In the popover, click *Save current query*.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
++
+. Enter a name, a description, and then select the filter options.
+By default, filters are automatically included, but the time filter is not.
++
+[role="screenshot"]
+image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
+. Click *Save*.
+. To load a saved query into *Discover* or *Dashboard*, open the *Saved search* popover, and select the query.
+. To manage your saved queries, use these actions in the popover:
++
+* Save as new:  Save changes to the current query.
+* Clear.  Clear a query that is currently loaded in an app.
+* Delete.  You can’t recover a deleted query.
+. To import and export saved queries, go to <<managing-saved-objects, Saved Objects in Management>>.
