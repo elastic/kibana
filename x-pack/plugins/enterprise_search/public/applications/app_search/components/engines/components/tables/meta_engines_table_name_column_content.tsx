@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiIcon, EuiHealth, EuiFlexItem } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_PATH } from '../../../../routes';
 import { generateEncodedPath } from '../../../../utils/encode_path_params';
@@ -38,24 +40,38 @@ export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameCon
     >
       <strong>{name}</strong>
     </EuiLinkTo>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
+    <button
+      type="button"
       onClick={() => (isExpanded ? hideRow(name) : showRow(name))}
+      aria-expanded={isExpanded}
       className="meta-engines__expand-row"
-      responsive={false}
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {item.engine_count || '0'} Engine{item.engine_count !== 1 ? 's' : ''}
-      </EuiFlexItem>
-      {item.schemaConflicts && Object.keys(item.schemaConflicts).length > 0 && (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning">Field-type conflict</EuiHealth>
+          <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.sourceEnginesCount',
+            {
+              defaultMessage: '{sourceEnginesCount, plural, one {# Engine} other {# Engines}}',
+              values: { sourceEnginesCount: item.engine_count || 0 },
+            }
+          )}
+        </EuiFlexItem>
+        {item.schemaConflicts && Object.keys(item.schemaConflicts).length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="warning">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.fieldTypeConflictWarning',
+                {
+                  defaultMessage: 'Field-type conflict',
+                }
+              )}
+            </EuiHealth>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </button>
   </EuiFlexGroup>
 );
