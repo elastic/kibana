@@ -294,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('using aggregations', () => {
-        it('should return 200 with a valid response', async () =>
+        it('should return 200 with valid response for a valid aggregation', async () =>
           await supertest
             .get(
               `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
               });
             }));
 
-        it('wrong type should return 400 with Bad Request', async () =>
+        it('should return a 400 when referencing an invalid SO attribute', async () =>
           await supertest
             .get(
               `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
@@ -337,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
               });
             }));
 
-        it('adding a wrong attributes should return 400 with Bad Request', async () =>
+        it('should return a 400 when using a forbidden aggregation option', async () =>
           await supertest
             .get(
               `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
