@@ -388,6 +388,8 @@ export {
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './search';
 
 export type {
@@ -467,6 +469,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
 export { AggsStart } from './search/aggs';
