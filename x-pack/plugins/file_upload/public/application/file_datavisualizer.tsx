@@ -8,6 +8,7 @@ import './_index.scss';
 import React, { FC } from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 // import type { MapsStartApi } from '../../../maps/public';
@@ -22,6 +23,7 @@ export interface FileDataVisualizerProps {
   // maps?: MapsStartApi;
   security?: SecurityPluginSetup;
   coreStart: CoreStart;
+  share: SharePluginStart;
 }
 
 export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
@@ -29,9 +31,10 @@ export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
   embeddable,
   // maps,
   security,
+  share,
   coreStart,
 }) => {
-  const services = { data, embeddable, /* maps,*/ security, ...coreStart };
+  const services = { data, embeddable, share, /* maps,*/ security, ...coreStart };
 
   return (
     <KibanaContextProvider services={{ ...services }}>

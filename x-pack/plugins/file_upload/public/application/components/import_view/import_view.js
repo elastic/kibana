@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-// import { ResultsLinks } from '../results_links';
+import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
@@ -32,7 +32,7 @@ import {
   getDefaultCombinedFields,
 } from '../combined_fields';
 import { ExperimentalBadge } from '../experimental_badge';
-import { hasImportPermission, importerFactory } from '../../../api';
+import { hasImportPermission, importerFactory, checkIndexExists } from '../../../api';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -352,16 +352,15 @@ export class ImportView extends Component {
       return;
     }
 
-    // const { exists } = await ml.checkIndexExists({ index });
-    // const indexNameError = exists ? (
-    //   <FormattedMessage
-    //     id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
-    //     defaultMessage="Index name already exists"
-    //   />
-    // ) : (
-    //   isIndexNameValid(index)
-    // );
-    const indexNameError = isIndexNameValid(index); // TODO - REMOVE THIS LINE AND COPY INDEX EXISTS
+    const { exists } = await checkIndexExists(index);
+    const indexNameError = exists ? (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        defaultMessage="Index name already exists"
+      />
+    ) : (
+      isIndexNameValid(index)
+    );
     this.setState({ checkingValidIndex: false, indexNameError });
   }, 500);
 
@@ -467,6 +466,7 @@ export class ImportView extends Component {
       pipelineString,
       indexNameError,
       indexPatternNameError,
+      timeFieldName,
       isFilebeatFlyoutVisible,
       checkingValidIndex,
       combinedFields,
@@ -595,14 +595,14 @@ export class ImportView extends Component {
 
                     <EuiSpacer size="l" />
 
-                    {/* <ResultsLinks
+                    <ResultsLinks
                       fieldStats={this.props.results?.field_stats}
                       index={index}
                       indexPatternId={indexPatternId}
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
                       showFilebeatFlyout={this.showFilebeatFlyout}
-                    /> */}
+                    />
 
                     {isFilebeatFlyoutVisible && (
                       <FilebeatConfigFlyout

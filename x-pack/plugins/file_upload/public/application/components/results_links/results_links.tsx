@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-/*
 import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-// import { ml } from '../../../../services/ml_api_service'; // pass in http service
-import { isFullLicense } from '../../../../license'; // is this needed?
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { useMlKibana, useMlUrlGenerator } from '../../../../contexts/kibana'; // copy context?
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator'; // copy component?
-import { MlCommonGlobalState } from '../../../../../../common/types/ml_url_generator'; // copy component?
 import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../src/plugins/discover/public';
 import { FindFileStructureResponse } from '../../../../common';
-
-const RECHECK_DELAY_MS = 3000;
+import { useFileUploadKibana } from '../../kibana_context';
+import { getTimeFieldRange } from '../../../api';
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
@@ -33,6 +25,17 @@ interface Props {
   createIndexPattern: boolean;
   showFilebeatFlyout(): void;
 }
+
+interface GlobalState {
+  time?: {
+    from: string;
+    to: string;
+    mode?: 'absolute' | 'relative';
+  };
+  refreshInterval?: { pause: boolean; value: number };
+}
+
+const RECHECK_DELAY_MS = 3000;
 
 export const ResultsLinks: FC<Props> = ({
   fieldStats,
@@ -46,16 +49,11 @@ export const ResultsLinks: FC<Props> = ({
     from: 'now-30m',
     to: 'now',
   });
-  const [showCreateJobLink, setShowCreateJobLink] = useState(false);
-  const [globalState, setGlobalState] = useState<MlCommonGlobalState | undefined>();
+  const [globalState, setGlobalState] = useState<GlobalState | undefined>();
 
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
-  const [dataVisualizerLink, setDataVisualizerLink] = useState('');
-  const [createJobsSelectTypePage, setCreateJobsSelectTypePage] = useState('');
-
-  const mlUrlGenerator = useMlUrlGenerator();
 
   const {
     services: {
@@ -64,7 +62,7 @@ export const ResultsLinks: FC<Props> = ({
         urlGenerators: { getUrlGenerator },
       },
     },
-  } = useMlKibana();
+  } = useFileUploadKibana();
 
   useEffect(() => {
     let unmounted = false;
@@ -99,34 +97,7 @@ export const ResultsLinks: FC<Props> = ({
       }
     };
 
-    const getDataVisualizerLink = async (): Promise<void> => {
-      const _dataVisualizerLink = await mlUrlGenerator.createUrl({
-        page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
-        pageState: {
-          index: indexPatternId,
-          globalState,
-        },
-      });
-      if (!unmounted) {
-        setDataVisualizerLink(_dataVisualizerLink);
-      }
-    };
-    const getADCreateJobsSelectTypePage = async (): Promise<void> => {
-      const _createJobsSelectTypePage = await mlUrlGenerator.createUrl({
-        page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
-        pageState: {
-          index: indexPatternId,
-          globalState,
-        },
-      });
-      if (!unmounted) {
-        setCreateJobsSelectTypePage(_createJobsSelectTypePage);
-      }
-    };
-
     getDiscoverUrl();
-    getDataVisualizerLink();
-    getADCreateJobsSelectTypePage();
 
     if (!unmounted) {
       setIndexManagementLink(
@@ -142,15 +113,16 @@ export const ResultsLinks: FC<Props> = ({
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPatternId, getUrlGenerator, JSON.stringify(globalState)]);
 
   useEffect(() => {
-    setShowCreateJobLink(checkPermission('canCreateJob') && mlNodesAvailable());
     updateTimeValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const _globalState: MlCommonGlobalState = {
+    const _globalState: GlobalState = {
       time: {
         from: duration.from,
         to: duration.to,
@@ -213,42 +185,6 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {isFullLicense() === true &&
-        timeFieldName !== undefined &&
-        showCreateJobLink &&
-        createIndexPattern &&
-        createJobsSelectTypePage && (
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
-                  defaultMessage="Create new ML job"
-                />
-              }
-              description=""
-              href={createJobsSelectTypePage}
-            />
-          </EuiFlexItem>
-        )}
-
-      {createIndexPattern && dataVisualizerLink && (
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
-            title={
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
-                defaultMessage="Open in Data Visualizer"
-              />
-            }
-            description=""
-            href={dataVisualizerLink}
-          />
-        </EuiFlexItem>
-      )}
-
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
@@ -298,21 +234,15 @@ export const ResultsLinks: FC<Props> = ({
 };
 
 async function getFullTimeRange(index: string, timeFieldName: string) {
-  // const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };
-  // const resp = await ml.getTimeFieldRange({
-  //   index,
-  //   timeFieldName,
-  //   query,
-  // });
+  const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };
+  const resp = await getTimeFieldRange({
+    index,
+    timeFieldName,
+    query,
+  });
 
-  // return {
-  //   from: moment(resp.start.epoch).toISOString(),
-  //   to: moment(resp.end.epoch).toISOString(),
-  // };
-  // TODO FIX
   return {
-    from: moment(0).toISOString(),
-    to: moment(0).toISOString(),
+    from: moment(resp.start.epoch).toISOString(),
+    to: moment(resp.end.epoch).toISOString(),
   };
 }
-*/

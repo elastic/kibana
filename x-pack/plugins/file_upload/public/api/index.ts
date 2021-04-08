@@ -19,6 +19,12 @@ export interface FileUploadStartApi {
   analyzeFile(file: string, params: Record<string, string>): Promise<any>;
 }
 
+export interface GetTimeFieldRangeResponse {
+  success: boolean;
+  start: { epoch: number; string: string };
+  end: { epoch: number; string: string };
+}
+
 export async function getFileUploadComponent(): Promise<
   React.ComponentType<FileUploadComponentProps>
 > {
@@ -65,5 +71,38 @@ export async function analyzeFile(
     method: 'POST',
     body,
     query: params,
+  });
+}
+
+export async function checkIndexExists(
+  index: string,
+  params: Record<string, string> = {}
+): Promise<boolean> {
+  const body = JSON.stringify({ index });
+  const fileUploadModules = await lazyLoadFileUploadModules();
+  return await fileUploadModules.getHttp().fetch<any>({
+    path: `/api/file_upload/index_exists`,
+    method: 'POST',
+    body,
+    query: params,
+  });
+}
+
+export async function getTimeFieldRange({
+  index,
+  timeFieldName,
+  query,
+}: {
+  index: string;
+  timeFieldName?: string;
+  query: any;
+}) {
+  const body = JSON.stringify({ index, timeFieldName, query });
+
+  const fileUploadModules = await lazyLoadFileUploadModules();
+  return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
+    path: `/api/file_upload/time_field_range`,
+    method: 'POST',
+    body,
   });
 }

@@ -18,6 +18,7 @@ import {
 import { wrapError } from './error_wrapper';
 import { analyzeFile } from './analyze_file';
 import { importDataProvider } from './import_data';
+import { getTimeFieldRange } from './get_time_field_range';
 
 import { updateTelemetry } from './telemetry';
 import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';
@@ -175,6 +176,92 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           data
         );
         return response.ok({ body: result });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    }
+  );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /api/file_upload/index_exists ES Field caps wrapper checks if index exists
+   * @apiName IndexExists
+   */
+  router.post(
+    {
+      path: '/api/file_upload/index_exists',
+      validate: {
+        body: schema.object({ index: schema.string() }),
+      },
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { index } = request.body;
+
+        const options = {
+          index: [index],
+          fields: ['*'],
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        };
+
+        const { body } = await context.core.elasticsearch.client.asCurrentUser.fieldCaps(options);
+        const exists = Array.isArray(body.indices) && body.indices.length !== 0;
+        return response.ok({
+          body: { exists },
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    }
+  );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /api/file_upload/time_field_range Get time field range
+   * @apiName GetTimeFieldRange
+   * @apiDescription Returns the time range for the given index and query using the specified time range.
+   *
+   * @apiSchema (body) getTimeFieldRangeSchema
+   *
+   * @apiSuccess {Object} start start of time range with epoch and string properties.
+   * @apiSuccess {Object} end end of time range with epoch and string properties.
+   */
+  router.post(
+    {
+      path: '/api/file_upload/time_field_range',
+      validate: {
+        body: schema.object({
+          /** Index or indexes for which to return the time range. */
+          index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+          /** Name of the time field in the index. */
+          timeFieldName: schema.string(),
+          /** Query to match documents in the index(es). */
+          query: schema.maybe(schema.any()),
+        }),
+      },
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { index, timeFieldName, query } = request.body;
+        const resp = await getTimeFieldRange(
+          context.core.elasticsearch.client,
+          index,
+          timeFieldName,
+          query
+        );
+
+        return response.ok({
+          body: resp,
+        });
       } catch (e) {
         return response.customError(wrapError(e));
       }

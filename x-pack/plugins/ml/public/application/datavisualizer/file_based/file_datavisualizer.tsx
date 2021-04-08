@@ -17,7 +17,7 @@ import { FileDataVisualizer } from '../../../../../file_upload/public';
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, data, embeddable, /* maps,*/ security, savedObjects },
+    services: { docLinks, data, embeddable, share, /* maps,*/ security, savedObjects },
   } = useMlKibana();
   const coreStart = { savedObjects } as CoreStart;
   const helpLink = docLinks.links.ml.guide;
@@ -28,6 +28,7 @@ export const FileDataVisualizerPage: FC = () => {
         coreStart={coreStart}
         data={data}
         embeddable={embeddable}
+        share={share}
         // maps={maps}
         security={security}
       />

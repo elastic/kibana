@@ -7,6 +7,7 @@
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
 import { useKibana, KibanaReactContextValue } from '../../../../../src/plugins/kibana_react/public';
 import { SecurityPluginSetup } from '../../../security/public';
 import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -16,6 +17,7 @@ interface StartPlugins {
   data: DataPublicPluginStart;
   security?: SecurityPluginSetup;
   embeddable: EmbeddableStart;
+  share: SharePluginStart;
   // maps?: MapsStartApi;
 }
 export type StartServices = CoreStart & StartPlugins;

@@ -7,7 +7,9 @@
   "requiredPlugins": [
     "data",
     "usageCollection",
-    "embeddable"
+    "embeddable",
+    "share",
+    "discover"
   ],
   "optionalPlugins": [
     "security"
