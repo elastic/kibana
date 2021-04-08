@@ -22,7 +22,13 @@ describe('ConfiguredSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<ConfiguredSourcesList {...props} />);
 
-    expect(wrapper.find('ConfiguredSource')).toHaveLength(6);
+    expect(
+      wrapper.find('[data-test-subj="ConfiguredSharedSourcesPanel"]').find('ConfiguredSource')
+    ).toHaveLength(5);
+
+    expect(
+      wrapper.find('[data-test-subj="ConfiguredPrivateSourcesPanel"]').find('ConfiguredSource')
+    ).toHaveLength(1);
   });
 
   it('handles empty state', () => {

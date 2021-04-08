@@ -87,7 +87,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
 
   const visibleSources = (
     <>
-      <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
+      <EuiPanel
+        color="subdued"
+        hasShadow={false}
+        paddingSize="l"
+        data-test-subj="ConfiguredSharedSourcesPanel"
+      >
         <EuiText size="s">
           <h3>{CONFIGURED_ORG_SOURCES_TITLE}</h3>
           <p>{CONFIGURED_ORG_SOURCES_BODY}</p>
@@ -113,7 +118,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
           <p>{CONFIGURED_PRIVATE_SOURCES_BODY}</p>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGrid columns={3} responsive={false} className="source-grid-configured">
+        <EuiFlexGrid
+          columns={3}
+          responsive={false}
+          className="source-grid-configured"
+          data-test-subj="ConfiguredPrivateSourcesPanel"
+        >
           {sourcesPrivate.map(
             ({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
               <ConfiguredSource

@@ -105,7 +105,7 @@ export const configuredSources = [
     needsPermissions: false,
     accountContextOnly: true,
     supportedByLicense: false,
-    privateSourcesEnabled: false,
+    privateSourcesEnabled: true,
   },
   {
     serviceType: 'confluence_cloud',
