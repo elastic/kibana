@@ -1,11 +1,19 @@
 #! /bin/bash
 
 # Whether to run Jest on the entire enterprise_search plugin or a specific component/folder
+
 FOLDER="${1:-all}"
 if [[ $FOLDER && $FOLDER != "all" ]]
 then
-  FOLDER=${FOLDER%/} # Strip any trailing slash
-  FOLDER="${FOLDER}/ --collectCoverageFrom='<rootDir>/x-pack/plugins/enterprise_search/${FOLDER}/**/*.{ts,tsx}'"
+  # If this is a file
+  if [[ "$FOLDER" == *".ts"* ]]; then
+    PATH_WITHOUT_EXTENSION=${1%%.*}
+    FOLDER="${FOLDER} --collectCoverageFrom='<rootDir>/x-pack/plugins/enterprise_search/${PATH_WITHOUT_EXTENSION}.{ts,tsx}'"
+  # If this is a folder
+  else
+    FOLDER=${FOLDER%/} # Strip any trailing slash
+    FOLDER="${FOLDER}/ --collectCoverageFrom='<rootDir>/x-pack/plugins/enterprise_search/${FOLDER}/**/*.{ts,tsx}'"
+  fi
 else
   FOLDER=''
 fi
