@@ -11,23 +11,21 @@ require('@kbn/optimizer').registerNodeAutoTranspilation();
 
 const { run } = require('@kbn/dev-utils');
 
-const { optimize } = require('./optimize-tsconfig/optimize');
-const { deoptimize } = require('./optimize-tsconfig/deoptimize');
+const { optimize } = require('./optimize_tsconfig/optimize');
+const { deoptimize } = require('./optimize_tsconfig/deoptimize');
 
 run(
-  ({ log, flags }) => {
+  async ({ log, flags }) => {
     const { revert } = flags;
 
     if (revert) {
-      deoptimize().finally(() => {
-        log.info('Reverted Presentation TypeScript optimization changes.');
-      });
+      await deoptimize();
+      log.info('Reverted Presentation TypeScript optimization changes.');
     } else {
-      optimize().finally(() => {
-        log.info(
-          'Optimized tsconfig.json file(s) in Kibana for Presentation Team development. To undo these changes, run `./scripts/optimize_tsconfig --revert`'
-        );
-      });
+      await optimize();
+      log.info(
+        'Optimized tsconfig.json file(s) in Kibana for Presentation Team development. To undo these changes, run `./scripts/optimize_tsconfig --revert`'
+      );
     }
   },
   {

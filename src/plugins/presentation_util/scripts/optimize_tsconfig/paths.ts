@@ -9,8 +9,8 @@
 import path from 'path';
 
 export const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
-export const TS_CONFIG_TEMPLATE = path.resolve(__dirname, './template-tsconfig.json');
-export const TS_CONFIG_TEST_TEMPLATE = path.resolve(__dirname, './test-tsconfig.json');
+export const TS_CONFIG_TEMPLATE = path.resolve(__dirname, './template_tsconfig.json');
+export const TS_CONFIG_TEST_TEMPLATE = path.resolve(__dirname, './test_tsconfig.json');
 
 export const PROJECT_TS_CONFIG_FILES = [
   path.resolve(KIBANA_ROOT, 'src/plugins/dashboard', 'tsconfig.json'),
