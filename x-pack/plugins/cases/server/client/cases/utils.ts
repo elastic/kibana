@@ -38,7 +38,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIds } from '../utils';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;

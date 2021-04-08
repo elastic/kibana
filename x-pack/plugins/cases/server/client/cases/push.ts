@@ -134,7 +134,6 @@ export const push = async ({
 
   try {
     connectorMappings = await casesClientInternal.configuration.getMappings({
-      actionsClient,
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
     });

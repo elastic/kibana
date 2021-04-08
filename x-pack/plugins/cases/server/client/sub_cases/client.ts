@@ -23,7 +23,7 @@ import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { constructQueryOptions } from '../../routes/api/cases/helpers';
+import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClient } from '../client';
 import { update } from './update';

@@ -7,9 +7,9 @@
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_TAGS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_TAGS_URL } from '../../../../../common/constants';
 
-export function initGetTagsApi({ caseService, router }: RouteDeps) {
+export function initGetTagsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_TAGS_URL,
@@ -17,14 +17,11 @@ export function initGetTagsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-        const tags = await caseService.getTags({
-          soClient,
-        });
-        return response.ok({ body: tags });
+        const client = await context.cases.getCasesClient();
+
+        return response.ok({ body: await client.tags.get() });
       } catch (error) {
+        logger.error(`Failed to retrieve tags in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

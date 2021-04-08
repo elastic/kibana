@@ -6,7 +6,6 @@
  */
 
 import {
-  transformNewCase,
   transformNewComment,
   wrapError,
   transformCases,
@@ -14,214 +13,16 @@ import {
   flattenCommentSavedObjects,
   transformComments,
   flattenCommentSavedObject,
-  sortToSnake,
 } from './utils';
-import { newCase } from './__mocks__/request_responses';
 import { isBoom, boomify } from '@hapi/boom';
 import {
   mockCases,
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
-import {
-  ConnectorTypes,
-  ESCaseConnector,
-  CommentType,
-  AssociationType,
-  CaseType,
-  CaseResponse,
-} from '../../../common/api';
+import { CommentType, AssociationType, CaseResponse } from '../../../common/api';
 
 describe('Utils', () => {
-  describe('transformNewCase', () => {
-    const connector: ESCaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: [
-        { key: 'issueType', value: 'Task' },
-        { key: 'priority', value: 'High' },
-        { key: 'parent', value: null },
-      ],
-    };
-    it('transform correctly', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: 'elastic@elastic.co',
-        full_name: 'Elastic',
-        username: 'elastic',
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": "elastic@elastic.co",
-            "full_name": "Elastic",
-            "username": "elastic",
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-
-    it('transform correctly without optional fields', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": undefined,
-            "full_name": undefined,
-            "username": undefined,
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-
-    it('transform correctly with optional fields as null', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: null,
-        full_name: null,
-        username: null,
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": null,
-            "full_name": null,
-            "username": null,
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-  });
-
   describe('transformNewComment', () => {
     it('transforms correctly', () => {
       const comment = {
@@ -868,32 +669,6 @@ describe('Utils', () => {
         version: '0',
         ...comment.attributes,
       });
-    });
-  });
-
-  describe('sortToSnake', () => {
-    it('it transforms status correctly', () => {
-      expect(sortToSnake('status')).toBe('status');
-    });
-
-    it('it transforms createdAt correctly', () => {
-      expect(sortToSnake('createdAt')).toBe('created_at');
-    });
-
-    it('it transforms created_at correctly', () => {
-      expect(sortToSnake('created_at')).toBe('created_at');
-    });
-
-    it('it transforms closedAt correctly', () => {
-      expect(sortToSnake('closedAt')).toBe('closed_at');
-    });
-
-    it('it transforms closed_at correctly', () => {
-      expect(sortToSnake('closed_at')).toBe('closed_at');
-    });
-
-    it('it transforms default correctly', () => {
-      expect(sortToSnake('not-exist')).toBe('created_at');
     });
   });
 });

@@ -18,10 +18,7 @@ import {
   UserActionFieldType,
   SubCaseAttributes,
 } from '../../../common/api';
-import {
-  isTwoArraysDifference,
-  transformESConnectorToCaseConnector,
-} from '../../routes/api/cases/helpers';
+import { isTwoArraysDifference, transformESConnectorToCaseConnector } from '../../client/utils';
 import { UserActionItem } from '.';
 import {
   CASE_SAVED_OBJECT,

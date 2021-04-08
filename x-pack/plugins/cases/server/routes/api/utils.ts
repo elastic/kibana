@@ -24,7 +24,6 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
-  ESCaseConnector,
   ESCaseAttributes,
   CommentRequest,
   ContextTypeUserRt,
@@ -33,66 +32,16 @@ import {
   CommentType,
   excess,
   throwErrors,
-  CaseStatuses,
-  CasesClientPostRequest,
   AssociationType,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
-  User,
   AlertCommentRequestRt,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
-import { SortFieldCase } from './types';
 import { AlertInfo } from '../../common';
 import { isCaseError } from '../../common/error';
-
-export const transformNewSubCase = ({
-  createdAt,
-  createdBy,
-}: {
-  createdAt: string;
-  createdBy: User;
-}): SubCaseAttributes => {
-  return {
-    closed_at: null,
-    closed_by: null,
-    created_at: createdAt,
-    created_by: createdBy,
-    status: CaseStatuses.open,
-    updated_at: null,
-    updated_by: null,
-  };
-};
-
-export const transformNewCase = ({
-  connector,
-  createdDate,
-  email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
-  newCase,
-  username,
-}: {
-  connector: ESCaseConnector;
-  createdDate: string;
-  email?: string | null;
-  full_name?: string | null;
-  newCase: CasesClientPostRequest;
-  username?: string | null;
-}): ESCaseAttributes => ({
-  ...newCase,
-  closed_at: null,
-  closed_by: null,
-  connector,
-  created_at: createdDate,
-  created_by: { email, full_name, username },
-  external_service: null,
-  status: CaseStatuses.open,
-  updated_at: null,
-  updated_by: null,
-});
 
 type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;
@@ -100,16 +49,6 @@ type NewCommentArgs = CommentRequest & {
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
-};
-
-/**
- * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
- */
-export const getAlertIds = (comment: CommentRequest): string[] => {
-  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
-    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-  }
-  return [];
 };
 
 const getIDsAndIndicesAsArrays = (
@@ -320,21 +259,6 @@ export const flattenCommentSavedObject = (
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
-
-export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
-  switch (sortField) {
-    case 'status':
-      return SortFieldCase.status;
-    case 'createdAt':
-    case 'created_at':
-      return SortFieldCase.createdAt;
-    case 'closedAt':
-    case 'closed_at':
-      return SortFieldCase.closedAt;
-    default:
-      return SortFieldCase.createdAt;
-  }
-};
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

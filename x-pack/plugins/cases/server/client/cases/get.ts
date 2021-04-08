@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
@@ -34,6 +35,12 @@ export const get = async ({
   includeSubCaseComments = false,
 }: GetParams): Promise<CaseResponse> => {
   try {
+    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
+      throw Boom.badRequest(
+        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
+      );
+    }
+
     let theCase: SavedObject<ESCaseAttributes>;
     let subCaseIds: string[] = [];
 

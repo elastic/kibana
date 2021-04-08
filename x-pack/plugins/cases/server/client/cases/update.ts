@@ -42,10 +42,7 @@ import {
   User,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
-import {
-  getCaseToUpdate,
-  transformCaseConnectorToEsConnector,
-} from '../../routes/api/cases/helpers';
+import { getCaseToUpdate, transformCaseConnectorToEsConnector } from '../utils';
 
 import { CaseService, CaseUserActionService } from '../../services';
 import {

@@ -17,7 +17,7 @@ import {
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
 
-import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
+import { flattenCaseSavedObject } from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -33,7 +33,8 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
   getConnectorFromConfiguration,
   transformCaseConnectorToEsConnector,
-} from '../../routes/api/cases/helpers';
+  transformNewCase,
+} from '../utils';
 
 import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';

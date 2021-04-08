@@ -18,31 +18,39 @@ import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { create } from './create';
+import { deleteCases } from './delete';
 import { find } from './find';
 import { get } from './get';
 import { push } from './push';
 import { update } from './update';
 
-export interface CaseGet {
+interface CaseGet {
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
 }
 
-export interface CasePush {
+interface CasePush {
   actionsClient: ActionsClient;
   caseId: string;
   connectorId: string;
 }
 
+/**
+ * The public API for interacting with cases.
+ */
 export interface CasesSubClient {
   create(theCase: CasePostRequest): Promise<CaseResponse>;
   find(args: CasesFindRequest): Promise<CasesFindResponse>;
   get(args: CaseGet): Promise<CaseResponse>;
   push(args: CasePush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
+  delete(ids: string[]): Promise<void>;
 }
 
+/**
+ * Creates the interface for CRUD on cases objects.
+ */
 export const createCasesSubClient = (
   args: CasesClientArgs,
   casesClient: CasesClient,
@@ -112,6 +120,7 @@ export const createCasesSubClient = (
         casesClientInternal,
         logger,
       }),
+    delete: (ids: string[]) => deleteCases(ids, args),
   };
 
   return Object.freeze(casesSubClient);

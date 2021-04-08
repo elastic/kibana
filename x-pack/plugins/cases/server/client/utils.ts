@@ -9,7 +9,7 @@ import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { nodeBuilder, KueryNode } from '../../../../../../../src/plugins/data/common';
+import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import {
   CaseConnector,
   ESCaseConnector,
@@ -19,11 +19,52 @@ import {
   CaseStatuses,
   CaseType,
   ESConnectorFields,
-} from '../../../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { sortToSnake } from '../utils';
-import { combineFilterWithAuthorizationFilter } from '../../../authorization/utils';
-import { SavedObjectFindOptionsKueryNode } from '../../../common';
+  CasesClientPostRequest,
+  ESCaseAttributes,
+  CommentRequest,
+} from '../../common/api';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
+import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
+import { SavedObjectFindOptionsKueryNode } from '../common';
+import { isCommentRequestTypeAlertOrGenAlert } from '../routes/api/utils';
+
+/**
+ * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
+ */
+export const getAlertIds = (comment: CommentRequest): string[] => {
+  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  }
+  return [];
+};
+
+export const transformNewCase = ({
+  connector,
+  createdDate,
+  email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  full_name,
+  newCase,
+  username,
+}: {
+  connector: ESCaseConnector;
+  createdDate: string;
+  email?: string | null;
+  full_name?: string | null;
+  newCase: CasesClientPostRequest;
+  username?: string | null;
+}): ESCaseAttributes => ({
+  ...newCase,
+  closed_at: null,
+  closed_by: null,
+  connector,
+  created_at: createdDate,
+  created_by: { email, full_name, username },
+  external_service: null,
+  status: CaseStatuses.open,
+  updated_at: null,
+  updated_by: null,
+});
 
 export const addStatusFilter = ({
   status,
@@ -392,4 +433,25 @@ export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector)
     name: connector?.name ?? 'none',
     ...connectorTypeField,
   };
+};
+
+enum SortFieldCase {
+  closedAt = 'closed_at',
+  createdAt = 'created_at',
+  status = 'status',
+}
+
+export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
+  switch (sortField) {
+    case 'status':
+      return SortFieldCase.status;
+    case 'createdAt':
+    case 'created_at':
+      return SortFieldCase.createdAt;
+    case 'closedAt':
+    case 'closed_at':
+      return SortFieldCase.closedAt;
+    default:
+      return SortFieldCase.createdAt;
+  }
 };

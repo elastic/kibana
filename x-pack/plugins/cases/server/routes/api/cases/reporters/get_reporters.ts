@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { UsersRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_REPORTERS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 
-export function initGetReportersApi({ caseService, router, logger }: RouteDeps) {
+export function initGetReportersApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_REPORTERS_URL,
@@ -18,13 +17,9 @@ export function initGetReportersApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-        const reporters = await caseService.getReporters({
-          soClient,
-        });
-        return response.ok({ body: UsersRt.encode(reporters) });
+        const client = await context.cases.getCasesClient();
+
+        return response.ok({ body: await client.reporters.get() });
       } catch (error) {
         logger.error(`Failed to get reporters in route: ${error}`);
         return response.customError(wrapError(error));

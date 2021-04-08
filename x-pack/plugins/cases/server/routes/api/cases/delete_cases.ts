@@ -7,54 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL, SAVED_OBJECT_TYPES, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
-import { CaseService, AttachmentService } from '../../../services';
+import { CASES_URL } from '../../../../common/constants';
 
-async function deleteSubCases({
-  attachmentService,
-  caseService,
-  soClient,
-  caseIds,
-}: {
-  attachmentService: AttachmentService;
-  caseService: CaseService;
-  soClient: SavedObjectsClientContract;
-  caseIds: string[];
-}) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ soClient, ids: caseIds });
-
-  const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllSubCaseComments({
-    soClient,
-    id: subCaseIDs,
-  });
-
-  // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
-  // per case ID
-  await Promise.all(
-    commentsForSubCases.saved_objects.map((commentSO) =>
-      attachmentService.delete({ soClient, attachmentId: commentSO.id })
-    )
-  );
-
-  await Promise.all(
-    subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(soClient, subCaseSO.id)
-    )
-  );
-}
-
-export function initDeleteCasesApi({
-  attachmentService,
-  caseService,
-  router,
-  userActionService,
-  logger,
-}: RouteDeps) {
+export function initDeleteCasesApi({ router, logger }: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,
@@ -66,73 +23,8 @@ export function initDeleteCasesApi({
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-        await Promise.all(
-          request.query.ids.map((id) =>
-            caseService.deleteCase({
-              soClient,
-              id,
-            })
-          )
-        );
-        const comments = await Promise.all(
-          request.query.ids.map((id) =>
-            caseService.getAllCaseComments({
-              soClient,
-              id,
-            })
-          )
-        );
-
-        if (comments.some((c) => c.saved_objects.length > 0)) {
-          await Promise.all(
-            comments.map((c) =>
-              Promise.all(
-                c.saved_objects.map(({ id }) =>
-                  attachmentService.delete({
-                    soClient,
-                    attachmentId: id,
-                  })
-                )
-              )
-            )
-          );
-        }
-
-        if (ENABLE_CASE_CONNECTOR) {
-          await deleteSubCases({
-            attachmentService,
-            caseService,
-            soClient,
-            caseIds: request.query.ids,
-          });
-        }
-
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request });
-        const deleteDate = new Date().toISOString();
-
-        await userActionService.bulkCreate({
-          soClient,
-          actions: request.query.ids.map((id) =>
-            buildCaseUserActionItem({
-              action: 'create',
-              actionAt: deleteDate,
-              actionBy: { username, full_name, email },
-              caseId: id,
-              fields: [
-                'comment',
-                'description',
-                'status',
-                'tags',
-                'title',
-                ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
-              ],
-            })
-          ),
-        });
+        const client = await context.cases.getCasesClient();
+        await client.cases.delete(request.query.ids);
 
         return response.noContent();
       } catch (error) {

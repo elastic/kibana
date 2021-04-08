@@ -40,7 +40,7 @@ import {
   flattenSubCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
 } from '../../routes/api/utils';
-import { getCaseToUpdate } from '../../routes/api/cases/helpers';
+import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import { createAlertUpdateRequest } from '../../common';
 import { createCaseError } from '../../common/error';

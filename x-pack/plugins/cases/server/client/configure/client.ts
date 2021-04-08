@@ -16,10 +16,7 @@ import {
   GetFieldsResponse,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import {
-  transformCaseConnectorToEsConnector,
-  transformESConnectorToCaseConnector,
-} from '../../routes/api/cases/helpers';
+import { transformCaseConnectorToEsConnector, transformESConnectorToCaseConnector } from '../utils';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
