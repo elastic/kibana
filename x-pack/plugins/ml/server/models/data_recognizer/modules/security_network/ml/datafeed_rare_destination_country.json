@@ -1,5 +1,5 @@
 {
-  "job_id": "rare-destination-country",
+  "job_id": "rare_destination_country",
   "indices": [
     "logs-*",
     "filebeat-*",

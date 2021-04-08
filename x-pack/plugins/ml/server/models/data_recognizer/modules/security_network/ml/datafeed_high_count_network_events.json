@@ -1,4 +1,4 @@
-{    "job_id": "high-count-network-events",
+{    "job_id": "high_count_network_events",
    "indices": ["logs-*","filebeat-*","packetbeat-*"],
     "max_empty_searches": 10,
       "query": {

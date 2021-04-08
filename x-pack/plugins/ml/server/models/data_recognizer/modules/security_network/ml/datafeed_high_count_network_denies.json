@@ -1,5 +1,5 @@
 {
-  "job_id": "high-count-network-denies",
+  "job_id": "high_count_network_denies",
   "indices": [
     "logs-*",
     "filebeat-*",

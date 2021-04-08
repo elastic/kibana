@@ -1,5 +1,5 @@
 {
-  "job_id": "high-count-by-destination-country",
+  "job_id": "high_count_by_destination_country",
   "indices": [
     "logs-*",
     "filebeat-*",
