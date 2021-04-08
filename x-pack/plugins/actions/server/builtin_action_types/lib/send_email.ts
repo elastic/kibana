@@ -63,6 +63,17 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     };
   }
 
+  let useProxy = !!proxySettings;
+
+  if (host) {
+    if (proxySettings?.proxyBypassHosts && proxySettings?.proxyBypassHosts?.has(host)) {
+      useProxy = false;
+    }
+    if (proxySettings?.proxyOnlyHosts && !proxySettings?.proxyOnlyHosts?.has(host)) {
+      useProxy = false;
+    }
+  }
+
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
@@ -73,7 +84,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.port = port;
     transportConfig.secure = !!secure;
 
-    if (proxySettings) {
+    if (proxySettings && useProxy) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
         rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
