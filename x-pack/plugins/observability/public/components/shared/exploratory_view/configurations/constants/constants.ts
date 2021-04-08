@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewTypeId } from '../types';
-import {
-  CLS_FIELD,
-  FCP_FIELD,
-  FID_FIELD,
-  LCP_FIELD,
-  TBT_FIELD,
-} from './data/elasticsearch_fieldnames';
+import { AppDataType, ReportViewTypeId } from '../../types';
+import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
@@ -24,10 +18,10 @@ export const FieldLabels: Record<string, string> = {
   'service.name': 'Service Name',
   'service.environment': 'Environment',
 
-  [LCP_FIELD]: 'Largest contentful paint',
-  [FCP_FIELD]: 'First contentful paint',
-  [TBT_FIELD]: 'Total blocking time',
-  [FID_FIELD]: 'First input delay',
+  [LCP_FIELD]: 'Largest contentful paint (Seconds)',
+  [FCP_FIELD]: 'First contentful paint (Seconds)',
+  [TBT_FIELD]: 'Total blocking time  (Seconds)',
+  [FID_FIELD]: 'First input delay (Seconds)',
   [CLS_FIELD]: 'Cumulative layout shift',
 
   'monitor.id': 'Monitor Id',
@@ -38,6 +32,7 @@ export const FieldLabels: Record<string, string> = {
   'monitor.name': 'Monitor name',
   'monitor.type': 'Monitor Type',
   'url.port': 'Port',
+  'url.full': 'Url',
   tags: 'Tags',
 
   // custom

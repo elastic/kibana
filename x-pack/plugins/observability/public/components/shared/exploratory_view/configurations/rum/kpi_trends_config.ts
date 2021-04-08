@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../types';
-import { FieldLabels } from './constants';
-import { buildPhraseFilter } from './utils';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   PROCESSOR_EVENT,
@@ -18,7 +18,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-} from './data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
