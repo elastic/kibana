@@ -43,5 +43,3 @@ export const renderApp = (
 
   return () => unmountComponentAtNode(element);
 };
-
-export { Phase, MinAgePhase } from './sections/edit_policy';

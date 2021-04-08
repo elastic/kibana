@@ -14,7 +14,6 @@ import {
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import { licensingMock } from '../../../../../licensing/public/mocks';
-import { MinAgePhase } from '../../../../public/application';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;
