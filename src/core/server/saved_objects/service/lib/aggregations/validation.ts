@@ -28,10 +28,12 @@ interface ValidationContext {
 }
 
 /**
- * Validates an aggregation structure against the declared mapping and
- * aggregation schema, and rewrite the attribute fields from the
- * `{type}.attributes.{attribute}` (KQL-like) syntax to the underlying
- * `{type}.{attribute} format.`
+ * Validate an aggregation structure against the declared mappings and
+ * aggregation schemas, and rewrite the attribute fields using the KQL-like syntax
+ * - `{type}.attributes.{attribute}` to `{type}.{attribute}`
+ * - `{type}.{rootField}` to `{rootField}`
+ *
+ * throws on the first validation error if any is encountered.
  */
 export const validateAndConvertAggregations = (
   allowedTypes: string[],
@@ -46,12 +48,9 @@ export const validateAndConvertAggregations = (
 };
 
 /**
- * Validates a record of aggregation containers,
+ * Validate a record of aggregation containers,
  * Which can either be the root level aggregations (`SearchRequest.body.aggs`)
  * Or a nested record of aggregation (`SearchRequest.body.aggs.myAggregation.aggs`)
- *
- * @param aggregations
- * @param context
  */
 const validateAggregations = (
   aggregations: Record<string, estypes.AggregationContainer>,
@@ -66,11 +65,8 @@ const validateAggregations = (
 };
 
 /**
- * Validates an aggregation container, e.g an entry of `SearchRequest.body.aggs`, or
- * from a nested aggregation record.
- *
- * @param aggregation
- * @param context
+ * Validate an aggregation container, e.g an entry of `SearchRequest.body.aggs`, or
+ * from a nested aggregation record, including its potential nested aggregations.
  */
 const validateAggregation = (
   aggregation: estypes.AggregationContainer,
@@ -91,6 +87,10 @@ const validateAggregation = (
   return container;
 };
 
+/**
+ * Validates root-level aggregation of given aggregation container
+ * (ignoring its nested aggregations)
+ */
 const validateAggregationContainer = (
   container: estypes.AggregationContainer,
   context: ValidationContext
