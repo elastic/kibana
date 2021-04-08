@@ -30,7 +30,7 @@ jest.mock('../color_range_legend', () => ({
   }),
 }));
 
-// Mocking VegaChart to avoid a canvas element related error
+// Mocking VegaChart to avoid a jest/canvas related error
 jest.mock('../vega_chart', () => ({
   VegaChart: () => <div data-test-subj="mlVegaChart" />,
 }));
@@ -80,7 +80,7 @@ describe('Data Frame Analytics: <ScatterplotMatrix />', () => {
       });
       // should hide the loading indicator and render the wrapping options boilerplate
       expect(screen.queryByTestId('mlScatterplotMatrix loaded')).toBeInTheDocument();
-      // should not render the scatterplot matrix.
+      // should render the scatterplot matrix.
       expect(screen.queryByTestId('mlVegaChart')).toBeInTheDocument();
     });
   });
