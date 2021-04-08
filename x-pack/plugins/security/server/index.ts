@@ -26,7 +26,7 @@ export type {
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
 } from './authentication';
-export type { CheckPrivilegesPayload } from './authorization';
+export type { CheckPrivilegesPayload, AuthorizationServiceSetup } from './authorization';
 export {
   LegacyAuditLogger,
   AuditLogger,
