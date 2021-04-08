@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -20,14 +21,15 @@ import {
 import { EventFiltersHttpService, EventFiltersService } from '../service';
 
 import { EventFiltersListPageState } from '../state';
+import { EventFilterChangeForm } from './action';
 
 const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
-  trustedAppsService: EventFiltersService,
+  eventFiltersService: EventFiltersService,
   entry: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   try {
-    await trustedAppsService.addEventFilter(entry);
+    await eventFiltersService.addEventFilter(entry);
   } catch (error) {
     if (error) throw error;
   }

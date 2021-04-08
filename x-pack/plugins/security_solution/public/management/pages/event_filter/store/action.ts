@@ -17,10 +17,20 @@ export type EventFilterInitForm = Action<'eventFilterInitForm'> & {
   };
 };
 
+export type EventFilterChangeForm = Action<'eventFilterChangeForm'> & {
+  payload: {
+    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    hasError: boolean;
+  };
+};
+
 export type EventFilterCreateStart = Action<'eventFilterCreateStart'> & {
   payload: {
     entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
   };
 };
 
-export type EventFiltersPageAction = EventFilterCreateStart | EventFilterInitForm;
+export type EventFiltersPageAction =
+  | EventFilterCreateStart
+  | EventFilterInitForm
+  | EventFilterChangeForm;

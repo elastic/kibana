@@ -9,7 +9,7 @@ import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 
-import { EventFilterCreateStart, EventFilterInitForm } from './action';
+import { EventFilterCreateStart, EventFilterInitForm, EventFilterChangeForm } from './action';
 
 import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
@@ -28,6 +28,13 @@ const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) =>
   return { ...state, form: { ...state.form, entry: action.payload.entry } };
 };
 
+const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action) => {
+  return {
+    ...state,
+    form: { ...state.form, entry: action.payload.entry, hasError: action.payload.hasError },
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -37,6 +44,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFilterCreateStart(state, action);
     case 'eventFilterInitForm':
       return eventFilterInitForm(state, action);
+    case 'eventFilterChangeForm':
+      return eventFilterChangeForm(state, action);
   }
 
   return state;

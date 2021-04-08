@@ -6,6 +6,8 @@
  */
 
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
@@ -17,6 +19,7 @@ import { AddExceptionComments } from '../../../../../../common/components/except
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
+import { AppAction } from '../../../../../../common/store/actions';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -25,25 +28,13 @@ import {
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntry } from '../../../store/selector';
 
-export interface OnChangeProps {
-  item: ExceptionListItemSchema | CreateExceptionListItemSchema;
-  hasError: boolean;
-  name: string;
-  comment: string;
-}
-
-export interface EventFilteringFormProps {
-  onFormChange(arg: OnChangeProps): void;
-}
-
-export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(({ onFormChange }) => {
+export const EventFilteringForm: React.FC = memo(() => {
   const { http, data } = useKibana().services;
+  const dispatch = useDispatch<Dispatch<AppAction>>();
   const exception = useEventFiltersSelector(getFormEntry);
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
-  const [item, setItem] = useState<
-    ExceptionListItemSchema | CreateExceptionListItemSchema | undefined
-  >();
+  const [item, setItem] = useState<ExceptionListItemSchema | CreateExceptionListItemSchema>();
   const [name, setName] = useState<string>('');
   const [hasNameError, setHasNameError] = useState(!name);
   const [hasItemsError, setHasItemsError] = useState(false);
@@ -61,12 +52,12 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(({ onF
   }, []);
 
   useEffect(() => {
-    if (exception) setItem(exception);
-  }, [exception]);
-
-  useEffect(() => {
-    if (item) onFormChange({ item, hasError: hasNameError || hasItemsError, name, comment });
-  }, [item, name, comment, onFormChange, hasNameError, hasItemsError]);
+    if (item)
+      dispatch({
+        type: 'eventFilterChangeForm',
+        payload: { entry: { ...item, name }, hasError: hasNameError || hasItemsError },
+      });
+  }, [item, name, comment, hasNameError, hasItemsError, dispatch]);
 
   const exceptionBuilderComponentMemo = useMemo(
     () => (
@@ -74,7 +65,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(({ onF
         <ExceptionBuilderComponent
           httpService={http}
           autocompleteService={data.autocomplete}
-          exceptionListItems={[item as ExceptionListItemSchema]}
+          exceptionListItems={[exception as ExceptionListItemSchema]}
           listType={'endpoint'}
           listId={''}
           listNamespaceType={'agnostic'}
@@ -90,7 +81,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(({ onF
         <EuiSpacer />
       </>
     ),
-    [data, handleOnBuilderChange, http, indexPatterns, item]
+    [data, handleOnBuilderChange, http, indexPatterns, exception]
   );
 
   const nameInputMemo = useMemo(
@@ -114,7 +105,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(({ onF
     [comment, setComment]
   );
 
-  return !isIndexPatternLoading && item ? (
+  return !isIndexPatternLoading && exception ? (
     <>
       {nameInputMemo}
       {exceptionBuilderComponentMemo}

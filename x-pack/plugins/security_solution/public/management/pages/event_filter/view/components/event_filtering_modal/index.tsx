@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled, { css } from 'styled-components';
@@ -17,17 +17,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import uuid from 'uuid';
-import { addIdToItem } from '../../../../../../../common';
-
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../../../../../public/shared_imports';
 
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
-import { EventFilteringForm, OnChangeProps } from '../event_filtering_form';
+import { EventFilteringForm } from '../event_filtering_form';
+import { useGetInitialExceptionFromEvent, useEventFiltersSelector } from '../../hooks';
+import { getFormHasError, getFormEntry } from '../../../store/selector';
 
 export interface EventFilteringModalProps {
   data: Ecs;
@@ -59,49 +54,41 @@ const ModalBodySection = styled.section`
 export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
   ({ data, onCancel }) => {
     const dispatch = useDispatch<Dispatch<AppAction>>();
-    const [isSuccessButtonDisabled, setIsSuccessButtonDisabled] = useState(false);
-    const [exception, setException] = useState<
-      ExceptionListItemSchema | CreateExceptionListItemSchema
-    >();
-    const handleOnFormChange = useCallback((arg: OnChangeProps) => {
-      setIsSuccessButtonDisabled(arg.hasError);
-      setException(arg.item);
-    }, []);
+    const formHasError = useEventFiltersSelector(getFormHasError);
+    const formEntry = useEventFiltersSelector(getFormEntry);
+
+    const entry = useGetInitialExceptionFromEvent(data);
 
     useEffect(() => {
-      const entry: CreateExceptionListItemSchema = {
-        comments: [],
-        description: '',
-        entries:
-          data.event && data.process
-            ? [
-                addIdToItem({
-                  field: 'event.category',
-                  operator: 'included',
-                  type: 'match',
-                  value: (data.event.category ?? [])[0],
-                }),
-                addIdToItem({
-                  field: 'process.executable',
-                  operator: 'included',
-                  type: 'match',
-                  value: (data.process.executable ?? [])[0],
-                }),
-              ]
-            : [],
-        item_id: undefined,
-        list_id: 'as',
-        meta: {
-          temporaryUuid: uuid.v4(),
-        },
-        name: '',
-        namespace_type: 'agnostic',
-        tags: [],
-        type: 'simple',
-      };
       dispatch({ type: 'eventFilterInitForm', payload: { entry } });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [dispatch, entry]);
+
+    const confirmButtonMemo = useMemo(
+      () => (
+        <EuiButton
+          data-test-subj="add-exception-confirm-button"
+          fill
+          disabled={formHasError}
+          onClick={() => {
+            if (formEntry)
+              dispatch({ type: 'eventFilterCreateStart', payload: { entry: formEntry } });
+            onCancel();
+          }}
+        >
+          {'Confirm'}
+        </EuiButton>
+      ),
+      [dispatch, formEntry, formHasError, onCancel]
+    );
+
+    const modalBodyMemo = useMemo(
+      () => (
+        <ModalBodySection className="builder-section">
+          <EventFilteringForm />
+        </ModalBodySection>
+      ),
+      []
+    );
 
     return (
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -109,26 +96,13 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
           <EuiModalHeaderTitle>{'Add event filter'}</EuiModalHeaderTitle>
         </ModalHeader>
 
-        <ModalBodySection className="builder-section">
-          <EventFilteringForm onFormChange={handleOnFormChange} />
-        </ModalBodySection>
+        {modalBodyMemo}
 
         <EuiModalFooter>
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
             {'cancel'}
           </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="add-exception-confirm-button"
-            fill
-            disabled={isSuccessButtonDisabled}
-            onClick={() => {
-              dispatch({ type: 'eventFilterCreateStart', payload: { entry: exception } });
-              onCancel();
-            }}
-          >
-            {'Confirm'}
-          </EuiButton>
+          {confirmButtonMemo}
         </EuiModalFooter>
       </Modal>
     );

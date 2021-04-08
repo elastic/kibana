@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Immutable } from '../../../../../common/endpoint/types';
 import { EventFiltersListPageState } from '../state';
 import {
   ExceptionListItemSchema,
@@ -13,7 +12,11 @@ import {
 } from '../../../../../public/shared_imports';
 
 export const getFormEntry = (
-  state: Immutable<EventFiltersListPageState>
+  state: EventFiltersListPageState
 ): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
   return state.form.entry;
+};
+
+export const getFormHasError = (state: EventFiltersListPageState): boolean => {
+  return state.form.hasError;
 };
