@@ -1,25 +1,25 @@
-{    "job_id": "rare-destination-country",
-   "indices": ["logs-*","filebeat-*","packetbeat-*"],
-    "max_empty_searches": 10,
-      "query": {
-      "bool": {
-        "must": [],
-        "filter": [
-          {
-            "match_all": {}
-          },
-          {
-            "match_phrase": {
-              "event.category": "network"
-            }
-          },
-          {
-            "exists": {
-              "field": "destination.geo.country_name"
-            }
+{
+  "job_id": "rare-destination-country",
+  "indices": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
           }
-        ],
-        "should": []
-            }
-            }
+        },
+        {
+          "exists": {
+            "field": "destination.geo.country_name"
           }
+        }
+      ]
+    }
+  }
+}
