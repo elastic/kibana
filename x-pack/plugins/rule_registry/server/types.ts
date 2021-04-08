@@ -14,6 +14,7 @@ import {
   AlertTypeState,
 } from '../../alerting/common';
 import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
+import { RuleRegistry } from './rule_registry';
 import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 import { DefaultFieldMap } from './rule_registry/defaults/field_map';
 
@@ -93,3 +94,7 @@ export type RuleType<
     TAdditionalRuleExecutorServices
   >;
 };
+
+export type FieldMapOf<
+  TRuleRegistry extends RuleRegistry<any>
+> = TRuleRegistry extends RuleRegistry<infer TFieldMap> ? TFieldMap : never;

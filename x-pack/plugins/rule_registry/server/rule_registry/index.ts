@@ -78,11 +78,13 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
   private getEsNames() {
     const base = [this.options.kibanaIndex, this.options.name];
+    const indexTarget = `${base.join('-')}*`;
     const indexAliasName = [...base, this.options.kibanaVersion.toLowerCase()].join('-');
     const policyName = [...base, 'policy'].join('-');
 
     return {
       indexAliasName,
+      indexTarget,
       policyName,
     };
   }
@@ -137,13 +139,15 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     if (!this.options.writeEnabled) {
       return undefined;
     }
+    const { indexAliasName, indexTarget } = this.getEsNames();
 
     return createScopedRuleRegistryClient({
-      savedObjectsClient: context.core.savedObjects.client,
+      savedObjectsClient: context.core.savedObjects.getClient({ includedHiddenTypes: ['alert'] }),
       scopedClusterClient: context.core.elasticsearch.client,
       clusterClientAdapter: this.esAdapter,
       fieldMap: this.options.fieldMap,
-      index: this.getEsNames().indexAliasName,
+      indexAliasName,
+      indexTarget,
       logger: this.options.logger,
     });
   }
@@ -152,6 +156,8 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     type: RuleType<TFieldMap, TRuleParams, TActionVariable>
   ) {
     const logger = this.options.logger.get(type.id);
+
+    const { indexAliasName, indexTarget } = this.getEsNames();
 
     this.options.alertingPluginSetupContract.registerType<
       AlertTypeParams,
@@ -187,7 +193,8 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
                     scopedClusterClient: services.scopedClusterClient,
                     clusterClientAdapter: this.esAdapter,
                     fieldMap: this.options.fieldMap,
-                    index: this.getEsNames().indexAliasName,
+                    indexAliasName,
+                    indexTarget,
                     namespace,
                     ruleData: {
                       producer,

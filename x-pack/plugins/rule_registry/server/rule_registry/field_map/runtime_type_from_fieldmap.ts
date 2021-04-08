@@ -89,7 +89,7 @@ export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
   fieldMap: TFieldMap
 ): FieldMapType<TFieldMap> {
   function mapToType(fields: FieldMap) {
-    return mapValues(fields, (field) => {
+    return mapValues(fields, (field, key) => {
       const type =
         field.type in esFieldTypeMap
           ? esFieldTypeMap[field.type as keyof EsFieldTypeMap]

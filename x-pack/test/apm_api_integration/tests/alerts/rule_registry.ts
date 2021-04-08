@@ -134,9 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(apmIndexName.split('-').includes('observability')).to.be(true);
       expect(apmIndexName.split('-').includes('apm')).to.be(true);
 
-      expectSnapshot(indexNames[0]).toMatchInline(
-        `".kibana-alerts-observability-apm-8.0.0-000001"`
-      );
+      expect(indexNames[0].startsWith('.kibana-alerts-observability-apm')).to.be(true);
 
       expect(get(apmIndex, 'index.mappings.properties.service.properties.environment.type')).to.be(
         'keyword'

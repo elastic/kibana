@@ -28,7 +28,9 @@ const getRuleUuids = async ({
     ...(namespace ? { namespace } : {}),
   };
 
-  const pitFinder = savedObjectsClient.createPointInTimeFinder(options);
+  const pitFinder = savedObjectsClient.createPointInTimeFinder({
+    ...options,
+  });
 
   const ruleUuids: string[] = [];
 
@@ -53,7 +55,8 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
   savedObjectsClient,
   namespace,
   clusterClientAdapter,
-  index,
+  indexAliasName,
+  indexTarget,
   logger,
   ruleData,
 }: {
@@ -65,7 +68,8 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
     body: OutputOfFieldMap<TFieldMap>;
     index: string;
   }>;
-  index: string;
+  indexAliasName: string;
+  indexTarget: string;
   logger: Logger;
   ruleData?: {
     rule: {
@@ -100,7 +104,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
 
       const response = await scopedClusterClient.asInternalUser.search({
         ...searchRequest,
-        index,
+        index: indexTarget,
         body: {
           ...searchRequest.body,
           query: {
@@ -139,7 +143,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
         throw createPathReporterError(validation);
       }
 
-      clusterClientAdapter.indexDocument({ body: validation.right, index });
+      clusterClientAdapter.indexDocument({ body: validation.right, index: indexAliasName });
     },
     bulkIndex: (docs) => {
       const validations = docs.map((doc) => {
@@ -161,7 +165,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
 
       const operations = compact(
         validations.map((validation) => (isRight(validation) ? validation.right : null))
-      ).map((doc) => ({ body: doc, index }));
+      ).map((doc) => ({ body: doc, index: indexAliasName }));
 
       return clusterClientAdapter.indexDocuments(operations);
     },
