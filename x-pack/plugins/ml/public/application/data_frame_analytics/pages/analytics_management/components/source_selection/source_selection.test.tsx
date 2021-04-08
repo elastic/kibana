@@ -159,7 +159,9 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(
         screen.queryByText('Index patterns using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
-      expect(mockNavigateToPath).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToPath).toHaveBeenCalledWith(
+        '/data_frame_analytics/new_job?index=the-plain-index-pattern-id'
+      );
       expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(0);
     });
   });
@@ -186,7 +188,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(1);
+    expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledWith('the-remote-saved-search-id');
   });
 
   it('calls navigateToPath for a saved search using a plain index pattern ', async () => {
@@ -205,8 +207,10 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(
         screen.queryByText('Index patterns using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
-      expect(mockNavigateToPath).toHaveBeenCalledTimes(1);
-      expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToPath).toHaveBeenCalledWith(
+        '/data_frame_analytics/new_job?savedSearchId=the-plain-saved-search-id'
+      );
+      expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledWith('the-plain-saved-search-id');
     });
   });
 });
