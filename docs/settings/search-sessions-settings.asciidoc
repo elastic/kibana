@@ -16,28 +16,28 @@ a| `xpack.data_enhanced.`
 
 a| `xpack.data_enhanced.`
 `search.sessions.trackingInterval`
-| The frequency for updating the state of a search session. The default is 10s.
+| The frequency for updating the state of a search session. The default is `10s`.
 
 a| `xpack.data_enhanced.`
 `search.sessions.pageSize`
-| Controls how many search sessions Kibana processs at once while monitoring
-session progress. The default is 100.
+| How many search sessions {kib} processs at once while monitoring
+session progress. The default is `100`.
 
 a| `xpack.data_enhanced.`
 `search.sessions.notTouchedTimeout`
-| Controls for how long Kibana stores search results from unsaved sessions,
-after the last search in the session has completed. The default is 5m.
+| How long {kib} stores search results from unsaved sessions,
+after the last search in the session has completed. The default is `5m`.
 
 a| `xpack.data_enhanced.`
 `search.sessions.notTouchedInProgressTimeout`
-| Controls for how long a search session can run after a user navigates away without saving a session. The default is 1m.
+| How long a search session can run after a user navigates away without saving a session. The default is `1m`.
 
 a| `xpack.data_enhanced.`
 `search.sessions.maxUpdateRetries`
-| Controls how many retries Kibana can perform while attempting to save a search session. The default is 3.
+| How many retries {kib} can perform while attempting to save a search session. The default is `3`.
 
 a| `xpack.data_enhanced.`
 `search.sessions.defaultExpiration`
 | How long search session results are stored before they are deleted.
-Extending a search session resets the expiration by the same value. The default is 7d.
+Extending a search session resets the expiration by the same value. The default is `7d`.
 |===
