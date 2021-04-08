@@ -259,8 +259,8 @@ export const eventDetailsFormattedFields = [
   {
     category: 'threat',
     field: 'threat.indicator.matched.field',
-    values: ['matched_field', 'matched_field_2'],
-    originalValue: ['matched_field', 'matched_field_2'],
+    values: ['matched_field', 'other_matched_field', 'matched_field_2'],
+    originalValue: ['matched_field', 'other_matched_field', 'matched_field_2'],
     isObjectArray: false,
   },
   {

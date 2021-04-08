@@ -407,6 +407,14 @@ describe('#formatTimelineData', () => {
       });
     });
 
+    it('builds an object with no fields response', () => {
+      const { fields, ...fieldLessHit } = eventHit;
+      // @ts-expect-error fieldLessHit is intentionally missing fields
+      expect(buildObjectForFieldPath('@timestamp', fieldLessHit)).toEqual({
+        '@timestamp': [],
+      });
+    });
+
     it('does not misinterpret non-nested fields with a common prefix', () => {
       // @ts-expect-error hit is minimal
       const hit: EventHit = {

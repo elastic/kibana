@@ -124,7 +124,8 @@ export const buildObjectForFieldPath = (fieldPath: string, hit: EventHit): Parti
 /**
  * If a prefix of our full field path is present as a field, we know that our field is nested
  */
-const getNestedParentPath = (fieldPath: string, fields: Fields): string | undefined =>
+const getNestedParentPath = (fieldPath: string, fields: Fields | undefined): string | undefined =>
+  fields &&
   Object.keys(fields).find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
 
 const mergeTimelineFieldsWithHit = async <T>(
