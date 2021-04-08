@@ -74,8 +74,10 @@ save a dashboard without ending your editing session. To rename the dashboard or
 [[runtime-fields-7-12]]
 === Runtime fields in Discover
 
-Runtime fields are now available in *Discover*&mdash;view them like any other field.
-Refer to the {ref}/runtime.html[runtime fields] documentation for more information.
+*Discover* now shows all fields, including {ref}/runtime.html[runtime fields],
+multi-mapped fields like `.keyword`, and alias fields.
+Refer to
+https://www.elastic.co/blog/discover-uses-fields-api-in-7-12[the blog announcing the change to *Discover*].
 
 [float]
 [[alerting-7-12]]
