@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
 import { useUrlStorage } from '../../hooks/use_url_storage';
@@ -33,27 +34,39 @@ export function OperationTypeSelect({
   const options = [
     {
       value: 'average' as OperationType,
-      inputDisplay: 'Average',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.average', {
+        defaultMessage: 'Average',
+      }),
     },
     {
       value: 'median' as OperationType,
-      inputDisplay: 'Median',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.median', {
+        defaultMessage: 'Median',
+      }),
     },
     {
       value: '75th' as OperationType,
-      inputDisplay: '75th Percentile',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.75thPercentile', {
+        defaultMessage: '75th Percentile',
+      }),
     },
     {
       value: '90th' as OperationType,
-      inputDisplay: '90th Percentile',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.90thPercentile', {
+        defaultMessage: '90th Percentile',
+      }),
     },
     {
       value: '95th' as OperationType,
-      inputDisplay: '95th Percentile',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.95thPercentile', {
+        defaultMessage: '95th Percentile',
+      }),
     },
     {
       value: '99th' as OperationType,
-      inputDisplay: '99th Percentile',
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.99thPercentile', {
+        defaultMessage: '99th Percentile',
+      }),
     },
   ];
 
