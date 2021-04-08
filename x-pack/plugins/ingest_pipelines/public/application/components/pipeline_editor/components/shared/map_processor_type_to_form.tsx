@@ -316,18 +316,13 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.foreach', {
       defaultMessage: 'Applies an ingest processor to each value in an array.',
     }),
-    getDefaultDescription: ({ field, processor }) => {
-      const processorName = Object.keys(processor ?? {})[0];
-      return processorName
-        ? i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
-            defaultMessage: 'Runs the "{processorName}" processor for each object in "{field}"',
-            values: {
-              field,
-              processorName,
-            },
-          })
-        : undefined;
-    },
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
+        defaultMessage: 'Runs a processor for each object in "{field}"',
+        values: {
+          field,
+        },
+      }),
   },
   geoip: {
     FieldsComponent: GeoIP,
