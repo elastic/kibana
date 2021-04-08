@@ -13,7 +13,7 @@ import { configSchema, TelemetryConfigType } from './config';
 
 export { FetcherTask } from './fetcher';
 export { handleOldSettings } from './handle_old_settings';
-export { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
+export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
@@ -34,9 +34,12 @@ export { constants };
 export {
   getClusterUuids,
   getLocalStats,
-  TelemetryLocalStats,
   DATA_TELEMETRY_ID,
+  buildDataTelemetryPayload,
+} from './telemetry_collection';
+
+export type {
+  TelemetryLocalStats,
   DataTelemetryIndex,
   DataTelemetryPayload,
-  buildDataTelemetryPayload,
 } from './telemetry_collection';
