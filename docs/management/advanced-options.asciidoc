@@ -119,7 +119,7 @@ When date histograms use the `auto` interval, Kibana attempts to generate this
 number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
-Limits the density of date and number histograms across Kibana
+To improve performance, limits the density of date and number histograms across {kib}
 using a test query. When the test query contains too many buckets,
 the interval between buckets increases. This setting applies separately
 to each histogram aggregation, and does not apply to other types of aggregations.
