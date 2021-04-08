@@ -181,6 +181,13 @@ export async function generateEnrollmentAPIKey(
     .createApiKey({
       body: {
         name,
+        // @ts-expect-error Metadata in api keys
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'enroll',
+          policy_id: data.agentPolicyId,
+        },
         role_descriptors: {
           // Useless role to avoid to have the privilege of the user that created the key
           'fleet-apikey-enroll': {
