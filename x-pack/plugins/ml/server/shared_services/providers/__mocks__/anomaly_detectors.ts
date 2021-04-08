@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export * from './location_map';
-export * from '../availability_reporting/location_status_tags';
+export const createAnomalyDetectorsProviderMock = () =>
+  jest.fn(() => ({
+    jobs: jest.fn(),
+    jobStats: jest.fn(),
+    datafeeds: jest.fn(),
+    datafeedStats: jest.fn(),
+  }));
