@@ -59,10 +59,6 @@ describe('iteration', () => {
           it('should receive the expected number of results', async () => {
             expect(fetched.length).toEqual(numSummaries);
           });
-
-          it('should have no remaining pages', async () => {
-            expect(await iterator!.paginationAfterCurrent()).toBeNull();
-          });
         });
 
         describe('nextPage()', () => {
