@@ -13,7 +13,7 @@ import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { duration } from 'moment';
-import { fromRoot } from '../utils';
+import { fromRoot } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server } from '../server';
 
