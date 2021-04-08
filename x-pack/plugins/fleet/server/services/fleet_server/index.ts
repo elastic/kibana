@@ -12,7 +12,6 @@ import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
 
-import { setupFleetServerIndexes } from './elastic_index';
 import { runFleetServerMigration } from './saved_object_migrations';
 
 let _isFleetServerSetup = false;
@@ -58,7 +57,6 @@ export async function startFleetServerSetup() {
   try {
     // We need licence to be initialized before using the SO service.
     await licenseService.getLicenseInformation$()?.pipe(first())?.toPromise();
-    await setupFleetServerIndexes();
     await runFleetServerMigration();
     _isFleetServerSetup = true;
   } catch (err) {

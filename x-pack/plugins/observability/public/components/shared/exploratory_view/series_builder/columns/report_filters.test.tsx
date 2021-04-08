@@ -11,7 +11,7 @@ import { render } from '../../../../../utils/test_helper';
 import { ReportFilters } from './report_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 
 describe('Series Builder ReportFilters', function () {
   const dataViewSeries = getDefaultConfigs({
