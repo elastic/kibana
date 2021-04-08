@@ -8,7 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
+import {
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+} from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
@@ -48,10 +51,7 @@ export class FieldParamType extends BaseParamType {
         }
 
         if (field.type === KBN_FIELD_TYPES.MISSING) {
-          throw new SavedObjectNotFound(
-            'index-pattern-field',
-            field.name,
-            undefined,
+          throw new SavedFieldNotFound(
             i18n.translate(
               'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
               {
@@ -70,7 +70,7 @@ export class FieldParamType extends BaseParamType {
         );
 
         if (!validField) {
-          throw new Error(
+          throw new SavedFieldTypeInvalidForAgg(
             i18n.translate(
               'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
               {

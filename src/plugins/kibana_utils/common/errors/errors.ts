@@ -48,6 +48,24 @@ export class SavedObjectNotFound extends KbnError {
 }
 
 /**
+ * A saved field doesn't exist anymore
+ */
+export class SavedFieldNotFound extends KbnError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+/**
+ * A saved field type doesn't compatible with aggregation
+ */
+export class SavedFieldTypeInvalidForAgg extends KbnError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+/**
  * This error is for scenarios where a saved object is detected that has invalid JSON properties.
  * There was a scenario where we were importing objects with double-encoded JSON, and the system
  * was silently failing. This error is now thrown in those scenarios.
