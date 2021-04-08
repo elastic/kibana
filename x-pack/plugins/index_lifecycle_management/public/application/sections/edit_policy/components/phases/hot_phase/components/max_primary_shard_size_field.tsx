@@ -24,7 +24,7 @@ export const MaxPrimaryShardSizeField: FunctionComponent = () => {
           component={NumericField}
           componentProps={{
             euiFieldProps: {
-              'data-test-subj': `hot-selectedMaxPrimaryShardSize`,
+              'data-test-subj': 'hot-selectedMaxPrimaryShardSize',
               min: 1,
             },
           }}

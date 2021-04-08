@@ -23,7 +23,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
           path={ROLLOVER_FORM_PATHS.maxSize}
           component={NumericField}
           componentProps={{
-            euiFieldProps: { 'data-test-subj': `hot-selectedMaxSizeStored`, min: 1 },
+            euiFieldProps: { 'data-test-subj': 'hot-selectedMaxSizeStored', min: 1 },
           }}
         />
       </EuiFlexItem>

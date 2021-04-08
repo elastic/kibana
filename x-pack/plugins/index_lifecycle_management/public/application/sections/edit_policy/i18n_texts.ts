@@ -129,7 +129,7 @@ export const i18nTexts = {
       maximumPrimaryShardSizeRequiredMessage: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardSizeMissingError',
         {
-          defaultMessage: 'Maximum primary shard size is required',
+          defaultMessage: 'A maximum primary shard size is required',
         }
       ),
       rollOverConfigurationCallout: {
