@@ -268,6 +268,13 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       const frozenPhase = draft.phases.frozen!;
 
       /**
+       * FROZEN PHASE MIN AGE
+       */
+      if (updatedPolicy.phases.frozen?.min_age) {
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+      }
+
+      /**
        * FROZEN PHASE SEARCHABLE SNAPSHOT
        */
       if (updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {

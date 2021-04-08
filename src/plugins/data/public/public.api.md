@@ -1786,6 +1786,8 @@ export enum KBN_FIELD_TYPES {
     // (undocumented)
     IP_RANGE = "ip_range",
     // (undocumented)
+    MISSING = "missing",
+    // (undocumented)
     MURMUR3 = "murmur3",
     // (undocumented)
     NESTED = "nested",

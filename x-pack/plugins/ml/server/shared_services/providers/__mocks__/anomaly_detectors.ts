@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
-export { setupEnvironment } from './setup_environment';
+export const createAnomalyDetectorsProviderMock = () =>
+  jest.fn(() => ({
+    jobs: jest.fn(),
+    jobStats: jest.fn(),
+    datafeeds: jest.fn(),
+    datafeedStats: jest.fn(),
+  }));
