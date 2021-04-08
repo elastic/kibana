@@ -494,8 +494,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           error: 'Not Found',
-          message: 'Not Found',
+          message: 'Response Error',
           statusCode: 404,
+          attributes: {},
         });
       });
     });
