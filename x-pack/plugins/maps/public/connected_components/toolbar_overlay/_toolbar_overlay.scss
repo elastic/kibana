@@ -33,7 +33,7 @@
 
   // Removes the focus background state because it can induce users to think these buttons are "enabled".
   // The buttons functionality are just applied once, so they shouldn't stay highlighted.
-  .euiButtonIcon:focus {
+  .euiButtonIcon:focus:not(:hover) {
     background: none;
   }
 }
