@@ -176,6 +176,18 @@ export class MonitoringPlugin
         logger: this.log,
       });
       initInfraSource(config, plugins.infra);
+      router.get({ path: '/monitoring-myfakepath', validate: false }, async (context, req, res) => {
+        try {
+          const racClient = await context.ruleRegistry?.getRacClient();
+          const thing = await racClient?.get({ id: 'hello world', owner: 'observability' });
+          console.error('THE THING!!!', JSON.stringify(thing.body, null, 2));
+          return res.ok({ body: { success: true } });
+        } catch (err) {
+          console.error('monitoring route threw an error');
+          console.error(err);
+          return res.notFound({ body: { message: err.message } });
+        }
+      });
     }
 
     return {
@@ -244,8 +256,30 @@ export class MonitoringPlugin
       }),
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['monitoring', 'kibana'],
+      rac: ['observability'],
       catalogue: ['monitoring'],
-      privileges: null,
+      privileges: {
+        all: {
+          rac: {
+            all: ['observability'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show', 'save', 'alerting:show', 'alerting:save'],
+        },
+        read: {
+          rac: {
+            all: ['observability'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show', 'save', 'alerting:show', 'alerting:save'],
+        },
+      },
       alerting: ALERTS,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {

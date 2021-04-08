@@ -112,7 +112,13 @@ export class RacClient {
     this.esClient = esClient;
   }
 
-  public async get<Params>({ id }: { id: string }): Promise<unknown> {
+  public async get<Params>({
+    id,
+    owner,
+  }: {
+    id: string;
+    owner: 'securitySolution' | 'observability';
+  }): Promise<unknown> {
     // TODO: type alert for the get method
     const result = await this.esClient.search({
       index: '.siem*',
@@ -124,7 +130,7 @@ export class RacClient {
       await this.authorization.ensureAuthorized(
         // TODO: add spaceid here.. I think
         // result.body._source?.owner,
-        'securitySolution',
+        owner,
         ReadOperations.Get
       );
     } catch (error) {

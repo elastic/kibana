@@ -92,11 +92,15 @@ export class RacAuthorization {
 
     // Does the owner the client sent up match with the KibanaFeatures structure
     const isAvailableOwner = this.featureOwners.has(owner);
+    console.error('PROVIDED OWNER', owner);
     console.error('THIS.FEATUREOWNERS', this.featureOwners);
     console.error('IS AVAILABLE OWNER', isAvailableOwner);
+    console.error('AUTHORIZATION???', authorization);
+    console.error('THIS.SHOULDCHECKAUTHZ', this.shouldCheckAuthorization());
 
     if (authorization != null && this.shouldCheckAuthorization()) {
       const requiredPrivileges = [authorization.actions.rac.get(owner, operation)];
+      console.error('REQUIRED PRIVILEGES', JSON.stringify(requiredPrivileges, null, 2));
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: requiredPrivileges,
