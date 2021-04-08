@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for manage spaces page', async () => {
+    // flaky
+    it.skip('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await toasts.dismissAllToasts();
