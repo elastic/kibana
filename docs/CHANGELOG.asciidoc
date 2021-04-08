@@ -73,18 +73,17 @@ To display the cluster data in *Discover*, load documents directly from `_source
 
 [discrete]
 [[breaking-kibana-discover-fields]]
-.*Discover* now uses the fields API
+.*Discover* now uses the fields parameter
 [%collapsible]
 ====
 *Details* +
-In 7.12.0, *Discover* uses the {ref}/search-fields.html#search-fields-param[fields API] by default.
+With the new {ref}/search-fields.html#search-fields-param[fields parameter],
+*Discover* now shows all fields, including runtime fields,
+multi-mapped fields like `.keyword`, and alias fields.
 Reading from `_source` is still supported through a switch in *Advanced Settings*.
-With the fields API, *Discover* now shows all fields, including runtime fields, multi-mapped fields like `.keyword`, and alias fields.
 
 *Impact* +
 Refer to https://www.elastic.co/blog/discover-uses-fields-api-in-7-12[the blog announcing the change to *Discover*].
-for more information on runtime fields in *Discover*,
-including the switch to using the fields API.
 ====
 
 // end::notable-breaking-changes[]
