@@ -49,7 +49,7 @@ Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
 
 [float]
 ==== Custom tiles are not displayed
-* When using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
+* When using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your {kib} domain have permission to access your tile server domain.
 * Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
 
 [float]
