@@ -47,12 +47,11 @@ const getEsCause = (obj: ErrorObject = {}, causes: string[] = []): string[] => {
 
 export const getEsErrorMessage = (error: Error) => {
   let message = error.message;
-  const apiError = (error as ElasticsearchError)?.meta?.body?.error;
+  const apiError =
+    (error as ElasticsearchError)?.error?.meta?.body?.error ??
+    (error as ElasticsearchError)?.meta?.body?.error;
   if (apiError) {
-    console.log({ apiError });
     message += `, caused by: "${getEsCause(apiError as ErrorObject)}"`;
-  } else {
-    console.log({ error });
   }
   return message;
 };
