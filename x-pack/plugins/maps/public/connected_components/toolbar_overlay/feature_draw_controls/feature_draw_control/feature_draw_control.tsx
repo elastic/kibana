@@ -21,6 +21,7 @@ export interface Props {
 export function FeatureDrawControl(props: Props) {
   const drawLineSelected = props.drawType === DRAW_TYPE.LINE;
   const drawPolygonSelected = props.drawType === DRAW_TYPE.POLYGON;
+  const drawCircleSelected = props.drawType === DRAW_TYPE.DISTANCE;
   const drawBBoxSelected = props.drawType === DRAW_TYPE.BOUNDS;
   const drawPointSelected = props.drawType === DRAW_TYPE.POINT;
 
@@ -46,7 +47,7 @@ export function FeatureDrawControl(props: Props) {
           <EuiButtonIcon
             className={`mapToolbarOverlay__button${drawPolygonSelected ? '__selected' : ''}`}
             onClick={() => props.initiateDraw(DRAW_TYPE.POLYGON)}
-            iconType="home"
+            iconType="node"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
               defaultMessage: 'Draw polygon',
             })}
@@ -55,6 +56,21 @@ export function FeatureDrawControl(props: Props) {
             })}
             aria-pressed={drawPolygonSelected}
             isSelected={drawPolygonSelected}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem key={'circle'} grow={false}>
+          <EuiButtonIcon
+            className={`mapToolbarOverlay__button${drawCircleSelected ? '__selected' : ''}`}
+            onClick={() => props.initiateDraw(DRAW_TYPE.DISTANCE)}
+            iconType="plusInCircle"
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel', {
+              defaultMessage: 'Draw circle',
+            })}
+            title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleTitle', {
+              defaultMessage: 'Draw circle',
+            })}
+            aria-pressed={drawCircleSelected}
+            isSelected={drawCircleSelected}
           />
         </EuiFlexItem>
         <EuiFlexItem key={'boundingBox'} grow={false}>
