@@ -12,6 +12,17 @@ import { Agent as HttpsAgent, AgentOptions } from 'https';
 
 import { WildcardMatcher } from './wildcard_matcher';
 
+interface Config {
+  match: {
+    protocol: string;
+    host: string;
+    port: string;
+    path: string;
+  };
+  ssl?: { verify?: boolean; ca?: string; cert?: string; key?: string };
+  timeout: number;
+}
+
 export class ProxyConfig {
   // @ts-ignore
   private id: string;
@@ -26,9 +37,9 @@ export class ProxyConfig {
 
   private readonly sslAgent?: HttpsAgent;
 
-  private verifySsl: any;
+  private verifySsl: undefined | boolean;
 
-  constructor(config: { match: any; timeout: number }) {
+  constructor(config: Config) {
     config = {
       ...config,
     };
@@ -61,8 +72,8 @@ export class ProxyConfig {
     this.sslAgent = this._makeSslAgent(config);
   }
 
-  _makeSslAgent(config: any) {
-    const ssl = config.ssl || {};
+  _makeSslAgent(config: Config) {
+    const ssl: Config['ssl'] = config.ssl || {};
     this.verifySsl = ssl.verify;
 
     const sslAgentOpts: AgentOptions = {

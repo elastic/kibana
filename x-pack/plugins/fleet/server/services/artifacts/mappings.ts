@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ESSearchHit } from '../../../../../../typings/elasticsearch';
+import type { SearchHit } from '../../../../../../typings/elasticsearch';
 
 import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
 
 export const esSearchHitToArtifact = <
-  T extends Pick<ESSearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
+  T extends Pick<SearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
 >({
   _id: id,
   _source: {
@@ -71,4 +71,14 @@ export const relativeDownloadUrlFromArtifact = <
     '{decodedSha256}',
     decodedSha256
   );
+};
+
+export const uniqueIdFromArtifact = <
+  T extends Pick<Artifact, 'identifier' | 'decodedSha256' | 'packageName'>
+>({
+  identifier,
+  decodedSha256,
+  packageName,
+}: T): string => {
+  return `${packageName}:${identifier}-${decodedSha256}`;
 };

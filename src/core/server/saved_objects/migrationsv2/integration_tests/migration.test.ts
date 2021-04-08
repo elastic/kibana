@@ -19,7 +19,8 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-describe('migration v2', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/91107
+describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
@@ -162,7 +163,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
@@ -217,7 +220,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];

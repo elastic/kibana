@@ -85,6 +85,15 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
     responsive={true}
   />
   <ItemDetailsAction
+    color="primary"
+    data-test-subj="trustedAppEditButton"
+    fill={true}
+    onClick={[Function]}
+    size="s"
+  >
+    Edit
+  </ItemDetailsAction>
+  <ItemDetailsAction
     color="danger"
     data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
@@ -179,6 +188,15 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
     items={Array []}
     responsive={true}
   />
+  <ItemDetailsAction
+    color="primary"
+    data-test-subj="trustedAppEditButton"
+    fill={true}
+    onClick={[Function]}
+    size="s"
+  >
+    Edit
+  </ItemDetailsAction>
   <ItemDetailsAction
     color="danger"
     data-test-subj="trustedAppDeleteButton"

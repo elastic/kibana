@@ -313,6 +313,7 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -387,6 +388,8 @@ export {
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './search';
 
 export type {
@@ -423,6 +426,7 @@ export const search = {
     toAbsoluteDates,
     boundsDescendingRaw,
     getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -465,6 +469,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
 export { AggsStart } from './search/aggs';

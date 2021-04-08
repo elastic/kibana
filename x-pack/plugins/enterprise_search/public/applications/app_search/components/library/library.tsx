@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
@@ -86,14 +85,8 @@ export const Library: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={['Library']} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Library</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle="Library" />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>

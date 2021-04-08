@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiText,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 import type { Observable, Subscription } from 'rxjs';
@@ -128,7 +127,7 @@ export class SecurityNavControl extends Component<Props, State> {
       const userMenuLinkMenuItems = userMenuLinks
         .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
         .map(({ label, iconType, href }: UserMenuLink) => ({
-          name: <EuiText>{label}</EuiText>,
+          name: label,
           icon: <EuiIcon type={iconType} size="m" />,
           href,
           'data-test-subj': `userMenuLink__${label}`,

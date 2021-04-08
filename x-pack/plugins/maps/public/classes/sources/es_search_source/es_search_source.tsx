@@ -18,6 +18,7 @@ import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
+  isTotalHitsGreaterThan,
   PreIndexedShape,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
@@ -59,53 +60,12 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { TopHitsUpdateSourceEditor } from './top_hits';
+import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
-
-export interface ScriptField {
-  source: string;
-  lang: string;
-}
-
-function getDocValueAndSourceFields(
-  indexPattern: IndexPattern,
-  fieldNames: string[],
-  dateFormat: string
-): {
-  docValueFields: Array<string | { format: string; field: string }>;
-  sourceOnlyFields: string[];
-  scriptFields: Record<string, { script: ScriptField }>;
-} {
-  const docValueFields: Array<string | { format: string; field: string }> = [];
-  const sourceOnlyFields: string[] = [];
-  const scriptFields: Record<string, { script: ScriptField }> = {};
-  fieldNames.forEach((fieldName) => {
-    const field = getField(indexPattern, fieldName);
-    if (field.scripted) {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script || '',
-          lang: field.lang || '',
-        },
-      };
-    } else if (field.readFromDocValues) {
-      const docValueField =
-        field.type === 'date'
-          ? {
-              field: fieldName,
-              format: dateFormat,
-            }
-          : fieldName;
-      docValueFields.push(docValueField);
-    } else {
-      sourceOnlyFields.push(fieldName);
-    }
-  });
-
-  return { docValueFields, sourceOnlyFields, scriptFields };
-}
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
@@ -165,6 +125,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+    if (this._isTopHits()) {
+      return (
+        <TopHitsUpdateSourceEditor
+          source={this}
+          indexPatternId={this.getIndexPatternId()}
+          onChange={sourceEditorArgs.onChange}
+          tooltipFields={this._tooltipFields}
+          sortField={this._descriptor.sortField}
+          sortOrder={this._descriptor.sortOrder}
+          filterByMapBounds={this.isFilterByMapBounds()}
+          topHitsSplitField={this._descriptor.topHitsSplitField}
+          topHitsSize={this._descriptor.topHitsSize}
+        />
+      );
+    }
+
     const getGeoField = () => {
       return this._getGeoField();
     };
@@ -179,8 +155,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        topHitsSplitField={this._descriptor.topHitsSplitField}
-        topHitsSize={this._descriptor.topHitsSize}
       />
     );
   }
@@ -313,6 +287,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
 
     const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
@@ -343,11 +318,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
     entityBuckets.forEach((entityBucket: any) => {
-      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
-      if (total > hits.length) {
+      if (isTotalHitsGreaterThan(entityBucket.entityHits.hits.total, hits.length)) {
         areTopHitsTrimmed = true;
       }
     });
@@ -385,6 +359,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
+    searchSource.setField('trackTotalHits', maxResultWindow + 1);
     searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
@@ -408,7 +383,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
-        areResultsTrimmed: resp.hits.total > resp.hits.hits.length,
+        areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
       },
     };
   }
@@ -508,6 +483,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create(initialSearchContext as object);
+    searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
@@ -520,7 +496,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch();
+    const resp = await searchSource.fetch({ legacyHitsTotal: false });
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -655,6 +631,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
+      filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
       scalingType: this._descriptor.scalingType,

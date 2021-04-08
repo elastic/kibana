@@ -57,7 +57,7 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-
+import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -88,8 +88,8 @@ export type {
   ConfigService,
   ConfigDeprecation,
   ConfigDeprecationProvider,
-  ConfigDeprecationLogger,
   ConfigDeprecationFactory,
+  AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
 } from './config';
@@ -282,6 +282,9 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
@@ -378,6 +381,12 @@ export type {
 } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
+export type {
+  DeprecationsDetails,
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+  DeprecationsServiceSetup,
+} from './deprecations';
 
 export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
@@ -396,8 +405,6 @@ export type {
   SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
-
-export type { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
@@ -478,6 +485,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }

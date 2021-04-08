@@ -230,6 +230,15 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       }
 
       /**
+       * COLD PHASE READ ONLY
+       */
+      if (_meta.cold.readonlyEnabled) {
+        coldPhase.actions.readonly = coldPhase.actions.readonly ?? {};
+      } else {
+        delete coldPhase.actions.readonly;
+      }
+
+      /**
        * COLD PHASE SET PRIORITY
        */
       if (!updatedPolicy.phases.cold?.actions?.set_priority) {
@@ -254,9 +263,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     /**
      * FROZEN PHASE SERIALIZATION
      */
-    if (_meta.frozen.enabled) {
+    if (_meta.frozen?.enabled) {
       draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
       const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE MIN AGE
+       */
+      if (updatedPolicy.phases.frozen?.min_age) {
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+      }
 
       /**
        * FROZEN PHASE SEARCHABLE SNAPSHOT

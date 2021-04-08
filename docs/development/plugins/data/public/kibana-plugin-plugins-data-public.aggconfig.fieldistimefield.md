@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-fieldIsTimeField(): boolean | "" | undefined;
+fieldIsTimeField(): boolean;
 ```
 <b>Returns:</b>
 
-`boolean | "" | undefined`
+`boolean`
 

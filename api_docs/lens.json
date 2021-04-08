@@ -82,7 +82,7 @@
               "lineNumber": 43
             },
             "signature": [
-              "\"cardinality\""
+              "\"unique_count\""
             ]
           }
         ],
@@ -238,7 +238,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "signature": [
               "\"filters\""
@@ -252,7 +252,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "signature": [
               "{ filters: ",
@@ -269,7 +269,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
-          "lineNumber": 72
+          "lineNumber": 73
         },
         "initialIsOpen": false
       },
@@ -288,10 +288,10 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             },
             "signature": [
-              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"counter_rate\" | \"cardinality\" | \"percentile\" | \"last_value\" | undefined"
+              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"percentile\" | \"last_value\" | undefined"
             ]
           },
           {
@@ -302,7 +302,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             },
             "signature": [
               "string | undefined"
@@ -311,7 +311,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-          "lineNumber": 43
+          "lineNumber": 45
         },
         "initialIsOpen": false
       },
@@ -537,6 +537,30 @@
             },
             "signature": [
               "() => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.LensPublicStart.getXyVisTypes",
+            "type": "Function",
+            "label": "getXyVisTypes",
+            "description": [
+              "\nMethod which returns xy VisualizationTypes array keeping this async as to not impact page load bundle"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/plugin.ts",
+              "lineNumber": 108
+            },
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.VisualizationType",
+                "text": "VisualizationType"
+              },
+              "[]>"
             ]
           }
         ],
@@ -929,7 +953,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 59
+              "lineNumber": 57
             },
             "signature": [
               "\"terms\""
@@ -943,7 +967,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 60
+              "lineNumber": 58
             },
             "signature": [
               "{ size: number; orderBy: { type: \"alphabetical\"; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
@@ -952,7 +976,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-          "lineNumber": 58
+          "lineNumber": 56
         },
         "initialIsOpen": false
       },
@@ -1114,7 +1138,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 420
+              "lineNumber": 423
             },
             "signature": [
               {
@@ -1134,7 +1158,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 421
+              "lineNumber": 424
             },
             "signature": [
               {
@@ -1154,7 +1178,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 422
+              "lineNumber": 425
             },
             "signature": [
               "\"hide\" | \"inside\" | \"outside\" | undefined"
@@ -1168,7 +1192,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 423
+              "lineNumber": 426
             },
             "signature": [
               "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
@@ -1182,7 +1206,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 424
+              "lineNumber": 427
             },
             "signature": [
               {
@@ -1203,7 +1227,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 425
+              "lineNumber": 428
             },
             "signature": [
               "string | undefined"
@@ -1217,7 +1241,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 426
+              "lineNumber": 429
             },
             "signature": [
               "string | undefined"
@@ -1231,7 +1255,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 427
+              "lineNumber": 430
             },
             "signature": [
               "string | undefined"
@@ -1245,7 +1269,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 428
+              "lineNumber": 431
             },
             "signature": [
               {
@@ -1266,7 +1290,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 429
+              "lineNumber": 432
             },
             "signature": [
               {
@@ -1287,7 +1311,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 430
+              "lineNumber": 433
             },
             "signature": [
               {
@@ -1299,11 +1323,25 @@
               },
               " | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.XYState.curveType",
+            "type": "CompoundType",
+            "label": "curveType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 434
+            },
+            "signature": [
+              "\"LINEAR\" | \"CURVE_MONOTONE_X\" | undefined"
+            ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 419
+          "lineNumber": 422
         },
         "initialIsOpen": false
       }
@@ -1318,10 +1356,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 125
+          "lineNumber": 126
         },
         "signature": [
-          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"avg\"; }"
+          "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"average\"; }"
         ],
         "initialIsOpen": false
       },
@@ -1380,12 +1418,12 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/derivative.tsx",
-          "lineNumber": 35
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/differences.tsx",
+          "lineNumber": 37
         },
         "signature": [
           "BaseIndexPatternColumn",
-          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'derivative'; }"
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: typeof OPERATION_NAME; }"
         ],
         "initialIsOpen": false
       },
@@ -1456,7 +1494,7 @@
             "section": "def-public.DateHistogramIndexPatternColumn",
             "text": "DateHistogramIndexPatternColumn"
           },
-          " | MetricColumn<\"min\"> | MetricColumn<\"max\"> | MetricColumn<\"avg\"> | ",
+          " | MetricColumn<\"min\"> | MetricColumn<\"max\"> | MetricColumn<\"average\"> | ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -1475,7 +1513,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 127
+          "lineNumber": 128
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"max\"; }"
@@ -1490,7 +1528,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 128
+          "lineNumber": 129
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"median\"; }"
@@ -1505,7 +1543,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 126
+          "lineNumber": 127
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"min\"; }"
@@ -1538,10 +1576,10 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 405
+          "lineNumber": 406
         },
         "signature": [
-          "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"counter_rate\" | \"cardinality\" | \"percentile\" | \"last_value\""
+          "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"percentile\" | \"last_value\""
         ],
         "initialIsOpen": false
       },
@@ -1598,7 +1636,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 124
+          "lineNumber": 125
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"sum\"; }"

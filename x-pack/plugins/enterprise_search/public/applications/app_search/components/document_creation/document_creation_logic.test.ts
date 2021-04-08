@@ -294,7 +294,9 @@ describe('DocumentCreationLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('onSubmitFile', () => {
       describe('with a valid file', () => {
         beforeAll(() => {

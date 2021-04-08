@@ -327,10 +327,9 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
 
-  const seriesIndexPattern =
-    props.model.override_index_pattern && props.model.series_index_pattern
-      ? props.model.series_index_pattern
-      : props.indexPatternForQuery;
+  const seriesIndexPattern = props.model.override_index_pattern
+    ? props.model.series_index_pattern
+    : props.indexPatternForQuery;
 
   const initialPalette = {
     ...model.palette,
@@ -542,7 +541,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             {...props}
             prefix="series_"
             disabled={!model.override_index_pattern}
-            allowLevelofDetail={true}
+            allowLevelOfDetail={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -555,6 +554,6 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   seriesQuantity: PropTypes.object,
 };

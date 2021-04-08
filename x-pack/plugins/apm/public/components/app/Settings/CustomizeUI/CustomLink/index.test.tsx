@@ -8,6 +8,7 @@
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { getCallApmApiSpy } from '../../../../../services/rest/callApmApiSpy';
 import { CustomLinkOverview } from '.';
 import { License } from '../../../../../../../licensing/common/license';
 import { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
@@ -17,27 +18,18 @@ import {
 } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../../context/license/license_context';
 import * as hooks from '../../../../../hooks/use_fetcher';
-import * as apmApi from '../../../../../services/rest/createCallApmApi';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
 
-const data = [
-  {
-    id: '1',
-    label: 'label 1',
-    url: 'url 1',
-    'service.name': 'opbeans-java',
-  },
-  {
-    id: '2',
-    label: 'label 2',
-    url: 'url 2',
-    'transaction.type': 'request',
-  },
-];
+const data = {
+  customLinks: [
+    { id: '1', label: 'label 1', url: 'url 1', 'service.name': 'opbeans-java' },
+    { id: '2', label: 'label 2', url: 'url 2', 'transaction.type': 'request' },
+  ],
+};
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
   return ({
@@ -51,7 +43,7 @@ function getMockAPMContext({ canSave }: { canSave: boolean }) {
 
 describe('CustomLink', () => {
   beforeAll(() => {
-    jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
+    getCallApmApiSpy().mockResolvedValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -69,7 +61,7 @@ describe('CustomLink', () => {
   describe('empty prompt', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });
@@ -290,7 +282,7 @@ describe('CustomLink', () => {
   describe('invalid license', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });

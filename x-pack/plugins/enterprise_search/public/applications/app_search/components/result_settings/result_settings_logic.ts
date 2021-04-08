@@ -27,11 +27,9 @@ import {
   areFieldsAtDefaultSettings,
   areFieldsEmpty,
   clearAllFields,
-  clearAllServerFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   resetAllFields,
-  resetAllServerFields,
   splitResultFields,
 } from './utils';
 
@@ -44,12 +42,9 @@ interface ResultSettingsActions {
     schema: Schema,
     schemaConflicts?: SchemaConflicts
   ): {
-    serverResultFields: ServerFieldResultSettingObject;
     resultFields: FieldResultSettingObject;
     schema: Schema;
     schemaConflicts: SchemaConflicts;
-    nonTextResultFields: FieldResultSettingObject;
-    textResultFields: FieldResultSettingObject;
   };
   clearAllFields(): void;
   resetAllFields(): void;
@@ -76,18 +71,19 @@ interface ResultSettingsValues {
   dataLoading: boolean;
   saving: boolean;
   openModal: OpenModal;
-  nonTextResultFields: FieldResultSettingObject;
-  textResultFields: FieldResultSettingObject;
   resultFields: FieldResultSettingObject;
-  serverResultFields: ServerFieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
   schema: Schema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  textResultFields: FieldResultSettingObject;
+  nonTextResultFields: FieldResultSettingObject;
+  serverResultFields: ServerFieldResultSettingObject;
   resultFieldsAtDefaultSettings: boolean;
   resultFieldsEmpty: boolean;
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
+  queryPerformanceScore: number;
 }
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
@@ -98,18 +94,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     closeModals: () => true,
     initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
       const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
-      Object.keys(schema).forEach((fieldName) => {
-        if (!serverResultFields.hasOwnProperty(fieldName)) {
-          serverResultFields[fieldName] = {};
-        }
-      });
 
       return {
-        serverResultFields,
         resultFields,
         schema,
         schemaConflicts,
-        ...splitResultFields(resultFields, schema),
       };
     },
     clearAllFields: () => true,
@@ -151,30 +140,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         saving: () => OpenModal.None,
       },
     ],
-    nonTextResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { nonTextResultFields }) => nonTextResultFields,
-        clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
-        resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
-        updateField: (nonTextResultFields, { fieldName, settings }) =>
-          nonTextResultFields.hasOwnProperty(fieldName)
-            ? { ...nonTextResultFields, [fieldName]: settings }
-            : nonTextResultFields,
-      },
-    ],
-    textResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { textResultFields }) => textResultFields,
-        clearAllFields: (textResultFields) => clearAllFields(textResultFields),
-        resetAllFields: (textResultFields) => resetAllFields(textResultFields),
-        updateField: (textResultFields, { fieldName, settings }) =>
-          textResultFields.hasOwnProperty(fieldName)
-            ? { ...textResultFields, [fieldName]: settings }
-            : textResultFields,
-      },
-    ],
     resultFields: [
       {},
       {
@@ -185,22 +150,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           resultFields.hasOwnProperty(fieldName)
             ? { ...resultFields, [fieldName]: settings }
             : resultFields,
-      },
-    ],
-    serverResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { serverResultFields }) => serverResultFields,
-        clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
-        resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
-        updateField: (serverResultFields, { fieldName, settings }) => {
-          return serverResultFields.hasOwnProperty(fieldName)
-            ? {
-                ...serverResultFields,
-                [fieldName]: convertToServerFieldResultSetting(settings),
-              }
-            : serverResultFields;
-        },
       },
     ],
     lastSavedResultFields: [
@@ -223,6 +172,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
+    textResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { textResultFields } = splitResultFields(resultFields, schema);
+        return textResultFields;
+      },
+    ],
+    nonTextResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { nonTextResultFields } = splitResultFields(resultFields, schema);
+        return nonTextResultFields;
+      },
+    ],
+    serverResultFields: [
+      () => [selectors.resultFields],
+      (resultFields: FieldResultSettingObject) => {
+        return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
+          return {
+            ...serverResultFields,
+            [fieldName]: convertToServerFieldResultSetting(settings as FieldResultSetting),
+          };
+        }, {});
+      },
+    ],
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
@@ -247,6 +221,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           },
           {}
         ),
+    ],
+    queryPerformanceScore: [
+      () => [selectors.serverResultFields, selectors.schema],
+      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+        return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
+          let newAcc = acc;
+          if (resultField.raw) {
+            if (schema[fieldName] !== 'text') {
+              newAcc += 0.2;
+            } else if (
+              typeof resultField.raw === 'object' &&
+              resultField.raw.size &&
+              resultField.raw.size <= 250
+            ) {
+              newAcc += 1.0;
+            } else {
+              newAcc += 1.5;
+            }
+          }
+          if (resultField.snippet) {
+            newAcc += 2.0;
+          }
+          return newAcc;
+        }, 0);
+      },
     ],
   }),
   listeners: ({ actions, values }) => ({

@@ -474,7 +474,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 30
+              "lineNumber": 31
             }
           },
           {
@@ -487,7 +487,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 31
+              "lineNumber": 32
             }
           },
           {
@@ -505,7 +505,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-                  "lineNumber": 33
+                  "lineNumber": 34
                 },
                 "signature": [
                   "boolean | undefined"
@@ -514,7 +514,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 32
+              "lineNumber": 33
             }
           }
         ],
@@ -522,7 +522,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -1360,6 +1360,136 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.ObservabilityPublicPluginsSetup",
+        "type": "Interface",
+        "label": "ObservabilityPublicPluginsSetup",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsSetup.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginSetup",
+                "text": "DataPublicPluginSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsSetup.home",
+            "type": "Object",
+            "label": "home",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginSetup",
+                "text": "HomePublicPluginSetup"
+              },
+              " | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 29
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ObservabilityPublicPluginsStart",
+        "type": "Interface",
+        "label": "ObservabilityPublicPluginsStart",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.home",
+            "type": "Object",
+            "label": "home",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 35
+            },
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginStart",
+                "text": "HomePublicPluginStart"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.lens",
+            "type": "Object",
+            "label": "lens",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 37
+            },
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 34
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.Series",
         "type": "Interface",
         "label": "Series",
@@ -1951,21 +2081,21 @@
     ],
     "objects": [],
     "setup": {
-      "id": "def-public.ObservabilityPluginSetup",
+      "id": "def-public.ObservabilityPublicSetup",
       "type": "Interface",
-      "label": "ObservabilityPluginSetup",
+      "label": "ObservabilityPublicSetup",
       "description": [],
       "tags": [],
       "children": [
         {
           "tags": [],
-          "id": "def-public.ObservabilityPluginSetup.dashboard",
+          "id": "def-public.ObservabilityPublicSetup.dashboard",
           "type": "Object",
           "label": "dashboard",
           "description": [],
           "source": {
             "path": "x-pack/plugins/observability/public/plugin.ts",
-            "lineNumber": 25
+            "lineNumber": 26
           },
           "signature": [
             "{ register: typeof ",
@@ -1982,20 +2112,20 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 24
+        "lineNumber": 25
       },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
-      "id": "def-public.ObservabilityPluginStart",
+      "id": "def-public.ObservabilityPublicStart",
       "type": "Type",
-      "label": "ObservabilityPluginStart",
+      "label": "ObservabilityPublicStart",
       "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 33
+        "lineNumber": 40
       },
       "signature": [
         "void"
@@ -2086,8 +2216,8 @@
             "pluginId": "observability",
             "scope": "server",
             "docId": "kibObservabilityPluginApi",
-            "section": "def-server.MappingsDefinition",
-            "text": "MappingsDefinition"
+            "section": "def-server.Mappings",
+            "text": "Mappings"
           },
           "; client: ",
           {
@@ -2118,26 +2248,26 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 32
+                  "lineNumber": 20
                 }
               },
               {
                 "tags": [],
                 "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.mappings",
-                "type": "Object",
+                "type": "CompoundType",
                 "label": "mappings",
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 33
+                  "lineNumber": 21
                 },
                 "signature": [
                   {
                     "pluginId": "observability",
                     "scope": "server",
                     "docId": "kibObservabilityPluginApi",
-                    "section": "def-server.MappingsDefinition",
-                    "text": "MappingsDefinition"
+                    "section": "def-server.Mappings",
+                    "text": "Mappings"
                   }
                 ]
               },
@@ -2149,7 +2279,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 34
+                  "lineNumber": 22
                 },
                 "signature": [
                   {
@@ -2169,7 +2299,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 35
+                  "lineNumber": 23
                 },
                 "signature": [
                   "Logger"
@@ -2178,7 +2308,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 31
+              "lineNumber": 19
             }
           }
         ],
@@ -2186,7 +2316,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-          "lineNumber": 26
+          "lineNumber": 14
         },
         "initialIsOpen": false
       },
@@ -2224,82 +2354,32 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "id": "def-server.MappingsDefinition",
-        "type": "Interface",
-        "label": "MappingsDefinition",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.MappingsDefinition.dynamic",
-            "type": "CompoundType",
-            "label": "dynamic",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 21
-            },
-            "signature": [
-              "boolean | \"strict\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.MappingsDefinition.properties",
-            "type": "Object",
-            "label": "properties",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 22
-            },
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "observability",
-                "scope": "server",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-server.MappingsDefinition",
-                "text": "MappingsDefinition"
-              },
-              " | ",
-              {
-                "pluginId": "observability",
-                "scope": "server",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-server.MappingsObject",
-                "text": "MappingsObject"
-              },
-              ">"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.MappingsDefinition.dynamic_templates",
-            "type": "Array",
-            "label": "dynamic_templates",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 23
-            },
-            "signature": [
-              "any[] | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-          "lineNumber": 20
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "id": "def-server.Mappings",
+        "type": "Type",
+        "label": "Mappings",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "TypeMapping",
+          " & { all_field?: ",
+          "AllField",
+          " | undefined; date_detection?: boolean | undefined; dynamic?: boolean | \"strict\" | undefined; dynamic_date_formats?: string[] | undefined; dynamic_templates?: Record<string, ",
+          "DynamicTemplate",
+          "> | Record<string, ",
+          "DynamicTemplate",
+          ">[] | undefined; field_names_field?: ",
+          "FieldNamesField"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.ObservabilityConfig",
         "type": "Type",
@@ -2330,7 +2410,9 @@
           "Annotation",
           "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
           "GetResponse",
-          ">; delete: (deleteParams: { id: string; }) => Promise<Record<string, any>>; }"
+          "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
+          "DeleteResponse",
+          ">; }"
         ],
         "initialIsOpen": false
       }
@@ -2351,7 +2433,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/observability/server/plugin.ts",
-            "lineNumber": 22
+            "lineNumber": 23
           },
           "signature": [
             "LazyScopedAnnotationsClientFactory"
@@ -2360,7 +2442,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 21
+        "lineNumber": 22
       },
       "lifecycle": "setup",
       "initialIsOpen": true

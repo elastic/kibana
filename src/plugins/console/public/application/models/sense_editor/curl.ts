@@ -25,7 +25,7 @@ export function detectCURL(text: string) {
 export function parseCURL(text: string) {
   let state = 'NONE';
   const out = [];
-  let body: any[] = [];
+  let body: string[] = [];
   let line = '';
   const lines = text.trim().split('\n');
   let matches;
@@ -62,7 +62,7 @@ export function parseCURL(text: string) {
   }
 
   function unescapeLastBodyEl() {
-    const str = body.pop().replace(/\\([\\"'])/g, '$1');
+    const str = body.pop()!.replace(/\\([\\"'])/g, '$1');
     body.push(str);
   }
 
