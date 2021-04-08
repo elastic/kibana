@@ -346,38 +346,30 @@ interface CommonSavedObjectAttributes {
   [key: string]: unknown;
 }
 
-const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'] as const;
+const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'];
 
-export const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
+const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
   object: T,
-  keys: readonly string[]
+  keys: K[]
 ): Omit<T, K> => {
-  // @ts-ignore
   return omit<T, K>(object, keys);
 };
-
 export const removeServerGeneratedPropertiesFromSavedObject = <
   T extends CommonSavedObjectAttributes
 >(
   attributes: T,
-  keys?: readonly string[]
-): Omit<
-  T,
-  typeof keys extends string[]
-    ? typeof savedObjectCommonAttributes[number] & typeof keys[number]
-    : typeof savedObjectCommonAttributes[number]
-> => {
-  const typedKeys = keys != null ? keys : [];
-  return removeServerGeneratedPropertiesFromObject<
-    T,
-    typeof savedObjectCommonAttributes[number] & typeof typedKeys[number]
-  >(attributes, [...savedObjectCommonAttributes, ...typedKeys]);
+  keys: Array<keyof T> = []
+): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> => {
+  return removeServerGeneratedPropertiesFromObject(attributes, [
+    ...savedObjectCommonAttributes,
+    ...keys,
+  ]);
 };
 
 export const removeServerGeneratedPropertiesFromUserAction = (
   attributes: CaseUserActionResponse
-): Omit<CaseUserActionResponse, 'action_id' | 'action_at'> => {
-  const keysToRemove = ['action_id', 'action_at'] as const;
+) => {
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'action_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionResponse,
     typeof keysToRemove[number]
@@ -391,15 +383,16 @@ export const removeServerGeneratedPropertiesFromSubCase = (
     return;
   }
 
-  const keysToRemove = ['closed_at', 'comments'] as const;
-  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, keysToRemove);
+  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, [
+    'closed_at',
+    'comments',
+  ]);
 };
 
 export const removeServerGeneratedPropertiesFromCase = (
   theCase: CaseResponse
 ): Partial<CaseResponse> => {
-  const keysToRemove = ['closed_at'] as const;
-  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, keysToRemove);
+  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, ['closed_at']);
 };
 
 export const removeServerGeneratedPropertiesFromComments = (
