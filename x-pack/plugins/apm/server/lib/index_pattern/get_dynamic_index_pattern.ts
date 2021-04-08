@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import LRU from 'lru-cache';
 import {
   IndexPatternsFetcher,
   FieldDescriptor,
@@ -19,11 +18,6 @@ export interface IndexPatternTitleAndFields {
   fields: FieldDescriptor[];
 }
 
-const cache = new LRU<string, IndexPatternTitleAndFields | undefined>({
-  max: 100,
-  maxAge: 1000 * 60,
-});
-
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = ({
   context,
@@ -32,11 +26,6 @@ export const getDynamicIndexPattern = ({
 }) => {
   return withApmSpan('get_dynamic_index_pattern', async () => {
     const indexPatternTitle = context.config['apm_oss.indexPattern'];
-
-    const CACHE_KEY = `apm_dynamic_index_pattern_${indexPatternTitle}`;
-    if (cache.has(CACHE_KEY)) {
-      return cache.get(CACHE_KEY);
-    }
 
     const indexPatternsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser
@@ -57,11 +46,8 @@ export const getDynamicIndexPattern = ({
         title: indexPatternTitle,
       };
 
-      cache.set(CACHE_KEY, indexPattern);
       return indexPattern;
     } catch (e) {
-      // since `getDynamicIndexPattern` can be called multiple times per request it can be expensive not to cache failed lookups
-      cache.set(CACHE_KEY, undefined);
       const notExists = e.output?.statusCode === 404;
       if (notExists) {
         context.logger.error(

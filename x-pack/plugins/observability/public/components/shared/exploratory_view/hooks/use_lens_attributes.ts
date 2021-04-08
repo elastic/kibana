@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
-import { useUrlStorage } from './use_url_strorage';
+import { useUrlStorage } from './use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';

@@ -29,6 +29,7 @@ import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -76,6 +77,7 @@ export const IndexPattern = ({
   const intervalName = `${prefix}interval`;
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+  const defaultIndex = useContext(DefaultIndexPatternContext);
   const updateControlValidity = useContext(FormValidationContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
@@ -110,7 +112,6 @@ export const IndexPattern = ({
   ];
 
   const defaults = {
-    default_index_pattern: '',
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
@@ -120,7 +121,6 @@ export const IndexPattern = ({
 
   const model = { ...defaults, ..._model };
 
-  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
@@ -205,7 +205,7 @@ export const IndexPattern = ({
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
-              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
+              placeholder={defaultIndex?.timeFieldName}
             />
           </EuiFormRow>
         </EuiFlexItem>
