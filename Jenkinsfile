@@ -7,7 +7,7 @@ kibanaPipeline(timeoutMinutes: 300) {
       ciStats.trackBuild {
         workers.ci(ramDisk: false, name: "package-build", size: 'l') {
           withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-            kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Build it")
+            kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Package builds")
           }
         }
         def packageTypes = ['deb', 'docker', 'rpm']
@@ -24,6 +24,8 @@ kibanaPipeline(timeoutMinutes: 300) {
 }
 def testPackage(packageType) {
   workers.ci(ramDisk: false, name: "package-${packageType}", size: 's') {
-    kibanaPipeline.bash("test/scripts/jenkins_xpack_package_${packageType}.sh", "Execute package testing for ${packageType}")
+    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+      kibanaPipeline.bash("test/scripts/jenkins_xpack_package_${packageType}.sh", "Execute package testing for ${packageType}")
+    }
   }
 }
