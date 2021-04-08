@@ -12,17 +12,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  caseStatuses,
-  SubCasesFindRequestRt,
-  SubCasesFindResponseRt,
-  throwErrors,
-} from '../../../../../common/api';
+import { SubCasesFindRequestRt, throwErrors } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
-import { escapeHatch, transformSubCases, wrapError } from '../../utils';
-import { SUB_CASES_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
-import { constructQueryOptions } from '../helpers';
-import { defaultPage, defaultPerPage } from '../..';
+import { escapeHatch, wrapError } from '../../utils';
+import { SUB_CASES_URL } from '../../../../../common/constants';
 
 export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
@@ -37,58 +30,17 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
         const queryParams = pipe(
           SubCasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const ids = [request.params.case_id];
-        const { subCase: subCaseQueryOptions } = constructQueryOptions({
-          status: queryParams.status,
-          sortByField: queryParams.sortField,
-        });
-
-        const subCases = await caseService.findSubCasesGroupByCase({
-          soClient,
-          ids,
-          options: {
-            sortField: 'created_at',
-            page: defaultPage,
-            perPage: defaultPerPage,
-            ...queryParams,
-            ...subCaseQueryOptions,
-          },
-        });
-
-        const [open, inProgress, closed] = await Promise.all([
-          ...caseStatuses.map((status) => {
-            const { subCase: statusQueryOptions } = constructQueryOptions({
-              status,
-              sortByField: queryParams.sortField,
-            });
-            return caseService.findSubCaseStatusStats({
-              soClient,
-              options: statusQueryOptions ?? {},
-              ids,
-            });
-          }),
-        ]);
-
+        const client = await context.cases.getCasesClient();
         return response.ok({
-          body: SubCasesFindResponseRt.encode(
-            transformSubCases({
-              page: subCases.page,
-              perPage: subCases.perPage,
-              total: subCases.total,
-              subCasesMap: subCases.subCasesMap,
-              open,
-              inProgress,
-              closed,
-            })
-          ),
+          body: await client.subCases.find({
+            caseID: request.params.case_id,
+            queryParams,
+          }),
         });
       } catch (error) {
         logger.error(
