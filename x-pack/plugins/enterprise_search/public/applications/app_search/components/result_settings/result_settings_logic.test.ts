@@ -15,7 +15,7 @@ import { nextTick } from '@kbn/test/jest';
 
 import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
 
-import { OpenModal, ServerFieldResultSettingObject } from './types';
+import { ServerFieldResultSettingObject } from './types';
 
 import { ResultSettingsLogic } from '.';
 
@@ -25,7 +25,6 @@ describe('ResultSettingsLogic', () => {
   const DEFAULT_VALUES = {
     dataLoading: true,
     saving: false,
-    openModal: OpenModal.None,
     resultFields: {},
     lastSavedResultFields: {},
     schema: {},
@@ -83,7 +82,6 @@ describe('ResultSettingsLogic', () => {
         mount({
           dataLoading: true,
           saving: true,
-          openModal: OpenModal.ConfirmSaveModal,
         });
 
         ResultSettingsLogic.actions.initializeResultFields(
@@ -139,8 +137,6 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
-          // The modal should be reset back to closed if it had been opened previously
-          openModal: OpenModal.None,
           // Stores the provided schema details
           schema,
           schemaConflicts,
@@ -153,47 +149,6 @@ describe('ResultSettingsLogic', () => {
         ResultSettingsLogic.actions.initializeResultFields(serverResultFields, schema);
 
         expect(ResultSettingsLogic.values.schemaConflicts).toEqual({});
-      });
-    });
-
-    describe('openConfirmSaveModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmSaveModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmSaveModal,
-      });
-    });
-
-    describe('openConfirmResetModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmResetModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmResetModal,
-      });
-    });
-
-    describe('closeModals', () => {
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.closeModals();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
-        });
       });
     });
 
@@ -235,19 +190,6 @@ describe('ResultSettingsLogic', () => {
             quuz: { raw: true, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: false },
           },
-        });
-      });
-
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.resetAllFields();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
         });
       });
     });
@@ -297,7 +239,7 @@ describe('ResultSettingsLogic', () => {
     });
 
     describe('saving', () => {
-      it('sets saving to true and close any open modals', () => {
+      it('sets saving to true', () => {
         mount({
           saving: false,
         });
@@ -307,7 +249,6 @@ describe('ResultSettingsLogic', () => {
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           saving: true,
-          openModal: OpenModal.None,
         });
       });
     });

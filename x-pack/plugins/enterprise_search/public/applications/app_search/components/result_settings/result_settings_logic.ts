@@ -19,7 +19,6 @@ import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
-  OpenModal,
   ServerFieldResultSettingObject,
 } from './types';
 
@@ -34,9 +33,6 @@ import {
 } from './utils';
 
 interface ResultSettingsActions {
-  openConfirmResetModal(): void;
-  openConfirmSaveModal(): void;
-  closeModals(): void;
   initializeResultFields(
     serverResultFields: ServerFieldResultSettingObject,
     schema: Schema,
@@ -70,7 +66,6 @@ interface ResultSettingsActions {
 interface ResultSettingsValues {
   dataLoading: boolean;
   saving: boolean;
-  openModal: OpenModal;
   resultFields: FieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
   schema: Schema;
@@ -89,9 +84,6 @@ interface ResultSettingsValues {
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
-    openConfirmResetModal: () => true,
-    openConfirmSaveModal: () => true,
-    closeModals: () => true,
     initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
       const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
 
@@ -127,17 +119,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       {
         initializeResultFields: () => false,
         saving: () => true,
-      },
-    ],
-    openModal: [
-      OpenModal.None,
-      {
-        initializeResultFields: () => OpenModal.None,
-        closeModals: () => OpenModal.None,
-        resetAllFields: () => OpenModal.None,
-        openConfirmResetModal: () => OpenModal.ConfirmResetModal,
-        openConfirmSaveModal: () => OpenModal.ConfirmSaveModal,
-        saving: () => OpenModal.None,
       },
     ],
     resultFields: [
