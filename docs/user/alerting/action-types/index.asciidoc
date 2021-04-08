@@ -85,7 +85,7 @@ PUT test
 
 [float]
 [[preconfigured-connector-alert-history]]
-=== Alert history preconfigured {es} index connector
+=== Alert history {es} index connector
 
 experimental[] {kib} offers a preconfigured index connector to facilitate indexing active alert data into {es}.
 
