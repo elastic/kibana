@@ -5,41 +5,42 @@
  * 2.0.
  */
 
-import { getEsCause } from './es_error_parser';
+import { getEsErrorMessage } from './es_error_parser';
 
 describe('ES error parser', () => {
   test('should return all the cause of the error', () => {
     expect(
-      getEsCause({
-        caused_by: {
-          reason: 'reason1',
-        },
-      })
-    ).toStrictEqual(['reason1']);
-
-    expect(
-      getEsCause({
-        caused_by: {
-          reason: 'reason1',
-          caused_by: {
-            reason: 'reason2',
-          },
-        },
-      })
-    ).toStrictEqual(['reason1', 'reason2']);
-
-    expect(
-      getEsCause({
-        failed_shards: [
-          {
-            reason: {
-              caused_by: {
-                reason: 'reason3',
+      getEsErrorMessage({
+        name: '',
+        message: '',
+        error: {
+          meta: {
+            body: {
+              error: {
+                caused_by: {
+                  reason: 'reason1',
+                },
               },
             },
           },
-        ],
+        },
       })
-    ).toStrictEqual(['reason3']);
+    ).toStrictEqual(', caused by: "reason1"');
+
+    expect(
+      getEsErrorMessage({
+        name: '',
+        message: '',
+        meta: {
+          body: {
+            error: {
+              caused_by: {
+                reason: 'reason2',
+              },
+            },
+          },
+        },
+      })
+    ).toStrictEqual(', caused by: "reason2"');
   });
 });

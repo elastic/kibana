@@ -45,11 +45,9 @@ const getEsCause = (obj: ErrorObject = {}, causes: string[] = []): string[] => {
   return updated.filter(Boolean);
 };
 
-export const getEsErrorMessage = (error: Error) => {
-  let message = error.message;
-  const apiError =
-    (error as ElasticsearchError)?.error?.meta?.body?.error ??
-    (error as ElasticsearchError)?.meta?.body?.error;
+export const getEsErrorMessage = (error: ElasticsearchError) => {
+  let message = error?.message;
+  const apiError = error?.error?.meta?.body?.error ?? error?.meta?.body?.error;
   if (apiError) {
     message += `, caused by: "${getEsCause(apiError as ErrorObject)}"`;
   }
