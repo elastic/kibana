@@ -15,6 +15,7 @@ import { TransformConfigSchema } from '../../../common/transforms/types';
 import { DEFAULT_TRANSFORMS } from '../../../common/constants';
 import { useUiSetting$ } from '../../common/lib/kibana';
 import { getTransformChangesIfTheyExist } from '../utils';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export type TransformChangesIfTheyExist = ({
   factoryQueryType,
@@ -41,6 +42,8 @@ export interface ReturnTransform {
 
 export const useTransforms = (): ReturnTransform => {
   const [transformSettings] = useUiSetting$<TransformConfigSchema>(DEFAULT_TRANSFORMS);
+  // TODO: Once we are past experimental phase this code should be removed
+  const metricsEntitiesEnabled = useIsExperimentalFeatureEnabled('metricsEntitiesEnabled');
   const [transforms, setTransforms] = useState<ReturnTransform>({
     getTransformChangesIfTheyExist: ({
       factoryQueryType,
@@ -48,15 +51,26 @@ export const useTransforms = (): ReturnTransform => {
       filterQuery,
       histogramType,
       timerange,
-    }) =>
-      getTransformChangesIfTheyExist({
-        factoryQueryType,
-        indices,
-        filterQuery,
-        transformSettings,
-        histogramType,
-        timerange,
-      }),
+    }) => {
+      if (metricsEntitiesEnabled) {
+        return getTransformChangesIfTheyExist({
+          factoryQueryType,
+          indices,
+          filterQuery,
+          transformSettings,
+          histogramType,
+          timerange,
+        });
+      } else {
+        // TODO: Once the experimental flag is removed, then remove this return statement
+        return {
+          indices,
+          filterQuery,
+          timerange,
+          factoryQueryType,
+        };
+      }
+    },
   });
 
   useMemo(() => {
@@ -67,17 +81,28 @@ export const useTransforms = (): ReturnTransform => {
         filterQuery,
         histogramType,
         timerange,
-      }) =>
-        getTransformChangesIfTheyExist({
-          factoryQueryType,
-          indices,
-          transformSettings,
-          filterQuery,
-          histogramType,
-          timerange,
-        }),
+      }) => {
+        if (metricsEntitiesEnabled) {
+          return getTransformChangesIfTheyExist({
+            factoryQueryType,
+            indices,
+            transformSettings,
+            filterQuery,
+            histogramType,
+            timerange,
+          });
+        } else {
+          // TODO: Once the experimental flag is removed, then remove this return statement
+          return {
+            indices,
+            filterQuery,
+            timerange,
+            factoryQueryType,
+          };
+        }
+      },
     });
-  }, [transformSettings]);
+  }, [transformSettings, metricsEntitiesEnabled]);
 
   return { ...transforms };
 };

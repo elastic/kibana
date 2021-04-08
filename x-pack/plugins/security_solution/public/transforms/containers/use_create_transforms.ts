@@ -8,10 +8,10 @@ import { useEffect, useState } from 'react';
 import { DEFAULT_TRANSFORMS } from '../../../common/constants';
 import { TransformConfigSchema } from '../../../common/transforms/types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { isSecurityAppError } from '../../common/utils/api';
 import * as i18n from './translations';
 import { createTransforms } from './api';
 import { useUiSetting$ } from '../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type Func = () => Promise<void>;
 
@@ -29,14 +29,20 @@ export const useCreateTransforms = (): ReturnTransform => {
   const [transforms, setTransforms] = useState<Omit<ReturnTransform, 'loading'>>({
     createTransforms: noop,
   });
+  // TODO: Once we are past experimental phase this code should be removed
+  const metricsEntitiesEnabled = useIsExperimentalFeatureEnabled('metricsEntitiesEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const createTheTransforms = async () => {
-      // double check one more time and
-      // not create the transform if the settings are not enabled.
+      // TODO: Once we are past experimental phase this code should be removed
+      if (!metricsEntitiesEnabled) {
+        return;
+      }
+
+      // double check one more time and not create the transform if the settings are not enabled.
       if (!transformSettings.enabled || !transformSettings.auto_create) {
         return;
       }
@@ -50,8 +56,11 @@ export const useCreateTransforms = (): ReturnTransform => {
         }
       } catch (error) {
         if (isSubscribed) {
-          if (isSecurityAppError(error)) {
+          if (error.body.statusCode !== 404 && error.body.status_code !== 404) {
             errorToToaster({ title: i18n.TRANSFORM_CREATE_FAILURE, error, dispatchToaster });
+          } else {
+            // This means that the plugin is disabled and/or the user does not have permissions
+            // so we do not show an error toaster for this condition since this is a 404 error message
           }
         }
       }
@@ -69,7 +78,7 @@ export const useCreateTransforms = (): ReturnTransform => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [dispatchToaster, transformSettings]);
+  }, [dispatchToaster, transformSettings, metricsEntitiesEnabled]);
 
   return { loading, ...transforms };
 };
