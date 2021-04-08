@@ -78,7 +78,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
   private getEsNames() {
     const base = [this.options.kibanaIndex, this.options.name];
-    const indexAliasName = [...base, this.options.kibanaVersion].join('-');
+    const indexAliasName = [...base, this.options.kibanaVersion.toLowerCase()].join('-');
     const policyName = [...base, 'policy'].join('-');
 
     return {
@@ -131,9 +131,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
   createScopedRuleRegistryClient({
     context,
-    request,
   }: {
-    request: KibanaRequest;
     context: RequestHandlerContext;
   }): ScopedRuleRegistryClient<TFieldMap> | undefined {
     if (!this.options.writeEnabled) {
