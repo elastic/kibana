@@ -8,12 +8,12 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonGroup, EuiPopover } from '@elastic/eui';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { useUrlStorage } from '../../hooks/use_url_storage';
 import { OperationType } from '../../../../../../../lens/public';
 
 const toggleButtons = [
   {
-    id: `avg`,
+    id: `average`,
     label: i18n.translate('xpack.observability.expView.metricsSelect.average', {
       defaultMessage: 'Average',
     }),
@@ -49,7 +49,7 @@ export function MetricSelection({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const [toggleIdSelected, setToggleIdSelected] = useState(series?.metric ?? 'avg');
+  const [toggleIdSelected, setToggleIdSelected] = useState(series?.metric ?? 'average');
 
   const onChange = (optionId: OperationType) => {
     setToggleIdSelected(optionId);
