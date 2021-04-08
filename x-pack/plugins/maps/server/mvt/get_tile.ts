@@ -13,6 +13,7 @@ import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
+  COUNT_PROP_NAME,
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   GEOTILE_GRID_AGG_NAME,
@@ -99,20 +100,41 @@ export async function getGridTile({
         minLon: tileBounds.top_left.lon,
       });
 
-      const rangeMeta = {
-        doc_count: {
-          min: Infinity,
-          max: -Infinity,
-        },
-      };
+      const rangeMeta: { [key: string]: { min: number; max: number } } = {};
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
-        const newValue = parseFloat(feature.properties ? feature.properties.doc_count : null);
-        if (!isNaN(newValue)) {
-          rangeMeta.doc_count.min = Math.min(rangeMeta.doc_count.min, newValue);
-          rangeMeta.doc_count.max = Math.max(rangeMeta.doc_count.max, newValue);
+
+        if (feature.properties) {
+          for (const key in feature.properties) {
+            if (feature.properties.hasOwnProperty(key)) {
+              if (key !== 'key' && key !== 'gridCentroid') {
+                const rawValue = feature.properties[key];
+                logger.warn(`${key}  : ${JSON.stringify(rawValue)}`);
+                let numberValue: number;
+                if (key === COUNT_PROP_NAME) {
+                  numberValue = parseFloat(rawValue);
+                } else {
+                  numberValue =
+                    typeof rawValue === 'number' ? rawValue : parseFloat(rawValue.value);
+                }
+                if (!isNaN(numberValue)) {
+                  if (!rangeMeta[key]) {
+                    rangeMeta[key] = {
+                      min: Infinity,
+                      max: -Infinity,
+                    };
+                  }
+
+                  rangeMeta[key].min = Math.min(rangeMeta[key].min, numberValue);
+                  rangeMeta[key].max = Math.max(rangeMeta[key].max, numberValue);
+                }
+              }
+            }
+          }
         }
       }
+
+      logger.warn(`tile ${z}/${x}/${y} ${JSON.stringify(rangeMeta)}`);
 
       const metaDataFeature = {
         type: 'Feature',
@@ -134,6 +156,8 @@ export async function getGridTile({
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
     if (!isAbortError(e)) {
+      // These are often circuit breaking exceptions
+      // Should return a tile with some error message
       logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
     }
     return null;

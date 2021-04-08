@@ -12,6 +12,7 @@ import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
+  COUNT_PROP_NAME,
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
@@ -512,27 +513,31 @@ export class VectorStyle implements IVectorStyle {
       }
 
       // todo - should support ALL countable metrics
-      if (name === 'doc_count') {
-        styleMeta.fieldMeta[name] = {};
+      console.log('pluck tile meta!', name, foobar);
+      // if (name === COUNT_PROP_NAME) {
+      styleMeta.fieldMeta[name] = {};
 
-        let min = Infinity;
-        let max = -Infinity;
-        for (let i = 0; i < foobar.length; i++) {
-          const metaFromTiles = JSON.parse(foobar[i].properties.doc_count);
+      let min = Infinity;
+      let max = -Infinity;
+      for (let i = 0; i < foobar.length; i++) {
+        if (foobar[i].properties && foobar[i].properties[name]) {
+          const metaFromTiles = JSON.parse(foobar[i].properties[name]);
           min = Math.min(metaFromTiles.min, min);
           max = Math.max(metaFromTiles.max, max);
         }
-
-        styleMeta.fieldMeta.doc_count = {
-          range: {
-            min,
-            max,
-            delta: max - min,
-          },
-        };
       }
+
+      styleMeta.fieldMeta[name] = {
+        range: {
+          min,
+          max,
+          delta: max - min,
+        },
+      };
+      // }
     });
 
+    console.log('sm', styleMeta);
     return styleMeta;
   }
 
