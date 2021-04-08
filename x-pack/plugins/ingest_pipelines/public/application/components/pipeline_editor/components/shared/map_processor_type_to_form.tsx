@@ -117,7 +117,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.circle', {
-        defaultMessage: 'Converts a circle definition of "{field}" to into an approximate polygon',
+        defaultMessage: 'Converts a circle definition of "{field}" into an approximate polygon',
         values: {
           field,
         },
@@ -255,15 +255,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.drop', {
       defaultMessage: 'Drops documents without returning an error.',
     }),
-    getDefaultDescription: ({ if: value }) =>
-      value
-        ? i18n.translate('xpack.ingestPipelines.processors.defaultDescription.drop', {
-            defaultMessage: 'Drops document if the current conditions are met "{if}"',
-            values: {
-              if: value,
-            },
-          })
-        : undefined,
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.drop', {
+        defaultMessage: 'Drops documents without returning an error',
+      }),
   },
   enrich: {
     FieldsComponent: Enrich,
@@ -307,15 +302,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Returns a custom error message on failure. Often used to notify requesters of required conditions.',
     }),
-    getDefaultDescription: ({ if: value }) =>
-      value
-        ? i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fail', {
-            defaultMessage: 'Raises an exception if the current conditions are met "{if}"',
-            values: {
-              if: value,
-            },
-          })
-        : undefined,
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fail', {
+        defaultMessage: 'Raises an exception that halts execution',
+      }),
   },
   foreach: {
     FieldsComponent: Foreach,
@@ -416,7 +406,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.html_strip', {
-        defaultMessage: 'Removes HTML tags from "{field}',
+        defaultMessage: 'Removes HTML tags from "{field}"',
         values: {
           field,
         },
@@ -612,7 +602,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     ),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.setSecurityUser', {
-        defaultMessage: 'Adds details about the current user to "{field}".',
+        defaultMessage: 'Adds details about the current user to "{field}"',
         values: { field },
       }),
   },
