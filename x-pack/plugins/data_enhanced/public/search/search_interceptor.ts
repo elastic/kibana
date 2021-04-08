@@ -16,7 +16,7 @@ import {
   IKibanaSearchRequest,
   SearchSessionState,
 } from '../../../../../src/plugins/data/public';
-import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
+import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../../../../src/plugins/data/common';
 import { SearchAbortController } from './search_abort_controller';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {

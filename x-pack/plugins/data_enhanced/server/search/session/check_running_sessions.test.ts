@@ -6,12 +6,7 @@
  */
 
 import { checkRunningSessions } from './check_running_sessions';
-import {
-  SearchSessionStatus,
-  SearchSessionSavedObjectAttributes,
-  ENHANCED_ES_SEARCH_STRATEGY,
-  EQL_SEARCH_STRATEGY,
-} from '../../../common';
+import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import moment from 'moment';
@@ -20,6 +15,10 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../../../../../src/plugins/data/common';
 
 describe('getSearchStatus', () => {
   let mockClient: any;

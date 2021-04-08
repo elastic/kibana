@@ -11,7 +11,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { SearchSessionStatus, SEARCH_SESSION_TYPE } from '../../../common';
+import { SearchSessionStatus } from '../../../common';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
@@ -19,7 +19,7 @@ import { coreMock } from '../../../../../../src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { AuthenticatedUser } from '../../../../security/common/model';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder, SEARCH_SESSION_TYPE } from '../../../../../../src/plugins/data/common';
 import { TaskManagerStartContract } from '../../../../task_manager/server';
 
 const MAX_UPDATE_RETRIES = 3;

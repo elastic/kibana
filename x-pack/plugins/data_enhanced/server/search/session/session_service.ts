@@ -21,6 +21,8 @@ import {
   IKibanaSearchRequest,
   ISearchOptions,
   nodeBuilder,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
 import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
@@ -29,11 +31,9 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import {
-  ENHANCED_ES_SEARCH_STRATEGY,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-  SEARCH_SESSION_TYPE,
 } from '../../../common';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';

@@ -55,7 +55,6 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = esClient.asCurrentUser.asyncSearch;
 
-    // TODO: keep_alive from session settings
     const search = async () => {
       const params = id
         ? getDefaultAsyncGetParams(options)
