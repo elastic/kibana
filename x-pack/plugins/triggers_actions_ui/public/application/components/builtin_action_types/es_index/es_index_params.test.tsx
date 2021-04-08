@@ -22,6 +22,13 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{

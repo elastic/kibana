@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import React, { ComponentProps, ComponentType } from 'react';
 import { LicensePrompt } from '.';
 import {
   ApmPluginContext,
@@ -17,19 +17,25 @@ const contextMock = ({
 } as unknown) as ApmPluginContextValue;
 
 export default {
-  title: 'app/LicensePrompt',
+  title: 'shared/LicensePrompt',
   component: LicensePrompt,
   decorators: [
     (Story: ComponentType) => (
       <ApmPluginContext.Provider value={contextMock}>
-        <Story />{' '}
+        <Story />
       </ApmPluginContext.Provider>
     ),
   ],
 };
 
-export function Example() {
-  return (
-    <LicensePrompt text="To create Feature name, you must be subscribed to an Elastic X license or above." />
-  );
+export function Example({
+  showBetaBadge,
+  text,
+}: ComponentProps<typeof LicensePrompt>) {
+  return <LicensePrompt showBetaBadge={showBetaBadge} text={text} />;
 }
+Example.args = {
+  showBetaBadge: false,
+  text:
+    'To create Feature name, you must be subscribed to an Elastic X license or above.',
+} as ComponentProps<typeof LicensePrompt>;
