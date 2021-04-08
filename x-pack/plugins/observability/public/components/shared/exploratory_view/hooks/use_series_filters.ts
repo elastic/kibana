@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useUrlStorage } from './use_url_strorage';
+import { useUrlStorage } from './use_url_storage';
 import { UrlFilter } from '../types';
 
 export interface UpdateFilter {
