@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
-  CaseResponse,
   CommentsResponse,
   CommentType,
   AttributesTypeUser,
@@ -65,201 +64,214 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesUserActions(es);
     });
 
-    it('should post a comment', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as AttributesTypeUser
-      );
+    describe('happy path', () => {
+      it('should post a comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const comment = removeServerGeneratedPropertiesFromSavedObject(
+          patchedCase.comments![0] as AttributesTypeUser
+        );
 
-      expect(comment).to.eql({
-        type: postCommentUserReq.type,
-        comment: postCommentUserReq.comment,
-        associationType: 'case',
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
+        expect(comment).to.eql({
+          type: postCommentUserReq.type,
+          comment: postCommentUserReq.comment,
+          associationType: 'case',
+          created_by: defaultUser,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: null,
+        });
+
+        // updates the case correctly after adding a comment
+        expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
+        expect(patchedCase.updated_by).to.eql(defaultUser);
       });
 
-      // updates the case correctly after adding a comment
-      expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
-      expect(patchedCase.updated_by).to.eql(defaultUser);
-    });
+      it('should post an alert', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+        const comment = removeServerGeneratedPropertiesFromSavedObject(
+          patchedCase.comments![0] as AttributesTypeAlerts
+        );
 
-    it('should post an alert', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as AttributesTypeAlerts
-      );
+        expect(comment).to.eql({
+          type: postCommentAlertReq.type,
+          alertId: postCommentAlertReq.alertId,
+          index: postCommentAlertReq.index,
+          rule: postCommentAlertReq.rule,
+          associationType: 'case',
+          created_by: defaultUser,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: null,
+        });
 
-      expect(comment).to.eql({
-        type: postCommentAlertReq.type,
-        alertId: postCommentAlertReq.alertId,
-        index: postCommentAlertReq.index,
-        rule: postCommentAlertReq.rule,
-        associationType: 'case',
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
+        // updates the case correctly after adding a comment
+        expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
+        expect(patchedCase.updated_by).to.eql(defaultUser);
       });
 
-      // updates the case correctly after adding a comment
-      expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
-      expect(patchedCase.updated_by).to.eql(defaultUser);
-    });
+      it('creates a user action', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
-    it('creates a user action', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
-      const userActions = await getAllUserAction(supertest, postedCase.id);
-      const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-
-      expect(commentUserAction).to.eql({
-        action_field: ['comment'],
-        action: 'create',
-        action_by: defaultUser,
-        new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}"}`,
-        old_value: null,
-        case_id: `${postedCase.id}`,
-        comment_id: `${patchedCase.comments![0].id}`,
-        sub_case_id: '',
+        expect(commentUserAction).to.eql({
+          action_field: ['comment'],
+          action: 'create',
+          action_by: defaultUser,
+          new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}"}`,
+          old_value: null,
+          case_id: `${postedCase.id}`,
+          comment_id: `${patchedCase.comments![0].id}`,
+          sub_case_id: '',
+        });
       });
     });
 
-    it('unhappy path - 400s when type is missing', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment(
-        supertest,
-        postedCase.id,
-        {
-          // @ts-expect-error
-          bad: 'comment',
-        },
-        400
-      );
-    });
-
-    it('unhappy path - 400s when missing attributes for type user', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment(
-        supertest,
-        postedCase.id,
-        // @ts-expect-error
-        {
-          type: CommentType.user,
-        },
-        400
-      );
-    });
-
-    it('unhappy path - 400s when adding excess attributes for type user', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-
-      for (const attribute of ['alertId', 'index']) {
+    describe('unhappy path', () => {
+      it('400s when type is missing', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
         await createComment(
           supertest,
           postedCase.id,
+          {
+            // @ts-expect-error
+            bad: 'comment',
+          },
+          400
+        );
+      });
+
+      it('400s when missing attributes for type user', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment(
+          supertest,
+          postedCase.id,
+          // @ts-expect-error
           {
             type: CommentType.user,
-            [attribute]: attribute,
-            comment: 'a comment',
           },
           400
         );
-      }
-    });
+      });
 
-    it('unhappy path - 400s when missing attributes for type alert', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
+      it('400s when adding excess attributes for type user', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
 
-      const allRequestAttributes = {
-        type: CommentType.alert,
-        index: 'test-index',
-        alertId: 'test-id',
-        rule: {
-          id: 'id',
-          name: 'name',
-        },
-      };
+        for (const attribute of ['alertId', 'index']) {
+          await createComment(
+            supertest,
+            postedCase.id,
+            {
+              type: CommentType.user,
+              [attribute]: attribute,
+              comment: 'a comment',
+            },
+            400
+          );
+        }
+      });
 
-      for (const attribute of ['alertId', 'index']) {
-        const requestAttributes = omit(attribute, allRequestAttributes);
-        // @ts-expect-error
-        await createComment(supertest, postedCase.id, requestAttributes, 400);
-      }
-    });
+      it('400s when missing attributes for type alert', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
 
-    it('unhappy path - 400s when adding excess attributes for type alert', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
+        const allRequestAttributes = {
+          type: CommentType.alert,
+          index: 'test-index',
+          alertId: 'test-id',
+          rule: {
+            id: 'id',
+            name: 'name',
+          },
+        };
 
-      for (const attribute of ['comment']) {
+        for (const attribute of ['alertId', 'index']) {
+          const requestAttributes = omit(attribute, allRequestAttributes);
+          // @ts-expect-error
+          await createComment(supertest, postedCase.id, requestAttributes, 400);
+        }
+      });
+
+      it('400s when adding excess attributes for type alert', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        for (const attribute of ['comment']) {
+          await createComment(
+            supertest,
+            postedCase.id,
+            {
+              type: CommentType.alert,
+              [attribute]: attribute,
+              alertId: 'test-id',
+              index: 'test-index',
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+            },
+            400
+          );
+        }
+      });
+
+      it('400s when case is missing', async () => {
         await createComment(
           supertest,
-          postedCase.id,
+          'not-exists',
           {
-            type: CommentType.alert,
-            [attribute]: attribute,
-            alertId: 'test-id',
-            index: 'test-index',
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
+            // @ts-expect-error
+            bad: 'comment',
           },
           400
         );
-      }
-    });
+      });
 
-    it('unhappy path - 400s when case is missing', async () => {
-      await createComment(
-        supertest,
-        'not-exists',
-        {
-          // @ts-expect-error
-          bad: 'comment',
-        },
-        400
-      );
-    });
+      it('400s when adding an alert to a closed case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
 
-    it('unhappy path - 400s when adding an alert to a closed case', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
+        await supertest
+          .patch(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: 'closed',
+              },
+            ],
+          })
+          .expect(200);
 
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'closed',
-            },
-          ],
-        })
-        .expect(200);
+        await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
+      });
 
-      await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
-    });
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+      it.skip('400s when adding an alert to a collection case', async () => {
+        const postedCase = await createCase(supertest, postCollectionReq);
+        await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
+      });
 
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip('400s when adding an alert to a collection case', async () => {
-      const postedCase = await createCase(supertest, postCollectionReq);
-      await createComment(supertest, postedCase.id, postCommentAlertReq, 400);
-    });
+      it('400s when adding a generated alert to an individual case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
 
-    it('400s when adding a generated alert to an individual case', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
+        await supertest
+          .post(`${CASES_URL}/${postedCase.id}/comments`)
+          .set('kbn-xsrf', 'true')
+          .send(postCommentGenAlertReq)
+          .expect(400);
+      });
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentGenAlertReq)
-        .expect(400);
+      it('should return a 400 when passing the subCaseId', async () => {
+        const { body } = await supertest
+          .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
+          .set('kbn-xsrf', 'true')
+          .send(postCommentUserReq)
+          .expect(400);
+        expect(body.message).to.contain('subCaseId');
+      });
     });
 
     describe('alerts', () => {
@@ -366,15 +378,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
       });
-    });
-
-    it('should return a 400 when passing the subCaseId', async () => {
-      const { body } = await supertest
-        .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(400);
-      expect(body.message).to.contain('subCaseId');
     });
 
     describe('alert format', () => {

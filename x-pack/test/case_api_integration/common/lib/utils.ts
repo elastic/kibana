@@ -29,6 +29,7 @@ import {
   CaseUserActionResponse,
   SubCaseResponse,
   CommentResponse,
+  CasesPatchRequest,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -584,4 +585,18 @@ export const getAllUserAction = async (
     .expect(expectedHttpCode);
 
   return userActions;
+};
+
+export const updateCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  params: CasesPatchRequest,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse[]> => {
+  const { body: cases } = await supertest
+    .patch(CASES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return cases;
 };
