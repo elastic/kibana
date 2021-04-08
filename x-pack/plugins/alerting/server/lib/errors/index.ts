@@ -6,6 +6,7 @@
  */
 
 import { ErrorThatHandlesItsOwnResponse, ElasticsearchError } from './types';
+import { getEsErrorMessage } from './es_error_parser';
 
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse
@@ -13,5 +14,5 @@ export function isErrorThatHandlesItsOwnResponse(
   return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
 }
 
-export { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
+export { ErrorThatHandlesItsOwnResponse, ElasticsearchError, getEsErrorMessage };
 export { AlertTypeDisabledError, AlertTypeDisabledReason } from './alert_type_disabled';

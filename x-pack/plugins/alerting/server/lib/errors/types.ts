@@ -11,6 +11,15 @@ export interface ErrorThatHandlesItsOwnResponse extends Error {
   sendResponse(res: KibanaResponseFactory): IKibanaResponse;
 }
 
+interface ElasticsearchErrorMeta {
+  body?: {
+    error?: ApiError;
+  };
+}
+
 export interface ElasticsearchError extends Error {
-  error?: ApiError;
+  error?: {
+    meta?: ElasticsearchErrorMeta;
+  };
+  meta?: ElasticsearchErrorMeta;
 }
