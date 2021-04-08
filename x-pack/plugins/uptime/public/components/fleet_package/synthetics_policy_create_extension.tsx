@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
+import { useTrackPageview } from '../../../../observability/public';
 import {
   Config,
   ConfigKeys,
@@ -29,6 +30,8 @@ import { validate } from './validation';
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
+    useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
+    useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
     const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
 
     // Fleet will initialize the create form with a default name for the integratin policy, however,

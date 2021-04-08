@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
+import { useTrackPageview } from '../../../../observability/public';
 import { Config, ConfigKeys, ICustomFields, contentTypesToMode, ContentType } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
@@ -19,6 +20,8 @@ import { validate } from './validation';
  */
 export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
+    useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
+    useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
     const { enableTLS: isTLSEnabled, config: defaultConfig } = useMemo(() => {
       let enableTLS = false;
       const getDefaultConfig = () => {
