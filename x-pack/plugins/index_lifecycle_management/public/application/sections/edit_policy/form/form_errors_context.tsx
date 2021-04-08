@@ -84,9 +84,9 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
           } = previousErrors;
 
           const nextHasErrors =
-            Object.keys(restOfPhaseErrors).length === 0 &&
+            Object.keys(restOfPhaseErrors).length > 0 ||
             Object.values(otherPhases).some((phaseErrors) => {
-              return !!Object.keys(phaseErrors).length;
+              return Object.keys(phaseErrors).length > 0;
             });
 
           return {
