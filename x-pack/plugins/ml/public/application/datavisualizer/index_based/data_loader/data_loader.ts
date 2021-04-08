@@ -110,14 +110,15 @@ export class DataLoader {
   async loadFieldHistograms(
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
-    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
+    editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldHistograms({
       indexPatternTitle: this._indexPatternTitle,
       query,
       fields,
       samplerShardSize,
-      runtimeMappings: this._runtimeMappings,
+      runtimeMappings: editorRuntimeMappings || this._runtimeMappings,
     });
 
     return stats;

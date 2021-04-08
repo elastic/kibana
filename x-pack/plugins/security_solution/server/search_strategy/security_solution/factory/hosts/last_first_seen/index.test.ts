@@ -14,7 +14,10 @@ import {
   formattedSearchStrategyLastResponse,
   formattedSearchStrategyFirstResponse,
 } from './__mocks__';
-import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy';
+import {
+  Direction,
+  HostFirstLastSeenRequestOptions,
+} from '../../../../../../common/search_strategy';
 
 describe('firstLastSeenHost search strategy', () => {
   describe('first seen search strategy', () => {
@@ -51,7 +54,7 @@ describe('firstLastSeenHost search strategy', () => {
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
-        const options: HostFirstLastSeenRequestOptions = { ...mockOptions, order: 'desc' };
+        const options: HostFirstLastSeenRequestOptions = { ...mockOptions, order: Direction.desc };
         firstOrLastSeenHost.buildDsl(options);
         expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(options);
       });
@@ -60,7 +63,7 @@ describe('firstLastSeenHost search strategy', () => {
     describe('parse', () => {
       test('should parse data correctly', async () => {
         const result = await firstOrLastSeenHost.parse(
-          { ...mockOptions, order: 'desc' },
+          { ...mockOptions, order: Direction.desc },
           mockSearchStrategyLastSeenResponse
         );
         expect(result).toMatchObject(formattedSearchStrategyLastResponse);

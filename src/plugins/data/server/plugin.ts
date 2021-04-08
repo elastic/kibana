@@ -46,8 +46,10 @@ export interface DataPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataPluginStartDependencies {}
+export interface DataPluginStartDependencies {
+  fieldFormats: FieldFormatsStart;
+  logger: Logger;
+}
 
 export class DataServerPlugin
   implements
@@ -82,7 +84,11 @@ export class DataServerPlugin
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    this.indexPatterns.setup(core, { expressions });
+    this.indexPatterns.setup(core, {
+      expressions,
+      logger: this.logger.get('indexPatterns'),
+      usageCollection,
+    });
 
     core.uiSettings.register(getUiSettings());
 

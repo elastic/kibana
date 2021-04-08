@@ -11,7 +11,7 @@ import { skip } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { Query, UI_SETTINGS } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, Query, UI_SETTINGS } from '../../../common';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
@@ -25,7 +25,7 @@ export class QueryStringManager {
 
   private getDefaultLanguage() {
     return (
-      this.storage.get('kibana.userQueryLanguage') ||
+      this.storage.get(KIBANA_USER_QUERY_LANGUAGE_KEY) ||
       this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
     );
   }

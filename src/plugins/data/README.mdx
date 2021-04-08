@@ -561,6 +561,45 @@ function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
 
 ```
 
+### Timefilter
+
+`data.query.timefilter` is responsible for the time range filter and the auto refresh behavior settings.
+
+#### Autorefresh
+
+Timefilter provides an API for setting and getting current auto refresh state:
+
+```ts
+const { pause, value } = data.query.timefilter.timefilter.getRefreshInterval();
+
+data.query.timefilter.timefilter.setRefreshInterval({ pause: false, value: 5000 }); // start auto refresh with 5 seconds interval
+```
+
+Timefilter API also provides an `autoRefreshFetch$` observables that apps should use to get notified
+when it is time to refresh data because of auto refresh.
+This API expects apps to confirm when they are done with reloading the data.
+The confirmation mechanism is needed to prevent excessive queue of fetches.
+
+```
+import { refetchData } from '../my-app'
+
+const autoRefreshFetch$ = data.query.timefilter.timefilter.getAutoRefreshFetch$()
+autoRefreshFetch$.subscribe((done) => {
+  try {
+    await refetchData();
+  } finally {
+    // confirm that data fetching was finished
+    done();
+  }
+})
+
+function unmount() {
+  // don't forget to unsubscribe when leaving the app
+  autoRefreshFetch$.unsubscribe()
+}
+
+```
+
 ## Search
 
 Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.

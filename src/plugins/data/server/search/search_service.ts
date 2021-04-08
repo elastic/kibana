@@ -38,7 +38,7 @@ import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
-import { DataPluginStart } from '../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
@@ -117,7 +117,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public setup(
-    core: CoreSetup<{}, DataPluginStart>,
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;

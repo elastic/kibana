@@ -399,6 +399,10 @@ export interface AggFunctionsMapping {
     //
     // (undocumented)
     aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+    // Warning: (ae-forgotten-export) The symbol "aggSinglePercentile" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
     // Warning: (ae-forgotten-export) The symbol "aggStdDeviation" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -499,6 +503,11 @@ export interface ApplyGlobalFilterActionContext {
 //
 // @public (undocumented)
 export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
+
+// Warning: (ae-missing-release-tag) "AutoRefreshDoneFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AutoRefreshDoneFn = () => void;
 
 // Warning: (ae-forgotten-export) The symbol "DateFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
@@ -717,7 +726,7 @@ export const ES_SEARCH_STRATEGY = "es";
 // Warning: (ae-missing-release-tag) "EsaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_35, Arguments_21, Output_35>;
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_36, Arguments_21, Output_36>;
 
 // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Input" needs to be exported by the entry point index.d.ts
@@ -726,7 +735,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'e
 // Warning: (ae-missing-release-tag) "EsdslExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<typeof name_3, Input_36, Arguments_23, Output_36>;
+export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<typeof name_3, Input_37, Arguments_23, Output_37>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1860,6 +1869,8 @@ export enum METRIC_TYPES {
     // (undocumented)
     SERIAL_DIFF = "serial_diff",
     // (undocumented)
+    SINGLE_PERCENTILE = "single_percentile",
+    // (undocumented)
     STD_DEV = "std_dev",
     // (undocumented)
     SUM = "sum",
@@ -2017,6 +2028,8 @@ export const QueryStringInput: (props: QueryStringInputProps) => JSX.Element;
 // @public (undocumented)
 export interface QueryStringInputProps {
     // (undocumented)
+    autoSubmit?: boolean;
+    // (undocumented)
     bubbleSubmitEvent?: boolean;
     // (undocumented)
     className?: string;
@@ -2064,6 +2077,8 @@ export interface QueryStringInputProps {
     //
     // (undocumented)
     size?: SuggestionsListSize;
+    // (undocumented)
+    storageKey?: string;
     // (undocumented)
     submitOnBlur?: boolean;
 }
@@ -2637,6 +2652,18 @@ export const UI_SETTINGS: {
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
 };
 
+// Warning: (ae-missing-release-tag) "waitUntilNextSessionCompletes$" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export function waitUntilNextSessionCompletes$(sessionService: ISessionService, { waitForIdle }?: WaitUntilNextSessionCompletesOptions): import("rxjs").Observable<SearchSessionState>;
+
+// Warning: (ae-missing-release-tag) "WaitUntilNextSessionCompletesOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface WaitUntilNextSessionCompletesOptions {
+    waitForIdle?: number;
+}
+
 
 // Warnings were encountered during analysis:
 //
@@ -2650,7 +2677,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/search/aggs/types.ts:127:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/aggs/types.ts:129:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:56:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:56:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
@@ -2684,21 +2711,21 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "validateIndexPattern" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "flattenHitWrapper" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "formatHitProvider" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:406:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:407:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:416:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:417:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:418:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:419:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:423:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:424:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:427:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:428:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:431:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:406:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:406:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:406:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:406:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:408:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:409:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:418:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:419:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:420:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:425:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:426:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:429:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:430:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:433:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/search/session/session_service.ts:56:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 

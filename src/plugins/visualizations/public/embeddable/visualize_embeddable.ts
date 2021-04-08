@@ -50,7 +50,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
-  editable: boolean;
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -111,7 +111,7 @@ export class VisualizeEmbeddable
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
@@ -129,7 +129,6 @@ export class VisualizeEmbeddable
         editApp: 'visualize',
         editUrl,
         indexPatterns,
-        editable,
         visTypeName: vis.type.name,
       },
       parent
@@ -142,6 +141,12 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
+
+    if (this.attributeService) {
+      const isByValue = !this.inputIsRefType(initialInput);
+      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      this.updateOutput({ ...this.getOutput(), editable });
+    }
 
     this.subscriptions.push(
       this.getUpdated$().subscribe(() => {
@@ -362,8 +367,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
@@ -390,13 +395,13 @@ export class VisualizeEmbeddable
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {
