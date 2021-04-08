@@ -1662,24 +1662,16 @@ exports[`MonitorList component renders the monitor list 1`] = `
           >
             <button
               aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty-isDisabled"
+              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="xpack.uptime.monitorList.prevButton"
               disabled=""
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonContent__icon"
-                  data-euiicon-type="arrowLeft"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Previous
-                </span>
-              </span>
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="arrowLeft"
+              />
             </button>
           </div>
           <div
@@ -1687,24 +1679,16 @@ exports[`MonitorList component renders the monitor list 1`] = `
           >
             <button
               aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty-isDisabled"
+              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="xpack.uptime.monitorList.nextButton"
               disabled=""
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonContent__icon"
-                  data-euiicon-type="arrowRight"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Next
-                </span>
-              </span>
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="arrowRight"
+              />
             </button>
           </div>
         </div>
