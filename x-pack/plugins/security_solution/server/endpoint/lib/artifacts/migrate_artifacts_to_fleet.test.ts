@@ -66,8 +66,8 @@ describe('When migrating artifacts to fleet', () => {
 
   it('should do nothing if `fleetServerEnabled` flag is false', async () => {
     await migrateArtifactsToFleet(soClient, artifactClient, logger, false);
-    expect(logger.info).toHaveBeenCalledWith(
-      'Skipping Artifacts migration to fleet. [fleetServerEnabled] flag is off'
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping Artifacts migration. [fleetServerEnabled] flag is off'
     );
     expect(soClient.find).not.toHaveBeenCalled();
   });
