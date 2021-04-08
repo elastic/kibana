@@ -216,6 +216,34 @@ describe('formula', () => {
       });
     });
 
+    it('it should move over lucene arguments without', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            operationType: 'count',
+            filter: {
+              language: 'lucene',
+              query: `*`,
+            },
+          } as IndexPatternColumn,
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {
+          isFormulaBroken: false,
+          formula: `count(lucene='*')`,
+        },
+        references: [],
+      });
+    });
+
     it('should move over previous operation parameter if set - only numeric', () => {
       expect(
         formulaOperation.buildColumn(

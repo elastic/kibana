@@ -56,7 +56,9 @@ import {
   getPossibleFunctions,
   getSignatureHelp,
   getHover,
+  getTokenInfo,
   offsetToRowColumn,
+  monacoPositionToOffset,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
@@ -178,8 +180,10 @@ export const formulaOperation: OperationDefinition<
           ', ' + formulaNamedArgs.map(({ name, value }) => `${name}=${value}`).join(', ');
       }
       if (previousColumn.filter) {
+        if (previousColumn.operationType !== 'count') {
+          previousFormula += ', ';
+        }
         previousFormula +=
-          ', ' +
           (previousColumn.filter.language === 'kuery' ? 'kql=' : 'lucene=') +
           `'${previousColumn.filter.query.replace(/'/g, `\\'`)}'`; // replace all
       }
@@ -503,11 +507,28 @@ function FormulaEditor({
       if (e.isFlush || e.isRedoing || e.isUndoing) {
         return;
       }
-      // I think the changes are always length 1 when triggered by a user, but if we
-      // add more automation it can create change lists.
       if (e.changes.length === 1 && e.changes[0].text === '=') {
         const currentPosition = e.changes[0].range;
         if (currentPosition) {
+          const tokenInfo = getTokenInfo(
+            editor.getValue(),
+            monacoPositionToOffset(
+              editor.getValue(),
+              new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
+            )
+          );
+          // Make sure that we are only adding kql='' or lucene='', and also
+          // check that the = sign isn't inside the KQL expression like kql='='
+          if (
+            !tokenInfo ||
+            typeof tokenInfo.ast === 'number' ||
+            tokenInfo.ast.type !== 'namedArgument' ||
+            (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
+            tokenInfo.ast.value !== 'LENS_MATH_MARKER'
+          ) {
+            return;
+          }
+
           // Timeout is required because otherwise the cursor position is not updated.
           setTimeout(() => {
             editor.executeEdits(
@@ -553,6 +574,9 @@ function FormulaEditor({
     [onTypeHandler]
   );
 
+  // Toggle between the handlers whenever the full screen mode is changed,
+  // because Monaco only maintains cursor position in the active model
+  // while it has focus.
   useEffect(() => {
     if (updateAfterTyping.current) {
       if (isOpen) {

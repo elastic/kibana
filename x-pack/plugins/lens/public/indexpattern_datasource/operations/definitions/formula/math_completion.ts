@@ -84,6 +84,17 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
+export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
+  const lines = expression.split(/\n/);
+  return lines
+    .slice(0, position.lineNumber)
+    .reduce(
+      (prev, current, index) =>
+        prev + index === position.lineNumber - 1 ? position.column : current.length,
+      0
+    );
+}
+
 export async function suggest({
   expression,
   position,
@@ -539,4 +550,15 @@ export function getHover(
     // do nothing
   }
   return { contents: [] };
+}
+
+export function getTokenInfo(expression: string, position: number) {
+  const text = expression.substr(0, position) + MARKER + expression.substr(position);
+  try {
+    const ast = parse(text);
+
+    return getInfoAtPosition(ast, position);
+  } catch (e) {
+    return;
+  }
 }
