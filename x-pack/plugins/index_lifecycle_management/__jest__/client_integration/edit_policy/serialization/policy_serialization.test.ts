@@ -482,60 +482,84 @@ describe('<EditPolicy /> serialization', () => {
     });
   });
 
-  describe('min age', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-      httpRequestsMockHelpers.setListNodes({
-        nodesByRoles: {},
-        nodesByAttributes: { test: ['123'] },
-        isUsingDeprecatedDataRoleConfig: false,
-      });
-      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+  describe('frozen phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.frozen.enable(true);
+      await actions.frozen.setSearchableSnapshot('myRepo');
 
-      await act(async () => {
-        testBed = await setup();
-      });
+      await actions.savePolicy();
 
-      const { component } = testBed;
-      component.update();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.frozen).toEqual({
+        min_age: '0d',
+        actions: {
+          searchable_snapshot: { snapshot_repository: 'myRepo' },
+        },
+      });
     });
 
-    (['warm', 'cold', 'frozen', 'delete'] as MinAgePhase[]).forEach((phase) => {
-      test(`should concatenate ${phase} min_age value with its min_age unit`, async () => {
+    describe('deserialization', () => {
+      beforeEach(async () => {
+        const policyToEdit = getDefaultHotPhasePolicy('my_policy');
+        policyToEdit.policy.phases.frozen = {
+          min_age: '1234m',
+          actions: { searchable_snapshot: { snapshot_repository: 'myRepo' } },
+        };
+
+        httpRequestsMockHelpers.setLoadPolicies([policyToEdit]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('default value', async () => {
         const { actions } = testBed;
 
-        await actions[phase].enable(true);
-        await actions[phase].setMinAgeValue('10');
-        await actions[phase].setMinAgeUnits('m');
-
-        if (phase === 'frozen') {
-          await actions[phase].setSearchableSnapshot('myRepo');
-        }
-
         await actions.savePolicy();
+
         const latestRequest = server.requests[server.requests.length - 1];
         const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-        expect(entirePolicy.phases[phase].min_age).toBe('10m');
+        expect(entirePolicy.phases.frozen).toEqual({
+          min_age: '1234m',
+          actions: {
+            searchable_snapshot: {
+              snapshot_repository: 'myRepo',
+            },
+          },
+        });
       });
     });
   });
 
-  test('delete phase', async () => {
-    const { actions } = testBed;
-    await actions.delete.enable(true);
-    await actions.setWaitForSnapshotPolicy('test');
-    await actions.savePolicy();
-    const latestRequest = server.requests[server.requests.length - 1];
-    const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-    expect(entirePolicy.phases.delete).toEqual({
-      min_age: '365d',
-      actions: {
-        delete: {},
-        wait_for_snapshot: {
-          policy: 'test',
+  describe('delete phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.delete.enable(true);
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
         },
-      },
+      });
     });
   });
 });
