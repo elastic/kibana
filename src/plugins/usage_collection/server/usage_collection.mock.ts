@@ -16,7 +16,8 @@ import {
 import { CollectorOptions, Collector, UsageCollector } from './collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';
 
-export { CollectorOptions, Collector };
+export type { CollectorOptions };
+export { Collector };
 
 const logger = loggingSystemMock.createLogger();
 
