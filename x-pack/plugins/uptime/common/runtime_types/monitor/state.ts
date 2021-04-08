@@ -65,16 +65,17 @@ export const HistogramType = t.type({
 
 export type Histogram = t.TypeOf<typeof HistogramType>;
 
-export const MonitorSummaryType = t.intersection([
-  t.type({
-    monitor_id: t.string,
-    state: StateType,
-  }),
-  t.partial({
-    histogram: HistogramType,
-    minInterval: t.number,
-  }),
-]);
+export const MonitorHistogramResultType = t.type({
+  histograms: t.record(t.string, HistogramType),
+  minInterval: t.number,
+});
+
+export type MonitorHistogramResult = t.TypeOf<typeof MonitorHistogramResultType>;
+
+export const MonitorSummaryType = t.type({
+  monitor_id: t.string,
+  state: StateType,
+});
 
 export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
@@ -132,3 +133,18 @@ export const FetchMonitorListPaginationType = t.intersection([
 ]);
 
 export type FetchMonitorListPaginationParams = t.TypeOf<typeof FetchMonitorListPaginationType>;
+
+export const FetchMonitorListHistogramType = t.intersection([
+  t.partial({
+    filters: t.string,
+    statusFilter: t.string,
+    query: t.string,
+    pagination: t.string,
+  }),
+  t.type({
+    dateRangeStart: t.string,
+    dateRangeEnd: t.string,
+  }),
+]);
+
+export type FetchMonitorListHistogramParams = t.TypeOf<typeof FetchMonitorListHistogramType>;

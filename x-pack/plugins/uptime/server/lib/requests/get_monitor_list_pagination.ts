@@ -7,13 +7,11 @@
 
 import { getFilterClause } from '../helper';
 import { FetchMonitorListPaginationParams } from '../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { createEsQuery } from '../lib';
+import { createEsQuery, UptimeESClient } from '../lib';
 
-export const getMonitorListPagination: UMElasticsearchQueryFn<
-  FetchMonitorListPaginationParams,
-  any
-> = async ({
+export type MonitorListPaginationResult = ReturnType<typeof getMonitorListPagination>;
+
+export const getMonitorListPagination = async ({
   query,
   filters,
   statusFilter,
@@ -22,7 +20,7 @@ export const getMonitorListPagination: UMElasticsearchQueryFn<
   afterMonitorId,
   dateRangeStart: from,
   dateRangeEnd: to,
-}) => {
+}: FetchMonitorListPaginationParams & { uptimeEsClient: UptimeESClient }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
 

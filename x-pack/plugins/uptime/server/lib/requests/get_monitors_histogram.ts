@@ -9,7 +9,7 @@ import { QueryContext } from './search';
 import {
   Histogram,
   HistogramPoint,
-  MonitorSummariesResult,
+  MonitorHistogramResult,
 } from '../../../common/runtime_types/monitor';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { GetMonitorStatesParams } from './get_monitor_states';
@@ -17,7 +17,7 @@ import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export const getHistogramForMonitors: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
-  MonitorSummariesResult
+  MonitorHistogramResult
 > = async ({
   uptimeEsClient,
   dateRangeStart,
@@ -115,7 +115,8 @@ export const getHistogramForMonitors: UMElasticsearchQueryFn<
     };
   });
 
-  const histosById: { [key: string]: Histogram } = {};
+  const histogramsById: Record<string, Histogram> = {};
+
   monitorIds.forEach((id: string) => {
     const points: HistogramPoint[] = [];
     simplified.forEach((simpleHisto) => {
@@ -125,8 +126,8 @@ export const getHistogramForMonitors: UMElasticsearchQueryFn<
         down: simpleHisto.byId[id],
       });
     });
-    histosById[id] = { points };
+    histogramsById[id] = { points };
   });
 
-  return { histograms: histosById, minInterval };
+  return { histograms: histogramsById, minInterval };
 };

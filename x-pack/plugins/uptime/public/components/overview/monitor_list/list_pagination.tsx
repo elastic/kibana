@@ -22,7 +22,7 @@ const Wrapper = styled.div`
 `;
 
 export const ListPagination = ({ items, next, previous, loading: listLoading }: Props) => {
-  const { loading, nextData, previousData } = usePagination({ items });
+  const { loading, nextData = [], previousData = [] } = usePagination({ items });
 
   return (
     <Wrapper>

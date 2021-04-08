@@ -23,7 +23,7 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
 
   const monitorIds = (items ?? []).map(({ monitor_id: monitorId }) => monitorId);
 
-  const { data = {}, loading } = useFetcher(() => {
+  const { data, loading } = useFetcher(() => {
     if (monitorIds.length > 0) {
       return fetchMonitorListHistogram(
         {
@@ -37,8 +37,7 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
         { monitorIds }
       );
     }
-    return new Promise((resolve) => resolve(null));
   }, [JSON.stringify(monitorIds), lastRefresh]);
 
-  return { loading, ...data };
+  return { loading, ...(data ?? {}) };
 };

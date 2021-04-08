@@ -37,14 +37,13 @@ export const usePagination = ({ items }: { items: MonitorSummary[] }) => {
         query,
       });
     }
-    return new Promise((resolve) => resolve(null));
   }, [beforeMonitorId, afterMonitorId, lastRefresh]);
 
   const { before, after } = data?.result?.aggregations ?? {};
 
   return {
-    nextData: after?.buckets ?? [],
-    previousData: before?.buckets ?? [],
+    nextData: after?.buckets,
+    previousData: before?.buckets,
     loading,
   };
 };
