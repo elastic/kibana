@@ -38,6 +38,7 @@ interface ContextValue {
   errors: Errors;
   addError(phase: PhasesAndOther, fieldPath: string, errorMessages: string[]): void;
   clearError(phase: PhasesAndOther, fieldPath: string): void;
+  isFormSubmitted: boolean;
 }
 
 const FormErrorsContext = createContext<ContextValue>(null as any);
@@ -56,7 +57,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 
-  const { getErrors: getFormErrors } = form;
+  const { getErrors: getFormErrors, isSubmitted } = form;
 
   const addError: ContextValue['addError'] = useCallback(
     (phase, fieldPath, errorMessages) => {
@@ -107,6 +108,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
         errors,
         addError,
         clearError,
+        isFormSubmitted: isSubmitted,
       }}
     >
       {children}
