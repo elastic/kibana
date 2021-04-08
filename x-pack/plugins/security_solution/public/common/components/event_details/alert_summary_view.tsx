@@ -182,20 +182,19 @@ const AlertSummaryViewComponent: React.FC<{
   }, [data]);
   const { rule: maybeRule } = useRuleAsync(ruleId);
 
-  const guide = useMemo(
-    () =>
-      maybeRule?.note ? (
+  return (
+    <>
+      <SummaryView summaryColumns={summaryColumns} summaryList={summaryList} />
+      {maybeRule?.note && (
         <StyledEuiDescriptionList data-test-subj={`summary-table-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <LineClamp content={maybeRule?.note} />
           </EuiDescriptionListDescription>
         </StyledEuiDescriptionList>
-      ) : undefined,
-    [maybeRule]
+      )}
+    </>
   );
-
-  return <SummaryView summaryColumns={summaryColumns} summaryList={summaryList} guide={guide} />;
 };
 
 export const AlertSummaryView = React.memo(AlertSummaryViewComponent);

@@ -29,13 +29,6 @@ const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
-const Separator = styled.div`
-  height: 2px;
-  margin: 12px 0;
-  width: 90%;
-  background: linear-gradient(90deg, rgba(238, 238, 238, 1) 70%, rgba(238, 238, 238, 0) 100%);
-`;
-
 interface RenderRuleNameProps {
   contextId: string;
   eventId: string;

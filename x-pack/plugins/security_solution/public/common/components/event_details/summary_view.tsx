@@ -25,18 +25,14 @@ export const SummaryViewComponent: React.FC<{
   summaryColumns: Array<EuiBasicTableColumn<SummaryRow>>;
   summaryList: SummaryRow[];
   dataTestSubj?: string;
-  guide?: JSX.Element;
-}> = ({ summaryColumns, summaryList, dataTestSubj = 'summary-view', guide }) => {
+}> = ({ summaryColumns, summaryList, dataTestSubj = 'summary-view' }) => {
   return (
-    <>
-      <StyledEuiInMemoryTable
-        data-test-subj={dataTestSubj}
-        items={summaryList}
-        columns={summaryColumns}
-        compressed
-      />
-      {guide}
-    </>
+    <StyledEuiInMemoryTable
+      data-test-subj={dataTestSubj}
+      items={summaryList}
+      columns={summaryColumns}
+      compressed
+    />
   );
 };
 
