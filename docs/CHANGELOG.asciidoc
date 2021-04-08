@@ -1101,7 +1101,64 @@ Uptime::
 
 For detailed information about the 7.10.0 release, review the following sections.
 
-<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
+<<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>> | <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>>
+
+[float]
+[[deprecation-v7.10.0]]
+=== Deprecations
+Monitoring::
+* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
+Platform::
+* The /api/status endpoint response format is now deprecated and will change in 8.0 {kibana-pull}76054[#76054]
+* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
+Security::
+* Deprecates the `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` setting for SAML authentication {kibana-pull}68117[#68117]
+Visualizations::
+* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib} {kibana-pull}74660[#74660]
++
+To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
++
+NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
++
+To migrate a *Timelion* worksheet to a dashboard:
+
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
+
+. For each *Timelion* app worksheet, complete the following steps.
+
+.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
+
+.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[Timelion app chart]
+
+.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
+
+.. In the toolbar, click *Save*.
+
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
++
+The Timelion visualization panel appears on the dashboard.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
+
+[float]
+[[breaking-v7.10.0]]
+=== Breaking changes
+Lens and visualizations::
+* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
+Operations::
+* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
+Platform::
+* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
+
+For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [float]
 [[enhancement-v7.10.0]]
@@ -1531,61 +1588,6 @@ Spaces::
 Uptime::
 * Ml anomaly alert edit {kibana-pull}76909[#76909]
 * Removes custom handling of license enabling {kibana-pull}82019[#82019]
-
-[float]
-[[deprecation-v7.10.0]]
-=== Deprecations
-Monitoring::
-* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
-Platform::
-* The /api/status endpoint response format is now deprecated and will change in 8.0. {kibana-pull}76054[#76054]
-* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
-Visualizations::
-* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. {kibana-pull}74660[#74660]
-+
-To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-+
-NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-+
-To migrate a *Timelion* worksheet to a dashboard:
-
-. Open the main menu, click *Dashboard*, then click *Create dashboard*.
-
-. For each *Timelion* app worksheet, complete the following steps.
-
-.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
-
-.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-.. In the toolbar, click *Save*.
-
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
-
-[float]
-[[breaking-v7.10.0]]
-=== Breaking changes
-Lens and visualizations::
-* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
-Operations::
-* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
-Platform::
-* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
-
-For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
