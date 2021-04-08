@@ -10,13 +10,15 @@ import React from 'react';
 import { EuiBasicTable, EuiHealth, EuiTextAlign, EuiTitle } from '@elastic/eui';
 
 import { EngineDetails } from '../../../engine/types';
+import { SOURCE_ENGINES_TITLE } from '../../constants';
 
 import {
+  BLANK_COLUMN,
   CREATED_AT_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
-} from './engines_table';
+} from './shared_columns';
 
 import './meta_engines_table_expanded_row.scss';
 
@@ -32,7 +34,7 @@ export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowPr
   <div className="meta-engines__source-engines-table">
     <EuiTextAlign textAlign="center">
       <EuiTitle size="xs">
-        <h3>Source Engines</h3>
+        <h3>{SOURCE_ENGINES_TITLE}</h3>
       </EuiTitle>
     </EuiTextAlign>
     <EuiBasicTable
@@ -48,9 +50,7 @@ export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowPr
           },
         },
         CREATED_AT_COLUMN,
-        {
-          render: () => <></>, // This is a blank column in place of the `Language` column
-        },
+        BLANK_COLUMN,
         DOCUMENT_COUNT_COLUMN,
         {
           ...FIELD_COUNT_COLUMN,
@@ -64,9 +64,7 @@ export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowPr
             </>
           ),
         },
-        {
-          render: () => <></>, // This is a blank column in place of the `Actions` column
-        },
+        BLANK_COLUMN,
       ]}
     />
   </div>

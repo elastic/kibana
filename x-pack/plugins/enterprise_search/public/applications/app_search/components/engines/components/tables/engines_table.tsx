@@ -17,7 +17,6 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n/react';
 
 import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -27,34 +26,14 @@ import { AppLogic } from '../../../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../../../constants';
 import { ENGINE_PATH } from '../../../../routes';
 import { generateEncodedPath } from '../../../../utils/encode_path_params';
-import { FormattedDateTime } from '../../../../utils/formatted_date_time';
 import { EngineDetails } from '../../../engine/types';
 
-export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
-  field: 'name',
-  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
-    defaultMessage: 'Name',
-  }),
-  width: '30%',
-  truncateText: true,
-  mobileOptions: {
-    header: true,
-    // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-    // @ts-ignore
-    enlarge: true,
-    width: '100%',
-    truncateText: false,
-  },
-};
-
-export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
-  field: 'created_at',
-  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.createdAt', {
-    defaultMessage: 'Created At',
-  }),
-  dataType: 'string',
-  render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
-};
+import {
+  CREATED_AT_COLUMN,
+  DOCUMENT_COUNT_COLUMN,
+  FIELD_COUNT_COLUMN,
+  NAME_COLUMN,
+} from './shared_columns';
 
 export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'language',
@@ -63,29 +42,6 @@ export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   }),
   dataType: 'string',
   render: (language: string) => language || UNIVERSAL_LANGUAGE,
-};
-
-export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
-  field: 'document_count',
-  name: i18n.translate(
-    'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.documentCount',
-    {
-      defaultMessage: 'Document Count',
-    }
-  ),
-  dataType: 'number',
-  render: (number: number) => <FormattedNumber value={number} />,
-  truncateText: true,
-};
-
-export const FIELD_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
-  field: 'field_count',
-  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.fieldCount', {
-    defaultMessage: 'Field Count',
-  }),
-  dataType: 'number',
-  render: (number: number) => <FormattedNumber value={number} />,
-  truncateText: true,
 };
 
 interface EnginesTableProps {

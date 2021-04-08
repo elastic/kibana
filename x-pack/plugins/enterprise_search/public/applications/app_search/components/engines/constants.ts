@@ -16,6 +16,11 @@ export const META_ENGINES_TITLE = i18n.translate(
   { defaultMessage: 'Meta Engines' }
 );
 
+export const SOURCE_ENGINES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.metaEngines.title',
+  { defaultMessage: 'Source Engines' }
+);
+
 export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createAnEngineButton.ButtonLabel',
   {

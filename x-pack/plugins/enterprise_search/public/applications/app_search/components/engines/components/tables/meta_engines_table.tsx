@@ -24,15 +24,16 @@ import { ENGINE_PATH } from '../../../../routes';
 import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { EngineDetails } from '../../../engine/types';
 
+import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
+import { MetaEnginesTableLogic } from './meta_engines_table_logic';
+import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
 import {
+  BLANK_COLUMN,
   CREATED_AT_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
-} from './engines_table';
-import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
-import { MetaEnginesTableLogic } from './meta_engines_table_logic';
-import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
+} from './shared_columns';
 import { getConflictingEnginesSet } from './utils';
 
 interface EnginesTableProps {
@@ -117,9 +118,7 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
       ),
     },
     CREATED_AT_COLUMN,
-    {
-      render: () => <></>, // This is a blank column in place of the `Language` column
-    },
+    BLANK_COLUMN,
     DOCUMENT_COUNT_COLUMN,
     FIELD_COUNT_COLUMN,
   ];
