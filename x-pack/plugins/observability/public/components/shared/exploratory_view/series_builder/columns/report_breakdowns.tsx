@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Breakdowns } from '../../series_editor/columns/breakdowns';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { DataSeries } from '../../types';
 
 export function ReportBreakdowns({ dataViewSeries }: { dataViewSeries: DataSeries }) {
