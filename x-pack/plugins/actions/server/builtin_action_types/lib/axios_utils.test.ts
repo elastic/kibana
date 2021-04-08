@@ -42,6 +42,10 @@ describe('request', () => {
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
     }));
+    configurationUtilities.getResponseSettings.mockReturnValue({
+      maxContentLength: 1000000,
+      timeout: 360000,
+    });
   });
 
   test('it fetch correctly with defaults', async () => {
@@ -58,6 +62,8 @@ describe('request', () => {
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
     expect(res).toEqual({
       status: 200,
@@ -88,6 +94,8 @@ describe('request', () => {
       httpAgent,
       httpsAgent,
       proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
     expect(res).toEqual({
       status: 200,
@@ -116,6 +124,8 @@ describe('request', () => {
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
     expect(res).toEqual({
       status: 200,
@@ -224,6 +234,8 @@ describe('request', () => {
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
     expect(res).toEqual({
       status: 200,
@@ -235,10 +247,15 @@ describe('request', () => {
 
 describe('patch', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     axiosMock.mockImplementation(() => ({
       status: 200,
       headers: { 'content-type': 'application/json' },
     }));
+    configurationUtilities.getResponseSettings.mockReturnValue({
+      maxContentLength: 1000000,
+      timeout: 360000,
+    });
   });
 
   test('it fetch correctly', async () => {
@@ -249,6 +266,8 @@ describe('patch', () => {
       httpAgent: undefined,
       httpsAgent: expect.any(HttpsAgent),
       proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
     });
   });
 });
