@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import { AccountHeader } from '../../components/layout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { SourceSubNav } from './components/source_sub_nav';
@@ -43,6 +44,7 @@ describe('PrivateSourcesLayout', () => {
 
     expect(wrapper.find('[data-test-subj="TestChildren"]')).toHaveLength(1);
     expect(wrapper.find(SourceSubNav)).toHaveLength(1);
+    expect(wrapper.find(AccountHeader)).toHaveLength(1);
   });
 
   it('uses correct title and description when private sources are enabled', () => {

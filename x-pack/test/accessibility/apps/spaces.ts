@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home');
     });
 
-    it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
+    // flaky https://github.com/elastic/kibana/issues/77933
+    it.skip('a11y test for manage spaces menu from top nav on Kibana home', async () => {
       await PageObjects.spaceSelector.openSpacesNav();
       await retry.waitFor(
         'Manage spaces option visible',

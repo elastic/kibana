@@ -30,6 +30,13 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();

@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
-import { FieldLabels } from '../../configurations/constants';
+import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 
 interface Props {
   seriesId: string;

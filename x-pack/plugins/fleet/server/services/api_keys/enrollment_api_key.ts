@@ -38,6 +38,7 @@ export async function listEnrollmentApiKeys(
     size: perPage,
     sort: 'created_at:desc',
     track_total_hits: true,
+    ignore_unavailable: true,
     q: kuery,
   });
 
@@ -230,6 +231,7 @@ export async function generateEnrollmentAPIKey(
 export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
   const res = await esClient.search<FleetServerEnrollmentAPIKey>({
     index: ENROLLMENT_API_KEYS_INDEX,
+    ignore_unavailable: true,
     q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
   });
 
