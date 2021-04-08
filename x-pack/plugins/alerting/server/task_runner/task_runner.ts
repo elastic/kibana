@@ -50,7 +50,7 @@ import {
   WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
-import { getEsErrorMessage } from './es_error_parser';
+import { getEsErrorMessage } from '../lib/errors';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 

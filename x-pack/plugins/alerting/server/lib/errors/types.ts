@@ -12,5 +12,10 @@ export interface ErrorThatHandlesItsOwnResponse extends Error {
 }
 
 export interface ElasticsearchError extends Error {
-  error?: ApiError;
+  // error?: ApiError;
+  meta?: {
+    body?: {
+      error?: ApiError;
+    };
+  };
 }
