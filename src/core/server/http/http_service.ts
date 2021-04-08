@@ -29,6 +29,7 @@ import {
   RequestHandlerContextProvider,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  InternalNotReadyHttpServiceSetup,
 } from './types';
 
 import { registerCoreHandlers } from './lifecycle_handlers';
@@ -90,12 +91,32 @@ export class HttpService
       ? await this.runNotReadyServer(config)
       : undefined;
 
+    let notReadyServer: InternalNotReadyHttpServiceSetup | undefined;
+    if (notReadySetup) {
+      // We cannot use the real context container since the core services may not yet be ready
+      const fakeContext: RequestHandlerContextContainer = deps.context.createContextContainer();
+      notReadyServer = {
+        registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
+          const router = new Router(
+            path,
+            this.log,
+            fakeContext.createHandler.bind(null, this.coreContext.coreId)
+          );
+
+          registerCallback(router);
+          notReadySetup.registerRouter(router, true);
+        },
+      };
+    }
+
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
 
     registerCoreHandlers(serverContract, config, this.env);
 
     this.internalSetup = {
       ...serverContract,
+
+      notReadyServer,
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
@@ -118,23 +139,6 @@ export class HttpService
         provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
-
-    if (notReadySetup) {
-      // We cannot use the real context container since the core services may not yet be ready
-      const fakeContext: RequestHandlerContextContainer = deps.context.createContextContainer();
-      this.internalSetup.notReadyServer = {
-        registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
-          const router = new Router(
-            path,
-            this.log,
-            fakeContext.createHandler.bind(null, this.coreContext.coreId)
-          );
-
-          registerCallback(router);
-          notReadySetup.registerRouter(router, true);
-        },
-      };
-    }
 
     return this.internalSetup;
   }
