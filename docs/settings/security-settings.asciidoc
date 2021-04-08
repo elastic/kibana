@@ -37,7 +37,7 @@ You do not need to configure any additional settings to use the
 You configure the authentication settings in the `xpack.security.authc.providers` namespace. For more information, refer to <<kibana-authentication>>.
 
 `xpack.security.authc.providers`::
-The SAML realm in {es} that the provider should use.
+Identifies the authentication method.
 +
 For example:
 +
@@ -46,10 +46,21 @@ For example:
 xpack.security.authc.providers: [saml, basic, oidc]
 --------------------------------------------------
 
-`xpack.security.authc.saml.realm`::
+[float]
+[[saml-authentication-provider-settings]]
+===== SAML authentication provider settings
+
+`xpack.security.authc.providers.saml.<provider-name>.realm`::
 The SAML realm in {es} that the provider should use.
 
-`xpack.security.authc.oidc.realm`::
+`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`::
+Specifies the maximum size of the URL that {kib} is allowed to store during the SAML handshake.
+
+[float]
+[[oidc-authentication-provider-settings]]
+===== OpenID Connect authentication provider setting
+
+`xpack.security.authc.providers.oidc.<provider-name>.realm`::
 The OpenID Connect realm in {es} that the provider should use.
 
 [float]
