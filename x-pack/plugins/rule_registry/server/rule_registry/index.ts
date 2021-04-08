@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
+import { CoreSetup, Logger, RequestHandlerContext } from 'kibana/server';
 import { inspect } from 'util';
 import { SpacesServiceStart } from '../../../spaces/server';
 import {
