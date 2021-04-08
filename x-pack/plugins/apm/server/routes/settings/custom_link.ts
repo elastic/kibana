@@ -75,13 +75,13 @@ const createCustomLinkRoute = createApmServerRoute({
     }
     const setup = await setupRequest(resources);
     const customLink = params.body;
-    const res = await createOrUpdateCustomLink({ customLink, setup });
 
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
       featureName: 'customLinks',
     });
-    return res;
+
+    await createOrUpdateCustomLink({ customLink, setup });
   },
 });
 
@@ -106,12 +106,12 @@ const updateCustomLinkRoute = createApmServerRoute({
 
     const { id } = params.path;
     const customLink = params.body;
-    const res = await createOrUpdateCustomLink({
+
+    await createOrUpdateCustomLink({
       customLinkId: id,
       customLink,
       setup,
     });
-    return res;
   },
 });
 

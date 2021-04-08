@@ -6,11 +6,14 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
+import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
   EndpointOf,
   ReturnOf,
   RouteRepositoryClient,
+  ServerRouteRepository,
+  ServerRoute,
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository/target/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
@@ -18,6 +21,7 @@ import { callApi } from './callApi';
 import type {
   APMServerRouteRepository,
   InspectResponse,
+  APMRouteHandlerResources,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
 
@@ -49,6 +53,20 @@ export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
 export type APIClientRequestParamsOf<
   TEndpoint extends EndpointOf<APMServerRouteRepository>
 > = ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+
+export type AbstractAPMRepository = ServerRouteRepository<
+  APMRouteHandlerResources,
+  {},
+  Record<
+    string,
+    ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>
+  >
+>;
+
+export type AbstractAPMClient = RouteRepositoryClient<
+  AbstractAPMRepository,
+  APMClientOptions
+>;
 
 export let callApmApi: APMClient = () => {
   throw new Error(

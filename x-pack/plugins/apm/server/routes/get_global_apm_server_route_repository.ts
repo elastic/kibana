@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServerRouteRepository } from '@kbn/server-route-repository/target/typings';
+import type {
+  ServerRouteRepository,
+  ReturnOf,
+  EndpointOf,
+} from '@kbn/server-route-repository';
+import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
 import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -55,5 +60,23 @@ const getGlobalApmServerRouteRepository = () => {
 export type APMServerRouteRepository = ReturnType<
   typeof getTypedGlobalApmServerRouteRepository
 >;
+
+// Ensure no APIs return arrays (or, by proxy, the any type),
+// to guarantee compatibility with _inspect.
+
+type CompositeEndpoint = EndpointOf<APMServerRouteRepository>;
+
+type EndpointReturnTypes = {
+  [Endpoint in CompositeEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
+};
+
+type ArrayLikeReturnTypes = PickByValue<EndpointReturnTypes, any[]>;
+
+type ViolatingEndpoints = keyof ArrayLikeReturnTypes;
+
+function assertType<T = never, U extends T = never>() {}
+
+// if any endpoint has an array-like return type, the assertion below will fail
+assertType<never, ViolatingEndpoints>();
 
 export { getGlobalApmServerRouteRepository };

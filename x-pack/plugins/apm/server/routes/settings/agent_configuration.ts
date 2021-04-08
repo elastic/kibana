@@ -137,7 +137,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       }`
     );
 
-    return await createOrUpdateConfiguration({
+    await createOrUpdateConfiguration({
       configurationId: config?._id,
       configurationIntake: body,
       setup,
