@@ -1242,6 +1242,13 @@ describe('migrations v2 model', () => {
               },
             },
           },
+          "unusedTypesToExclude": Object {
+            "_tag": "Some",
+            "value": Array [
+              "fleet-agent-events",
+              "tsvb-validation-telemetry",
+            ],
+          },
           "versionAlias": ".kibana_task_manager_8.1.0",
           "versionIndex": ".kibana_task_manager_8.1.0_001",
         }
