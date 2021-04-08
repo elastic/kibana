@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
-export function initDeleteCommentApi({ caseService, router, logger }: RouteDeps) {
+export function initDeleteCommentApi({ router, logger }: RouteDeps) {
   router.delete(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -29,16 +29,9 @@ export function initDeleteCommentApi({ caseService, router, logger }: RouteDeps)
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-
-        const user = caseService.getUser({ request });
         const client = await context.cases.getCasesClient();
         await client.attachments.delete({
           attachmentID: request.params.comment_id,
-          user,
-          soClient,
           subCaseID: request.query?.subCaseId,
           caseID: request.params.case_id,
         });

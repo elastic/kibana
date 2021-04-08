@@ -17,14 +17,14 @@ import { identity } from 'fp-ts/lib/function';
 import { SavedObjectFindOptionsRt, throwErrors } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
   subCaseId: rt.string,
 });
 
-export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
+export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASE_COMMENTS_URL}/_find`,
@@ -37,9 +37,6 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
         const query = pipe(
           FindQueryParamsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
@@ -48,7 +45,6 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
         const client = await context.cases.getCasesClient();
         return response.ok({
           body: await client.attachments.find({
-            soClient,
             caseID: request.params.case_id,
             queryParams: query,
           }),

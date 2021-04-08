@@ -4,43 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { esKuery } from 'src/plugins/data/server';
 import {
-  AssociationType,
+  AllCommentsResponse,
   CaseResponse,
   CommentRequest as AttachmentsRequest,
+  CommentResponse,
   CommentsResponse,
-  CommentsResponseRt,
-  SavedObjectFindOptionsRt,
 } from '../../../common/api';
-import { checkEnabledCaseConnectorOrThrow } from '../../common';
-import { createCaseError } from '../../common/error';
-import { defaultPage, defaultPerPage } from '../../routes/api';
-import { transformComments } from '../../routes/api/utils';
+
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { addComment } from './add';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
+import { find, FindArgs, get, getAll, GetAllArgs, GetArgs } from './get';
+import { update, UpdateArgs } from './update';
 
 interface AttachmentsAdd {
   caseId: string;
   comment: AttachmentsRequest;
-}
-
-const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
-  subCaseId: rt.string,
-});
-
-type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
-
-interface FindArgs {
-  soClient: SavedObjectsClientContract;
-  caseID: string;
-  queryParams?: FindQueryParams;
 }
 
 export interface AttachmentsSubClient {
@@ -48,6 +30,9 @@ export interface AttachmentsSubClient {
   deleteAll(deleteAllArgs: DeleteAllArgs): Promise<void>;
   delete(deleteArgs: DeleteArgs): Promise<void>;
   find(findArgs: FindArgs): Promise<CommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  get(getArgs: GetArgs): Promise<CommentResponse>;
+  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
 }
 
 export const createAttachmentsSubClient = (
@@ -65,57 +50,10 @@ export const createAttachmentsSubClient = (
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, args),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, args),
     find: (findArgs: FindArgs) => find(findArgs, args),
+    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, args),
+    get: (getArgs: GetArgs) => get(getArgs, args),
+    update: (updateArgs: UpdateArgs) => update(updateArgs, args),
   };
 
   return Object.freeze(attachmentSubClient);
 };
-
-async function find(
-  { soClient, caseID, queryParams }: FindArgs,
-  clientArgs: CasesClientArgs
-): Promise<CommentsResponse> {
-  try {
-    checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
-
-    const id = queryParams?.subCaseId ?? caseID;
-    const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;
-    const { filter, ...queryWithoutFilter } = queryParams ?? {};
-    const args = queryParams
-      ? {
-          caseService: clientArgs.caseService,
-          soClient,
-          id,
-          options: {
-            // We need this because the default behavior of getAllCaseComments is to return all the comments
-            // unless the page and/or perPage is specified. Since we're spreading the query after the request can
-            // still override this behavior.
-            page: defaultPage,
-            perPage: defaultPerPage,
-            sortField: 'created_at',
-            filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
-            ...queryWithoutFilter,
-          },
-          associationType,
-        }
-      : {
-          caseService: clientArgs.caseService,
-          soClient,
-          id,
-          options: {
-            page: defaultPage,
-            perPage: defaultPerPage,
-            sortField: 'created_at',
-          },
-          associationType,
-        };
-
-    const theComments = await clientArgs.caseService.getCommentsByAssociation(args);
-    return CommentsResponseRt.encode(transformComments(theComments));
-  } catch (error) {
-    throw createCaseError({
-      message: `Failed to find comments case id: ${caseID}: ${error}`,
-      error,
-      logger: clientArgs.logger,
-    });
-  }
-}

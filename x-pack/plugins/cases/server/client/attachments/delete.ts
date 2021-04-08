@@ -6,10 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'kibana/server';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 
-import { AssociationType, User } from '../../../common/api';
+import { AssociationType } from '../../../common/api';
 import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
@@ -20,8 +19,6 @@ import { checkEnabledCaseConnectorOrThrow } from '../../common';
  */
 export interface DeleteAllArgs {
   caseID: string;
-  soClient: SavedObjectsClientContract;
-  user: User;
   subCaseID?: string;
 }
 
@@ -32,22 +29,29 @@ export interface DeleteArgs {
   caseID: string;
   attachmentID: string;
   subCaseID?: string;
-  soClient: SavedObjectsClientContract;
-  user: User;
 }
 
 /**
  * Delete all comments for a case or sub case.
  */
 export async function deleteAll(
-  { caseID, subCaseID, soClient, user }: DeleteAllArgs,
+  { caseID, subCaseID }: DeleteAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> {
+  const {
+    user,
+    savedObjectsClient: soClient,
+    caseService,
+    attachmentService,
+    userActionService,
+    logger,
+  } = clientArgs;
+
   try {
     checkEnabledCaseConnectorOrThrow(subCaseID);
 
     const id = subCaseID ?? caseID;
-    const comments = await clientArgs.caseService.getCommentsByAssociation({
+    const comments = await caseService.getCommentsByAssociation({
       soClient,
       id,
       associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
@@ -55,7 +59,7 @@ export async function deleteAll(
 
     await Promise.all(
       comments.saved_objects.map((comment) =>
-        clientArgs.attachmentService.delete({
+        attachmentService.delete({
           soClient,
           attachmentId: comment.id,
         })
@@ -64,7 +68,7 @@ export async function deleteAll(
 
     const deleteDate = new Date().toISOString();
 
-    await clientArgs.userActionService.bulkCreate({
+    await userActionService.bulkCreate({
       soClient,
       actions: comments.saved_objects.map((comment) =>
         buildCommentUserActionItem({
@@ -82,21 +86,29 @@ export async function deleteAll(
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID} sub case id: ${subCaseID}: ${error}`,
       error,
-      logger: clientArgs.logger,
+      logger,
     });
   }
 }
 
 export async function deleteComment(
-  { caseID, user, soClient, attachmentID, subCaseID }: DeleteArgs,
+  { caseID, attachmentID, subCaseID }: DeleteArgs,
   clientArgs: CasesClientArgs
 ) {
+  const {
+    user,
+    savedObjectsClient: soClient,
+    attachmentService,
+    userActionService,
+    logger,
+  } = clientArgs;
+
   try {
     checkEnabledCaseConnectorOrThrow(subCaseID);
 
     const deleteDate = new Date().toISOString();
 
-    const myComment = await clientArgs.attachmentService.get({
+    const myComment = await attachmentService.get({
       soClient,
       attachmentId: attachmentID,
     });
@@ -113,12 +125,12 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}).`);
     }
 
-    await clientArgs.attachmentService.delete({
+    await attachmentService.delete({
       soClient,
       attachmentId: attachmentID,
     });
 
-    await clientArgs.userActionService.bulkCreate({
+    await userActionService.bulkCreate({
       soClient,
       actions: [
         buildCommentUserActionItem({
@@ -136,7 +148,7 @@ export async function deleteComment(
     throw createCaseError({
       message: `Failed to delete comment in route case id: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
       error,
-      logger: clientArgs.logger,
+      logger,
     });
   }
 }

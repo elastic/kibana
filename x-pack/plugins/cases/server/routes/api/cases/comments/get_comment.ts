@@ -7,12 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CommentResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
-import { flattenCommentSavedObject, wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { wrapError } from '../../utils';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
-export function initGetCommentApi({ attachmentService, router, logger }: RouteDeps) {
+export function initGetCommentApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -25,16 +24,13 @@ export function initGetCommentApi({ attachmentService, router, logger }: RouteDe
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
+        const client = await context.cases.getCasesClient();
 
-        const comment = await attachmentService.get({
-          soClient,
-          attachmentId: request.params.comment_id,
-        });
         return response.ok({
-          body: CommentResponseRt.encode(flattenCommentSavedObject(comment)),
+          body: await client.attachments.get({
+            attachmentID: request.params.comment_id,
+            caseID: request.params.case_id,
+          }),
         });
       } catch (error) {
         logger.error(

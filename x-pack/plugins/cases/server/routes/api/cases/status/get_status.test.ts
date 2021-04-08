@@ -16,7 +16,7 @@ import {
 } from '../../__fixtures__';
 import { initGetCasesStatusApi } from './get_status';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
-import { esKuery } from 'src/plugins/data/server';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { CaseType } from '../../../../../common/api';
 
 describe('GET status', () => {
