@@ -6,10 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '../../../../actions/server';
 
 import { GetFieldsResponse } from '../../../common/api';
-import { ConfigurationGetFields } from './client';
 import { createDefaultMapping, formatFields } from './utils';
+
+interface ConfigurationGetFields {
+  connectorId: string;
+  connectorType: string;
+  actionsClient: PublicMethodsOf<ActionsClient>;
+}
 
 export const getFields = async ({
   actionsClient,

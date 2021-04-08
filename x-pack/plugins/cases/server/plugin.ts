@@ -9,7 +9,10 @@ import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } fro
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
+import {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '../../actions/server';
 import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 import { ConfigType } from './config';
@@ -50,6 +53,7 @@ export interface PluginsStart {
   security?: SecurityPluginStart;
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export class CasePlugin {
@@ -143,6 +147,7 @@ export class CasePlugin {
         return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       featuresPluginStart: plugins.features,
+      actionsPluginStart: plugins.actions,
     });
 
     const getCasesClientWithRequestAndContext = async (

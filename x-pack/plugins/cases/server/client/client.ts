@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
 import { CasesClientArgs } from './types';
 import { CasesSubClient, createCasesSubClient } from './cases/client';
@@ -13,6 +12,7 @@ import { UserActionsSubClient, createUserActionsSubClient } from './user_actions
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
+import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
@@ -20,6 +20,7 @@ export class CasesClient {
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
   private readonly _subCases: SubCasesClient;
+  private readonly _configure: ConfigureSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -27,6 +28,7 @@ export class CasesClient {
     this._attachments = createAttachmentsSubClient(args, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
     this._subCases = createSubCasesClient(args, this);
+    this._configure = createConfigurationSubClient(args, this._casesClientInternal);
   }
 
   public get cases() {
@@ -46,6 +48,10 @@ export class CasesClient {
       throw new Error('The case connector feature is disabled');
     }
     return this._subCases;
+  }
+
+  public get configure() {
+    return this._configure;
   }
 
   // TODO: Remove it when all routes will be moved to the cases client.

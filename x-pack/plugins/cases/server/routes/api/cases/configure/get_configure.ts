@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { CaseConfigureResponseRt, ConnectorMappingsAttributes } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
-import { transformESConnectorToCaseConnector } from '../helpers';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
-export function initGetCaseConfigure({ caseConfigureService, router, logger }: RouteDeps) {
+export function initGetCaseConfigure({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_CONFIGURE_URL,
@@ -20,49 +17,10 @@ export function initGetCaseConfigure({ caseConfigureService, router, logger }: R
     },
     async (context, request, response) => {
       try {
-        let error = null;
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-
-        const myCaseConfigure = await caseConfigureService.find({ soClient });
-
-        const { connector, ...caseConfigureWithoutConnector } = myCaseConfigure.saved_objects[0]
-          ?.attributes ?? { connector: null };
-        let mappings: ConnectorMappingsAttributes[] = [];
-        if (connector != null) {
-          if (!context.cases) {
-            throw Boom.badRequest('RouteHandlerContext is not registered for cases');
-          }
-          const casesClient = await context.cases.getCasesClient();
-          const actionsClient = context.actions?.getActionsClient();
-          if (actionsClient == null) {
-            throw Boom.notFound('Action client not found');
-          }
-          try {
-            mappings = await casesClient.casesClientInternal.configuration.getMappings({
-              actionsClient,
-              connectorId: connector.id,
-              connectorType: connector.type,
-            });
-          } catch (e) {
-            error = e.isBoom
-              ? e.output.payload.message
-              : `Error connecting to ${connector.name} instance`;
-          }
-        }
+        const client = await context.cases.getCasesClient();
 
         return response.ok({
-          body:
-            myCaseConfigure.saved_objects.length > 0
-              ? CaseConfigureResponseRt.encode({
-                  ...caseConfigureWithoutConnector,
-                  connector: transformESConnectorToCaseConnector(connector),
-                  mappings,
-                  version: myCaseConfigure.saved_objects[0].version ?? '',
-                  error,
-                })
-              : {},
+          body: await client.configure.get(),
         });
       } catch (error) {
         logger.error(`Failed to get case configure in route: ${error}`);

@@ -24,6 +24,7 @@ import {
   AttachmentService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -38,6 +39,7 @@ interface CasesClientFactoryArgs {
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
+  actionsPluginStart: ActionsPluginStart;
 }
 
 /**
@@ -112,6 +114,7 @@ export class CasesClientFactory {
       logger: this.logger,
       authorization: auth,
       auditLogger,
+      actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });
   }
 }

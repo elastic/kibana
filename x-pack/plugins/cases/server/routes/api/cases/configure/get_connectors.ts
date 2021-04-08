@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { ActionType } from '../../../../../../actions/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../../../actions/server/types';
 
-import {
-  CASE_CONFIGURE_CONNECTORS_URL,
-  SUPPORTED_CONNECTORS,
-} from '../../../../../common/constants';
-
-const isConnectorSupported = (
-  action: FindActionResult,
-  actionTypes: Record<string, ActionType>
-): boolean =>
-  SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-  actionTypes[action.actionTypeId]?.enabledInLicense;
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
 
 /*
  * Be aware that this api will only return 20 connectors
  */
-
 export function initCaseConfigureGetActionConnector({ router, logger }: RouteDeps) {
   router.get(
     {
@@ -36,21 +21,9 @@ export function initCaseConfigureGetActionConnector({ router, logger }: RouteDep
     },
     async (context, request, response) => {
       try {
-        const actionsClient = context.actions?.getActionsClient();
+        const client = await context.cases.getCasesClient();
 
-        if (actionsClient == null) {
-          throw Boom.notFound('Action client not found');
-        }
-
-        const actionTypes = (await actionsClient.listTypes()).reduce(
-          (types, type) => ({ ...types, [type.id]: type }),
-          {}
-        );
-
-        const results = (await actionsClient.getAll()).filter((action) =>
-          isConnectorSupported(action, actionTypes)
-        );
-        return response.ok({ body: results });
+        return response.ok({ body: await client.configure.getConnectors() });
       } catch (error) {
         logger.error(`Failed to get connectors in route: ${error}`);
         return response.customError(wrapError(error));
