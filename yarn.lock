@@ -2680,6 +2680,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/legacy-logging@link:packages/kbn-legacy-logging":
   version "0.0.0"
   uid ""
@@ -2709,6 +2713,10 @@
   uid ""
 
 "@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
 
@@ -10941,11 +10949,6 @@ currently-unhandled@^0.4.1:
   integrity sha1-mI3zP+qxke95mmE2nddsF635V+o=
   dependencies:
     array-find-index "^1.0.1"
-
-custom-event-polyfill@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/custom-event-polyfill/-/custom-event-polyfill-0.3.0.tgz#99807839be62edb446b645832e0d80ead6fa1888"
-  integrity sha1-mYB4Ob5i7bRGtkWDLg2A6tb6GIg=
 
 cwise-compiler@^1.0.0, cwise-compiler@^1.1.2:
   version "1.1.3"
