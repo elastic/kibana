@@ -15,7 +15,9 @@ import type { PackagePolicy } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
+import { appContextService } from './app_context';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
+import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import { outputService } from './output';
 import {
   ensureInstalledDefaultPackages,
@@ -150,6 +152,20 @@ async function createSetupSideEffects(
   }
 
   await ensureAgentActionPolicyChangeExists(soClient);
+
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
+
+  const policies = policiesOrUndefined ?? [];
+  const packages = packagesOrUndefined ?? [];
+
+  await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient,
+    policies,
+    packages,
+    defaultOutput
+  );
 
   return { isIntialized: true };
 }
