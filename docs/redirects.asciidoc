@@ -299,3 +299,8 @@ This page has been moved. PRefer to <<external-plugin-localization>>.
 
 This page has been removed. Refer to <<dashboard>>.
 
+
+[role="exclude",id="space-rbac-tutorial"]
+== Tutorial: Use role-based access control to customize Kibana spaces
+
+This content has moved. refer to <<tutorial-secure-access-to-kibana>>.
