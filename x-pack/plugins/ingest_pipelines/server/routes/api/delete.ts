@@ -37,12 +37,13 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
           return clusterClient.asCurrentUser.ingest
             .deletePipeline({ id: pipelineName })
             .then(() => response.itemsDeleted.push(pipelineName))
-            .catch((e) =>
+            .catch((e) => {
               response.errors.push({
+                error: e?.meta?.body?.error ?? e,
+                status: e?.meta?.body?.status,
                 name: pipelineName,
-                error: e,
-              })
-            );
+              });
+            });
         })
       );
 
