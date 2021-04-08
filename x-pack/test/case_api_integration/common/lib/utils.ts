@@ -30,6 +30,7 @@ import {
   SubCaseResponse,
   CommentResponse,
   CasesPatchRequest,
+  AllCommentsResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -612,6 +613,35 @@ export const deleteComment = async (
     .set('kbn-xsrf', 'true')
     .expect(expectedHttpCode)
     .send();
+
+  return comment;
+};
+
+export const getAllComments = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  expectedHttpCode: number = 204
+): Promise<AllCommentsResponse> => {
+  const { body: comments } = await supertest
+    .get(`${CASES_URL}/${caseId}/comments`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return comments;
+};
+
+export const getComment = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  commentId: string,
+  expectedHttpCode: number = 204
+): Promise<CommentResponse> => {
+  const { body: comment } = await supertest
+    .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
 
   return comment;
 };

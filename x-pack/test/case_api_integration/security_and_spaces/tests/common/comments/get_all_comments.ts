@@ -15,6 +15,9 @@ import {
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
+  createCase,
+  createComment,
+  getAllComments,
 } from '../../../../common/lib/utils';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
 
@@ -29,29 +32,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get multiple comments for a single case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: comments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment(supertest, postedCase.id, postCommentUserReq);
+      await createComment(supertest, postedCase.id, postCommentUserReq);
+      const comments = await getAllComments(supertest, postedCase.id);
 
       expect(comments.length).to.eql(2);
     });
