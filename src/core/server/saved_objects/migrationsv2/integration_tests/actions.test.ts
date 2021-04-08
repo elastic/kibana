@@ -59,7 +59,7 @@ describe('migration actions', () => {
 
     // Create test fixture data:
     await createIndex(client, 'existing_index_with_docs', {
-      dynamic: true as any,
+      dynamic: true,
       properties: {},
     })();
     const sourceDocs = ([
@@ -337,7 +337,6 @@ describe('migration actions', () => {
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
   describe('reindex & waitForReindexTask', () => {
-    expect.assertions(2);
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex(
         client,
@@ -354,11 +353,11 @@ describe('migration actions', () => {
                 }
               `);
 
-      const results = ((await searchForOutdatedDocuments(
-        client,
-        'reindex_target',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'reindex_target',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
           "doc 1",
@@ -384,11 +383,11 @@ describe('migration actions', () => {
                   "right": "reindex_succeeded",
                 }
               `);
-      const results = ((await searchForOutdatedDocuments(
-        client,
-        'reindex_target_2',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'reindex_target_2',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
@@ -432,12 +431,12 @@ describe('migration actions', () => {
                       }
                   `);
 
-      // Assert that documents weren't overrided by the second, unscripted reindex
-      const results = ((await searchForOutdatedDocuments(
-        client,
-        'reindex_target_3',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      // Assert that documents weren't overridden by the second, unscripted reindex
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'reindex_target_3',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
@@ -452,11 +451,11 @@ describe('migration actions', () => {
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex(client, 'reindex_target_4', { properties: {} })();
-      const sourceDocs = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_with_docs',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments
+      const sourceDocs = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_with_docs',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments
         .slice(0, 2)
         .map(({ _id, _source }) => ({
           _id,
@@ -479,13 +478,13 @@ describe('migration actions', () => {
                           "right": "reindex_succeeded",
                         }
                   `);
-      // Assert that existing documents weren't overrided, but that missing
+      // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
-      const results = ((await searchForOutdatedDocuments(
-        client,
-        'reindex_target_4',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'reindex_target_4',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
           "doc 1",
@@ -701,26 +700,30 @@ describe('migration actions', () => {
   describe('searchForOutdatedDocuments', () => {
     it('only returns documents that match the outdatedDocumentsQuery', async () => {
       expect.assertions(2);
-      const resultsWithQuery = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_with_docs',
-        {
+      const resultsWithQuery = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_with_docs',
+        outdatedDocumentsQuery: {
           match: { title: { query: 'doc' } },
-        }
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+        },
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(resultsWithQuery.length).toBe(3);
 
-      const resultsWithoutQuery = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_with_docs',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const resultsWithoutQuery = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_with_docs',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(resultsWithoutQuery.length).toBe(4);
     });
     it('resolves with _id, _source, _seq_no and _primary_term', async () => {
       expect.assertions(1);
-      const results = ((await searchForOutdatedDocuments(client, 'existing_index_with_docs', {
-        match: { title: { query: 'doc' } },
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_with_docs',
+        outdatedDocumentsQuery: {
+          match: { title: { query: 'doc' } },
+        },
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results).toEqual(
         expect.arrayContaining([
@@ -805,7 +808,7 @@ describe('migration actions', () => {
     it('resolves right when mappings were updated and picked up', async () => {
       // Create an index without any mappings and insert documents into it
       await createIndex(client, 'existing_index_without_mappings', {
-        dynamic: false as any,
+        dynamic: false,
         properties: {},
       })();
       const sourceDocs = ([
@@ -821,11 +824,13 @@ describe('migration actions', () => {
       )();
 
       // Assert that we can't search over the unmapped fields of the document
-      const originalSearchResults = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_without_mappings',
-        { match: { title: { query: 'doc' } } }
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const originalSearchResults = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_without_mappings',
+        outdatedDocumentsQuery: {
+          match: { title: { query: 'doc' } },
+        },
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(originalSearchResults.length).toBe(0);
 
       // Update and pickup mappings so that the title field is searchable
@@ -839,11 +844,13 @@ describe('migration actions', () => {
       await waitForPickupUpdatedMappingsTask(client, taskId, '60s')();
 
       // Repeat the search expecting to be able to find the existing documents
-      const pickedUpSearchResults = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_without_mappings',
-        { match: { title: { query: 'doc' } } }
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const pickedUpSearchResults = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_without_mappings',
+        outdatedDocumentsQuery: {
+          match: { title: { query: 'doc' } },
+        },
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(pickedUpSearchResults.length).toBe(4);
     });
   });
@@ -1050,11 +1057,11 @@ describe('migration actions', () => {
               `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
-      const existingDocs = ((await searchForOutdatedDocuments(
-        client,
-        'existing_index_with_docs',
-        undefined as any
-      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const existingDocs = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'existing_index_with_docs',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
 
       const task = bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', [
         ...existingDocs,
