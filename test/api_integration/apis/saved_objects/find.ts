@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
             }));
       });
 
-      describe('with a aggs', () => {
+      describe('using aggregations', () => {
         it('should return 200 with a valid response', async () =>
           await supertest
             .get(
@@ -331,7 +331,8 @@ export default function ({ getService }: FtrProviderContext) {
             .then((resp) => {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
-                message: 'Invalid aggregation: This type dashboard is not allowed: Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.field] Invalid attribute path: dashboard.attributes.version: Bad Request',
                 statusCode: 400,
               });
             }));
