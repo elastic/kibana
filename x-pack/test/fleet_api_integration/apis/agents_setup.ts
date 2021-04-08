@@ -15,7 +15,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('fleet_agents_setup', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96515
+  describe.skip('fleet_agents_setup', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('empty_kibana');
