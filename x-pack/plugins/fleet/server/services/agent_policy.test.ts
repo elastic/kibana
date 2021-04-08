@@ -171,7 +171,8 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
+          protocol: 'http',
+          hosts: ['localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',
@@ -207,7 +208,8 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
+          protocol: 'http',
+          hosts: ['localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',
@@ -244,7 +246,8 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          hosts: ['http://localhost:5603'],
+          protocol: 'http',
+          hosts: ['localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',

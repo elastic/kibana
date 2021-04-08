@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { getFullAgentPolicyKibanaConfig } from './full_agent_policy_kibana_config';
+import { getFullAgentPolicyHostAndProtocolConfig } from './full_agent_policy_kibana_config';
 
 describe('Fleet - getFullAgentPolicyKibanaConfig', () => {
   it('should return no path when there is no path', () => {
-    expect(getFullAgentPolicyKibanaConfig(['http://localhost:5601'])).toEqual({
+    expect(getFullAgentPolicyHostAndProtocolConfig(['http://localhost:5601'])).toEqual({
       hosts: ['localhost:5601'],
       protocol: 'http',
     });
   });
   it('should return correct config when there is a path', () => {
-    expect(getFullAgentPolicyKibanaConfig(['http://localhost:5601/ssg'])).toEqual({
+    expect(getFullAgentPolicyHostAndProtocolConfig(['http://localhost:5601/ssg'])).toEqual({
       hosts: ['localhost:5601'],
       protocol: 'http',
       path: '/ssg/',
     });
   });
   it('should return correct config when there is a path that ends in a slash', () => {
-    expect(getFullAgentPolicyKibanaConfig(['http://localhost:5601/ssg/'])).toEqual({
+    expect(getFullAgentPolicyHostAndProtocolConfig(['http://localhost:5601/ssg/'])).toEqual({
       hosts: ['localhost:5601'],
       protocol: 'http',
       path: '/ssg/',
@@ -30,7 +30,10 @@ describe('Fleet - getFullAgentPolicyKibanaConfig', () => {
   });
   it('should return correct config when there are multiple hosts', () => {
     expect(
-      getFullAgentPolicyKibanaConfig(['http://localhost:5601/ssg/', 'http://localhost:3333/ssg/'])
+      getFullAgentPolicyHostAndProtocolConfig([
+        'http://localhost:5601/ssg/',
+        'http://localhost:3333/ssg/',
+      ])
     ).toEqual({
       hosts: ['localhost:5601', 'localhost:3333'],
       protocol: 'http',

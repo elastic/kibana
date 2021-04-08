@@ -81,11 +81,9 @@ export interface FullAgentPolicy {
     [output: string]: FullAgentPolicyOutputPermissions;
   };
   fleet?:
+    | FullAgentPolicyHostAndProtocolConfig
     | {
-        hosts: string[];
-      }
-    | {
-        kibana: FullAgentPolicyKibanaConfig;
+        kibana: FullAgentPolicyHostAndProtocolConfig;
       };
   inputs: FullAgentPolicyInput[];
   revision?: number;
@@ -99,7 +97,7 @@ export interface FullAgentPolicy {
   };
 }
 
-export interface FullAgentPolicyKibanaConfig {
+export interface FullAgentPolicyHostAndProtocolConfig {
   hosts: string[];
   protocol: string;
   path?: string;
