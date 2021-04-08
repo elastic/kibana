@@ -77,7 +77,7 @@ describe('Overview page', () => {
 
       expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
       expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
-      expect(find('deprecationLoggingCallout').find('.euiSwitch__label').text()).toContain(
+      expect(find('deprecationLoggingFormRow').find('.euiSwitch__label').text()).toContain(
         'Enable deprecation logging'
       );
 
@@ -89,7 +89,7 @@ describe('Overview page', () => {
 
       expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
       expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(true);
-      expect(find('deprecationLoggingCallout').find('.euiSwitch__label').text()).toContain(
+      expect(find('deprecationLoggingFormRow').find('.euiSwitch__label').text()).toContain(
         'Could not load logging state'
       );
     });

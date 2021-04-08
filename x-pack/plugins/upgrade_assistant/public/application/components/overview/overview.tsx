@@ -17,8 +17,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
-  EuiCallOut,
   EuiLink,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,13 +41,10 @@ const i18nTexts = {
         nextMajor,
       },
     }),
-  deprecationLoggingTitle: i18n.translate('xpack.upgradeAssistant.deprecationLoggingTitle', {
-    defaultMessage: 'Review deprecation logs',
-  }),
-  deprecationLoggingDescription: (href: string) => (
+  deprecationLoggingLabel: (href: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="For other issues that need your attention, review the deprecation logs. You may need to enable deprecation logging. {learnMore}"
+      defaultMessage="Deprecation logs may identify additional deprecations that should be addressed. {learnMore}"
       values={{
         learnMore: (
           <EuiLink href={href} target="_blank">
@@ -111,22 +108,6 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer />
 
-            <EuiCallOut
-              title={i18nTexts.deprecationLoggingTitle}
-              iconType="pin"
-              data-test-subj="deprecationLoggingCallout"
-            >
-              <p>
-                {i18nTexts.deprecationLoggingDescription(
-                  docLinks.links.elasticsearch.deprecationLogging
-                )}
-              </p>
-
-              <DeprecationLoggingToggle />
-            </EuiCallOut>
-
-            <EuiSpacer />
-
             {/* Remove this in last minor of the current major (e.g., 7.15) */}
             <LatestMinorBanner />
 
@@ -135,6 +116,18 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
                 <ESDeprecationStats history={history} />
+
+                <EuiSpacer />
+
+                <EuiFormRow
+                  label={i18nTexts.deprecationLoggingLabel(
+                    docLinks.links.elasticsearch.deprecationLogging
+                  )}
+                  hasChildLabel={false}
+                  data-test-subj="deprecationLoggingFormRow"
+                >
+                  <DeprecationLoggingToggle />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

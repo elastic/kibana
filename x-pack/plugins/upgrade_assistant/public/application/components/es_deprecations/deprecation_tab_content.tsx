@@ -10,12 +10,19 @@ import React, { FunctionComponent, useState } from 'react';
 
 import { EuiEmptyPrompt, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
+import { SectionLoading } from '../../../shared_imports';
 import { GroupByOption, LevelFilterOption, UpgradeAssistantTabProps } from '../types';
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations/grouped';
 import { EsDeprecationErrors } from './es_deprecation_errors';
 
+const i18nTexts = {
+  isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
+    defaultMessage: 'Loading deprecations…',
+  }),
+};
 export interface CheckupTabProps extends UpgradeAssistantTabProps {
   checkupLabel: string;
 }
@@ -56,82 +63,90 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
     return Object.keys(GroupByOption).filter((opt) => find(deprecations, opt)) as GroupByOption[];
   };
 
-  const renderCheckupData = () => {
+  if (deprecations && deprecations.length === 0) {
     return (
-      <GroupedDeprecations
-        currentGroupBy={currentGroupBy}
-        currentFilter={currentFilter}
-        search={search}
-        allDeprecations={deprecations}
+      <EuiEmptyPrompt
+        iconType="faceHappy"
+        data-test-subj="noDeprecationsPrompt"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesTitle"
+              defaultMessage="All clear!"
+            />
+          </h2>
+        }
+        body={
+          <>
+            <p data-test-subj="upgradeAssistantIssueSummary">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesLabel"
+                defaultMessage="You have no {strongCheckupLabel} issues."
+                values={{
+                  strongCheckupLabel: <strong>{checkupLabel}</strong>,
+                }}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail"
+                defaultMessage="Check the {overviewTabButton} for next steps."
+                values={{
+                  overviewTabButton: (
+                    <EuiLink onClick={navigateToOverviewPage}>
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
+                        defaultMessage="Overview page"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </>
+        }
       />
     );
-  };
+  }
+
+  let content: React.ReactNode;
+
+  if (isLoading) {
+    content = <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
+  } else if (deprecations?.length) {
+    content = (
+      <div data-test-subj="deprecationsContainer">
+        <CheckupControls
+          allDeprecations={deprecations}
+          isLoading={isLoading}
+          loadData={refreshCheckupData}
+          currentFilter={currentFilter}
+          onFilterChange={changeFilter}
+          onSearchChange={changeSearch}
+          availableGroupByOptions={availableGroupByOptions()}
+          currentGroupBy={currentGroupBy}
+          onGroupByChange={changeGroupBy}
+        />
+
+        <EuiSpacer />
+
+        <GroupedDeprecations
+          currentGroupBy={currentGroupBy}
+          currentFilter={currentFilter}
+          search={search}
+          allDeprecations={deprecations}
+        />
+      </div>
+    );
+  } else if (error) {
+    content = <EsDeprecationErrors error={error} />;
+  }
 
   return (
     <div data-test-subj={`${checkupLabel}TabContent`}>
       <EuiSpacer />
 
-      {error ? (
-        <EsDeprecationErrors error={error} />
-      ) : deprecations && deprecations.length > 0 ? (
-        <div data-test-subj="deprecationsContainer">
-          <CheckupControls
-            allDeprecations={deprecations}
-            isLoading={isLoading}
-            loadData={refreshCheckupData}
-            currentFilter={currentFilter}
-            onFilterChange={changeFilter}
-            onSearchChange={changeSearch}
-            availableGroupByOptions={availableGroupByOptions()}
-            currentGroupBy={currentGroupBy}
-            onGroupByChange={changeGroupBy}
-          />
-          <EuiSpacer />
-          {renderCheckupData()}
-        </div>
-      ) : (
-        <EuiEmptyPrompt
-          iconType="faceHappy"
-          data-test-subj="noDeprecationsPrompt"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesTitle"
-                defaultMessage="All clear!"
-              />
-            </h2>
-          }
-          body={
-            <>
-              <p data-test-subj="upgradeAssistantIssueSummary">
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesLabel"
-                  defaultMessage="You have no {strongCheckupLabel} issues."
-                  values={{
-                    strongCheckupLabel: <strong>{checkupLabel}</strong>,
-                  }}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail"
-                  defaultMessage="Check the {overviewTabButton} for next steps."
-                  values={{
-                    overviewTabButton: (
-                      <EuiLink onClick={navigateToOverviewPage}>
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
-                          defaultMessage="Overview page"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </>
-          }
-        />
-      )}
+      {content}
     </div>
   );
 };

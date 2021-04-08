@@ -34,7 +34,7 @@ export type OverviewTestSubjects =
   | 'esStatsPanel'
   | 'esStatsPanel.totalDeprecations'
   | 'esStatsPanel.criticalDeprecations'
-  | 'deprecationLoggingCallout'
+  | 'deprecationLoggingFormRow'
   | 'requestErrorIconTip'
   | 'partiallyUpgradedErrorIconTip'
   | 'upgradedErrorIconTip'

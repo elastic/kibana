@@ -22999,7 +22999,6 @@
     "xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel": "更改筛选以显示更多内容。",
     "xpack.upgradeAssistant.checkupTab.controls.collapseAllButtonLabel": "折叠全部",
     "xpack.upgradeAssistant.checkupTab.controls.expandAllButtonLabel": "展开全部",
-    "xpack.upgradeAssistant.checkupTab.controls.filterBar.allButtonLabel": "全部",
     "xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel": "紧急",
     "xpack.upgradeAssistant.checkupTab.controls.filterErrorMessageLabel": "筛选无效：{searchTermError}",
     "xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIndexLabel": "按索引",

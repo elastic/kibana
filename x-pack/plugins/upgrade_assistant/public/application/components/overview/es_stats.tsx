@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -39,6 +40,21 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
+  viewDeprecationsLink: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecationStats.viewDeprecationsLinkText',
+    {
+      defaultMessage: 'View deprecations',
+    }
+  ),
+  getTotalDeprecationsTooltip: (clusterCount: number, indexCount: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
+      defaultMessage:
+        'This cluster contains {clusterCount} cluster deprecations and {indexCount} index deprecations',
+      values: {
+        clusterCount,
+        indexCount,
+      },
+    }),
 };
 
 interface Props {
@@ -56,17 +72,22 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
   );
 
   return (
-    <EuiPanel data-test-subj="esStatsPanel">
-      <EuiTitle size="s">
-        <h3>
+    <EuiPanel data-test-subj="esStatsPanel" hasShadow={false} hasBorder={true}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{i18nTexts.statsTitle}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiLink
             {...reactRouterNavigate(history, '/es_deprecations/cluster')}
             data-test-subj="esDeprecationsLink"
           >
-            {i18nTexts.statsTitle}
+            {i18nTexts.viewDeprecationsLink}
           </EuiLink>
-        </h3>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer />
 
@@ -75,7 +96,18 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
           <EuiStat
             data-test-subj="totalDeprecations"
             title={error ? '--' : allDeprecations.length}
-            description={i18nTexts.totalDeprecationsTitle}
+            description={
+              <>
+                <span>{i18nTexts.totalDeprecationsTitle}</span>{' '}
+                <EuiIconTip
+                  content={i18nTexts.getTotalDeprecationsTooltip(
+                    esDeprecations?.cluster.length ?? 0,
+                    esDeprecations?.indices.length ?? 0
+                  )}
+                  position="right"
+                />
+              </>
+            }
             isLoading={isLoading}
           />
         </EuiFlexItem>

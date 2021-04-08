@@ -59,6 +59,7 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
           }}
           hasActiveFilters={currentFilter === LevelFilterOption.critical}
           numFilters={levelCounts[LevelFilterOption.critical] || undefined}
+          data-test-subj="criticalLevelFilter"
         >
           {LocalizedOptions[LevelFilterOption.critical]}
         </EuiFilterButton>
@@ -73,6 +74,7 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
           }}
           hasActiveFilters={currentFilter === LevelFilterOption.warning}
           numFilters={levelCounts[LevelFilterOption.warning] || undefined}
+          data-test-subj="warningLevelFilter"
         >
           {LocalizedOptions[LevelFilterOption.warning]}
         </EuiFilterButton>
