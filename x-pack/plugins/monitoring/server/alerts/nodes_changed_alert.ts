@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -102,7 +103,7 @@ export class NodesChangedAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -111,7 +112,7 @@ export class NodesChangedAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern
     );

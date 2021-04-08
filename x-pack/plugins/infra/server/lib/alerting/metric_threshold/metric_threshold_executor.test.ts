@@ -16,6 +16,8 @@ import {
 } from '../../../../../alerting/server/mocks';
 import { InfraSources } from '../../sources';
 import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -422,9 +424,8 @@ describe('The metric threshold alert type', () => {
 
 const createMockStaticConfiguration = (sources: any) => ({
   enabled: true,
-  query: {
-    partitionSize: 1,
-    partitionFactor: 1,
+  inventory: {
+    compositeSize: 2000,
   },
   sources,
 });
@@ -439,26 +440,36 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
+services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
+  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (params?.body.aggs.groupings) {
+    if (params?.body.aggs.groupings.composite.after) {
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mocks.compositeEndResponse
+      );
     }
     if (metric === 'test.metric.2') {
-      return mocks.alternateCompositeResponse;
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mocks.alternateCompositeResponse
+      );
     }
-    return mocks.basicCompositeResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.basicCompositeResponse
+    );
   }
   if (metric === 'test.metric.2') {
-    return mocks.alternateMetricResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.alternateMetricResponse
+    );
   } else if (metric === 'test.metric.3') {
-    return body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
-      ? mocks.emptyRateResponse
-      : mocks.emptyMetricResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+        ? mocks.emptyRateResponse
+        : mocks.emptyMetricResponse
+    );
   }
-  return mocks.basicMetricResponse;
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse);
 });
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')

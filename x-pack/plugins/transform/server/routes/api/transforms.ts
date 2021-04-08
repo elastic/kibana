@@ -206,6 +206,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
+            // @ts-expect-error @elastic/elasticsearch max_page_search_size is required in TransformPivot
             body: req.body,
             transform_id: transformId,
           })
@@ -250,6 +251,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const {
             body,
           } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error query doesn't satisfy QueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
           });
@@ -452,9 +454,12 @@ async function deleteTransforms(
           transform_id: transformId,
         });
         const transformConfig = body.transforms[0];
+        // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
         destinationIndex = Array.isArray(transformConfig.dest.index)
-          ? transformConfig.dest.index[0]
-          : transformConfig.dest.index;
+          ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index[0]
+          : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index;
       } catch (getTransformConfigError) {
         transformDeleted.error = getTransformConfigError.meta.body.error;
         results[transformId] = {
@@ -539,6 +544,7 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+      // @ts-expect-error max_page_search_size is required in TransformPivot
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {

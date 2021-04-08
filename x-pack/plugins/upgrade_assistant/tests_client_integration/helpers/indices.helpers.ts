@@ -59,4 +59,7 @@ export type IndicesTestSubjects =
   | 'expandAll'
   | 'removeIndexSettingsButton'
   | 'deprecationsContainer'
+  | 'permissionsError'
+  | 'upgradeStatusError'
+  | 'noDeprecationsPrompt'
   | string;

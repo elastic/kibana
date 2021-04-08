@@ -43,7 +43,9 @@ export const MultiMetricDetectorsSummary: FC = () => {
         try {
           const tempFieldValues = await chartLoader.loadFieldExampleValues(
             jobCreator.splitField,
-            jobCreator.runtimeMappings
+            jobCreator.runtimeMappings,
+            // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+            jobCreator.datafeedConfig.indices_options
           );
           setFieldValues(tempFieldValues);
         } catch (error) {
@@ -76,7 +78,9 @@ export const MultiMetricDetectorsSummary: FC = () => {
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
-          jobCreator.runtimeMappings
+          jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
       } catch (error) {

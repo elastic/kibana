@@ -109,6 +109,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
@@ -168,6 +169,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getBoundsForFilters(boundsFilters, registerCancelCallback) {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destFitToBounds: {
         geo_bounds: {
@@ -185,7 +187,10 @@ export class ESPewPewSource extends AbstractESAggSource {
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
+      const esResp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        legacyHitsTotal: false,
+      });
       if (esResp.aggregations.destFitToBounds.bounds) {
         corners.push([
           esResp.aggregations.destFitToBounds.bounds.top_left.lon,

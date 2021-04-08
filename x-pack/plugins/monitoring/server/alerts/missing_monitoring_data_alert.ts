@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -66,7 +67,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   }
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -78,7 +79,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
-      callCluster,
+      esClient,
       clusters,
       indexPattern,
       Globals.app.config.ui.max_bucket_size,

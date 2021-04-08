@@ -7,12 +7,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import {
-  ExpressionsService,
-  ExpressionsServiceSetup,
-  ExecutionContext,
-  ExpressionsServiceStart,
-} from '../common';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, IExpressionLoader, loader } from './loader';
@@ -42,14 +37,8 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   private configureExecutor(core: CoreSetup) {
     const { executor } = this.expressions;
 
-    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
-      const [start] = await core.getStartServices();
-      return start.savedObjects.client.get(type, id);
-    };
-
     executor.extendContext({
       environment: 'client',
-      getSavedObject,
     });
   }
 

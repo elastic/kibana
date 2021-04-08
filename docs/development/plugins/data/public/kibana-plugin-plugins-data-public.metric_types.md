@@ -20,6 +20,7 @@ export declare enum METRIC_TYPES
 |  COUNT | <code>&quot;count&quot;</code> |  |
 |  CUMULATIVE\_SUM | <code>&quot;cumulative_sum&quot;</code> |  |
 |  DERIVATIVE | <code>&quot;derivative&quot;</code> |  |
+|  FILTERED\_METRIC | <code>&quot;filtered_metric&quot;</code> |  |
 |  GEO\_BOUNDS | <code>&quot;geo_bounds&quot;</code> |  |
 |  GEO\_CENTROID | <code>&quot;geo_centroid&quot;</code> |  |
 |  MAX | <code>&quot;max&quot;</code> |  |
@@ -31,6 +32,7 @@ export declare enum METRIC_TYPES
 |  PERCENTILE\_RANKS | <code>&quot;percentile_ranks&quot;</code> |  |
 |  PERCENTILES | <code>&quot;percentiles&quot;</code> |  |
 |  SERIAL\_DIFF | <code>&quot;serial_diff&quot;</code> |  |
+|  SINGLE\_PERCENTILE | <code>&quot;single_percentile&quot;</code> |  |
 |  STD\_DEV | <code>&quot;std_dev&quot;</code> |  |
 |  SUM | <code>&quot;sum&quot;</code> |  |
 |  SUM\_BUCKET | <code>&quot;sum_bucket&quot;</code> |  |

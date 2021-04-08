@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__';
 
 import React from 'react';
 
@@ -31,10 +31,15 @@ describe('OrganicDocuments', () => {
     activeQuery: 'world',
     organicDocumentsLoading: false,
   };
+  const actions = {
+    addPromotedId: jest.fn(),
+    addHiddenId: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(values);
+    setMockActions(actions);
   });
 
   it('renders a list of organic results', () => {
@@ -63,5 +68,23 @@ describe('OrganicDocuments', () => {
     const wrapper = shallow(<OrganicDocuments />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  });
+
+  describe('actions', () => {
+    it('renders results with an action button that promotes the result', () => {
+      const wrapper = shallow(<OrganicDocuments />);
+      const result = wrapper.find(CurationResult).first();
+      result.prop('actions')[1].onClick();
+
+      expect(actions.addPromotedId).toHaveBeenCalledWith('mock-document-1');
+    });
+
+    it('renders results with an action button that hides the result', () => {
+      const wrapper = shallow(<OrganicDocuments />);
+      const result = wrapper.find(CurationResult).last();
+      result.prop('actions')[0].onClick();
+
+      expect(actions.addHiddenId).toHaveBeenCalledWith('mock-document-3');
+    });
   });
 });

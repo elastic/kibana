@@ -40,6 +40,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
@@ -54,6 +55,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -92,7 +94,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -311,6 +313,7 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -385,6 +388,8 @@ export {
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './search';
 
 export type {
@@ -421,6 +426,7 @@ export const search = {
     toAbsoluteDates,
     boundsDescendingRaw,
     getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -463,6 +469,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
 export { AggsStart } from './search/aggs';

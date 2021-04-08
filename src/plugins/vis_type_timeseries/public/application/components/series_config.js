@@ -33,10 +33,9 @@ export const SeriesConfig = (props) => {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
-  const seriesIndexPattern =
-    props.model.override_index_pattern && props.model.series_index_pattern
-      ? props.model.series_index_pattern
-      : props.indexPatternForQuery;
+  const seriesIndexPattern = props.model.override_index_pattern
+    ? props.model.series_index_pattern
+    : props.indexPatternForQuery;
 
   return (
     <div className="tvbAggRow">
@@ -137,5 +136,5 @@ SeriesConfig.propTypes = {
   panel: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };

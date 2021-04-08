@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import 'source-map-support/register';
-
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
@@ -18,6 +16,7 @@ import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
 import { runOptimizer } from './run_optimizer';
 import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
+import { reportOptimizerTimings } from './report_optimizer_timings';
 
 function getLimitsPath(flags: Flags, defaultPath: string) {
   if (flags.limits) {
@@ -144,7 +143,9 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
 
       const update$ = runOptimizer(config);
 
-      await lastValueFrom(update$.pipe(logOptimizerState(log, config)));
+      await lastValueFrom(
+        update$.pipe(logOptimizerState(log, config), reportOptimizerTimings(log, config))
+      );
 
       if (updateLimits) {
         updateBundleLimits({

@@ -45,7 +45,7 @@ export const createRulesRoute = (
       }
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -78,7 +78,7 @@ export const createRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
+          esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
         if (!indexExists) {

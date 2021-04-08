@@ -746,8 +746,8 @@
                 "label": "http",
                 "description": [],
                 "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
-                  "lineNumber": 13
+                  "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+                  "lineNumber": 29
                 },
                 "signature": [
                   {
@@ -761,16 +761,16 @@
               }
             ],
             "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
-              "lineNumber": 13
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+              "lineNumber": 29
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
-          "lineNumber": 13
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+          "lineNumber": 29
         },
         "initialIsOpen": false
       },

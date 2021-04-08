@@ -8,7 +8,6 @@
 import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiHealth,
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
@@ -17,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,11 +26,7 @@ import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/end
 import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
-import {
-  POLICY_STATUS_TO_HEALTH_COLOR,
-  POLICY_STATUS_TO_BADGE_COLOR,
-  HOST_STATUS_TO_HEALTH_COLOR,
-} from '../host_constants';
+import { POLICY_STATUS_TO_BADGE_COLOR, HOST_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
@@ -45,17 +41,6 @@ const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
   .euiListGroupItem__text {
     padding: 0;
-  }
-`;
-
-const LinkToExternalApp = styled.div`
-  margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
-  .linkToAppIcon {
-    margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
-    vertical-align: top;
-  }
-  .linkToAppPopoutIcon {
-    margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
   }
 `;
 
@@ -80,7 +65,7 @@ export const EndpointDetails = memo(
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useEndpointSelector(
       policyResponseStatus
-    ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
+    ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
     const detailsResultsUpper = useMemo(() => {
@@ -89,32 +74,37 @@ export const EndpointDetails = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
             defaultMessage: 'OS',
           }),
-          description: details.host.os.full,
+          description: <EuiText>{details.host.os.full}</EuiText>,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
             defaultMessage: 'Agent Status',
           }),
           description: (
-            <EuiHealth
-              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
-              data-test-subj="agentStatusHealth"
+            <EuiBadge
+              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
+              data-test-subj="hostDetailsAgentStatusBadge"
             >
               <EuiText size="m">
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                  defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
                   values={{ hostStatus }}
                 />
               </EuiText>
-            </EuiHealth>
+            </EuiBadge>
           ),
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
             defaultMessage: 'Last Seen',
           }),
-          description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
+          description: (
+            <EuiText>
+              {' '}
+              <FormattedDateAndTime date={new Date(details['@timestamp'])} />
+            </EuiText>
+          ),
         },
       ];
     }, [details, hostStatus]);
@@ -169,12 +159,14 @@ export const EndpointDetails = memo(
           description: (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <EndpointPolicyLink
-                  policyId={details.Endpoint.policy.applied.id}
-                  data-test-subj="policyDetailsValue"
-                >
-                  {details.Endpoint.policy.applied.name}
-                </EndpointPolicyLink>
+                <EuiText>
+                  <EndpointPolicyLink
+                    policyId={details.Endpoint.policy.applied.id}
+                    data-test-subj="policyDetailsValue"
+                  >
+                    {details.Endpoint.policy.applied.name}
+                  </EndpointPolicyLink>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="baseline">
                 {details.Endpoint.policy.applied.endpoint_policy_version && (
@@ -241,9 +233,11 @@ export const EndpointDetails = memo(
           }),
           description: (
             <EuiListGroup flush>
-              {details.host.ip.map((ip: string, index: number) => (
-                <HostIds key={index} label={ip} />
-              ))}
+              <EuiText size="xs">
+                {details.host.ip.map((ip: string, index: number) => (
+                  <HostIds key={index} label={ip} />
+                ))}
+              </EuiText>
             </EuiListGroup>
           ),
         },
@@ -251,13 +245,13 @@ export const EndpointDetails = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.hostname', {
             defaultMessage: 'Hostname',
           }),
-          description: details.host.hostname,
+          description: <EuiText>{details.host.hostname}</EuiText>,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
             defaultMessage: 'Endpoint Version',
           }),
-          description: details.agent.version,
+          description: <EuiText>{details.agent.version}</EuiText>,
         },
       ];
     }, [details.agent.version, details.host.hostname, details.host.ip]);
@@ -275,22 +269,36 @@ export const EndpointDetails = memo(
           listItems={detailsResultsPolicy}
           data-test-subj="endpointDetailsPolicyList"
         />
-        <LinkToExternalApp>
-          <LinkToApp
-            appId={ingestAppId}
-            appPath={agentDetailsWithFlyoutPath}
-            href={agentDetailsWithFlyoutUrl}
-            onClick={handleReassignEndpointsClick}
-            data-test-subj="endpointDetailsLinkToIngest"
+        <EuiSpacer size="m" />
+        <LinkToApp
+          appId={ingestAppId}
+          appPath={agentDetailsWithFlyoutPath}
+          href={agentDetailsWithFlyoutUrl}
+          onClick={handleReassignEndpointsClick}
+          data-test-subj="endpointDetailsLinkToIngest"
+        >
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="xs"
+            justifyContent="flexStart"
+            alignItems="center"
           >
-            <EuiIcon type="managementApp" className="linkToAppIcon" />
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
-              defaultMessage="Reassign Policy"
-            />
-            <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-          </LinkToApp>
-        </LinkToExternalApp>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="managementApp" className="linkToAppIcon" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
+                  defaultMessage="Reassign Policy"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </LinkToApp>
         <EuiHorizontalRule margin="m" />
         <EuiDescriptionList
           type="column"

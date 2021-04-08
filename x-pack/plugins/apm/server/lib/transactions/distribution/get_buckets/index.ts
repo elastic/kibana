@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -86,7 +86,7 @@ export async function getBuckets({
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-      ];
+      ] as QueryContainer[];
 
       async function getSamplesForDistributionBuckets() {
         const response = await withApmSpan(
@@ -106,7 +106,7 @@ export async function getBuckets({
                     should: [
                       { term: { [TRACE_ID]: traceId } },
                       { term: { [TRANSACTION_ID]: transactionId } },
-                    ],
+                    ] as QueryContainer[],
                   },
                 },
                 aggs: {
@@ -122,7 +122,7 @@ export async function getBuckets({
                           _source: [TRANSACTION_ID, TRACE_ID],
                           size: 10,
                           sort: {
-                            _score: 'desc',
+                            _score: 'desc' as const,
                           },
                         },
                       },

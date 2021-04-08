@@ -27,6 +27,7 @@ import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import type { UptimeRouter } from '../../types';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -63,7 +64,8 @@ const mockOptions = (
   services = alertsMock.createAlertServices(),
   state = {}
 ): any => {
-  services.scopedClusterClient = jest.fn() as any;
+  services.scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  services.scopedClusterClient.asCurrentUser = (jest.fn() as unknown) as any;
 
   services.savedObjectsClient.get.mockResolvedValue({
     id: '',

@@ -6,7 +6,12 @@
  */
 
 import { CoreStart, Plugin } from '../../../../src/core/public';
-import { FileUploadStartApi, getFileUploadComponent, importerFactory } from './api';
+import {
+  FileUploadStartApi,
+  getFileUploadComponent,
+  importerFactory,
+  hasImportPermission,
+} from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
@@ -37,6 +42,7 @@ export class FileUploadPlugin
       importerFactory,
       getMaxBytes,
       getMaxBytesFormatted,
+      hasImportPermission,
     };
   }
 }

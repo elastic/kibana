@@ -18,6 +18,7 @@ const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false)
 export const timelineDefaults: SubsetTimelineModel &
   Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },

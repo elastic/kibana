@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InfraSourceConfiguration } from '../../common/http_api/source_api';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -13,6 +12,7 @@ import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -25,15 +25,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   framework: KibanaFramework;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
-}
-
-export interface InfraConfiguration {
-  enabled: boolean;
-  query: {
-    partitionSize: number;
-    partitionFactor: number;
-  };
-  sources: {
-    default: InfraSourceConfiguration;
-  };
+  getLogQueryFields: GetLogQueryFields;
 }

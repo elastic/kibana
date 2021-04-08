@@ -60,7 +60,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
   isOrganization,
   header,
 }) => (
-  <div className="custom-api-step-2">
+  <>
     {header}
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={2}>
@@ -205,5 +205,5 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </div>
+  </>
 );

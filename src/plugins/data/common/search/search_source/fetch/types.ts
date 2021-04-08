@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { LegacyFetchHandlers } from '../legacy/types';
 import { GetConfigFn } from '../../../types';
 
@@ -25,7 +25,10 @@ export interface FetchHandlers {
    * Callback which can be used to hook into responses, modify them, or perform
    * side effects like displaying UI errors on the client.
    */
-  onResponse: (request: SearchRequest, response: SearchResponse<any>) => SearchResponse<any>;
+  onResponse: (
+    request: SearchRequest,
+    response: estypes.SearchResponse<any>
+  ) => estypes.SearchResponse<any>;
   /**
    * These handlers are only used by the legacy defaultSearchStrategy and can be removed
    * once that strategy has been deprecated.

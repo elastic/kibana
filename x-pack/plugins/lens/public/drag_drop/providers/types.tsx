@@ -12,6 +12,13 @@ export interface HumanData {
   groupLabel?: string;
   position?: number;
   nextLabel?: string;
+  canSwap?: boolean;
+  canDuplicate?: boolean;
+}
+
+export interface Ghost {
+  children: React.ReactElement;
+  style: React.CSSProperties;
 }
 
 export type DragDropIdentifier = Record<string, unknown> & {
@@ -23,10 +30,7 @@ export type DragDropIdentifier = Record<string, unknown> & {
 };
 
 export type DraggingIdentifier = DragDropIdentifier & {
-  ghost?: {
-    children: React.ReactElement;
-    style: React.CSSProperties;
-  };
+  ghost?: Ghost;
 };
 
 export type DropIdentifier = DragDropIdentifier & {
