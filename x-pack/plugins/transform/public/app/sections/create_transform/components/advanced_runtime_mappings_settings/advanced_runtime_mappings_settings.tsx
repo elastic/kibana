@@ -91,7 +91,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
           defaultMessage: 'Runtime mappings',
         })}
       >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {runtimeMappings !== undefined && Object.keys(runtimeMappings).length > 0 ? (
               <FormattedMessage
@@ -124,7 +124,10 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                     <AdvancedRuntimeMappingsEditorSwitch {...props.runtimeMappingsEditor} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiCopy beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS} textToCopy={''}>
+                    <EuiCopy
+                      beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                      textToCopy={advancedRuntimeMappingsConfig ?? ''}
+                    >
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}

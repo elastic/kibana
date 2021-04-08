@@ -108,6 +108,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
 export interface SerializedColdPhase extends SerializedPhase {
   actions: {
     freeze?: {};
+    readonly?: {};
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;
