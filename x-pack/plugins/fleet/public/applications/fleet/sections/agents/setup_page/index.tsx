@@ -69,50 +69,6 @@ export const SetupPage: React.FunctionComponent<{
     }
   };
 
-  if (!missingRequirements.includes('api_keys')) {
-    return (
-      <WithoutHeaderLayout>
-        <EuiPageBody restrictWidth={648}>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            className="eui-textCenter"
-            paddingSize="l"
-          >
-            <EuiSpacer size="m" />
-            <EuiIcon type="lock" color="subdued" size="xl" />
-            <EuiSpacer size="m" />
-            <EuiTitle size="l">
-              <h2>
-                <FormattedMessage
-                  id="xpack.fleet.setupPage.enableTitle"
-                  defaultMessage="Enable central management for Elastic Agents"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="xl" />
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.setupPage.enableText"
-                defaultMessage="Central management requires an Elastic user who can create API keys and write to logs-* and metrics-*."
-              />
-            </EuiText>
-            <EuiSpacer size="l" />
-            <EuiForm>
-              <EuiButton onClick={onSubmit} fill isLoading={isFormLoading} type="submit">
-                <FormattedMessage
-                  id="xpack.fleet.setupPage.enableCentralManagement"
-                  defaultMessage="Create user and enable central management"
-                />
-              </EuiButton>
-            </EuiForm>
-            <EuiSpacer size="m" />
-          </EuiPageContent>
-        </EuiPageBody>
-      </WithoutHeaderLayout>
-    );
-  }
-
   return (
     <WithoutHeaderLayout>
       <EuiPageBody restrictWidth={820}>
@@ -126,7 +82,7 @@ export const SetupPage: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.setupPage.missingRequirementsCalloutDescription"
-              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch and Kibana security features."
+              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch security features."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -184,75 +140,6 @@ export const SetupPage: React.FunctionComponent<{
           <EuiCodeBlock isCopyable={true}>
             {`xpack.security.enabled: true
 xpack.security.authc.api_key.enabled: true`}
-          </EuiCodeBlock>
-          <EuiSpacer size="l" />
-          <FormattedMessage
-            id="xpack.fleet.setupPage.missingRequirementsKibanaTitle"
-            defaultMessage="In your Kibana policy, enable:"
-          />
-          <EuiSpacer size="l" />
-          <RequirementItem isMissing={missingRequirements.includes('tls_required')}>
-            <FormattedMessage
-              id="xpack.fleet.setupPage.tlsFlagText"
-              defaultMessage="{kibanaSecurityLink}. Set {securityFlag} to {true}. For development purposes, you can disable {tlsLink} by setting {tlsFlag} to {true} as an unsafe alternative."
-              values={{
-                kibanaSecurityLink: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/kibana/current/using-kibana-with-security.html"
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.setupPage.kibanaSecurityLink"
-                      defaultMessage="Kibana security"
-                    />
-                  </EuiLink>
-                ),
-                securityFlag: <EuiCode>xpack.security.enabled</EuiCode>,
-                tlsLink: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/kibana/current/configuring-tls.html"
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage id="xpack.fleet.setupPage.tlsLink" defaultMessage="TLS" />
-                  </EuiLink>
-                ),
-                tlsFlag: <EuiCode>xpack.fleet.agents.tlsCheckDisabled</EuiCode>,
-                true: <EuiCode>true</EuiCode>,
-              }}
-            />
-          </RequirementItem>
-          <EuiSpacer size="s" />
-          <RequirementItem
-            isMissing={missingRequirements.includes(
-              'encrypted_saved_object_encryption_key_required'
-            )}
-          >
-            <FormattedMessage
-              id="xpack.fleet.setupPage.encryptionKeyFlagText"
-              defaultMessage="{encryptionKeyLink}. Set {keyFlag} to any alphanumeric value of at least 32 characters."
-              values={{
-                encryptionKeyLink: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html"
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.setupPage.kibanaEncryptionLink"
-                      defaultMessage="Kibana encryption key"
-                    />
-                  </EuiLink>
-                ),
-                keyFlag: <EuiCode>xpack.encryptedSavedObjects.encryptionKey</EuiCode>,
-              }}
-            />
-          </RequirementItem>
-          <EuiSpacer size="m" />
-          <EuiCodeBlock isCopyable={true}>
-            {`xpack.security.enabled: true
-xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"`}
           </EuiCodeBlock>
           <EuiSpacer size="l" />
           <FormattedMessage

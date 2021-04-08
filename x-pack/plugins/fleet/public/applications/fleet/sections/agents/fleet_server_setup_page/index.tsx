@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { useStartServices } from '../../../hooks';
 
 export const ContentWrapper = styled(EuiFlexGroup)`
-  height: 80%;
+  height: 100%;
 `;
 
 function renderOnPremInstructions() {
@@ -134,25 +134,27 @@ export const FleetServerSetupPage = () => {
   const deploymentUrl = startService.cloud?.deploymentUrl;
 
   return (
-    <ContentWrapper justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        {deploymentUrl ? renderCloudInstructions(deploymentUrl) : renderOnPremInstructions()}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.waitingText"
-                defaultMessage="Waiting for a Fleet Server to connect..."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xxl" />
-      </EuiFlexItem>
-    </ContentWrapper>
+    <>
+      <ContentWrapper justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          {deploymentUrl ? renderCloudInstructions(deploymentUrl) : renderOnPremInstructions()}
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerSetup.waitingText"
+                  defaultMessage="Waiting for a Fleet Server to connect..."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </ContentWrapper>
+      <EuiSpacer size="xxl" />
+    </>
   );
 };

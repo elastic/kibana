@@ -74,7 +74,7 @@ export const FleetApp: React.FunctionComponent = () => {
     fleetStatus?.missingRequirements?.length === 1 &&
     fleetStatus.missingRequirements[0] === 'fleet_server';
 
-  if (hasOnlyFleetServerMissignRequirement) {
+  if (!hasOnlyFleetServerMissignRequirement) {
     return (
       <SetupPage
         missingRequirements={fleetStatus.missingRequirements || []}

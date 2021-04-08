@@ -43,7 +43,6 @@ import type {
   UIExtensionsStorage,
 } from './applications/fleet/types';
 
-
 export { FleetConfigType } from '../common/types';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
@@ -114,7 +113,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud
+          cloud: deps.cloud,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -140,8 +139,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         return () => {};
       },
     });
-
-    if (deps.)
 
     // Register components for home/add data integration
     if (deps.home) {

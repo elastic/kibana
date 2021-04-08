@@ -23,12 +23,13 @@ import {
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
 
-import { generateEnrollmentAPIKey } from './api_keys';
+import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
+import { appContextService } from './app_context';
 
 export interface SetupStatus {
   isIntialized: true | undefined;
@@ -157,12 +158,29 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
 ) {
+  const security = appContextService.getSecurity();
+  if (!security) {
+    return;
+  }
+
+  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
+    return;
+  }
+  // Wait on PR create API keys as internal user to be merged
+  return; //
+
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
 
   await Promise.all(
-    agentPolicies.map((agentPolicy) => {
+    agentPolicies.map(async (agentPolicy) => {
+      const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicy.id);
+
+      if (hasKey) {
+        return;
+      }
+
       return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
