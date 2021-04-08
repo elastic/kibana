@@ -8,16 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  Chart,
-  ChartSizeArray,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-  PointerEvent,
-} from '@elastic/charts';
+import { Chart, niceTimeFormatter, TooltipValue, PointerEvent } from '@elastic/charts';
 import moment from 'moment';
 import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
@@ -36,12 +27,10 @@ import {
   MetricsExplorerAggregation,
   MetricsExplorerSeries,
 } from '../../../../../../../../common/http_api';
-import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
 import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { ChartHeader } from './chart_header';
+import { ChartSection } from './chart_section';
 import {
   SYSTEM_METRIC_NAME,
   USER_METRIC_NAME,
@@ -53,17 +42,19 @@ import {
   LOAD_CHART_TITLE,
   MEMORY_CHART_TITLE,
   NETWORK_CHART_TITLE,
+  LOG_RATE_METRIC_NAME,
+  LOG_RATE_CHART_TITLE,
 } from './translations';
 import { TimeDropdown } from './time_dropdown';
 
 const ONE_HOUR = 60 * 60 * 1000;
-const CHART_SIZE: ChartSizeArray = ['100%', 160];
 
 const TabComponent = (props: TabProps) => {
   const cpuChartRef = useRef<Chart>(null);
   const networkChartRef = useRef<Chart>(null);
   const memoryChartRef = useRef<Chart>(null);
   const loadChartRef = useRef<Chart>(null);
+  const logRateChartRef = useRef<Chart>(null);
   const [time, setTime] = useState(ONE_HOUR);
   const chartRefs = useMemo(() => [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef], [
     cpuChartRef,
@@ -102,7 +93,14 @@ const TabComponent = (props: TabProps) => {
     [setTime]
   );
 
-  const { nodes, reload } = useSnapshot(
+  const timeRange = {
+    interval: '1m',
+    to: currentTime,
+    from: currentTime - time,
+    ignoreLookback: true,
+  };
+
+  const { nodes, reload, loading } = useSnapshot(
     filter,
     [
       { type: 'rx' },
@@ -123,12 +121,20 @@ const TabComponent = (props: TabProps) => {
     accountId,
     region,
     false,
-    {
-      interval: '1m',
-      to: currentTime,
-      from: currentTime - time,
-      ignoreLookback: true,
-    }
+    timeRange
+  );
+
+  const { nodes: logRateNodes, reload: reloadLogRate, loading: logRateLoading } = useSnapshot(
+    filter,
+    [{ type: 'logRate' }],
+    [],
+    nodeType,
+    sourceId,
+    currentTime,
+    accountId,
+    region,
+    false,
+    timeRange
   );
 
   const getDomain = useCallback(
@@ -163,6 +169,7 @@ const TabComponent = (props: TabProps) => {
     []
   );
   const loadFormatter = useMemo(() => createInventoryMetricFormatter({ type: 'load' }), []);
+  const logRateFormatter = useMemo(() => createInventoryMetricFormatter({ type: 'logRate' }), []);
 
   const mergeTimeseries = useCallback((...series: MetricsExplorerSeries[]) => {
     const base = series[0];
@@ -219,6 +226,16 @@ const TabComponent = (props: TabProps) => {
     [nodes]
   );
 
+  const getLogRateTimeseries = useCallback(() => {
+    if (!logRateNodes) {
+      return null;
+    }
+    if (logRateNodes.length === 0) {
+      return { rows: [], columns: [], id: '0' };
+    }
+    return logRateNodes[0].metrics.find((m) => m.name === 'logRate')!.timeseries!;
+  }, [logRateNodes]);
+
   const systemMetricsTs = useMemo(() => getTimeseries('system'), [getTimeseries]);
   const userMetricsTs = useMemo(() => getTimeseries('user'), [getTimeseries]);
   const rxMetricsTs = useMemo(() => getTimeseries('rx'), [getTimeseries]);
@@ -229,10 +246,12 @@ const TabComponent = (props: TabProps) => {
   const usedMemoryMetricsTs = useMemo(() => getTimeseries('usedMemory'), [getTimeseries]);
   const freeMemoryMetricsTs = useMemo(() => getTimeseries('freeMemory'), [getTimeseries]);
   const coresMetricsTs = useMemo(() => getTimeseries('cores'), [getTimeseries]);
+  const logRateMetricsTs = useMemo(() => getLogRateTimeseries(), [getLogRateTimeseries]);
 
   useEffect(() => {
     reload();
-  }, [time, reload]);
+    reloadLogRate();
+  }, [time, reload, reloadLogRate]);
 
   if (
     !systemMetricsTs ||
@@ -243,12 +262,14 @@ const TabComponent = (props: TabProps) => {
     !load5mMetricsTs ||
     !load15mMetricsTs ||
     !usedMemoryMetricsTs ||
-    !freeMemoryMetricsTs
+    !freeMemoryMetricsTs ||
+    !logRateMetricsTs
   ) {
     return <LoadingPlaceholder />;
   }
 
   const cpuChartMetrics = buildChartMetricLabels([SYSTEM_METRIC_NAME, USER_METRIC_NAME], 'avg');
+  const logRateChartMetrics = buildChartMetricLabels([LOG_RATE_METRIC_NAME], 'rate');
   const networkChartMetrics = buildChartMetricLabels(
     [INBOUND_METRIC_NAME, OUTBOUND_METRIC_NAME],
     'rate'
@@ -277,6 +298,7 @@ const TabComponent = (props: TabProps) => {
     return r;
   });
   const cpuTimeseries = mergeTimeseries(systemMetricsTs, userMetricsTs);
+  const logRateTimeseries = mergeTimeseries(logRateMetricsTs);
   const networkTimeseries = mergeTimeseries(rxMetricsTs, txMetricsTs);
   const loadTimeseries = mergeTimeseries(load1mMetricsTs, load5mMetricsTs, load15mMetricsTs);
   const memoryTimeseries = mergeTimeseries(usedMemoryMetricsTs, freeMemoryMetricsTs);
@@ -291,166 +313,88 @@ const TabComponent = (props: TabProps) => {
 
       <EuiFlexGrid columns={2} gutterSize={'l'} responsive={false}>
         <EuiFlexItem>
-          <ChartHeader title={CPU_CHART_TITLE} metrics={cpuChartMetrics} />
-          <Chart ref={cpuChartRef} size={CHART_SIZE}>
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={cpuChartMetrics[0]}
-              id={'0'}
-              series={systemMetricsTs!}
-              stack={false}
-            />
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={cpuChartMetrics[1]}
-              id={'0'}
-              series={userMetricsTs}
-              stack={false}
-            />
-            <Axis
-              id={'timestamp'}
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={formatter}
-            />
-            <Axis
-              id={'values'}
-              position={Position.Left}
-              tickFormat={cpuFormatter}
-              domain={getDomain(cpuTimeseries, cpuChartMetrics)}
-              ticks={6}
-              showGridLines
-            />
-            <Settings
-              onPointerUpdate={pointerUpdate}
-              tooltip={tooltipProps}
-              theme={getTimelineChartTheme(isDarkMode)}
-            />
-          </Chart>
+          <ChartSection
+            title={CPU_CHART_TITLE}
+            style={MetricsExplorerChartType.line}
+            chartRef={cpuChartRef}
+            series={[
+              { metric: cpuChartMetrics[0], series: systemMetricsTs },
+              { metric: cpuChartMetrics[1], series: userMetricsTs },
+            ]}
+            tickFormatterForTime={formatter}
+            tickFormatter={cpuFormatter}
+            onPointerUpdate={pointerUpdate}
+            domain={getDomain(cpuTimeseries, cpuChartMetrics)}
+            isDarkMode={isDarkMode}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <ChartHeader title={LOAD_CHART_TITLE} metrics={loadChartMetrics} />
-          <Chart ref={loadChartRef} size={CHART_SIZE}>
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={loadChartMetrics[0]}
-              id="0"
-              series={load1mMetricsTs}
-              stack={false}
-            />
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={loadChartMetrics[1]}
-              id="0"
-              series={load5mMetricsTs}
-              stack={false}
-            />
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={loadChartMetrics[2]}
-              id="0"
-              series={load15mMetricsTs}
-              stack={false}
-            />
-            <Axis
-              id={'timestamp'}
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={formatter}
-            />
-            <Axis
-              id={'values1'}
-              position={Position.Left}
-              tickFormat={loadFormatter}
-              domain={getDomain(loadTimeseries, loadChartMetrics)}
-              ticks={6}
-              showGridLines
-            />
-            <Settings
-              onPointerUpdate={pointerUpdate}
-              tooltip={tooltipProps}
-              theme={getTimelineChartTheme(isDarkMode)}
-            />
-          </Chart>
+          <ChartSection
+            title={LOAD_CHART_TITLE}
+            style={MetricsExplorerChartType.line}
+            chartRef={loadChartRef}
+            series={[
+              { metric: loadChartMetrics[0], series: load1mMetricsTs },
+              { metric: loadChartMetrics[1], series: load5mMetricsTs },
+              { metric: loadChartMetrics[2], series: load15mMetricsTs },
+            ]}
+            tickFormatterForTime={formatter}
+            tickFormatter={loadFormatter}
+            onPointerUpdate={pointerUpdate}
+            domain={getDomain(loadTimeseries, loadChartMetrics)}
+            isDarkMode={isDarkMode}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <ChartHeader title={MEMORY_CHART_TITLE} metrics={memoryChartMetrics} />
-          <Chart ref={memoryChartRef} size={CHART_SIZE}>
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={memoryChartMetrics[0]}
-              id="0"
-              series={usedMemoryMetricsTs}
-              stack={false}
-            />
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={memoryChartMetrics[1]}
-              id="0"
-              series={freeMemoryMetricsTs}
-              stack={false}
-            />
-            <Axis
-              id={'timestamp'}
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={formatter}
-            />
-            <Axis
-              id={'values'}
-              position={Position.Left}
-              tickFormat={memoryFormatter}
-              domain={getDomain(memoryTimeseries, memoryChartMetrics)}
-              ticks={6}
-              showGridLines
-            />
-            <Settings
-              onPointerUpdate={pointerUpdate}
-              tooltip={tooltipProps}
-              theme={getTimelineChartTheme(isDarkMode)}
-            />
-          </Chart>
+          <ChartSection
+            title={MEMORY_CHART_TITLE}
+            style={MetricsExplorerChartType.line}
+            chartRef={memoryChartRef}
+            series={[
+              { metric: memoryChartMetrics[0], series: usedMemoryMetricsTs },
+              { metric: memoryChartMetrics[1], series: freeMemoryMetricsTs },
+            ]}
+            tickFormatterForTime={formatter}
+            tickFormatter={memoryFormatter}
+            onPointerUpdate={pointerUpdate}
+            domain={getDomain(memoryTimeseries, memoryChartMetrics)}
+            isDarkMode={isDarkMode}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <ChartHeader title={NETWORK_CHART_TITLE} metrics={networkChartMetrics} />
-          <Chart ref={networkChartRef} size={CHART_SIZE}>
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={networkChartMetrics[0]}
-              id="0"
-              series={rxMetricsTs}
-              stack={false}
-            />
-            <MetricExplorerSeriesChart
-              type={MetricsExplorerChartType.line}
-              metric={networkChartMetrics[1]}
-              id="0"
-              series={txMetricsTs}
-              stack={false}
-            />
-            <Axis
-              id={'timestamp'}
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={formatter}
-            />
-            <Axis
-              id={'values'}
-              position={Position.Left}
-              tickFormat={networkFormatter}
-              domain={getDomain(networkTimeseries, networkChartMetrics)}
-              ticks={6}
-              showGridLines
-            />
-            <Settings
-              onPointerUpdate={pointerUpdate}
-              tooltip={tooltipProps}
-              theme={getTimelineChartTheme(isDarkMode)}
-            />
-          </Chart>
+          <ChartSection
+            title={NETWORK_CHART_TITLE}
+            style={MetricsExplorerChartType.line}
+            chartRef={networkChartRef}
+            series={[
+              { metric: networkChartMetrics[0], series: rxMetricsTs },
+              { metric: networkChartMetrics[1], series: txMetricsTs },
+            ]}
+            tickFormatterForTime={formatter}
+            tickFormatter={networkFormatter}
+            onPointerUpdate={pointerUpdate}
+            domain={getDomain(networkTimeseries, networkChartMetrics)}
+            isDarkMode={isDarkMode}
+            stack={true}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <ChartSection
+            title={LOG_RATE_CHART_TITLE}
+            style={MetricsExplorerChartType.line}
+            chartRef={logRateChartRef}
+            series={[{ metric: logRateChartMetrics[0], series: logRateMetricsTs }]}
+            tickFormatterForTime={formatter}
+            tickFormatter={logRateFormatter}
+            onPointerUpdate={pointerUpdate}
+            domain={getDomain(logRateTimeseries, logRateChartMetrics)}
+            isDarkMode={isDarkMode}
+            stack={true}
+          />
         </EuiFlexItem>
       </EuiFlexGrid>
     </TabContent>
