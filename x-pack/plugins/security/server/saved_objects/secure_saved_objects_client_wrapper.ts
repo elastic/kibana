@@ -28,7 +28,7 @@ import type {
 import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger, SecurityAuditLogger } from '../audit';
-import { EventOutcome, SavedObjectAction, savedObjectEvent } from '../audit';
+import { SavedObjectAction, savedObjectEvent } from '../audit';
 import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { SpacesService } from '../plugin';
@@ -116,7 +116,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id: optionsWithId.id },
       })
     );
@@ -178,7 +178,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.CREATE,
-          outcome: EventOutcome.UNKNOWN,
+          outcome: 'unknown',
           savedObject: { type, id },
         })
       )
@@ -205,7 +205,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
       })
     );
@@ -400,7 +400,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.UPDATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
       })
     );
@@ -446,7 +446,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.ADD_TO_SPACES,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
         addToSpaces: namespaces,
       })
@@ -483,7 +483,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.DELETE_FROM_SPACES,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
         deleteFromSpaces: namespaces,
       })
@@ -524,7 +524,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.UPDATE,
-          outcome: EventOutcome.UNKNOWN,
+          outcome: 'unknown',
           savedObject: { type, id },
         })
       )
@@ -560,7 +560,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       savedObjectEvent({
         action: SavedObjectAction.REMOVE_REFERENCES,
         savedObject: { type, id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -592,7 +592,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.OPEN_POINT_IN_TIME,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -611,7 +611,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.CLOSE_POINT_IN_TIME,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 

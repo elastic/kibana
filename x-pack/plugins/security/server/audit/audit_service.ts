@@ -37,15 +37,6 @@ export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 }
 
-interface AuditLogMeta extends AuditEvent {
-  ecs: {
-    version: string;
-  };
-  trace: {
-    id: string;
-  };
-}
-
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
   getLogger: (id?: string) => LegacyAuditLogger;
@@ -146,7 +137,7 @@ export class AuditService {
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
        *     action: 'saved_object_update',
-       *     outcome: EventOutcome.UNKNOWN
+       *     outcome: 'unknown'
        *   },
        *   kibana: {
        *     saved_object: { type: 'dashboard', id: '123' }
@@ -161,13 +152,12 @@ export class AuditService {
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
-        const meta: AuditLogMeta = {
-          ecs: { version: ECS_VERSION },
+        const meta: AuditEvent = {
           ...event,
           user:
             (user && {
               name: user.username,
-              roles: user.roles,
+              roles: user.roles as string[],
             }) ||
             event.user,
           kibana: {
@@ -250,10 +240,10 @@ export function filterEvent(
   if (ignoreFilters) {
     return !ignoreFilters.some(
       (rule) =>
-        (!rule.actions || rule.actions.includes(event.event.action)) &&
-        (!rule.categories || rule.categories.includes(event.event.category!)) &&
-        (!rule.types || rule.types.includes(event.event.type!)) &&
-        (!rule.outcomes || rule.outcomes.includes(event.event.outcome!)) &&
+        (!rule.actions || rule.actions.includes(event.event?.action!)) &&
+        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
+        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );
   }

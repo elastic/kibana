@@ -19,7 +19,6 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
 import type { AuditEvent } from './audit_events';
-import { EventCategory, EventOutcome, EventType } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,
@@ -185,7 +184,6 @@ describe('#asScoped', () => {
 
     await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
-      ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
       kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       message: 'MESSAGE',
@@ -353,9 +351,9 @@ describe('#filterEvent', () => {
     message: 'this is my audit message',
     event: {
       action: 'http_request',
-      category: EventCategory.WEB,
-      type: EventType.ACCESS,
-      outcome: EventOutcome.SUCCESS,
+      category: ['web'],
+      type: ['access'],
+      outcome: 'success',
     },
     user: {
       name: 'jdoe',
