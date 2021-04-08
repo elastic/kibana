@@ -16,7 +16,7 @@ import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
 

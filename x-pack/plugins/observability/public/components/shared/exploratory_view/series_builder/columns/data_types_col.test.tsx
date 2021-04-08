@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 
 describe('DataTypesCol', function () {
   it('should render properly', function () {

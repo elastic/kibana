@@ -13,13 +13,7 @@ import { alertFilterLabels, filterAriaLabels } from './translations';
 import { FilterExpressionsSelectProps } from './filters_expression_select_container';
 import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
-type FilterFieldUpdate = (updateTarget: { fieldName: string; values: string[] }) => void;
-
-interface OwnProps {
-  setUpdatedFieldValues: FilterFieldUpdate;
-}
-
-type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'> & OwnProps;
+type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'>;
 
 export const FiltersExpressionsSelect: React.FC<Props> = ({
   alertParams,
@@ -27,13 +21,15 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   newFilters,
   onRemoveFilter,
   setAlertParams,
-  setUpdatedFieldValues,
 }) => {
   const { tags, ports, schemes, locations } = overviewFilters;
-  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
-  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
-  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
-  const selectedTags = alertParams?.filters?.tags ?? [];
+
+  const alertFilters = alertParams?.filters;
+
+  const selectedPorts = alertFilters?.['url.port'] ?? [];
+  const selectedLocations = alertFilters?.['observer.geo.name'] ?? [];
+  const selectedSchemes = alertFilters?.['monitor.type'] ?? [];
+  const selectedTags = alertFilters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     // the `filters` field is no longer a string
@@ -54,7 +50,6 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
         )
       );
     }
-    setUpdatedFieldValues({ fieldName, values });
   };
 
   const monitorFilters = [
@@ -162,12 +157,9 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               }}
             />
           </EuiFlexItem>
-
           <EuiSpacer size="xs" />
         </EuiFlexGroup>
       ))}
-
-      <EuiSpacer size="xs" />
     </>
   );
 };
