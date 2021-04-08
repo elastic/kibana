@@ -110,7 +110,7 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  *
  * @throws An error if response is not OK
  */
-export const someAPICall = async (hostId: string): Promise<SomeType> =>
+export const someAPICall = async ({ hostId }: { hostId: string }): Promise<SomeType> =>
   KibanaServices.get().http.fetch<SomeType>(DANPANSAPI, {
     method: 'POST',
     body: JSON.stringify({
