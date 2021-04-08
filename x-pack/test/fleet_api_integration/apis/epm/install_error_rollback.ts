@@ -23,13 +23,6 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest
-      .delete(`/api/fleet/epm/packages/${pkgkey}`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({ force: true });
-  };
-
   const getPackageInfo = async (pkgkey: string) => {
     return await supertest.get(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
