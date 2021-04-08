@@ -22,7 +22,7 @@ interface Props {
   isMetaEngine: boolean;
   resultMeta: ResultMeta;
   actions?: React.ReactNode;
-  shouldLinkToDetailPage: boolean;
+  shouldLinkToDetailPage?: boolean;
 }
 
 export const ResultHeader: React.FC<Props> = ({
@@ -30,7 +30,7 @@ export const ResultHeader: React.FC<Props> = ({
   resultMeta,
   isMetaEngine,
   actions,
-  shouldLinkToDetailPage,
+  shouldLinkToDetailPage = false,
 }) => {
   const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
     engineName: resultMeta.engine,
@@ -49,7 +49,6 @@ export const ResultHeader: React.FC<Props> = ({
             type="id"
           />
         </EuiFlexItem>
-        {/* Score */}
         {showScore && (
           <EuiFlexItem grow={false}>
             <ResultHeaderItem

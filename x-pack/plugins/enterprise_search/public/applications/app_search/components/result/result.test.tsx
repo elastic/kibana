@@ -10,7 +10,7 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiButtonIconColor } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../shared/types';
 
@@ -83,13 +83,13 @@ describe('Result', () => {
         title: 'Hide',
         onClick: jest.fn(),
         iconType: 'eyeClosed',
-        iconColor: 'danger',
+        iconColor: 'danger' as EuiButtonIconColor,
       },
       {
         title: 'Bookmark',
         onClick: jest.fn(),
         iconType: 'starFilled',
-        iconColor: '',
+        iconColor: undefined,
       },
     ];
 
