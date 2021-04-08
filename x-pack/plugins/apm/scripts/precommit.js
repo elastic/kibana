@@ -23,6 +23,8 @@ const tsconfig = useOptimizedTsConfig
   ? resolve(root, 'tsconfig.json')
   : resolve(root, 'x-pack/plugins/apm/tsconfig.json');
 
+const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
+
 const tasks = new Listr(
   [
     {
@@ -55,16 +57,18 @@ const tasks = new Listr(
           ],
           execaOpts
         ).then(() =>
-          execa(
-            require.resolve('typescript/bin/tsc'),
-            [
-              '--project',
-              tsconfig,
-              '--pretty',
-              ...(useOptimizedTsConfig ? ['--noEmit'] : []),
-            ],
-            execaOpts
-          )
+          Promise.all([
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', tsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', testTsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+          ])
         ),
     },
     {
