@@ -49,7 +49,10 @@ export const findRulesRoute = (
         const savedObjectsClient = context.core.savedObjects.client;
         const racClient = await context.ruleRegistry?.getRacClient();
         try {
-          const helloWorld = await racClient?.get({ id: 'hello world!!!' });
+          const helloWorld = await racClient?.get({
+            id: 'hello world!!!',
+            owner: 'securitySolution',
+          });
           console.error('RESPONSE FROM RAC CLIENT', helloWorld);
         } catch (exc) {
           console.error('SOMETHING THREW AN ERROR', JSON.stringify(exc, null, 2));

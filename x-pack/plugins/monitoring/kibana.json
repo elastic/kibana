@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "licensing",
     "features",
+    "ruleRegistry",
     "data",
     "navigation",
     "kibanaLegacy",

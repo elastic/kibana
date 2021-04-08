@@ -219,6 +219,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
     registerHostIsolationRoutes(router, endpointContext);
+    router.get({ path: '/security-myfakepath', validate: false }, async (context, req, res) => {
+      try {
+        const racClient = await context.ruleRegistry?.getRacClient();
+        const thing = await racClient?.get({ id: 'hello world', owner: 'securitySolution' });
+        console.error('THE THING EXISTS??', JSON.stringify(thing.body, null, 2));
+        return res.ok({ body: { success: true } });
+      } catch (err) {
+        console.error('monitoring route threw an error');
+        console.error(err);
+        return res.notFound({ body: { message: err.message } });
+      }
+    });
 
     const referenceRuleTypes = [REFERENCE_RULE_ALERT_TYPE_ID];
     const ruleTypes = [SIGNALS_ID, NOTIFICATIONS_ID, ...referenceRuleTypes];
