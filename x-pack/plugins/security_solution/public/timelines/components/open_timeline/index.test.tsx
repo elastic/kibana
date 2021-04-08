@@ -8,7 +8,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { waitFor } from '@testing-library/react';
@@ -167,7 +167,7 @@ describe('StatefulOpenTimeline', () => {
       expect(result.current.timelineType).toBe(TimelineType.template);
     });
 
-    test("should land on correct templates' tab after switching tab", () => {
+    test("should land on correct templates' tab after switching tab", async () => {
       (useParams as jest.Mock).mockReturnValue({
         tabName: TimelineType.template,
         pageName: SecurityPageName.timelines,
@@ -183,11 +183,12 @@ describe('StatefulOpenTimeline', () => {
           />
         </TestProviders>
       );
-      wrapper
-        .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
-        .first()
-        .simulate('click');
-      act(() => {
+      await waitFor(() => {
+        wrapper
+          .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
+          .first()
+          .simulate('click');
+
         expect(history.length).toBeGreaterThan(0);
       });
     });
@@ -208,7 +209,7 @@ describe('StatefulOpenTimeline', () => {
       expect(result.current.timelineType).toBe(TimelineType.default);
     });
 
-    test('should not change url after switching filter', () => {
+    test('should not change url after switching filter', async () => {
       (useParams as jest.Mock).mockReturnValue({
         tabName: 'mockTabName',
         pageName: SecurityPageName.case,
@@ -224,20 +225,20 @@ describe('StatefulOpenTimeline', () => {
           />
         </TestProviders>
       );
-      wrapper
-        .find(
-          `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
-        )
-        .first()
-        .simulate('click');
-      act(() => {
+      await waitFor(() => {
+        wrapper
+          .find(
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
+          )
+          .first()
+          .simulate('click');
         expect(mockHistory.length).toEqual(0);
       });
     });
   });
 
   describe('#onQueryChange', () => {
-    test('it updates the query state with the expected trimmed value when the user enters a query', () => {
+    test('it updates the query state with the expected trimmed value when the user enters a query', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulOpenTimeline
@@ -248,12 +249,13 @@ describe('StatefulOpenTimeline', () => {
           />
         </TestProviders>
       );
-      wrapper
-        .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
-      expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="search-bar"] input')
+          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
+        expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
+      });
     });
-
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
       const wrapper = mount(
         <TestProviders>
