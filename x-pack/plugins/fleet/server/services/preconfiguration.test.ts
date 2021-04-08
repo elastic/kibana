@@ -66,9 +66,19 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  ensureInstalledPackage({ pkgName, pkgVersion }: { pkgName: string; pkgVersion: string }) {
+  ensureInstalledPackage({
+    pkgName,
+    pkgVersion,
+    force,
+  }: {
+    pkgName: string;
+    pkgVersion: string;
+    force?: boolean;
+  }) {
     const installedPackage = mockInstalledPackages.get(pkgName);
-    if (installedPackage) return installedPackage;
+    if (installedPackage) {
+      if (installedPackage.version === pkgVersion) return installedPackage;
+    }
 
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
@@ -138,12 +148,12 @@ describe('policy preconfiguration', () => {
       soClient,
       esClient,
       [],
-      [{ name: 'test-package', version: '3.0.0' }],
+      [{ name: 'test_package', version: '3.0.0' }],
       mockDefaultOutput
     );
 
     expect(policies.length).toBe(0);
-    expect(packages).toEqual(expect.arrayContaining(['test-package:3.0.0']));
+    expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
   });
 
   it('should install packages and configure agent policies successfully', async () => {
@@ -160,19 +170,19 @@ describe('policy preconfiguration', () => {
           id: 'test-id',
           package_policies: [
             {
-              package: { name: 'test-package' },
+              package: { name: 'test_package' },
               name: 'Test package',
             },
           ],
         },
       ] as PreconfiguredAgentPolicy[],
-      [{ name: 'test-package', version: '3.0.0' }],
+      [{ name: 'test_package', version: '3.0.0' }],
       mockDefaultOutput
     );
 
     expect(policies.length).toEqual(1);
     expect(policies[0].id).toBe('mocked-test-id');
-    expect(packages).toEqual(expect.arrayContaining(['test-package:3.0.0']));
+    expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
   });
 
   it('should throw an error when trying to install duplicate packages', async () => {
@@ -185,13 +195,13 @@ describe('policy preconfiguration', () => {
         esClient,
         [],
         [
-          { name: 'test-package', version: '3.0.0' },
-          { name: 'test-package', version: '2.0.0' },
+          { name: 'test_package', version: '3.0.0' },
+          { name: 'test_package', version: '2.0.0' },
         ],
         mockDefaultOutput
       )
     ).rejects.toThrow(
-      'Duplicate packages specified in configuration: test-package:3.0.0, test-package:2.0.0'
+      'Duplicate packages specified in configuration: test_package-3.0.0, test_package-2.0.0'
     );
   });
 
