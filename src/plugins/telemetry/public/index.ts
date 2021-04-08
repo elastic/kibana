@@ -8,7 +8,7 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { TelemetryPlugin, TelemetryPluginConfig } from './plugin';
-export { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
+export type { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
   return new TelemetryPlugin(initializerContext);
