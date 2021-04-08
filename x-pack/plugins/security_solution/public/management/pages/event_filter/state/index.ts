@@ -14,6 +14,7 @@ export interface EventFiltersListPageState {
   form: {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
     hasError: boolean;
-    isLoading: boolean;
+    isLoadingAction: boolean;
+    isLoadingEntry: boolean;
   };
 }

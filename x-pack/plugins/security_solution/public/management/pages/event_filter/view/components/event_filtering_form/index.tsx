@@ -18,17 +18,16 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-import {
-  ExceptionBuilderComponent,
-  OnChangeProps as OnChangeBuilderProps,
-} from '../../../../../../common/components/exceptions/builder';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { ExceptionListItemSchema } from '../../../../../../../public/shared_imports';
+import {
+  ExceptionListItemSchema,
+  ExceptionBuilder,
+} from '../../../../../../../public/shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntry } from '../../../store/selector';
@@ -61,7 +60,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
     const [hasItemsError, setHasItemsError] = useState(false);
     const [comment, setComment] = useState<string>('');
     const handleOnBuilderChange = useCallback(
-      (arg: OnChangeBuilderProps) => {
+      (arg: ExceptionBuilder.OnChangeProps) => {
         if (isEmpty(arg.exceptionItems)) return;
         setHasItemsError(arg.errorExists);
         dispatch({
@@ -89,7 +88,8 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
 
     const exceptionBuilderComponentMemo = useMemo(
       () => (
-        <ExceptionBuilderComponent
+        <ExceptionBuilder.ExceptionBuilderComponent
+          allowLargeValueLists
           httpService={http}
           autocompleteService={data.autocomplete}
           exceptionListItems={[exception as ExceptionListItemSchema]}
