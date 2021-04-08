@@ -117,7 +117,7 @@ export interface SavedObjectsFindOptions {
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
   /**
-   * Specify an Elasticsearch aggregation to perform.
+   * A record of aggregations to perform.
    * The API currently only supports a limited set of metrics and bucket aggregation types.
    * Additional aggregation types can be contributed to Core.
    *
