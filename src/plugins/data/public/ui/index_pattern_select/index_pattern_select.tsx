@@ -62,8 +62,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   componentDidMount() {
     this.isMounted = true;
-    // force index pattern cache refresh on first search after component mount so newly created index patterns show up
-    this.fetchOptions('', true);
+    this.fetchOptions('');
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
@@ -102,83 +101,74 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
     });
   };
 
-  debouncedFetch = _.debounce(
-    async (searchValue: string, forceIndexPatternCacheRefresh: boolean) => {
-      const isCurrentSearch = () => {
-        return this.isMounted && searchValue === this.state.searchValue;
-      };
+  debouncedFetch = _.debounce(async (searchValue: string) => {
+    const isCurrentSearch = () => {
+      return this.isMounted && searchValue === this.state.searchValue;
+    };
 
-      const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle(
-        forceIndexPatternCacheRefresh
-      );
-      if (!isCurrentSearch()) {
-        return;
+    const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
+    if (!isCurrentSearch()) {
+      return;
+    }
+
+    const options = [];
+    for (let i = 0; i < idsAndTitles.length; i++) {
+      if (
+        searchValue.length &&
+        !idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())
+      ) {
+        // index pattern excluded due to title not matching search
+        continue;
       }
 
-      const options = [];
-      for (let i = 0; i < idsAndTitles.length; i++) {
-        if (
-          searchValue.length &&
-          !idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())
-        ) {
-          // index pattern excluded due to title not matching search
-          continue;
-        }
-
-        if (this.props.fieldTypes) {
-          try {
-            const indexPattern = await this.props.indexPatternService.get(idsAndTitles[i].id);
-            if (!isCurrentSearch()) {
-              return;
-            }
-            const hasRequiredFieldTypes = indexPattern.fields.some((field) => {
-              return this.props.fieldTypes!.includes(field.type);
-            });
-            if (!hasRequiredFieldTypes) {
-              continue;
-            }
-          } catch (err) {
-            // could not load index pattern, exclude it from list.
+      if (this.props.fieldTypes) {
+        try {
+          const indexPattern = await this.props.indexPatternService.get(idsAndTitles[i].id);
+          if (!isCurrentSearch()) {
+            return;
+          }
+          const hasRequiredFieldTypes = indexPattern.fields.some((field) => {
+            return this.props.fieldTypes!.includes(field.type);
+          });
+          if (!hasRequiredFieldTypes) {
             continue;
           }
-        }
-
-        options.push({
-          label: idsAndTitles[i].title,
-          value: idsAndTitles[i].id,
-        });
-
-        // Loading each index pattern object requires a network call so just find small number of matching index patterns
-        // Users can use 'searchValue' to further refine the list and locate their index pattern.
-        if (options.length > 15) {
-          break;
+        } catch (err) {
+          // could not load index pattern, exclude it from list.
+          continue;
         }
       }
 
-      this.setState({
-        isLoading: false,
-        options,
+      options.push({
+        label: idsAndTitles[i].title,
+        value: idsAndTitles[i].id,
       });
 
-      if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
-        this.props.onNoIndexPatterns();
+      // Loading each index pattern object requires a network call so just find small number of matching index patterns
+      // Users can use 'searchValue' to further refine the list and locate their index pattern.
+      if (options.length > 15) {
+        break;
       }
-    },
-    300
-  );
+    }
 
-  onSearchChange = (searchValue = '') => {
-    this.fetchOptions(searchValue, false);
-  };
+    this.setState({
+      isLoading: false,
+      options,
+    });
 
-  fetchOptions = (searchValue: string, forceIndexPatternCacheRefresh: boolean) => {
+    if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
+      this.props.onNoIndexPatterns();
+    }
+  }, 300);
+
+  fetchOptions = (searchValue: string) => {
     this.setState(
       {
         isLoading: true,
         searchValue,
       },
       () => {
-        this.debouncedFetch(searchValue, forceIndexPatternCacheRefresh);
+        this.debouncedFetch(searchValue);
       }
     );
   };
@@ -204,7 +194,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
         placeholder={placeholder}
         singleSelection={true}
         isLoading={this.state.isLoading}
-        onSearchChange={this.onSearchChange}
+        onSearchChange={this.fetchOptions}
         options={this.state.options}
         selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
         onChange={this.onChange}

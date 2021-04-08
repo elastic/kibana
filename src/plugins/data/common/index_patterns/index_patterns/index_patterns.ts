@@ -535,6 +535,7 @@ export class IndexPatternsService {
     });
     indexPattern.id = response.id;
     this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    this.savedObjectsCache.push(response);
     return indexPattern;
   }
 
