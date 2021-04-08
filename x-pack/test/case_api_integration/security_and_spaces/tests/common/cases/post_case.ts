@@ -13,12 +13,7 @@ import {
   ConnectorJiraTypeFields,
   CaseStatuses,
 } from '../../../../../../plugins/cases/common/api';
-import {
-  getPostCaseRequest,
-  postCaseResp,
-  defaultUser,
-  postCaseReq,
-} from '../../../../common/lib/mock';
+import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   createCaseAsUser,
   deleteCases,

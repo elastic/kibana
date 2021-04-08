@@ -600,3 +600,18 @@ export const updateCase = async (
 
   return cases;
 };
+
+export const deleteComment = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  commentId: string,
+  expectedHttpCode: number = 204
+): Promise<void> => {
+  const { body: comment } = await supertest
+    .delete(`${CASES_URL}/${caseId}/comments/${commentId}`)
+    .set('kbn-xsrf', 'true')
+    .expect(expectedHttpCode)
+    .send();
+
+  return comment;
+};

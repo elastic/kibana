@@ -18,6 +18,9 @@ import {
   deleteCases,
   deleteCasesUserActions,
   deleteComments,
+  createCase,
+  createComment,
+  deleteComment,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,77 +35,50 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesUserActions(es);
     });
 
-    it('should delete a comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    describe('happy path', () => {
+      it('should delete a comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const comment = await deleteComment(supertest, postedCase.id, patchedCase.comments![0].id);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: comment } = await supertest
-        .delete(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
-        .set('kbn-xsrf', 'true')
-        .expect(204)
-        .send();
-      expect(comment).to.eql({});
+        expect(comment).to.eql({});
+      });
     });
 
-    it('unhappy path - 404s when comment belongs to different case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    describe('unhappy path', () => {
+      it('404s when comment belongs to different case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        const message = await deleteComment(supertest, 'fake-id', patchedCase.comments![0].id, 404);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+        expect(message).to.eql(
+          `This comment ${patchedCase.comments![0].id} does not exist in fake-id).`
+        );
+      });
 
-      const { body } = await supertest
-        .delete(`${CASES_URL}/fake-id/comments/${patchedCase.comments[0].id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
+      it('404s when comment is not there', async () => {
+        await deleteComment(supertest, 'fake-id', 'fake-id', 404);
+      });
 
-      expect(body.message).to.eql(
-        `This comment ${patchedCase.comments[0].id} does not exist in fake-id).`
-      );
-    });
+      it('should return a 400 when attempting to delete all comments when passing the `subCaseId` parameter', async () => {
+        const { body } = await supertest
+          .delete(`${CASES_URL}/case-id/comments?subCaseId=value`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
+        // make sure the failure is because of the subCaseId
+        expect(body.message).to.contain('subCaseId');
+      });
 
-    it('unhappy path - 404s when comment is not there', async () => {
-      await supertest
-        .delete(`${CASES_URL}/fake-id/comments/fake-id`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
-    });
-
-    it('should return a 400 when attempting to delete all comments when passing the `subCaseId` parameter', async () => {
-      const { body } = await supertest
-        .delete(`${CASES_URL}/case-id/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-      // make sure the failure is because of the subCaseId
-      expect(body.message).to.contain('subCaseId');
-    });
-
-    it('should return a 400 when attempting to delete a single comment when passing the `subCaseId` parameter', async () => {
-      const { body } = await supertest
-        .delete(`${CASES_URL}/case-id/comments/comment-id?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-      // make sure the failure is because of the subCaseId
-      expect(body.message).to.contain('subCaseId');
+      it('should return a 400 when attempting to delete a single comment when passing the `subCaseId` parameter', async () => {
+        const { body } = await supertest
+          .delete(`${CASES_URL}/case-id/comments/comment-id?subCaseId=value`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
+        // make sure the failure is because of the subCaseId
+        expect(body.message).to.contain('subCaseId');
+      });
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
