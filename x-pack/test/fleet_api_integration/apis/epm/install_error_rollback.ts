@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(pkgInfoResponse.text).response.status).to.be('not_installed');
     });
 
-    it('on an upgrade, it should fall back to the previous good version during rollback', async function () {
+    it.skip('on an upgrade, it should fall back to the previous good version during rollback', async function () {
       await installPackage(goodPackage);
       await supertest
         .post(`/api/fleet/epm/packages/${badPackage}`)
