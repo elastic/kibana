@@ -46,8 +46,8 @@ Use Geo containment alerts.
 [%collapsible]
 ====
 *Details* +
-When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters. 
-With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved. 
+When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters.
+With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved.
 For more information, refer to {kibana-ref}/upgrade-migrations.html[saved object upgrade migrations].
 
 *Impact* +
@@ -60,7 +60,7 @@ Before you upgrade to 7.12.0, review the documentation for {kibana-ref}/upgrade-
 [%collapsible]
 ====
 *Details* +
-In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. When one or more remote {es} clusters use a version prior to 7.12.0, *Discover*, *Maps*, *Canvas*, and *Logs* are 
+In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. When one or more remote {es} clusters use a version prior to 7.12.0, *Discover*, *Maps*, *Canvas*, and *Logs* are
 unable to display the cluster data. For information about the cross-cluster search limitations in {kib}, refer to {kibana-issue}94965[#94965].
 
 *Impact* +
@@ -69,6 +69,21 @@ To display the cluster data in *Discover*, load documents directly from `_source
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 
 . Go to `discover:searchFieldsFromSource`, then select *On*.
+====
+
+[discrete]
+[[breaking-kibana-discover-fields]]
+.*Discover* now uses the fields parameter
+[%collapsible]
+====
+*Details* +
+With the new {ref}/search-fields.html#search-fields-param[fields parameter],
+*Discover* now shows all fields, including runtime fields,
+multi-mapped fields like `.keyword`, and alias fields.
+Reading from `_source` is still supported through a switch in *Advanced Settings*.
+
+*Impact* +
+Refer to https://www.elastic.co/blog/discover-uses-fields-api-in-7-12[the blog announcing the change to *Discover*].
 ====
 
 // end::notable-breaking-changes[]
@@ -92,7 +107,7 @@ Deprecates `services.callCluster` in the alert and action type executors. For mo
 *Impact* +
 Use `services.scopedClusterClient`.
 ====
-      
+
 [discrete]
 [[deprecation-87114]]
 .Deprecates configuring [kib] with a `server.host` value of `0`
@@ -104,15 +119,15 @@ In the new version of joi, `0` is an invalid hostname. When upgraded, the extra 
 *Impact* +
 To bind to all interfaces, use `0.0.0.0`.
 ====
-      
+
 [discrete]
 [[deprecation-89296]]
 .Deprecates the use of `elasticsearch.logQueries`
 [%collapsible]
 ====
 *Details* +
-When `logging.verbose: true` or `logging.root.level: 'debug'`, {es} query logs are now always shown. 
-In 7.11.0 and earlier, {es} query logs were not included in verbose logging unless `elasticsearch.logQueries` was configured. 
+When `logging.verbose: true` or `logging.root.level: 'debug'`, {es} query logs are now always shown.
+In 7.11.0 and earlier, {es} query logs were not included in verbose logging unless `elasticsearch.logQueries` was configured.
 For more information, refer to {kibana-pull}89296[#89296].
 
 *Impact* +
@@ -125,7 +140,7 @@ logging:
        level: off
 ----
 ====
-      
+
 [float]
 [[features-7.12.0]]
 === Features
