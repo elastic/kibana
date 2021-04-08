@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams } from '../../../hooks';
@@ -16,19 +16,16 @@ interface OverviewPageLinkProps {
   dataTestSubj: string;
   direction: string;
   pagination: string;
-  label: string;
   loading: boolean;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
-  label,
   loading,
   dataTestSubj,
   direction,
   pagination,
 }) => {
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
-  const iconSide = direction === 'prev' ? 'left' : 'right';
 
   const ariaLabel =
     direction === 'next'
@@ -51,16 +48,13 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   const linkParameters = stringifyUrlParams({ ...params, pagination }, true);
 
   return (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       color="text"
       href={basePath + '/app/uptime' + linkParameters}
       data-test-subj={dataTestSubj}
       iconType={icon}
       aria-label={!pagination ? disableLinkLabel : ariaLabel}
       isDisabled={!pagination || loading}
-      iconSide={iconSide}
-    >
-      {label}
-    </EuiButtonEmpty>
+    />
   );
 };

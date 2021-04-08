@@ -38,7 +38,6 @@ export const ListPagination = ({ items, next, previous, loading: listLoading }: 
             dataTestSubj="xpack.uptime.monitorList.prevButton"
             direction="prev"
             pagination={previousData.length > 0 ? previous : ''}
-            label={'Previous'}
             loading={loading || listLoading}
           />
         </EuiFlexItem>
@@ -47,7 +46,6 @@ export const ListPagination = ({ items, next, previous, loading: listLoading }: 
             dataTestSubj="xpack.uptime.monitorList.nextButton"
             direction="next"
             pagination={nextData.length > 0 ? next : ''}
-            label="Next"
             loading={loading || listLoading}
           />
         </EuiFlexItem>
