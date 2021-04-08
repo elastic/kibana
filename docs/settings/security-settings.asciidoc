@@ -33,7 +33,7 @@ to `false`. For more details see <<xpack-security-audit-logging>>.
 You configure the authentication settings in the `xpack.security.authc.providers` namespace. For more information, refer to <<kibana-authentication>>.
 
 `xpack.security.authc.providers`::
-The SAML realm in {es} that the provider should use.
+Identifies the authentication method.
 +
 For example:
 +
