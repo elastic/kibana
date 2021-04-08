@@ -247,7 +247,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.helpText"
-            defaultMessage="Certificate for SSL client authentication."
+            defaultMessage="Certificate for TLS client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -279,7 +279,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
-            defaultMessage="Certificate key for SSL client authentication."
+            defaultMessage="Certificate key for TLS client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -311,7 +311,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.helpText"
-            defaultMessage="Certificate key passphrase for SSL client authentication."
+            defaultMessage="Certificate key passphrase for TLS client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
