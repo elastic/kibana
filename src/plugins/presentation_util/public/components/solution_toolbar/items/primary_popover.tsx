@@ -15,7 +15,3 @@ export type Props = Omit<SolutionToolbarPopoverProps, 'primary'>;
 export const PrimaryActionPopover = (props: Omit<SolutionToolbarPopoverProps, 'primary'>) => (
   <SolutionToolbarPopover primary={true} {...props} />
 );
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default PrimaryActionPopover;

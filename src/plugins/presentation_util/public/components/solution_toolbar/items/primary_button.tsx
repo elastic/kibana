@@ -13,7 +13,3 @@ import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './bu
 export const PrimaryActionButton = (props: Omit<SolutionToolbarButtonProps, 'primary'>) => (
   <SolutionToolbarButton primary={true} {...props} />
 );
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default PrimaryActionButton;
