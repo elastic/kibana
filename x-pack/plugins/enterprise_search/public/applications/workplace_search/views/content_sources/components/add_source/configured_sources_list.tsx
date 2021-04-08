@@ -7,28 +7,18 @@
 
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
-import { SourceIcon } from '../../../../components/shared/source_icon';
-import { getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { ConfiguredSource } from './configured_source';
+
 import {
-  CONFIGURED_SOURCES_CONNECT_BUTTON,
   CONFIGURED_SOURCES_EMPTY_STATE,
-  CONFIGURED_ORG_SOURCES_BODY,
   CONFIGURED_ORG_SOURCES_TITLE,
   CONFIGURED_PRIVATE_SOURCES_BODY,
   CONFIGURED_PRIVATE_SOURCES_TITLE,
+  CONFIGURED_ORG_SOURCES_BODY,
 } from './constants';
 
 interface ConfiguredSourcesProps {
@@ -40,48 +30,6 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   sources,
   isOrganization,
 }) => {
-  const ButtonConnect = ({ addPath }: { addPath: string }) => (
-    <EuiButtonTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-      {CONFIGURED_SOURCES_CONNECT_BUTTON}
-    </EuiButtonTo>
-  );
-  const ButtonDisabled = () => <EuiButton disabled>Available in personal dashboard</EuiButton>;
-
-  const ConfiguredSource = ({
-    accountContextOnly,
-    addPath,
-    connected,
-    name,
-    serviceType,
-  }: {
-    accountContextOnly: boolean;
-    addPath: string;
-    connected?: boolean;
-    name: string;
-    serviceType: string;
-  }) => {
-    const privateSource = !isOrganization || (isOrganization && !accountContextOnly);
-    return (
-      <EuiFlexItem>
-        <EuiCard
-          description={
-            !privateSource
-              ? 'Private Source'
-              : connected
-              ? 'At least one source connected'
-              : 'No sources connected'
-          }
-          display={'plain'}
-          icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
-          paddingSize={'l'}
-          title={name}
-          titleSize={'xs'}
-          footer={privateSource ? <ButtonConnect addPath={addPath} /> : <ButtonDisabled />}
-        />
-      </EuiFlexItem>
-    );
-  };
-
   const sourcesPrivate = sources.filter((i) => i.privateSourcesEnabled);
   const sourcesShared = sources.filter((i) => !i.privateSourcesEnabled);
 
@@ -107,6 +55,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
               name={name}
               serviceType={serviceType}
               key={i}
+              isOrganization={isOrganization}
             />
           ))}
         </EuiFlexGrid>
@@ -133,6 +82,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 name={name}
                 serviceType={serviceType}
                 key={i}
+                isOrganization={isOrganization}
               />
             )
           )}
