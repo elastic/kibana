@@ -24,13 +24,9 @@ import moment from 'moment';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
 
-import { FormInternal } from '../types';
+import { FormInternal, MinAgePhase, Phase } from '../types';
 
-/* -===- Private functions and types -===- */
-
-type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
-
-type Phase = 'hot' | MinAgePhase;
+/* -===- Private functions -===- */
 
 const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 

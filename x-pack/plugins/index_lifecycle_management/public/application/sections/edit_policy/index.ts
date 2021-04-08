@@ -6,3 +6,5 @@
  */
 
 export { EditPolicy } from './edit_policy.container';
+
+export { Phase, MinAgePhase } from './types';

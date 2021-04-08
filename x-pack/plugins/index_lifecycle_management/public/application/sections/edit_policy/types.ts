@@ -81,3 +81,7 @@ export interface FormInternal extends SerializedPolicy {
     };
   };
 }
+
+export type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
+
+export type Phase = 'hot' | MinAgePhase;

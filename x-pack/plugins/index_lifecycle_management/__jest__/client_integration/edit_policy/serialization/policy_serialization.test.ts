@@ -14,6 +14,7 @@ import {
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import { licensingMock } from '../../../../../licensing/public/mocks';
+import { MinAgePhase } from '../../../../public/application';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;
@@ -478,6 +479,45 @@ describe('<EditPolicy /> serialization', () => {
       expect(entirePolicy2.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
         'my-repo'
       );
+    });
+  });
+
+  describe('min age', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    (['warm', 'cold', 'frozen', 'delete'] as MinAgePhase[]).forEach((phase) => {
+      test(`should concatenate ${phase} min_age value with its min_age unit`, async () => {
+        const { actions } = testBed;
+
+        await actions[phase].enable(true);
+        await actions[phase].setMinAgeValue('10');
+        await actions[phase].setMinAgeUnits('m');
+
+        if (phase === 'frozen') {
+          await actions[phase].setSearchableSnapshot('myRepo');
+        }
+
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+        expect(entirePolicy.phases[phase].min_age).toBe('10m');
+      });
     });
   });
 
