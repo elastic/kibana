@@ -13,6 +13,7 @@ import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
 import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
+import { labsServiceFactory } from './labs';
 
 export { NotifyService } from './notify';
 export { PlatformService } from './platform';
@@ -78,6 +79,7 @@ export const services = {
   notify: new CanvasServiceProvider(notifyServiceFactory),
   platform: new CanvasServiceProvider(platformServiceFactory),
   navLink: new CanvasServiceProvider(navLinkServiceFactory),
+  labs: new CanvasServiceProvider(labsServiceFactory),
 };
 
 export type CanvasServiceProviders = typeof services;
@@ -88,6 +90,7 @@ export interface CanvasServices {
   notify: ServiceFromProvider<typeof services.notify>;
   platform: ServiceFromProvider<typeof services.platform>;
   navLink: ServiceFromProvider<typeof services.navLink>;
+  labs: ServiceFromProvider<typeof services.labs>;
 }
 
 export const startServices = async (
