@@ -12,7 +12,7 @@ import { MapStoreState } from '../../../reducers/store';
 import { NewVectorLayerEditor } from './wizard';
 import {
   addLayer,
-  indexDrawnLayers,
+  clearDrawingData,
   setSelectedLayer,
   setVectorLayerIndexName,
   updateEditMode,
@@ -31,10 +31,13 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     setEditModeActive: () => dispatch(updateEditMode(true)),
-    setEditModeInActive: () => dispatch(updateEditMode(false)),
+    setEditModeInActive: () => {
+      dispatch(updateEditMode(false))
+      dispatch(clearDrawingData());
+    },
     setIndexName: (indexName: string) => dispatch(setVectorLayerIndexName(indexName)),
-    indexDrawnLayers: () => {
-      dispatch(indexDrawnLayers());
+    clearDrawingData: () => {
+      dispatch(clearDrawingData());
     },
     addNewLayer: async (layerDescriptor: LayerDescriptor) => {
       await dispatch(addLayer(layerDescriptor));

@@ -38,7 +38,7 @@ interface NewVectorLayerProps extends RenderWizardArguments {
   setEditModeActive: () => void;
   setEditModeInActive: () => void;
   setIndexName: (indexName: string) => void;
-  indexDrawnLayers: () => void;
+  clearDrawingData: () => void;
   addNewLayer: (layerDescriptor: LayerDescriptor) => void;
 }
 
@@ -76,7 +76,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
     }
     if (!this.state.indexingTriggered && currentStepId === ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID) {
       await this._addFeaturesToNewIndex();
-      this.props.indexDrawnLayers();
+      this.props.clearDrawingData();
     }
   }
 

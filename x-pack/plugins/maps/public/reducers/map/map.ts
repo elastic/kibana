@@ -49,7 +49,7 @@ import {
   UPDATE_EDIT_MODE,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
-  INDEX_DRAWN_LAYERS,
+  CLEAR_DRAWING_DATA,
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
 } from '../../actions';
 
@@ -84,7 +84,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     vectorLayerIndexName: '',
     drawState: undefined,
     drawFeatureState: undefined,
-    editModeActive: undefined,
+    editModeActive: false,
     featuresToIndexQueue: [],
   },
   selectedLayerId: null,
@@ -145,11 +145,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           vectorLayerIndexName: action.indexName,
         },
       };
-    case INDEX_DRAWN_LAYERS:
+    case CLEAR_DRAWING_DATA:
       return {
         ...state,
         mapState: {
           ...state.mapState,
+          drawState: undefined,
+          drawFeatureState: undefined,
+          editModeActive: false,
           featuresToIndexQueue: [],
         },
       };

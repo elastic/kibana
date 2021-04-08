@@ -37,7 +37,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
-  INDEX_DRAWN_LAYERS,
+  CLEAR_DRAWING_DATA,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
@@ -555,8 +555,8 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
   };
 }
 
-export function indexDrawnLayers() {
+export function clearDrawingData() {
   return {
-    type: INDEX_DRAWN_LAYERS,
+    type: CLEAR_DRAWING_DATA,
   };
 }

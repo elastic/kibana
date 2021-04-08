@@ -47,7 +47,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
       this.props.addFeaturesToIndexQueue(e.features);
     } catch (error) {
       getToasts().addWarning(
-        i18n.translate('xpack.maps.drawFeatureControl.unableToCreatFilter', {
+        i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {
           defaultMessage: `Unable to create feature, error: '{errorMsg}'.`,
           values: {
             errorMsg: error.message,
