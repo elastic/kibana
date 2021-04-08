@@ -449,12 +449,17 @@ export const SearchExamplesApp = ({
                 the response with each partial result, and updates a progress bar.
                 <EuiSpacer />
                 <EuiFieldNumber
-                  id="Fibonacci"
+                  id="FibonacciN"
                   placeholder="Number of Fibonacci numbers to generate"
                   value={fibonacciN}
                   onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
                 />
-                <EuiButtonEmpty size="xs" onClick={onPartialResultsClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onPartialResultsClickHandler}
+                  iconType="play"
+                  data-test-subj="requestFibonacci"
+                >
                   Request Fibonacci sequence
                 </EuiButtonEmpty>
               </EuiText>
@@ -485,7 +490,7 @@ export const SearchExamplesApp = ({
                   values={{ time: timeTook ?? 'Unknown' }}
                 />
               </EuiText>
-              <EuiProgress value={loaded} max={total} size="xs" />
+              <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
               <EuiCodeBlock
                 language="json"
                 fontSize="s"

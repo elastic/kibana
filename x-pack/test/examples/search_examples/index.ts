@@ -23,6 +23,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
       await esArchiver.unload('lens/basic');
     });
 
+    loadTestFile(require.resolve('./partial_results_example'));
     loadTestFile(require.resolve('./search_session_example'));
   });
 }
