@@ -69,6 +69,7 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
+  inMemoryExecutionEnqueuer: ExecutionEnqueuer;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -89,6 +90,7 @@ export class ActionsClient {
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly inMemoryExecutionEnqueuer: ExecutionEnqueuer;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -99,6 +101,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    inMemoryExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
@@ -110,6 +113,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.inMemoryExecutionEnqueuer = inMemoryExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -483,6 +487,17 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async enqueueInMemoryExecution(options: EnqueueExecutionOptions): Promise<void> {
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.inMemoryExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {

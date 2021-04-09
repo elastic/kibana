@@ -101,6 +101,22 @@ export class TaskScheduling {
     });
   }
 
+  public async runTask(taskInstanceWithDeprecatedFields: TaskInstanceWithDeprecatedFields) {
+    const taskInstance: ConcreteTaskInstance = {
+      ...taskInstanceWithDeprecatedFields,
+      id: taskInstanceWithDeprecatedFields.id ?? '',
+      version: '',
+      scheduledAt: new Date(),
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      attempts: 0,
+      status: TaskStatus.Idle,
+      ownerId: taskInstanceWithDeprecatedFields.ownerId ?? '',
+    };
+    this.taskPollingLifecycle.attemptToRunTaskDirectly(taskInstance);
+  }
+
   /**
    * Schedules a task with an Id
    *

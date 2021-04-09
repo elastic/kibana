@@ -78,6 +78,63 @@ export function createExecutionEnqueuerFunction({
   };
 }
 
+export function createInMemoryExecutionEnqueuerFunction({
+  taskManager,
+  actionTypeRegistry,
+  isESOCanEncrypt,
+  preconfiguredActions,
+}: CreateExecuteFunctionOptions) {
+  return async function execute(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    { id, params, spaceId, source, apiKey }: ExecuteOptions
+  ) {
+    if (!isESOCanEncrypt) {
+      throw new Error(
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const actionTypeId = await getActionTypeId(
+      unsecuredSavedObjectsClient,
+      preconfiguredActions,
+      id
+    );
+
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
+    const task = {
+      taskType: `actions:${actionTypeId}`,
+      params: {
+        spaceId,
+        taskParams: {
+          actionId: id,
+          apiKey,
+          params,
+        },
+        // actionTaskParamsId: actionTaskParamsRecord.id,
+      },
+      state: {},
+      scope: ['actions'],
+    };
+
+    await taskManager.runTask(task);
+
+    // const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
+    //   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+    //   {
+    //     actionId: id,
+    //     params,
+    //     apiKey,
+    //   },
+    //   executionSourceAsSavedObjectReferences(source)
+    // );
+
+    // await taskManager.schedule();
+  };
+}
+
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
   return isSavedObjectExecutionSource(executionSource)
     ? {

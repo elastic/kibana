@@ -35,7 +35,7 @@ export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware)
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ensureScheduled'
+  'schedule' | 'runNow' | 'ensureScheduled' | 'runTask'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
@@ -161,6 +161,7 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
+      runTask: (...args) => taskScheduling.runTask(...args),
     };
   }
 

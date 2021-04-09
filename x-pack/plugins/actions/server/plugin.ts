@@ -34,7 +34,10 @@ import { ActionsConfig, getValidatedConfig } from './config';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createExecutionEnqueuerFunction } from './create_execute_function';
+import {
+  createExecutionEnqueuerFunction,
+  createInMemoryExecutionEnqueuerFunction,
+} from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
@@ -300,6 +303,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
+        inMemoryExecutionEnqueuer: createInMemoryExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
         auditLogger: this.security?.audit.asScoped(request),
       });
     };
@@ -445,6 +454,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
             executionEnqueuer: createExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
+            inMemoryExecutionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,

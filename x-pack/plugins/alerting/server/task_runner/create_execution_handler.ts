@@ -157,7 +157,19 @@ export function createExecutionHandler<
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      await actionsClient.enqueueExecution({
+      // logger.warn(`Firing action for ${action.actionTypeId} with ${action.params.message}`);
+      // await actionsClient.enqueueExecution({
+      //   id: action.id,
+      //   params: action.params,
+      //   spaceId,
+      //   apiKey: apiKey ?? null,
+      //   source: asSavedObjectExecutionSource({
+      //     id: alertId,
+      //     type: 'alert',
+      //   }),
+      // });
+
+      await actionsClient.enqueueInMemoryExecution({
         id: action.id,
         params: action.params,
         spaceId,
@@ -167,6 +179,17 @@ export function createExecutionHandler<
           type: 'alert',
         }),
       });
+
+      // setTimeout(async () => {
+      //   await actionsClient.execute({
+      //     actionId: action.id,
+      //     params: action.params,
+      //     source: asSavedObjectExecutionSource({
+      //       id: alertId,
+      //       type: 'alert',
+      //     }),
+      //   });
+      // });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 

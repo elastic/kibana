@@ -190,7 +190,10 @@ export class TaskClaiming {
   ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
     if (this.getCapacity()) {
       return this.claimAvailableTasks(claimingOptions).pipe(
-        map((claimResult) => asOk(claimResult))
+        map((claimResult) => {
+          // console.log('task_claiming', { claimResult });
+          return asOk(claimResult);
+        })
       );
     }
     this.logger.debug(
@@ -263,9 +266,11 @@ export class TaskClaiming {
         ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, taskTypes, size)
         : [];
 
-    const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
-      claimTasksById.includes(doc.id)
-    );
+    // console.log('task_claiming, executClaimAvailableTasks(), main', { claimTasksById, docs, tasksUpdated });
+    const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) => {
+      // console.log('task_claiming, executClaimAvailableTasks(), loop', { doc });
+      return claimTasksById.includes(doc.id);
+    });
 
     const [documentsClaimedById, documentsRequestedButNotClaimed] = partition(
       documentsReturnedById,
@@ -379,6 +384,8 @@ export class TaskClaiming {
       sort.unshift('_score');
     }
 
+    // console.log('task_claiming, markAvailableTasksAsClaimed()', { claimTasksById, query })
+
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const result = await this.taskStore.updateByQuery(
       {
@@ -421,7 +428,7 @@ export class TaskClaiming {
       this.taskStore.taskManagerId,
       tasksOfType([...taskTypes])
     );
-    const { docs } = await this.taskStore.fetch({
+    const params = {
       query:
         claimTasksById && claimTasksById.length
           ? asPinnedQuery(claimTasksById, claimedTasksQuery)
@@ -429,7 +436,9 @@ export class TaskClaiming {
       size,
       sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
-    });
+    };
+    // console.log('task_claiming, sweepForClaimedTasks()', { claimTasksById, params });
+    const { docs } = await this.taskStore.fetch(params);
 
     return docs;
   }
