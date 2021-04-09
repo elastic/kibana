@@ -26,13 +26,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import moment, { Moment } from 'moment';
 
+import { TypedLensByValueInput } from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
 import { LensMarkDownRenderer } from './processor';
 import { ID } from './constants';
 import * as i18n from './translations';
 
 const ModalContainer = styled.div`
-  width: ${({ theme }) => `${theme.eui.euiBreakpoints.m}px`};
+  width: ${({ theme }) => theme.eui.euiBreakpoints.m};
 `;
 
 interface LensEditorProps {
@@ -52,7 +53,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
   onClosePopover,
   onInsert,
 }) => {
-  const services = useKibana().services;
+  const soClient = useKibana().services.savedObjects.client;
   const [lensOptions, setLensOptions] = useState<Array<{ label: string; value: string }>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string; value: string }>>(
     id && title ? [{ value: id, label: title }] : []
@@ -67,7 +68,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
 
   useEffect(() => {
     const fetchLensSavedObjects = async () => {
-      const { savedObjects } = await services.savedObjects.client.find<TagSavedObject>({
+      const { savedObjects } = await soClient.find<TypedLensByValueInput['attributes']>({
         type: 'lens',
         perPage: 1000,
       });
@@ -78,22 +79,13 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
 
       setLensOptions(options);
     };
-    const fetchTagsSavedObjects = async () => {
-      const tags = await services.savedObjects.client.find({
-        type: 'tag',
-        perPage: 1000,
-      });
-    };
     fetchLensSavedObjects();
-    fetchTagsSavedObjects();
-  }, []);
+  }, [soClient]);
 
   const handleChange = useCallback((options) => {
     setSelectedOptions(options);
     setLensSavedObjectId(options[0] ? options[0].value : null);
   }, []);
-
-  console.error(';ss', lensOptions);
 
   const handleLensDateChange = useCallback((data) => {
     if (data.range?.length === 2) {
@@ -170,8 +162,8 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
         <EuiSpacer />
         <LensMarkDownRenderer
           id={lensSavedObjectId}
-          startDate={startDate}
-          endDate={endDate}
+          startDate={startDate?.format()}
+          endDate={endDate?.format()}
           onBrushEnd={handleLensDateChange}
         />
       </EuiModalBody>
