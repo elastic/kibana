@@ -17,6 +17,6 @@ export const WatchBazelCommand: ICommand = {
     const runOffline = options?.offline === true;
 
     // Call bazel with the target to build all available packages and run it through iBazel to watch it for changes
-    await runIBazel(['build', '//packages:build'], runOffline);
+    await runIBazel(['--run_output=false', 'build', '//packages:build'], runOffline);
   },
 };

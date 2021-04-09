@@ -59653,7 +59653,7 @@ const WatchBazelCommand = {
   }) {
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Call bazel with the target to build all available packages and run it through iBazel to watch it for changes
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['build', '//packages:build'], runOffline);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build'], runOffline);
   }
 
 };
