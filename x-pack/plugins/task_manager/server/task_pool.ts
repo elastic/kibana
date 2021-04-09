@@ -113,7 +113,10 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
+  public run = async (
+    tasks: TaskRunner[],
+    inMemory: boolean = false
+  ): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
@@ -123,7 +126,7 @@ export class TaskPool {
           .map(async (taskRunner) => {
             this.tasksInPool.set(taskRunner.id, taskRunner);
             return taskRunner
-              .markTaskAsRunning()
+              .markTaskAsRunning(inMemory)
               .then((hasTaskBeenMarkAsRunning: boolean) =>
                 hasTaskBeenMarkAsRunning
                   ? this.handleMarkAsRunning(taskRunner)
@@ -159,6 +162,7 @@ export class TaskPool {
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
+    // console.log(`task_pool.handleMarkAsRunning()  ${taskRunner}`);
     taskRunner
       .run()
       .catch((err) => {

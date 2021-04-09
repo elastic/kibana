@@ -60,7 +60,7 @@ export interface TaskRunner {
   startedAt: Date | null;
   definition: TaskDefinition;
   cancel: CancelFunction;
-  markTaskAsRunning: () => Promise<boolean>;
+  markTaskAsRunning: (inMemory: boolean) => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
   stage: string;
@@ -275,7 +275,7 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<boolean>}
    */
-  public async markTaskAsRunning(): Promise<boolean> {
+  public async markTaskAsRunning(inMemory: boolean = false): Promise<boolean> {
     if (!isPending(this.instance)) {
       throw new Error(
         `Marking task ${this} as running has failed as it ${
@@ -310,29 +310,37 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
-      this.instance = asReadyToRun(
-        (await this.bufferedTaskStore.update({
+      if (!inMemory) {
+        this.instance = asReadyToRun(
+          (await this.bufferedTaskStore.update({
+            ...taskInstance,
+            status: TaskStatus.Running,
+            startedAt: now,
+            attempts,
+            retryAt:
+              (this.instance.task.schedule
+                ? maxIntervalFromDate(
+                    now,
+                    this.instance.task.schedule.interval,
+                    this.definition.timeout
+                  )
+                : this.getRetryDelay({
+                    attempts,
+                    // Fake an error. This allows retry logic when tasks keep timing out
+                    // and lets us set a proper "retryAt" value each time.
+                    error: new Error('Task timeout'),
+                    addDuration: this.definition.timeout,
+                  })) ?? null,
+            // This is a safe convertion as we're setting the startAt above
+          })) as ConcreteTaskInstanceWithStartedAt
+        );
+      } else {
+        const startedTask: ConcreteTaskInstanceWithStartedAt = {
           ...taskInstance,
-          status: TaskStatus.Running,
-          startedAt: now,
-          attempts,
-          retryAt:
-            (this.instance.task.schedule
-              ? maxIntervalFromDate(
-                  now,
-                  this.instance.task.schedule.interval,
-                  this.definition.timeout
-                )
-              : this.getRetryDelay({
-                  attempts,
-                  // Fake an error. This allows retry logic when tasks keep timing out
-                  // and lets us set a proper "retryAt" value each time.
-                  error: new Error('Task timeout'),
-                  addDuration: this.definition.timeout,
-                })) ?? null,
-          // This is a safe convertion as we're setting the startAt above
-        })) as ConcreteTaskInstanceWithStartedAt
-      );
+          startedAt: new Date(),
+        };
+        this.instance = asReadyToRun(startedTask);
+      }
 
       const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
         ownershipClaimedUntil

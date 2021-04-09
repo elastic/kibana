@@ -105,6 +105,7 @@ export function createInMemoryExecutionEnqueuerFunction({
     }
 
     const task = {
+      id: '' + +new Date(),
       taskType: `actions:${actionTypeId}`,
       params: {
         spaceId,
@@ -113,25 +114,13 @@ export function createInMemoryExecutionEnqueuerFunction({
           apiKey,
           params,
         },
-        // actionTaskParamsId: actionTaskParamsRecord.id,
       },
       state: {},
       scope: ['actions'],
     };
 
+    // console.log(`Running task`, { task })
     await taskManager.runTask(task);
-
-    // const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
-    //   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-    //   {
-    //     actionId: id,
-    //     params,
-    //     apiKey,
-    //   },
-    //   executionSourceAsSavedObjectReferences(source)
-    // );
-
-    // await taskManager.schedule();
   };
 }
 

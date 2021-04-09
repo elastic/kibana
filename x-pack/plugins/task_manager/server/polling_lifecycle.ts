@@ -209,7 +209,8 @@ export class TaskPollingLifecycle {
 
   public async attemptToRunTaskDirectly(taskInstance: ConcreteTaskInstance) {
     const runner = this.createTaskRunnerForTask(taskInstance);
-    await this.pool.run([runner]);
+    // console.log(`polling_lifecycle.attemptToRunTaskDirectly() ${runner}`)
+    await this.pool.run([runner], true);
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {

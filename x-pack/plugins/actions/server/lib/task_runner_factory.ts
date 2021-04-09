@@ -74,6 +74,7 @@ export class TaskRunnerFactory {
     return {
       async run() {
         const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
+        // console.log('task_runner_factory, run()')
         const namespace = spaceIdToNamespace(spaceId as string);
         const taskParams = taskInstance.params.taskParams;
 
