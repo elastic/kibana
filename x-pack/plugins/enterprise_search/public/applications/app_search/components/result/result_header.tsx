@@ -38,8 +38,14 @@ export const ResultHeader: React.FC<Props> = ({
   });
 
   return (
-    <header style={{ margin: '0 0 .75rem 0' }}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+    <header className="appSearchResultHeader">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+      >
         <EuiFlexItem grow>
           <ResultHeaderItem
             href={shouldLinkToDetailPage ? documentLink : undefined}
