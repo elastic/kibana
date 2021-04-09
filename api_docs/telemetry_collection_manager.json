@@ -56,13 +56,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorSet",
-                "text": "CollectorSet"
-              },
+              "CollectorSet",
               ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\">"
             ]
           },
@@ -331,21 +325,9 @@
           },
           "signature": [
             "<T extends ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.BasicStatsPayload",
-              "text": "BasicStatsPayload"
-            },
+            "BasicStatsPayload",
             ">(collectionConfig: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.CollectionStrategyConfig",
-              "text": "CollectionStrategyConfig"
-            },
+            "CollectionStrategyConfig",
             "<T>) => void"
           ]
         },

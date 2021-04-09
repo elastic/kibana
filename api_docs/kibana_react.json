@@ -45,7 +45,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListView.Unnamed.props",
+                "id": "def-public.TableListView.Unnamed.$1",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -208,7 +208,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListView.setFilter.queryText.queryText",
+                "id": "def-public.TableListView.setFilter.$1.queryText",
                 "type": "Object",
                 "label": "{ queryText }",
                 "tags": [],
@@ -216,7 +216,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.TableListView.setFilter.queryText.queryText.queryText",
+                    "id": "def-public.TableListView.setFilter.$1.queryText.queryText",
                     "type": "string",
                     "label": "queryText",
                     "description": [],
@@ -496,7 +496,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.nextProps",
+                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "label": "nextProps",
                 "isRequired": true,
@@ -510,7 +510,7 @@
                 }
               },
               {
-                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.prevState",
+                "id": "def-public.ValidatedDualRange.getDerivedStateFromProps.$2",
                 "type": "Object",
                 "label": "prevState",
                 "isRequired": true,
@@ -548,7 +548,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ValidatedDualRange._onChange.value",
+                "id": "def-public.ValidatedDualRange._onChange.$1",
                 "type": "Object",
                 "label": "value",
                 "isRequired": true,
@@ -604,19 +604,13 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.CodeEditor.props",
+            "id": "def-public.CodeEditor.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               ">"
             ],
             "description": [],
@@ -646,7 +640,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.createKibanaReactContext.services",
+            "id": "def-public.createKibanaReactContext.$1",
             "type": "Uncategorized",
             "label": "services",
             "isRequired": true,
@@ -694,7 +688,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.createNotifications.services",
+            "id": "def-public.createNotifications.$1",
             "type": "Object",
             "label": "services",
             "isRequired": true,
@@ -749,7 +743,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.createReactOverlays.services",
+            "id": "def-public.createReactOverlays.$1",
             "type": "Object",
             "label": "services",
             "isRequired": true,
@@ -817,7 +811,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.FieldButton.sizemisActivefalsefieldIconfieldNamefieldInfoIconfieldActionclassNameisDraggablefalseonClickdataTestSubjbuttonProps...rest",
+            "id": "def-public.FieldButton.$1",
             "type": "Object",
             "label": "{\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
             "isRequired": true,
@@ -865,7 +859,7 @@
         ],
         "children": [
           {
-            "id": "def-public.FieldIcon.typelabelsizesscriptedclassName...rest",
+            "id": "def-public.FieldIcon.$1",
             "type": "Object",
             "label": "{\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}",
             "isRequired": true,
@@ -913,18 +907,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.Markdown.props",
+            "id": "def-public.Markdown.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.MarkdownProps",
-                "text": "MarkdownProps"
-              }
+              "MarkdownProps"
             ],
             "description": [],
             "source": {
@@ -953,18 +941,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.MarkdownSimple.props",
+            "id": "def-public.MarkdownSimple.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.MarkdownSimpleProps",
-                "text": "MarkdownSimpleProps"
-              }
+              "MarkdownSimpleProps"
             ],
             "description": [],
             "source": {
@@ -993,7 +975,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.MountPointPortal.childrensetMountPoint",
+            "id": "def-public.MountPointPortal.$1",
             "type": "CompoundType",
             "label": "{ children, setMountPoint }",
             "isRequired": true,
@@ -1027,7 +1009,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.OverviewPageFooter.addBasePathpathonSetDefaultRouteonChangeDefaultRoute",
+            "id": "def-public.OverviewPageFooter.$1",
             "type": "CompoundType",
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "isRequired": true,
@@ -1059,7 +1041,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.OverviewPageHeader.hideToolbariconTypeoverlapshowDevToolsLinkshowManagementLinktitleaddBasePath",
+            "id": "def-public.OverviewPageHeader.$1",
             "type": "CompoundType",
             "label": "{\n  hideToolbar,\n  iconType,\n  overlap,\n  showDevToolsLink,\n  showManagementLink,\n  title,\n  addBasePath,\n}",
             "isRequired": true,
@@ -1098,18 +1080,12 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.Panel.childrenclassNameinitialWidth100style",
+            "id": "def-public.Panel.$1",
             "type": "Object",
             "label": "{ children, className, initialWidth = 100, style = {} }",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
+              "Props"
             ],
             "description": [],
             "source": {
@@ -1138,18 +1114,12 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.PanelsContainer.childrenclassNameonPanelWidthChangeresizerClassName",
+            "id": "def-public.PanelsContainer.$1",
             "type": "Object",
             "label": "{\n  children,\n  className,\n  onPanelWidthChange,\n  resizerClassName,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
+              "Props"
             ],
             "description": [],
             "source": {
@@ -1171,7 +1141,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.reactRouterNavigate.history",
+            "id": "def-public.reactRouterNavigate.$1",
             "type": "CompoundType",
             "label": "history",
             "isRequired": true,
@@ -1194,7 +1164,7 @@
             }
           },
           {
-            "id": "def-public.reactRouterNavigate.to",
+            "id": "def-public.reactRouterNavigate.$2",
             "type": "CompoundType",
             "label": "to",
             "isRequired": true,
@@ -1208,7 +1178,7 @@
             }
           },
           {
-            "id": "def-public.reactRouterNavigate.onClickCallback",
+            "id": "def-public.reactRouterNavigate.$3",
             "type": "Object",
             "label": "onClickCallback",
             "isRequired": false,
@@ -1250,7 +1220,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.reactRouterOnClickHandler.history",
+            "id": "def-public.reactRouterOnClickHandler.$1",
             "type": "CompoundType",
             "label": "history",
             "isRequired": true,
@@ -1273,7 +1243,7 @@
             }
           },
           {
-            "id": "def-public.reactRouterOnClickHandler.to",
+            "id": "def-public.reactRouterOnClickHandler.$2",
             "type": "CompoundType",
             "label": "to",
             "isRequired": true,
@@ -1287,7 +1257,7 @@
             }
           },
           {
-            "id": "def-public.reactRouterOnClickHandler.onClickCallback",
+            "id": "def-public.reactRouterOnClickHandler.$3",
             "type": "Object",
             "label": "onClickCallback",
             "isRequired": false,
@@ -1329,7 +1299,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.reactToUiComponent.ReactComp",
+            "id": "def-public.reactToUiComponent.$1",
             "type": "CompoundType",
             "label": "ReactComp",
             "isRequired": true,
@@ -1371,7 +1341,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.RedirectAppLinks.applicationchildrenclassName...otherProps",
+            "id": "def-public.RedirectAppLinks.$1",
             "type": "CompoundType",
             "label": "{\n  application,\n  children,\n  className,\n  ...otherProps\n}",
             "isRequired": true,
@@ -1405,7 +1375,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.toMountPoint.node",
+            "id": "def-public.toMountPoint.$1",
             "type": "CompoundType",
             "label": "node",
             "isRequired": false,
@@ -1447,7 +1417,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.ToolbarButton.childrenclassNamefontWeightnormalsizemhasArrowtruegroupPositionnonedataTestSubj...rest",
+            "id": "def-public.ToolbarButton.$1",
             "type": "CompoundType",
             "label": "{\n  children,\n  className,\n  fontWeight = 'normal',\n  size = 'm',\n  hasArrow = true,\n  groupPosition = 'none',\n  dataTestSubj = '',\n  ...rest\n}",
             "isRequired": true,
@@ -1495,7 +1465,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.uiToReactComponent.Comp",
+            "id": "def-public.uiToReactComponent.$1",
             "type": "Function",
             "label": "Comp",
             "isRequired": true,
@@ -1516,7 +1486,7 @@
             }
           },
           {
-            "id": "def-public.uiToReactComponent.as",
+            "id": "def-public.uiToReactComponent.$2",
             "type": "string",
             "label": "as",
             "isRequired": true,
@@ -1558,7 +1528,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.UrlTemplateEditor.height105valuevariablesonChangeonEditorEditorCodeEditor",
+            "id": "def-public.UrlTemplateEditor.$1",
             "type": "CompoundType",
             "label": "{\n  height = 105,\n  value,\n  variables,\n  onChange,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "isRequired": true,
@@ -1639,7 +1609,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.UseKibana.children",
+            "id": "def-public.UseKibana.$1",
             "type": "CompoundType",
             "label": "{ children }",
             "isRequired": true,
@@ -1687,7 +1657,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useUiSetting.key",
+            "id": "def-public.useUiSetting.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -1701,7 +1671,7 @@
             }
           },
           {
-            "id": "def-public.useUiSetting.defaultValue",
+            "id": "def-public.useUiSetting.$2",
             "type": "Uncategorized",
             "label": "defaultValue",
             "isRequired": false,
@@ -1735,7 +1705,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useUiSetting$.key",
+            "id": "def-public.useUiSetting$.$1",
             "type": "string",
             "label": "key",
             "isRequired": true,
@@ -1749,7 +1719,7 @@
             }
           },
           {
-            "id": "def-public.useUiSetting$.defaultValue",
+            "id": "def-public.useUiSetting$.$2",
             "type": "Uncategorized",
             "label": "defaultValue",
             "isRequired": false,
@@ -1783,7 +1753,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.withKibana.type",
+            "id": "def-public.withKibana.$1",
             "type": "CompoundType",
             "label": "type",
             "isRequired": true,
@@ -2437,7 +2407,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListViewProps.deleteItems.items",
+                "id": "def-public.TableListViewProps.deleteItems.$1",
                 "type": "Array",
                 "label": "items",
                 "isRequired": true,
@@ -2468,7 +2438,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListViewProps.editItem.item",
+                "id": "def-public.TableListViewProps.editItem.$1",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -2521,7 +2491,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.TableListViewProps.findItems.query",
+                "id": "def-public.TableListViewProps.findItems.$1",
                 "type": "string",
                 "label": "query",
                 "isRequired": true,
@@ -2791,13 +2761,7 @@
               "lineNumber": 75
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpFetchError",
-                "text": "HttpFetchError"
-              },
+              "HttpFetchError",
               " | undefined"
             ]
           },
@@ -3037,21 +3001,9 @@
             },
             "signature": [
               "React.FunctionComponent<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               "> | React.ComponentClass<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
+              "Props",
               ", any> | undefined"
             ]
           }
@@ -3848,7 +3800,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.EuiThemeProvider.darkModefalse...otherProps",
+            "id": "def-common.EuiThemeProvider.$1",
             "type": "CompoundType",
             "label": "{\n  darkMode = false,\n  ...otherProps\n}",
             "isRequired": true,

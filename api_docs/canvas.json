@@ -31,21 +31,9 @@
                 "text": "CoreStart"
               },
               " & ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasStartDeps",
-                "text": "CanvasStartDeps"
-              },
+              "CanvasStartDeps",
               " & { canvas: ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasServices",
-                "text": "CanvasServices"
-              },
+              "CanvasServices",
               "; }; }"
             ]
           }

@@ -45,13 +45,7 @@
               "lineNumber": 76
             },
             "signature": [
-              {
-                "pluginId": "indexPatternFieldEditor",
-                "scope": "public",
-                "docId": "kibIndexPatternFieldEditorPluginApi",
-                "section": "def-public.FormatEditorState",
-                "text": "FormatEditorState"
-              },
+              "FormatEditorState",
               " & S"
             ]
           },
@@ -73,18 +67,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.nextProps",
+                "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "label": "nextProps",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "indexPatternFieldEditor",
-                    "scope": "public",
-                    "docId": "kibIndexPatternFieldEditorPluginApi",
-                    "section": "def-public.FormatEditorProps",
-                    "text": "FormatEditorProps"
-                  },
+                  "FormatEditorProps",
                   "<{}>"
                 ],
                 "description": [],
@@ -94,18 +82,12 @@
                 }
               },
               {
-                "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.state",
+                "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.$2",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "indexPatternFieldEditor",
-                    "scope": "public",
-                    "docId": "kibIndexPatternFieldEditorPluginApi",
-                    "section": "def-public.FormatEditorState",
-                    "text": "FormatEditorState"
-                  }
+                  "FormatEditorState"
                 ],
                 "description": [],
                 "source": {
@@ -126,7 +108,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.DefaultFormatEditor.onChange.newParams",
+                "id": "def-public.DefaultFormatEditor.onChange.$1",
                 "type": "Object",
                 "label": "newParams",
                 "isRequired": true,
@@ -218,13 +200,7 @@
               "lineNumber": 33
             },
             "signature": [
-              {
-                "pluginId": "indexPatternFieldEditor",
-                "scope": "public",
-                "docId": "kibIndexPatternFieldEditorPluginApi",
-                "section": "def-public.InternalFieldType",
-                "text": "InternalFieldType"
-              }
+              "InternalFieldType"
             ]
           },
           {
@@ -421,7 +397,7 @@
           "description": [],
           "children": [
             {
-              "id": "def-public.PluginStart.openEditor.options",
+              "id": "def-public.PluginStart.openEditor.$1",
               "type": "Object",
               "label": "options",
               "isRequired": true,
@@ -466,7 +442,7 @@
           "description": [],
           "children": [
             {
-              "id": "def-public.PluginStart.openDeleteModal.options",
+              "id": "def-public.PluginStart.openDeleteModal.$1",
               "type": "Object",
               "label": "options",
               "isRequired": true,
@@ -549,13 +525,7 @@
           },
           "signature": [
             "React.FunctionComponent<",
-            {
-              "pluginId": "indexPatternFieldEditor",
-              "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
-              "section": "def-public.Props",
-              "text": "Props"
-            },
+            "Props",
             ">"
           ]
         }

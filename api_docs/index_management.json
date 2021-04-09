@@ -8,7 +8,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.getIndexListUri.filter",
+            "id": "def-public.getIndexListUri.$1",
             "type": "string",
             "label": "filter",
             "isRequired": false,
@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "def-public.getIndexListUri.includeHiddenIndices",
+            "id": "def-public.getIndexListUri.$2",
             "type": "CompoundType",
             "label": "includeHiddenIndices",
             "isRequired": false,
@@ -230,13 +230,7 @@
               "lineNumber": 14
             },
             "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "public",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-public.ExtensionsSetup",
-                "text": "ExtensionsSetup"
-              }
+              "ExtensionsSetup"
             ]
           }
         ],
@@ -650,13 +644,7 @@
           },
           "signature": [
             "{ add: (enricher: ",
-            {
-              "pluginId": "indexManagement",
-              "scope": "server",
-              "docId": "kibIndexManagementPluginApi",
-              "section": "def-server.Enricher",
-              "text": "Enricher"
-            },
+            "Enricher",
             ") => void; }"
           ]
         }
@@ -677,7 +665,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getTemplateParameter.template",
+            "id": "def-common.getTemplateParameter.$1",
             "type": "CompoundType",
             "label": "template",
             "isRequired": true,
@@ -705,7 +693,7 @@
             }
           },
           {
-            "id": "def-common.getTemplateParameter.setting",
+            "id": "def-common.getTemplateParameter.$2",
             "type": "CompoundType",
             "label": "setting",
             "isRequired": true,
@@ -1284,13 +1272,7 @@
               "lineNumber": 33
             },
             "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.DataStreamIndexFromEs",
-                "text": "DataStreamIndexFromEs"
-              },
+              "DataStreamIndexFromEs",
               "[]"
             ]
           },
@@ -1330,13 +1312,7 @@
               "lineNumber": 36
             },
             "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.HealthFromEs",
-                "text": "HealthFromEs"
-              }
+              "HealthFromEs"
             ]
           },
           {

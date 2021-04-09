@@ -96,7 +96,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.EnhancedDataServerPlugin.Unnamed.initializerContext",
+                "id": "def-server.EnhancedDataServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -138,27 +138,15 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.DataEnhancedStartDependencies",
-                "text": "DataEnhancedStartDependencies"
-              },
+              "DataEnhancedStartDependencies",
               ", unknown>, deps: ",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.DataEnhancedSetupDependencies",
-                "text": "DataEnhancedSetupDependencies"
-              },
+              "DataEnhancedSetupDependencies",
               ") => void"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-server.EnhancedDataServerPlugin.setup.core",
+                "id": "def-server.EnhancedDataServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -171,13 +159,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.DataEnhancedStartDependencies",
-                    "text": "DataEnhancedStartDependencies"
-                  },
+                  "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
                 "description": [],
@@ -187,18 +169,12 @@
                 }
               },
               {
-                "id": "def-server.EnhancedDataServerPlugin.setup.deps",
+                "id": "def-server.EnhancedDataServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "deps",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.DataEnhancedSetupDependencies",
-                    "text": "DataEnhancedSetupDependencies"
-                  }
+                  "DataEnhancedSetupDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -228,19 +204,13 @@
                 "text": "CoreStart"
               },
               ", { taskManager }: ",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.DataEnhancedStartDependencies",
-                "text": "DataEnhancedStartDependencies"
-              },
+              "DataEnhancedStartDependencies",
               ") => void"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-server.EnhancedDataServerPlugin.start.core",
+                "id": "def-server.EnhancedDataServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -260,18 +230,12 @@
                 }
               },
               {
-                "id": "def-server.EnhancedDataServerPlugin.start.taskManager",
+                "id": "def-server.EnhancedDataServerPlugin.start.$2",
                 "type": "Object",
                 "label": "{ taskManager }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.DataEnhancedStartDependencies",
-                    "text": "DataEnhancedStartDependencies"
-                  }
+                  "DataEnhancedStartDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -356,7 +320,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.pollSearch.search",
+            "id": "def-common.pollSearch.$1",
             "type": "Function",
             "label": "search",
             "isRequired": true,
@@ -370,7 +334,7 @@
             }
           },
           {
-            "id": "def-common.pollSearch.cancel",
+            "id": "def-common.pollSearch.$2",
             "type": "Function",
             "label": "cancel",
             "isRequired": false,
@@ -384,7 +348,7 @@
             }
           },
           {
-            "id": "def-common.pollSearch.pollInterval1000abortSignal",
+            "id": "def-common.pollSearch.$3",
             "type": "Object",
             "label": "{ pollInterval = 1000, abortSignal }",
             "isRequired": true,

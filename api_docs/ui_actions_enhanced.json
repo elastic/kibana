@@ -71,7 +71,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AbstractActionStorage.read.eventId",
+                "id": "def-public.AbstractActionStorage.read.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -110,7 +110,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AbstractActionStorage.create.event",
+                "id": "def-public.AbstractActionStorage.create.$1",
                 "type": "Object",
                 "label": "event",
                 "isRequired": true,
@@ -155,7 +155,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AbstractActionStorage.update.event",
+                "id": "def-public.AbstractActionStorage.update.$1",
                 "type": "Object",
                 "label": "event",
                 "isRequired": true,
@@ -192,7 +192,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AbstractActionStorage.remove.eventId",
+                "id": "def-public.AbstractActionStorage.remove.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -302,7 +302,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.Unnamed.def",
+                "id": "def-public.ActionFactory.Unnamed.$1",
                 "type": "Object",
                 "label": "def",
                 "isRequired": true,
@@ -323,18 +323,12 @@
                 }
               },
               {
-                "id": "def-public.ActionFactory.Unnamed.deps",
+                "id": "def-public.ActionFactory.Unnamed.$2",
                 "type": "Object",
                 "label": "deps",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "public",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-public.ActionFactoryDeps",
-                    "text": "ActionFactoryDeps"
-                  }
+                  "ActionFactoryDeps"
                 ],
                 "description": [],
                 "source": {
@@ -555,7 +549,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.getIconType.context",
+                "id": "def-public.ActionFactory.getIconType.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -586,7 +580,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.getDisplayName.context",
+                "id": "def-public.ActionFactory.getDisplayName.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -617,7 +611,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.getDisplayNameTooltip.context",
+                "id": "def-public.ActionFactory.getDisplayNameTooltip.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -648,7 +642,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.isCompatible.context",
+                "id": "def-public.ActionFactory.isCompatible.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -713,7 +707,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.create.serializedAction",
+                "id": "def-public.ActionFactory.create.$1",
                 "type": "Object",
                 "label": "serializedAction",
                 "isRequired": true,
@@ -776,7 +770,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.telemetry.state",
+                "id": "def-public.ActionFactory.telemetry.$1",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -796,7 +790,7 @@
                 }
               },
               {
-                "id": "def-public.ActionFactory.telemetry.telemetryData",
+                "id": "def-public.ActionFactory.telemetry.$2",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -839,19 +833,13 @@
                 "text": "SerializedEvent"
               },
               "; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.extract.state",
+                "id": "def-public.ActionFactory.extract.$1",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -892,13 +880,7 @@
                 "text": "SerializedEvent"
               },
               ", references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -911,7 +893,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ActionFactory.inject.state",
+                "id": "def-public.ActionFactory.inject.$1",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -931,18 +913,12 @@
                 }
               },
               {
-                "id": "def-public.ActionFactory.inject.references",
+                "id": "def-public.ActionFactory.inject.$2",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "description": [],
@@ -1021,13 +997,7 @@
             "signature": [
               "BehaviorSubject",
               "<",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.ILicense",
-                "text": "ILicense"
-              },
+              "ILicense",
               " | undefined>"
             ]
           },
@@ -1041,7 +1011,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.Unnamed.initializerContext",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -1083,13 +1053,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.StartDependencies",
-                "text": "StartDependencies"
-              },
+              "StartDependencies",
               ", unknown>, { embeddable, uiActions, licensing }: SetupDependencies) => ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -1102,7 +1066,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.core",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1115,13 +1079,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "public",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-public.StartDependencies",
-                    "text": "StartDependencies"
-                  },
+                  "StartDependencies",
                   ", unknown>"
                 ],
                 "description": [],
@@ -1131,7 +1089,7 @@
                 }
               },
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.embeddableuiActionslicensing",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ embeddable, uiActions, licensing }",
                 "isRequired": true,
@@ -1166,13 +1124,7 @@
                 "text": "CoreStart"
               },
               ", { uiActions, licensing }: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.StartDependencies",
-                "text": "StartDependencies"
-              },
+              "StartDependencies",
               ") => ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -1185,7 +1137,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.start.core",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1205,18 +1157,12 @@
                 }
               },
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.start.uiActionslicensing",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.start.$2",
                 "type": "Object",
                 "label": "{ uiActions, licensing }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "public",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-public.StartDependencies",
-                    "text": "StartDependencies"
-                  }
+                  "StartDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -1294,29 +1240,11 @@
                 "text": "ReduxLikeStateContainer"
               },
               "<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.State",
-                "text": "State"
-              },
+              "State",
               ", ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.Transitions",
-                "text": "Transitions"
-              },
+              "Transitions",
               ", ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.Selectors",
-                "text": "Selectors"
-              },
+              "Selectors",
               ">"
             ]
           },
@@ -1330,7 +1258,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.Unnamed.params",
+                "id": "def-public.DynamicActionManager.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -1374,7 +1302,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.getEvent.eventId",
+                "id": "def-public.DynamicActionManager.getEvent.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -1407,7 +1335,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.generateActionId.eventId",
+                "id": "def-public.DynamicActionManager.generateActionId.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -1446,7 +1374,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.reviveAction.event",
+                "id": "def-public.DynamicActionManager.reviveAction.$1",
                 "type": "Object",
                 "label": "event",
                 "isRequired": true,
@@ -1491,7 +1419,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.killAction.eventIdtriggers",
+                "id": "def-public.DynamicActionManager.killAction.$1",
                 "type": "Object",
                 "label": "{ eventId, triggers }",
                 "isRequired": true,
@@ -1539,13 +1467,7 @@
                 "text": "StateContainer"
               },
               "<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.State",
-                "text": "State"
-              },
+              "State",
               ", object, {}>"
             ]
           },
@@ -1613,7 +1535,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.createEvent.action",
+                "id": "def-public.DynamicActionManager.createEvent.$1",
                 "type": "Object",
                 "label": "action",
                 "isRequired": true,
@@ -1644,7 +1566,7 @@
                 }
               },
               {
-                "id": "def-public.DynamicActionManager.createEvent.triggers",
+                "id": "def-public.DynamicActionManager.createEvent.$2",
                 "type": "Array",
                 "label": "triggers",
                 "isRequired": true,
@@ -1695,7 +1617,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.updateEvent.eventId",
+                "id": "def-public.DynamicActionManager.updateEvent.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -1711,7 +1633,7 @@
                 }
               },
               {
-                "id": "def-public.DynamicActionManager.updateEvent.action",
+                "id": "def-public.DynamicActionManager.updateEvent.$2",
                 "type": "Object",
                 "label": "action",
                 "isRequired": true,
@@ -1742,7 +1664,7 @@
                 }
               },
               {
-                "id": "def-public.DynamicActionManager.updateEvent.triggers",
+                "id": "def-public.DynamicActionManager.updateEvent.$3",
                 "type": "Array",
                 "label": "triggers",
                 "isRequired": true,
@@ -1777,7 +1699,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.deleteEvent.eventId",
+                "id": "def-public.DynamicActionManager.deleteEvent.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -1812,7 +1734,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.deleteEvents.eventIds",
+                "id": "def-public.DynamicActionManager.deleteEvents.$1",
                 "type": "Array",
                 "label": "eventIds",
                 "isRequired": true,
@@ -1878,7 +1800,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MemoryActionStorage.Unnamed.events",
+                "id": "def-public.MemoryActionStorage.Unnamed.$1",
                 "type": "Object",
                 "label": "events",
                 "isRequired": true,
@@ -1957,7 +1879,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MemoryActionStorage.create.event",
+                "id": "def-public.MemoryActionStorage.create.$1",
                 "type": "Object",
                 "label": "event",
                 "isRequired": true,
@@ -2002,7 +1924,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MemoryActionStorage.update.event",
+                "id": "def-public.MemoryActionStorage.update.$1",
                 "type": "Object",
                 "label": "event",
                 "isRequired": true,
@@ -2039,7 +1961,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MemoryActionStorage.remove.eventId",
+                "id": "def-public.MemoryActionStorage.remove.$1",
                 "type": "string",
                 "label": "eventId",
                 "isRequired": true,
@@ -2074,19 +1996,13 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.ActionWizard.currentActionFactoryactionFactoriesonActionFactoryChangeonConfigChangeconfigcontextonSelectedTriggersChangegetTriggerInfotriggerstriggerPickerDocsLink",
+            "id": "def-public.ActionWizard.$1",
             "type": "CompoundType",
             "label": "{\n  currentActionFactory,\n  actionFactories,\n  onActionFactoryChange,\n  onConfigChange,\n  config,\n  context,\n  onSelectedTriggersChange,\n  getTriggerInfo,\n  triggers,\n  triggerPickerDocsLink,\n}",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.ActionWizardProps",
-                "text": "ActionWizardProps"
-              },
+              "ActionWizardProps",
               "<",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -2137,7 +2053,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.compile.urlTemplate",
+            "id": "def-public.compile.$1",
             "type": "string",
             "label": "urlTemplate",
             "isRequired": true,
@@ -2151,7 +2067,7 @@
             }
           },
           {
-            "id": "def-public.compile.context",
+            "id": "def-public.compile.$2",
             "type": "Uncategorized",
             "label": "context",
             "isRequired": true,
@@ -2165,7 +2081,7 @@
             }
           },
           {
-            "id": "def-public.compile.doEncode",
+            "id": "def-public.compile.$3",
             "type": "boolean",
             "label": "doEncode",
             "isRequired": true,
@@ -2204,7 +2120,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.globalScopeProvider.core",
+            "id": "def-public.globalScopeProvider.$1",
             "type": "Object",
             "label": "{\n  core,\n}",
             "isRequired": true,
@@ -2231,19 +2147,13 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.UrlDrilldownCollectConfig.props",
+            "id": "def-public.UrlDrilldownCollectConfig.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.UrlDrilldownCollectConfigProps",
-                "text": "UrlDrilldownCollectConfigProps"
-              },
+              "UrlDrilldownCollectConfigProps",
               ">"
             ],
             "description": [],
@@ -2278,7 +2188,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.validateUrl.url",
+            "id": "def-public.validateUrl.$1",
             "type": "string",
             "label": "url",
             "isRequired": true,
@@ -2318,7 +2228,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.validateUrlTemplate.urlTemplate",
+            "id": "def-public.validateUrlTemplate.$1",
             "type": "Object",
             "label": "urlTemplate",
             "isRequired": true,
@@ -2332,7 +2242,7 @@
             }
           },
           {
-            "id": "def-public.validateUrlTemplate.scope",
+            "id": "def-public.validateUrlTemplate.$2",
             "type": "Object",
             "label": "scope",
             "isRequired": true,
@@ -2502,7 +2412,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ActionFactoryDefinition.create.serializedAction",
+                "id": "def-public.ActionFactoryDefinition.create.$1",
                 "type": "Object",
                 "label": "serializedAction",
                 "isRequired": true,
@@ -2811,7 +2721,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DrilldownDefinition.isCompatible.config",
+                "id": "def-public.DrilldownDefinition.isCompatible.$1",
                 "type": "Uncategorized",
                 "label": "config",
                 "isRequired": true,
@@ -2825,7 +2735,7 @@
                 }
               },
               {
-                "id": "def-public.DrilldownDefinition.isCompatible.context",
+                "id": "def-public.DrilldownDefinition.isCompatible.$2",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -2874,7 +2784,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DrilldownDefinition.execute.config",
+                "id": "def-public.DrilldownDefinition.execute.$1",
                 "type": "Uncategorized",
                 "label": "config",
                 "isRequired": true,
@@ -2890,7 +2800,7 @@
                 }
               },
               {
-                "id": "def-public.DrilldownDefinition.execute.context",
+                "id": "def-public.DrilldownDefinition.execute.$2",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -2941,7 +2851,7 @@
             ],
             "children": [
               {
-                "id": "def-public.DrilldownDefinition.getHref.config",
+                "id": "def-public.DrilldownDefinition.getHref.$1",
                 "type": "Uncategorized",
                 "label": "config",
                 "isRequired": true,
@@ -2955,7 +2865,7 @@
                 }
               },
               {
-                "id": "def-public.DrilldownDefinition.getHref.context",
+                "id": "def-public.DrilldownDefinition.getHref.$2",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -3027,13 +2937,7 @@
               "lineNumber": 33
             },
             "signature": [
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.ActionStorage",
-                "text": "ActionStorage"
-              }
+              "ActionStorage"
             ]
           },
           {
@@ -3423,13 +3327,7 @@
               "lineNumber": 26
             },
             "signature": [
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "server",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-server.ActionFactoryRegistry",
-                "text": "ActionFactoryRegistry"
-              }
+              "ActionFactoryRegistry"
             ]
           },
           {
@@ -3482,7 +3380,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.AdvancedUiActionsServerPlugin.setup.core",
+                "id": "def-server.AdvancedUiActionsServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3503,7 +3401,7 @@
                 }
               },
               {
-                "id": "def-server.AdvancedUiActionsServerPlugin.setup.embeddable",
+                "id": "def-server.AdvancedUiActionsServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,
@@ -3561,7 +3459,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.AdvancedUiActionsServerPlugin.registerActionFactory.definition",
+                "id": "def-server.AdvancedUiActionsServerPlugin.registerActionFactory.$1",
                 "type": "Object",
                 "label": "definition",
                 "isRequired": true,

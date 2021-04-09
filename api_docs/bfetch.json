@@ -8,7 +8,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.split.delimiter",
+            "id": "def-public.split.$1",
             "type": "string",
             "label": "delimiter",
             "isRequired": true,
@@ -81,13 +81,7 @@
           },
           "signature": [
             "(params: ",
-            {
-              "pluginId": "bfetch",
-              "scope": "public",
-              "docId": "kibBfetchPluginApi",
-              "section": "def-public.FetchStreamingParams",
-              "text": "FetchStreamingParams"
-            },
+            "FetchStreamingParams",
             ") => { xhr: XMLHttpRequest; stream: ",
             "Observable",
             "<string>; }"
@@ -105,13 +99,7 @@
           },
           "signature": [
             "<Payload, Result extends object>(params: ",
-            {
-              "pluginId": "bfetch",
-              "scope": "public",
-              "docId": "kibBfetchPluginApi",
-              "section": "def-public.StreamingBatchedFunctionParams",
-              "text": "StreamingBatchedFunctionParams"
-            },
+            "StreamingBatchedFunctionParams",
             "<Payload, Result>) => ",
             {
               "pluginId": "bfetch",
@@ -396,7 +384,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ItemBuffer.Unnamed.params",
+                "id": "def-common.ItemBuffer.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -449,7 +437,7 @@
             ],
             "children": [
               {
-                "id": "def-common.ItemBuffer.write.item",
+                "id": "def-common.ItemBuffer.write.$1",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -548,7 +536,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.TimedItemBuffer.Unnamed.params",
+                "id": "def-common.TimedItemBuffer.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -586,7 +574,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.TimedItemBuffer.write.item",
+                "id": "def-common.TimedItemBuffer.write.$1",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -653,7 +641,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.createBatchedFunction.params",
+            "id": "def-common.createBatchedFunction.$1",
             "type": "Object",
             "label": "params",
             "isRequired": true,
@@ -708,7 +696,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.normalizeError.err",
+            "id": "def-common.normalizeError.$1",
             "type": "Any",
             "label": "err",
             "isRequired": true,
@@ -756,7 +744,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.removeLeadingSlash.text",
+            "id": "def-common.removeLeadingSlash.$1",
             "type": "string",
             "label": "text",
             "isRequired": true,
@@ -1076,7 +1064,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.StreamingResponseHandler.getResponseStream.payload",
+                "id": "def-common.StreamingResponseHandler.getResponseStream.$1",
                 "type": "Uncategorized",
                 "label": "payload",
                 "isRequired": true,

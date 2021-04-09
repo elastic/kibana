@@ -228,7 +228,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IServiceSettings.getEMSHotLink.layer",
+                "id": "def-public.IServiceSettings.getEMSHotLink.$1",
                 "type": "Object",
                 "label": "layer",
                 "isRequired": true,
@@ -321,7 +321,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IServiceSettings.getUrlForRegionLayer.layer",
+                "id": "def-public.IServiceSettings.getUrlForRegionLayer.$1",
                 "type": "Object",
                 "label": "layer",
                 "isRequired": true,
@@ -358,14 +358,14 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IServiceSettings.setQueryParams.params.params",
+                "id": "def-public.IServiceSettings.setQueryParams.$1.params",
                 "type": "Object",
                 "label": "params",
                 "tags": [],
                 "description": [],
                 "children": [
                   {
-                    "id": "def-public.IServiceSettings.setQueryParams.params.params.Unnamed",
+                    "id": "def-public.IServiceSettings.setQueryParams.$1.params.Unnamed",
                     "type": "Any",
                     "label": "Unnamed",
                     "tags": [],
@@ -410,7 +410,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.tmsServiceConfig",
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$1",
                 "type": "Object",
                 "label": "tmsServiceConfig",
                 "isRequired": true,
@@ -430,7 +430,7 @@
                 }
               },
               {
-                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.isDesaturated",
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$2",
                 "type": "boolean",
                 "label": "isDesaturated",
                 "isRequired": true,
@@ -444,7 +444,7 @@
                 }
               },
               {
-                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.isDarkMode",
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$3",
                 "type": "boolean",
                 "label": "isDarkMode",
                 "isRequired": true,
@@ -875,7 +875,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.MapsEmsPlugin.Unnamed.initializerContext",
+                "id": "def-server.MapsEmsPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -921,7 +921,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.MapsEmsPlugin.setup.core",
+                "id": "def-server.MapsEmsPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,

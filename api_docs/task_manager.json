@@ -61,7 +61,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.TaskManagerPlugin.Unnamed.initContext",
+                "id": "def-server.TaskManagerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initContext",
                 "isRequired": true,
@@ -114,7 +114,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.TaskManagerPlugin.setup.core",
+                "id": "def-server.TaskManagerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -167,7 +167,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.TaskManagerPlugin.start.savedObjectselasticsearch",
+                "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "label": "{ savedObjects, elasticsearch }",
                 "isRequired": true,
@@ -215,19 +215,13 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.isUnrecoverableError.error",
+            "id": "def-server.isUnrecoverableError.$1",
             "type": "CompoundType",
             "label": "error",
             "isRequired": true,
             "signature": [
               "Error | ",
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.DecoratedError",
-                "text": "DecoratedError"
-              }
+              "DecoratedError"
             ],
             "description": [],
             "source": {
@@ -254,7 +248,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.throwUnrecoverableError.error",
+            "id": "def-server.throwUnrecoverableError.$1",
             "type": "Object",
             "label": "error",
             "isRequired": true,
@@ -622,13 +616,7 @@
               "lineNumber": 239
             },
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.IntervalSchedule",
-                "text": "IntervalSchedule"
-              },
+              "IntervalSchedule",
               " | undefined"
             ]
           },

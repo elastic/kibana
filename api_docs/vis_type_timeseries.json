@@ -16,18 +16,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.isVisSeriesData.data",
+            "id": "def-server.isVisSeriesData.$1",
             "type": "CompoundType",
             "label": "data",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "visTypeTimeseries",
-                "scope": "common",
-                "docId": "kibVisTypeTimeseriesPluginApi",
-                "section": "def-common.TimeseriesVisData",
-                "text": "TimeseriesVisData"
-              }
+              "TimeseriesVisData"
             ],
             "description": [],
             "source": {
@@ -57,18 +51,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.isVisTableData.data",
+            "id": "def-server.isVisTableData.$1",
             "type": "CompoundType",
             "label": "data",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "visTypeTimeseries",
-                "scope": "common",
-                "docId": "kibVisTypeTimeseriesPluginApi",
-                "section": "def-common.TimeseriesVisData",
-                "text": "TimeseriesVisData"
-              }
+              "TimeseriesVisData"
             ],
             "description": [],
             "source": {
@@ -133,13 +121,7 @@
           },
           "signature": [
             "(requestContext: ",
-            {
-              "pluginId": "data",
-              "scope": "server",
-              "docId": "kibDataSearchPluginApi",
-              "section": "def-server.DataRequestHandlerContext",
-              "text": "DataRequestHandlerContext"
-            },
+            "DataRequestHandlerContext",
             ", fakeRequest: ",
             {
               "pluginId": "core",
@@ -149,13 +131,7 @@
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>, options: any) => Promise<",
-            {
-              "pluginId": "visTypeTimeseries",
-              "scope": "common",
-              "docId": "kibVisTypeTimeseriesPluginApi",
-              "section": "def-common.TimeseriesVisData",
-              "text": "TimeseriesVisData"
-            },
+            "TimeseriesVisData",
             ">"
           ]
         }

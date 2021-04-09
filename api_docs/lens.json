@@ -110,13 +110,7 @@
               "lineNumber": 43
             },
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.ColumnState",
-                "text": "ColumnState"
-              },
+              "ColumnState",
               "[]"
             ]
           },
@@ -142,13 +136,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.SortingState",
-                "text": "SortingState"
-              },
+              "SortingState",
               " | undefined"
             ]
           }
@@ -256,13 +244,7 @@
             },
             "signature": [
               "{ filters: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]; }"
             ]
           }
@@ -334,13 +316,7 @@
             },
             "signature": [
               "Record<string, Pick<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.IndexPatternLayer",
-                "text": "IndexPatternLayer"
-              },
+              "IndexPatternLayer",
               ", \"columns\" | \"columnOrder\" | \"incompleteColumns\">>"
             ]
           }
@@ -513,13 +489,7 @@
             },
             "signature": [
               "(input: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.LensEmbeddableInput",
-                "text": "LensEmbeddableInput"
-              },
+              "LensEmbeddableInput",
               ") => void"
             ]
           },
@@ -553,13 +523,7 @@
             },
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.VisualizationType",
-                "text": "VisualizationType"
-              },
+              "VisualizationType",
               "[]>"
             ]
           }
@@ -606,6 +570,67 @@
         "source": {
           "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
           "lineNumber": 8
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.OperationMetadata",
+        "type": "Interface",
+        "label": "OperationMetadata",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.OperationMetadata.dataType",
+            "type": "CompoundType",
+            "label": "dataType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/public/types.ts",
+              "lineNumber": 360
+            },
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DataType",
+                "text": "DataType"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.OperationMetadata.isBucketed",
+            "type": "boolean",
+            "label": "isBucketed",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/public/types.ts",
+              "lineNumber": 363
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.OperationMetadata.scale",
+            "type": "CompoundType",
+            "label": "scale",
+            "description": [
+              "\nordinal: Each name is a unique value, but the names are in sorted order, like \"Top values\"\ninterval: Histogram data, like date or number histograms\nratio: Most number data is rendered as a ratio that includes 0"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/types.ts",
+              "lineNumber": 369
+            },
+            "signature": [
+              "\"interval\" | \"ordinal\" | \"ratio\" | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/public/types.ts",
+          "lineNumber": 358
         },
         "initialIsOpen": false
       },
@@ -776,21 +801,9 @@
             },
             "signature": [
               "{ type: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.MODES_TYPES",
-                "text": "MODES_TYPES"
-              },
+              "MODES_TYPES",
               "; maxBars: number | \"auto\"; ranges: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.RangeTypeLens",
-                "text": "RangeTypeLens"
-              },
+              "RangeTypeLens",
               "[]; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; parentFormat?: { id: string; params?: { id?: string | undefined; template?: string | undefined; replaceInfinity?: boolean | undefined; } | undefined; } | undefined; }"
             ]
           }
@@ -1051,13 +1064,7 @@
               "lineNumber": 381
             },
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.YConfig",
-                "text": "YConfig"
-              },
+              "YConfig",
               "[] | undefined"
             ]
           },
@@ -1760,7 +1767,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LensServerPlugin.Unnamed.initializerContext",
+                "id": "def-server.LensServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -1822,7 +1829,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LensServerPlugin.setup.core",
+                "id": "def-server.LensServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1851,7 +1858,7 @@
                 }
               },
               {
-                "id": "def-server.LensServerPlugin.setup.plugins",
+                "id": "def-server.LensServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -1904,7 +1911,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LensServerPlugin.start.core",
+                "id": "def-server.LensServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1924,7 +1931,7 @@
                 }
               },
               {
-                "id": "def-server.LensServerPlugin.start.plugins",
+                "id": "def-server.LensServerPlugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -1996,13 +2003,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorSet",
-                "text": "CollectorSet"
-              },
+              "CollectorSet",
               ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
             ]
           },
@@ -2124,7 +2125,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.getEditPath.id",
+            "id": "def-common.getEditPath.$1",
             "type": "string",
             "label": "id",
             "isRequired": false,
@@ -2156,7 +2157,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.getFullPath.id",
+            "id": "def-common.getFullPath.$1",
             "type": "string",
             "label": "id",
             "isRequired": false,

@@ -41,7 +41,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ToastsApi.Unnamed.deps.deps",
+                "id": "def-public.ToastsApi.Unnamed.$1.deps",
                 "type": "Object",
                 "label": "deps",
                 "tags": [],
@@ -49,7 +49,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ToastsApi.Unnamed.deps.deps.uiSettings",
+                    "id": "def-public.ToastsApi.Unnamed.$1.deps.uiSettings",
                     "type": "Object",
                     "label": "uiSettings",
                     "description": [],
@@ -136,7 +136,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.add.toastOrTitle",
+                "id": "def-public.ToastsApi.add.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -187,7 +187,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.remove.toastOrId",
+                "id": "def-public.ToastsApi.remove.$1",
                 "type": "CompoundType",
                 "label": "toastOrId",
                 "isRequired": true,
@@ -252,7 +252,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.addInfo.toastOrTitle",
+                "id": "def-public.ToastsApi.addInfo.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -274,7 +274,7 @@
                 }
               },
               {
-                "id": "def-public.ToastsApi.addInfo.options",
+                "id": "def-public.ToastsApi.addInfo.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -341,7 +341,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.addSuccess.toastOrTitle",
+                "id": "def-public.ToastsApi.addSuccess.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -363,7 +363,7 @@
                 }
               },
               {
-                "id": "def-public.ToastsApi.addSuccess.options",
+                "id": "def-public.ToastsApi.addSuccess.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -430,7 +430,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.addWarning.toastOrTitle",
+                "id": "def-public.ToastsApi.addWarning.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -452,7 +452,7 @@
                 }
               },
               {
-                "id": "def-public.ToastsApi.addWarning.options",
+                "id": "def-public.ToastsApi.addWarning.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -519,7 +519,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.addDanger.toastOrTitle",
+                "id": "def-public.ToastsApi.addDanger.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -541,7 +541,7 @@
                 }
               },
               {
-                "id": "def-public.ToastsApi.addDanger.options",
+                "id": "def-public.ToastsApi.addDanger.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -600,7 +600,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ToastsApi.addError.error",
+                "id": "def-public.ToastsApi.addError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -616,7 +616,7 @@
                 }
               },
               {
-                "id": "def-public.ToastsApi.addError.options",
+                "id": "def-public.ToastsApi.addError.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -789,7 +789,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AsyncPlugin.setup.core",
+                "id": "def-public.AsyncPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -810,7 +810,7 @@
                 }
               },
               {
-                "id": "def-public.AsyncPlugin.setup.plugins",
+                "id": "def-public.AsyncPlugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -849,7 +849,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AsyncPlugin.start.core",
+                "id": "def-public.AsyncPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -869,7 +869,7 @@
                 }
               },
               {
-                "id": "def-public.AsyncPlugin.start.plugins",
+                "id": "def-public.AsyncPlugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -1477,13 +1477,7 @@
             },
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "[]>"
             ]
           },
@@ -1501,13 +1495,7 @@
             },
             "signature": [
               "(domainId: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               "[]>"
             ]
           },
@@ -1525,13 +1513,7 @@
             },
             "signature": [
               "(details: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               ") => boolean"
             ]
           },
@@ -1549,13 +1531,7 @@
             },
             "signature": [
               "(details: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
+              "DomainDeprecationDetails",
               ") => Promise<",
               {
                 "pluginId": "core",
@@ -1591,7 +1567,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 348
+              "lineNumber": 349
             }
           },
           {
@@ -1602,7 +1578,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 349
+              "lineNumber": 350
             }
           },
           {
@@ -1613,7 +1589,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 350
+              "lineNumber": 351
             },
             "signature": [
               "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; simulatePipeline: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
@@ -1622,7 +1598,7 @@
         ],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 347
+          "lineNumber": 348
         },
         "initialIsOpen": false
       },
@@ -2034,21 +2010,9 @@
             },
             "signature": [
               "() => Readonly<Record<string, Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"validation\"> & ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UiSettingsParams",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\"> & ",
+              "UserProvidedValues",
               "<any>>>"
             ]
           },
@@ -2334,7 +2298,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayBannersStart.add.mount",
+                "id": "def-public.OverlayBannersStart.add.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2355,7 +2319,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayBannersStart.add.priority",
+                "id": "def-public.OverlayBannersStart.add.$2",
                 "type": "number",
                 "label": "priority",
                 "isRequired": false,
@@ -2392,7 +2356,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayBannersStart.remove.id",
+                "id": "def-public.OverlayBannersStart.remove.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2437,7 +2401,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayBannersStart.replace.id",
+                "id": "def-public.OverlayBannersStart.replace.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -2453,7 +2417,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayBannersStart.replace.mount",
+                "id": "def-public.OverlayBannersStart.replace.$2",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2474,7 +2438,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayBannersStart.replace.priority",
+                "id": "def-public.OverlayBannersStart.replace.$3",
                 "type": "number",
                 "label": "priority",
                 "isRequired": false,
@@ -2668,7 +2632,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayFlyoutStart.open.mount",
+                "id": "def-public.OverlayFlyoutStart.open.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -2689,7 +2653,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayFlyoutStart.open.options",
+                "id": "def-public.OverlayFlyoutStart.open.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2988,7 +2952,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayModalStart.open.mount",
+                "id": "def-public.OverlayModalStart.open.$1",
                 "type": "Function",
                 "label": "mount",
                 "isRequired": true,
@@ -3009,7 +2973,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayModalStart.open.options",
+                "id": "def-public.OverlayModalStart.open.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3067,7 +3031,7 @@
             ],
             "children": [
               {
-                "id": "def-public.OverlayModalStart.openConfirm.message",
+                "id": "def-public.OverlayModalStart.openConfirm.$1",
                 "type": "CompoundType",
                 "label": "message",
                 "isRequired": true,
@@ -3089,7 +3053,7 @@
                 }
               },
               {
-                "id": "def-public.OverlayModalStart.openConfirm.options",
+                "id": "def-public.OverlayModalStart.openConfirm.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3437,7 +3401,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.Plugin.setup.core",
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3458,7 +3422,7 @@
                 }
               },
               {
-                "id": "def-public.Plugin.setup.plugins",
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -3497,7 +3461,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.Plugin.start.core",
+                "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3517,7 +3481,7 @@
                 }
               },
               {
-                "id": "def-public.Plugin.start.plugins",
+                "id": "def-public.Plugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -3717,13 +3681,7 @@
               "lineNumber": 78
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -3756,13 +3714,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -3779,13 +3731,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -5510,13 +5456,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ]
           },
@@ -5547,29 +5487,11 @@
               "lineNumber": 81
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.ImageValidation",
-                "text": "ImageValidation"
-              },
+              "ImageValidation",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegex",
-                "text": "StringValidationRegex"
-              },
+              "StringValidationRegex",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegexString",
-                "text": "StringValidationRegexString"
-              },
+              "StringValidationRegexString",
               " | undefined"
             ]
           },
@@ -5837,7 +5759,7 @@
           "lineNumber": 102
         },
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; }"
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -6576,7 +6498,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.ElasticsearchConfig.Unnamed.rawConfig",
+                "id": "def-server.ElasticsearchConfig.Unnamed.$1",
                 "type": "Object",
                 "label": "rawConfig",
                 "isRequired": true,
@@ -6644,7 +6566,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LegacyClusterClient.Unnamed.config",
+                "id": "def-server.LegacyClusterClient.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "config",
                 "isRequired": true,
@@ -6664,7 +6586,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyClusterClient.Unnamed.log",
+                "id": "def-server.LegacyClusterClient.Unnamed.$2",
                 "type": "Object",
                 "label": "log",
                 "isRequired": true,
@@ -6678,7 +6600,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyClusterClient.Unnamed.type",
+                "id": "def-server.LegacyClusterClient.Unnamed.$3",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6692,7 +6614,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyClusterClient.Unnamed.getAuthHeaders",
+                "id": "def-server.LegacyClusterClient.Unnamed.$4",
                 "type": "Function",
                 "label": "getAuthHeaders",
                 "isRequired": true,
@@ -6724,7 +6646,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.LegacyClusterClient.callAsInternalUser.endpoint",
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -6738,7 +6660,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyClusterClient.callAsInternalUser.clientParams",
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -6752,7 +6674,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyClusterClient.callAsInternalUser.options",
+                "id": "def-server.LegacyClusterClient.callAsInternalUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -6859,7 +6781,7 @@
             ],
             "children": [
               {
-                "id": "def-server.LegacyClusterClient.asScoped.request",
+                "id": "def-server.LegacyClusterClient.asScoped.$1",
                 "type": "CompoundType",
                 "label": "request",
                 "isRequired": false,
@@ -6941,7 +6863,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LegacyElasticsearchErrorHelpers.isNotAuthorizedError.error",
+                "id": "def-server.LegacyElasticsearchErrorHelpers.isNotAuthorizedError.$1",
                 "type": "Any",
                 "label": "error",
                 "isRequired": true,
@@ -6980,7 +6902,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.error",
+                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -6994,7 +6916,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.reason",
+                "id": "def-server.LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -7062,7 +6984,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.LegacyScopedClusterClient.Unnamed.internalAPICaller",
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$1",
                 "type": "Function",
                 "label": "internalAPICaller",
                 "isRequired": true,
@@ -7082,7 +7004,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.Unnamed.scopedAPICaller",
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$2",
                 "type": "Function",
                 "label": "scopedAPICaller",
                 "isRequired": true,
@@ -7102,7 +7024,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.Unnamed.headers",
+                "id": "def-server.LegacyScopedClusterClient.Unnamed.$3",
                 "type": "CompoundType",
                 "label": "headers",
                 "isRequired": false,
@@ -7150,7 +7072,7 @@
             ],
             "children": [
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.endpoint",
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -7166,7 +7088,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.clientParams",
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -7182,7 +7104,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.options",
+                "id": "def-server.LegacyScopedClusterClient.callAsInternalUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7234,7 +7156,7 @@
             ],
             "children": [
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.endpoint",
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$1",
                 "type": "string",
                 "label": "endpoint",
                 "isRequired": true,
@@ -7250,7 +7172,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.clientParams",
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$2",
                 "type": "Object",
                 "label": "clientParams",
                 "isRequired": true,
@@ -7266,7 +7188,7 @@
                 }
               },
               {
-                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.options",
+                "id": "def-server.LegacyScopedClusterClient.callAsCurrentUser.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7535,7 +7457,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.AsyncPlugin.setup.core",
+                "id": "def-server.AsyncPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -7556,7 +7478,7 @@
                 }
               },
               {
-                "id": "def-server.AsyncPlugin.setup.plugins",
+                "id": "def-server.AsyncPlugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -7595,7 +7517,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.AsyncPlugin.start.core",
+                "id": "def-server.AsyncPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -7615,7 +7537,7 @@
                 }
               },
               {
-                "id": "def-server.AsyncPlugin.start.plugins",
+                "id": "def-server.AsyncPlugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -7772,7 +7694,7 @@
             ],
             "children": [
               {
-                "id": "def-server.CapabilitiesSetup.registerProvider.provider",
+                "id": "def-server.CapabilitiesSetup.registerProvider.$1",
                 "type": "Function",
                 "label": "provider",
                 "isRequired": true,
@@ -7819,7 +7741,7 @@
             ],
             "children": [
               {
-                "id": "def-server.CapabilitiesSetup.registerSwitcher.switcher",
+                "id": "def-server.CapabilitiesSetup.registerSwitcher.$1",
                 "type": "Function",
                 "label": "switcher",
                 "isRequired": true,
@@ -7886,13 +7808,7 @@
                 "text": "ResolveCapabilitiesOptions"
               },
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">"
             ],
             "description": [
@@ -7900,7 +7816,7 @@
             ],
             "children": [
               {
-                "id": "def-server.CapabilitiesStart.resolveCapabilities.request",
+                "id": "def-server.CapabilitiesStart.resolveCapabilities.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -7921,7 +7837,7 @@
                 }
               },
               {
-                "id": "def-server.CapabilitiesStart.resolveCapabilities.options",
+                "id": "def-server.CapabilitiesStart.resolveCapabilities.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -7985,7 +7901,7 @@
             ],
             "children": [
               {
-                "id": "def-server.ConfigDeprecationFactory.rename.oldKey",
+                "id": "def-server.ConfigDeprecationFactory.rename.$1",
                 "type": "string",
                 "label": "oldKey",
                 "isRequired": true,
@@ -7999,7 +7915,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.rename.newKey",
+                "id": "def-server.ConfigDeprecationFactory.rename.$2",
                 "type": "string",
                 "label": "newKey",
                 "isRequired": true,
@@ -8013,7 +7929,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.rename.details",
+                "id": "def-server.ConfigDeprecationFactory.rename.$3",
                 "type": "Object",
                 "label": "details",
                 "isRequired": false,
@@ -8051,7 +7967,7 @@
             ],
             "children": [
               {
-                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.oldKey",
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$1",
                 "type": "string",
                 "label": "oldKey",
                 "isRequired": true,
@@ -8065,7 +7981,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.newKey",
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$2",
                 "type": "string",
                 "label": "newKey",
                 "isRequired": true,
@@ -8079,7 +7995,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.details",
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.$3",
                 "type": "Object",
                 "label": "details",
                 "isRequired": false,
@@ -8117,7 +8033,7 @@
             ],
             "children": [
               {
-                "id": "def-server.ConfigDeprecationFactory.unused.unusedKey",
+                "id": "def-server.ConfigDeprecationFactory.unused.$1",
                 "type": "string",
                 "label": "unusedKey",
                 "isRequired": true,
@@ -8131,7 +8047,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.unused.details",
+                "id": "def-server.ConfigDeprecationFactory.unused.$2",
                 "type": "Object",
                 "label": "details",
                 "isRequired": false,
@@ -8169,7 +8085,7 @@
             ],
             "children": [
               {
-                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.unusedKey",
+                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.$1",
                 "type": "string",
                 "label": "unusedKey",
                 "isRequired": true,
@@ -8183,7 +8099,7 @@
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.details",
+                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.$2",
                 "type": "Object",
                 "label": "details",
                 "isRequired": false,
@@ -10327,7 +10243,7 @@
             ],
             "children": [
               {
-                "id": "def-server.IContextContainer.registerContext.pluginOpaqueId",
+                "id": "def-server.IContextContainer.registerContext.$1",
                 "type": "Uncategorized",
                 "label": "pluginOpaqueId",
                 "isRequired": true,
@@ -10343,7 +10259,7 @@
                 }
               },
               {
-                "id": "def-server.IContextContainer.registerContext.contextName",
+                "id": "def-server.IContextContainer.registerContext.$2",
                 "type": "Uncategorized",
                 "label": "contextName",
                 "isRequired": true,
@@ -10359,7 +10275,7 @@
                 }
               },
               {
-                "id": "def-server.IContextContainer.registerContext.provider",
+                "id": "def-server.IContextContainer.registerContext.$3",
                 "type": "Function",
                 "label": "provider",
                 "isRequired": true,
@@ -10423,20 +10339,14 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<T>) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaResponse",
-                "text": "KibanaResponse"
-              }
+              "KibanaResponse"
             ],
             "description": [
               "\nCreate a new handler function pre-wired to context for the plugin.\n"
             ],
             "children": [
               {
-                "id": "def-server.IContextContainer.createHandler.pluginOpaqueId",
+                "id": "def-server.IContextContainer.createHandler.$1",
                 "type": "Uncategorized",
                 "label": "pluginOpaqueId",
                 "isRequired": true,
@@ -10452,7 +10362,7 @@
                 }
               },
               {
-                "id": "def-server.IContextContainer.createHandler.handler",
+                "id": "def-server.IContextContainer.createHandler.$2",
                 "type": "Function",
                 "label": "handler",
                 "isRequired": true,
@@ -10483,13 +10393,7 @@
                     "text": "CustomHttpResponseOptions"
                   },
                   "<T>) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaResponse",
-                    "text": "KibanaResponse"
-                  }
+                  "KibanaResponse"
                 ],
                 "description": [
                   "- Handler function to pass context object to."
@@ -10924,14 +10828,8 @@
             },
             "signature": [
               "() => Readonly<Record<string, Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"validation\">>>"
+              "UiSettingsParams",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\">>>"
             ]
           },
           {
@@ -10980,13 +10878,7 @@
             },
             "signature": [
               "<T = any>() => Promise<Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<T>>>"
             ]
           },
@@ -12912,7 +12804,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.trace.message",
+                "id": "def-server.Logger.trace.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -12928,7 +12820,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.trace.meta",
+                "id": "def-server.Logger.trace.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -12966,7 +12858,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.debug.message",
+                "id": "def-server.Logger.debug.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -12982,7 +12874,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.debug.meta",
+                "id": "def-server.Logger.debug.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -13020,7 +12912,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.info.message",
+                "id": "def-server.Logger.info.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -13036,7 +12928,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.info.meta",
+                "id": "def-server.Logger.info.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -13074,7 +12966,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.warn.errorOrMessage",
+                "id": "def-server.Logger.warn.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -13090,7 +12982,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.warn.meta",
+                "id": "def-server.Logger.warn.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -13128,7 +13020,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.error.errorOrMessage",
+                "id": "def-server.Logger.error.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -13144,7 +13036,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.error.meta",
+                "id": "def-server.Logger.error.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -13182,7 +13074,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.fatal.errorOrMessage",
+                "id": "def-server.Logger.fatal.$1",
                 "type": "CompoundType",
                 "label": "errorOrMessage",
                 "isRequired": true,
@@ -13198,7 +13090,7 @@
                 }
               },
               {
-                "id": "def-server.Logger.fatal.meta",
+                "id": "def-server.Logger.fatal.$2",
                 "type": "Object",
                 "label": "meta",
                 "isRequired": false,
@@ -13235,7 +13127,7 @@
             ],
             "children": [
               {
-                "id": "def-server.Logger.get.childContextPaths",
+                "id": "def-server.Logger.get.$1",
                 "type": "Array",
                 "label": "childContextPaths",
                 "isRequired": true,
@@ -13352,7 +13244,7 @@
             ],
             "children": [
               {
-                "id": "def-server.LoggerFactory.get.contextParts",
+                "id": "def-server.LoggerFactory.get.$1",
                 "type": "Array",
                 "label": "contextParts",
                 "isRequired": true,
@@ -13415,7 +13307,7 @@
             ],
             "children": [
               {
-                "id": "def-server.LoggingServiceSetup.configure.config$",
+                "id": "def-server.LoggingServiceSetup.configure.$1",
                 "type": "Object",
                 "label": "config$",
                 "isRequired": true,
@@ -14150,7 +14042,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.Plugin.setup.core",
+                "id": "def-server.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -14171,7 +14063,7 @@
                 }
               },
               {
-                "id": "def-server.Plugin.setup.plugins",
+                "id": "def-server.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -14210,7 +14102,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.Plugin.start.core",
+                "id": "def-server.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -14230,7 +14122,7 @@
                 }
               },
               {
-                "id": "def-server.Plugin.start.plugins",
+                "id": "def-server.Plugin.start.$2",
                 "type": "Uncategorized",
                 "label": "plugins",
                 "isRequired": true,
@@ -14866,13 +14758,7 @@
               "lineNumber": 78
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -14905,13 +14791,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -14928,13 +14808,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -15195,13 +15069,7 @@
             },
             "signature": [
               "{ total: number; max_score: number; hits: { _index: string; _type: string; _id: string; _score: number; _source: T; _version?: number | undefined; _explanation?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.Explanation",
-                "text": "Explanation"
-              },
+              "Explanation",
               " | undefined; fields?: any; highlight?: any; inner_hits?: any; matched_queries?: string[] | undefined; sort?: unknown[] | undefined; }[]; }"
             ]
           },
@@ -15556,7 +15424,7 @@
             ],
             "children": [
               {
-                "id": "def-server.StatusServiceSetup.set.status$",
+                "id": "def-server.StatusServiceSetup.set.$1",
                 "type": "Object",
                 "label": "status$",
                 "isRequired": true,
@@ -15930,13 +15798,7 @@
               "lineNumber": 68
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ]
           },
@@ -15967,29 +15829,11 @@
               "lineNumber": 81
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.ImageValidation",
-                "text": "ImageValidation"
-              },
+              "ImageValidation",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegex",
-                "text": "StringValidationRegex"
-              },
+              "StringValidationRegex",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.StringValidationRegexString",
-                "text": "StringValidationRegexString"
-              },
+              "StringValidationRegexString",
               " | undefined"
             ]
           },
@@ -16050,13 +15894,7 @@
             "label": "register",
             "signature": [
               "(settings: Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
+              "UiSettingsParams",
               "<unknown>>) => void"
             ],
             "description": [
@@ -16064,19 +15902,13 @@
             ],
             "children": [
               {
-                "id": "def-server.UiSettingsServiceSetup.register.settings",
+                "id": "def-server.UiSettingsServiceSetup.register.$1",
                 "type": "Object",
                 "label": "settings",
                 "isRequired": true,
                 "signature": [
                   "Record<string, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.UiSettingsParams",
-                    "text": "UiSettingsParams"
-                  },
+                  "UiSettingsParams",
                   "<unknown>>"
                 ],
                 "description": [],
@@ -16136,7 +15968,7 @@
             ],
             "children": [
               {
-                "id": "def-server.UiSettingsServiceStart.asScopedToClient.savedObjectsClient",
+                "id": "def-server.UiSettingsServiceStart.asScopedToClient.$1",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -16907,7 +16739,7 @@
           "lineNumber": 102
         },
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; }"
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: UiCounterMetricType; name: string; } | undefined; validation?: ImageValidation | StringValidationRegex | StringValidationRegexString | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: DeprecationSettings | undefined; }"
         ],
         "initialIsOpen": false
       },

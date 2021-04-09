@@ -123,7 +123,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeDocTitle.change.newTitle",
+                "id": "def-public.ChromeDocTitle.change.$1",
                 "type": "CompoundType",
                 "label": "newTitle",
                 "isRequired": true,
@@ -604,7 +604,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavControls.registerLeft.navControl",
+                "id": "def-public.ChromeNavControls.registerLeft.$1",
                 "type": "Object",
                 "label": "navControl",
                 "isRequired": true,
@@ -651,7 +651,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavControls.registerRight.navControl",
+                "id": "def-public.ChromeNavControls.registerRight.$1",
                 "type": "Object",
                 "label": "navControl",
                 "isRequired": true,
@@ -698,7 +698,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavControls.registerCenter.navControl",
+                "id": "def-public.ChromeNavControls.registerCenter.$1",
                 "type": "Object",
                 "label": "navControl",
                 "isRequired": true,
@@ -780,13 +780,7 @@
               "lineNumber": 29
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              },
+              "AppCategory",
               " | undefined"
             ]
           },
@@ -994,7 +988,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavLinks.get.id",
+                "id": "def-public.ChromeNavLinks.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1053,7 +1047,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavLinks.has.id",
+                "id": "def-public.ChromeNavLinks.has.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1086,7 +1080,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavLinks.showOnly.id",
+                "id": "def-public.ChromeNavLinks.showOnly.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1135,7 +1129,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeNavLinks.update.id",
+                "id": "def-public.ChromeNavLinks.update.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1149,7 +1143,7 @@
                 }
               },
               {
-                "id": "def-public.ChromeNavLinks.update.values",
+                "id": "def-public.ChromeNavLinks.update.$2",
                 "type": "Object",
                 "label": "values",
                 "isRequired": true,
@@ -1248,7 +1242,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeRecentlyAccessed.add.link",
+                "id": "def-public.ChromeRecentlyAccessed.add.$1",
                 "type": "string",
                 "label": "link",
                 "isRequired": true,
@@ -1264,7 +1258,7 @@
                 }
               },
               {
-                "id": "def-public.ChromeRecentlyAccessed.add.label",
+                "id": "def-public.ChromeRecentlyAccessed.add.$2",
                 "type": "string",
                 "label": "label",
                 "isRequired": true,
@@ -1280,7 +1274,7 @@
                 }
               },
               {
-                "id": "def-public.ChromeRecentlyAccessed.add.id",
+                "id": "def-public.ChromeRecentlyAccessed.add.$3",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1524,7 +1518,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setAppTitle.appTitle",
+                "id": "def-public.ChromeStart.setAppTitle.$1",
                 "type": "string",
                 "label": "appTitle",
                 "isRequired": true,
@@ -1593,7 +1587,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setBrand.brand",
+                "id": "def-public.ChromeStart.setBrand.$1",
                 "type": "Object",
                 "label": "brand",
                 "isRequired": true,
@@ -1652,7 +1646,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setIsVisible.isVisible",
+                "id": "def-public.ChromeStart.setIsVisible.$1",
                 "type": "boolean",
                 "label": "isVisible",
                 "isRequired": true,
@@ -1705,7 +1699,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.addApplicationClass.className",
+                "id": "def-public.ChromeStart.addApplicationClass.$1",
                 "type": "string",
                 "label": "className",
                 "isRequired": true,
@@ -1738,7 +1732,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.removeApplicationClass.className",
+                "id": "def-public.ChromeStart.removeApplicationClass.$1",
                 "type": "string",
                 "label": "className",
                 "isRequired": true,
@@ -1807,7 +1801,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setBadge.badge",
+                "id": "def-public.ChromeStart.setBadge.$1",
                 "type": "Object",
                 "label": "badge",
                 "isRequired": false,
@@ -1871,7 +1865,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setBreadcrumbs.newBreadcrumbs",
+                "id": "def-public.ChromeStart.setBreadcrumbs.$1",
                 "type": "Array",
                 "label": "newBreadcrumbs",
                 "isRequired": true,
@@ -1901,13 +1895,7 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                "text": "ChromeBreadcrumbsAppendExtension"
-              },
+              "ChromeBreadcrumbsAppendExtension",
               " | undefined>"
             ],
             "description": [
@@ -1927,13 +1915,7 @@
             "label": "setBreadcrumbsAppendExtension",
             "signature": [
               "(breadcrumbsAppendExtension?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                "text": "ChromeBreadcrumbsAppendExtension"
-              },
+              "ChromeBreadcrumbsAppendExtension",
               " | undefined) => void"
             ],
             "description": [
@@ -1941,18 +1923,12 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setBreadcrumbsAppendExtension.breadcrumbsAppendExtension",
+                "id": "def-public.ChromeStart.setBreadcrumbsAppendExtension.$1",
                 "type": "Object",
                 "label": "breadcrumbsAppendExtension",
                 "isRequired": false,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreChromePluginApi",
-                    "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                    "text": "ChromeBreadcrumbsAppendExtension"
-                  },
+                  "ChromeBreadcrumbsAppendExtension",
                   " | undefined"
                 ],
                 "description": [],
@@ -2017,7 +1993,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setCustomNavLink.newCustomNavLink",
+                "id": "def-public.ChromeStart.setCustomNavLink.$1",
                 "type": "Object",
                 "label": "newCustomNavLink",
                 "isRequired": false,
@@ -2094,7 +2070,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setHelpExtension.helpExtension",
+                "id": "def-public.ChromeStart.setHelpExtension.$1",
                 "type": "Object",
                 "label": "helpExtension",
                 "isRequired": false,
@@ -2134,7 +2110,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setHelpSupportUrl.url",
+                "id": "def-public.ChromeStart.setHelpSupportUrl.$1",
                 "type": "string",
                 "label": "url",
                 "isRequired": true,
@@ -2197,7 +2173,7 @@
             ],
             "children": [
               {
-                "id": "def-public.ChromeStart.setHeaderBanner.headerBanner",
+                "id": "def-public.ChromeStart.setHeaderBanner.$1",
                 "type": "Object",
                 "label": "headerBanner",
                 "isRequired": false,

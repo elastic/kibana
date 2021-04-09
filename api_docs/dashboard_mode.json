@@ -45,7 +45,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.DashboardModeServerPlugin.Unnamed.initializerContext",
+                "id": "def-server.DashboardModeServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -91,7 +91,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.DashboardModeServerPlugin.setup.core",
+                "id": "def-server.DashboardModeServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -112,7 +112,7 @@
                 }
               },
               {
-                "id": "def-server.DashboardModeServerPlugin.setup.security",
+                "id": "def-server.DashboardModeServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ security }",
                 "isRequired": true,
@@ -151,7 +151,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.DashboardModeServerPlugin.start.core",
+                "id": "def-server.DashboardModeServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,

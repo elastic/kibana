@@ -625,7 +625,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IImporter.read.data",
+                "id": "def-public.IImporter.read.$1",
                 "type": "Object",
                 "label": "data",
                 "isRequired": true,
@@ -688,7 +688,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IImporter.initializeImport.index",
+                "id": "def-public.IImporter.initializeImport.$1",
                 "type": "string",
                 "label": "index",
                 "isRequired": true,
@@ -702,7 +702,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.initializeImport.settings",
+                "id": "def-public.IImporter.initializeImport.$2",
                 "type": "Object",
                 "label": "settings",
                 "isRequired": true,
@@ -722,7 +722,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.initializeImport.mappings",
+                "id": "def-public.IImporter.initializeImport.$3",
                 "type": "Object",
                 "label": "mappings",
                 "isRequired": true,
@@ -742,7 +742,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.initializeImport.pipeline",
+                "id": "def-public.IImporter.initializeImport.$4",
                 "type": "Object",
                 "label": "pipeline",
                 "isRequired": true,
@@ -787,7 +787,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IImporter.import.id",
+                "id": "def-public.IImporter.import.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -801,7 +801,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.import.index",
+                "id": "def-public.IImporter.import.$2",
                 "type": "string",
                 "label": "index",
                 "isRequired": true,
@@ -815,7 +815,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.import.pipelineId",
+                "id": "def-public.IImporter.import.$3",
                 "type": "string",
                 "label": "pipelineId",
                 "isRequired": false,
@@ -829,7 +829,7 @@
                 }
               },
               {
-                "id": "def-public.IImporter.import.setImportProgress",
+                "id": "def-public.IImporter.import.$4",
                 "type": "Function",
                 "label": "setImportProgress",
                 "isRequired": true,

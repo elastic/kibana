@@ -396,7 +396,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.getTag.tagId",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTag.$1",
                 "type": "string",
                 "label": "tagId",
                 "isRequired": true,
@@ -444,7 +444,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration.object",
+                "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration.$1",
                 "type": "Object",
                 "label": "object",
                 "isRequired": true,
@@ -492,7 +492,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter.options",
+                "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -528,13 +528,7 @@
               "() => ",
               "EuiTableFieldDataColumnType",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>>"
             ],
             "description": [
@@ -568,7 +562,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference.tagName",
+                "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference.$1",
                 "type": "string",
                 "label": "tagName",
                 "isRequired": true,
@@ -616,7 +610,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.query",
+                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.$1",
                 "type": "string",
                 "label": "query",
                 "isRequired": true,
@@ -632,7 +626,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.options",
+                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -668,13 +662,7 @@
             "label": "getTagIdsFromReferences",
             "signature": [
               "(references: (",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | ",
               {
                 "pluginId": "core",
@@ -690,19 +678,13 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences.references",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences.$1",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
                 "signature": [
                   "(",
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   " | ",
                   {
                     "pluginId": "core",
@@ -739,7 +721,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName.tagName",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName.$1",
                 "type": "string",
                 "label": "tagName",
                 "isRequired": true,
@@ -766,21 +748,9 @@
             "label": "updateTagsReferences",
             "signature": [
               "(references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[], newTagIds: string[]) => ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
             "description": [
@@ -788,18 +758,12 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.references",
+                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.$1",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "description": [],
@@ -809,7 +773,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.newTagIds",
+                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.$2",
                 "type": "Array",
                 "label": "newTagIds",
                 "isRequired": true,
@@ -973,13 +937,7 @@
               "lineNumber": 218
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>"
             ]
           }
@@ -1114,7 +1072,7 @@
           ],
           "children": [
             {
-              "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi.provider",
+              "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi.$1",
               "type": "Object",
               "label": "provider",
               "isRequired": true,
@@ -1284,7 +1242,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.create.attributes",
+                "id": "def-common.ITagsClient.create.$1",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -1329,7 +1287,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.get.id",
+                "id": "def-common.ITagsClient.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1376,7 +1334,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.getAll.options",
+                "id": "def-common.ITagsClient.getAll.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1414,7 +1372,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.delete.id",
+                "id": "def-common.ITagsClient.delete.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1461,7 +1419,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.update.id",
+                "id": "def-common.ITagsClient.update.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1475,7 +1433,7 @@
                 }
               },
               {
-                "id": "def-common.ITagsClient.update.attributes",
+                "id": "def-common.ITagsClient.update.$2",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,

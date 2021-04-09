@@ -139,7 +139,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SavedObjectsManagementAction.setActionContext.actionContext",
+                "id": "def-public.SavedObjectsManagementAction.setActionContext.$1",
                 "type": "Object",
                 "label": "actionContext",
                 "isRequired": true,
@@ -170,7 +170,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SavedObjectsManagementAction.registerOnFinishCallback.callback",
+                "id": "def-public.SavedObjectsManagementAction.registerOnFinishCallback.$1",
                 "type": "Object",
                 "label": "callback",
                 "isRequired": true,
@@ -209,7 +209,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SavedObjectsManagementAction.start.record",
+                "id": "def-public.SavedObjectsManagementAction.start.$1",
                 "type": "Object",
                 "label": "record",
                 "isRequired": true,
@@ -286,7 +286,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.processImportResponse.response",
+            "id": "def-public.processImportResponse.$1",
             "type": "Object",
             "label": "response",
             "isRequired": true,
@@ -1001,13 +1001,7 @@
               "lineNumber": 19
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -1184,13 +1178,7 @@
           },
           "signature": [
             "Pick<",
-            {
-              "pluginId": "savedObjectsManagement",
-              "scope": "public",
-              "docId": "kibSavedObjectsManagementPluginApi",
-              "section": "def-public.SavedObjectsManagementServiceRegistry",
-              "text": "SavedObjectsManagementServiceRegistry"
-            },
+            "SavedObjectsManagementServiceRegistry",
             ", \"get\" | \"register\" | \"all\">"
           ]
         }

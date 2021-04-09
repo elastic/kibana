@@ -129,7 +129,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.OptInExampleFlyout.renderBody.dataisLoadinghasPrivilegeToRead",
+                "id": "def-public.OptInExampleFlyout.renderBody.$1",
                 "type": "Object",
                 "label": "{ data, isLoading, hasPrivilegeToRead }",
                 "isRequired": true,

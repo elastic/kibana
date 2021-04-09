@@ -65,18 +65,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable.Unnamed.config",
+                "id": "def-public.MapEmbeddable.Unnamed.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.MapEmbeddableConfig",
-                    "text": "MapEmbeddableConfig"
-                  }
+                  "MapEmbeddableConfig"
                 ],
                 "description": [],
                 "source": {
@@ -85,7 +79,7 @@
                 }
               },
               {
-                "id": "def-public.MapEmbeddable.Unnamed.initialInput",
+                "id": "def-public.MapEmbeddable.Unnamed.$2",
                 "type": "CompoundType",
                 "label": "initialInput",
                 "isRequired": true,
@@ -105,7 +99,7 @@
                 }
               },
               {
-                "id": "def-public.MapEmbeddable.Unnamed.parent",
+                "id": "def-public.MapEmbeddable.Unnamed.$3",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -163,18 +157,12 @@
                 "text": "MapEmbeddableInput"
               },
               ") => input is ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.MapByReferenceInput",
-                "text": "MapByReferenceInput"
-              }
+              "MapByReferenceInput"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable.inputIsRefType.input",
+                "id": "def-public.MapEmbeddable.inputIsRefType.$1",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -207,13 +195,7 @@
             "label": "getInputAsRefType",
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.MapByReferenceInput",
-                "text": "MapByReferenceInput"
-              },
+              "MapByReferenceInput",
               ">"
             ],
             "description": [],
@@ -231,13 +213,7 @@
             "label": "getInputAsValueType",
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.MapByValueInput",
-                "text": "MapByValueInput"
-              },
+              "MapByValueInput",
               ">"
             ],
             "description": [],
@@ -286,18 +262,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.MapEmbeddable.setRenderTooltipContent.renderTooltipContent",
+                "id": "def-public.MapEmbeddable.setRenderTooltipContent.$1",
                 "type": "Function",
                 "label": "renderTooltipContent",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.RenderToolTipContent",
-                    "text": "RenderToolTipContent"
-                  }
+                  "RenderToolTipContent"
                 ],
                 "description": [],
                 "source": {
@@ -308,13 +278,7 @@
             ],
             "signature": [
               "(renderTooltipContent: ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.RenderToolTipContent",
-                "text": "RenderToolTipContent"
-              },
+              "RenderToolTipContent",
               ") => void"
             ],
             "description": [],
@@ -331,18 +295,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.MapEmbeddable.setEventHandlers.eventHandlers",
+                "id": "def-public.MapEmbeddable.setEventHandlers.$1",
                 "type": "Object",
                 "label": "eventHandlers",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.EventHandlers",
-                    "text": "EventHandlers"
-                  }
+                  "EventHandlers"
                 ],
                 "description": [],
                 "source": {
@@ -353,13 +311,7 @@
             ],
             "signature": [
               "(eventHandlers: ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.EventHandlers",
-                "text": "EventHandlers"
-              },
+              "EventHandlers",
               ") => void"
             ],
             "description": [],
@@ -420,7 +372,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable._dispatchSetQuery.forceRefresh.forceRefresh",
+                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
                 "type": "Object",
                 "label": "{ forceRefresh }",
                 "tags": [],
@@ -428,7 +380,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.MapEmbeddable._dispatchSetQuery.forceRefresh.forceRefresh.forceRefresh",
+                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh.forceRefresh",
                     "type": "boolean",
                     "label": "forceRefresh",
                     "description": [],
@@ -469,7 +421,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig.refreshConfig",
+                "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig.$1",
                 "type": "Object",
                 "label": "refreshConfig",
                 "isRequired": true,
@@ -506,7 +458,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor.syncColors",
+                "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor.$1",
                 "type": "CompoundType",
                 "label": "syncColors",
                 "isRequired": false,
@@ -539,7 +491,7 @@
             ],
             "children": [
               {
-                "id": "def-public.MapEmbeddable.render.domNode",
+                "id": "def-public.MapEmbeddable.render.$1",
                 "type": "Object",
                 "label": "domNode",
                 "isRequired": true,
@@ -566,30 +518,18 @@
             "label": "setLayerList",
             "signature": [
               "(layerList: ",
-              {
-                "pluginId": "maps",
-                "scope": "common",
-                "docId": "kibMapsPluginApi",
-                "section": "def-common.LayerDescriptor",
-                "text": "LayerDescriptor"
-              },
+              "LayerDescriptor",
               "[]) => void"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable.setLayerList.layerList",
+                "id": "def-public.MapEmbeddable.setLayerList.$1",
                 "type": "Array",
                 "label": "layerList",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "common",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-common.LayerDescriptor",
-                    "text": "LayerDescriptor"
-                  },
+                  "LayerDescriptor",
                   "[]"
                 ],
                 "description": [],
@@ -611,7 +551,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.actionId",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$1",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -625,7 +565,7 @@
                 }
               },
               {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.key",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$2",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -639,7 +579,7 @@
                 }
               },
               {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.value",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$3",
                 "type": "CompoundType",
                 "label": "value",
                 "isRequired": false,
@@ -684,7 +624,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.MapEmbeddable.addFilters.filters",
+                "id": "def-public.MapEmbeddable.addFilters.$1",
                 "type": "Array",
                 "label": "filters",
                 "isRequired": true,
@@ -705,7 +645,7 @@
                 }
               },
               {
-                "id": "def-public.MapEmbeddable.addFilters.actionId",
+                "id": "def-public.MapEmbeddable.addFilters.$2",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -862,7 +802,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.addFilters.filter",
+                "id": "def-public.RenderTooltipContentParams.addFilters.$1",
                 "type": "Uncategorized",
                 "label": "filter",
                 "isRequired": true,
@@ -876,7 +816,7 @@
                 }
               },
               {
-                "id": "def-public.RenderTooltipContentParams.addFilters.actionId",
+                "id": "def-public.RenderTooltipContentParams.addFilters.$2",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -924,13 +864,7 @@
               "lineNumber": 34
             },
             "signature": [
-              {
-                "pluginId": "maps",
-                "scope": "common",
-                "docId": "kibMapsPluginApi",
-                "section": "def-common.TooltipFeature",
-                "text": "TooltipFeature"
-              },
+              "TooltipFeature",
               "[]"
             ]
           },
@@ -955,7 +889,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.getLayerName.layerId",
+                "id": "def-public.RenderTooltipContentParams.getLayerName.$1",
                 "type": "string",
                 "label": "layerId",
                 "isRequired": true,
@@ -982,38 +916,20 @@
             "label": "loadFeatureProperties",
             "signature": [
               "({ layerId, featureId }: ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.LoadFeatureProps",
-                "text": "LoadFeatureProps"
-              },
+              "LoadFeatureProps",
               ") => Promise<",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.ITooltipProperty",
-                "text": "ITooltipProperty"
-              },
+              "ITooltipProperty",
               "[]>"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.layerIdfeatureId",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.LoadFeatureProps",
-                    "text": "LoadFeatureProps"
-                  }
+                  "LoadFeatureProps"
                 ],
                 "description": [],
                 "source": {
@@ -1035,37 +951,19 @@
             "label": "loadFeatureGeometry",
             "signature": [
               "({ layerId, featureId }: ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.LoadFeatureProps",
-                "text": "LoadFeatureProps"
-              },
+              "LoadFeatureProps",
               ") => ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.FeatureGeometry",
-                "text": "FeatureGeometry"
-              }
+              "FeatureGeometry"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.layerIdfeatureId",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.LoadFeatureProps",
-                    "text": "LoadFeatureProps"
-                  }
+                  "LoadFeatureProps"
                 ],
                 "description": [],
                 "source": {
@@ -1144,37 +1042,13 @@
           },
           "signature": [
             "{ createSecurityLayerDescriptors: (indexPatternId: string, indexPatternTitle: string) => Promise<",
-            {
-              "pluginId": "maps",
-              "scope": "common",
-              "docId": "kibMapsPluginApi",
-              "section": "def-common.LayerDescriptor",
-              "text": "LayerDescriptor"
-            },
+            "LayerDescriptor",
             "[]>; createBasemapLayerDescriptor: () => Promise<",
-            {
-              "pluginId": "maps",
-              "scope": "common",
-              "docId": "kibMapsPluginApi",
-              "section": "def-common.LayerDescriptor",
-              "text": "LayerDescriptor"
-            },
+            "LayerDescriptor",
             " | null>; createESSearchSourceLayerDescriptor: (params: ",
-            {
-              "pluginId": "maps",
-              "scope": "public",
-              "docId": "kibMapsPluginApi",
-              "section": "def-public.CreateLayerDescriptorParams",
-              "text": "CreateLayerDescriptorParams"
-            },
+            "CreateLayerDescriptorParams",
             ") => Promise<",
-            {
-              "pluginId": "maps",
-              "scope": "common",
-              "docId": "kibMapsPluginApi",
-              "section": "def-common.LayerDescriptor",
-              "text": "LayerDescriptor"
-            },
+            "LayerDescriptor",
             ">; }"
           ]
         },
@@ -1184,30 +1058,18 @@
           "label": "registerLayerWizard",
           "signature": [
             "(layerWizard: ",
-            {
-              "pluginId": "maps",
-              "scope": "public",
-              "docId": "kibMapsPluginApi",
-              "section": "def-public.LayerWizard",
-              "text": "LayerWizard"
-            },
+            "LayerWizard",
             ") => Promise<void>"
           ],
           "description": [],
           "children": [
             {
-              "id": "def-public.MapsStartApi.registerLayerWizard.layerWizard",
+              "id": "def-public.MapsStartApi.registerLayerWizard.$1",
               "type": "Object",
               "label": "layerWizard",
               "isRequired": true,
               "signature": [
-                {
-                  "pluginId": "maps",
-                  "scope": "public",
-                  "docId": "kibMapsPluginApi",
-                  "section": "def-public.LayerWizard",
-                  "text": "LayerWizard"
-                }
+                "LayerWizard"
               ],
               "description": [],
               "source": {
@@ -1229,30 +1091,18 @@
           "label": "registerSource",
           "signature": [
             "(entry: ",
-            {
-              "pluginId": "maps",
-              "scope": "public",
-              "docId": "kibMapsPluginApi",
-              "section": "def-public.SourceRegistryEntry",
-              "text": "SourceRegistryEntry"
-            },
+            "SourceRegistryEntry",
             ") => Promise<void>"
           ],
           "description": [],
           "children": [
             {
-              "id": "def-public.MapsStartApi.registerSource.entry",
+              "id": "def-public.MapsStartApi.registerSource.$1",
               "type": "Object",
               "label": "entry",
               "isRequired": true,
               "signature": [
-                {
-                  "pluginId": "maps",
-                  "scope": "public",
-                  "docId": "kibMapsPluginApi",
-                  "section": "def-public.SourceRegistryEntry",
-                  "text": "SourceRegistryEntry"
-                }
+                "SourceRegistryEntry"
               ],
               "description": [],
               "source": {
@@ -1274,38 +1124,20 @@
           "label": "suggestEMSTermJoinConfig",
           "signature": [
             "(config: ",
-            {
-              "pluginId": "maps",
-              "scope": "public",
-              "docId": "kibMapsPluginApi",
-              "section": "def-public.SampleValuesConfig",
-              "text": "SampleValuesConfig"
-            },
+            "SampleValuesConfig",
             ") => Promise<",
-            {
-              "pluginId": "maps",
-              "scope": "public",
-              "docId": "kibMapsPluginApi",
-              "section": "def-public.EMSTermJoinConfig",
-              "text": "EMSTermJoinConfig"
-            },
+            "EMSTermJoinConfig",
             " | null>"
           ],
           "description": [],
           "children": [
             {
-              "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig.config",
+              "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig.$1",
               "type": "Object",
               "label": "config",
               "isRequired": true,
               "signature": [
-                {
-                  "pluginId": "maps",
-                  "scope": "public",
-                  "docId": "kibMapsPluginApi",
-                  "section": "def-public.SampleValuesConfig",
-                  "text": "SampleValuesConfig"
-                }
+                "SampleValuesConfig"
               ],
               "description": [],
               "source": {
@@ -1351,7 +1183,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.getEditPath.id",
+            "id": "def-common.getEditPath.$1",
             "type": "string",
             "label": "id",
             "isRequired": true,
@@ -1383,7 +1215,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.getExistingMapPath.id",
+            "id": "def-common.getExistingMapPath.$1",
             "type": "string",
             "label": "id",
             "isRequired": true,

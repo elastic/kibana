@@ -27,7 +27,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPatternsFetcher.Unnamed.elasticsearchClient",
+                "id": "def-server.IndexPatternsFetcher.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "elasticsearchClient",
                 "isRequired": true,
@@ -47,7 +47,7 @@
                 }
               },
               {
-                "id": "def-server.IndexPatternsFetcher.Unnamed.allowNoIndices",
+                "id": "def-server.IndexPatternsFetcher.Unnamed.$2",
                 "type": "boolean",
                 "label": "allowNoIndices",
                 "isRequired": true,
@@ -88,7 +88,7 @@
             ],
             "children": [
               {
-                "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options",
+                "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -96,7 +96,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options.pattern",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options.pattern",
                     "type": "CompoundType",
                     "label": "pattern",
                     "description": [],
@@ -110,7 +110,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options.metaFields",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options.metaFields",
                     "type": "Array",
                     "label": "metaFields",
                     "description": [],
@@ -124,7 +124,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options.fieldCapsOptions",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options.fieldCapsOptions",
                     "type": "Object",
                     "label": "fieldCapsOptions",
                     "description": [],
@@ -138,7 +138,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options.type",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options.type",
                     "type": "string",
                     "label": "type",
                     "description": [],
@@ -152,7 +152,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.options.rollupIndex",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.options.rollupIndex",
                     "type": "string",
                     "label": "rollupIndex",
                     "description": [],
@@ -201,7 +201,7 @@
             ],
             "children": [
               {
-                "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.options",
+                "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.$1.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -209,7 +209,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.options.pattern",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.$1.options.pattern",
                     "type": "string",
                     "label": "pattern",
                     "description": [],
@@ -220,7 +220,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.options.metaFields",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.$1.options.metaFields",
                     "type": "Array",
                     "label": "metaFields",
                     "description": [],
@@ -234,7 +234,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.options.lookBack",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.$1.options.lookBack",
                     "type": "number",
                     "label": "lookBack",
                     "description": [],
@@ -245,7 +245,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.options.interval",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.$1.options.interval",
                     "type": "string",
                     "label": "interval",
                     "description": [],
@@ -283,7 +283,7 @@
             ],
             "children": [
               {
-                "id": "def-server.IndexPatternsFetcher.validatePatternListActive.patternList",
+                "id": "def-server.IndexPatternsFetcher.validatePatternListActive.$1",
                 "type": "Array",
                 "label": "patternList",
                 "isRequired": true,
@@ -356,13 +356,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-server.IndexPatternsServiceStartDeps",
-                "text": "IndexPatternsServiceStartDeps"
-              },
+              "IndexPatternsServiceStartDeps",
               ", ",
               {
                 "pluginId": "data",
@@ -372,19 +366,13 @@
                 "text": "DataPluginStart"
               },
               ">, { expressions, usageCollection }: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-server.IndexPatternsServiceSetupDeps",
-                "text": "IndexPatternsServiceSetupDeps"
-              },
+              "IndexPatternsServiceSetupDeps",
               ") => void"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPatternsServiceProvider.setup.core",
+                "id": "def-server.IndexPatternsServiceProvider.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -397,13 +385,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataIndexPatternsPluginApi",
-                    "section": "def-server.IndexPatternsServiceStartDeps",
-                    "text": "IndexPatternsServiceStartDeps"
-                  },
+                  "IndexPatternsServiceStartDeps",
                   ", ",
                   {
                     "pluginId": "data",
@@ -421,18 +403,12 @@
                 }
               },
               {
-                "id": "def-server.IndexPatternsServiceProvider.setup.expressionsusageCollection",
+                "id": "def-server.IndexPatternsServiceProvider.setup.$2",
                 "type": "Object",
                 "label": "{ expressions, usageCollection }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataIndexPatternsPluginApi",
-                    "section": "def-server.IndexPatternsServiceSetupDeps",
-                    "text": "IndexPatternsServiceSetupDeps"
-                  }
+                  "IndexPatternsServiceSetupDeps"
                 ],
                 "description": [],
                 "source": {
@@ -462,13 +438,7 @@
                 "text": "CoreStart"
               },
               ", { fieldFormats, logger }: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-server.IndexPatternsServiceStartDeps",
-                "text": "IndexPatternsServiceStartDeps"
-              },
+              "IndexPatternsServiceStartDeps",
               ") => { indexPatternsServiceFactory: (savedObjectsClient: Pick<",
               {
                 "pluginId": "core",
@@ -497,7 +467,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPatternsServiceProvider.start.core",
+                "id": "def-server.IndexPatternsServiceProvider.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -517,18 +487,12 @@
                 }
               },
               {
-                "id": "def-server.IndexPatternsServiceProvider.start.fieldFormatslogger",
+                "id": "def-server.IndexPatternsServiceProvider.start.$2",
                 "type": "Object",
                 "label": "{ fieldFormats, logger }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataIndexPatternsPluginApi",
-                    "section": "def-server.IndexPatternsServiceStartDeps",
-                    "text": "IndexPatternsServiceStartDeps"
-                  }
+                  "IndexPatternsServiceStartDeps"
                 ],
                 "description": [],
                 "source": {
@@ -563,14 +527,14 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.getCapabilitiesForRollupIndices.indices.indices",
+            "id": "def-server.getCapabilitiesForRollupIndices.$1.indices",
             "type": "Object",
             "label": "indices",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-server.getCapabilitiesForRollupIndices.indices.indices.Unnamed",
+                "id": "def-server.getCapabilitiesForRollupIndices.$1.indices.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
                 "tags": [],
@@ -603,14 +567,14 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.mergeCapabilitiesWithFields.rollupIndexCapabilities.rollupIndexCapabilities",
+            "id": "def-server.mergeCapabilitiesWithFields.$1.rollupIndexCapabilities",
             "type": "Object",
             "label": "rollupIndexCapabilities",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-server.mergeCapabilitiesWithFields.rollupIndexCapabilities.rollupIndexCapabilities.Unnamed",
+                "id": "def-server.mergeCapabilitiesWithFields.$1.rollupIndexCapabilities.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
                 "tags": [],
@@ -630,14 +594,14 @@
             }
           },
           {
-            "id": "def-server.mergeCapabilitiesWithFields.fieldsFromFieldCapsApi.fieldsFromFieldCapsApi",
+            "id": "def-server.mergeCapabilitiesWithFields.$2.fieldsFromFieldCapsApi",
             "type": "Object",
             "label": "fieldsFromFieldCapsApi",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-server.mergeCapabilitiesWithFields.fieldsFromFieldCapsApi.fieldsFromFieldCapsApi.Unnamed",
+                "id": "def-server.mergeCapabilitiesWithFields.$2.fieldsFromFieldCapsApi.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
                 "tags": [],
@@ -657,7 +621,7 @@
             }
           },
           {
-            "id": "def-server.mergeCapabilitiesWithFields.previousFields",
+            "id": "def-server.mergeCapabilitiesWithFields.$3",
             "type": "Array",
             "label": "previousFields",
             "isRequired": true,
@@ -717,7 +681,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.shouldReadFieldFromDocValues.aggregatable",
+            "id": "def-server.shouldReadFieldFromDocValues.$1",
             "type": "boolean",
             "label": "aggregatable",
             "isRequired": true,
@@ -731,7 +695,7 @@
             }
           },
           {
-            "id": "def-server.shouldReadFieldFromDocValues.esType",
+            "id": "def-server.shouldReadFieldFromDocValues.$2",
             "type": "string",
             "label": "esType",
             "isRequired": true,
@@ -983,7 +947,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.DuplicateIndexPatternError.Unnamed.message",
+                "id": "def-common.DuplicateIndexPatternError.Unnamed.$1",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -1288,7 +1252,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.Unnamed.specfieldFormatsshortDotsEnablefalsemetaFields",
+                "id": "def-common.IndexPattern.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -1448,7 +1412,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.addScriptedField.name",
+                "id": "def-common.IndexPattern.addScriptedField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1464,7 +1428,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.addScriptedField.script",
+                "id": "def-common.IndexPattern.addScriptedField.$2",
                 "type": "string",
                 "label": "script",
                 "isRequired": true,
@@ -1480,7 +1444,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.addScriptedField.fieldType",
+                "id": "def-common.IndexPattern.addScriptedField.$3",
                 "type": "string",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1513,7 +1477,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.removeScriptedField.fieldName",
+                "id": "def-common.IndexPattern.removeScriptedField.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -1656,7 +1620,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.getFieldByName.name",
+                "id": "def-common.IndexPattern.getFieldByName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1754,7 +1718,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.getFormatterForField.field",
+                "id": "def-common.IndexPattern.getFormatterForField.$1",
                 "type": "CompoundType",
                 "label": "field",
                 "isRequired": true,
@@ -1817,7 +1781,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.addRuntimeField.name",
+                "id": "def-common.IndexPattern.addRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1833,7 +1797,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.addRuntimeField.runtimeField",
+                "id": "def-common.IndexPattern.addRuntimeField.$2",
                 "type": "Object",
                 "label": "runtimeField",
                 "isRequired": true,
@@ -1874,7 +1838,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.removeRuntimeField.name",
+                "id": "def-common.IndexPattern.removeRuntimeField.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1917,7 +1881,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPattern.getFormatterForFieldNoDefault.fieldname",
+                "id": "def-common.IndexPattern.getFormatterForFieldNoDefault.$1",
                 "type": "string",
                 "label": "fieldname",
                 "isRequired": true,
@@ -1956,7 +1920,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.setFieldAttrs.fieldName",
+                "id": "def-common.IndexPattern.setFieldAttrs.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -1970,7 +1934,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.setFieldAttrs.attrName",
+                "id": "def-common.IndexPattern.setFieldAttrs.$2",
                 "type": "Uncategorized",
                 "label": "attrName",
                 "isRequired": true,
@@ -1984,7 +1948,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.setFieldAttrs.value",
+                "id": "def-common.IndexPattern.setFieldAttrs.$3",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -2022,7 +1986,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.setFieldCustomLabel.fieldName",
+                "id": "def-common.IndexPattern.setFieldCustomLabel.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -2036,7 +2000,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.setFieldCustomLabel.customLabel",
+                "id": "def-common.IndexPattern.setFieldCustomLabel.$2",
                 "type": "CompoundType",
                 "label": "customLabel",
                 "isRequired": false,
@@ -2067,7 +2031,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.setFieldCount.fieldName",
+                "id": "def-common.IndexPattern.setFieldCount.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -2081,7 +2045,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.setFieldCount.count",
+                "id": "def-common.IndexPattern.setFieldCount.$2",
                 "type": "CompoundType",
                 "label": "count",
                 "isRequired": false,
@@ -2107,7 +2071,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPattern.setFieldFormat.fieldName",
+                "id": "def-common.IndexPattern.setFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -2121,7 +2085,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPattern.setFieldFormat.format",
+                "id": "def-common.IndexPattern.setFieldFormat.$2",
                 "type": "Object",
                 "label": "format",
                 "isRequired": true,
@@ -2167,7 +2131,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPattern.deleteFieldFormat.fieldName",
+                "id": "def-common.IndexPattern.deleteFieldFormat.$1",
                 "type": "string",
                 "label": "fieldName",
                 "isRequired": true,
@@ -2254,7 +2218,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPatternField.Unnamed.spec",
+                "id": "def-common.IndexPatternField.Unnamed.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -2715,7 +2679,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPatternField.toSpec.getFormatterForField.getFormatterForField",
+                "id": "def-common.IndexPatternField.toSpec.$1.getFormatterForField",
                 "type": "Object",
                 "label": "{\n    getFormatterForField,\n  }",
                 "tags": [],
@@ -2723,7 +2687,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-common.IndexPatternField.toSpec.getFormatterForField.getFormatterForField.getFormatterForField",
+                    "id": "def-common.IndexPatternField.toSpec.$1.getFormatterForField.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -2806,13 +2770,7 @@
               "lineNumber": 67
             },
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.EnsureDefaultIndexPattern",
-                "text": "EnsureDefaultIndexPattern"
-              }
+              "EnsureDefaultIndexPattern"
             ]
           },
           {
@@ -2825,7 +2783,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.Unnamed.uiSettingssavedObjectsClientapiClientfieldFormatsonNotificationonErroronRedirectNoIndexPattern",
+                "id": "def-common.IndexPatternsService.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -2851,7 +2809,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.getIds.refresh",
+                "id": "def-common.IndexPatternsService.getIds.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -2884,7 +2842,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.getTitles.refresh",
+                "id": "def-common.IndexPatternsService.getTitles.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -2917,7 +2875,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.find.search",
+                "id": "def-common.IndexPatternsService.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -2931,7 +2889,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.find.size",
+                "id": "def-common.IndexPatternsService.find.$2",
                 "type": "number",
                 "label": "size",
                 "isRequired": true,
@@ -2974,7 +2932,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.getIdsWithTitle.refresh",
+                "id": "def-common.IndexPatternsService.getIdsWithTitle.$1",
                 "type": "boolean",
                 "label": "refresh",
                 "isRequired": true,
@@ -3007,7 +2965,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.clearCache.id",
+                "id": "def-common.IndexPatternsService.clearCache.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -3041,21 +2999,9 @@
             "children": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternSavedObjectAttrs",
-                "text": "IndexPatternSavedObjectAttrs"
-              },
+              "IndexPatternSavedObjectAttrs",
               ">[] | null | undefined>"
             ],
             "description": [],
@@ -3098,7 +3044,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.setDefault.id",
+                "id": "def-common.IndexPatternsService.setDefault.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -3112,7 +3058,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.setDefault.force",
+                "id": "def-common.IndexPatternsService.setDefault.$2",
                 "type": "boolean",
                 "label": "force",
                 "isRequired": true,
@@ -3145,7 +3091,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.getFieldsForWildcard.options",
+                "id": "def-common.IndexPatternsService.getFieldsForWildcard.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -3194,7 +3140,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.getFieldsForIndexPattern.indexPattern",
+                "id": "def-common.IndexPatternsService.getFieldsForIndexPattern.$1",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -3222,7 +3168,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.getFieldsForIndexPattern.options",
+                "id": "def-common.IndexPatternsService.getFieldsForIndexPattern.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3288,7 +3234,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.refreshFields.indexPattern",
+                "id": "def-common.IndexPatternsService.refreshFields.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -3335,7 +3281,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.fieldArrayToMap.fields",
+                "id": "def-common.IndexPatternsService.fieldArrayToMap.$1",
                 "type": "Array",
                 "label": "fields",
                 "isRequired": true,
@@ -3356,7 +3302,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.fieldArrayToMap.fieldAttrs",
+                "id": "def-common.IndexPatternsService.fieldArrayToMap.$2",
                 "type": "Object",
                 "label": "fieldAttrs",
                 "isRequired": false,
@@ -3422,18 +3368,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.savedObjectToSpec.savedObject",
+                "id": "def-common.IndexPatternsService.savedObjectToSpec.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<",
                   {
                     "pluginId": "data",
@@ -3453,13 +3393,7 @@
             ],
             "signature": [
               "(savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -3495,7 +3429,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.IndexPatternsService.get.id",
+                "id": "def-common.IndexPatternsService.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -3559,7 +3493,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.create.spec",
+                "id": "def-common.IndexPatternsService.create.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -3579,7 +3513,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.create.skipFetchFields",
+                "id": "def-common.IndexPatternsService.create.$2",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -3630,7 +3564,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.createAndSave.spec",
+                "id": "def-common.IndexPatternsService.createAndSave.$1",
                 "type": "Object",
                 "label": "spec",
                 "isRequired": true,
@@ -3650,7 +3584,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.createAndSave.override",
+                "id": "def-common.IndexPatternsService.createAndSave.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -3666,7 +3600,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.createAndSave.skipFetchFields",
+                "id": "def-common.IndexPatternsService.createAndSave.$3",
                 "type": "boolean",
                 "label": "skipFetchFields",
                 "isRequired": true,
@@ -3717,7 +3651,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.createSavedObject.indexPattern",
+                "id": "def-common.IndexPatternsService.createSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -3737,7 +3671,7 @@
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.createSavedObject.override",
+                "id": "def-common.IndexPatternsService.createSavedObject.$2",
                 "type": "boolean",
                 "label": "override",
                 "isRequired": true,
@@ -3780,7 +3714,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.updateSavedObject.indexPattern",
+                "id": "def-common.IndexPatternsService.updateSavedObject.$1",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -3796,11 +3730,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 551
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.updateSavedObject.saveAttempts",
+                "id": "def-common.IndexPatternsService.updateSavedObject.$2",
                 "type": "number",
                 "label": "saveAttempts",
                 "isRequired": true,
@@ -3810,11 +3744,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 552
                 }
               },
               {
-                "id": "def-common.IndexPatternsService.updateSavedObject.ignoreErrors",
+                "id": "def-common.IndexPatternsService.updateSavedObject.$3",
                 "type": "boolean",
                 "label": "ignoreErrors",
                 "isRequired": true,
@@ -3824,7 +3758,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 553
                 }
               }
             ],
@@ -3832,7 +3766,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 550
             }
           },
           {
@@ -3847,7 +3781,7 @@
             ],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.delete.indexPatternId",
+                "id": "def-common.IndexPatternsService.delete.$1",
                 "type": "string",
                 "label": "indexPatternId",
                 "isRequired": true,
@@ -3859,7 +3793,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 636
                 }
               }
             ],
@@ -3867,7 +3801,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 636
             }
           }
         ],
@@ -3884,7 +3818,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.fieldList.specs",
+            "id": "def-common.fieldList.$1",
             "type": "Array",
             "label": "specs",
             "isRequired": true,
@@ -3905,7 +3839,7 @@
             }
           },
           {
-            "id": "def-common.fieldList.shortDotsEnable",
+            "id": "def-common.fieldList.$2",
             "type": "boolean",
             "label": "shortDotsEnable",
             "isRequired": true,
@@ -3990,7 +3924,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.isFilterable.field",
+            "id": "def-common.isFilterable.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -4036,7 +3970,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.isNestedField.field",
+            "id": "def-common.isNestedField.$1",
             "type": "Object",
             "label": "field",
             "isRequired": true,
@@ -5372,7 +5306,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.add.field",
+                "id": "def-common.IIndexPatternFieldList.add.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -5441,7 +5375,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.getByName.name",
+                "id": "def-common.IIndexPatternFieldList.getByName.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -5480,7 +5414,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.getByType.type",
+                "id": "def-common.IIndexPatternFieldList.getByType.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5519,7 +5453,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.remove.field",
+                "id": "def-common.IIndexPatternFieldList.remove.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -5580,7 +5514,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.replaceAll.specs",
+                "id": "def-common.IIndexPatternFieldList.replaceAll.$1",
                 "type": "Array",
                 "label": "specs",
                 "isRequired": true,
@@ -5626,7 +5560,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.update.field",
+                "id": "def-common.IIndexPatternFieldList.update.$1",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -5702,7 +5636,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IIndexPatternFieldList.toSpec.options.options",
+                "id": "def-common.IIndexPatternFieldList.toSpec.$1.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -5710,7 +5644,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-common.IIndexPatternFieldList.toSpec.options.options.getFormatterForField",
+                    "id": "def-common.IIndexPatternFieldList.toSpec.$1.options.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -6359,13 +6293,7 @@
                 "text": "SavedObjectsClientCommonFindArgs"
               },
               ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>[]>"
             ]
           },
@@ -6381,13 +6309,7 @@
             },
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ]
           },
@@ -6403,13 +6325,7 @@
             },
             "signature": [
               "(type: string, id: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>>"
             ]
           },
@@ -6425,13 +6341,7 @@
             },
             "signature": [
               "(type: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>>"
             ]
           },
@@ -6781,7 +6691,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 639
+          "lineNumber": 642
         },
         "signature": [
           "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; find: (search: string, size?: number) => Promise<IndexPattern[]>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"

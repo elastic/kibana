@@ -26,21 +26,9 @@
           },
           "signature": [
             "((props: ",
-            {
-              "pluginId": "timelines",
-              "scope": "public",
-              "docId": "kibTimelinesPluginApi",
-              "section": "def-public.TimelineProps",
-              "text": "TimelineProps"
-            },
+            "TimelineProps",
             ") => React.ReactElement<",
-            {
-              "pluginId": "timelines",
-              "scope": "public",
-              "docId": "kibTimelinesPluginApi",
-              "section": "def-public.TimelineProps",
-              "text": "TimelineProps"
-            },
+            "TimelineProps",
             ", string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>) | undefined"
           ]
         }

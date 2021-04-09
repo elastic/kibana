@@ -164,7 +164,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.PLUGIN.getI18nName.i18n",
+                "id": "def-common.PLUGIN.getI18nName.$1",
                 "type": "Any",
                 "label": "i18n",
                 "isRequired": true,

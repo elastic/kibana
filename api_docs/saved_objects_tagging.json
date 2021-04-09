@@ -99,18 +99,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getTagsCapabilities.capabilities",
+            "id": "def-common.getTagsCapabilities.$1",
             "type": "Object",
             "label": "capabilities",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "description": [],
             "source": {
@@ -146,7 +140,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.validateTagColor.color",
+            "id": "def-common.validateTagColor.$1",
             "type": "string",
             "label": "color",
             "isRequired": true,
@@ -178,7 +172,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.validateTagDescription.description",
+            "id": "def-common.validateTagDescription.$1",
             "type": "string",
             "label": "description",
             "isRequired": true,
@@ -210,7 +204,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.validateTagName.name",
+            "id": "def-common.validateTagName.$1",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -272,7 +266,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.create.attributes",
+                "id": "def-common.ITagsClient.create.$1",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -317,7 +311,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.get.id",
+                "id": "def-common.ITagsClient.get.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -364,7 +358,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.getAll.options",
+                "id": "def-common.ITagsClient.getAll.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -402,7 +396,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.delete.id",
+                "id": "def-common.ITagsClient.delete.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -449,7 +443,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ITagsClient.update.id",
+                "id": "def-common.ITagsClient.update.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -463,7 +457,7 @@
                 }
               },
               {
-                "id": "def-common.ITagsClient.update.attributes",
+                "id": "def-common.ITagsClient.update.$2",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,

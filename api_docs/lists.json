@@ -54,7 +54,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.Plugin.Unnamed.initializerContext",
+                "id": "def-public.Plugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -96,13 +96,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ", ",
               {
                 "pluginId": "lists",
@@ -112,13 +106,7 @@
                 "text": "PluginStart"
               },
               ">, plugins: ",
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.SetupPlugins",
-                "text": "SetupPlugins"
-              },
+              "SetupPlugins",
               ") => ",
               {
                 "pluginId": "lists",
@@ -131,7 +119,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.Plugin.setup.core",
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -144,13 +132,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "lists",
-                    "scope": "public",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-public.StartPlugins",
-                    "text": "StartPlugins"
-                  },
+                  "StartPlugins",
                   ", ",
                   {
                     "pluginId": "lists",
@@ -168,18 +150,12 @@
                 }
               },
               {
-                "id": "def-public.Plugin.setup.plugins",
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "public",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-public.SetupPlugins",
-                    "text": "SetupPlugins"
-                  }
+                  "SetupPlugins"
                 ],
                 "description": [],
                 "source": {
@@ -209,13 +185,7 @@
                 "text": "CoreStart"
               },
               ", plugins: ",
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.StartPlugins",
-                "text": "StartPlugins"
-              },
+              "StartPlugins",
               ") => ",
               {
                 "pluginId": "lists",
@@ -228,7 +198,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.Plugin.start.core",
+                "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -248,18 +218,12 @@
                 }
               },
               {
-                "id": "def-public.Plugin.start.plugins",
+                "id": "def-public.Plugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "public",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-public.StartPlugins",
-                    "text": "StartPlugins"
-                  }
+                  "StartPlugins"
                 ],
                 "description": [],
                 "source": {
@@ -289,18 +253,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addEndpointExceptionListWithValidation.httpsignal",
+            "id": "def-public.addEndpointExceptionListWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.AddEndpointExceptionListProps",
-                "text": "AddEndpointExceptionListProps"
-              }
+              "AddEndpointExceptionListProps"
             ],
             "description": [],
             "source": {
@@ -312,7 +270,7 @@
         "signature": [
           "({ http, signal, }: ",
           "AddEndpointExceptionListProps",
-          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | {}>"
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | {}>"
         ],
         "description": [],
         "label": "addEndpointExceptionListWithValidation",
@@ -329,18 +287,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addExceptionListItemWithValidation.httplistItemsignal",
+            "id": "def-public.addExceptionListItemWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  listItem,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.AddExceptionListItemProps",
-                "text": "AddExceptionListItemProps"
-              }
+              "AddExceptionListItemProps"
             ],
             "description": [],
             "source": {
@@ -352,7 +304,7 @@
         "signature": [
           "({ http, listItem, signal, }: ",
           "AddExceptionListItemProps",
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "description": [],
         "label": "addExceptionListItemWithValidation",
@@ -369,18 +321,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addExceptionListWithValidation.httplistsignal",
+            "id": "def-public.addExceptionListWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  list,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.AddExceptionListProps",
-                "text": "AddExceptionListProps"
-              }
+              "AddExceptionListProps"
             ],
             "description": [],
             "source": {
@@ -392,7 +338,7 @@
         "signature": [
           "({ http, list, signal, }: ",
           "AddExceptionListProps",
-          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }>"
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "description": [],
         "label": "addExceptionListWithValidation",
@@ -409,18 +355,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.exportListWithValidation.httplistIdsignal",
+            "id": "def-public.exportListWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  listId,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.ExportListParams",
-                "text": "ExportListParams"
-              }
+              "ExportListParams"
             ],
             "description": [],
             "source": {
@@ -449,18 +389,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.fetchExceptionListByIdWithValidation.httpidnamespaceTypesignal",
+            "id": "def-public.fetchExceptionListByIdWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.ApiCallByIdProps",
-                "text": "ApiCallByIdProps"
-              }
+              "ApiCallByIdProps"
             ],
             "description": [],
             "source": {
@@ -472,7 +406,7 @@
         "signature": [
           "({ http, id, namespaceType, signal, }: ",
           "ApiCallByIdProps",
-          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }>"
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "description": [],
         "label": "fetchExceptionListByIdWithValidation",
@@ -489,18 +423,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.updateExceptionListItemWithValidation.httplistItemsignal",
+            "id": "def-public.updateExceptionListItemWithValidation.$1",
             "type": "Object",
             "label": "{\n  http,\n  listItem,\n  signal,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.UpdateExceptionListItemProps",
-                "text": "UpdateExceptionListItemProps"
-              }
+              "UpdateExceptionListItemProps"
             ],
             "description": [],
             "source": {
@@ -512,7 +440,7 @@
         "signature": [
           "({ http, listItem, signal, }: ",
           "UpdateExceptionListItemProps",
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "description": [],
         "label": "updateExceptionListItemWithValidation",
@@ -529,7 +457,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useApi.http",
+            "id": "def-public.useApi.$1",
             "type": "Object",
             "label": "http",
             "isRequired": true,
@@ -576,7 +504,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useAsync.fn",
+            "id": "def-public.useAsync.$1",
             "type": "Function",
             "label": "fn",
             "isRequired": true,
@@ -637,18 +565,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useCursor.pageIndexpageSize",
+            "id": "def-public.useCursor.$1",
             "type": "Object",
             "label": "{ pageIndex, pageSize }",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.UseCursorProps",
-                "text": "UseCursorProps"
-              }
+              "UseCursorProps"
             ],
             "description": [],
             "source": {
@@ -683,7 +605,7 @@
           "OptionalSignalArgs",
           "<",
           "DeleteListParams",
-          ">], { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }>"
+          ">], { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "description": [],
         "label": "useDeleteList",
@@ -700,18 +622,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useExceptionListItems.httplistspaginationpage1perPage20total0filterOptionsshowDetectionsListsOnlyshowEndpointListsOnlymatchFiltersonErroronSuccess",
+            "id": "def-public.useExceptionListItems.$1",
             "type": "Object",
             "label": "{\n  http,\n  lists,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions,\n  showDetectionsListsOnly,\n  showEndpointListsOnly,\n  matchFilters,\n  onError,\n  onSuccess,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.UseExceptionListProps",
-                "text": "UseExceptionListProps"
-              }
+              "UseExceptionListProps"
             ],
             "description": [],
             "source": {
@@ -743,18 +659,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useExceptionLists.errorMessagehttppaginationpage1perPage20total0filterOptionsnamespaceTypesnotificationsshowTrustedAppsfalse",
+            "id": "def-public.useExceptionLists.$1",
             "type": "Object",
             "label": "{\n  errorMessage,\n  http,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.UseExceptionListsProps",
-                "text": "UseExceptionListsProps"
-              }
+              "UseExceptionListsProps"
             ],
             "description": [],
             "source": {
@@ -815,7 +725,7 @@
           "OptionalSignalArgs",
           "<",
           "FindListsParams",
-          ">], { cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+          ">], { cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
         ],
         "description": [],
         "label": "useFindLists",
@@ -838,7 +748,7 @@
           "OptionalSignalArgs",
           "<",
           "ImportListParams",
-          ">], { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }>"
+          ">], { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "description": [],
         "label": "useImportList",
@@ -876,18 +786,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.usePersistExceptionItem.httponError",
+            "id": "def-public.usePersistExceptionItem.$1",
             "type": "Object",
             "label": "{\n  http,\n  onError,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.PersistHookProps",
-                "text": "PersistHookProps"
-              }
+              "PersistHookProps"
             ],
             "description": [],
             "source": {
@@ -919,18 +823,12 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.usePersistExceptionList.httponError",
+            "id": "def-public.usePersistExceptionList.$1",
             "type": "Object",
             "label": "{\n  http,\n  onError,\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.PersistHookProps",
-                "text": "PersistHookProps"
-              }
+              "PersistHookProps"
             ],
             "description": [],
             "source": {
@@ -1008,7 +906,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.withOptionalSignal.fn",
+            "id": "def-public.withOptionalSignal.$1",
             "type": "Function",
             "label": "fn",
             "isRequired": true,
@@ -1055,7 +953,7 @@
             "section": "def-public.ExceptionList",
             "text": "ExceptionList"
           },
-          " extends { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }"
+          " extends { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "description": [],
         "tags": [],
@@ -1216,7 +1114,7 @@
               "lineNumber": 66
             },
             "signature": [
-              "\"endpoint\" | \"detection\""
+              "\"endpoint\" | \"detection\" | \"endpoint_events\""
             ]
           }
         ],
@@ -1294,7 +1192,7 @@
               "lineNumber": 46
             },
             "signature": [
-              "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]"
+              "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]"
             ]
           },
           {
@@ -1342,7 +1240,7 @@
               "lineNumber": 121
             },
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }[]"
             ]
           },
           {
@@ -1441,18 +1339,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.ExceptionListClient.Unnamed.usersavedObjectsClient",
+                "id": "def-server.ExceptionListClient.Unnamed.$1",
                 "type": "Object",
                 "label": "{ user, savedObjectsClient }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.ConstructorOptions",
-                    "text": "ConstructorOptions"
-                  }
+                  "ConstructorOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1473,18 +1365,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getExceptionList.listIdidnamespaceType",
+                "id": "def-server.ExceptionListClient.getExceptionList.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetExceptionListOptions",
-                    "text": "GetExceptionListOptions"
-                  }
+                  "GetExceptionListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1495,14 +1381,8 @@
             ],
             "signature": [
               "({ listId, id, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetExceptionListOptions",
-                "text": "GetExceptionListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "GetExceptionListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "getExceptionList",
@@ -1518,18 +1398,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getExceptionListItem.itemIdidnamespaceType",
+                "id": "def-server.ExceptionListClient.getExceptionListItem.$1",
                 "type": "Object",
                 "label": "{\n    itemId,\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetExceptionListItemOptions",
-                    "text": "GetExceptionListItemOptions"
-                  }
+                  "GetExceptionListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1540,14 +1414,8 @@
             ],
             "signature": [
               "({ itemId, id, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetExceptionListItemOptions",
-                "text": "GetExceptionListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              "GetExceptionListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [],
             "label": "getExceptionListItem",
@@ -1563,7 +1431,7 @@
             "type": "Function",
             "children": [],
             "signature": [
-              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [
               "\nThis creates an agnostic space endpoint list if it does not exist. This tries to be\nas fast as possible by ignoring conflict errors and not returning the contents of the\nlist if it already exists."
@@ -1583,7 +1451,7 @@
             "type": "Function",
             "children": [],
             "signature": [
-              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [
               "\nCreate the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)"
@@ -1601,18 +1469,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createEndpointListItem.commentsdescriptionentriesitemIdmetanameosTypestagstype",
+                "id": "def-server.ExceptionListClient.createEndpointListItem.$1",
                 "type": "Object",
                 "label": "{\n    comments,\n    description,\n    entries,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.CreateEndpointListItemOptions",
-                    "text": "CreateEndpointListItemOptions"
-                  }
+                  "CreateEndpointListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1623,14 +1485,8 @@
             ],
             "signature": [
               "({ comments, description, entries, itemId, meta, name, osTypes, tags, type, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.CreateEndpointListItemOptions",
-                "text": "CreateEndpointListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              "CreateEndpointListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "description": [
               "\nThis is the same as \"createListItem\" except it applies specifically to the agnostic endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the agnostic endpoint\nbeing there and existing before the item is inserted into the agnostic endpoint list."
@@ -1648,18 +1504,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateEndpointListItem._versioncommentsdescriptionentriesiditemIdmetanameosTypestagstype",
+                "id": "def-server.ExceptionListClient.updateEndpointListItem.$1",
                 "type": "Object",
                 "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.UpdateEndpointListItemOptions",
-                    "text": "UpdateEndpointListItemOptions"
-                  }
+                  "UpdateEndpointListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1670,14 +1520,8 @@
             ],
             "signature": [
               "({ _version, comments, description, entries, id, itemId, meta, name, osTypes, tags, type, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.UpdateEndpointListItemOptions",
-                "text": "UpdateEndpointListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              "UpdateEndpointListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [
               "\nThis is the same as \"updateExceptionListItem\" except it applies specifically to the endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the endpoint\nbeing there if it did not exist before. If the list did not exist before, then creating it here will still cause a\nreturn of null but at least the list exists again."
@@ -1695,18 +1539,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getEndpointListItem.itemIdid",
+                "id": "def-server.ExceptionListClient.getEndpointListItem.$1",
                 "type": "Object",
                 "label": "{\n    itemId,\n    id,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetEndpointListItemOptions",
-                    "text": "GetEndpointListItemOptions"
-                  }
+                  "GetEndpointListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1717,14 +1555,8 @@
             ],
             "signature": [
               "({ itemId, id, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetEndpointListItemOptions",
-                "text": "GetEndpointListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              "GetEndpointListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [
               "\nThis is the same as \"getExceptionListItem\" except it applies specifically to the endpoint list."
@@ -1742,18 +1574,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createExceptionList.descriptionimmutablelistIdmetanamenamespaceTypetagstypeversion",
+                "id": "def-server.ExceptionListClient.createExceptionList.$1",
                 "type": "Object",
                 "label": "{\n    description,\n    immutable,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    tags,\n    type,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.CreateExceptionListOptions",
-                    "text": "CreateExceptionListOptions"
-                  }
+                  "CreateExceptionListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1764,14 +1590,8 @@
             ],
             "signature": [
               "({ description, immutable, listId, meta, name, namespaceType, tags, type, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.CreateExceptionListOptions",
-                "text": "CreateExceptionListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }>"
+              "CreateExceptionListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "description": [],
             "label": "createExceptionList",
@@ -1787,18 +1607,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateExceptionList._versioniddescriptionlistIdmetanamenamespaceTypeosTypestagstypeversion",
+                "id": "def-server.ExceptionListClient.updateExceptionList.$1",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    description,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.UpdateExceptionListOptions",
-                    "text": "UpdateExceptionListOptions"
-                  }
+                  "UpdateExceptionListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1809,14 +1623,8 @@
             ],
             "signature": [
               "({ _version, id, description, listId, meta, name, namespaceType, osTypes, tags, type, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.UpdateExceptionListOptions",
-                "text": "UpdateExceptionListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "UpdateExceptionListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "updateExceptionList",
@@ -1832,18 +1640,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionList.idlistIdnamespaceType",
+                "id": "def-server.ExceptionListClient.deleteExceptionList.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    listId,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteExceptionListOptions",
-                    "text": "DeleteExceptionListOptions"
-                  }
+                  "DeleteExceptionListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1854,14 +1656,8 @@
             ],
             "signature": [
               "({ id, listId, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteExceptionListOptions",
-                "text": "DeleteExceptionListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "DeleteExceptionListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "deleteExceptionList",
@@ -1877,7 +1673,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createExceptionListItem.commentsdescriptionentriesitemIdlistIdmetanamenamespaceTypeosTypestagstype",
+                "id": "def-server.ExceptionListClient.createExceptionListItem.$1",
                 "type": "Object",
                 "label": "{\n    comments,\n    description,\n    entries,\n    itemId,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -1906,7 +1702,7 @@
                 "section": "def-server.CreateExceptionListItemOptions",
                 "text": "CreateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "description": [],
             "label": "createExceptionListItem",
@@ -1922,7 +1718,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateExceptionListItem._versioncommentsdescriptionentriesiditemIdmetanamenamespaceTypeosTypestagstype",
+                "id": "def-server.ExceptionListClient.updateExceptionListItem.$1",
                 "type": "Object",
                 "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -1951,7 +1747,7 @@
                 "section": "def-server.UpdateExceptionListItemOptions",
                 "text": "UpdateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [],
             "label": "updateExceptionListItem",
@@ -1967,18 +1763,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionListItem.iditemIdnamespaceType",
+                "id": "def-server.ExceptionListClient.deleteExceptionListItem.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    itemId,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteExceptionListItemOptions",
-                    "text": "DeleteExceptionListItemOptions"
-                  }
+                  "DeleteExceptionListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -1989,14 +1779,8 @@
             ],
             "signature": [
               "({ id, itemId, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteExceptionListItemOptions",
-                "text": "DeleteExceptionListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              "DeleteExceptionListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [],
             "label": "deleteExceptionListItem",
@@ -2012,18 +1796,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionListItemById.idnamespaceType",
+                "id": "def-server.ExceptionListClient.deleteExceptionListItemById.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteExceptionListItemByIdOptions",
-                    "text": "DeleteExceptionListItemByIdOptions"
-                  }
+                  "DeleteExceptionListItemByIdOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2034,13 +1812,7 @@
             ],
             "signature": [
               "({ id, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteExceptionListItemByIdOptions",
-                "text": "DeleteExceptionListItemByIdOptions"
-              },
+              "DeleteExceptionListItemByIdOptions",
               ") => Promise<void>"
             ],
             "description": [],
@@ -2057,18 +1829,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteEndpointListItem.iditemId",
+                "id": "def-server.ExceptionListClient.deleteEndpointListItem.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    itemId,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteEndpointListItemOptions",
-                    "text": "DeleteEndpointListItemOptions"
-                  }
+                  "DeleteEndpointListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2079,14 +1845,8 @@
             ],
             "signature": [
               "({ id, itemId, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteEndpointListItemOptions",
-                "text": "DeleteEndpointListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              "DeleteEndpointListItemOptions",
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "description": [
               "\nThis is the same as \"deleteExceptionListItem\" except it applies specifically to the endpoint list."
@@ -2104,18 +1864,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionListItem.listIdfilterperPagepagesortFieldsortOrdernamespaceType",
+                "id": "def-server.ExceptionListClient.findExceptionListItem.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindExceptionListItemOptions",
-                    "text": "FindExceptionListItemOptions"
-                  }
+                  "FindExceptionListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2126,14 +1880,8 @@
             ],
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindExceptionListItemOptions",
-                "text": "FindExceptionListItemOptions"
-              },
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              "FindExceptionListItemOptions",
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "description": [],
             "label": "findExceptionListItem",
@@ -2149,18 +1897,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionListsItem.listIdfilterperPagepagesortFieldsortOrdernamespaceType",
+                "id": "def-server.ExceptionListClient.findExceptionListsItem.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindExceptionListsItemOptions",
-                    "text": "FindExceptionListsItemOptions"
-                  }
+                  "FindExceptionListsItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2171,14 +1913,8 @@
             ],
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindExceptionListsItemOptions",
-                "text": "FindExceptionListsItemOptions"
-              },
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              "FindExceptionListsItemOptions",
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "description": [],
             "label": "findExceptionListsItem",
@@ -2194,18 +1930,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findValueListExceptionListItems.perPagepagesortFieldsortOrdervalueListId",
+                "id": "def-server.ExceptionListClient.findValueListExceptionListItems.$1",
                 "type": "Object",
                 "label": "{\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    valueListId,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindValueListExceptionListsItems",
-                    "text": "FindValueListExceptionListsItems"
-                  }
+                  "FindValueListExceptionListsItems"
                 ],
                 "description": [],
                 "source": {
@@ -2216,14 +1946,8 @@
             ],
             "signature": [
               "({ perPage, page, sortField, sortOrder, valueListId, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindValueListExceptionListsItems",
-                "text": "FindValueListExceptionListsItems"
-              },
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              "FindValueListExceptionListsItems",
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "description": [],
             "label": "findValueListExceptionListItems",
@@ -2239,18 +1963,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionList.filterperPagepagesortFieldsortOrdernamespaceType",
+                "id": "def-server.ExceptionListClient.findExceptionList.$1",
                 "type": "Object",
                 "label": "{\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindExceptionListOptions",
-                    "text": "FindExceptionListOptions"
-                  }
+                  "FindExceptionListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2261,14 +1979,8 @@
             ],
             "signature": [
               "({ filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindExceptionListOptions",
-                "text": "FindExceptionListOptions"
-              },
-              ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              "FindExceptionListOptions",
+              ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
             "description": [],
             "label": "findExceptionList",
@@ -2284,18 +1996,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findEndpointListItem.filterperPagepagesortFieldsortOrder",
+                "id": "def-server.ExceptionListClient.findEndpointListItem.$1",
                 "type": "Object",
                 "label": "{\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindEndpointListItemOptions",
-                    "text": "FindEndpointListItemOptions"
-                  }
+                  "FindEndpointListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2306,14 +2012,8 @@
             ],
             "signature": [
               "({ filter, perPage, page, sortField, sortOrder, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindEndpointListItemOptions",
-                "text": "FindEndpointListItemOptions"
-              },
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              "FindEndpointListItemOptions",
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "description": [
               "\nThis is the same as \"findExceptionList\" except it applies specifically to the  endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the  endpoint\nbeing there if it did not exist before. If the list did not exist before, then creating it here should give you\na good guarantee that you will get an empty record set rather than null. I keep the null as the return value in\nthe off chance that you still might somehow not get into a race condition where the  endpoint list does\nnot exist because someone deleted it in-between the initial create and then the find."
@@ -2350,18 +2050,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.ListClient.Unnamed.spaceIduserconfigesClient",
+                "id": "def-server.ListClient.Unnamed.$1",
                 "type": "Object",
                 "label": "{ spaceId, user, config, esClient }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.ConstructorOptions",
-                    "text": "ConstructorOptions"
-                  }
+                  "ConstructorOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2414,18 +2108,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getList.id",
+                "id": "def-server.ListClient.getList.$1",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetListOptions",
-                    "text": "GetListOptions"
-                  }
+                  "GetListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2436,14 +2124,8 @@
             ],
             "signature": [
               "({ id }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetListOptions",
-                "text": "GetListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "GetListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "getList",
@@ -2459,18 +2141,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createList.iddeserializerimmutableserializernamedescriptiontypemetaversion",
+                "id": "def-server.ListClient.createList.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    immutable,\n    serializer,\n    name,\n    description,\n    type,\n    meta,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.CreateListOptions",
-                    "text": "CreateListOptions"
-                  }
+                  "CreateListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2481,14 +2157,8 @@
             ],
             "signature": [
               "({ id, deserializer, immutable, serializer, name, description, type, meta, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.CreateListOptions",
-                "text": "CreateListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }>"
+              "CreateListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "description": [],
             "label": "createList",
@@ -2504,18 +2174,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createListIfItDoesNotExist.iddeserializerserializernamedescriptionimmutabletypemetaversion",
+                "id": "def-server.ListClient.createListIfItDoesNotExist.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    serializer,\n    name,\n    description,\n    immutable,\n    type,\n    meta,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.CreateListIfItDoesNotExistOptions",
-                    "text": "CreateListIfItDoesNotExistOptions"
-                  }
+                  "CreateListIfItDoesNotExistOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2526,14 +2190,8 @@
             ],
             "signature": [
               "({ id, deserializer, serializer, name, description, immutable, type, meta, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.CreateListIfItDoesNotExistOptions",
-                "text": "CreateListIfItDoesNotExistOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }>"
+              "CreateListIfItDoesNotExistOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "description": [],
             "label": "createListIfItDoesNotExist",
@@ -2869,18 +2527,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteListItem.id",
+                "id": "def-server.ListClient.deleteListItem.$1",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteListItemOptions",
-                    "text": "DeleteListItemOptions"
-                  }
+                  "DeleteListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2891,14 +2543,8 @@
             ],
             "signature": [
               "({ id }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteListItemOptions",
-                "text": "DeleteListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              "DeleteListItemOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "description": [],
             "label": "deleteListItem",
@@ -2914,18 +2560,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteListItemByValue.listIdvaluetype",
+                "id": "def-server.ListClient.deleteListItemByValue.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    value,\n    type,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteListItemByValueOptions",
-                    "text": "DeleteListItemByValueOptions"
-                  }
+                  "DeleteListItemByValueOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2936,14 +2576,8 @@
             ],
             "signature": [
               "({ listId, value, type, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteListItemByValueOptions",
-                "text": "DeleteListItemByValueOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              "DeleteListItemByValueOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "description": [],
             "label": "deleteListItemByValue",
@@ -2959,18 +2593,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteList.id",
+                "id": "def-server.ListClient.deleteList.$1",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.DeleteListOptions",
-                    "text": "DeleteListOptions"
-                  }
+                  "DeleteListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -2981,14 +2609,8 @@
             ],
             "signature": [
               "({ id }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.DeleteListOptions",
-                "text": "DeleteListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "DeleteListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "deleteList",
@@ -3004,18 +2626,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.exportListItemsToStream.stringToAppendlistIdstream",
+                "id": "def-server.ListClient.exportListItemsToStream.$1",
                 "type": "Object",
                 "label": "{\n    stringToAppend,\n    listId,\n    stream,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.ExportListItemsToStreamOptions",
-                    "text": "ExportListItemsToStreamOptions"
-                  }
+                  "ExportListItemsToStreamOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3026,13 +2642,7 @@
             ],
             "signature": [
               "({ stringToAppend, listId, stream, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.ExportListItemsToStreamOptions",
-                "text": "ExportListItemsToStreamOptions"
-              },
+              "ExportListItemsToStreamOptions",
               ") => void"
             ],
             "description": [],
@@ -3049,18 +2659,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.importListItemsToStream.deserializerserializertypelistIdstreammetaversion",
+                "id": "def-server.ListClient.importListItemsToStream.$1",
                 "type": "Object",
                 "label": "{\n    deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.ImportListItemsToStreamOptions",
-                    "text": "ImportListItemsToStreamOptions"
-                  }
+                  "ImportListItemsToStreamOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3071,14 +2675,8 @@
             ],
             "signature": [
               "({ deserializer, serializer, type, listId, stream, meta, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.ImportListItemsToStreamOptions",
-                "text": "ImportListItemsToStreamOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "ImportListItemsToStreamOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "importListItemsToStream",
@@ -3094,18 +2692,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItemByValue.listIdvaluetype",
+                "id": "def-server.ListClient.getListItemByValue.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    value,\n    type,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetListItemByValueOptions",
-                    "text": "GetListItemByValueOptions"
-                  }
+                  "GetListItemByValueOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3116,14 +2708,8 @@
             ],
             "signature": [
               "({ listId, value, type, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetListItemByValueOptions",
-                "text": "GetListItemByValueOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              "GetListItemByValueOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "description": [],
             "label": "getListItemByValue",
@@ -3139,18 +2725,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createListItem.iddeserializerserializerlistIdvaluetypemeta",
+                "id": "def-server.ListClient.createListItem.$1",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.CreateListItemOptions",
-                    "text": "CreateListItemOptions"
-                  }
+                  "CreateListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3161,14 +2741,8 @@
             ],
             "signature": [
               "({ id, deserializer, serializer, listId, value, type, meta, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.CreateListItemOptions",
-                "text": "CreateListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              "CreateListItemOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "description": [],
             "label": "createListItem",
@@ -3184,18 +2758,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.updateListItem._versionidvaluemeta",
+                "id": "def-server.ListClient.updateListItem.$1",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    value,\n    meta,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.UpdateListItemOptions",
-                    "text": "UpdateListItemOptions"
-                  }
+                  "UpdateListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3206,14 +2774,8 @@
             ],
             "signature": [
               "({ _version, id, value, meta, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.UpdateListItemOptions",
-                "text": "UpdateListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              "UpdateListItemOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "description": [],
             "label": "updateListItem",
@@ -3229,18 +2791,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.updateList._versionidnamedescriptionmetaversion",
+                "id": "def-server.ListClient.updateList.$1",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    name,\n    description,\n    meta,\n    version,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.UpdateListOptions",
-                    "text": "UpdateListOptions"
-                  }
+                  "UpdateListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3251,14 +2807,8 @@
             ],
             "signature": [
               "({ _version, id, name, description, meta, version, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.UpdateListOptions",
-                "text": "UpdateListOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "UpdateListOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "description": [],
             "label": "updateList",
@@ -3274,18 +2824,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItem.id",
+                "id": "def-server.ListClient.getListItem.$1",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetListItemOptions",
-                    "text": "GetListItemOptions"
-                  }
+                  "GetListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3296,14 +2840,8 @@
             ],
             "signature": [
               "({ id }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetListItemOptions",
-                "text": "GetListItemOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              "GetListItemOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "description": [],
             "label": "getListItem",
@@ -3319,18 +2857,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItemByValues.typelistIdvalue",
+                "id": "def-server.ListClient.getListItemByValues.$1",
                 "type": "Object",
                 "label": "{\n    type,\n    listId,\n    value,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.GetListItemsByValueOptions",
-                    "text": "GetListItemsByValueOptions"
-                  }
+                  "GetListItemsByValueOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3341,14 +2873,8 @@
             ],
             "signature": [
               "({ type, listId, value, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetListItemsByValueOptions",
-                "text": "GetListItemsByValueOptions"
-              },
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              "GetListItemsByValueOptions",
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "description": [],
             "label": "getListItemByValues",
@@ -3364,18 +2890,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.searchListItemByValues.typelistIdvalue",
+                "id": "def-server.ListClient.searchListItemByValues.$1",
                 "type": "Object",
                 "label": "{\n    type,\n    listId,\n    value,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.SearchListItemByValuesOptions",
-                    "text": "SearchListItemByValuesOptions"
-                  }
+                  "SearchListItemByValuesOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3386,14 +2906,8 @@
             ],
             "signature": [
               "({ type, listId, value, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.SearchListItemByValuesOptions",
-                "text": "SearchListItemByValuesOptions"
-              },
-              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
+              "SearchListItemByValuesOptions",
+              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
             ],
             "description": [],
             "label": "searchListItemByValues",
@@ -3409,18 +2923,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.findList.filtercurrentIndexPositionperPagepagesortFieldsortOrdersearchAfter",
+                "id": "def-server.ListClient.findList.$1",
                 "type": "Object",
                 "label": "{\n    filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindListOptions",
-                    "text": "FindListOptions"
-                  }
+                  "FindListOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3431,14 +2939,8 @@
             ],
             "signature": [
               "({ filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindListOptions",
-                "text": "FindListOptions"
-              },
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              "FindListOptions",
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
             "description": [],
             "label": "findList",
@@ -3454,18 +2956,12 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.findListItem.listIdfiltercurrentIndexPositionperPagepagesortFieldsortOrdersearchAfter",
+                "id": "def-server.ListClient.findListItem.$1",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "lists",
-                    "scope": "server",
-                    "docId": "kibListsPluginApi",
-                    "section": "def-server.FindListItemOptions",
-                    "text": "FindListItemOptions"
-                  }
+                  "FindListItemOptions"
                 ],
                 "description": [],
                 "source": {
@@ -3476,14 +2972,8 @@
             ],
             "signature": [
               "({ listId, filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.FindListItemOptions",
-                "text": "FindListItemOptions"
-              },
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
+              "FindListItemOptions",
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "description": [],
             "label": "findListItem",
@@ -3536,7 +3026,7 @@
               "lineNumber": 119
             },
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
             ]
           },
           {
@@ -3678,13 +3168,7 @@
               "lineNumber": 41
             },
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetExceptionListClientType",
-                "text": "GetExceptionListClientType"
-              }
+              "GetExceptionListClientType"
             ]
           },
           {
@@ -3698,13 +3182,7 @@
               "lineNumber": 42
             },
             "signature": [
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.GetListClientType",
-                "text": "GetListClientType"
-              }
+              "GetListClientType"
             ]
           }
         ],
@@ -3818,7 +3296,7 @@
               "lineNumber": 146
             },
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
             ]
           },
           {
@@ -3967,7 +3445,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize",
+            "id": "def-common.buildExceptionFilter.$1.listsexcludeExceptionschunkSize",
             "type": "Object",
             "label": "{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}",
             "tags": [],
@@ -3975,7 +3453,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.lists",
+                "id": "def-common.buildExceptionFilter.$1.listsexcludeExceptionschunkSize.lists",
                 "type": "Array",
                 "label": "lists",
                 "description": [],
@@ -3984,12 +3462,12 @@
                   "lineNumber": 74
                 },
                 "signature": [
-                  "(({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]"
+                  "(({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]"
                 ]
               },
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.excludeExceptions",
+                "id": "def-common.buildExceptionFilter.$1.listsexcludeExceptionschunkSize.excludeExceptions",
                 "type": "boolean",
                 "label": "excludeExceptions",
                 "description": [],
@@ -4000,7 +3478,7 @@
               },
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.chunkSize",
+                "id": "def-common.buildExceptionFilter.$1.listsexcludeExceptionschunkSize.chunkSize",
                 "type": "number",
                 "label": "chunkSize",
                 "description": [],
@@ -4017,7 +3495,7 @@
           }
         ],
         "signature": [
-          "({ lists, excludeExceptions, chunkSize, }: { lists: (({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]; excludeExceptions: boolean; chunkSize: number; }) => ",
+          "({ lists, excludeExceptions, chunkSize, }: { lists: (({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]; excludeExceptions: boolean; chunkSize: number; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4048,7 +3526,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 219
+          "lineNumber": 223
         },
         "initialIsOpen": false
       },
@@ -4060,7 +3538,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 276
+          "lineNumber": 281
         },
         "initialIsOpen": false
       },
@@ -4072,7 +3550,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 281
+          "lineNumber": 286
         },
         "initialIsOpen": false
       }
@@ -4149,7 +3627,7 @@
           "lineNumber": 55
         },
         "signature": [
-          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
+          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -4164,7 +3642,7 @@
           "lineNumber": 50
         },
         "signature": [
-          "{ description: string; name: string; type: \"endpoint\" | \"detection\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -4213,7 +3691,7 @@
           "lineNumber": 22
         },
         "signature": [
-          "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
+          "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
         ],
         "initialIsOpen": false
       },
@@ -4228,7 +3706,7 @@
           "lineNumber": 17
         },
         "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; }"
+          "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; }"
         ],
         "initialIsOpen": false
       },
@@ -4258,7 +3736,7 @@
           "lineNumber": 21
         },
         "signature": [
-          "{ field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; }"
+          "{ field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; }"
         ],
         "initialIsOpen": false
       },
@@ -4318,7 +3796,7 @@
           "lineNumber": 53
         },
         "signature": [
-          "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
+          "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
         ],
         "initialIsOpen": false
       },
@@ -4333,7 +3811,7 @@
           "lineNumber": 52
         },
         "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }"
+          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "initialIsOpen": false
       },
@@ -4345,10 +3823,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 217
+          "lineNumber": 221
         },
         "signature": [
-          "\"endpoint\" | \"detection\""
+          "\"endpoint\" | \"detection\" | \"endpoint_events\""
         ],
         "initialIsOpen": false
       },
@@ -4363,7 +3841,7 @@
           "lineNumber": 48
         },
         "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }"
+          "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "initialIsOpen": false
       },
@@ -4405,7 +3883,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 275
+          "lineNumber": 280
         },
         "signature": [
           "\"excluded\" | \"included\""
@@ -4420,7 +3898,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 325
+          "lineNumber": 330
         },
         "signature": [
           "(\"windows\" | \"linux\" | \"macos\")[]"
@@ -4438,7 +3916,7 @@
           "lineNumber": 123
         },
         "signature": [
-          "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\""
+          "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\""
         ],
         "initialIsOpen": false
       },
@@ -4453,7 +3931,7 @@
           "lineNumber": 55
         },
         "signature": [
-          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
+          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
         ],
         "initialIsOpen": false
       }
@@ -4678,7 +4156,7 @@
         },
         "signature": [
           "KeyofC",
-          "<{ detection: null; endpoint: null; }>"
+          "<{ detection: null; endpoint: null; endpoint_events: null; }>"
         ],
         "initialIsOpen": false
       },
@@ -4752,7 +4230,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 317
+          "lineNumber": 322
         },
         "signature": [
           "KeyofC",
@@ -4768,7 +4246,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
-          "lineNumber": 324
+          "lineNumber": 329
         },
         "signature": [
           "Type",

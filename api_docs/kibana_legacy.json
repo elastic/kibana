@@ -19,7 +19,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.KibanaLegacyPlugin.Unnamed.initializerContext",
+                "id": "def-public.KibanaLegacyPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -61,19 +61,13 @@
                 "text": "CoreSetup"
               },
               "<{}, { dashboardConfig: ",
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.DashboardConfig",
-                "text": "DashboardConfig"
-              },
+              "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.KibanaLegacyPlugin.setup.core",
+                "id": "def-public.KibanaLegacyPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -86,13 +80,7 @@
                     "text": "CoreSetup"
                   },
                   "<{}, { dashboardConfig: ",
-                  {
-                    "pluginId": "kibanaLegacy",
-                    "scope": "public",
-                    "docId": "kibKibanaLegacyPluginApi",
-                    "section": "def-public.DashboardConfig",
-                    "text": "DashboardConfig"
-                  },
+                  "DashboardConfig",
                   "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
                 ],
                 "description": [],
@@ -123,19 +111,13 @@
                 "text": "CoreStart"
               },
               ") => { dashboardConfig: ",
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.DashboardConfig",
-                "text": "DashboardConfig"
-              },
+              "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
             ],
             "description": [],
             "children": [
               {
-                "id": "def-public.KibanaLegacyPlugin.start.applicationhttpbasePathuiSettings",
+                "id": "def-public.KibanaLegacyPlugin.start.$1",
                 "type": "Object",
                 "label": "{ application, http: { basePath }, uiSettings }",
                 "isRequired": true,
@@ -207,7 +189,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ToastNotifications.Unnamed.toasts",
+                "id": "def-public.ToastNotifications.Unnamed.$1",
                 "type": "Object",
                 "label": "toasts",
                 "isRequired": true,
@@ -241,7 +223,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.onChange.callback",
+                "id": "def-public.ToastNotifications.onChange.$1",
                 "type": "Function",
                 "label": "callback",
                 "isRequired": true,
@@ -272,7 +254,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.add.toastOrTitle",
+                "id": "def-public.ToastNotifications.add.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -324,7 +306,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.remove.toast",
+                "id": "def-public.ToastNotifications.remove.$1",
                 "type": "CompoundType",
                 "label": "toast",
                 "isRequired": true,
@@ -369,7 +351,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.addSuccess.toastOrTitle",
+                "id": "def-public.ToastNotifications.addSuccess.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -421,7 +403,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.addWarning.toastOrTitle",
+                "id": "def-public.ToastNotifications.addWarning.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -473,7 +455,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.addDanger.toastOrTitle",
+                "id": "def-public.ToastNotifications.addDanger.$1",
                 "type": "CompoundType",
                 "label": "toastOrTitle",
                 "isRequired": true,
@@ -525,7 +507,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.ToastNotifications.addError.error",
+                "id": "def-public.ToastNotifications.addError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -539,7 +521,7 @@
                 }
               },
               {
-                "id": "def-public.ToastNotifications.addError.options",
+                "id": "def-public.ToastNotifications.addError.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -600,7 +582,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.$setupXsrfRequestInterceptor.version",
+            "id": "def-public.$setupXsrfRequestInterceptor.$1",
             "type": "string",
             "label": "version",
             "isRequired": true,
@@ -653,7 +635,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.addFatalError.fatalErrors",
+            "id": "def-public.addFatalError.$1",
             "type": "Object",
             "label": "fatalErrors",
             "isRequired": true,
@@ -673,7 +655,7 @@
             }
           },
           {
-            "id": "def-public.addFatalError.error",
+            "id": "def-public.addFatalError.$2",
             "type": "CompoundType",
             "label": "error",
             "isRequired": true,
@@ -694,7 +676,7 @@
             }
           },
           {
-            "id": "def-public.addFatalError.location",
+            "id": "def-public.addFatalError.$3",
             "type": "string",
             "label": "location",
             "isRequired": false,
@@ -728,7 +710,7 @@
         ],
         "children": [
           {
-            "id": "def-public.addSystemApiHeader.originalHeaders",
+            "id": "def-public.addSystemApiHeader.$1",
             "type": "Object",
             "label": "originalHeaders",
             "isRequired": true,
@@ -761,7 +743,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.configureAppAngularModule.angularModule",
+            "id": "def-public.configureAppAngularModule.$1",
             "type": "Object",
             "label": "angularModule",
             "isRequired": true,
@@ -775,7 +757,7 @@
             }
           },
           {
-            "id": "def-public.configureAppAngularModule.newPlatform.newPlatform",
+            "id": "def-public.configureAppAngularModule.$2.newPlatform",
             "type": "Object",
             "label": "newPlatform",
             "tags": [],
@@ -783,7 +765,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.configureAppAngularModule.newPlatform.newPlatform.core",
+                "id": "def-public.configureAppAngularModule.$2.newPlatform.core",
                 "type": "Object",
                 "label": "core",
                 "description": [],
@@ -803,7 +785,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.configureAppAngularModule.newPlatform.newPlatform.env",
+                "id": "def-public.configureAppAngularModule.$2.newPlatform.env",
                 "type": "Object",
                 "label": "env",
                 "description": [],
@@ -826,7 +808,7 @@
             }
           },
           {
-            "id": "def-public.configureAppAngularModule.isLocalAngular",
+            "id": "def-public.configureAppAngularModule.$3",
             "type": "boolean",
             "label": "isLocalAngular",
             "isRequired": true,
@@ -840,7 +822,7 @@
             }
           },
           {
-            "id": "def-public.configureAppAngularModule.getHistory",
+            "id": "def-public.configureAppAngularModule.$4",
             "type": "Function",
             "label": "getHistory",
             "isRequired": false,
@@ -916,7 +898,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.formatAngularHttpError.error",
+            "id": "def-public.formatAngularHttpError.$1",
             "type": "Object",
             "label": "error",
             "isRequired": true,
@@ -949,7 +931,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.formatESMsg.err",
+            "id": "def-public.formatESMsg.$1",
             "type": "CompoundType",
             "label": "err",
             "isRequired": true,
@@ -990,7 +972,7 @@
         ],
         "children": [
           {
-            "id": "def-public.formatMsg.err",
+            "id": "def-public.formatMsg.$1",
             "type": "CompoundType",
             "label": "err",
             "isRequired": true,
@@ -1004,7 +986,7 @@
             }
           },
           {
-            "id": "def-public.formatMsg.source",
+            "id": "def-public.formatMsg.$2",
             "type": "string",
             "label": "source",
             "isRequired": true,
@@ -1038,7 +1020,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.formatStack.err",
+            "id": "def-public.formatStack.$1",
             "type": "Object",
             "label": "err",
             "isRequired": true,
@@ -1085,7 +1067,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.isAngularHttpError.error",
+            "id": "def-public.isAngularHttpError.$1",
             "type": "Any",
             "label": "error",
             "isRequired": true,
@@ -1119,7 +1101,7 @@
         ],
         "children": [
           {
-            "id": "def-public.isSystemApiRequest.request",
+            "id": "def-public.isSystemApiRequest.$1",
             "type": "Object",
             "label": "request",
             "isRequired": true,
@@ -1157,7 +1139,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.loadKbnTopNavDirectives.navUi",
+            "id": "def-public.loadKbnTopNavDirectives.$1",
             "type": "Unknown",
             "label": "navUi",
             "isRequired": true,
@@ -1206,7 +1188,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.PaginateDirectiveProvider.$parse",
+            "id": "def-public.PaginateDirectiveProvider.$1",
             "type": "Any",
             "label": "$parse",
             "isRequired": true,
@@ -1220,7 +1202,7 @@
             }
           },
           {
-            "id": "def-public.PaginateDirectiveProvider.$compile",
+            "id": "def-public.PaginateDirectiveProvider.$2",
             "type": "Any",
             "label": "$compile",
             "isRequired": true,
@@ -1269,7 +1251,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.PromiseServiceCreator.$q",
+            "id": "def-public.PromiseServiceCreator.$1",
             "type": "Unknown",
             "label": "$q",
             "isRequired": true,
@@ -1283,7 +1265,7 @@
             }
           },
           {
-            "id": "def-public.PromiseServiceCreator.$timeout",
+            "id": "def-public.PromiseServiceCreator.$2",
             "type": "Unknown",
             "label": "$timeout",
             "isRequired": true,
@@ -1315,7 +1297,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.registerListenEventListener.$rootScope",
+            "id": "def-public.registerListenEventListener.$1",
             "type": "Unknown",
             "label": "$rootScope",
             "isRequired": true,
@@ -1358,7 +1340,7 @@
         ],
         "children": [
           {
-            "id": "def-public.subscribeWithScope.$scope",
+            "id": "def-public.subscribeWithScope.$1",
             "type": "Object",
             "label": "$scope",
             "isRequired": true,
@@ -1372,7 +1354,7 @@
             }
           },
           {
-            "id": "def-public.subscribeWithScope.observable",
+            "id": "def-public.subscribeWithScope.$2",
             "type": "Object",
             "label": "observable",
             "isRequired": true,
@@ -1387,7 +1369,7 @@
             }
           },
           {
-            "id": "def-public.subscribeWithScope.observer",
+            "id": "def-public.subscribeWithScope.$3",
             "type": "CompoundType",
             "label": "observer",
             "isRequired": false,
@@ -1406,7 +1388,7 @@
             }
           },
           {
-            "id": "def-public.subscribeWithScope.fatalError",
+            "id": "def-public.subscribeWithScope.$4",
             "type": "Function",
             "label": "fatalError",
             "isRequired": false,
@@ -1438,7 +1420,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.watchMultiDecorator.$provide",
+            "id": "def-public.watchMultiDecorator.$1",
             "type": "Unknown",
             "label": "$provide",
             "isRequired": true,

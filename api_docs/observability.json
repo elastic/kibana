@@ -13,7 +13,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.ActionMenu.props",
+            "id": "def-public.ActionMenu.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -64,19 +64,13 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.createExploratoryViewUrl.allSeries",
+            "id": "def-public.createExploratoryViewUrl.$1",
             "type": "Object",
             "label": "allSeries",
             "isRequired": true,
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.SeriesUrl",
-                "text": "SeriesUrl"
-              },
+              "SeriesUrl",
               ">"
             ],
             "description": [],
@@ -86,7 +80,7 @@
             }
           },
           {
-            "id": "def-public.createExploratoryViewUrl.baseHref",
+            "id": "def-public.createExploratoryViewUrl.$2",
             "type": "string",
             "label": "baseHref",
             "isRequired": true,
@@ -120,18 +114,12 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.FieldValueSuggestions.props",
+            "id": "def-public.FieldValueSuggestions.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.FieldValueSuggestionsProps",
-                "text": "FieldValueSuggestionsProps"
-              }
+              "FieldValueSuggestionsProps"
             ],
             "description": [],
             "source": {
@@ -158,7 +146,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.getApmTraceUrl.traceIdrangeFromrangeTo.traceIdrangeFromrangeTo",
+            "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo",
             "type": "Object",
             "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "tags": [],
@@ -166,7 +154,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.traceIdrangeFromrangeTo.traceIdrangeFromrangeTo.traceId",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.traceId",
                 "type": "string",
                 "label": "traceId",
                 "description": [],
@@ -177,7 +165,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.traceIdrangeFromrangeTo.traceIdrangeFromrangeTo.rangeFrom",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.rangeFrom",
                 "type": "string",
                 "label": "rangeFrom",
                 "description": [],
@@ -188,7 +176,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.traceIdrangeFromrangeTo.traceIdrangeFromrangeTo.rangeTo",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.rangeTo",
                 "type": "string",
                 "label": "rangeTo",
                 "description": [],
@@ -224,18 +212,12 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.getCoreVitalsComponent.props",
+            "id": "def-public.getCoreVitalsComponent.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.CoreVitalProps",
-                "text": "CoreVitalProps"
-              }
+              "CoreVitalProps"
             ],
             "description": [],
             "source": {
@@ -264,18 +246,12 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.HeaderMenuPortal.props",
+            "id": "def-public.HeaderMenuPortal.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.HeaderMenuPortalProps",
-                "text": "HeaderMenuPortalProps"
-              }
+              "HeaderMenuPortalProps"
             ],
             "description": [],
             "source": {
@@ -320,7 +296,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionLink.props",
+            "id": "def-public.SectionLink.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -356,7 +332,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionLinks.children...props",
+            "id": "def-public.SectionLinks.$1",
             "type": "CompoundType",
             "label": "{ children, ...props }",
             "isRequired": true,
@@ -409,7 +385,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionSubtitle.children.children",
+            "id": "def-public.SectionSubtitle.$1.children",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -417,7 +393,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionSubtitle.children.children.children",
+                "id": "def-public.SectionSubtitle.$1.children.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -454,7 +430,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionTitle.children.children",
+            "id": "def-public.SectionTitle.$1.children",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -462,7 +438,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionTitle.children.children.children",
+                "id": "def-public.SectionTitle.$1.children.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -527,7 +503,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useFetcher.fn",
+            "id": "def-public.useFetcher.$1",
             "type": "Function",
             "label": "fn",
             "isRequired": true,
@@ -541,7 +517,7 @@
             }
           },
           {
-            "id": "def-public.useFetcher.fnDeps",
+            "id": "def-public.useFetcher.$2",
             "type": "Array",
             "label": "fnDeps",
             "isRequired": true,
@@ -555,7 +531,7 @@
             }
           },
           {
-            "id": "def-public.useFetcher.options.options",
+            "id": "def-public.useFetcher.$3.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -563,7 +539,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useFetcher.options.options.preservePreviousData",
+                "id": "def-public.useFetcher.$3.options.preservePreviousData",
                 "type": "CompoundType",
                 "label": "preservePreviousData",
                 "description": [],
@@ -632,7 +608,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useTrackMetric.appmetricmetricTypeMETRIC_TYPE.COUNTdelay0",
+            "id": "def-public.useTrackMetric.$1",
             "type": "CompoundType",
             "label": "{ app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }",
             "isRequired": true,
@@ -652,7 +628,7 @@
             }
           },
           {
-            "id": "def-public.useTrackMetric.effectDependencies",
+            "id": "def-public.useTrackMetric.$2",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -684,7 +660,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useTrackPageview.path...rest",
+            "id": "def-public.useTrackPageview.$1",
             "type": "CompoundType",
             "label": "{ path, ...rest }",
             "isRequired": true,
@@ -698,7 +674,7 @@
             }
           },
           {
-            "id": "def-public.useTrackPageview.effectDependencies",
+            "id": "def-public.useTrackPageview.$2",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -725,7 +701,7 @@
         "type": "Function",
         "label": "useUiTracker",
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -738,7 +714,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useUiTracker.appdefaultApp.appdefaultApp",
+            "id": "def-public.useUiTracker.$1.appdefaultApp",
             "type": "Object",
             "label": "{\n  app: defaultApp,\n}",
             "tags": [],
@@ -746,7 +722,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useUiTracker.appdefaultApp.appdefaultApp.app",
+                "id": "def-public.useUiTracker.$1.appdefaultApp.app",
                 "type": "CompoundType",
                 "label": "app",
                 "description": [],
@@ -755,7 +731,7 @@
                   "lineNumber": 40
                 },
                 "signature": [
-                  "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ]
               }
             ],
@@ -2281,7 +2257,7 @@
           "lineNumber": 48
         },
         "signature": [
-          "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"ux\""
+          "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"ux\""
         ],
         "initialIsOpen": false
       },
@@ -2382,13 +2358,7 @@
           },
           "signature": [
             "{ register: typeof ",
-            {
-              "pluginId": "observability",
-              "scope": "public",
-              "docId": "kibObservabilityPluginApi",
-              "section": "def-public.registerDataHandler",
-              "text": "registerDataHandler"
-            },
+            "registerDataHandler",
             "; }"
           ]
         }
@@ -2460,7 +2430,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.WrappedElasticsearchClientError.Unnamed.originalError",
+                "id": "def-server.WrappedElasticsearchClientError.Unnamed.$1",
                 "type": "Object",
                 "label": "originalError",
                 "isRequired": true,
@@ -2518,7 +2488,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.createOrUpdateIndex.indexmappingsclientlogger.indexmappingsclientlogger",
+            "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger",
             "type": "Object",
             "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "tags": [],
@@ -2526,7 +2496,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.indexmappingsclientlogger.indexmappingsclientlogger.index",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.index",
                 "type": "string",
                 "label": "index",
                 "description": [],
@@ -2537,7 +2507,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.indexmappingsclientlogger.indexmappingsclientlogger.mappings",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.mappings",
                 "type": "CompoundType",
                 "label": "mappings",
                 "description": [],
@@ -2557,7 +2527,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.indexmappingsclientlogger.indexmappingsclientlogger.client",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.client",
                 "type": "CompoundType",
                 "label": "client",
                 "description": [],
@@ -2577,7 +2547,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.indexmappingsclientlogger.indexmappingsclientlogger.logger",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.logger",
                 "type": "Object",
                 "label": "logger",
                 "description": [],
@@ -2616,7 +2586,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.unwrapEsResponse.responsePromise",
+            "id": "def-server.unwrapEsResponse.$1",
             "type": "Uncategorized",
             "label": "responsePromise",
             "isRequired": true,
@@ -2705,30 +2675,32 @@
     "objects": [],
     "setup": {
       "id": "def-server.ObservabilityPluginSetup",
-      "type": "Interface",
+      "type": "Type",
       "label": "ObservabilityPluginSetup",
-      "description": [],
       "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.ObservabilityPluginSetup.getScopedAnnotationsClient",
-          "type": "Function",
-          "label": "getScopedAnnotationsClient",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/observability/server/plugin.ts",
-            "lineNumber": 23
-          },
-          "signature": [
-            "LazyScopedAnnotationsClientFactory"
-          ]
-        }
-      ],
+      "description": [],
       "source": {
         "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 22
+        "lineNumber": 20
       },
+      "signature": [
+        "{ getScopedAnnotationsClient: (requestContext: ",
+        "ObservabilityRequestHandlerContext",
+        ", request: ",
+        {
+          "pluginId": "core",
+          "scope": "server",
+          "docId": "kibCorePluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
+        "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
+        "Annotation",
+        "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
+        "GetResponse",
+        "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
+        "DeleteResponse"
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     }

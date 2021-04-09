@@ -71,13 +71,7 @@
               "lineNumber": 27
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsExecutionService",
-                "text": "UiActionsExecutionService"
-              }
+              "UiActionsExecutionService"
             ]
           },
           {
@@ -91,13 +85,7 @@
               "lineNumber": 28
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerRegistry",
-                "text": "TriggerRegistry"
-              }
+              "TriggerRegistry"
             ]
           },
           {
@@ -111,13 +99,7 @@
               "lineNumber": 29
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionRegistry",
-                "text": "ActionRegistry"
-              }
+              "ActionRegistry"
             ]
           },
           {
@@ -131,13 +113,7 @@
               "lineNumber": 30
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerToActionsRegistry",
-                "text": "TriggerToActionsRegistry"
-              }
+              "TriggerToActionsRegistry"
             ]
           },
           {
@@ -150,7 +126,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.UiActionsService.Unnamed.triggersnewMapactionsnewMaptriggerToActionsnewMap",
+                "id": "def-public.UiActionsService.Unnamed.$1",
                 "type": "Object",
                 "label": "{\n    triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
                 "isRequired": true,
@@ -182,7 +158,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.registerTrigger.trigger",
+                "id": "def-public.UiActionsService.registerTrigger.$1",
                 "type": "Object",
                 "label": "trigger",
                 "isRequired": true,
@@ -227,7 +203,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.getTrigger.triggerId",
+                "id": "def-public.UiActionsService.getTrigger.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -243,13 +219,7 @@
             ],
             "signature": [
               "(triggerId: string) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerContract",
-                "text": "TriggerContract"
-              },
+              "TriggerContract",
               "<object>"
             ],
             "description": [],
@@ -266,7 +236,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.registerAction.definition",
+                "id": "def-public.UiActionsService.registerAction.$1",
                 "type": "Uncategorized",
                 "label": "definition",
                 "isRequired": true,
@@ -298,13 +268,7 @@
                 "text": "Action"
               },
               "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionContext",
-                "text": "ActionContext"
-              },
+              "ActionContext",
               "<A>>"
             ],
             "description": [],
@@ -321,7 +285,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.unregisterAction.actionId",
+                "id": "def-public.UiActionsService.unregisterAction.$1",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -352,7 +316,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.hasAction.actionId",
+                "id": "def-public.UiActionsService.hasAction.$1",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -383,7 +347,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.attachAction.triggerId",
+                "id": "def-public.UiActionsService.attachAction.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -397,7 +361,7 @@
                 }
               },
               {
-                "id": "def-public.UiActionsService.attachAction.actionId",
+                "id": "def-public.UiActionsService.attachAction.$2",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -428,7 +392,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.detachAction.triggerId",
+                "id": "def-public.UiActionsService.detachAction.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -442,7 +406,7 @@
                 }
               },
               {
-                "id": "def-public.UiActionsService.detachAction.actionId",
+                "id": "def-public.UiActionsService.detachAction.$2",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -473,7 +437,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.addTriggerAction.triggerId",
+                "id": "def-public.UiActionsService.addTriggerAction.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -487,7 +451,7 @@
                 }
               },
               {
-                "id": "def-public.UiActionsService.addTriggerAction.action",
+                "id": "def-public.UiActionsService.addTriggerAction.$2",
                 "type": "Object",
                 "label": "action",
                 "isRequired": true,
@@ -535,7 +499,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.getAction.id",
+                "id": "def-public.UiActionsService.getAction.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -567,13 +531,7 @@
                 "text": "Action"
               },
               "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionContext",
-                "text": "ActionContext"
-              },
+              "ActionContext",
               "<T>>"
             ],
             "description": [],
@@ -590,7 +548,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.getTriggerActions.triggerId",
+                "id": "def-public.UiActionsService.getTriggerActions.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -629,7 +587,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.getTriggerCompatibleActions.triggerId",
+                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -643,7 +601,7 @@
                 }
               },
               {
-                "id": "def-public.UiActionsService.getTriggerCompatibleActions.context",
+                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$2",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -682,7 +640,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.UiActionsService.executeTriggerActions.triggerId",
+                "id": "def-public.UiActionsService.executeTriggerActions.$1",
                 "type": "string",
                 "label": "triggerId",
                 "isRequired": true,
@@ -696,7 +654,7 @@
                 }
               },
               {
-                "id": "def-public.UiActionsService.executeTriggerActions.context",
+                "id": "def-public.UiActionsService.executeTriggerActions.$2",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -792,18 +750,12 @@
         ],
         "children": [
           {
-            "id": "def-public.buildContextMenuForActions.actionstitledefaultTitlecloseMenu",
+            "id": "def-public.buildContextMenuForActions.$1",
             "type": "Object",
             "label": "{\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.BuildContextMenuParams",
-                "text": "BuildContextMenuParams"
-              }
+              "BuildContextMenuParams"
             ],
             "description": [],
             "source": {
@@ -846,7 +798,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.createAction.action",
+            "id": "def-public.createAction.$1",
             "type": "Object",
             "label": "action",
             "isRequired": true,
@@ -972,7 +924,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.getIconType.context",
+                "id": "def-public.Action.getIconType.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1020,7 +972,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.getDisplayName.context",
+                "id": "def-public.Action.getDisplayName.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1099,7 +1051,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.isCompatible.context",
+                "id": "def-public.Action.isCompatible.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1147,7 +1099,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.execute.context",
+                "id": "def-public.Action.execute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1195,7 +1147,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.getHref.context",
+                "id": "def-public.Action.getHref.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1243,7 +1195,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Action.shouldAutoExecute.context",
+                "id": "def-public.Action.shouldAutoExecute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -1342,13 +1294,7 @@
             "label": "isCompatible",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "description": [
@@ -1356,18 +1302,12 @@
             ],
             "children": [
               {
-                "id": "def-public.ActionDefinition.isCompatible.context",
+                "id": "def-public.ActionDefinition.isCompatible.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
@@ -1390,13 +1330,7 @@
             "label": "execute",
             "signature": [
               "(context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<void>"
             ],
             "description": [
@@ -1404,18 +1338,12 @@
             ],
             "children": [
               {
-                "id": "def-public.ActionDefinition.execute.context",
+                "id": "def-public.ActionDefinition.execute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
@@ -1438,13 +1366,7 @@
             "label": "shouldAutoExecute",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "description": [
@@ -1452,18 +1374,12 @@
             ],
             "children": [
               {
-                "id": "def-public.ActionDefinition.shouldAutoExecute.context",
+                "id": "def-public.ActionDefinition.shouldAutoExecute.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
@@ -1486,13 +1402,7 @@
             "label": "getHref",
             "signature": [
               "((context: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinitionContext",
-                "text": "ActionDefinitionContext"
-              },
+              "ActionDefinitionContext",
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
             "description": [
@@ -1500,18 +1410,12 @@
             ],
             "children": [
               {
-                "id": "def-public.ActionDefinition.getHref.context",
+                "id": "def-public.ActionDefinition.getHref.$1",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinitionContext",
-                    "text": "ActionDefinitionContext"
-                  },
+                  "ActionDefinitionContext",
                   "<Context>"
                 ],
                 "description": [],
@@ -1653,7 +1557,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Presentable.getIconType.context",
+                "id": "def-public.Presentable.getIconType.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1686,7 +1590,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Presentable.getDisplayName.context",
+                "id": "def-public.Presentable.getDisplayName.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1719,7 +1623,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Presentable.getDisplayNameTooltip.context",
+                "id": "def-public.Presentable.getDisplayNameTooltip.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1752,7 +1656,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Presentable.getHref.context",
+                "id": "def-public.Presentable.getHref.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1785,7 +1689,7 @@
             ],
             "children": [
               {
-                "id": "def-public.Presentable.isCompatible.context",
+                "id": "def-public.Presentable.isCompatible.$1",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -1965,13 +1869,7 @@
               "lineNumber": 17
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerRegistry",
-                "text": "TriggerRegistry"
-              },
+              "TriggerRegistry",
               " | undefined"
             ]
           },
@@ -1986,13 +1884,7 @@
               "lineNumber": 18
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionRegistry",
-                "text": "ActionRegistry"
-              },
+              "ActionRegistry",
               " | undefined"
             ]
           },
@@ -2009,13 +1901,7 @@
               "lineNumber": 23
             },
             "signature": [
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.TriggerToActionsRegistry",
-                "text": "TriggerToActionsRegistry"
-              },
+              "TriggerToActionsRegistry",
               " | undefined"
             ]
           }

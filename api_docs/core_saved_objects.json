@@ -18,7 +18,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.create.type",
+                "id": "def-public.SavedObjectsClient.create.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -32,7 +32,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.create.attributes",
+                "id": "def-public.SavedObjectsClient.create.$2",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -46,7 +46,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.create.options",
+                "id": "def-public.SavedObjectsClient.create.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -101,7 +101,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.bulkCreate.objects",
+                "id": "def-public.SavedObjectsClient.bulkCreate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -122,7 +122,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.bulkCreate.options",
+                "id": "def-public.SavedObjectsClient.bulkCreate.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -189,7 +189,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.delete.type",
+                "id": "def-public.SavedObjectsClient.delete.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -203,7 +203,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.delete.id",
+                "id": "def-public.SavedObjectsClient.delete.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -217,18 +217,12 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.delete.options",
+                "id": "def-public.SavedObjectsClient.delete.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsDeleteOptions",
-                    "text": "SavedObjectsDeleteOptions"
-                  },
+                  "SavedObjectsDeleteOptions",
                   " | undefined"
                 ],
                 "description": [],
@@ -240,13 +234,7 @@
             ],
             "signature": [
               "(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
+              "SavedObjectsDeleteOptions",
               " | undefined) => Promise<{}>"
             ],
             "description": [
@@ -265,7 +253,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.find.options",
+                "id": "def-public.SavedObjectsClient.find.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -326,7 +314,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.get.type",
+                "id": "def-public.SavedObjectsClient.get.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -340,7 +328,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.get.id",
+                "id": "def-public.SavedObjectsClient.get.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -383,7 +371,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.bulkGet.objects",
+                "id": "def-public.SavedObjectsClient.bulkGet.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -449,7 +437,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.update.type",
+                "id": "def-public.SavedObjectsClient.update.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -463,7 +451,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.update.id",
+                "id": "def-public.SavedObjectsClient.update.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -477,7 +465,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.update.attributes",
+                "id": "def-public.SavedObjectsClient.update.$3",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -491,7 +479,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.update.versionmigrationVersionreferences",
+                "id": "def-public.SavedObjectsClient.update.$4",
                 "type": "Object",
                 "label": "{ version, migrationVersion, references }",
                 "isRequired": true,
@@ -548,7 +536,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectsClient.bulkUpdate.objects",
+                "id": "def-public.SavedObjectsClient.bulkUpdate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -669,13 +657,7 @@
               "lineNumber": 29
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -704,13 +686,7 @@
               "lineNumber": 31
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               " | undefined"
             ]
           },
@@ -725,13 +701,7 @@
               "lineNumber": 32
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ]
           },
@@ -745,7 +715,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SimpleSavedObject.Unnamed.client",
+                "id": "def-public.SimpleSavedObject.Unnamed.$1",
                 "type": "Object",
                 "label": "client",
                 "isRequired": true,
@@ -767,18 +737,12 @@
                 }
               },
               {
-                "id": "def-public.SimpleSavedObject.Unnamed.idtypeversionattributeserrorreferencesmigrationVersioncoreMigrationVersion",
+                "id": "def-public.SimpleSavedObject.Unnamed.$2",
                 "type": "Object",
                 "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<T>"
                 ],
                 "description": [],
@@ -805,7 +769,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SimpleSavedObject.get.key",
+                "id": "def-public.SimpleSavedObject.get.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -836,7 +800,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SimpleSavedObject.set.key",
+                "id": "def-public.SimpleSavedObject.set.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -850,7 +814,7 @@
                 }
               },
               {
-                "id": "def-public.SimpleSavedObject.set.value",
+                "id": "def-public.SimpleSavedObject.set.$2",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -881,7 +845,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.SimpleSavedObject.has.key",
+                "id": "def-public.SimpleSavedObject.has.$1",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -1169,13 +1133,7 @@
               "lineNumber": 71
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           }
@@ -1270,13 +1228,7 @@
               "lineNumber": 42
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -1307,13 +1259,7 @@
               "lineNumber": 45
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           }
@@ -1469,13 +1415,7 @@
               "lineNumber": 83
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -1490,13 +1430,7 @@
               "lineNumber": 84
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           }
@@ -1601,13 +1535,7 @@
                 "text": "SavedObjectsCreateOptions"
               },
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ],
             "description": [
@@ -1615,7 +1543,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.create.type",
+                "id": "def-server.SavedObjectsClient.create.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1629,7 +1557,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.create.attributes",
+                "id": "def-server.SavedObjectsClient.create.$2",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -1643,7 +1571,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.create.options",
+                "id": "def-server.SavedObjectsClient.create.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1707,7 +1635,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.bulkCreate.objects",
+                "id": "def-server.SavedObjectsClient.bulkCreate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -1728,7 +1656,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.bulkCreate.options",
+                "id": "def-server.SavedObjectsClient.bulkCreate.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1792,7 +1720,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.checkConflicts.objects",
+                "id": "def-server.SavedObjectsClient.checkConflicts.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -1813,7 +1741,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.checkConflicts.options",
+                "id": "def-server.SavedObjectsClient.checkConflicts.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1860,7 +1788,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.delete.type",
+                "id": "def-server.SavedObjectsClient.delete.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1874,7 +1802,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.delete.id",
+                "id": "def-server.SavedObjectsClient.delete.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1888,7 +1816,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.delete.options",
+                "id": "def-server.SavedObjectsClient.delete.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1943,7 +1871,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.find.options",
+                "id": "def-server.SavedObjectsClient.find.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2006,7 +1934,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.bulkGet.objects",
+                "id": "def-server.SavedObjectsClient.bulkGet.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -2029,7 +1957,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.bulkGet.options",
+                "id": "def-server.SavedObjectsClient.bulkGet.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2070,13 +1998,7 @@
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ],
             "description": [
@@ -2084,7 +2006,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.get.type",
+                "id": "def-server.SavedObjectsClient.get.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2100,7 +2022,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.get.id",
+                "id": "def-server.SavedObjectsClient.get.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2116,7 +2038,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.get.options",
+                "id": "def-server.SavedObjectsClient.get.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2171,7 +2093,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.resolve.type",
+                "id": "def-server.SavedObjectsClient.resolve.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2187,7 +2109,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.resolve.id",
+                "id": "def-server.SavedObjectsClient.resolve.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2203,7 +2125,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.resolve.options",
+                "id": "def-server.SavedObjectsClient.resolve.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2258,7 +2180,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.update.type",
+                "id": "def-server.SavedObjectsClient.update.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2272,7 +2194,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.update.id",
+                "id": "def-server.SavedObjectsClient.update.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2286,7 +2208,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.update.attributes",
+                "id": "def-server.SavedObjectsClient.update.$3",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -2300,7 +2222,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.update.options",
+                "id": "def-server.SavedObjectsClient.update.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2355,7 +2277,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.addToNamespaces.type",
+                "id": "def-server.SavedObjectsClient.addToNamespaces.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2369,7 +2291,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.addToNamespaces.id",
+                "id": "def-server.SavedObjectsClient.addToNamespaces.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2383,7 +2305,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.addToNamespaces.namespaces",
+                "id": "def-server.SavedObjectsClient.addToNamespaces.$3",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -2397,7 +2319,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.addToNamespaces.options",
+                "id": "def-server.SavedObjectsClient.addToNamespaces.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2452,7 +2374,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.type",
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2466,7 +2388,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.id",
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2480,7 +2402,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.namespaces",
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.$3",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -2494,7 +2416,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.options",
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2557,7 +2479,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.bulkUpdate.objects",
+                "id": "def-server.SavedObjectsClient.bulkUpdate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -2578,7 +2500,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.bulkUpdate.options",
+                "id": "def-server.SavedObjectsClient.bulkUpdate.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2634,7 +2556,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.removeReferencesTo.type",
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2648,7 +2570,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.removeReferencesTo.id",
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2662,7 +2584,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.removeReferencesTo.options",
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2718,7 +2640,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.openPointInTimeForType.type",
+                "id": "def-server.SavedObjectsClient.openPointInTimeForType.$1",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": true,
@@ -2732,7 +2654,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.openPointInTimeForType.options",
+                "id": "def-server.SavedObjectsClient.openPointInTimeForType.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2787,7 +2709,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.closePointInTime.id",
+                "id": "def-server.SavedObjectsClient.closePointInTime.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2801,7 +2723,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.closePointInTime.options",
+                "id": "def-server.SavedObjectsClient.closePointInTime.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2864,7 +2786,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.findOptions",
+                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.$1",
                 "type": "Object",
                 "label": "findOptions",
                 "isRequired": true,
@@ -2886,7 +2808,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.dependencies",
+                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.$2",
                 "type": "Object",
                 "label": "dependencies",
                 "isRequired": false,
@@ -2948,7 +2870,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError.$1",
                 "type": "Any",
                 "label": "error",
                 "isRequired": true,
@@ -2987,7 +2909,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3001,7 +2923,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3040,7 +2962,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError.$1",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3079,7 +3001,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError.type",
+                "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3118,19 +3040,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3164,7 +3080,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError.versionInput",
+                "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError.$1",
                 "type": "string",
                 "label": "versionInput",
                 "isRequired": false,
@@ -3203,19 +3119,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3249,7 +3159,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3263,7 +3173,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3302,19 +3212,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3348,7 +3252,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3362,7 +3266,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3401,19 +3305,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3447,7 +3345,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3461,7 +3359,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3500,19 +3398,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3546,7 +3438,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.type",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$1",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": false,
@@ -3560,7 +3452,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.id",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$2",
                 "type": "CompoundType",
                 "label": "id",
                 "isRequired": false,
@@ -3599,7 +3491,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.alias",
+                "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.$1",
                 "type": "string",
                 "label": "alias",
                 "isRequired": true,
@@ -3638,7 +3530,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3652,7 +3544,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.alias",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$2",
                 "type": "string",
                 "label": "alias",
                 "isRequired": true,
@@ -3691,19 +3583,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3737,7 +3623,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3751,7 +3637,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3790,7 +3676,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.type",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3804,7 +3690,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.id",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -3818,7 +3704,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$3",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3857,19 +3743,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isConflictError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isConflictError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -3903,7 +3783,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3917,7 +3797,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3956,7 +3836,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.type",
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3970,7 +3850,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.id",
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -4009,19 +3889,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -4055,7 +3929,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -4069,7 +3943,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4108,19 +3982,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -4154,7 +4022,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -4168,7 +4036,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4207,19 +4075,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -4253,7 +4115,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$1",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -4267,7 +4129,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.reason",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$2",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4306,19 +4168,13 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsErrorHelpers.isGeneralError.error",
+                "id": "def-server.SavedObjectsErrorHelpers.isGeneralError.$1",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
                 "signature": [
                   "Error | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.DecoratedError",
-                    "text": "DecoratedError"
-                  }
+                  "DecoratedError"
                 ],
                 "description": [],
                 "source": {
@@ -4429,7 +4285,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger",
+                "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
                 "tags": [],
@@ -4437,7 +4293,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClient",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -4459,7 +4315,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.typeRegistry",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -4481,7 +4337,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.exportSizeLimit",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.exportSizeLimit",
                     "type": "number",
                     "label": "exportSizeLimit",
                     "description": [],
@@ -4492,7 +4348,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.logger",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.logger",
                     "type": "Object",
                     "label": "logger",
                     "description": [],
@@ -4540,7 +4396,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsExporter.exportByTypes.options",
+                "id": "def-server.SavedObjectsExporter.exportByTypes.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -4591,7 +4447,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsExporter.exportByObjects.options",
+                "id": "def-server.SavedObjectsExporter.exportByObjects.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -4656,7 +4512,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExportError.Unnamed.type",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -4670,7 +4526,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsExportError.Unnamed.message",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$2",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -4684,7 +4540,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsExportError.Unnamed.attributes",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$3",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": false,
@@ -4723,7 +4579,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExportError.exportSizeExceeded.limit",
+                "id": "def-server.SavedObjectsExportError.exportSizeExceeded.$1",
                 "type": "number",
                 "label": "limit",
                 "isRequired": true,
@@ -4762,18 +4618,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExportError.objectFetchError.objects",
+                "id": "def-server.SavedObjectsExportError.objectFetchError.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
                 "description": [],
@@ -4810,18 +4660,12 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsExportError.objectTransformError.objects",
+                "id": "def-server.SavedObjectsExportError.objectTransformError.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
                 "description": [],
@@ -4831,7 +4675,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsExportError.objectTransformError.cause",
+                "id": "def-server.SavedObjectsExportError.objectTransformError.$2",
                 "type": "Object",
                 "label": "cause",
                 "isRequired": true,
@@ -4872,7 +4716,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsExportError.invalidTransformError.objectKeys",
+                "id": "def-server.SavedObjectsExportError.invalidTransformError.$1",
                 "type": "Array",
                 "label": "objectKeys",
                 "isRequired": true,
@@ -4996,7 +4840,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit",
+                "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
                 "tags": [],
@@ -5004,7 +4848,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClient",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -5026,7 +4870,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.typeRegistry",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -5048,7 +4892,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.importSizeLimit",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.importSizeLimit",
                     "type": "number",
                     "label": "importSizeLimit",
                     "description": [],
@@ -5099,7 +4943,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.import.readStreamcreateNewCopiesnamespaceoverwrite",
+                "id": "def-server.SavedObjectsImporter.import.$1",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
                 "isRequired": true,
@@ -5156,7 +5000,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.resolveImportErrors.readStreamcreateNewCopiesnamespaceretries",
+                "id": "def-server.SavedObjectsImporter.resolveImportErrors.$1",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    retries,\n  }",
                 "isRequired": true,
@@ -5229,7 +5073,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImportError.importSizeExceeded.limit",
+                "id": "def-server.SavedObjectsImportError.importSizeExceeded.$1",
                 "type": "number",
                 "label": "limit",
                 "isRequired": true,
@@ -5268,7 +5112,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects.nonUniqueEntries",
+                "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects.$1",
                 "type": "Array",
                 "label": "nonUniqueEntries",
                 "isRequired": true,
@@ -5307,7 +5151,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects.nonUniqueRetryObjects",
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects.$1",
                 "type": "Array",
                 "label": "nonUniqueRetryObjects",
                 "isRequired": true,
@@ -5346,7 +5190,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations.nonUniqueRetryDestinations",
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations.$1",
                 "type": "Array",
                 "label": "nonUniqueRetryDestinations",
                 "isRequired": true,
@@ -5385,18 +5229,12 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImportError.referencesFetchError.objects",
+                "id": "def-server.SavedObjectsImportError.referencesFetchError.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
                 "description": [],
@@ -5443,13 +5281,7 @@
                 "text": "SavedObjectsCreateOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ],
             "description": [
@@ -5457,7 +5289,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.create.type",
+                "id": "def-server.SavedObjectsRepository.create.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5471,7 +5303,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.create.attributes",
+                "id": "def-server.SavedObjectsRepository.create.$2",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -5485,7 +5317,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.create.options",
+                "id": "def-server.SavedObjectsRepository.create.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5552,7 +5384,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.bulkCreate.objects",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5575,7 +5407,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.bulkCreate.options",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5642,7 +5474,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.checkConflicts.objects",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5663,7 +5495,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.checkConflicts.options",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5710,7 +5542,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.delete.type",
+                "id": "def-server.SavedObjectsRepository.delete.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5724,7 +5556,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.delete.id",
+                "id": "def-server.SavedObjectsRepository.delete.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5738,7 +5570,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.delete.options",
+                "id": "def-server.SavedObjectsRepository.delete.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5787,7 +5619,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.deleteByNamespace.namespace",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -5801,7 +5633,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.deleteByNamespace.options",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5856,7 +5688,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.find.options",
+                "id": "def-server.SavedObjectsRepository.find.$1",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5923,7 +5755,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.bulkGet.objects",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5946,7 +5778,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.bulkGet.options",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5991,13 +5823,7 @@
                 "text": "SavedObjectsBaseOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ],
             "description": [
@@ -6005,7 +5831,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.get.type",
+                "id": "def-server.SavedObjectsRepository.get.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6019,7 +5845,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.get.id",
+                "id": "def-server.SavedObjectsRepository.get.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6033,7 +5859,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.get.options",
+                "id": "def-server.SavedObjectsRepository.get.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6092,7 +5918,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.resolve.type",
+                "id": "def-server.SavedObjectsRepository.resolve.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6106,7 +5932,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.resolve.id",
+                "id": "def-server.SavedObjectsRepository.resolve.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6120,7 +5946,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.resolve.options",
+                "id": "def-server.SavedObjectsRepository.resolve.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6179,7 +6005,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.update.type",
+                "id": "def-server.SavedObjectsRepository.update.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6193,7 +6019,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.update.id",
+                "id": "def-server.SavedObjectsRepository.update.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6207,7 +6033,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.update.attributes",
+                "id": "def-server.SavedObjectsRepository.update.$3",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -6221,7 +6047,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.update.options",
+                "id": "def-server.SavedObjectsRepository.update.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6278,7 +6104,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.addToNamespaces.type",
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6292,7 +6118,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.addToNamespaces.id",
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6306,7 +6132,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.addToNamespaces.namespaces",
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.$3",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -6320,7 +6146,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.addToNamespaces.options",
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6375,7 +6201,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.type",
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6389,7 +6215,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.id",
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6403,7 +6229,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.namespaces",
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.$3",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -6417,7 +6243,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.options",
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6480,7 +6306,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.bulkUpdate.objects",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$1",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -6503,7 +6329,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.bulkUpdate.options",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6562,7 +6388,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.type",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6576,7 +6402,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.id",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6590,7 +6416,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.removeReferencesTo.options",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$3",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6639,13 +6465,7 @@
                 "text": "SavedObjectsIncrementCounterOptions"
               },
               "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>>"
             ],
             "description": [
@@ -6653,7 +6473,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.incrementCounter.type",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6669,7 +6489,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.incrementCounter.id",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6685,7 +6505,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.incrementCounter.counterFields",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$3",
                 "type": "Array",
                 "label": "counterFields",
                 "isRequired": true,
@@ -6709,7 +6529,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.incrementCounter.options",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$4",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6769,7 +6589,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.type",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$1",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": true,
@@ -6783,7 +6603,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.keepAlive5mpreference",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$2",
                 "type": "Object",
                 "label": "{ keepAlive = '5m', preference }",
                 "isRequired": true,
@@ -6842,7 +6662,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.closePointInTime.id",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6856,7 +6676,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.closePointInTime.options",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -6923,7 +6743,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.findOptions",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$1",
                 "type": "Object",
                 "label": "findOptions",
                 "isRequired": true,
@@ -6945,7 +6765,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.dependencies",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$2",
                 "type": "Object",
                 "label": "dependencies",
                 "isRequired": false,
@@ -7019,7 +6839,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.doc",
+                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.$1",
                 "type": "Object",
                 "label": "doc",
                 "isRequired": true,
@@ -7041,7 +6861,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.options",
+                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -7106,7 +6926,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.doc",
+                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.$1",
                 "type": "Object",
                 "label": "doc",
                 "isRequired": true,
@@ -7128,7 +6948,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.options",
+                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -7184,7 +7004,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsSerializer.savedObjectToRaw.savedObj",
+                "id": "def-server.SavedObjectsSerializer.savedObjectToRaw.$1",
                 "type": "CompoundType",
                 "label": "savedObj",
                 "isRequired": true,
@@ -7226,7 +7046,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawId.namespace",
+                "id": "def-server.SavedObjectsSerializer.generateRawId.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -7242,7 +7062,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawId.type",
+                "id": "def-server.SavedObjectsSerializer.generateRawId.$2",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7258,7 +7078,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawId.id",
+                "id": "def-server.SavedObjectsSerializer.generateRawId.$3",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -7293,7 +7113,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.namespace",
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -7309,7 +7129,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.type",
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.$2",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7325,7 +7145,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.id",
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.$3",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -7369,7 +7189,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.SavedObjectsUtils.namespaceIdToString.namespace",
+                "id": "def-server.SavedObjectsUtils.namespaceIdToString.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -7402,7 +7222,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.SavedObjectsUtils.namespaceStringToId.namespace",
+                "id": "def-server.SavedObjectsUtils.namespaceStringToId.$1",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -7435,7 +7255,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.pageFIND_DEFAULT_PAGEperPageFIND_DEFAULT_PER_PAGE",
+                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.$1",
                 "type": "Object",
                 "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
                 "isRequired": true,
@@ -7531,7 +7351,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsUtils.isRandomId.id",
+                "id": "def-server.SavedObjectsUtils.isRandomId.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -7594,7 +7414,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.registerType.type",
+                "id": "def-server.SavedObjectTypeRegistry.registerType.$1",
                 "type": "Object",
                 "label": "type",
                 "isRequired": true,
@@ -7641,7 +7461,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.getType.type",
+                "id": "def-server.SavedObjectTypeRegistry.getType.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7752,7 +7572,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isNamespaceAgnostic.type",
+                "id": "def-server.SavedObjectTypeRegistry.isNamespaceAgnostic.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7785,7 +7605,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isSingleNamespace.type",
+                "id": "def-server.SavedObjectTypeRegistry.isSingleNamespace.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7818,7 +7638,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isMultiNamespace.type",
+                "id": "def-server.SavedObjectTypeRegistry.isMultiNamespace.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7851,7 +7671,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isShareable.type",
+                "id": "def-server.SavedObjectTypeRegistry.isShareable.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7884,7 +7704,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isHidden.type",
+                "id": "def-server.SavedObjectTypeRegistry.isHidden.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7917,7 +7737,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.getIndex.type",
+                "id": "def-server.SavedObjectTypeRegistry.getIndex.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7950,7 +7770,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectTypeRegistry.isImportableAndExportable.type",
+                "id": "def-server.SavedObjectTypeRegistry.isImportableAndExportable.$1",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -8445,13 +8265,7 @@
               "lineNumber": 75
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           },
@@ -8468,13 +8282,7 @@
               "lineNumber": 77
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -8621,13 +8429,7 @@
               "lineNumber": 125
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>[]"
             ]
           }
@@ -8670,13 +8472,7 @@
               "lineNumber": 310
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>[]"
             ]
           }
@@ -8944,13 +8740,7 @@
             },
             "signature": [
               "{ id: string; type: string; error: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
+              "SavedObjectError",
               "; }[]"
             ]
           }
@@ -9402,13 +9192,7 @@
               "lineNumber": 41
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -9439,13 +9223,7 @@
               "lineNumber": 52
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           },
@@ -11510,13 +11288,7 @@
               "lineNumber": 115
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ]
           },
@@ -11849,13 +11621,7 @@
               "lineNumber": 18
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRawDocSource",
-                "text": "SavedObjectsRawDocSource"
-              }
+              "SavedObjectsRawDocSource"
             ]
           },
           {
@@ -12218,13 +11984,7 @@
               "lineNumber": 336
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<T>"
             ]
           },
@@ -12875,13 +12635,7 @@
             },
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<any>) => string) | undefined"
             ]
           },
@@ -12899,13 +12653,7 @@
             },
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<any>) => string) | undefined"
             ]
           },
@@ -12923,13 +12671,7 @@
             },
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<any>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
             ]
           },
@@ -13099,13 +12841,7 @@
               "lineNumber": 213
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           },
@@ -13180,13 +12916,7 @@
               "lineNumber": 328
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined"
             ]
           }

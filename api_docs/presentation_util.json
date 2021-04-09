@@ -76,7 +76,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.withSuspense.Component",
+            "id": "def-public.withSuspense.$1",
             "type": "CompoundType",
             "label": "Component",
             "isRequired": true,
@@ -90,7 +90,7 @@
             }
           },
           {
-            "id": "def-public.withSuspense.fallback",
+            "id": "def-public.withSuspense.$2",
             "type": "CompoundType",
             "label": "fallback",
             "isRequired": false,
@@ -326,13 +326,7 @@
             "lineNumber": 16
           },
           "signature": [
-            {
-              "pluginId": "presentationUtil",
-              "scope": "public",
-              "docId": "kibPresentationUtilPluginApi",
-              "section": "def-public.PresentationLabsService",
-              "text": "PresentationLabsService"
-            }
+            "PresentationLabsService"
           ]
         }
       ],
@@ -377,7 +371,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.isProjectEnabledByStatus.active",
+            "id": "def-common.isProjectEnabledByStatus.$1",
             "type": "boolean",
             "label": "active",
             "isRequired": true,
@@ -391,7 +385,7 @@
             }
           },
           {
-            "id": "def-common.isProjectEnabledByStatus.status",
+            "id": "def-common.isProjectEnabledByStatus.$2",
             "type": "Object",
             "label": "status",
             "isRequired": true,

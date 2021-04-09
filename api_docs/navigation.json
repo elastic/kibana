@@ -53,7 +53,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.NavigationPublicPlugin.Unnamed.initializerContext",
+                "id": "def-public.NavigationPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -106,7 +106,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.NavigationPublicPlugin.setup.core",
+                "id": "def-public.NavigationPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -148,13 +148,7 @@
                 "text": "CoreStart"
               },
               ", { data }: ",
-              {
-                "pluginId": "navigation",
-                "scope": "public",
-                "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPluginStartDependencies",
-                "text": "NavigationPluginStartDependencies"
-              },
+              "NavigationPluginStartDependencies",
               ") => ",
               {
                 "pluginId": "navigation",
@@ -167,7 +161,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.NavigationPublicPlugin.start.i18n",
+                "id": "def-public.NavigationPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "{ i18n }",
                 "isRequired": true,
@@ -187,18 +181,12 @@
                 }
               },
               {
-                "id": "def-public.NavigationPublicPlugin.start.data",
+                "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "label": "{ data }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "navigation",
-                    "scope": "public",
-                    "docId": "kibNavigationPluginApi",
-                    "section": "def-public.NavigationPluginStartDependencies",
-                    "text": "NavigationPluginStartDependencies"
-                  }
+                  "NavigationPluginStartDependencies"
                 ],
                 "description": [],
                 "source": {
@@ -257,7 +245,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.TopNavMenu.props",
+            "id": "def-public.TopNavMenu.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -330,13 +318,7 @@
               "lineNumber": 16
             },
             "signature": [
-              {
-                "pluginId": "navigation",
-                "scope": "public",
-                "docId": "kibNavigationPluginApi",
-                "section": "def-public.TopNavMenuAction",
-                "text": "TopNavMenuAction"
-              }
+              "TopNavMenuAction"
             ]
           },
           {
@@ -519,13 +501,7 @@
           },
           "signature": [
             "(menuItem: ",
-            {
-              "pluginId": "navigation",
-              "scope": "public",
-              "docId": "kibNavigationPluginApi",
-              "section": "def-public.RegisteredTopNavMenuData",
-              "text": "RegisteredTopNavMenuData"
-            },
+            "RegisteredTopNavMenuData",
             ") => void"
           ]
         }

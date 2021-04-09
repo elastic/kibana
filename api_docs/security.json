@@ -31,13 +31,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ]
           },
           {
@@ -53,13 +47,7 @@
               "lineNumber": 30
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ]
           },
           {
@@ -75,13 +63,7 @@
               "lineNumber": 35
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.AuthenticationProvider",
-                "text": "AuthenticationProvider"
-              }
+              "AuthenticationProvider"
             ]
           },
           {
@@ -165,13 +147,7 @@
             "label": "getFeatures",
             "signature": [
               "() => ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SecurityLicenseFeatures",
-                "text": "SecurityLicenseFeatures"
-              }
+              "SecurityLicenseFeatures"
             ],
             "description": [],
             "children": [],
@@ -195,13 +171,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SecurityLicenseFeatures",
-                "text": "SecurityLicenseFeatures"
-              },
+              "SecurityLicenseFeatures",
               ">"
             ]
           }
@@ -718,13 +688,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ]
           },
           {
@@ -740,13 +704,7 @@
               "lineNumber": 30
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ]
           },
           {
@@ -762,13 +720,7 @@
               "lineNumber": 35
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.AuthenticationProvider",
-                "text": "AuthenticationProvider"
-              }
+              "AuthenticationProvider"
             ]
           },
           {
@@ -1125,13 +1077,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null; }"
             ]
           },
@@ -1149,13 +1095,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.AuthorizationServiceSetup",
-                "text": "AuthorizationServiceSetup"
-              },
+              "AuthorizationServiceSetup",
               ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ]
           },
@@ -1170,13 +1110,7 @@
               "lineNumber": 81
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.SecurityLicense",
-                "text": "SecurityLicense"
-              }
+              "SecurityLicense"
             ]
           },
           {
@@ -1190,13 +1124,7 @@
               "lineNumber": 82
             },
             "signature": [
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.AuditServiceSetup",
-                "text": "AuditServiceSetup"
-              }
+              "AuditServiceSetup"
             ]
           }
         ],
@@ -1227,13 +1155,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.AuthenticationServiceStart",
-                "text": "AuthenticationServiceStart"
-              },
+              "AuthenticationServiceStart",
               ", \"apiKeys\" | \"getCurrentUser\">"
             ]
           },
@@ -1249,13 +1171,7 @@
             },
             "signature": [
               "Pick<",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.AuthorizationServiceSetup",
-                "text": "AuthorizationServiceSetup"
-              },
+              "AuthorizationServiceSetup",
               ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ]
           }
