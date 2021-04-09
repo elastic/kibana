@@ -69,6 +69,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    unusedTypesToExclude: Option.some(['unused-fleet-agent-events']),
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
