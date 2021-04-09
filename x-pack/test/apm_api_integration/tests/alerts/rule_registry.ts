@@ -34,7 +34,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const INDEXING_DELAY = 5000;
 
   const ALERTS_INDEX_TARGET = '.kibana-alerts-*-apm*';
-  const ALERTS_INDEX_NAME = '.kibana-alerts-observability-apm-8.0.0-000001';
   const APM_TRANSACTION_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionEvent = (override: Record<string, any>) => {
@@ -94,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         setTimeout(resolve, BULK_INDEX_DELAY);
       });
       await es.indices.refresh({
-        index: ALERTS_INDEX_NAME,
+        index: ALERTS_INDEX_TARGET,
       });
 
       return nextAlert;
@@ -250,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         await es.deleteByQuery({
-          index: ALERTS_INDEX_NAME,
+          index: ALERTS_INDEX_TARGET,
           body: {
             query: {
               match_all: {},
