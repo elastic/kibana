@@ -9,11 +9,9 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
-import { generateEncodedPath } from '../../utils/encode_path_params';
-
+import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
-import { ResultMeta } from './types';
+import { ResultMeta, ResultAction } from './types';
 
 import './result_header.scss';
 
@@ -21,8 +19,8 @@ interface Props {
   showScore: boolean;
   isMetaEngine: boolean;
   resultMeta: ResultMeta;
-  actions?: React.ReactNode;
-  shouldLinkToDetailPage?: boolean;
+  actions: ResultAction[];
+  documentLink?: string;
 }
 
 export const ResultHeader: React.FC<Props> = ({
@@ -30,13 +28,8 @@ export const ResultHeader: React.FC<Props> = ({
   resultMeta,
   isMetaEngine,
   actions,
-  shouldLinkToDetailPage = false,
+  documentLink,
 }) => {
-  const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
-    engineName: resultMeta.engine,
-    documentId: resultMeta.id,
-  });
-
   return (
     <header className="appSearchResultHeader">
       <EuiFlexGroup
@@ -48,7 +41,7 @@ export const ResultHeader: React.FC<Props> = ({
       >
         <EuiFlexItem grow>
           <ResultHeaderItem
-            href={shouldLinkToDetailPage ? documentLink : undefined}
+            href={documentLink}
             data-test-subj="ResultId"
             field="ID"
             value={resultMeta.id}
@@ -75,7 +68,11 @@ export const ResultHeader: React.FC<Props> = ({
             />
           </EuiFlexItem>
         )}
-        {actions}
+        {actions.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <ResultActions actions={actions} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </header>
   );
