@@ -21,12 +21,12 @@ import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
 describe('Detections Usage and Metrics', () => {
   let esClientMock: jest.Mocked<ElasticsearchClient>;
   let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
-  let mlMock: ReturnType<typeof mlServicesMock.create>;
+  let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   describe('fetchDetectionsUsage()', () => {
     beforeEach(() => {
       esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mlMock = mlServicesMock.create();
+      mlMock = mlServicesMock.createSetupContract();
     });
 
     it('returns zeroed counts if both calls are empty', async () => {
@@ -108,7 +108,7 @@ describe('Detections Usage and Metrics', () => {
 
   describe('fetchDetectionsMetrics()', () => {
     beforeEach(() => {
-      mlMock = mlServicesMock.create();
+      mlMock = mlServicesMock.createSetupContract();
     });
 
     it('returns an empty array if there is no data', async () => {
