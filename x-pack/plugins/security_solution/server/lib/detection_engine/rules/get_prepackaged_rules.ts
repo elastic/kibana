@@ -52,7 +52,9 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (
+export const getPrepackagedRules = async (
   // @ts-expect-error mock data is too loosely typed
   rules: AddPrepackagedRulesSchema[] = rawRules
-): AddPrepackagedRulesSchemaDecoded[] => validateAllPrepackagedRules(rules);
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  return validateAllPrepackagedRules(rules);
+};
