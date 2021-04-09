@@ -19,6 +19,7 @@ import { BadRequestError } from '../errors/bad_request_error';
 
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
+import { RuleAssetSavedObjectsClient } from './rule_asset_saved_objects_client';
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -52,9 +53,43 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = async (
+/**
+ * Retrieve and validate rules that were installed from Fleet as saved objects.
+ */
+export const getFleetInstalledRules = async (
+  client: RuleAssetSavedObjectsClient
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  const fleetResponse = await client.all();
+  const fleetRules = fleetResponse.map(
+    // @ts-expect-error data is too loosely typed
+    (so) => so.attributes as AddPrepackagedRulesSchema
+  );
+  return validateAllPrepackagedRules(fleetRules);
+};
+
+export const getPrepackagedRules = (
   // @ts-expect-error mock data is too loosely typed
   rules: AddPrepackagedRulesSchema[] = rawRules
-): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+): AddPrepackagedRulesSchemaDecoded[] => {
   return validateAllPrepackagedRules(rules);
+};
+
+export const getLatestPrepackagedRules = async (
+  client: RuleAssetSavedObjectsClient
+): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  // build a map of the most version of each rule
+  const prepackaged = getPrepackagedRules();
+  const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
+
+  // check the rules installed via fleet and create/update if the version is newer
+  const fleetRules = await getFleetInstalledRules(client);
+  const fleetUpdates = fleetRules.filter(
+    // @ts-expect-error data ruleMap.get() is safe because of ruleMap.has() check
+    (r) => !ruleMap.has(r.rule_id) || ruleMap.get(r.rule_id).version < r.version
+  );
+
+  // add the new or updated rules to the map
+  fleetUpdates.forEach((r) => ruleMap.set(r.rule_id, r));
+
+  return Array.from(ruleMap.values());
 };
