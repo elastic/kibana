@@ -14,7 +14,7 @@ import {
   APM_INDICES_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
-import { APMRequestHandlerContext } from '../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../routes/typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
@@ -91,9 +91,8 @@ const APM_UI_INDICES: ApmIndicesName[] = [
 
 export async function getApmIndexSettings({
   context,
-}: {
-  context: APMRequestHandlerContext;
-}) {
+  config,
+}: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
   let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
   try {
     apmIndicesSavedObject = await getApmIndicesSavedObject(
@@ -106,7 +105,7 @@ export async function getApmIndexSettings({
       throw error;
     }
   }
-  const apmIndicesConfig = getApmIndicesConfig(context.config);
+  const apmIndicesConfig = getApmIndicesConfig(config);
 
   return APM_UI_INDICES.map((configurationName) => ({
     configurationName,
