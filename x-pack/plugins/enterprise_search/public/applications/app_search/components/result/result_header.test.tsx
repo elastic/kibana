@@ -30,6 +30,22 @@ describe('ResultHeader', () => {
       <ResultHeader showScore={false} resultMeta={resultMeta} isMetaEngine={false} />
     );
     expect(wrapper.find('[data-test-subj="ResultId"]').prop('value')).toEqual('1');
+    expect(wrapper.find('[data-test-subj="ResultId"]').prop('href')).toBeUndefined();
+  });
+
+  it('renders id as a link if shouldLinkToDetailPage is true', () => {
+    const wrapper = shallow(
+      <ResultHeader
+        showScore={false}
+        resultMeta={resultMeta}
+        isMetaEngine={false}
+        shouldLinkToDetailPage
+      />
+    );
+    expect(wrapper.find('[data-test-subj="ResultId"]').prop('value')).toEqual('1');
+    expect(wrapper.find('[data-test-subj="ResultId"]').prop('href')).toEqual(
+      '/engines/my-engine/documents/1'
+    );
   });
 
   describe('score', () => {

@@ -167,7 +167,7 @@ export class MarkdownPanelConfig extends Component<
                     onChange={(filter) => {
                       this.props.onChange({ filter });
                     }}
-                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
+                    indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

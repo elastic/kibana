@@ -228,7 +228,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
+                'Force merge, shrink, read only and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
