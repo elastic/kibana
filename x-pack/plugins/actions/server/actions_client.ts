@@ -69,7 +69,7 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
-  inMemoryExecutionEnqueuer: ExecutionEnqueuer;
+  executionThroughTaskManagerDirectly: ExecutionEnqueuer;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -90,7 +90,7 @@ export class ActionsClient {
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
-  private readonly inMemoryExecutionEnqueuer: ExecutionEnqueuer;
+  private readonly executionThroughTaskManagerDirectly: ExecutionEnqueuer;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -101,7 +101,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
-    inMemoryExecutionEnqueuer,
+    executionThroughTaskManagerDirectly,
     request,
     authorization,
     auditLogger,
@@ -113,7 +113,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
-    this.inMemoryExecutionEnqueuer = inMemoryExecutionEnqueuer;
+    this.executionThroughTaskManagerDirectly = executionThroughTaskManagerDirectly;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -489,7 +489,7 @@ export class ActionsClient {
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async enqueueInMemoryExecution(options: EnqueueExecutionOptions): Promise<void> {
+  public async executeThroughTaskManager(options: EnqueueExecutionOptions): Promise<void> {
     const { source } = options;
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -497,7 +497,7 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
-    return this.inMemoryExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+    return this.executionThroughTaskManagerDirectly(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {

@@ -191,7 +191,6 @@ export class TaskClaiming {
     if (this.getCapacity()) {
       return this.claimAvailableTasks(claimingOptions).pipe(
         map((claimResult) => {
-          // console.log('task_claiming', { claimResult });
           return asOk(claimResult);
         })
       );
@@ -266,9 +265,7 @@ export class TaskClaiming {
         ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, taskTypes, size)
         : [];
 
-    // console.log('task_claiming, executClaimAvailableTasks(), main', { claimTasksById, docs, tasksUpdated });
     const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) => {
-      // console.log('task_claiming, executClaimAvailableTasks(), loop', { doc });
       return claimTasksById.includes(doc.id);
     });
 
@@ -384,8 +381,6 @@ export class TaskClaiming {
       sort.unshift('_score');
     }
 
-    // console.log('task_claiming, markAvailableTasksAsClaimed()', { claimTasksById, query })
-
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const result = await this.taskStore.updateByQuery(
       {
@@ -437,7 +432,6 @@ export class TaskClaiming {
       sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
     };
-    // console.log('task_claiming, sweepForClaimedTasks()', { claimTasksById, params });
     const { docs } = await this.taskStore.fetch(params);
 
     return docs;

@@ -36,7 +36,7 @@ import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
-  createInMemoryExecutionEnqueuerFunction,
+  createExecutionThroughTaskManagerDirectlyFunction,
 } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
@@ -303,7 +303,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
-        inMemoryExecutionEnqueuer: createInMemoryExecutionEnqueuerFunction({
+        executionThroughTaskManagerDirectly: createExecutionThroughTaskManagerDirectlyFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
@@ -459,7 +459,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               preconfiguredActions,
             }),
-            inMemoryExecutionEnqueuer: createExecutionEnqueuerFunction({
+            executionThroughTaskManagerDirectly: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,

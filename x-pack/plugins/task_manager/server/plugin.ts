@@ -27,6 +27,7 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { ConcreteTaskInstance, TaskInstanceWithDeprecatedFields, TaskStatus } from './task';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
   TaskTypeDictionary,
@@ -35,10 +36,12 @@ export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware)
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ensureScheduled' | 'runTask'
+  'schedule' | 'runNow' | 'ensureScheduled'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
+  } & {
+    runTask: (taskInstanceWithDeprecatedFields: TaskInstanceWithDeprecatedFields) => void;
   };
 
 export class TaskManagerPlugin
@@ -161,7 +164,21 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
-      runTask: (...args) => taskScheduling.runTask(...args),
+      runTask: (taskInstanceWithDeprecatedFields: TaskInstanceWithDeprecatedFields) => {
+        const taskInstance: ConcreteTaskInstance = {
+          ...taskInstanceWithDeprecatedFields,
+          id: taskInstanceWithDeprecatedFields.id ?? '',
+          version: '',
+          scheduledAt: new Date(),
+          runAt: new Date(),
+          startedAt: null,
+          retryAt: null,
+          attempts: 0,
+          status: TaskStatus.Idle,
+          ownerId: taskInstanceWithDeprecatedFields.ownerId ?? '',
+        };
+        this.taskPollingLifecycle?.attemptToRunTaskDirectly(taskInstance);
+      },
     };
   }
 

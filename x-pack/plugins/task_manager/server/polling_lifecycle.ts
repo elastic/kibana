@@ -209,7 +209,6 @@ export class TaskPollingLifecycle {
 
   public async attemptToRunTaskDirectly(taskInstance: ConcreteTaskInstance) {
     const runner = this.createTaskRunnerForTask(taskInstance);
-    // console.log(`polling_lifecycle.attemptToRunTaskDirectly() ${runner}`)
     await this.pool.run([runner], true);
   }
 
@@ -231,10 +230,6 @@ export class TaskPollingLifecycle {
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
-    // console.log('polling_lifecycle, pollForWork', {
-    //   tasksToClaim,
-    //   workers: this.pool.availableWorkers,
-    // });
     return fillPool(
       // claim available tasks
       () =>
@@ -295,7 +290,6 @@ export function claimAvailableTasks(
   logger: Logger
 ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
   return new Observable((observer) => {
-    // console.log('polling_lifecycle, claimAvailableTasks()', { claimTasksById })
     taskClaiming
       .claimAvailableTasksIfCapacityIsAvailable({
         claimOwnershipUntil: intervalFromNow('30s')!,
@@ -303,7 +297,6 @@ export function claimAvailableTasks(
       })
       .subscribe(
         (claimResult) => {
-          // console.log('polling_lifecycle, claimAvailableTasks()', { claimResult });
           observer.next(claimResult);
         },
         (ex) => {

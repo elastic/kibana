@@ -78,7 +78,7 @@ export function createExecutionEnqueuerFunction({
   };
 }
 
-export function createInMemoryExecutionEnqueuerFunction({
+export function createExecutionThroughTaskManagerDirectlyFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,

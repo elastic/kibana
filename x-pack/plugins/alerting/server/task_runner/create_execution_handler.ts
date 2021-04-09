@@ -169,7 +169,7 @@ export function createExecutionHandler<
       //   }),
       // });
 
-      await actionsClient.enqueueInMemoryExecution({
+      await actionsClient.executeThroughTaskManager({
         id: action.id,
         params: action.params,
         spaceId,

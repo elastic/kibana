@@ -162,7 +162,6 @@ export class TaskPool {
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
-    // console.log(`task_pool.handleMarkAsRunning()  ${taskRunner}`);
     taskRunner
       .run()
       .catch((err) => {

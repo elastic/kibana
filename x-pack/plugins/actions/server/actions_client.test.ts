@@ -44,6 +44,7 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
+const executionThroughTaskManagerDirectly = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
 
@@ -77,6 +78,7 @@ beforeEach(() => {
     preconfiguredActions: [],
     actionExecutor,
     executionEnqueuer,
+    executionThroughTaskManagerDirectly,
     request,
     authorization: (authorization as unknown) as ActionsAuthorization,
     auditLogger,
@@ -432,6 +434,7 @@ describe('create()', () => {
       preconfiguredActions: [],
       actionExecutor,
       executionEnqueuer,
+      executionThroughTaskManagerDirectly,
       request,
       authorization: (authorization as unknown) as ActionsAuthorization,
     });
@@ -529,6 +532,7 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        executionThroughTaskManagerDirectly,
         request,
         authorization: (authorization as unknown) as ActionsAuthorization,
         preconfiguredActions: [
@@ -583,6 +587,7 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        executionThroughTaskManagerDirectly,
         request,
         authorization: (authorization as unknown) as ActionsAuthorization,
         preconfiguredActions: [
@@ -697,6 +702,7 @@ describe('get()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      executionThroughTaskManagerDirectly,
       request,
       authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
@@ -766,6 +772,7 @@ describe('getAll()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        executionThroughTaskManagerDirectly,
         request,
         authorization: (authorization as unknown) as ActionsAuthorization,
         preconfiguredActions: [
@@ -901,6 +908,7 @@ describe('getAll()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      executionThroughTaskManagerDirectly,
       request,
       authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
@@ -974,6 +982,7 @@ describe('getBulk()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        executionThroughTaskManagerDirectly,
         request,
         authorization: (authorization as unknown) as ActionsAuthorization,
         preconfiguredActions: [
@@ -1103,6 +1112,7 @@ describe('getBulk()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      executionThroughTaskManagerDirectly,
       request,
       authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
