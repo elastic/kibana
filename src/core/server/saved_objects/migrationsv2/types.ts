@@ -205,7 +205,7 @@ export type OutdatedDocumentsSearch = PostInitState & {
   /** Search for outdated documents in the target index */
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH';
 };
-
+// this has changed because we're no longer writing the latest version of the documents to the target index.
 export type OutdatedDocumentsTransform = PostInitState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
   readonly controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
@@ -293,6 +293,14 @@ export type LegacyDeleteState = LegacyBaseState & {
    * e.g. `.kibana`.
    */
   readonly controlState: 'LEGACY_DELETE';
+};
+
+export type TransformedDocumentsBulkIndex = LegacyBaseState & {
+  /**
+   * Write the up-to-date transformed documents to the index, overwriting any
+   * documents that are still on their outdated version.
+   */
+  readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
 };
 
 export type State =

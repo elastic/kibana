@@ -201,12 +201,6 @@ export class KibanaMigrator {
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
               migrationsConfig: this.soMigrationsConfig,
-              captureTransformRawDocsErrors: (collection: Error[], specificErrors: Error[]) =>
-                logCorruptSavedObjectsErrors(
-                  collection,
-                  specificErrors,
-                  new MigrationLogger(this.log)
-                ),
             });
           },
         };
@@ -281,6 +275,7 @@ export type LogCorruptSavedObjectsErrors = (
 ) => string;
 // TINA there's a better way to handle this and I don't think we even need
 // to but I'm trying to not have to throw in OUTDATED_DOCUMENTS_TRANSFORM
+// don't need to do this, we just throw from next. These will be different errors though thrown from the transform raw docs function
 export function logCorruptSavedObjectsErrors(
   existing: Error[],
   newCollection: Error[],

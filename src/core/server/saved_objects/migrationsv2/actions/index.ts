@@ -604,7 +604,6 @@ export const waitForPickupUpdatedMappingsTask = flow(
     }
   )
 );
-
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
 }

@@ -9,7 +9,6 @@
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { pipe } from 'fp-ts/lib/pipeable';
 import type {
   AllActionStates,
   ReindexSourceToTempState,
@@ -36,14 +35,18 @@ import type {
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
-import { SavedObjectsRawDoc } from '..';
+import { SavedObjectsRawDoc } from '../serialization';
 import {
-  LogCaptureTransformRawDocsErrors,
-  LogCorruptSavedObjectsErrors,
-} from '../migrations/kibana/kibana_migrator';
-import { MigrationLogger } from '../migrations/core/migration_logger';
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../migrations/core/migrate_raw_docs';
 
-export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
+// How do i handle this type now that transformRawDocs is actually running migrateRawDocsNonThrowing
+// migrateRawDocsNonThrowing returns an Either.left with failed docs or an Either.right with successfylly processed/transformed docs
+export type TransformRawDocs = (
+  processedDocs: SavedObjectsRawDoc[] | { corruptSavedObjectIds: string[]; type: string }
+) => Promise<DocumentsTransformSuccess | DocumentsTransformFailed>;
+
 type ActionMap = ReturnType<typeof nextActionMap>;
 
 /**
@@ -56,11 +59,7 @@ export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (
-  client: ElasticsearchClient,
-  transformRawDocs: TransformRawDocs,
-  captureTransformRawDocsErrors: LogCaptureTransformRawDocsErrors
-) => {
+export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
@@ -98,20 +97,22 @@ export const nextActionMap = (
         outdatedDocumentsQuery: state.outdatedDocumentsQuery,
       }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
-      pipe(
-        TaskEither.tryCatch(
-          () => transformRawDocs(state.outdatedDocuments),
-          (e) => {
-            captureTransformRawDocsErrors(state.errors, e);
-            // TINA: we don't want to throw here, these errors are never caught
-            throw e;
-          }
-        ),
-        // if we decide to return the CorruptSavedObjectsErrors, the return signature of `transformRawDocs` will change
-        TaskEither.chain((docs) =>
-          Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
-        )
+      // this needs to change because we're no longer throwing anything from the transformRawDocs method
+      TaskEither.tryCatch(
+        () => transformRawDocs(state.outdatedDocuments), // one of { processedDocs } or { type: 'document_transform_failed', corruptSavedObjectIds }
+        (e) => {
+          // TINA: we throw for realy bad errors
+          throw e;
+        }
       ),
+    TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: any) =>
+      // The call to this action was being handled in OUTDATES_DOCUMENTS_TRANSFORM:
+      //         TaskEither.chain((docs) =>
+      //     Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
+      //   )
+      // ),
+      // How to I get access to the processedDocs now?
+      Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs.processedDocs),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
@@ -136,12 +137,8 @@ export const nextActionMap = (
   };
 };
 
-export const next = (
-  client: ElasticsearchClient,
-  transformRawDocs: TransformRawDocs,
-  captureTransformRawDocsErrors: LogCorruptSavedObjectsErrors
-) => {
-  const map = nextActionMap(client, transformRawDocs, captureTransformRawDocsErrors);
+export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
+  const map = nextActionMap(client, transformRawDocs);
   return (state: State) => {
     const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
       return () => {
