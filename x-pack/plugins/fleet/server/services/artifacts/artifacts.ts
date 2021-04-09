@@ -105,6 +105,7 @@ export const listArtifacts = async (
       sort: `${sortField}:${sortOrder}`,
       q: kuery,
       from: (page - 1) * perPage,
+      ignore_unavailable: true,
       size: perPage,
     });
 
