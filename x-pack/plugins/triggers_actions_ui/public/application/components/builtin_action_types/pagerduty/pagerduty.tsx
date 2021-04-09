@@ -18,6 +18,7 @@ import {
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams,
+  EventActionOptions,
 } from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
@@ -88,7 +89,10 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (!actionParams.summary?.length) {
+      if (
+        actionParams.eventAction === EventActionOptions.TRIGGER &&
+        !actionParams.summary?.length
+      ) {
         errors.summary.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',
