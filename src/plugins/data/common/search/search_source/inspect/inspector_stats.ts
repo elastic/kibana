@@ -15,8 +15,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { ISearchSource } from 'src/plugins/data/public';
-import { RequestStatistics } from 'src/plugins/inspector/common';
+import type { ISearchSource } from 'src/plugins/data/public';
+import type { RequestStatistics } from 'src/plugins/inspector/common';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
