@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { ResultFieldValue } from './result_field_value';
-export { ResultToken } from './result_token';
-export { Result } from './result';
+export const createModulesProviderMock = () =>
+  jest.fn(() => ({
+    recognize: jest.fn(),
+    getModule: jest.fn(),
+    listModules: jest.fn(),
+    setup: jest.fn(),
+  }));

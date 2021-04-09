@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { ResultFieldValue } from './result_field_value';
-export { ResultToken } from './result_token';
-export { Result } from './result';
+export const createAnomalyDetectorsProviderMock = () =>
+  jest.fn(() => ({
+    jobs: jest.fn(),
+    jobStats: jest.fn(),
+    datafeeds: jest.fn(),
+    datafeedStats: jest.fn(),
+  }));

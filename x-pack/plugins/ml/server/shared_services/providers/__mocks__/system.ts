@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { ResultFieldValue } from './result_field_value';
-export { ResultToken } from './result_token';
-export { Result } from './result';
+export const createMockMlSystemProvider = () =>
+  jest.fn(() => ({
+    mlCapabilities: jest.fn(),
+    mlInfo: jest.fn(),
+    mlAnomalySearch: jest.fn(),
+  }));
