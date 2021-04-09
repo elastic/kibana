@@ -109,7 +109,7 @@ Documents are indexed using a preconfigured schema that captures the <<defining-
 
 [IMPORTANT]
 ==============================================
-To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<xpack-kibana-role-management>> for more information.
+To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<kibana-role-management>> for more information.
 ==============================================
 
 [NOTE]
