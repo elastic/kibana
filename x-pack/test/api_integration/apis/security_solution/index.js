@@ -26,6 +26,5 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./uncommon_processes'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./tls'));
-    loadTestFile(require.resolve('./feature_controls'));
   });
 }
