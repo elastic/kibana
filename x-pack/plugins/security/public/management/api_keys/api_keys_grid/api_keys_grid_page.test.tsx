@@ -237,7 +237,7 @@ describe('APIKeysGridPage', () => {
     await findByDisplayValue(btoa('1D:AP1_K3Y'));
   });
 
-  it('invalidates api key using cta button', async () => {
+  it('deletes api key using cta button', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
     const { findByRole, findAllByLabelText } = render(
@@ -250,11 +250,11 @@ describe('APIKeysGridPage', () => {
       </Providers>
     );
 
-    const [invalidateButton] = await findAllByLabelText(/Invalidate/i);
-    fireEvent.click(invalidateButton);
+    const [deleteButton] = await findAllByLabelText(/Delete/i);
+    fireEvent.click(deleteButton);
 
     const dialog = await findByRole('dialog');
-    fireEvent.click(await within(dialog).findByRole('button', { name: 'Invalidate API key' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Delete API key' }));
 
     await waitFor(() => {
       expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
@@ -264,7 +264,7 @@ describe('APIKeysGridPage', () => {
     });
   });
 
-  it('invalidates multiple api keys using bulk select', async () => {
+  it('deletes multiple api keys using bulk select', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
     const { findByRole, findAllByRole } = render(
@@ -277,12 +277,12 @@ describe('APIKeysGridPage', () => {
       </Providers>
     );
 
-    const invalidateCheckboxes = await findAllByRole('checkbox', { name: 'Select this row' });
-    invalidateCheckboxes.forEach((checkbox) => fireEvent.click(checkbox));
-    fireEvent.click(await findByRole('button', { name: 'Invalidate API keys' }));
+    const deleteCheckboxes = await findAllByRole('checkbox', { name: 'Select this row' });
+    deleteCheckboxes.forEach((checkbox) => fireEvent.click(checkbox));
+    fireEvent.click(await findByRole('button', { name: 'Delete API keys' }));
 
     const dialog = await findByRole('dialog');
-    fireEvent.click(await within(dialog).findByRole('button', { name: 'Invalidate API keys' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Delete API keys' }));
 
     await waitFor(() => {
       expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
