@@ -161,13 +161,6 @@ module.exports = {
 
   extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
-  parserOptions: {
-    ecmaVersion: 2018,
-    babelOptions: {
-      configFile: require.resolve('@kbn/babel-code-parser/.babelrc'),
-    },
-  },
-
   overrides: [
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
