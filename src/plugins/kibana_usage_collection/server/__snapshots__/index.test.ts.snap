@@ -12,7 +12,7 @@ exports[`kibana_usage_collection Runs the setup method without issues 5`] = `fal
 
 exports[`kibana_usage_collection Runs the setup method without issues 6`] = `false`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 7`] = `true`;
+exports[`kibana_usage_collection Runs the setup method without issues 7`] = `false`;
 
 exports[`kibana_usage_collection Runs the setup method without issues 8`] = `true`;
 
