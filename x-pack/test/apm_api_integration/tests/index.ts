@@ -24,6 +24,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./alerts/chart_preview'));
     });
 
+    describe('alerts/rule_registry', function () {
+      loadTestFile(require.resolve('./alerts/rule_registry'));
+    });
+
     describe('correlations/latency_slow_transactions', function () {
       loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
     });

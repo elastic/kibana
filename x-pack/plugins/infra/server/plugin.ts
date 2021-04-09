@@ -35,9 +35,8 @@ import { createGetLogQueryFields } from './services/log_queries/get_log_query_fi
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    query: schema.object({
-      partitionSize: schema.number({ defaultValue: 75 }),
-      partitionFactor: schema.number({ defaultValue: 1.2 }),
+    inventory: schema.object({
+      compositeSize: schema.number({ defaultValue: 2000 }),
     }),
     sources: schema.maybe(
       schema.object({
