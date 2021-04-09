@@ -25,7 +25,6 @@ export type IndexPatternSelectProps = Required<
   indexPatternId: string;
   fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
-  maxIndexPatterns?: number;
 };
 
 export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
@@ -42,10 +41,6 @@ interface IndexPatternSelectState {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
-  static defaultProps: {
-    maxIndexPatterns: 1000;
-  };
-
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
@@ -67,7 +62,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   componentDidMount() {
     this.isMounted = true;
-    this.fetchOptions();
+    this.fetchOptions('');
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
@@ -107,39 +102,59 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const { fieldTypes, onNoIndexPatterns, indexPatternService } = this.props;
-    const indexPatterns = await indexPatternService.find(
-      `${searchValue}*`,
-      this.props.maxIndexPatterns
-    );
+    const isCurrentSearch = () => {
+      return this.isMounted && searchValue === this.state.searchValue;
+    };
 
-    // We need this check to handle the case where search results come back in a different
-    // order than they were sent out. Only load results for the most recent search.
-    if (searchValue !== this.state.searchValue || !this.isMounted) {
+    const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
+    if (!isCurrentSearch()) {
       return;
     }
 
-    const options = indexPatterns
-      .filter((indexPattern) => {
-        return fieldTypes
-          ? indexPattern.fields.some((field) => {
-              return fieldTypes.includes(field.type);
-            })
-          : true;
-      })
-      .map((indexPattern) => {
-        return {
-          label: indexPattern.title,
-          value: indexPattern.id,
-        };
+    const options = [];
+    for (let i = 0; i < idsAndTitles.length; i++) {
+      if (!idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
+        // index pattern excluded due to title not matching search
+        continue;
+      }
+
+      if (this.props.fieldTypes) {
+        try {
+          const indexPattern = await this.props.indexPatternService.get(idsAndTitles[i].id);
+          if (!isCurrentSearch()) {
+            return;
+          }
+          const hasRequiredFieldTypes = indexPattern.fields.some((field) => {
+            return this.props.fieldTypes!.includes(field.type);
+          });
+          if (!hasRequiredFieldTypes) {
+            continue;
+          }
+        } catch (err) {
+          // could not load index pattern, exclude it from list.
+          continue;
+        }
+      }
+
+      options.push({
+        label: idsAndTitles[i].title,
+        value: idsAndTitles[i].id,
       });
+
+      // Loading each index pattern object requires a network call so just find small number of matching index patterns
+      // Users can use 'searchValue' to further refine the list and locate their index pattern.
+      if (options.length > 15) {
+        break;
+      }
+    }
+
     this.setState({
       isLoading: false,
       options,
     });
 
-    if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
-      onNoIndexPatterns();
+    if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
+      this.props.onNoIndexPatterns();
     }
   }, 300);
 
