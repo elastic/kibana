@@ -83,7 +83,10 @@ export function getTimelionRequestHandler({
       );
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const queryConfig = {
+      ...esQuery.getEsQueryConfig(uiSettings),
+      shouldIgnoreFiltersWithRuntimeFields: true,
+    };
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
@@ -113,7 +116,7 @@ export function getTimelionRequestHandler({
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery.buildEsQuery(indexPattern, query, filters, esQueryConfigs),
+              filter: esQuery.buildEsQuery(indexPattern, query, filters, queryConfig),
             },
           },
           time: {

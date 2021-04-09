@@ -33,10 +33,11 @@ export function buildEsQuery(
   indexPattern: IIndexPattern | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
-  config: EsQueryConfig = {
+  config: EsQueryConfig & { shouldIgnoreFiltersWithRuntimeFields: boolean } = {
     allowLeadingWildcards: false,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
+    shouldIgnoreFiltersWithRuntimeFields: false,
   }
 ) {
   queries = Array.isArray(queries) ? queries : [queries];
@@ -58,7 +59,8 @@ export function buildEsQuery(
   const filterQuery = buildQueryFromFilters(
     filters,
     indexPattern,
-    config.ignoreFilterIfFieldNotInIndex
+    config.ignoreFilterIfFieldNotInIndex,
+    config.shouldIgnoreFiltersWithRuntimeFields
   );
 
   return {

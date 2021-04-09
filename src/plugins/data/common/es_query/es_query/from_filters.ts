@@ -43,26 +43,28 @@ const translateToQuery = (filter: Filter) => {
   return filter;
 };
 
-const filterContainsRuntimeFiled = (filter: Filter, indexPattern?: IIndexPattern) =>
-  indexPattern?.fields.some(
+const filterContainsRuntimeFiled = (filter: Filter, indexPattern: IIndexPattern) =>
+  indexPattern.fields.some(
     (field) => field.name === filter.meta.key && field.toSpec?.().runtimeField
   );
 
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
   indexPattern: IIndexPattern | undefined,
-  ignoreFilterIfFieldNotInIndex: boolean = false
+  ignoreFilterIfFieldNotInIndex: boolean = false,
+  shouldIgnoreFiltersWithRuntimeFields: boolean
 ) => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter(filterNegate(negate))
-      .filter(
-        (filter) =>
-          !ignoreFilterIfFieldNotInIndex ||
-          (filterMatchesIndex(filter, indexPattern) &&
-            !filterContainsRuntimeFiled(filter, indexPattern))
+      .filter((filter) =>
+        ignoreFilterIfFieldNotInIndex
+          ? shouldIgnoreFiltersWithRuntimeFields &&
+            indexPattern &&
+            !filterContainsRuntimeFiled(filter, indexPattern)
+          : filterMatchesIndex(filter, indexPattern)
       )
       .map((filter) => {
         return migrateFilter(filter, indexPattern);
