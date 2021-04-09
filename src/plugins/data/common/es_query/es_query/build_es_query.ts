@@ -33,7 +33,7 @@ export function buildEsQuery(
   indexPattern: IIndexPattern | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
-  config: EsQueryConfig & { shouldIgnoreFiltersWithRuntimeFields: boolean } = {
+  config: EsQueryConfig & { shouldIgnoreFiltersWithRuntimeFields?: boolean } = {
     allowLeadingWildcards: false,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,

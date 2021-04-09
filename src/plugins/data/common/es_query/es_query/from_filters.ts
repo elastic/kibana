@@ -52,20 +52,19 @@ export const buildQueryFromFilters = (
   filters: Filter[] = [],
   indexPattern: IIndexPattern | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false,
-  shouldIgnoreFiltersWithRuntimeFields: boolean
+  shouldIgnoreFiltersWithRuntimeFields: boolean = false
 ) => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter(filterNegate(negate))
-      .filter((filter) =>
-        ignoreFilterIfFieldNotInIndex
-          ? shouldIgnoreFiltersWithRuntimeFields &&
-            indexPattern &&
-            !filterContainsRuntimeFiled(filter, indexPattern)
-          : filterMatchesIndex(filter, indexPattern)
-      )
+      .filter((filter) => {
+        if (ignoreFilterIfFieldNotInIndex && shouldIgnoreFiltersWithRuntimeFields && indexPattern) {
+          return !filterContainsRuntimeFiled(filter, indexPattern);
+        }
+        return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern);
+      })
       .map((filter) => {
         return migrateFilter(filter, indexPattern);
       })

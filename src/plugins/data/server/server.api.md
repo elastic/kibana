@@ -438,7 +438,7 @@ export const esKuery: {
 //
 // @public (undocumented)
 export const esQuery: {
-    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IIndexPattern | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => {
+    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IIndexPattern | undefined, ignoreFilterIfFieldNotInIndex?: boolean, shouldIgnoreFiltersWithRuntimeFields?: boolean) => {
         must: never[];
         filter: import("../common").Filter[];
         should: never[];
