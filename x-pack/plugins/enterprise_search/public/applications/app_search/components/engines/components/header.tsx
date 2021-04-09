@@ -26,7 +26,7 @@ export const EnginesOverviewHeader: React.FC = () => {
       rightSideItems={[
         // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButton
-          fill
+          size="s"
           iconType="popout"
           href={getAppSearchUrl()}
           target="_blank"
