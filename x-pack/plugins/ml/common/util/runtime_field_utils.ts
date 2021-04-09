@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from './object_utils';
 import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
-import type { RuntimeField, RuntimeMappings } from '../types/fields';
+import type { RuntimeMappings } from '../types/fields';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
-export function isRuntimeField(arg: unknown): arg is RuntimeField {
+export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
       (isPopulatedObject(arg, ['type', 'script']) &&
