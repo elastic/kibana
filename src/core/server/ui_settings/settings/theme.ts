@@ -48,6 +48,8 @@ export const getThemeSettings = (
 ): Record<string, UiSettingsParams> => {
   const { availableVersions, defaultDarkMode, defaultVersion } = getThemeInfo(options);
 
+  const onlyOneThemeAvailable = !options?.isDist && availableVersions.length === 1;
+
   return {
     'theme:darkMode': {
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
@@ -68,10 +70,21 @@ export const getThemeSettings = (
       type: 'select',
       options: availableVersions,
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
-        defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
+        defaultMessage:
+          'Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied. {lessOptions}',
+        values: {
+          lessOptions: onlyOneThemeAvailable
+            ? '<br><br> There is only one theme available, set <code>KBN_OPTIMIZER_THEMES=v7light,v7dark,v8light,v8dark</code> to get more options.'
+            : undefined,
+        },
       }),
       requiresPageReload: true,
       schema: schema.oneOf(availableVersions.map((v) => schema.literal(v)) as [Type<string>]),
+      optionLabels: onlyOneThemeAvailable
+        ? {
+            [availableVersions[0]]: `${availableVersions[0]} (only)`,
+          }
+        : undefined,
     },
   };
 };
