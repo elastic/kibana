@@ -19,15 +19,6 @@ import {
 import { createStore, State } from '../../../../common/store';
 import { ExpandableHostDetails } from './expandable_host';
 
-jest.mock('react-apollo', () => {
-  const original = jest.requireActual('react-apollo');
-  return {
-    ...original,
-    // eslint-disable-next-line react/display-name
-    Query: () => <></>,
-  };
-});
-
 describe('Expandable Host Component', () => {
   const state: State = {
     ...mockGlobalState,
