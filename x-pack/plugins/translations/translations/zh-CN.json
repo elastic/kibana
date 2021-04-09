@@ -5507,7 +5507,6 @@
     "xpack.apm.serviceOverview.mlNudgeMessage.content": "通过 APM 的异常检测集成来查明异常事务，并了解上下游服务的运行状况。只需几分钟即可开始使用。",
     "xpack.apm.serviceOverview.mlNudgeMessage.dismissButton": "关闭",
     "xpack.apm.serviceOverview.mlNudgeMessage.learnMoreButton": "开始使用",
-    "xpack.apm.serviceOverview.searchBar.transactionTypeLabel": "类型：{transactionType}",
     "xpack.apm.serviceOverview.throughtputChartTitle": "吞吐量",
     "xpack.apm.serviceOverview.transactionsTableColumnErrorRate": "错误率",
     "xpack.apm.serviceOverview.transactionsTableColumnImpact": "影响",
