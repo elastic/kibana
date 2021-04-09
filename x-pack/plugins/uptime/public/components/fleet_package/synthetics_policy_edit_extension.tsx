@@ -5,129 +5,58 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useContext } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { Config, ConfigKeys, ICustomFields, contentTypesToMode, ContentType } from './types';
+import {
+  SimpleFieldsContext,
+  HTTPAdvancedFieldsContext,
+  TCPAdvancedFieldsContext,
+  TLSFieldsContext,
+} from './contexts';
+import { Config, ConfigKeys } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
-import { defaultConfig as fallbackConfig } from './synthetics_policy_create_extension';
 import { validate } from './validation';
 
+interface SyntheticsPolicyEditExtensionProps {
+  newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
+  defaultConfig: Config;
+  isTLSEnabled: boolean;
+}
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Fleet app create / edit package policy
  */
-export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
-  ({ policy: currentPolicy, newPolicy, onChange }) => {
+export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionProps>(
+  ({ newPolicy, onChange, defaultConfig, isTLSEnabled }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
-    const { enableTLS: isTLSEnabled, config: defaultConfig } = useMemo(() => {
-      let enableTLS = false;
-      const getDefaultConfig = () => {
-        const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
-        const vars = currentInput?.streams[0]?.vars;
-
-        const configKeys: ConfigKeys[] = Object.values(ConfigKeys);
-        const formattedDefaultConfig = configKeys.reduce(
-          (acc: Record<string, unknown>, key: ConfigKeys) => {
-            const value = vars?.[key]?.value;
-            switch (key) {
-              case ConfigKeys.NAME:
-                acc[key] = currentPolicy.name;
-                break;
-              case ConfigKeys.SCHEDULE:
-                // split unit and number
-                if (value) {
-                  const fullString = JSON.parse(value);
-                  const fullSchedule = fullString.replace('@every ', '');
-                  const unit = fullSchedule.slice(-1);
-                  const number = fullSchedule.slice(0, fullSchedule.length - 1);
-                  acc[key] = {
-                    unit,
-                    number,
-                  };
-                } else {
-                  acc[key] = fallbackConfig[key];
-                }
-                break;
-              case ConfigKeys.TIMEOUT:
-              case ConfigKeys.WAIT:
-                acc[key] = value ? value.slice(0, value.length - 1) : fallbackConfig[key]; // remove unit
-                break;
-              case ConfigKeys.TAGS:
-              case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
-              case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
-              case ConfigKeys.RESPONSE_RECEIVE_CHECK:
-              case ConfigKeys.RESPONSE_STATUS_CHECK:
-              case ConfigKeys.RESPONSE_HEADERS_CHECK:
-              case ConfigKeys.REQUEST_HEADERS_CHECK:
-                acc[key] = value ? JSON.parse(value) : fallbackConfig[key];
-                break;
-              case ConfigKeys.REQUEST_BODY_CHECK:
-                const headers = value
-                  ? JSON.parse(vars?.[ConfigKeys.REQUEST_HEADERS_CHECK].value)
-                  : fallbackConfig[ConfigKeys.REQUEST_HEADERS_CHECK];
-                const requestBodyValue =
-                  value !== null && value !== undefined
-                    ? JSON.parse(value)
-                    : fallbackConfig[key].value;
-                let type = fallbackConfig[key].type;
-                Object.keys(headers || []).some((headerKey) => {
-                  if (
-                    headerKey === 'Content-Type' &&
-                    contentTypesToMode[headers[headerKey] as ContentType]
-                  ) {
-                    type = contentTypesToMode[headers[headerKey] as ContentType];
-                    return true;
-                  }
-                });
-                acc[key] = {
-                  value: requestBodyValue,
-                  type,
-                };
-                break;
-              case ConfigKeys.TLS_CERTIFICATE:
-              case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
-              case ConfigKeys.TLS_KEY:
-              case ConfigKeys.TLS_KEY_PASSPHRASE:
-              case ConfigKeys.TLS_VERIFICATION_MODE:
-                const isEnabled = !!value;
-                acc[key] = {
-                  value: value ?? fallbackConfig[key].value,
-                  isEnabled,
-                };
-                if (isEnabled) {
-                  enableTLS = true;
-                }
-                break;
-              default:
-                acc[key] = value ?? fallbackConfig[key];
-            }
-            return acc;
-          },
-          {}
-        );
-
-        return { config: (formattedDefaultConfig as unknown) as Config, enableTLS };
-      };
-
-      return getDefaultConfig();
-    }, [currentPolicy]);
+    const { fields: simpleFields } = useContext(SimpleFieldsContext);
+    const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
+    const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
+    const { fields: tlsFields } = useContext(TLSFieldsContext);
     const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
 
-    const handleInputChange = useCallback(
-      (fields: ICustomFields) => {
-        setConfig((prevConfig) => ({ ...prevConfig, ...fields }));
+    useDebounce(
+      () => {
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          ...simpleFields,
+          ...httpAdvancedFields,
+          ...tcpAdvancedFields,
+          ...tlsFields,
+        }));
       },
-      [setConfig]
+      250,
+      [setConfig, simpleFields, httpAdvancedFields, tcpAdvancedFields, tlsFields]
     );
 
     return (
       <CustomFields
         isTLSEnabled={isTLSEnabled}
-        defaultValues={defaultConfig}
-        onChange={handleInputChange}
         validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
       />
     );

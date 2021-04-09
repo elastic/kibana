@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, memo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useCallback, useContext, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,7 +20,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ConfigKeys, HTTPMethod, IHTTPAdvancedFields, Validation } from './types';
+import { HTTPAdvancedFieldsContext } from './contexts';
+
+import { ConfigKeys, HTTPMethod, Validation } from './types';
 
 import { OptionalLabel } from './optional_label';
 import { HeaderField } from './header_field';
@@ -30,26 +31,16 @@ import { ResponseBodyIndexField } from './index_response_body_field';
 import { ComboBox } from './combo_box';
 
 interface Props {
-  defaultValues: IHTTPAdvancedFields;
-  onChange: (values: IHTTPAdvancedFields) => void;
   validate: Validation;
 }
 
-export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, validate }) => {
-  const [fields, setFields] = useState<IHTTPAdvancedFields>(defaultValues);
+export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
+  const { fields, setFields } = useContext(HTTPAdvancedFieldsContext);
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
-  );
-
-  useDebounce(
-    () => {
-      onChange(fields);
-    },
-    250,
-    [fields]
   );
 
   return (
@@ -216,7 +207,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
                 ? fields[ConfigKeys.REQUEST_BODY_CHECK].type
                 : undefined
             } // only pass contentMode if the request body is truthy
-            defaultValue={defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK]}
+            defaultValue={fields[ConfigKeys.REQUEST_HEADERS_CHECK]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
@@ -319,7 +310,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           }
         >
           <ResponseBodyIndexField
-            defaultValue={defaultValues[ConfigKeys.RESPONSE_BODY_INDEX]}
+            defaultValue={fields[ConfigKeys.RESPONSE_BODY_INDEX]}
             onChange={useCallback(
               (policy) =>
                 handleInputChange({ value: policy, configKey: ConfigKeys.RESPONSE_BODY_INDEX }),
@@ -417,7 +408,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           }
         >
           <HeaderField
-            defaultValue={defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK]}
+            defaultValue={fields[ConfigKeys.RESPONSE_HEADERS_CHECK]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({

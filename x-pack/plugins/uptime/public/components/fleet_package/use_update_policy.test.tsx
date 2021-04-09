@@ -8,9 +8,22 @@
 import { useUpdatePolicy } from './use_update_policy';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { defaultConfig } from './synthetics_policy_create_extension';
 import { validate } from './validation';
 import { ConfigKeys, DataStream, TLSVersion } from './types';
+import {
+  defaultSimpleFields,
+  defaultTLSFields,
+  defaultHTTPAdvancedFields,
+  defaultTCPAdvancedFields,
+} from './contexts';
+
+const defaultConfig = {
+  name: '',
+  ...defaultSimpleFields,
+  ...defaultTLSFields,
+  ...defaultHTTPAdvancedFields,
+  ...defaultTCPAdvancedFields,
+};
 
 describe('useBarChartsHooks', () => {
   const newPolicy: NewPackagePolicy = {

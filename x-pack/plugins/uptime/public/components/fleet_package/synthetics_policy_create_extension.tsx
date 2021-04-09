@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useContext, useEffect } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
+import { Config, ConfigKeys } from './types';
 import {
-  Config,
-  ConfigKeys,
-  DataStream,
-  HTTPMethod,
-  ICustomFields,
-  Mode,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  TLSVersion,
-  VerificationMode,
-} from './types';
+  SimpleFieldsContext,
+  HTTPAdvancedFieldsContext,
+  TCPAdvancedFieldsContext,
+  TLSFieldsContext,
+} from './contexts';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
@@ -30,6 +26,17 @@ import { validate } from './validation';
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
+    const { fields: simpleFields } = useContext(SimpleFieldsContext);
+    const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
+    const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
+    const { fields: tlsFields } = useContext(TLSFieldsContext);
+    const defaultConfig: Config = {
+      name: '',
+      ...simpleFields,
+      ...httpAdvancedFields,
+      ...tcpAdvancedFields,
+      ...tlsFields,
+    };
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
     const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
@@ -48,83 +55,21 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleInputChange = useCallback(
-      (fields: ICustomFields) => {
-        setConfig((prevConfig) => ({ ...prevConfig, ...fields }));
+    useDebounce(
+      () => {
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          ...simpleFields,
+          ...httpAdvancedFields,
+          ...tcpAdvancedFields,
+          ...tlsFields,
+        }));
       },
-      [setConfig]
+      250,
+      [setConfig, simpleFields, httpAdvancedFields, tcpAdvancedFields, tlsFields]
     );
 
-    return (
-      <CustomFields
-        defaultValues={defaultValues}
-        onChange={handleInputChange}
-        typeEditable
-        validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
-      />
-    );
+    return <CustomFields typeEditable validate={validate[config[ConfigKeys.MONITOR_TYPE]]} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
-
-const defaultValues = {
-  [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
-  [ConfigKeys.PASSWORD]: '',
-  [ConfigKeys.PROXY_URL]: '',
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: {},
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: true,
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: [], // may need to make sure that this field is not applied when length is 0
-  [ConfigKeys.REQUEST_BODY_CHECK]: {
-    value: '',
-    type: Mode.TEXT,
-  },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
-  [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
-  [ConfigKeys.REQUEST_SEND_CHECK]: '',
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
-  },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_CERTIFICATE]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_KEY]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_VERIFICATION_MODE]: {
-    value: VerificationMode.FULL,
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_VERSION]: {
-    value: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
-    isEnabled: false,
-  },
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
-  [ConfigKeys.URLS]: '',
-  [ConfigKeys.USERNAME]: '',
-  [ConfigKeys.WAIT]: '1',
-};
-
-export const defaultConfig: Config = {
-  name: '',
-  ...defaultValues,
-};

@@ -9,14 +9,26 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { defaultConfig } from './synthetics_policy_create_extension';
-import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
+import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import {
+  defaultSimpleFields,
+  defaultTLSFields,
+  defaultHTTPAdvancedFields,
+  defaultTCPAdvancedFields,
+} from './contexts';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
+
+const defaultConfig = {
+  ...defaultSimpleFields,
+  ...defaultTLSFields,
+  ...defaultHTTPAdvancedFields,
+  ...defaultTCPAdvancedFields,
+};
 
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
@@ -268,7 +280,11 @@ describe('<SyntheticsPolicyEditExtension />', () => {
   const onChange = jest.fn();
   const WrappedComponent = ({ policy = defaultCurrentPolicy, newPolicy = defaultNewPolicy }) => {
     return (
-      <SyntheticsPolicyEditExtension policy={policy} newPolicy={newPolicy} onChange={onChange} />
+      <SyntheticsPolicyEditExtensionWrapper
+        policy={policy}
+        newPolicy={newPolicy}
+        onChange={onChange}
+      />
     );
   };
 

@@ -6,27 +6,31 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { TCPAdvancedFields } from './tcp_advanced_fields';
-import { ConfigKeys } from './types';
+import {
+  TCPAdvancedFieldsContextProvider,
+  defaultTCPAdvancedFields as defaultConfig,
+} from './contexts';
+import { ConfigKeys, ITCPAdvancedFields } from './types';
 
 // ensures fields and labels map appropriately
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-const defaultConfig = {
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
-  [ConfigKeys.REQUEST_SEND_CHECK]: '',
-  [ConfigKeys.PROXY_URL]: '',
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
-};
-
 describe('<TCPAdvancedFields />', () => {
-  const onChange = jest.fn();
-  const WrappedComponent = ({ defaultValues = defaultConfig }) => {
-    return <TCPAdvancedFields defaultValues={defaultValues} onChange={onChange} />;
+  const WrappedComponent = ({
+    defaultValues = defaultConfig,
+  }: {
+    defaultValues?: ITCPAdvancedFields;
+  }) => {
+    return (
+      <TCPAdvancedFieldsContextProvider defaultValues={defaultValues}>
+        <TCPAdvancedFields />
+      </TCPAdvancedFieldsContextProvider>
+    );
   };
 
   it('renders TCPAdvancedFields', () => {
@@ -50,22 +54,6 @@ describe('<TCPAdvancedFields />', () => {
 
     fireEvent.change(requestPayload, { target: { value: 'success' } });
     expect(requestPayload.value).toEqual('success');
-  });
-
-  it('handles onChange', async () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-
-    const requestPayload = getByLabelText('Request payload') as HTMLInputElement;
-
-    fireEvent.change(requestPayload, { target: { value: 'success' } });
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith(
-        expect.objectContaining({
-          [ConfigKeys.REQUEST_SEND_CHECK]: 'success',
-        })
-      );
-    });
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {

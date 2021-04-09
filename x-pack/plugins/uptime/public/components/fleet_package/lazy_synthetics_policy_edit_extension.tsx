@@ -10,9 +10,11 @@ import { PackagePolicyEditExtensionComponent } from '../../../../fleet/public';
 
 export const LazySyntheticsPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {
-    const { SyntheticsPolicyEditExtension } = await import('./synthetics_policy_edit_extension');
+    const { SyntheticsPolicyEditExtensionWrapper } = await import(
+      './synthetics_policy_edit_extension_wrapper'
+    );
     return {
-      default: SyntheticsPolicyEditExtension,
+      default: SyntheticsPolicyEditExtensionWrapper,
     };
   }
 );

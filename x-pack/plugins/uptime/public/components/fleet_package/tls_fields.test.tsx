@@ -8,60 +8,31 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { CertsField, SSLRole } from './certs_field';
+import { TLSFields, TLSRole } from './tls_fields';
 import { ConfigKeys, VerificationMode } from './types';
+import { TLSFieldsContextProvider, defaultTLSFields as defaultValues } from './contexts';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-const defaultValues = {
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_CERTIFICATE]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_KEY]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-    value: '',
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_VERIFICATION_MODE]: {
-    value: VerificationMode.FULL,
-    isEnabled: false,
-  },
-  [ConfigKeys.TLS_VERSION]: {
-    value: [],
-    isEnabled: false,
-  },
-};
-
-describe('<CertsField />', () => {
+describe('<TLSFields />', () => {
   const onChange = jest.fn();
   const WrappedComponent = ({
-    sslRole = SSLRole.CLIENT,
+    tlsRole = TLSRole.CLIENT,
     isEnabled = true,
   }: {
-    sslRole?: SSLRole;
+    tlsRole?: TLSRole;
     isEnabled?: boolean;
   }) => {
     return (
-      <CertsField
-        onChange={onChange}
-        sslRole={sslRole}
-        defaultValues={defaultValues}
-        isEnabled={isEnabled}
-      />
+      <TLSFieldsContextProvider defaultValues={defaultValues}>
+        <TLSFields tlsRole={tlsRole} isEnabled={isEnabled} />
+      </TLSFieldsContextProvider>
     );
   };
-  it('renders CertsField', () => {
+  it('renders TLSFields', () => {
     const { getByLabelText, getByText } = render(<WrappedComponent />);
 
     expect(getByText('Certificate settings')).toBeInTheDocument();
@@ -73,12 +44,12 @@ describe('<CertsField />', () => {
   });
 
   it('handles role', () => {
-    const { getByLabelText, rerender } = render(<WrappedComponent sslRole={SSLRole.SERVER} />);
+    const { getByLabelText, rerender } = render(<WrappedComponent tlsRole={TLSRole.SERVER} />);
 
     expect(getByLabelText('Server certificate')).toBeInTheDocument();
     expect(getByLabelText('Server key')).toBeInTheDocument();
 
-    rerender(<WrappedComponent sslRole={SSLRole.CLIENT} />);
+    rerender(<WrappedComponent tlsRole={TLSRole.CLIENT} />);
   });
 
   it('updates fields and calls onChange', async () => {
@@ -116,35 +87,6 @@ describe('<CertsField />', () => {
     expect(clientKey.value).toEqual(newValues[ConfigKeys.TLS_KEY]);
     expect(certificateAuthorities.value).toEqual(newValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
     expect(verificationMode.value).toEqual(newValues[ConfigKeys.TLS_VERIFICATION_MODE]);
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        [ConfigKeys.TLS_CERTIFICATE]: {
-          value: newValues[ConfigKeys.TLS_CERTIFICATE],
-          isEnabled: true,
-        },
-        [ConfigKeys.TLS_KEY]: {
-          value: newValues[ConfigKeys.TLS_KEY],
-          isEnabled: true,
-        },
-        [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-          value: newValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-          isEnabled: true,
-        },
-        [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-          value: newValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-          isEnabled: true,
-        },
-        [ConfigKeys.TLS_VERIFICATION_MODE]: {
-          value: newValues[ConfigKeys.TLS_VERIFICATION_MODE],
-          isEnabled: true,
-        },
-        [ConfigKeys.TLS_VERSION]: {
-          value: defaultValues[ConfigKeys.TLS_VERSION].value,
-          isEnabled: true,
-        },
-      });
-    });
   });
 
   it('shows warning when verification mode is set to none', () => {
@@ -167,34 +109,5 @@ describe('<CertsField />', () => {
     expect(queryByLabelText('Client key passphrase')).not.toBeInTheDocument();
     expect(queryByLabelText('Certificate authorities')).not.toBeInTheDocument();
     expect(queryByLabelText('verification mode')).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        [ConfigKeys.TLS_CERTIFICATE]: {
-          value: defaultValues[ConfigKeys.TLS_CERTIFICATE].value,
-          isEnabled: false,
-        },
-        [ConfigKeys.TLS_KEY]: {
-          value: defaultValues[ConfigKeys.TLS_KEY].value,
-          isEnabled: false,
-        },
-        [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-          value: defaultValues[ConfigKeys.TLS_KEY_PASSPHRASE].value,
-          isEnabled: false,
-        },
-        [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-          value: defaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value,
-          isEnabled: false,
-        },
-        [ConfigKeys.TLS_VERIFICATION_MODE]: {
-          value: defaultValues[ConfigKeys.TLS_VERIFICATION_MODE].value,
-          isEnabled: false,
-        },
-        [ConfigKeys.TLS_VERSION]: {
-          value: defaultValues[ConfigKeys.TLS_VERSION].value,
-          isEnabled: false,
-        },
-      });
-    });
   });
 });

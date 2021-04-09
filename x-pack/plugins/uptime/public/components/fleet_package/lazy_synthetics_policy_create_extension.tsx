@@ -10,11 +10,11 @@ import { PackagePolicyCreateExtensionComponent } from '../../../../fleet/public'
 
 export const LazySyntheticsPolicyCreateExtension = lazy<PackagePolicyCreateExtensionComponent>(
   async () => {
-    const { SyntheticsPolicyCreateExtension } = await import(
-      './synthetics_policy_create_extension'
+    const { SyntheticsPolicyCreateExtensionWrapper } = await import(
+      './synthetics_policy_create_extension_wrapper'
     );
     return {
-      default: SyntheticsPolicyCreateExtension,
+      default: SyntheticsPolicyCreateExtensionWrapper,
     };
   }
 );

@@ -9,9 +9,21 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { defaultConfig } from './synthetics_policy_create_extension';
-import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
-import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import {
+  defaultSimpleFields,
+  defaultTLSFields,
+  defaultHTTPAdvancedFields,
+  defaultTCPAdvancedFields,
+} from './contexts';
+import { SyntheticsPolicyCreateExtensionWrapper } from './synthetics_policy_create_extension_wrapper';
+import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types';
+
+const defaultConfig = {
+  ...defaultSimpleFields,
+  ...defaultTLSFields,
+  ...defaultHTTPAdvancedFields,
+  ...defaultTCPAdvancedFields,
+};
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -257,7 +269,7 @@ const defaultNewPolicy: NewPackagePolicy = {
 describe('<SyntheticsPolicyCreateExtension />', () => {
   const onChange = jest.fn();
   const WrappedComponent = ({ newPolicy = defaultNewPolicy }) => {
-    return <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />;
+    return <SyntheticsPolicyCreateExtensionWrapper newPolicy={newPolicy} onChange={onChange} />;
   };
 
   it('renders SyntheticsPolicyCreateExtension', async () => {
@@ -597,6 +609,131 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
           isValid: true,
         })
       );
+    });
+  });
+
+  it('handles changing TLS fields', async () => {
+    const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
+
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith({
+        isValid: true,
+        updatedPolicy: {
+          ...defaultNewPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              streams: [
+                {
+                  ...defaultNewPolicy.inputs[0].streams[0],
+                  vars: {
+                    ...defaultNewPolicy.inputs[0].streams[0].vars,
+                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_CERTIFICATE]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY]: {
+                      value: null,
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                      value: null,
+                      type: 'text',
+                    },
+                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                      value: null,
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            defaultNewPolicy.inputs[1],
+            defaultNewPolicy.inputs[2],
+          ],
+        },
+      });
+    });
+
+    // ensure at least one http advanced option is present
+    fireEvent.click(enableSSL);
+
+    const ca = (await findByLabelText('Certificate authorities')) as HTMLInputElement;
+    const clientKey = (await findByLabelText('Client key')) as HTMLInputElement;
+    const clientKeyPassphrase = (await findByLabelText(
+      'Client key passphrase'
+    )) as HTMLInputElement;
+    const clientCertificate = (await findByLabelText('Client certificate')) as HTMLInputElement;
+    const verificationMode = (await findByLabelText('Verification mode')) as HTMLInputElement;
+
+    await waitFor(() => {
+      fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
+      expect(ca.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
+      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientKey, { target: { value: 'clientKey' } });
+      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
+      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
+      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value);
+    });
+
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith({
+        isValid: true,
+        updatedPolicy: {
+          ...defaultNewPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              streams: [
+                {
+                  ...defaultNewPolicy.inputs[0].streams[0],
+                  vars: {
+                    ...defaultNewPolicy.inputs[0].streams[0].vars,
+                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                      value: '"certificateAuthorities"',
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_CERTIFICATE]: {
+                      value: '"clientCertificate"',
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY]: {
+                      value: '"clientKey"',
+                      type: 'yaml',
+                    },
+                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                      value: 'clientKeyPassphrase',
+                      type: 'text',
+                    },
+                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                      value: VerificationMode.NONE,
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            defaultNewPolicy.inputs[1],
+            defaultNewPolicy.inputs[2],
+          ],
+        },
+      });
     });
   });
 });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, memo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useCallback, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
@@ -17,32 +16,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ConfigKeys, Config, ITCPAdvancedFields } from './types';
+import { TCPAdvancedFieldsContext } from './contexts';
+
+import { ConfigKeys } from './types';
 
 import { OptionalLabel } from './optional_label';
 import { ComboBox } from './combo_box';
 
-interface Props {
-  defaultValues: ITCPAdvancedFields;
-  onChange: (values: Partial<Config>) => void;
-}
-
-export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
-  const [fields, setFields] = useState<ITCPAdvancedFields>(defaultValues);
+export const TCPAdvancedFields = () => {
+  const { fields, setFields } = useContext(TCPAdvancedFieldsContext);
 
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
-  );
-
-  useDebounce(
-    () => {
-      onChange(fields);
-    },
-    250,
-    [fields]
   );
 
   return (
@@ -184,4 +172,4 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
       </EuiDescribedFormGroup>
     </EuiAccordion>
   );
-});
+};

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, memo } from 'react';
+import React, { useContext, useEffect, useState, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,22 +22,22 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { TLSFieldsContext } from './contexts';
+
+import { VerificationMode, ConfigKeys, TLSVersion } from './types';
+
 import { OptionalLabel } from './optional_label';
 
-import { VerificationMode, ConfigKeys, ITLSFields, TLSVersion } from './types';
-
-export enum SSLRole {
+export enum TLSRole {
   CLIENT = 'client',
   SERVER = 'server',
 }
 
-export const CertsField: React.FunctionComponent<{
-  defaultValues: ITLSFields;
+export const TLSFields: React.FunctionComponent<{
   isEnabled: boolean;
-  onChange: (newValue: any) => void;
-  sslRole: SSLRole;
-}> = memo(({ defaultValues, isEnabled, onChange, sslRole = SSLRole.CLIENT }) => {
-  const [fields, setFields] = useState<ITLSFields>(defaultValues);
+  tlsRole: TLSRole;
+}> = memo(({ isEnabled, tlsRole }) => {
+  const { fields, setFields } = useContext(TLSFieldsContext);
   const [
     verificationVersionInputRef,
     setVerificationVersionInputRef,
@@ -46,13 +45,6 @@ export const CertsField: React.FunctionComponent<{
   const [hasVerificationVersionError, setHasVerificationVersionError] = useState<
     string | undefined
   >(undefined);
-  useDebounce(
-    () => {
-      onChange(fields);
-    },
-    250,
-    [onChange, fields]
-  );
 
   useEffect(() => {
     setFields((prevFields) => ({
@@ -81,7 +73,7 @@ export const CertsField: React.FunctionComponent<{
         isEnabled,
       },
     }));
-  }, [isEnabled]);
+  }, [isEnabled, setFields]);
 
   const onVerificationVersionChange = (
     selectedVersionOptions: Array<EuiComboBoxOptionOption<TLSVersion>>
@@ -232,12 +224,22 @@ export const CertsField: React.FunctionComponent<{
               },
             }));
           }}
+          onBlur={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                value: value.trim(),
+                isEnabled: true,
+              },
+            }));
+          }}
         />
       </EuiFormRow>
       <EuiFormRow
         label={
           <>
-            {sslRoleLabels[sslRole]}{' '}
+            {tlsRoleLabels[tlsRole]}{' '}
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.label"
               defaultMessage="certificate"
@@ -264,12 +266,22 @@ export const CertsField: React.FunctionComponent<{
               },
             }));
           }}
+          onBlur={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_CERTIFICATE]: {
+                value: value.trim(),
+                isEnabled: true,
+              },
+            }));
+          }}
         />
       </EuiFormRow>
       <EuiFormRow
         label={
           <>
-            {sslRoleLabels[sslRole]}{' '}
+            {tlsRoleLabels[tlsRole]}{' '}
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.label"
               defaultMessage="key"
@@ -296,12 +308,22 @@ export const CertsField: React.FunctionComponent<{
               },
             }));
           }}
+          onBlur={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_KEY]: {
+                value: value.trim(),
+                isEnabled: true,
+              },
+            }));
+          }}
         />
       </EuiFormRow>
       <EuiFormRow
         label={
           <>
-            {sslRoleLabels[sslRole]}{' '}
+            {tlsRoleLabels[tlsRole]}{' '}
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.label"
               defaultMessage="key passphrase"
@@ -334,16 +356,16 @@ export const CertsField: React.FunctionComponent<{
   ) : null;
 });
 
-const sslRoleLabels = {
-  [SSLRole.CLIENT]: (
+const tlsRoleLabels = {
+  [TLSRole.CLIENT]: (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.sslRole.client"
+      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.tlsRole.client"
       defaultMessage="Client"
     />
   ),
-  [SSLRole.SERVER]: (
+  [TLSRole.SERVER]: (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.sslRole.server"
+      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.tlsRole.server"
       defaultMessage="Server"
     />
   ),

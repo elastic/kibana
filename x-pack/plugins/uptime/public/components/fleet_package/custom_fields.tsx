@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, memo } from 'react';
+import React, { useContext, useEffect, useState, memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -19,9 +19,9 @@ import {
   EuiDescribedFormGroup,
   EuiCheckbox,
 } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
-import { CertsField, SSLRole } from './certs_field';
-import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
+import { ConfigKeys, DataStream, ISimpleFields, Validation } from './types';
+import { SimpleFieldsContext } from './contexts';
+import { TLSFields, TLSRole } from './tls_fields';
 import { ComboBox } from './combo_box';
 import { OptionalLabel } from './optional_label';
 import { HTTPAdvancedFields } from './http_advanced_fields';
@@ -29,23 +29,15 @@ import { TCPAdvancedFields } from './tcp_advanced_fields';
 import { ScheduleField } from './schedule_field';
 
 interface Props {
-  defaultValues: ICustomFields;
   typeEditable?: boolean;
   isTLSEnabled?: boolean;
-  onChange: (fields: ICustomFields) => void;
   validate: Validation;
 }
 
 export const CustomFields = memo<Props>(
-  ({
-    defaultValues,
-    typeEditable = false,
-    isTLSEnabled: defaultIsTLSEnabled = false,
-    validate,
-    onChange,
-  }) => {
+  ({ typeEditable = false, isTLSEnabled: defaultIsTLSEnabled = false, validate }) => {
     const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
-    const [fields, setFields] = useState<ICustomFields>(defaultValues);
+    const { fields, setFields, defaultValues } = useContext(SimpleFieldsContext);
     const { type } = fields;
 
     const isHTTP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP;
@@ -54,33 +46,16 @@ export const CustomFields = memo<Props>(
 
     // reset monitor type specific fields any time a monitor type is switched
     useEffect(() => {
-      setFields((prevFields) => ({
+      setFields((prevFields: ISimpleFields) => ({
         ...prevFields,
         [ConfigKeys.HOSTS]: defaultValues[ConfigKeys.HOSTS],
         [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
       }));
-    }, [defaultValues, type]);
-
-    useDebounce(
-      () => {
-        onChange(fields);
-      },
-      250,
-      [onChange, fields]
-    );
+    }, [defaultValues, type, setFields]);
 
     const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     };
-
-    const onChangeAdvancedFields = useCallback(
-      (values: Partial<ICustomFields>) =>
-        setFields((prevFields) => ({
-          ...prevFields,
-          ...values,
-        })),
-      [setFields]
-    );
 
     return (
       <EuiForm component="form">
@@ -421,57 +396,12 @@ export const CustomFields = memo<Props>(
               }
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />
-            <CertsField
-              onChange={onChangeAdvancedFields}
-              sslRole={SSLRole.CLIENT}
-              isEnabled={isTLSEnabled}
-              defaultValues={{
-                [ConfigKeys.TLS_VERIFICATION_MODE]: defaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
-                [ConfigKeys.TLS_VERSION]: defaultValues[ConfigKeys.TLS_VERSION],
-                [ConfigKeys.TLS_KEY]: defaultValues[ConfigKeys.TLS_KEY],
-                [ConfigKeys.TLS_CERTIFICATE]: defaultValues[ConfigKeys.TLS_CERTIFICATE],
-                [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-                  defaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-                [ConfigKeys.TLS_KEY_PASSPHRASE]: defaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-              }}
-            />
+            <TLSFields tlsRole={TLSRole.CLIENT} isEnabled={isTLSEnabled} />
           </EuiDescribedFormGroup>
         )}
         <EuiSpacer size="m" />
-        {isHTTP && (
-          <HTTPAdvancedFields
-            defaultValues={{
-              [ConfigKeys.PASSWORD]: defaultValues[ConfigKeys.PASSWORD],
-              [ConfigKeys.PROXY_URL]: defaultValues[ConfigKeys.PROXY_URL],
-              [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]:
-                defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE],
-              [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]:
-                defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE],
-              [ConfigKeys.RESPONSE_BODY_INDEX]: defaultValues[ConfigKeys.RESPONSE_BODY_INDEX],
-              [ConfigKeys.RESPONSE_HEADERS_CHECK]: defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK],
-              [ConfigKeys.RESPONSE_HEADERS_INDEX]: defaultValues[ConfigKeys.RESPONSE_HEADERS_INDEX],
-              [ConfigKeys.RESPONSE_STATUS_CHECK]: defaultValues[ConfigKeys.RESPONSE_STATUS_CHECK],
-              [ConfigKeys.REQUEST_BODY_CHECK]: defaultValues[ConfigKeys.REQUEST_BODY_CHECK],
-              [ConfigKeys.REQUEST_HEADERS_CHECK]: defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK],
-              [ConfigKeys.REQUEST_METHOD_CHECK]: defaultValues[ConfigKeys.REQUEST_METHOD_CHECK],
-              [ConfigKeys.USERNAME]: defaultValues[ConfigKeys.USERNAME],
-            }}
-            onChange={onChangeAdvancedFields}
-            validate={validate}
-          />
-        )}
-        {isTCP && (
-          <TCPAdvancedFields
-            defaultValues={{
-              [ConfigKeys.PROXY_URL]: defaultValues[ConfigKeys.PROXY_URL],
-              [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]:
-                defaultValues[ConfigKeys.PROXY_USE_LOCAL_RESOLVER],
-              [ConfigKeys.REQUEST_SEND_CHECK]: defaultValues[ConfigKeys.REQUEST_SEND_CHECK],
-              [ConfigKeys.RESPONSE_RECEIVE_CHECK]: defaultValues[ConfigKeys.RESPONSE_RECEIVE_CHECK],
-            }}
-            onChange={onChangeAdvancedFields}
-          />
-        )}
+        {isHTTP && <HTTPAdvancedFields validate={validate} />}
+        {isTCP && <TCPAdvancedFields />}
       </EuiForm>
     );
   }

@@ -6,48 +6,34 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { HTTPAdvancedFields } from './http_advanced_fields';
+import { ConfigKeys, DataStream, HTTPMethod, IHTTPAdvancedFields, Validation } from './types';
 import {
-  ConfigKeys,
-  DataStream,
-  HTTPMethod,
-  Mode,
-  ResponseBodyIndexPolicy,
-  IHTTPAdvancedFields,
-} from './types';
+  HTTPAdvancedFieldsContextProvider,
+  defaultHTTPAdvancedFields as defaultConfig,
+} from './contexts';
 import { validate as centralValidation } from './validation';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-const defaultConfig: IHTTPAdvancedFields = {
-  [ConfigKeys.PASSWORD]: 'password',
-  [ConfigKeys.PROXY_URL]: 'test',
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: {},
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: true,
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: [], // may need to make sure that this field is not applied when length is 0
-  [ConfigKeys.REQUEST_BODY_CHECK]: {
-    value: '',
-    type: Mode.TEXT,
-  },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
-  [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
-  [ConfigKeys.USERNAME]: 'password',
-};
-
 const defaultValidation = centralValidation[DataStream.HTTP];
 
 describe('<HTTPAdvancedFields />', () => {
-  const onChange = jest.fn();
-  const WrappedComponent = ({ defaultValues = defaultConfig, validate = defaultValidation }) => {
+  const WrappedComponent = ({
+    defaultValues,
+    validate = defaultValidation,
+  }: {
+    defaultValues?: IHTTPAdvancedFields;
+    validate?: Validation;
+  }) => {
     return (
-      <HTTPAdvancedFields defaultValues={defaultValues} onChange={onChange} validate={validate} />
+      <HTTPAdvancedFieldsContextProvider defaultValues={defaultValues}>
+        <HTTPAdvancedFields validate={validate} />
+      </HTTPAdvancedFieldsContextProvider>
     );
   };
 
@@ -94,34 +80,27 @@ describe('<HTTPAdvancedFields />', () => {
   it('handles changing fields', () => {
     const { getByText, getByLabelText } = render(<WrappedComponent />);
 
+    const username = getByLabelText('Username') as HTMLInputElement;
+    const password = getByLabelText('Password') as HTMLInputElement;
+    const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const requestMethod = getByLabelText('Request method') as HTMLInputElement;
     const requestHeaders = getByText('Request headers');
     const indexResponseBody = getByLabelText('Index response body') as HTMLInputElement;
     const indexResponseHeaders = getByLabelText('Index response headers') as HTMLInputElement;
 
+    fireEvent.change(username, { target: { value: 'username' } });
+    fireEvent.change(password, { target: { value: 'password' } });
+    fireEvent.change(proxyUrl, { target: { value: 'proxyUrl' } });
     fireEvent.change(requestMethod, { target: { value: HTTPMethod.POST } });
     fireEvent.click(indexResponseBody);
     fireEvent.click(indexResponseHeaders);
 
+    expect(username.value).toEqual('username');
+    expect(password.value).toEqual('password');
+    expect(proxyUrl.value).toEqual('proxyUrl');
     expect(requestMethod.value).toEqual(HTTPMethod.POST);
     expect(requestHeaders).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(false);
     expect(indexResponseHeaders.checked).toBe(false);
-  });
-
-  it('handles onChange', async () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-
-    const requestMethod = getByLabelText('Request method') as HTMLInputElement;
-
-    fireEvent.change(requestMethod, { target: { value: HTTPMethod.POST } });
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith(
-        expect.objectContaining({
-          [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.POST,
-        })
-      );
-    });
   });
 });
