@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
@@ -65,26 +64,20 @@ describe('Users Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <UsersTable
-              data={mockUsersData.edges}
-              flowTarget={FlowTarget.source}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
-              id="user"
-              isInspect={false}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockUsersData.pageInfo
-              )}
-              totalCount={1}
-              type={networkModel.NetworkType.details}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <UsersTable
+            data={mockUsersData.edges}
+            flowTarget={FlowTarget.source}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            id="user"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
+            totalCount={1}
+            type={networkModel.NetworkType.details}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',

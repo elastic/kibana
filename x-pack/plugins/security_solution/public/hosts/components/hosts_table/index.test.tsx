@@ -7,7 +7,6 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../../common/mock/match_media';
 import {
@@ -73,21 +72,19 @@ describe('Hosts Table', () => {
 
       beforeEach(() => {
         wrapper = mount(
-          <MockedProvider>
-            <TestProviders store={store}>
-              <HostsTable
-                id="hostsQuery"
-                isInspect={false}
-                loading={false}
-                data={mockData}
-                totalCount={0}
-                fakeTotalCount={-1}
-                showMorePagesIndicator={false}
-                loadPage={loadPage}
-                type={hostsModel.HostsType.page}
-              />
-            </TestProviders>
-          </MockedProvider>
+          <TestProviders store={store}>
+            <HostsTable
+              id="hostsQuery"
+              isInspect={false}
+              loading={false}
+              data={mockData}
+              totalCount={0}
+              fakeTotalCount={-1}
+              showMorePagesIndicator={false}
+              loadPage={loadPage}
+              type={hostsModel.HostsType.page}
+            />
+          </TestProviders>
         );
       });
       test('Initial value of the store', () => {

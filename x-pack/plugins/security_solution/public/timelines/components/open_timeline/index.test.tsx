@@ -10,7 +10,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
@@ -597,14 +596,12 @@ describe('StatefulOpenTimeline', () => {
   test('it renders the expected count of matching timelines when no query has been entered', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider addTypename={false}>
-          <StatefulOpenTimeline
-            data-test-subj="stateful-timeline"
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          isModal={false}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={title}
+        />
       </TestProviders>
     );
 

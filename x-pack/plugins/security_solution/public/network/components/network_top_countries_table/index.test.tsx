@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
@@ -96,27 +95,25 @@ describe('NetworkTopCountries Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopCountriesTable
-              data={mockData.NetworkTopCountries.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
-              flowTargeted={FlowTargetSourceDest.source}
-              id="topCountriesSource"
-              isInspect={false}
-              indexPattern={mockIndexPattern}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkTopCountries.pageInfo
-              )}
-              totalCount={mockData.NetworkTopCountries.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <NetworkTopCountriesTable
+            data={mockData.NetworkTopCountries.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topCountriesSource"
+            isInspect={false}
+            indexPattern={mockIndexPattern}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopCountries.pageInfo
+            )}
+            totalCount={mockData.NetworkTopCountries.totalCount}
+            type={networkModel.NetworkType.page}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
         direction: 'desc',

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
-
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
@@ -54,7 +52,6 @@ export interface UpdateAlertStatusActionProps {
 }
 
 export interface SendAlertToTimelineActionProps {
-  apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
   ecsData: Ecs | Ecs[];
   nonEcsData: TimelineNonEcsData[];

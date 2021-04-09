@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
@@ -87,22 +86,20 @@ describe('NetworkTopNFlow Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopNFlowTable
-              data={mockData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-              flowTargeted={FlowTargetSourceDest.source}
-              id="topNFlowSource"
-              isInspect={false}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-              totalCount={mockData.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <NetworkTopNFlowTable
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topNFlowSource"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
+            type={networkModel.NetworkType.page}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
         direction: 'desc',

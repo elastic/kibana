@@ -6,7 +6,6 @@
  */
 
 import { IndicesGetMappingParams } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
 
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
@@ -26,7 +25,6 @@ export * from '../../utils/typed_resolvers';
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
     method: 'search',
