@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
+      require.resolve('./test_suites/usage_collection'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -59,6 +60,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--corePluginDeprecations.oldProperty=hello',
         '--corePluginDeprecations.secret=100',
         '--corePluginDeprecations.noLongerUsed=still_using',
+        // for testing set debounce to 0 to immediately flush counters into saved objects.
+        '--usageCollection.usageCounters.bufferDebounceMs=0',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

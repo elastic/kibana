@@ -19,6 +19,18 @@ export {
   CollectorFetchContext,
 } from './collector';
 
+export type {
+  UsageCountersSavedObject,
+  UsageCountersSavedObjectAttributes,
+} from './usage_counters';
+
+export {
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  serializeCounterKey,
+  deserializeCounterKey,
+  UsageCounter,
+} from './usage_counters';
+
 export { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>

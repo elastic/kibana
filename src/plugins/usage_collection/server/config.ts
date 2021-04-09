@@ -11,6 +11,11 @@ import { PluginConfigDescriptor } from 'src/core/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({
+  usageCounters: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    retryCount: schema.number({ defaultValue: 1 }),
+    bufferDebounceMs: schema.number({ defaultValue: 30 * 1000 }),
+  }),
   uiCounters: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),

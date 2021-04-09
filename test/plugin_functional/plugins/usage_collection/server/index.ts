@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { CollectorSet } from './collector_set';
-export {
-  Collector,
-  AllowedSchemaTypes,
-  AllowedSchemaNumberTypes,
-  SchemaField,
-  MakeSchemaFrom,
-  CollectorOptions,
-  CollectorFetchContext,
-} from './collector';
-export { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { UsageCollectionTestPlugin } from './plugin';
+
+export { config } from './config';
+export const plugin = () => new UsageCollectionTestPlugin();

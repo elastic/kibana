@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { CollectorSet } from './collector_set';
-export {
-  Collector,
-  AllowedSchemaTypes,
-  AllowedSchemaNumberTypes,
-  SchemaField,
-  MakeSchemaFrom,
-  CollectorOptions,
-  CollectorFetchContext,
-} from './collector';
-export { UsageCollector, UsageCollectorOptions } from './usage_collector';
+export const serializeUiCounterName = ({
+  appName,
+  eventName,
+}: {
+  appName: string;
+  eventName: string;
+}) => {
+  return `${appName}:${eventName}`;
+};
+
+export const deserializeUiCounterName = (key: string) => {
+  const [appName, ...restKey] = key.split(':');
+  const eventName = restKey.join(':');
+  return { appName, eventName };
+};

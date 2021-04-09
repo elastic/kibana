@@ -34,6 +34,8 @@ import {
   registerUiCountersUsageCollector,
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
+  registerUsageCountersRollups,
+  registerUsageCountersUsageCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -57,6 +59,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    usageCollection.createUsageCounter('uiCounters');
+
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,
@@ -91,6 +95,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerUiCounterSavedObjectType(coreSetup.savedObjects);
     registerUiCountersRollups(this.logger.get('ui-counters'), getSavedObjectsClient);
     registerUiCountersUsageCollector(usageCollection);
+
+    registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
+    registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);

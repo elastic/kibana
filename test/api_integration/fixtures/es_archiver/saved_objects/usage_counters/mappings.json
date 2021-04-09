@@ -28,13 +28,6 @@
             }
           }
         },
-        "ui-counter": {
-          "properties": {
-            "count": {
-              "type": "integer"
-            }
-          }
-        },
         "usage-counters": {
           "properties": {
             "count": {

@@ -19,3 +19,7 @@ export {
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
 } from './ui_counters';
+export {
+  registerUsageCountersRollups,
+  registerUsageCountersUsageCollector,
+} from './usage_counters';

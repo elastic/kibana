@@ -7,16 +7,16 @@
  */
 
 import moment from 'moment';
-import * as Rx from 'rxjs';
-import { isSavedObjectOlderThan, rollUiCounterIndices } from './rollups';
+import { isSavedObjectOlderThan, rollUsageCountersIndices } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
-import { SavedObjectsFindResult } from 'kibana/server';
+import { SavedObjectsFindResult } from '../../../../../../core/server';
 
 import {
-  UICounterSavedObjectAttributes,
-  UI_COUNTER_SAVED_OBJECT_TYPE,
-} from '../ui_counter_saved_object_type';
-import { UI_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
+  UsageCountersSavedObjectAttributes,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+} from '../../../../../usage_collection/server';
+
+import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 
 const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
   ({
@@ -29,7 +29,7 @@ const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
     updated_at: updatedAt.format(),
     version: 'WzI5LDFd',
     score: 0,
-  } as SavedObjectsFindResult<UICounterSavedObjectAttributes>);
+  } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);
 
 describe('isSavedObjectOlderThan', () => {
   it(`returns true if doc is older than x days`, () => {
@@ -69,54 +69,36 @@ describe('isSavedObjectOlderThan', () => {
   });
 });
 
-describe('rollUiCounterIndices', () => {
+describe('rollUsageCountersIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
-  let stopRollingUiCounterIndicies$: Rx.Subject<void>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     savedObjectClient = savedObjectsRepositoryMock.create();
-    stopRollingUiCounterIndicies$ = new Rx.Subject();
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollUiCounterIndices(logger, undefined)).resolves.toBe(undefined);
+    await expect(rollUsageCountersIndices(logger, undefined)).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
   it('does not delete any documents on empty saved objects', async () => {
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case UI_COUNTER_SAVED_OBJECT_TYPE:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: [], total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
-    ).resolves.toEqual([]);
+    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual([]);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
-  it('calls Subject complete() on empty saved objects', async () => {
-    savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
-      switch (type) {
-        case UI_COUNTER_SAVED_OBJECT_TYPE:
-          return { saved_objects: [], total: 0, page, per_page: perPage };
-        default:
-          throw new Error(`Unexpected type [${type}]`);
-      }
-    });
-    await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
-    ).resolves.toEqual([]);
-    expect(stopRollingUiCounterIndicies$.isStopped).toBe(true);
-  });
 
-  it(`deletes documents older than ${UI_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
+  it(`deletes documents older than ${USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
     const mockSavedObjects = [
       createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(1, 'days'), 'doc-id-2'),
@@ -125,25 +107,23 @@ describe('rollUiCounterIndices', () => {
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case UI_COUNTER_SAVED_OBJECT_TYPE:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
-    ).resolves.toHaveLength(2);
+    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toHaveLength(2);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       1,
-      UI_COUNTER_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
     );
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       2,
-      UI_COUNTER_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-3'
     );
     expect(logger.warn).toHaveBeenCalledTimes(0);
@@ -153,9 +133,7 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.find.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
-    ).resolves.toEqual(undefined);
+    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
     expect(logger.warn).toHaveBeenCalledTimes(2);
@@ -166,7 +144,7 @@ describe('rollUiCounterIndices', () => {
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case UI_COUNTER_SAVED_OBJECT_TYPE:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
@@ -175,14 +153,12 @@ describe('rollUiCounterIndices', () => {
     savedObjectClient.delete.mockImplementation(async () => {
       throw new Error(`Expected error!`);
     });
-    await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
-    ).resolves.toEqual(undefined);
+    await expect(rollUsageCountersIndices(logger, savedObjectClient)).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       1,
-      UI_COUNTER_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
     );
     expect(logger.warn).toHaveBeenCalledTimes(2);

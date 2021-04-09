@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { CollectorSet } from './collector_set';
-export {
-  Collector,
-  AllowedSchemaTypes,
-  AllowedSchemaNumberTypes,
-  SchemaField,
-  MakeSchemaFrom,
-  CollectorOptions,
-  CollectorFetchContext,
-} from './collector';
-export { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+};

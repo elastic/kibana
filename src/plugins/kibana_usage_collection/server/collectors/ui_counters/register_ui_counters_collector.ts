@@ -7,12 +7,28 @@
  */
 
 import moment from 'moment';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { chain } from 'lodash';
+
 import {
   UICounterSavedObject,
   UICounterSavedObjectAttributes,
   UI_COUNTER_SAVED_OBJECT_TYPE,
 } from './ui_counter_saved_object_type';
+
+import {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  UsageCountersSavedObject,
+  UsageCountersSavedObjectAttributes,
+  deserializeCounterKey,
+  serializeCounterKey,
+} from '../../../../usage_collection/server';
+
+import {
+  deserializeUiCounterName,
+  serializeUiCounterName,
+} from '../../../../usage_collection/common/ui_counters';
 
 interface UiCounterEvent {
   appName: string;
@@ -27,12 +43,20 @@ export interface UiCountersUsage {
   dailyEvents: UiCounterEvent[];
 }
 
-export function transformRawCounter(rawUiCounter: UICounterSavedObject) {
-  const { id, attributes, updated_at: lastUpdatedAt } = rawUiCounter;
+export function transformRawUiCounterObject(
+  rawUiCounter: UICounterSavedObject
+): UiCounterEvent | undefined {
+  const {
+    id,
+    attributes: { count },
+    updated_at: lastUpdatedAt,
+  } = rawUiCounter;
+  if (typeof count !== 'number' || count < 1) {
+    return;
+  }
+
   const [appName, , counterType, ...restId] = id.split(':');
   const eventName = restId.join(':');
-  const counterTotal: unknown = attributes.count;
-  const total = typeof counterTotal === 'number' ? counterTotal : 0;
   const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
 
   return {
@@ -41,7 +65,101 @@ export function transformRawCounter(rawUiCounter: UICounterSavedObject) {
     lastUpdatedAt,
     fromTimestamp,
     counterType,
-    total,
+    total: count,
+  };
+}
+
+export function transformRawUsageCounterObject(
+  rawUsageCounter: UsageCountersSavedObject
+): UiCounterEvent | undefined {
+  const {
+    id,
+    attributes: { count },
+    updated_at: lastUpdatedAt,
+  } = rawUsageCounter;
+  const { counterName, counterType, domainId } = deserializeCounterKey(id);
+
+  if (domainId !== 'uiCounter' || typeof count !== 'number' || count < 1) {
+    return;
+  }
+
+  const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
+  const { appName, eventName } = deserializeUiCounterName(counterName);
+
+  return {
+    appName,
+    eventName,
+    lastUpdatedAt,
+    fromTimestamp,
+    counterType,
+    total: count,
+  };
+}
+
+export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
+  const {
+    saved_objects: rawUsageCounters,
+  } = await soClient.find<UsageCountersSavedObjectAttributes>({
+    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    fields: ['count'],
+    perPage: 10000,
+  });
+
+  const { saved_objects: rawUiCounters } = await soClient.find<UICounterSavedObjectAttributes>({
+    type: UI_COUNTER_SAVED_OBJECT_TYPE,
+    fields: ['count'],
+    perPage: 10000,
+  });
+
+  const dailyEventsFromUiCounters = rawUiCounters.reduce((acc, raw) => {
+    try {
+      const event = transformRawUiCounterObject(raw);
+      if (event) {
+        const { appName, eventName, counterType } = event;
+        const key = serializeCounterKey({
+          domainId: 'uiCounters',
+          counterName: serializeUiCounterName({ appName, eventName }),
+          counterType,
+          date: moment(event.fromTimestamp).format('DDMMYYYY'),
+        });
+
+        acc[key] = event;
+      }
+    } catch (_) {
+      // swallow error; allows sending successfully transformed objects.
+    }
+    return acc;
+  }, {} as Record<string, UiCounterEvent>);
+
+  const dailyEventsFromUsageCounters = rawUsageCounters.reduce((acc, raw) => {
+    try {
+      const event = transformRawUsageCounterObject(raw);
+      if (event) {
+        acc[raw.id] = event;
+      }
+    } catch (_) {
+      // swallow error; allows sending successfully transformed objects.
+    }
+    return acc;
+  }, {} as Record<string, UiCounterEvent>);
+
+  return {
+    dailyEvents: chain(dailyEventsFromUsageCounters)
+      .mergeWith(
+        dailyEventsFromUiCounters,
+        (value: UiCounterEvent | undefined, srcValue: UiCounterEvent): UiCounterEvent => {
+          if (!value) {
+            return srcValue;
+          }
+
+          return {
+            ...srcValue,
+            total: srcValue.total + value.total,
+          };
+        }
+      )
+      .values()
+      .value(),
   };
 }
 
@@ -76,25 +194,7 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
         },
       },
     },
-    fetch: async ({ soClient }: CollectorFetchContext) => {
-      const { saved_objects: rawUiCounters } = await soClient.find<UICounterSavedObjectAttributes>({
-        type: UI_COUNTER_SAVED_OBJECT_TYPE,
-        fields: ['count'],
-        perPage: 10000,
-      });
-
-      return {
-        dailyEvents: rawUiCounters.reduce((acc, raw) => {
-          try {
-            const aggEvent = transformRawCounter(raw);
-            acc.push(aggEvent);
-          } catch (_) {
-            // swallow error; allows sending successfully transformed objects.
-          }
-          return acc;
-        }, [] as UiCounterEvent[]),
-      };
-    },
+    fetch: fetchUiCounters,
     isReady: () => true,
   });
 
