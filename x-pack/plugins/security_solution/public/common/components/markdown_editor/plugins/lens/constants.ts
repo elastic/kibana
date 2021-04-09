@@ -7,3 +7,4 @@
 
 export const ID = 'lens';
 export const PREFIX = `[`;
+export const LENS_VISUALIZATION_HEIGHT = 200;

@@ -5,33 +5,61 @@
  * 2.0.
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
-import { EuiToolTip, EuiLink, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import uuid from 'uuid';
+import React from 'react';
+import { EuiText, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
+import { Moment } from 'moment';
 
-// import { useLensClick } from '../../../../utils/lens/use_lens_click';
-import { LensProps } from './types';
-import * as i18n from './translations';
+import { EmbeddableComponentProps } from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
+import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
-export const LensMarkDownRendererComponent: React.FC<
-  LensProps & {
-    position: EuiMarkdownAstNodePosition;
-  }
-> = ({ id, title, graphEventId }) => {
+const Container = styled.div`
+  min-height: ${LENS_VISUALIZATION_HEIGHT}px;
+`;
+
+interface LensMarkDownRendererProps {
+  id?: string | null;
+  title?: string | null;
+  startDate?: Moment | null;
+  endDate?: Moment | null;
+  onBrushEnd?: EmbeddableComponentProps['onBrushEnd'];
+}
+
+const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
+  id,
+  title,
+  startDate,
+  endDate,
+  onBrushEnd,
+}) => {
   const kibana = useKibana();
   const LensComponent = kibana?.services?.lens?.EmbeddableComponent!;
 
   return (
-    <LensComponent
-      id=""
-      style={{ height: 200 }}
-      timeRange={{
-        from: 'now-5d',
-        to: 'now',
-      }}
-      savedObjectId={id}
-    />
+    <Container>
+      {id ? (
+        <>
+          <EuiText>
+            <h5>{title}</h5>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <LensComponent
+            id={`${id}-${uuid.v4()}`}
+            style={{ height: LENS_VISUALIZATION_HEIGHT }}
+            timeRange={{
+              from: startDate ?? 'now-5d',
+              to: endDate ?? 'now',
+              mode: startDate ? 'absolute' : 'relative',
+            }}
+            savedObjectId={id}
+            onBrushEnd={onBrushEnd}
+          />
+        </>
+      ) : null}
+    </Container>
   );
 };
 
-export const LensMarkDownRenderer = LensMarkDownRendererComponent;
+export const LensMarkDownRenderer = React.memo(LensMarkDownRendererComponent);

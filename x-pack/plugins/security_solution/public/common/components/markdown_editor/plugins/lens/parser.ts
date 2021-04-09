@@ -7,10 +7,6 @@
 
 import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
-import { parse } from 'query-string';
-import { decodeRisonUrlState } from '../../../url_state/helpers';
-import { ID, PREFIX } from './constants';
-import * as i18n from './translations';
 
 export const LensParser: Plugin = function () {
   const Parser = this.Parser;
