@@ -11,18 +11,7 @@ import React, { FC } from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../common';
-
-export interface ErrorResponse {
-  // TODO MOVE THIS OR REPLACE WITH COMMON RESPONSE
-  body: {
-    statusCode: number;
-    error: string;
-    message: string;
-    attributes?: any;
-  };
-  name: string;
-}
+import { FILE_SIZE_DISPLAY_FORMAT, FindFileStructureErrorResponse } from '../../../../common';
 
 interface FileTooLargeProps {
   fileSize: number;
@@ -86,7 +75,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
 };
 
 interface FileCouldNotBeReadProps {
-  error: ErrorResponse;
+  error: FindFileStructureErrorResponse;
   loaded: boolean;
   showEditFlyout(): void;
 }
@@ -142,7 +131,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
   );
 };
 
-export const Explanation: FC<{ error: ErrorResponse }> = ({ error }) => {
+export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ error }) => {
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }

@@ -76,6 +76,16 @@ export interface FindFileStructureResponse {
   should_trim_fields?: boolean;
 }
 
+export interface FindFileStructureErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes?: any;
+  };
+  name: string;
+}
+
 export type InputData = any[];
 
 export interface ImportResponse {
@@ -131,21 +141,7 @@ export interface IngestPipeline {
 
 export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
 
-// interface ListingPageUrlState {
-//   pageSize: number;
-//   pageIndex: number;
-//   sortField: string;
-//   sortDirection: string;
-//   queryText?: string;
-// }
-
-// export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
-//   visibleFieldTypes?: string[];
-//   visibleFieldNames?: string[];
-//   showDistributions?: boolean;
-// }
-
-export interface DataVisualizeTableState {
+export interface DataVisualizerTableState {
   pageSize: number;
   pageIndex: number;
   sortField: string;

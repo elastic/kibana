@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { ML_JOB_FIELD_TYPES, MlJobFieldType, DataVisualizeTableState } from '../../../../common';
+import { ML_JOB_FIELD_TYPES, MlJobFieldType, DataVisualizerTableState } from '../../../../common';
 import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
@@ -44,8 +44,8 @@ export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
 interface DataVisualizerTableProps<T> {
   items: T[];
-  pageState: DataVisualizeTableState;
-  updatePageState: (update: DataVisualizeTableState) => void;
+  pageState: DataVisualizerTableState;
+  updatePageState: (update: DataVisualizerTableState) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
 }
@@ -240,7 +240,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandAll, showDistributions, updatePageState, extendedColumns]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
@@ -249,7 +249,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       itemIds = items.map((i) => i[FIELD_NAME]).filter((f) => f !== undefined) as string[];
     }
     return getItemIdToExpandedRowMap(itemIds, items);
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandAll, items, expandedRowItemIds]);
 
   return (

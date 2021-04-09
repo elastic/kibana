@@ -7,7 +7,7 @@
 
 import React, { useMemo, FC, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse, DataVisualizeTableState } from '../../../../common';
+import type { FindFileStructureResponse, DataVisualizerTableState } from '../../../../common';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import type { FileBasedFieldVisConfig } from '../stats_table/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
@@ -22,7 +22,7 @@ interface Props {
   results: FindFileStructureResponse;
 }
 
-export const getDefaultDataVisualizerListState = (): DataVisualizeTableState => ({
+export const getDefaultDataVisualizerListState = (): DataVisualizerTableState => ({
   pageIndex: 0,
   pageSize: 10,
   sortField: 'fieldName',
@@ -48,7 +48,7 @@ function getItemIdToExpandedRowMap(
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
-  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizeTableState>(
+  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizerTableState>(
     restorableDefaults
   );
 

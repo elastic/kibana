@@ -8,7 +8,7 @@
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 
-import { DataVisualizeTableState } from '../../../../common';
+import { DataVisualizerTableState } from '../../../../common';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -20,8 +20,8 @@ interface UseTableSettingsReturnValue<T> {
 
 export function useTableSettings<TypeOfItem>(
   items: TypeOfItem[],
-  pageState: DataVisualizeTableState,
-  updatePageState: (update: DataVisualizeTableState) => void
+  pageState: DataVisualizerTableState,
+  updatePageState: (update: DataVisualizerTableState) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
