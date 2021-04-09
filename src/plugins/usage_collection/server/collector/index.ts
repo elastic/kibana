@@ -7,8 +7,8 @@
  */
 
 export { CollectorSet } from './collector_set';
-export {
-  Collector,
+export { Collector } from './collector';
+export type {
   AllowedSchemaTypes,
   AllowedSchemaNumberTypes,
   SchemaField,
@@ -16,4 +16,5 @@ export {
   CollectorOptions,
   CollectorFetchContext,
 } from './collector';
-export { UsageCollector, UsageCollectorOptions } from './usage_collector';
+export { UsageCollector } from './usage_collector';
+export type { UsageCollectorOptions } from './usage_collector';

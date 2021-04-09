@@ -23,7 +23,7 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
-import { DashboardPicker } from '../../services/presentation_util';
+import { LazyDashboardPicker, withSuspense } from '../../services/presentation_util';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
 import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { createDashboardEditUrl, DashboardConstants } from '../..';
@@ -36,6 +36,8 @@ interface CopyToDashboardModalProps {
   dashboardId?: string;
   closeModal: () => void;
 }
+
+const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({
   PresentationUtilContext,
