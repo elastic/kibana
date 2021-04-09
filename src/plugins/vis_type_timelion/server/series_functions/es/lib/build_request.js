@@ -12,7 +12,7 @@ import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 import { UI_SETTINGS } from '../../../../../data/server';
 
-export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
+export default function buildRequest(config, tlConfig, scriptedFields, runtimeFields, timeout) {
   const bool = { must: [] };
 
   const timeFilter = {
@@ -75,6 +75,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       },
       aggs: aggs,
       size: 0,
+      runtime_mappings: runtimeFields,
     },
   };
 

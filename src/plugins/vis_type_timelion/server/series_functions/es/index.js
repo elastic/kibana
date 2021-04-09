@@ -102,10 +102,11 @@ export default new Datasource('es', {
     );
 
     const scriptedFields = indexPatternSpec?.getScriptedFields() ?? [];
+    const runtimeFields = indexPatternSpec?.getComputedFields().runtimeFields ?? {};
 
     const esShardTimeout = tlConfig.esShardTimeout;
 
-    const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
+    const body = buildRequest(config, tlConfig, scriptedFields, runtimeFields, esShardTimeout);
 
     const resp = await tlConfig.context.search
       .search(
