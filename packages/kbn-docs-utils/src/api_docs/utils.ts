@@ -189,36 +189,52 @@ export function removeBrokenLinks(
   let missingCnt = 0;
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
-      if (api.signature) {
-        api.signature = api.signature.map((sig) => {
-          if (typeof sig !== 'string') {
-            if (apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId]) === false) {
-              if (missingApiItems[sig.pluginId] === undefined) {
-                missingApiItems[sig.pluginId] = {};
-              }
-              const sourceId = `${sig.pluginId}-${sig.scope}-${sig.text}`;
-              if (missingApiItems[sig.pluginId][sourceId] === undefined) {
-                missingApiItems[sig.pluginId][sourceId] = [];
-              }
-
-              missingApiItems[sig.pluginId][sourceId].push(`${pluginApi.id}-${api.id}`);
-
-              missingCnt++;
-              return sig.text;
-            }
-            return sig;
-          }
-          return sig;
-        });
-      }
+      missingCnt += removeBrokenLinksFromApi(pluginApi.id, api, missingApiItems, pluginApiMap);
     });
   });
 
   if (missingCnt > 0) {
-    log.debug(
+    log.info(
       `${pluginApi.id} had ${missingCnt} API item references removed to avoid broken links use the flag '--stats exports' to get a list of every missing export `
     );
   }
+}
+
+function removeBrokenLinksFromApi(
+  pluginId: string,
+  api: ApiDeclaration,
+  missingApiItems: { [key: string]: { [key: string]: string[] } },
+  pluginApiMap: { [key: string]: PluginApi }
+): number {
+  let missingCnt = 0;
+  if (api.signature) {
+    api.signature = api.signature.map((sig) => {
+      if (typeof sig !== 'string') {
+        if (!apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId])) {
+          if (missingApiItems[sig.pluginId] === undefined) {
+            missingApiItems[sig.pluginId] = {};
+          }
+          const sourceId = `${sig.pluginId}-${sig.scope}-${sig.text}`;
+          if (missingApiItems[sig.pluginId][sourceId] === undefined) {
+            missingApiItems[sig.pluginId][sourceId] = [];
+          }
+
+          missingApiItems[sig.pluginId][sourceId].push(`${pluginId}-${api.id}`);
+
+          missingCnt++;
+          return sig.text;
+        }
+        return sig;
+      }
+      return sig;
+    });
+  }
+  if (api.children) {
+    api.children.forEach((child) => {
+      missingCnt += removeBrokenLinksFromApi(pluginId, child, missingApiItems, pluginApiMap);
+    });
+  }
+  return missingCnt;
 }
 
 function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boolean {

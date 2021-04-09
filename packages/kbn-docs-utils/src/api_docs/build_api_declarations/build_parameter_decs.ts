@@ -33,16 +33,20 @@ export function buildApiDecsForParameters(
   log: ToolingLog,
   jsDocs?: JSDoc[]
 ): ApiDeclaration[] {
+  let paramIndex = 0;
   return params.reduce((acc, param) => {
+    paramIndex++;
     const apiName = param.getName();
-    const apiId = parentAnchorLink.apiName ? parentAnchorLink.apiName + '.' + apiName : apiName;
+    // Destructured parameters can make these ids look ugly. Instead of parameter name, use an index for the position.
+    const apiId = parentAnchorLink.apiName
+      ? parentAnchorLink.apiName + `.$${paramIndex}`
+      : `$${paramIndex}`;
     const anchorLink: AnchorLink = {
       scope: parentAnchorLink.scope,
       pluginName: parentAnchorLink.pluginName,
       apiName: apiId,
     };
-    const label = param.getName();
-    log.debug(`Getting parameter doc def for ${label} of kind ${param.getKindName()}`);
+    log.debug(`Getting parameter doc def for ${apiName} of kind ${param.getKindName()}`);
     // Literal types are non primitives that aren't references to other types. We add them as a more
     // defined node, with children.
     // If we don't want the docs to be too deeply nested we could avoid this special handling.
@@ -55,17 +59,17 @@ export function buildApiDecsForParameters(
           anchorLink.pluginName,
           anchorLink.scope,
           anchorLink.apiName,
-          label
+          apiName
         )
       );
     } else {
       acc.push({
         id: getApiSectionId(anchorLink),
         type: getTypeKind(param),
-        label,
+        label: apiName,
         isRequired: param.getType().isNullable() === false,
         signature: extractImportReferences(param.getType().getText(), plugins, log),
-        description: jsDocs ? getJSDocParamComment(jsDocs, label) : [],
+        description: jsDocs ? getJSDocParamComment(jsDocs, apiName) : [],
         source: getSourceForNode(param),
       });
     }

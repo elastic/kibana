@@ -197,3 +197,8 @@ export enum Lifecycle {
   START = 'start',
   SETUP = 'setup',
 }
+
+// Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
+export interface MissingApiItemMap {
+  [key: string]: { [key: string]: string[] };
+}

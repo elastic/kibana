@@ -12,12 +12,11 @@ import Path from 'path';
 import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
 import { Project } from 'ts-morph';
 
-import { getPluginApi } from './get_plugin_api';
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi, TypeKind } from './types';
 import { findPlugins } from './find_plugins';
-import { removeBrokenLinks } from './utils';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
+import { getPluginApiMap } from './get_plugin_api_map';
 
 export interface PluginInfo {
   apiCount: number;
@@ -73,19 +72,7 @@ export function runBuildApiDocsCli() {
         });
       }
 
-      const pluginApiMap: { [key: string]: PluginApi } = {};
-      plugins.map((plugin) => {
-        pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log);
-      });
-
-      // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
-      const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
-
-      plugins.forEach((plugin) => {
-        const id = plugin.manifest.id;
-        const pluginApi = pluginApiMap[id];
-        removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
-      });
+      const { pluginApiMap, missingApiItems } = getPluginApiMap(project, plugins, log);
 
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
