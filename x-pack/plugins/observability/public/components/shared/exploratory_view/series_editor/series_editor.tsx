@@ -13,7 +13,7 @@ import { ActionsCol } from './columns/actions_col';
 import { Breakdowns } from './columns/breakdowns';
 import { DataSeries } from '../types';
 import { SeriesBuilder } from '../series_builder/series_builder';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { RemoveSeries } from './columns/remove_series';
