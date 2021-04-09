@@ -11,6 +11,7 @@ import { Logger, SavedObjectsClientContract } from 'kibana/server';
 import { IScopedClusterClient as ScopedClusterClient } from 'src/core/server';
 import { compact } from 'lodash';
 import { ESSearchRequest } from 'typings/elasticsearch';
+import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 import { ClusterClientAdapter } from '../../../../event_log/server';
 import { runtimeTypeFromFieldMap, OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
 import { ScopedRuleRegistryClient, EventsOf } from './types';
@@ -131,6 +132,19 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
             return docRt.encode(validation.right);
           })
         ) as EventsOf<ESSearchRequest, TFieldMap>,
+      };
+    },
+    getDynamicIndexPattern: async () => {
+      const indexPatternsFetcher = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
+
+      const fields = await indexPatternsFetcher.getFieldsForWildcard({
+        pattern: indexTarget,
+      });
+
+      return {
+        fields,
+        timeFieldName: '@timestamp',
+        title: indexTarget,
       };
     },
     index: (doc) => {

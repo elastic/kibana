@@ -13,6 +13,8 @@ import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations
 import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
 export { rangeQuery, kqlQuery } from './utils/queries';
 
+export * from './types';
+
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

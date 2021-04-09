@@ -5,14 +5,14 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import Boom from '@hapi/boom';
 import { createObservabilityServerRoute } from './create_observability_server_route';
 import { createObservabilityServerRouteRepository } from './create_observability_server_route_repository';
 import { getTopAlerts } from '../lib/rules/get_top_alerts';
 
 const alertsListRoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/rules/alerts',
+  endpoint: 'GET /api/observability/rules/alerts/top',
   options: {
     tags: [],
   },
@@ -24,6 +24,7 @@ const alertsListRoute = createObservabilityServerRoute({
       }),
       t.partial({
         kuery: t.string,
+        size: toNumberRt,
       }),
     ]),
   }),
@@ -37,7 +38,7 @@ const alertsListRoute = createObservabilityServerRoute({
     }
 
     const {
-      query: { start, end, kuery },
+      query: { start, end, kuery, size = 100 },
     } = params;
 
     return getTopAlerts({
@@ -45,9 +46,29 @@ const alertsListRoute = createObservabilityServerRoute({
       start,
       end,
       kuery,
-      size: 100,
+      size,
     });
   },
 });
 
-export const rulesRouteRepository = createObservabilityServerRouteRepository().add(alertsListRoute);
+const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
+  endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+  options: {
+    tags: [],
+  },
+  handler: async ({ ruleRegistry, context }) => {
+    const ruleRegistryClient = ruleRegistry.createScopedRuleRegistryClient({
+      context,
+    });
+
+    if (!ruleRegistryClient) {
+      throw Boom.failedDependency();
+    }
+
+    return ruleRegistryClient.getDynamicIndexPattern();
+  },
+});
+
+export const rulesRouteRepository = createObservabilityServerRouteRepository()
+  .add(alertsListRoute)
+  .add(alertsDynamicIndexPatternRoute);

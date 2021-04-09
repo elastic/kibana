@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldDescriptor } from 'src/plugins/data/server';
 import { ESSearchRequest, ESSearchResponse } from 'typings/elasticsearch';
 import { DefaultFieldMap } from '../defaults/field_map';
 import { PatternsUnionOf, PickWithPatterns } from '../field_map/pick_with_patterns';
@@ -43,6 +44,11 @@ export interface ScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap> {
   ): Promise<{
     body: ESSearchResponse<unknown, TSearchRequest>;
     events: EventsOf<TSearchRequest, TFieldMap>;
+  }>;
+  getDynamicIndexPattern(): Promise<{
+    title: string;
+    timeFieldName: string;
+    fields: FieldDescriptor[];
   }>;
   index(doc: Omit<OutputOfFieldMap<TFieldMap>, PrepopulatedRuleEventFields>): void;
   bulkIndex(

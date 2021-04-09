@@ -5,9 +5,18 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { ServerRoute, ServerRouteRepository } from '@kbn/server-route-repository';
+import type {
+  EndpointOf,
+  ReturnOf,
+  ServerRoute,
+  ServerRouteRepository,
+} from '@kbn/server-route-repository';
 import { CoreSetup, CoreStart, KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ObservabilityRuleRegistry } from '../plugin';
+
+import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
+
+export { ObservabilityServerRouteRepository };
 
 export interface ObservabilityRouteHandlerResources {
   core: {
@@ -40,3 +49,7 @@ export type AbstractObservabilityServerRouteRepository = ServerRouteRepository<
     >
   >
 >;
+
+export type ObservabilityAPIReturnType<
+  TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>
+> = ReturnOf<ObservabilityServerRouteRepository, TEndpoint>;

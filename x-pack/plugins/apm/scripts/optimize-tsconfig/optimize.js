@@ -89,6 +89,12 @@ async function deleteApmTsConfig() {
   await unlink(path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'));
 }
 
+async function deleteObsTsConfig() {
+  await unlink(
+    path.resolve(kibanaRoot, 'x-pack/plugins/observability', 'tsconfig.json')
+  );
+}
+
 async function optimizeTsConfig() {
   await unoptimizeTsConfig();
 
@@ -99,6 +105,8 @@ async function optimizeTsConfig() {
   await addApmFilesToTestTsConfig();
 
   await deleteApmTsConfig();
+
+  await deleteObsTsConfig();
 
   await setIgnoreChanges();
   // eslint-disable-next-line no-console

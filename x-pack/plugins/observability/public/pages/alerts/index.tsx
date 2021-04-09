@@ -15,32 +15,59 @@ import {
   EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
+import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
-import { AlertItem, AlertsTable } from './alerts_table';
-import { wireframeData } from './example_data';
+import { AlertsTable } from './alerts_table';
+import { getAbsoluteDateRange } from '../../utils/date';
 
 interface AlertsPageProps {
-  items?: AlertItem[];
   routeParams: RouteParams<'/alerts'>;
 }
 
-export function AlertsPage({ items }: AlertsPageProps) {
-  // For now, if we're not passed any items load the example wireframe data.
-  if (!items) {
-    items = wireframeData;
-  }
-
-  const { core } = usePluginContext();
+export function AlertsPage({ routeParams }: AlertsPageProps) {
+  const {
+    core,
+    appMountParameters: { history },
+  } = usePluginContext();
   const { prepend } = core.http.basePath;
+
+  const {
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
+  } = routeParams;
+
+  const { start, end } = useMemo(() => {
+    return getAbsoluteDateRange({ rangeFrom, rangeTo });
+  }, [rangeFrom, rangeTo]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
   const manageDetectionRulesHref = prepend(
     '/app/management/insightsAndAlerting/triggersActions/alerts'
+  );
+
+  const { data: topAlerts } = useFetcher(
+    ({ signal }) => {
+      if (!start || !end) {
+        return;
+      }
+      return callObservabilityApi({
+        signal,
+        endpoint: 'GET /api/observability/rules/alerts/top',
+        params: {
+          query: {
+            start,
+            end,
+            kuery,
+          },
+        },
+      });
+    },
+    [start, end, kuery]
   );
 
   return (
@@ -87,10 +114,26 @@ export function AlertsPage({ items }: AlertsPageProps) {
             </EuiCallOut>
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertsSearchBar />
+            <AlertsSearchBar
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              query={kuery}
+              onQueryChange={({ dateRange, query }) => {
+                const nextSearchParams = new URLSearchParams(history.location.search);
+
+                nextSearchParams.set('rangeFrom', dateRange.from);
+                nextSearchParams.set('rangeTo', dateRange.to);
+                nextSearchParams.set('kuery', query ?? '');
+
+                history.push({
+                  ...history.location,
+                  search: nextSearchParams.toString(),
+                });
+              }}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertsTable items={items} />
+            <AlertsTable items={topAlerts ?? []} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>

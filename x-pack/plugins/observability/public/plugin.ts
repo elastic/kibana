@@ -21,6 +21,7 @@ import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/pl
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { LensPublicStart } from '../../lens/public';
+import { createCallObservabilityApi } from './services/call_observability_api';
 
 export interface ObservabilityPublicSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -57,6 +58,9 @@ export class Plugin
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+
+    createCallObservabilityApi(core.http);
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');

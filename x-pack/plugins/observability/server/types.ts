@@ -10,6 +10,14 @@ import type { ScopedRuleRegistryClient, FieldMapOf } from '../../rule_registry/s
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 import type { ObservabilityRuleRegistry } from './plugin';
 
+export type {
+  ObservabilityRouteCreateOptions,
+  ObservabilityRouteHandlerResources,
+  AbstractObservabilityServerRouteRepository,
+  ObservabilityServerRouteRepository,
+  ObservabilityAPIReturnType,
+} from './routes/types';
+
 /**
  * @internal
  */
