@@ -59652,6 +59652,9 @@ const WatchBazelCommand = {
     options
   }) {
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Call bazel with the target to build all available packages and run it through iBazel to watch it for changes
+    //
+    // Note: --run_output=false arg will disable the iBazel notifications about gazelle and buildozer when running it
+    // Can also be solved by adding a root `.bazel_fix_commands.json` but its not needed at the moment
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build'], runOffline);
   }
