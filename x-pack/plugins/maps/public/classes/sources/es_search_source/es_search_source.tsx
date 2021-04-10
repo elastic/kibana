@@ -44,6 +44,7 @@ import { ESDocField } from '../../fields/es_doc_field';
 
 import { registerSource } from '../source_registry';
 import {
+  DataMeta,
   ESSearchSourceDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -733,24 +734,16 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  maskForTimeslice(): boolean {
-    // TODO fix this
+  maskForTimeslice(prevMeta: DataMeta): boolean {
+    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return false;
+    }
+
+    if (this._descriptor.scalingType === SCALING_TYPES.LIMIT) {
+      return prevMeta.areResultsTrimmed !== undefined && !prevMeta.areResultsTrimmed;
+    }
+
     return true;
-
-    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
-      // Clustered ESSearchSource never has trimmed results.
-      return true;
-    }
-
-    if (
-      this._descriptor.scalingType === SCALING_TYPES.LIMIT &&
-      prevMeta.areResultsTrimmed !== undefined &&
-      !prevMeta.areResultsTrimmed
-    ) {
-      return true;
-    }
-
-    return false;
   }
 }
 

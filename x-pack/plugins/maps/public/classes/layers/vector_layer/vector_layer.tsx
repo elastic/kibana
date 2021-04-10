@@ -963,15 +963,34 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
-    const dateFieldName = await this.getSource().getDateFieldName();
-    const timesliceMaskConfig =
-      dateFieldName && timeslice && this.getSource().maskForTimeslice()
-        ? { dateFieldName, timeslice }
-        : undefined;
+    const timesliceMaskConfig = await this._getTimesliceMaskConfig(timeslice);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
     // centroid layers added after polygon layers to ensure they are on top of polygon layers
     this._setMbCentroidProperties(mbMap, undefined, timesliceMaskConfig);
+  }
+
+  async _getTimesliceMaskConfig(timeslice?: Timeslice): Promise<TimesliceMaskConfig | undefined> {
+    if (!timeslice || this.hasJoins()) {
+      return;
+    }
+
+    const dateFieldName = await this.getSource().getDateFieldName();
+    if (!dateFieldName) {
+      return;
+    }
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return;
+    }
+
+    const prevMeta = sourceDataRequest.getMeta();
+    if (!prevMeta) {
+      return;
+    }
+
+    return this.getSource().maskForTimeslice(prevMeta) ? { dateFieldName, timeslice } : undefined;
   }
 
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {

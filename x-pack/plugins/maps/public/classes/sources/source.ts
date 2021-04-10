@@ -71,7 +71,7 @@ export interface ISource {
   /*
    * Determine whether source has all data needed for client side timeslice masking.
    */
-  maskForTimeslice(): boolean;
+  maskForTimeslice(prevMeta: DataMeta): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -203,8 +203,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  maskForTimeslice(): boolean {
+  maskForTimeslice(prevMeta: DataMeta): boolean {
     return false;
-    return !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
   }
 }
