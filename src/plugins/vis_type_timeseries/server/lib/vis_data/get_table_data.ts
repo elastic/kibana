@@ -76,7 +76,7 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      panelIndex.indexPattern,
+      panelIndex,
       capabilities,
       services.uiSettings
     );
