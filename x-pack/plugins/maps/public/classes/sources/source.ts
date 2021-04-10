@@ -69,10 +69,9 @@ export interface ISource {
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 
   /*
-   * Determine whether source needs to trigger data re-fetch for timeslice changes.
-   * Returning false means that the source can handle client side masking to show results in timeslice.
+   * Determine whether source has all data needed for client side timeslice masking.
    */
-  updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean;
+  maskForTimeslice(): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -204,7 +203,8 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean {
+  maskForTimeslice(): boolean {
+    return false;
     return !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
   }
 }

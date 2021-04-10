@@ -13,14 +13,18 @@ import {
 } from '../../../common/constants';
 import { Timeslice } from '../../../common/descriptor_types';
 
+export interface TimesliceMaskConfig {
+  dateFieldName: string;
+  timeslice: Timeslice;
+}
+
 export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true];
 const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 function getFilterExpression(
   geometryFilter: unknown[],
   hasJoins: boolean,
-  dateField?: string,
-  timeslice?: Timeslice
+  timesliceMaskConfig?: TimesliceMaskConfig
 ) {
   const filters: unknown[] = [
     EXCLUDE_TOO_MANY_FEATURES_BOX,
@@ -32,10 +36,18 @@ function getFilterExpression(
     filters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
   }
 
-  if (dateField && timeslice) {
-    filters.push(['has', dateField]);
-    filters.push(['>=', ['get', dateField], timeslice.from]);
-    filters.push(['<', ['get', dateField], timeslice.to]);
+  if (timesliceMaskConfig) {
+    filters.push(['has', timesliceMaskConfig.dateFieldName]);
+    filters.push([
+      '>=',
+      ['get', timesliceMaskConfig.dateFieldName],
+      timesliceMaskConfig.timeslice.from,
+    ]);
+    filters.push([
+      '<',
+      ['get', timesliceMaskConfig.dateFieldName],
+      timesliceMaskConfig.timeslice.to,
+    ]);
   }
 
   return ['all', ...filters];
@@ -43,8 +55,7 @@ function getFilterExpression(
 
 export function getFillFilterExpression(
   hasJoins: boolean,
-  dateField?: string,
-  timeslice?: Timeslice
+  timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
     [
@@ -53,15 +64,13 @@ export function getFillFilterExpression(
       ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
     ],
     hasJoins,
-    dateField,
-    timeslice
+    timesliceMaskConfig
   );
 }
 
 export function getLineFilterExpression(
   hasJoins: boolean,
-  dateField?: string,
-  timeslice?: Timeslice
+  timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
     [
@@ -72,15 +81,13 @@ export function getLineFilterExpression(
       ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
     ],
     hasJoins,
-    dateField,
-    timeslice
+    timesliceMaskConfig
   );
 }
 
 export function getPointFilterExpression(
   hasJoins: boolean,
-  dateField?: string,
-  timeslice?: Timeslice
+  timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
     [
@@ -89,20 +96,17 @@ export function getPointFilterExpression(
       ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
     ],
     hasJoins,
-    dateField,
-    timeslice
+    timesliceMaskConfig
   );
 }
 
 export function getCentroidFilterExpression(
   hasJoins: boolean,
-  dateField?: string,
-  timeslice?: Timeslice
+  timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
     ['==', ['get', KBN_IS_CENTROID_FEATURE], true],
     hasJoins,
-    dateField,
-    timeslice
+    timesliceMaskConfig
   );
 }

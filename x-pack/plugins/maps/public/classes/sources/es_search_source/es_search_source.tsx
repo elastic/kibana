@@ -733,10 +733,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  updateDueToTimeslice(prevMeta: DataMeta, nextMeta: DataMeta): boolean {
+  maskForTimeslice(): boolean {
+    // TODO fix this
+    return true;
+
     if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
       // Clustered ESSearchSource never has trimmed results.
-      return false;
+      return true;
     }
 
     if (
@@ -744,10 +747,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       prevMeta.areResultsTrimmed !== undefined &&
       !prevMeta.areResultsTrimmed
     ) {
-      return false;
+      return true;
     }
 
-    return super.updateDueToTimeslice(prevMeta, nextMeta);
+    return false;
   }
 }
 

@@ -38,6 +38,7 @@ import {
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
+  TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
 
 import {
@@ -716,8 +717,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbPointsProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
-    dateField?: string,
-    timeslice?: Timeslice
+    timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
@@ -735,7 +735,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
-      this._setMbCircleProperties(mbMap, mvtSourceLayer, dateField, timeslice);
+      this._setMbCircleProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
     } else {
       markerLayerId = symbolLayerId;
       textLayerId = symbolLayerId;
@@ -757,8 +757,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbCircleProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
-    dateField?: string,
-    timeslice?: Timeslice
+    timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
@@ -791,7 +790,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this.hasJoins(), dateField, timeslice);
+    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
     if (!_.isEqual(filterExpr, mbMap.getFilter(pointLayerId))) {
       mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
@@ -848,8 +847,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbLinePolygonProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
-    dateField?: string,
-    timeslice?: Timeslice
+    timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
@@ -914,14 +912,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     this.syncVisibilityWithMb(mbMap, fillLayerId);
     mbMap.setLayerZoomRange(fillLayerId, this.getMinZoom(), this.getMaxZoom());
-    const fillFilterExpr = getFillFilterExpression(hasJoins);
+    const fillFilterExpr = getFillFilterExpression(hasJoins, timesliceMaskConfig);
     if (!_.isEqual(fillFilterExpr, mbMap.getFilter(fillLayerId))) {
       mbMap.setFilter(fillLayerId, fillFilterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this.getMinZoom(), this.getMaxZoom());
-    const lineFilterExpr = getLineFilterExpression(hasJoins);
+    const lineFilterExpr = getLineFilterExpression(hasJoins, timesliceMaskConfig);
     if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
@@ -933,8 +931,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbCentroidProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
-    dateField?: string,
-    timeslice?: timeslice
+    timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const centroidLayerId = this._getMbCentroidLayerId();
     const centroidLayer = mbMap.getLayer(centroidLayerId);
@@ -950,7 +947,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getCentroidFilterExpression(this.hasJoins());
+    const filterExpr = getCentroidFilterExpression(this.hasJoins(), timesliceMaskConfig);
     if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
       mbMap.setFilter(centroidLayerId, filterExpr);
     }
@@ -966,11 +963,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
-    const dateField = await this._source.getDateFieldName();
-    this._setMbPointsProperties(mbMap, undefined, dateField, timeslice);
-    this._setMbLinePolygonProperties(mbMap, undefined, dateField, timeslice);
+    const dateFieldName = await this.getSource().getDateFieldName();
+    const timesliceMaskConfig =
+      dateFieldName && timeslice && this.getSource().maskForTimeslice()
+        ? { dateFieldName, timeslice }
+        : undefined;
+    this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
+    this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
     // centroid layers added after polygon layers to ensure they are on top of polygon layers
-    this._setMbCentroidProperties(mbMap, undefined, dateField, timeslice);
+    this._setMbCentroidProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {

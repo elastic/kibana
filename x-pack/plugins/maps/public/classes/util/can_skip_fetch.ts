@@ -95,7 +95,9 @@ export async function canSkipSourceUpdate({
     if (nextMeta.applyGlobalTime) {
       updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
       if (prevMeta.timeslice !== undefined || nextMeta.timeslice !== undefined) {
-        updateDueToTimeslice = source.updateDueToTimeslice(prevMeta, nextMeta);
+        updateDueToTimeslice = source.maskForTimeslice()
+          ? false
+          : !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
       }
     }
   }
