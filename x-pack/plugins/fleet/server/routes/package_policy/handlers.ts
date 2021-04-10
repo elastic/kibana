@@ -80,10 +80,11 @@ export const createPackagePolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const { force, ...newPolicy } = request.body;
   try {
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      { ...request.body },
+      newPolicy,
       context,
       request
     );
@@ -91,6 +92,7 @@ export const createPackagePolicyHandler: RequestHandler<
     // Create package policy
     const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
       user,
+      force,
     });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
@@ -161,7 +163,7 @@ export const deletePackagePolicyHandler: RequestHandler<
       soClient,
       esClient,
       request.body.packagePolicyIds,
-      { user }
+      { user, force: request.body.force }
     );
     return response.ok({
       body,
