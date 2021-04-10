@@ -79,7 +79,7 @@ export const createPackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -114,7 +114,7 @@ export const updatePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -155,7 +155,7 @@ export const deletePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
