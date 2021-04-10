@@ -734,7 +734,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  maskForTimeslice(prevMeta: DataMeta): boolean {
+  canMaskForTimeslice(prevMeta: DataMeta): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return false;
     }

@@ -67,11 +67,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-
-  /*
-   * Determine whether source has all data needed for client side timeslice masking.
-   */
-  maskForTimeslice(prevMeta: DataMeta): boolean;
+  canMaskForTimeslice(prevMeta: DataMeta): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -203,7 +199,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  maskForTimeslice(prevMeta: DataMeta): boolean {
+  canMaskForTimeslice(prevMeta: DataMeta): boolean {
     return false;
   }
 }
