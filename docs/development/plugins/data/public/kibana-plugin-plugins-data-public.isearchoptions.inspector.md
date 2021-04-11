@@ -4,6 +4,8 @@
 
 ## ISearchOptions.inspector property
 
+Inspector integration options
+
 <b>Signature:</b>
 
 ```typescript

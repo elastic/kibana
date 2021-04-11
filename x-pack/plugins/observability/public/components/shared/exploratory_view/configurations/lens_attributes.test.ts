@@ -8,9 +8,8 @@
 import { LensAttributes } from './lens_attributes';
 import { mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
-import { sampleAttribute } from './data/sample_attribute';
-import { LCP_FIELD, SERVICE_NAME } from './data/elasticsearch_fieldnames';
-import { USER_AGENT_NAME } from './data/elasticsearch_fieldnames';
+import { sampleAttribute } from './test_data/sample_attribute';
+import { LCP_FIELD, SERVICE_NAME, USER_AGENT_NAME } from './constants/elasticsearch_fieldnames';
 
 describe('Lens Attribute', () => {
   const reportViewConfig = getDefaultConfigs({
@@ -93,7 +92,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getNumberColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time',
+      label: 'Page load time (Seconds)',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -129,7 +128,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getXAxis()).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time',
+      label: 'Page load time (Seconds)',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -154,7 +153,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time',
+          label: 'Page load time (Seconds)',
           operationType: 'range',
           params: {
             maxBars: 'auto',
@@ -318,7 +317,7 @@ describe('Lens Attribute', () => {
           'x-axis-column': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Page load time',
+            label: 'Page load time (Seconds)',
             operationType: 'range',
             params: {
               maxBars: 'auto',
@@ -363,7 +362,7 @@ describe('Lens Attribute', () => {
         'x-axis-column': {
           dataType: 'number',
           isBucketed: true,
-          label: 'Page load time',
+          label: 'Page load time (Seconds)',
           operationType: 'range',
           params: {
             maxBars: 'auto',

@@ -1001,8 +1001,6 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     indexPattern?: IndexPattern;
     // Warning: (ae-forgotten-export) The symbol "IInspectorInfo" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     inspector?: IInspectorInfo;
     isRestore?: boolean;
     isStored?: boolean;
@@ -1086,6 +1084,8 @@ export enum KBN_FIELD_TYPES {
     IP = "ip",
     // (undocumented)
     IP_RANGE = "ip_range",
+    // (undocumented)
+    MISSING = "missing",
     // (undocumented)
     MURMUR3 = "murmur3",
     // (undocumented)

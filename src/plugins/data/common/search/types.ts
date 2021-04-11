@@ -124,9 +124,11 @@ export interface ISearchOptions {
   /**
    * Index pattern reference is used for better error messages
    */
-
   indexPattern?: IndexPattern;
 
+  /**
+   * Inspector integration options
+   */
   inspector?: IInspectorInfo;
 }
 
