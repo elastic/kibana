@@ -13,9 +13,9 @@ import { compact } from 'lodash';
 import { ESSearchRequest } from 'typings/elasticsearch';
 import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 import { ClusterClientAdapter } from '../../../../event_log/server';
-import { runtimeTypeFromFieldMap, OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
+import { runtimeTypeFromFieldMap, OutputOfFieldMap, TypeOfFieldMap } from '../../../common';
 import { ScopedRuleRegistryClient, EventsOf } from './types';
-import { DefaultFieldMap } from '../defaults/field_map';
+import { BaseRuleFieldMap } from '../../../common';
 
 const getRuleUuids = async ({
   savedObjectsClient,
@@ -50,7 +50,7 @@ const createPathReporterError = (either: Either<Errors, unknown>) => {
   return error;
 };
 
-export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap>({
+export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMap>({
   fieldMap,
   scopedClusterClient,
   savedObjectsClient,
@@ -66,7 +66,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
   clusterClientAdapter: ClusterClientAdapter<{
-    body: OutputOfFieldMap<TFieldMap>;
+    body: TypeOfFieldMap<TFieldMap>;
     index: string;
   }>;
   indexAliasName: string;
@@ -85,7 +85,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
 }): ScopedRuleRegistryClient<TFieldMap> {
   const docRt = runtimeTypeFromFieldMap(fieldMap);
 
-  const defaults: Partial<OutputOfFieldMap<DefaultFieldMap>> = ruleData
+  const defaults: Partial<OutputOfFieldMap<BaseRuleFieldMap>> = ruleData
     ? {
         'rule.uuid': ruleData.rule.uuid,
         'rule.id': ruleData.rule.id,
@@ -112,7 +112,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
             bool: {
               filter: [
                 { terms: { 'rule.uuid': ruleUuids } },
-                ...(searchRequest.body?.query ? [searchRequest.body.query] : []),
+                ...compact([searchRequest.body?.query]),
               ],
             },
           },
@@ -157,7 +157,10 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
         throw createPathReporterError(validation);
       }
 
-      clusterClientAdapter.indexDocument({ body: validation.right, index: indexAliasName });
+      clusterClientAdapter.indexDocument({
+        body: validation.right,
+        index: indexAliasName,
+      });
     },
     bulkIndex: (docs) => {
       const validations = docs.map((doc) => {

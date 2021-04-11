@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import util from 'util';
-import { FieldMap } from '../types';
+import { FieldMap } from './types';
 
 export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
   first: T1,
@@ -39,7 +38,7 @@ export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
 
   if (conflicts.length) {
     const err = new Error(`Could not merge mapping due to conflicts`);
-    Object.assign(err, { conflicts: util.inspect(conflicts, { depth: null }) });
+    Object.assign(err, { conflicts });
     throw err;
   }
 

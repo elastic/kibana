@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickWithPatterns } from './pick_with_patterns';
+import { pickWithPatterns } from './';
 
 describe('pickWithPatterns', () => {
   const fieldMap = {

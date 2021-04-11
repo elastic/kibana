@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Mutable } from 'utility-types';
+import { ecsFieldMap } from './ecs_field_map';
+import { pickWithPatterns } from '../pick_with_patterns';
 
-import { ecsFieldMap } from '../../generated/ecs_field_map';
-import { pickWithPatterns } from '../field_map/pick_with_patterns';
-
-export const defaultFieldMap = {
+export const baseRuleFieldMap = {
   ...pickWithPatterns(
     ecsFieldMap,
     '@timestamp',
@@ -31,4 +31,4 @@ export const defaultFieldMap = {
   'kibana.rac.alert.status': { type: 'keyword' },
 } as const;
 
-export type DefaultFieldMap = typeof defaultFieldMap;
+export type BaseRuleFieldMap = Mutable<typeof baseRuleFieldMap>;

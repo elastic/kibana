@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Optional } from 'utility-types';
 import { mapValues, pickBy } from 'lodash';
 import * as t from 'io-ts';
-import { Mutable, PickByValueExact } from 'utility-types';
-import { FieldMap } from '../types';
+import { FieldMap } from './types';
 
 const esFieldTypeMap = {
   keyword: t.string,
@@ -31,22 +30,6 @@ type EsFieldTypeMap = typeof esFieldTypeMap;
 type EsFieldTypeOf<T extends string> = T extends keyof EsFieldTypeMap
   ? EsFieldTypeMap[T]
   : t.UnknownC;
-
-type RequiredKeysOf<T extends Record<string, { required?: boolean }>> = keyof PickByValueExact<
-  {
-    [key in keyof T]: T[key]['required'];
-  },
-  true
->;
-
-type IntersectionTypeOf<
-  T extends Record<string, { required?: boolean; type: t.Any }>
-> = t.IntersectionC<
-  [
-    t.TypeC<Pick<{ [key in keyof T]: T[key]['type'] }, RequiredKeysOf<T>>>,
-    t.PartialC<{ [key in keyof T]: T[key]['type'] }>
-  ]
->;
 
 type CastArray<T extends t.Type<any>> = t.Type<
   t.TypeOf<T> | Array<t.TypeOf<T>>,
@@ -71,25 +54,41 @@ const createCastSingleRt = <T extends t.Type<any>>(type: T): CastSingle<T> => {
   return new t.Type('castSingle', union.is, union.validate, (a) => (Array.isArray(a) ? a[0] : a));
 };
 
-type MapTypeValues<T extends FieldMap> = {
-  [key in keyof T]: {
-    required: T[key]['required'];
-    type: T[key]['array'] extends true
-      ? CastArray<EsFieldTypeOf<T[key]['type']>>
-      : CastSingle<EsFieldTypeOf<T[key]['type']>>;
-  };
+type SetOptional<
+  T extends Record<string, { required?: boolean; array?: boolean; type: string }>
+> = Optional<
+  T,
+  {
+    [key in keyof T]: T[key]['required'] extends true ? never : key;
+  }[keyof T]
+>;
+
+type OutputOfField<T extends { type: string; array?: boolean }> = T['array'] extends true
+  ? Array<t.OutputOf<EsFieldTypeOf<T['type']>>>
+  : t.OutputOf<EsFieldTypeOf<T['type']>>;
+
+type TypeOfField<T extends { type: string; array?: boolean }> =
+  | t.TypeOf<EsFieldTypeOf<T['type']>>
+  | Array<t.TypeOf<EsFieldTypeOf<T['type']>>>;
+
+type OutputOf<T extends Partial<FieldMap>> = {
+  [key in keyof T]: OutputOfField<Exclude<T[key], undefined>>;
 };
 
-type FieldMapType<T extends FieldMap> = IntersectionTypeOf<MapTypeValues<T>>;
+type TypeOf<T extends Partial<FieldMap>> = {
+  [key in keyof T]: TypeOfField<Exclude<T[key], undefined>>;
+};
 
-export type TypeOfFieldMap<T extends FieldMap> = Mutable<t.TypeOf<FieldMapType<T>>>;
-export type OutputOfFieldMap<T extends FieldMap> = Mutable<t.OutputOf<FieldMapType<T>>>;
+export type TypeOfFieldMap<T extends FieldMap> = TypeOf<SetOptional<T>>;
+export type OutputOfFieldMap<T extends FieldMap> = OutputOf<SetOptional<T>>;
+
+export type FieldMapType<T extends FieldMap> = t.Type<TypeOfFieldMap<T>, OutputOfFieldMap<T>>;
 
 export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
   fieldMap: TFieldMap
 ): FieldMapType<TFieldMap> {
   function mapToType(fields: FieldMap) {
-    return mapValues(fields, (field, key) => {
+    return mapValues(fields, (field) => {
       const type =
         field.type in esFieldTypeMap
           ? esFieldTypeMap[field.type as keyof EsFieldTypeMap]

@@ -15,14 +15,12 @@ import {
   AlertTypeState,
 } from '../../../alerting/common';
 import { createReadySignal, ClusterClientAdapter } from '../../../event_log/server';
-import { FieldMap, ILMPolicy } from './types';
+import { ILMPolicy } from './types';
 import { RuleParams, RuleType } from '../types';
-import { mergeFieldMaps } from './field_map/merge_field_maps';
-import { OutputOfFieldMap } from './field_map/runtime_type_from_fieldmap';
+import { mergeFieldMaps, TypeOfFieldMap, FieldMap, BaseRuleFieldMap } from '../../common';
 import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
 import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
-import { DefaultFieldMap } from './defaults/field_map';
 import { ScopedRuleRegistryClient } from './create_scoped_rule_registry_client/types';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
@@ -38,9 +36,9 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   writeEnabled: boolean;
 }
 
-export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
+export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
   private readonly esAdapter: ClusterClientAdapter<{
-    body: OutputOfFieldMap<TFieldMap>;
+    body: TypeOfFieldMap<TFieldMap>;
     index: string;
   }>;
   private readonly children: Array<RuleRegistry<TFieldMap>> = [];
@@ -51,7 +49,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     const { wait, signal } = createReadySignal<boolean>();
 
     this.esAdapter = new ClusterClientAdapter<{
-      body: OutputOfFieldMap<TFieldMap>;
+      body: TypeOfFieldMap<TFieldMap>;
       index: string;
     }>({
       wait,

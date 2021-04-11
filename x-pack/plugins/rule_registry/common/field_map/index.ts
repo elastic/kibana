@@ -4,5 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './field_map';
-export * from './pick_with_patterns';
+
+export * from './base_rule_field_map';
+export * from './ecs_field_map';
+export * from './merge_field_maps';
+export * from './runtime_type_from_fieldmap';
+export * from './types';
