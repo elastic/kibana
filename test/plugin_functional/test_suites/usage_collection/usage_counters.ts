@@ -18,6 +18,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const supertest = getService('supertest');
 
   async function getSavedObjectCounters() {
+    // wait until ES indexes the counter SavedObject;
+    await new Promise((res) => setTimeout(res, 7 * 1000));
+
     return await supertest
       .get('/api/saved_objects/_find?type=usage-counters')
       .set('kbn-xsrf', 'true')
@@ -62,9 +65,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         .post('/api/usage_collection_test_plugin/')
         .set('kbn-xsrf', 'true')
         .expect(200);
-
-      // wait until ES indexes the counter SavedObject;
-      await new Promise((res) => setTimeout(res, 7 * 1000));
 
       const { routeAccessed } = await getSavedObjectCounters();
       expect(routeAccessed).to.be(1);

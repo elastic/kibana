@@ -13,26 +13,29 @@ import {
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 
-import { CollectorOptions, Collector, UsageCollector } from './collector';
+import { CollectorOptions, Collector, CollectorSet } from './collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';
 
 export type { CollectorOptions };
 export { Collector };
 
-const logger = loggingSystemMock.createLogger();
-
 export const createUsageCollectionSetupMock = () => {
+  const collectorSet = new CollectorSet({
+    logger: loggingSystemMock.createLogger(),
+    maximumWaitTimeForAllCollectorsInS: 1,
+  });
+
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
-    areAllCollectorsReady: jest.fn(),
-    bulkFetch: jest.fn(),
     createUsageCounter: jest.fn(),
     getUsageCounterByType: jest.fn(),
-    getCollectorByType: jest.fn(),
-    toApiFieldNames: jest.fn(),
-    toObject: jest.fn(),
-    makeStatsCollector: jest.fn().mockImplementation((cfg) => new Collector(logger, cfg)),
-    makeUsageCollector: jest.fn().mockImplementation((cfg) => new UsageCollector(logger, cfg)),
-    registerCollector: jest.fn(),
+    areAllCollectorsReady: jest.fn().mockImplementation(collectorSet.areAllCollectorsReady),
+    bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
+    getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),
+    toApiFieldNames: jest.fn().mockImplementation(collectorSet.toApiFieldNames),
+    toObject: jest.fn().mockImplementation(collectorSet.toObject),
+    makeStatsCollector: jest.fn().mockImplementation(collectorSet.makeStatsCollector),
+    makeUsageCollector: jest.fn().mockImplementation(collectorSet.makeUsageCollector),
+    registerCollector: jest.fn().mockImplementation(collectorSet.registerCollector),
   };
 
   usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);
