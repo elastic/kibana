@@ -26,6 +26,7 @@ import { taskStoreMock } from './task_store.mock';
 import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
@@ -37,6 +38,8 @@ describe('TaskScheduling', () => {
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
+    ephemeralTaskLifecycle: ephemeralTaskLifecycleMock.create({}),
+    taskManagerId: '',
   };
 
   definitions.registerTaskDefinitions({

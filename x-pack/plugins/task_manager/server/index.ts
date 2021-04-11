@@ -15,6 +15,7 @@ export const plugin = (initContext: PluginInitializerContext) => new TaskManager
 export {
   TaskInstance,
   ConcreteTaskInstance,
+  EphemeralTask,
   TaskRunCreatorFunction,
   TaskStatus,
   RunContext,

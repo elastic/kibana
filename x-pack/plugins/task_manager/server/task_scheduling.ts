@@ -10,6 +10,9 @@ import { filter } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
+import uuid from 'uuid';
+import { pick } from 'lodash';
+import { merge } from 'rxjs';
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
 import {
@@ -31,11 +34,13 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
+  EphemeralTask,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -43,20 +48,25 @@ export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
   taskPollingLifecycle: TaskPollingLifecycle;
+  ephemeralTaskLifecycle: EphemeralTaskLifecycle;
   middleware: Middleware;
   definitions: TaskTypeDictionary;
+  taskManagerId: string;
 }
 
 interface RunNowResult {
-  id: string;
+  id: ConcreteTaskInstance['id'];
+  state?: ConcreteTaskInstance['state'];
 }
 
 export class TaskScheduling {
   private store: TaskStore;
   private taskPollingLifecycle: TaskPollingLifecycle;
+  private ephemeralTaskLifecycle: EphemeralTaskLifecycle;
   private logger: Logger;
   private middleware: Middleware;
   private definitions: TaskTypeDictionary;
+  private taskManagerId: string;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -67,8 +77,10 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.taskPollingLifecycle = opts.taskPollingLifecycle;
+    this.ephemeralTaskLifecycle = opts.ephemeralTaskLifecycle;
     this.store = opts.taskStore;
     this.definitions = opts.definitions;
+    this.taskManagerId = opts.taskManagerId;
   }
 
   /**
@@ -96,8 +108,39 @@ export class TaskScheduling {
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
-      this.awaitTaskRunResult(taskId).then(resolve).catch(reject);
+      this.awaitTaskRunResult(taskId)
+        // don't expose state on runNow
+        .then(({ id }) => resolve({ id }))
+        .catch(reject);
       this.taskPollingLifecycle.attemptToRun(taskId);
+    });
+  }
+
+  /**
+   * Run an ad-hoc task in memory without persisting it into ES or distributing the load across the cluster.
+   *
+   * @param task - The ephemeral task being queued.
+   * @returns {Promise<ConcreteTaskInstance>}
+   */
+  public async ephemeralRunNow(
+    task: EphemeralTask,
+    options?: Record<string, unknown>
+  ): Promise<RunNowResult> {
+    const id = uuid.v4();
+    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      ...options,
+      taskInstance: task,
+    });
+    return new Promise(async (resolve, reject) => {
+      this.awaitTaskRunResult(id).then(resolve).catch(reject);
+      this.ephemeralTaskLifecycle.attemptToRun({
+        id,
+        scheduledAt: new Date(),
+        runAt: new Date(),
+        status: TaskStatus.Idle,
+        ownerId: this.taskManagerId,
+        ...modifiedTask,
+      });
     });
   }
 
@@ -123,7 +166,10 @@ export class TaskScheduling {
 
   private async awaitTaskRunResult(taskId: string): Promise<RunNowResult> {
     return new Promise((resolve, reject) => {
-      const subscription = this.taskPollingLifecycle.events
+      const subscription = merge(
+        this.taskPollingLifecycle.events,
+        this.ephemeralTaskLifecycle.events
+      )
         // listen for all events related to the current task
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
@@ -157,7 +203,7 @@ export class TaskScheduling {
                 // resolve if the task has run sucessfully
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();
-                  resolve({ id: (taskInstance as RanTask).task.id });
+                  resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
                 }
               },
               async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {

@@ -73,7 +73,7 @@ export class TaskPollingLifecycle {
   private bufferedStore: BufferedTaskStore;
 
   private logger: Logger;
-  private pool: TaskPool;
+  public pool: TaskPool;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
   // all on-demand requests we wish to pipe into the poller
