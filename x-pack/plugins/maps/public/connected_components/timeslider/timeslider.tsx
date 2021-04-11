@@ -9,15 +9,12 @@ import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { EuiButtonIcon, EuiDualRange, EuiRangeTick, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { epochToKbnDateFormat, getTicks } from './time_utils';
-import { calcAutoIntervalNear, TimeRange } from '../../../../../../src/plugins/data/common';
+import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
+import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 import { NextTimesliceIcon } from './next_timeslice_icon';
 import { PreviousTimesliceIcon } from './previous_timeslice_icon';
-
-const NUM_TICKS = 6;
-const MAX_TICKS = 7;
 
 export interface Props {
   closeTimeslider: () => void;
@@ -53,17 +50,9 @@ class KeyedTimeslider extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timeRangeBounds = getTimeFilter().calculateBounds(props.timeRange);
-    const duration = timeRangeBounds.max - timeRangeBounds.min;
-    let interval = calcAutoIntervalNear(NUM_TICKS, duration);
-    // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
-    // Adjust the interval to get the requested number of ticks
-    const actualTicks = duration / interval;
-    if (actualTicks > MAX_TICKS) {
-      const factor = Math.ceil(actualTicks / NUM_TICKS);
-      interval *= factor;
-    }
     const min = timeRangeBounds.min.valueOf();
     const max = timeRangeBounds.max.valueOf();
+    const interval = getInterval(min, max);
     const timeslice = [min, max];
 
     this.state = {

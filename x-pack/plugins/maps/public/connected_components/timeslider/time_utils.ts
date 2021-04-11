@@ -7,6 +7,7 @@
 
 import moment from 'moment-timezone';
 import { EuiRangeTick } from '@elastic/eui';
+import { calcAutoIntervalNear } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter, getUiSettings } from '../../kibana_services';
 
 function getTimezone() {
@@ -48,6 +49,19 @@ export function epochToKbnDateFormat(epoch: number): string {
   const dateFormat = getUiSettings().get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
   const timezone = getTimezone();
   return moment.tz(epoch, timezone).format(dateFormat);
+}
+
+export function getInterval(min: number, max: number, steps = 6): number {
+  const duration = max - min;
+  let interval = calcAutoIntervalNear(steps, duration);
+  // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
+  // Adjust the interval to get the requested number of ticks
+  const actualSteps = duration / interval;
+  if (actualSteps > steps * 1.5) {
+    const factor = Math.round(actualSteps / steps);
+    interval *= factor;
+  }
+  return interval;
 }
 
 export function getTicks(min: number, max: number, interval: number): EuiRangeTick[] {
