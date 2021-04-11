@@ -735,7 +735,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  canMaskTimeslice(prevMeta: DataMeta, timeslice: Timeslice): boolean {
+  canMaskTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return false;
     }
@@ -744,9 +744,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return false;
     }
 
-    return prevMeta.timeslice !== undefined
-      ? timeslice.from >= prevMeta.timeslice.from && timeslice.to <= prevMeta.timeslice.to
-      : true;
+    if (prevMeta.timeslice !== undefined) {
+      return timeslice !== undefined
+        ? timeslice.from >= prevMeta.timeslice.from && timeslice.to <= prevMeta.timeslice.to
+        : false;
+    }
+
+    return true;
   }
 }
 

@@ -181,93 +181,129 @@ describe('ESSearchSource', () => {
     });
   });
 
-  describe('updateDueToTimeslice', () => {
-    test('should request re-fetch when areResultsTrimmed not provided and timeslice changes', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const prevMeta = ({
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      const nextMeta = ({
-        timeslice: {
-          from: 1000,
-          to: 2000,
-        },
-      } as unknown) as DataMeta;
-      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(true);
-    });
-
-    test('should not request re-fetch when areResultsTrimmed not provided and timeslice does not change', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const prevMeta = ({
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      const nextMeta = ({
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
-    });
-
-    test('should request re-fetch when results are trimmed and timeslice changes', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const prevMeta = ({
-        areResultsTrimmed: true,
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      const nextMeta = ({
-        timeslice: {
-          from: 1000,
-          to: 2000,
-        },
-      } as unknown) as DataMeta;
-      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(true);
-    });
-
-    test('should not request re-fetch when results are trimmed and timeslice does not change', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const prevMeta = ({
-        areResultsTrimmed: true,
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      const nextMeta = ({
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
-      } as unknown) as DataMeta;
-      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
-    });
-
-    test('should not request re-fetch when results are not trimmed and timeslice changes', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const prevMeta = ({
+  describe('canMaskTimeslice', () => {
+    describe('results are not trimmed', () => {
+      const resultsNotTrimmedMeta = ({
         areResultsTrimmed: false,
-        timeslice: {
-          from: 0,
-          to: 1000,
-        },
       } as unknown) as DataMeta;
-      const nextMeta = ({
-        timeslice: {
-          from: 1000,
-          to: 2000,
-        },
+
+      test('Can not mask timeslice when source is top hits', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.TOP_HITS,
+          topHitsSplitField: 'entityId',
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedMeta)).toBe(false);
+      });
+
+      test('Can not mask timeslice when source is MVT', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.MVT,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedMeta)).toBe(false);
+      });
+
+      test('Can mask timeslice when source is limit', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.LIMIT,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedMeta)).toBe(true);
+      });
+
+      test('Can mask timeslice when source is cluster', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.CLUSTER,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedMeta)).toBe(true);
+      });
+
+      describe('results are from timeslice', () => {
+        const resultsNotTrimmedAndFromTimesliceMeta = ({
+          areResultsTrimmed: false,
+          timeslice: { from: 1000, to: 2000 },
+        } as unknown) as DataMeta;
+
+        test('Can not mask timeslice when next timeslice is not provided', () => {
+          const esSearchSource = new ESSearchSource({
+            ...mockDescriptor,
+            scalingType: SCALING_TYPES.LIMIT,
+          });
+          expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedAndFromTimesliceMeta)).toBe(
+            false
+          );
+        });
+
+        test('Can not mask timeslice when next timeslice is outside data timeslice', () => {
+          const esSearchSource = new ESSearchSource({
+            ...mockDescriptor,
+            scalingType: SCALING_TYPES.LIMIT,
+          });
+          expect(
+            esSearchSource.canMaskTimeslice(resultsNotTrimmedAndFromTimesliceMeta, {
+              from: 500,
+              to: 1500,
+            })
+          ).toBe(false);
+        });
+
+        test('Can mask timeslice when next timeslice is contained by data timeslice', () => {
+          const esSearchSource = new ESSearchSource({
+            ...mockDescriptor,
+            scalingType: SCALING_TYPES.LIMIT,
+          });
+          expect(
+            esSearchSource.canMaskTimeslice(resultsNotTrimmedAndFromTimesliceMeta, {
+              from: 1000,
+              to: 1500,
+            })
+          ).toBe(true);
+        });
+      });
+    });
+
+    describe('results are trimmed', () => {
+      const resultsTrimmedMeta = ({
+        areResultsTrimmed: true,
       } as unknown) as DataMeta;
-      expect(esSearchSource.updateDueToTimeslice(prevMeta, nextMeta)).toBe(false);
+
+      test('Can not mask timeslice when source is limit', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.LIMIT,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
+      });
+
+      test('Can not mask timeslice when source is cluster', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.CLUSTER,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
+      });
+    });
+
+    describe('no previous data fetch', () => {
+      const resultsTrimmedMeta = ({} as unknown) as DataMeta;
+
+      test('Can not mask timeslice when source is limit', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.LIMIT,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
+      });
+
+      test('Can not mask timeslice when source is cluster', () => {
+        const esSearchSource = new ESSearchSource({
+          ...mockDescriptor,
+          scalingType: SCALING_TYPES.CLUSTER,
+        });
+        expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
+      });
     });
   });
 });

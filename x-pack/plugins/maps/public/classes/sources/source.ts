@@ -67,7 +67,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  canMaskTimeslice(prevMeta: DataMeta, timeslice: Timeslice): boolean;
+  canMaskTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -199,7 +199,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  canMaskTimeslice(prevMeta: DataMeta, timeslice: Timeslice): boolean {
+  canMaskTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
     return false;
   }
 }
