@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
@@ -14,7 +13,6 @@ import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
 export function query(
   req,
   panel,
-  series,
   annotation,
   esQueryConfig,
   indexPattern,
@@ -25,8 +23,7 @@ export function query(
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { bucketSize } = getBucketSize(req, 'auto', capabilities, barTargetUiSettings);
     const { from, to } = getTimerange(req);
-    const timeField =
-      annotation.time_field || getIntervalAndTimefield(panel, series, indexPattern).timeField;
+    const timeField = annotation.time_field || indexPattern?.timeFieldName || '';
 
     doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.body.query : [];

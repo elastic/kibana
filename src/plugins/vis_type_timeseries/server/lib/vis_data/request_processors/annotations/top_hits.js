@@ -7,13 +7,11 @@
  */
 
 import { overwrite } from '../../helpers';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 
-export function topHits(req, panel, series, annotation, esQueryConfig, indexPattern) {
+export function topHits(req, panel, annotation, esQueryConfig, indexPattern) {
   return (next) => (doc) => {
     const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField =
-      annotation.time_field || getIntervalAndTimefield(panel, series, indexPattern).timeField;
+    const timeField = annotation.time_field || indexPattern?.timeFieldName || '';
 
     overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
       sort: [

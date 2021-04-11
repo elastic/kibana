@@ -15,8 +15,6 @@ import {
 } from '../../../types';
 import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
 
-import type { SeriesItemsSchema } from '../../../../common/types';
-
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
   capabilities: DefaultSearchCapabilities;
   requestContext: VisTypeTimeseriesRequestHandlerContext;
@@ -26,7 +24,6 @@ export type AnnotationServices = VisTypeTimeseriesRequestServices & {
 export async function getAnnotationRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
-  series: SeriesItemsSchema[],
   annotation: AnnotationItemsSchema,
   {
     esShardTimeout,
@@ -43,7 +40,6 @@ export async function getAnnotationRequestParams(
   const request = await buildAnnotationRequest(
     req,
     panel,
-    series,
     annotation,
     esQueryConfig,
     indexPattern,
