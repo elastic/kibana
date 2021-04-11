@@ -78,8 +78,8 @@ describe('SearchSource', () => {
       .fn()
       .mockReturnValue(
         of(
-          { rawResponse: { isPartial: true, isRunning: true } },
-          { rawResponse: { isPartial: false, isRunning: false } }
+          { rawResponse: { test: 1 }, isPartial: true, isRunning: true },
+          { rawResponse: { test: 2 }, isPartial: false, isRunning: false }
         )
       );
 
@@ -739,16 +739,14 @@ describe('SearchSource', () => {
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             Object {
-              "isPartial": true,
-              "isRunning": true,
+              "test": 1,
             },
           ]
         `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
           Array [
             Object {
-              "isPartial": false,
-              "isRunning": false,
+              "test": 2,
             },
           ]
         `);
@@ -941,6 +939,7 @@ describe('SearchSource', () => {
       expect(requestResponder.error).not.toBeCalled();
       expect(requestResponder.json).toBeCalledTimes(1);
       expect(requestResponder.ok).toBeCalledTimes(1);
+      // First and last
       expect(requestResponder.stats).toBeCalledTimes(2);
     });
 
@@ -971,13 +970,63 @@ describe('SearchSource', () => {
 
       expect(options.inspector.adapter.start).toBeCalledTimes(1);
       expect(requestResponder.json).toBeCalledTimes(1);
-      expect(requestResponder.ok).toBeCalledTimes(0);
       expect(requestResponder.error).toBeCalledTimes(1);
-      expect(requestResponder.stats).toBeCalledTimes(1);
+      expect(requestResponder.ok).toBeCalledTimes(0);
+      expect(requestResponder.stats).toBeCalledTimes(0);
     });
 
-    test.skip('doesnt call any post flight requests if unavailable', () => {});
+    test('doesnt call any post flight requests if disabled', async () => {
+      const typesRegistry = mockAggTypesRegistry();
 
-    test.skip('calls post flight requests, fires 1 extra response', () => {});
+      const ac = new AggConfigs(
+        indexPattern3,
+        [
+          {
+            type: 'avg',
+            enabled: false,
+            params: { field: 'field1' },
+          },
+        ],
+        {
+          typesRegistry,
+        }
+      );
+
+      ac.aggs[0].type.postFlightRequest = jest.fn();
+
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('aggs', ac);
+      await searchSource.fetch$({}).toPromise();
+
+      expect(ac.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(0);
+    });
+
+    test.skip('calls post flight requests, fires 1 extra response', async () => {
+      const typesRegistry = mockAggTypesRegistry();
+
+      const ac = new AggConfigs(
+        indexPattern3,
+        [
+          {
+            type: 'avg',
+            enabled: true,
+            params: { field: 'field1' },
+          },
+        ],
+        {
+          typesRegistry,
+        }
+      );
+
+      ac.aggs[0].type.postFlightRequest = jest.fn();
+
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('aggs', ac);
+      await searchSource.fetch$({}).toPromise();
+
+      expect(ac.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(1);
+    });
   });
 });

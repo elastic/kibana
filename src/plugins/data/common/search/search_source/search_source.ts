@@ -60,8 +60,17 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
-import { catchError, finalize, last, map, share, switchMap, tap } from 'rxjs/operators';
-import { defer, from, Observable } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  first,
+  last,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
+import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -265,17 +274,7 @@ export class SearchSource {
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
 
-    const { id, title, description, adapter } = options.inspector || { title: '' };
-    const requestResponder = adapter?.start(title, {
-      id,
-      description,
-      searchSessionId: options.sessionId,
-    });
-
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
-      tap(() => {
-        requestResponder?.stats(getRequestInspectorStats(this));
-      }),
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
@@ -293,25 +292,10 @@ export class SearchSource {
           throw new RequestFailure(null, response);
         }
       }),
-      catchError((e) => {
-        requestResponder?.error({ json: e });
-        throw e;
-      }),
-      finalize(() => {
-        requestResponder?.json(this.getSearchRequestBody());
-      }),
-      share()
+      shareReplay()
     );
 
-    const sub = s$.pipe(last()).subscribe({
-      next: (finalResponse) => {
-        requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
-        requestResponder?.ok({ json: finalResponse });
-        sub.unsubscribe();
-      },
-    });
-
-    return s$;
+    return this.inspectSearch(s$, options);
   }
 
   /**
@@ -351,6 +335,60 @@ export class SearchSource {
   /** ****
    * PRIVATE APIS
    ******/
+
+  private inspectSearch(s$: Observable<estypes.SearchResponse<any>>, options: ISearchOptions) {
+    const { id, title, description, adapter } = options.inspector || { title: '' };
+    const requestResponder = adapter?.start(title, {
+      id,
+      description,
+      searchSessionId: options.sessionId,
+    });
+
+    try {
+      requestResponder?.json(this.getSearchRequestBody());
+    } catch (e) {
+      // ignore
+    }
+
+    // Track request stats on first emit
+    const first$ = s$
+      .pipe(
+        first(undefined, null),
+        tap(() => {
+          requestResponder?.stats(getRequestInspectorStats(this));
+        }),
+        catchError((e) => {
+          return EMPTY;
+        }),
+        finalize(() => {
+          first$.unsubscribe();
+        })
+      )
+      .subscribe();
+
+    // Track response stats on last emit
+    // Also track errors
+    const last$ = s$
+      .pipe(
+        catchError((e) => {
+          requestResponder?.error({ json: e });
+          return EMPTY;
+        }),
+        last(undefined, null),
+        tap((finalResponse) => {
+          if (finalResponse) {
+            requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
+            requestResponder?.ok({ json: finalResponse });
+          }
+        }),
+        finalize(() => {
+          last$.unsubscribe();
+        })
+      )
+      .subscribe();
+
+    return s$;
+  }
 
   private hasPostFlightRequests() {
     const aggs = this.getField('aggs');
