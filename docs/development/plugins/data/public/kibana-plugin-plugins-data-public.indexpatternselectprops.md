@@ -12,6 +12,5 @@ export declare type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
-    maxIndexPatterns?: number;
 };
 ```
