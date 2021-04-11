@@ -294,7 +294,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const requestMeta: VectorSourceRequestMeta = this._getSearchFilters(
+    const requestMeta: VectorSourceRequestMeta = await this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()

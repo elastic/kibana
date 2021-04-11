@@ -377,7 +377,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await Promise.all(joinSyncs);
   }
 
-  _getSearchFilters(
+  async _getSearchFilters(
     dataFilters: MapFilters,
     source: IVectorSource,
     style: IVectorStyle
@@ -387,6 +387,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       ...style.getSourceFieldNames(),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
+
+    const timesliceMaskFieldName = await source.getTimesliceMaskFieldName();
+    if (timesliceMaskFieldName) {
+      fieldNames.push(timesliceMaskFieldName);
+    }
 
     const sourceQuery = this.getQuery() as MapQuery;
     return {
@@ -662,7 +667,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: this._getSearchFilters(syncContext.dataFilters, source, style),
+        requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
         syncContext,
         source,
       });
@@ -975,8 +980,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
-    const dateFieldName = await this.getSource().getDateFieldName();
-    if (!dateFieldName) {
+    const timesliceMaskFieldName = await this.getSource().getTimesliceMaskFieldName();
+    if (!timesliceMaskFieldName) {
       return;
     }
 
@@ -991,7 +996,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     return this.getSource().canMaskTimeslice(prevMeta, timeslice)
-      ? { dateFieldName, timeslice }
+      ? { timesliceMaskFieldName, timeslice }
       : undefined;
   }
 

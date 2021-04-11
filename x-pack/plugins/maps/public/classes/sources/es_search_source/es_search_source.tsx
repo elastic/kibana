@@ -182,7 +182,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getFieldNames(): string[] {
-    return [this._descriptor.geoField, 'timestamp'];
+    return [this._descriptor.geoField];
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -733,6 +733,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
         : urlTemplate,
     };
+  }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    const indexPattern = await this.getIndexPattern();
+    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
   canMaskTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {

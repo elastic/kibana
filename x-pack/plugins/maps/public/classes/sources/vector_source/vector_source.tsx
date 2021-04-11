@@ -66,7 +66,7 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
-  getDateFieldName(): Promise<string | undefined>;
+  getTimesliceMaskFieldName(): Promise<string | null>;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
@@ -169,7 +169,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async getDateFieldName(): Promise<string | undefined> {
-    return undefined;
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    return null;
   }
 }
