@@ -34,6 +34,11 @@ import { mockIndexPattern } from './index_pattern';
 
 export const mockGlobalState: State = {
   app: {
+    enableExperimental: {
+      fleetServerEnabled: false,
+      trustedAppsByPolicyEnabled: false,
+      metricsEntitiesEnabled: false,
+    },
     notesById: {},
     errors: [
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
