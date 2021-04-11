@@ -101,6 +101,7 @@ describe('rollUsageCountersIndices', () => {
   it(`deletes documents older than ${USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
     const mockSavedObjects = [
       createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1'),
+      createMockSavedObjectDoc(moment().subtract(9, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(1, 'days'), 'doc-id-2'),
       createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3'),
     ];
@@ -140,7 +141,7 @@ describe('rollUsageCountersIndices', () => {
   });
 
   it(`logs warnings on savedObject.delete failure`, async () => {
-    const mockSavedObjects = [createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1')];
+    const mockSavedObjects = [createMockSavedObjectDoc(moment().subtract(7, 'days'), 'doc-id-1')];
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {

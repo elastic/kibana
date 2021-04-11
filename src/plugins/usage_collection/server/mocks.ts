@@ -6,20 +6,58 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../core/server/mocks';
-import { UsageCollectionSetup } from './plugin';
-import { CollectorSet } from './collector';
-export { Collector, createCollectorFetchContextMock } from './usage_collection.mock';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '../../../../src/core/server/mocks';
 
-const createSetupContract = () => {
-  return {
-    ...new CollectorSet({
-      logger: loggingSystemMock.createLogger(),
-      maximumWaitTimeForAllCollectorsInS: 1,
-    }),
-  } as UsageCollectionSetup;
+import { CollectorOptions, Collector, UsageCollector } from './collector';
+import { UsageCollectionSetup, CollectorFetchContext } from './index';
+
+export type { CollectorOptions };
+export { Collector };
+
+const logger = loggingSystemMock.createLogger();
+
+export const createUsageCollectionSetupMock = () => {
+  const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
+    areAllCollectorsReady: jest.fn(),
+    bulkFetch: jest.fn(),
+    createUsageCounter: jest.fn(),
+    getUsageCounterByType: jest.fn(),
+    getCollectorByType: jest.fn(),
+    toApiFieldNames: jest.fn(),
+    toObject: jest.fn(),
+    makeStatsCollector: jest.fn().mockImplementation((cfg) => new Collector(logger, cfg)),
+    makeUsageCollector: jest.fn().mockImplementation((cfg) => new UsageCollector(logger, cfg)),
+    registerCollector: jest.fn(),
+  };
+
+  usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);
+  return usageCollectionSetupMock;
 };
 
+export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext<false>> {
+  const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<false>> = {
+    esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+    soClient: savedObjectsClientMock.create(),
+  };
+  return collectorFetchClientsMock;
+}
+
+export function createCollectorFetchContextWithKibanaMock(): jest.Mocked<
+  CollectorFetchContext<true>
+> {
+  const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<true>> = {
+    esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+    soClient: savedObjectsClientMock.create(),
+    kibanaRequest: httpServerMock.createKibanaRequest(),
+  };
+  return collectorFetchClientsMock;
+}
+
 export const usageCollectionPluginMock = {
-  createSetupContract,
+  createSetupContract: createUsageCollectionSetupMock,
 };

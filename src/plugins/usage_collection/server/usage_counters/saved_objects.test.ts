@@ -38,6 +38,12 @@ describe('counterKey', () => {
 describe('storeCounter', () => {
   const internalRepository = savedObjectsRepositoryMock.create();
 
+  const mockNow = 1617954426939;
+
+  beforeEach(() => {
+    jest.spyOn(moment, 'now').mockReturnValue(mockNow);
+  });
+
   afterAll(() => {
     jest.resetAllMocks();
   });

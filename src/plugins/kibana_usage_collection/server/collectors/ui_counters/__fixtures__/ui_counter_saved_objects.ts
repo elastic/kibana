@@ -38,4 +38,14 @@ export const rawUiCounters: UICounterSavedObject[] = [
     updated_at: '2020-10-23T11:27:57.067Z',
     version: 'WzI5NDRd',
   },
+  {
+    type: 'ui-counter',
+    id: 'Kibana_home:24112020:click:only_reported_in_ui_counters',
+    attributes: {
+      count: 1,
+    },
+    references: [],
+    updated_at: '2020-11-24T11:27:57.067Z',
+    version: 'WzI5NDRd',
+  },
 ];

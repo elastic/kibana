@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/* eslint-disable dot-notation */
 import { UsageCountersService } from './usage_counters_service';
 import { loggingSystemMock, coreMock } from '../../../../core/server/mocks';
 import * as rxOp from 'rxjs/operators';
@@ -40,15 +42,15 @@ describe('UsageCountersService', () => {
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA' });
 
-    const dataInSourcePromise = usageCountersService.source$.pipe(rxOp.toArray()).toPromise();
-    usageCountersService.flushCache$.next();
-    usageCountersService.source$.complete();
+    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    usageCountersService['flushCache$'].next();
+    usageCountersService['source$'].complete();
     await expect(dataInSourcePromise).resolves.toHaveLength(2);
   });
 
   it('registers savedObject type during setup', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDebounceMs });
-    const { createUsageCounter } = usageCountersService.setup(coreSetup);
+    usageCountersService.setup(coreSetup);
     expect(coreSetup.savedObjects.registerType).toBeCalledTimes(1);
   });
 
@@ -67,9 +69,9 @@ describe('UsageCountersService', () => {
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA' });
 
-    const dataInSourcePromise = usageCountersService.source$.pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
     usageCountersService.start(coreStart);
-    usageCountersService.source$.complete();
+    usageCountersService['source$'].complete();
 
     await expect(dataInSourcePromise).resolves.toMatchInlineSnapshot(`
       Array [

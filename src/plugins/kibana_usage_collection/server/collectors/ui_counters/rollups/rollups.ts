@@ -8,7 +8,7 @@
 
 import { ISavedObjectsRepository, Logger } from 'kibana/server';
 import moment from 'moment';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
 import { UI_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 import {

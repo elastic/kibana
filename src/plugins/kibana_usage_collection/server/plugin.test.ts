@@ -14,7 +14,7 @@ import {
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../usage_collection/server/usage_collection.mock';
+} from '../../usage_collection/server/mocks';
 
 import { plugin } from './';
 
@@ -33,13 +33,63 @@ describe('kibana_usage_collection', () => {
     return createUsageCollectionSetupMock().makeStatsCollector(opts);
   });
 
-  test('Runs the setup method without issues', () => {
+  test('Runs the setup method without issues', async () => {
     const coreSetup = coreMock.createSetup();
 
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
-    usageCollectors.forEach(({ isReady }) => {
-      expect(isReady()).toMatchSnapshot(); // Some should return false at this stage
-    });
+
+    await expect(
+      Promise.all(
+        usageCollectors.map(async (usageCollector) => {
+          const isReady = await usageCollector.isReady();
+          const type = usageCollector.type;
+          return { type, isReady };
+        })
+      )
+    ).resolves.toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "isReady": true,
+          "type": "ui_counters",
+        },
+        Object {
+          "isReady": true,
+          "type": "usage_counters",
+        },
+        Object {
+          "isReady": false,
+          "type": "kibana_stats",
+        },
+        Object {
+          "isReady": true,
+          "type": "kibana",
+        },
+        Object {
+          "isReady": false,
+          "type": "stack_management",
+        },
+        Object {
+          "isReady": false,
+          "type": "ui_metric",
+        },
+        Object {
+          "isReady": false,
+          "type": "application_usage",
+        },
+        Object {
+          "isReady": true,
+          "type": "csp",
+        },
+        Object {
+          "isReady": false,
+          "type": "core",
+        },
+        Object {
+          "isReady": true,
+          "type": "localization",
+        },
+      ]
+    `);
   });
 
   test('Runs the start method without issues', () => {

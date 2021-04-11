@@ -19,4 +19,4 @@ export const ROLL_INDICES_START = 5 * 60 * 1000;
 /**
  * Number of days to keep the Usage counters saved object documents
  */
-export const USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS = 3;
+export const USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS = 5;

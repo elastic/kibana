@@ -13,14 +13,10 @@ import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
-import moment from 'moment';
 
 describe('store_report', () => {
   const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
   const uiCountersUsageCounter = usageCountersServiceSetup.createUsageCounter('uiCounter');
-
-  const momentTimestamp = moment();
-  const date = momentTimestamp.format('DDMMYYYY');
 
   let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
 
@@ -99,7 +95,8 @@ describe('store_report', () => {
         ],
       ]
     `);
-    expect(uiCountersUsageCounter.incrementCounter.mock.calls).toMatchInlineSnapshot(`
+    expect((uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls)
+      .toMatchInlineSnapshot(`
       Array [
         Array [
           Object {

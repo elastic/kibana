@@ -49,6 +49,14 @@ describe('transformRawUsageCounterObject', () => {
           "lastUpdatedAt": "2021-04-09T08:18:03.031Z",
           "total": 8,
         },
+        Object {
+          "appName": "myApp",
+          "counterType": "count",
+          "eventName": "only_reported_in_usage_counters",
+          "fromTimestamp": "2021-04-09T00:00:00Z",
+          "lastUpdatedAt": "2021-04-09T08:18:03.031Z",
+          "total": 1,
+        },
       ]
     `);
   });
@@ -83,6 +91,14 @@ describe('transformRawUiCounterObject', () => {
           "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
           "total": 3,
         },
+        Object {
+          "appName": "Kibana_home",
+          "counterType": "click",
+          "eventName": "only_reported_in_ui_counters",
+          "fromTimestamp": "2020-11-24T00:00:00Z",
+          "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
+          "total": 1,
+        },
       ]
     `);
   });
@@ -94,6 +110,7 @@ describe('fetchUiCounters', () => {
     jest.clearAllMocks();
   });
   it('merges saved objects from both ui_counters and usage_counters saved objects', async () => {
+    // @ts-expect-error incomplete mock implementation
     soClientMock.find.mockImplementation(async ({ type }) => {
       switch (type) {
         case UI_COUNTER_SAVED_OBJECT_TYPE:
@@ -105,28 +122,55 @@ describe('fetchUiCounters', () => {
       }
     });
 
+    // @ts-expect-error incomplete mock implementation
     const { dailyEvents } = await fetchUiCounters({ soClient: soClientMock });
-    expect(dailyEvents).toHaveLength(6);
+    expect(dailyEvents).toHaveLength(8);
     const intersectingEntry = dailyEvents.find(
-      (dailyEvent) =>
-        dailyEvent.eventName === 'home_tutorial_directory' &&
-        dailyEvent.fromTimestamp === '2020-10-23T00:00:00Z'
+      ({ eventName, fromTimestamp }) =>
+        eventName === 'home_tutorial_directory' && fromTimestamp === '2020-10-23T00:00:00Z'
     );
+
+    const onlyFromUICountersEntry = dailyEvents.find(
+      ({ eventName }) => eventName === 'only_reported_in_ui_counters'
+    );
+
+    const onlyFromUsageCountersEntry = dailyEvents.find(
+      ({ eventName }) => eventName === 'only_reported_in_usage_counters'
+    );
+
     const invalidCountEntry = dailyEvents.find(
-      (dailyEvent) => dailyEvent.eventName === 'my_event_malformed'
+      ({ eventName }) => eventName === 'my_event_malformed'
     );
 
     const zeroCountEntry = dailyEvents.find(
-      (dailyEvent) => dailyEvent.eventName === 'my_event_4457914848544'
+      ({ eventName }) => eventName === 'my_event_4457914848544'
     );
 
-    const nonUiCountersEntry = dailyEvents.find(
-      (dailyEvent) => dailyEvent.eventName === 'some_event_name'
-    );
+    const nonUiCountersEntry = dailyEvents.find(({ eventName }) => eventName === 'some_event_name');
 
     expect(invalidCountEntry).toBe(undefined);
     expect(nonUiCountersEntry).toBe(undefined);
     expect(zeroCountEntry).toBe(undefined);
+    expect(onlyFromUICountersEntry).toMatchInlineSnapshot(`
+      Object {
+        "appName": "Kibana_home",
+        "counterType": "click",
+        "eventName": "only_reported_in_ui_counters",
+        "fromTimestamp": "2020-11-24T00:00:00Z",
+        "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
+        "total": 1,
+      }
+    `);
+    expect(onlyFromUsageCountersEntry).toMatchInlineSnapshot(`
+      Object {
+        "appName": "myApp",
+        "counterType": "count",
+        "eventName": "only_reported_in_usage_counters",
+        "fromTimestamp": "2021-04-09T00:00:00Z",
+        "lastUpdatedAt": "2021-04-09T08:18:03.031Z",
+        "total": 1,
+      }
+    `);
     expect(intersectingEntry).toMatchInlineSnapshot(`
       Object {
         "appName": "Kibana_home",

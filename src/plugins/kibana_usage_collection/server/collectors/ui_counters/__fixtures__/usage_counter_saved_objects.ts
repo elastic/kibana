@@ -16,8 +16,6 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:17:57.693Z',
-    version: 'WzAsMV0=',
-    score: 0,
   },
   {
     type: 'usage-counters',
@@ -26,8 +24,6 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2020-10-23T11:27:57.067Z',
-    version: 'WzUsMV0=',
-    score: 0,
   },
   {
     type: 'usage-counters',
@@ -36,18 +32,15 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.030Z',
-    version: 'WzUsMV0=',
-    score: 0,
   },
   {
     type: 'usage-counters',
     id: 'uiCounter:09042021:count:myApp:my_event_malformed',
+    // @ts-expect-error
     attributes: { count: 'malformed' },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.030Z',
-    version: 'WzUsMV0=',
-    score: 0,
   },
   {
     type: 'usage-counters',
@@ -56,8 +49,6 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.030Z',
-    version: 'WzUsMV0=',
-    score: 0,
   },
   {
     type: 'usage-counters',
@@ -66,7 +57,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.031Z',
-    version: 'WzcsMV0=',
-    score: 0,
+  },
+  {
+    type: 'usage-counters',
+    id: 'uiCounter:09042021:count:myApp:only_reported_in_usage_counters',
+    attributes: { count: 1 },
+    references: [],
+    coreMigrationVersion: '8.0.0',
+    updated_at: '2021-04-09T08:18:03.031Z',
   },
 ];
