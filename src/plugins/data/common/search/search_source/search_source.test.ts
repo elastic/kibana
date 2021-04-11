@@ -915,4 +915,69 @@ describe('SearchSource', () => {
       );
     });
   });
+
+  describe('fetch$', () => {
+    test('calls inspector if provided', async () => {
+      const requestResponder = {
+        stats: jest.fn(),
+        ok: jest.fn(),
+        error: jest.fn(),
+        json: jest.fn(),
+      };
+      const options = {
+        inspector: {
+          title: 'a',
+          adapter: {
+            start: jest.fn().mockReturnValue(requestResponder),
+          } as any,
+        },
+      };
+
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+      await searchSource.fetch$(options).toPromise();
+
+      expect(options.inspector.adapter.start).toBeCalledTimes(1);
+      expect(requestResponder.error).not.toBeCalled();
+      expect(requestResponder.json).toBeCalledTimes(1);
+      expect(requestResponder.ok).toBeCalledTimes(1);
+      expect(requestResponder.stats).toBeCalledTimes(2);
+    });
+
+    test('calls error on inspector', async () => {
+      const requestResponder = {
+        stats: jest.fn(),
+        ok: jest.fn(),
+        error: jest.fn(),
+        json: jest.fn(),
+      };
+      const options = {
+        inspector: {
+          title: 'a',
+          adapter: {
+            start: jest.fn().mockReturnValue(requestResponder),
+          } as any,
+        },
+      };
+
+      searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+      await searchSource
+        .fetch$(options)
+        .toPromise()
+        .catch(() => {});
+
+      expect(options.inspector.adapter.start).toBeCalledTimes(1);
+      expect(requestResponder.json).toBeCalledTimes(1);
+      expect(requestResponder.ok).toBeCalledTimes(0);
+      expect(requestResponder.error).toBeCalledTimes(1);
+      expect(requestResponder.stats).toBeCalledTimes(1);
+    });
+
+    test.skip('doesnt call any post flight requests if unavailable', () => {});
+
+    test.skip('calls post flight requests, fires 1 extra response', () => {});
+  });
 });

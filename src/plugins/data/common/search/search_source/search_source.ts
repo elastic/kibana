@@ -60,7 +60,7 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
-import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, last, map, share, switchMap, tap } from 'rxjs/operators';
 import { defer, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -271,7 +271,8 @@ export class SearchSource {
       description,
       searchSessionId: options.sessionId,
     });
-    return defer(() => this.requestIsStarting(options)).pipe(
+
+    const s$ = defer(() => this.requestIsStarting(options)).pipe(
       tap(() => {
         requestResponder?.stats(getRequestInspectorStats(this));
       }),
@@ -288,11 +289,8 @@ export class SearchSource {
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-        if ((response as any).error) {
+        if (!response || (response as any).error) {
           throw new RequestFailure(null, response);
-        } else {
-          requestResponder?.stats(getResponseInspectorStats(response, this));
-          requestResponder?.ok({ json: response });
         }
       }),
       catchError((e) => {
@@ -301,8 +299,19 @@ export class SearchSource {
       }),
       finalize(() => {
         requestResponder?.json(this.getSearchRequestBody());
-      })
+      }),
+      share()
     );
+
+    const sub = s$.pipe(last()).subscribe({
+      next: (finalResponse) => {
+        requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
+        requestResponder?.ok({ json: finalResponse });
+        sub.unsubscribe();
+      },
+    });
+
+    return s$;
   }
 
   /**
@@ -393,7 +402,9 @@ export class SearchSource {
           } else {
             if (!this.hasPostFlightRequests()) {
               obs.next(response);
-              obs.complete();
+              if (isCompleteResponse(response)) {
+                obs.complete();
+              }
             } else {
               obs.next({
                 ...response,

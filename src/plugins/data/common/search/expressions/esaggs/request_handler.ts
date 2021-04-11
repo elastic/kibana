@@ -46,7 +46,6 @@ export const handleRequest = async ({
   filters,
   indexPattern,
   inspectorAdapters,
-  metricsAtAllLevels,
   partialRows,
   query,
   searchSessionId,
@@ -131,7 +130,7 @@ export const handleRequest = async ({
 
   const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
   const tabifyParams = {
-    metricsAtAllLevels,
+    metricsAtAllLevels: aggs.hierarchical,
     partialRows,
     timeRange: parsedTimeRange
       ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }

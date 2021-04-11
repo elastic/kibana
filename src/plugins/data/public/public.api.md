@@ -255,6 +255,8 @@ export class AggConfigs {
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
+    hierarchical?: boolean;
+    // (undocumented)
     indexPattern: IndexPattern;
     jsonDataEquals(aggConfigs: AggConfig[]): boolean;
     // (undocumented)
@@ -268,7 +270,7 @@ export class AggConfigs {
     // (undocumented)
     timeRange?: TimeRange;
     // (undocumented)
-    toDsl(hierarchical?: boolean): Record<string, any>;
+    toDsl(): Record<string, any>;
     }
 
 // @internal (undocumented)
