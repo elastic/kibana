@@ -8939,7 +8939,7 @@ const BootstrapCommand = {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
     }
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build'], runOffline); // Install monorepo npm dependencies outside of the Bazel managed ones
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build', '--show_result=1'], runOffline); // Install monorepo npm dependencies outside of the Bazel managed ones
 
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
