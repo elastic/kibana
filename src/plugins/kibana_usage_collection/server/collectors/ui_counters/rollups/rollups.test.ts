@@ -81,7 +81,9 @@ describe('rollUiCounterIndices', () => {
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollUiCounterIndices(logger, undefined)).resolves.toBe(undefined);
+    await expect(
+      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, undefined)
+    ).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
