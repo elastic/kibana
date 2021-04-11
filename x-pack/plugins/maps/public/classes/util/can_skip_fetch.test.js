@@ -289,13 +289,13 @@ describe('canSkipSourceUpdate', () => {
   });
 
   describe('isTimeAware', () => {
-    function createSourceMock({ canMaskForTimeslice }) {
+    function createSourceMock({ canMaskTimeslice }) {
       return {
         isTimeAware: () => {
           return true;
         },
-        canMaskForTimeslice: () => {
-          return canMaskForTimeslice;
+        canMaskTimeslice: () => {
+          return canMaskTimeslice;
         },
         isRefreshTimerAware: () => {
           return false;
@@ -318,7 +318,7 @@ describe('canSkipSourceUpdate', () => {
     describe('applyGlobalTime', () => {
       it('can not skip update when applyGlobalTime changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: createSourceMock({ canMaskForTimeslice: false }),
+          source: createSourceMock({ canMaskTimeslice: false }),
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataMeta: {
@@ -337,7 +337,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when applyGlobalTime does not change', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: createSourceMock({ canMaskForTimeslice: false }),
+          source: createSourceMock({ canMaskTimeslice: false }),
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataMeta: {
@@ -358,7 +358,7 @@ describe('canSkipSourceUpdate', () => {
     describe('timeFilters', () => {
       it('can not skip update when time range changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: createSourceMock({ canMaskForTimeslice: false }),
+          source: createSourceMock({ canMaskTimeslice: false }),
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataMeta: {
@@ -385,7 +385,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when time range does not change', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: createSourceMock({ canMaskForTimeslice: false }),
+          source: createSourceMock({ canMaskTimeslice: false }),
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataMeta: {
@@ -412,7 +412,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when time range changes but applyGlobalTime is false', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: createSourceMock({ canMaskForTimeslice: false }),
+          source: createSourceMock({ canMaskTimeslice: false }),
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataMeta: {
@@ -439,7 +439,7 @@ describe('canSkipSourceUpdate', () => {
     });
 
     describe('timeslice (source can use client side mask)', () => {
-      const mockSource = createSourceMock({ canMaskForTimeslice: true });
+      const mockSource = createSourceMock({ canMaskTimeslice: true });
       it('can skip update when timeslice changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
           source: mockSource,
@@ -477,7 +477,7 @@ describe('canSkipSourceUpdate', () => {
     });
 
     describe('timeslice (source can not use client side mask)', () => {
-      const mockSource = createSourceMock({ canMaskForTimeslice: false });
+      const mockSource = createSourceMock({ canMaskTimeslice: false });
       it('can not skip update when timeslice changes (undefined => provided)', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
           source: mockSource,

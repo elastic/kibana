@@ -294,7 +294,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+    const requestMeta: VectorSourceRequestMeta = this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -303,7 +303,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const canSkipFetch = await canSkipSourceUpdate({
       source,
       prevDataRequest: this.getDataRequest(dataRequestId),
-      nextMeta: searchFilters,
+      nextMeta: requestMeta,
       extentAware: source.isFilterByMapBounds(),
     });
 
@@ -321,11 +321,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     } else {
       let isSyncClustered;
       try {
-        syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        syncContext.startLoading(dataRequestId, requestToken, requestMeta);
         const abortController = new AbortController();
         syncContext.registerCancelCallback(requestToken, () => abortController.abort());
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
+        const searchSource = await this._documentSource.makeSearchSource(requestMeta, 0);
         searchSource.setField('trackTotalHits', maxResultWindow + 1);
         const resp = await searchSource.fetch({
           abortSignal: abortController.signal,
@@ -336,8 +336,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
           (resp.hits.total as unknown) as TotalHits,
           maxResultWindow
         );
-        const countData = { isSyncClustered } as CountData;
-        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
+        const results = { isSyncClustered } as CountData;
+        const resultsMeta = { areResultsTrimmed: isSyncClustered };
+        syncContext.stopLoading(dataRequestId, requestToken, results, resultsMeta);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

@@ -990,7 +990,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
-    return this.getSource().canMaskForTimeslice(prevMeta)
+    return this.getSource().canMaskTimeslice(prevMeta, timeslice)
       ? { dateFieldName, timeslice }
       : undefined;
   }

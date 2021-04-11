@@ -95,7 +95,7 @@ export async function canSkipSourceUpdate({
     if (nextMeta.applyGlobalTime) {
       updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
       if (prevMeta.timeslice !== undefined || nextMeta.timeslice !== undefined) {
-        updateDueToTimeslice = source.canMaskForTimeslice(prevMeta)
+        updateDueToTimeslice = source.canMaskTimeslice(prevMeta, nextMeta.timeslice)
           ? false
           : !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
       }

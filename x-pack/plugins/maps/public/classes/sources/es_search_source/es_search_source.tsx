@@ -46,6 +46,7 @@ import { registerSource } from '../source_registry';
 import {
   DataMeta,
   ESSearchSourceDescriptor,
+  Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -734,16 +735,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  canMaskForTimeslice(prevMeta: DataMeta): boolean {
+  canMaskTimeslice(prevMeta: DataMeta, timeslice: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return false;
     }
 
-    if (this._descriptor.scalingType === SCALING_TYPES.LIMIT) {
-      return prevMeta.areResultsTrimmed !== undefined && !prevMeta.areResultsTrimmed;
+    if (prevMeta.areResultsTrimmed === undefined || prevMeta.areResultsTrimmed) {
+      return false;
     }
 
-    return true;
+    return prevMeta.timeslice !== undefined
+      ? timeslice.from >= prevMeta.timeslice.from && timeslice.to <= prevMeta.timeslice.to
+      : true;
   }
 }
 
