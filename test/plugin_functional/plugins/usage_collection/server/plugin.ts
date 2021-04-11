@@ -25,7 +25,7 @@ export class UsageCollectionTestPlugin implements Plugin {
       throw new Error('Optional plugin `usageCollection` is expected to be enabled for testing.');
     }
 
-    const usageCounter = usageCollection?.createUsageCounter('usageCollectionTestPlugin');
+    const usageCounter = usageCollection.createUsageCounter('usageCollectionTestPlugin');
 
     registerRoutes(core.http, usageCounter);
     usageCounter.incrementCounter({
@@ -37,7 +37,10 @@ export class UsageCollectionTestPlugin implements Plugin {
   }
 
   public start() {
-    this.usageCounter?.incrementCounter({ counterName: 'duringStart' });
+    if (!this.usageCounter) {
+      throw new Error('Optional plugin `usageCollection` is expected to be enabled for testing.');
+    }
+    this.usageCounter.incrementCounter({ counterName: 'duringStart' });
   }
 
   public stop() {}

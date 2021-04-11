@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [
+      require.resolve('./test_suites/usage_collection'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
@@ -31,7 +32,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
-      require.resolve('./test_suites/usage_collection'),
     ],
     services: {
       ...functionalConfig.get('services'),
