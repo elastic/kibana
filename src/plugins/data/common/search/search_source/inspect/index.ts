@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const config = {
-  path: 'dev',
-  // dev configuration is validated by the dev cli.
-  // we only need to register the `dev` schema to avoid failing core's config validation
-  schema: schema.object({}, { unknowns: 'ignore' }),
-};
+export * from './inspector_stats';
