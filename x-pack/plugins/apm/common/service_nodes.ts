@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from './i18n';
+import { i18n } from '@kbn/i18n';
 
 export const SERVICE_NODE_NAME_MISSING = '_service_node_name_missing_';
+
+const UNIDENTIFIED_SERVICE_NODES_LABEL = i18n.translate(
+  'xpack.apm.serviceNodeNameMissing',
+  {
+    defaultMessage: '(Empty)',
+  }
+);
 
 export function getServiceNodeName(serviceNodeName?: string) {
   return serviceNodeName === SERVICE_NODE_NAME_MISSING || !serviceNodeName

@@ -293,8 +293,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
     component: withApmServiceContext(ServiceNodeMetrics),
-    breadcrumb: ({ match }) =>
-      getServiceNodeName(match.params.serviceNodeName) || '',
+    breadcrumb: ({ match }) => getServiceNodeName(match.params.serviceNodeName),
   },
   {
     exact: true,

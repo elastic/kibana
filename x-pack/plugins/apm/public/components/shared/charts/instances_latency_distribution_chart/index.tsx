@@ -94,7 +94,7 @@ export function InstancesLatencyDistributionChart({
 
   // With a linear scale, if all the instances have similar throughput (or if
   // there's just a single instance) they'll show along the origin. Make sure
-  // the x-axis domain always starts at 0 and goes to double the max of the items
+  // the x-axis domain is [0, maxThroughput].
   const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
   const xDomain = { min: 0, max: maxThroughput };
 

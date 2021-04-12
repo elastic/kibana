@@ -6,6 +6,7 @@
  */
 
 import { TooltipInfo } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
@@ -30,13 +31,21 @@ const throughputLabel = i18n.translate(
   }
 );
 
+const clickToFilterDescription = i18n.translate(
+  'xpack.apm.instancesLatencyDistributionChartTooltipClickToFilterDescription',
+  { defaultMessage: 'Click to filter by instance' }
+);
+
 /**
  * Tooltip for a single instance
  */
 function SingleInstanceCustomTooltip({
   latencyFormatter,
   values,
-}: TooltipInfo & { latencyFormatter: TimeFormatter }) {
+}: {
+  latencyFormatter: TimeFormatter;
+  values: TooltipInfo['values'];
+}) {
   const value = values[0];
   const { color } = value;
   const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
@@ -188,6 +197,7 @@ export function CustomTooltip(
   props: TooltipInfo & { latencyFormatter: TimeFormatter }
 ) {
   const { values } = props;
+  const theme = useTheme();
 
   return (
     <div className="echTooltip">
@@ -196,6 +206,9 @@ export function CustomTooltip(
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
+      <div style={{ padding: theme.eui.paddingSizes.xs }}>
+        <EuiIcon type="filter" /> {clickToFilterDescription}
+      </div>
     </div>
   );
 }
