@@ -35,6 +35,7 @@ import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/ty
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
+import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -386,9 +387,8 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
-export class EndpointDocGenerator {
+export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
-  random: seedrandom.prng;
   sequence: number = 0;
   /**
    * The EndpointDocGenerator parameters
@@ -396,12 +396,7 @@ export class EndpointDocGenerator {
    * @param seed either a string to seed the random number generator or a random number generator function
    */
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
-    if (typeof seed === 'string') {
-      this.random = seedrandom(seed);
-    } else {
-      this.random = seed;
-    }
-
+    super(seed);
     this.commonInfo = this.createHostData();
   }
 
@@ -1568,47 +1563,6 @@ export class EndpointDocGenerator {
     };
   }
 
-  private randomN(n: number): number {
-    return Math.floor(this.random() * n);
-  }
-
-  private *randomNGenerator(max: number, count: number) {
-    let iCount = count;
-    while (iCount > 0) {
-      yield this.randomN(max);
-      iCount = iCount - 1;
-    }
-  }
-
-  private randomArray<T>(lengthLimit: number, generator: () => T): T[] {
-    const rand = this.randomN(lengthLimit) + 1;
-    return [...Array(rand).keys()].map(generator);
-  }
-
-  private randomMac(): string {
-    return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
-  }
-
-  public randomIP(): string {
-    return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
-  }
-
-  private randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
-  }
-
-  private randomChoice<T>(choices: T[]): T {
-    return choices[this.randomN(choices.length)];
-  }
-
-  private randomString(length: number): string {
-    return [...this.randomNGenerator(36, length)].map((x) => x.toString(36)).join('');
-  }
-
-  private randomHostname(): string {
-    return `Host-${this.randomString(10)}`;
-  }
-
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
@@ -1645,6 +1599,10 @@ export class EndpointDocGenerator {
   /** Return a random fake process name */
   private randomProcessName(): string {
     return this.randomChoice(fakeProcessNames);
+  }
+
+  public randomIP(): string {
+    return super.randomIP();
   }
 }
 
