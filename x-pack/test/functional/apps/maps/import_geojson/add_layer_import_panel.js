@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }) {
     before(async () => {
       await security.testUser.setRoles([
         'global_maps_all',
-
-        'global_index_pattern_management_all',
+        'global_index_pattern_management_all'
       ]);
       await PageObjects.maps.openNewMap();
     });
