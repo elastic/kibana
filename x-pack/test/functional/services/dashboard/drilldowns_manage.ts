@@ -69,7 +69,6 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       destinationDashboardTitle: string;
     }) {
       await this.fillInDrilldownName(drilldownName);
-      await this.selectDashboardToDashboardActionIfNeeded();
       await this.selectDestinationDashboard(destinationDashboardTitle);
     }
 
@@ -97,13 +96,6 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
         await testSubjects.click(DASHBOARD_TO_URL_ACTION_LIST_ITEM);
       }
       await testSubjects.existOrFail(DASHBOARD_TO_URL_ACTION_WIZARD);
-    }
-
-    async selectDashboardToDashboardActionIfNeeded() {
-      if (await testSubjects.exists(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM)) {
-        await testSubjects.click(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM);
-      }
-      await testSubjects.existOrFail(DASHBOARD_TO_DASHBOARD_ACTION_WIZARD);
     }
 
     async selectDestinationDashboard(title: string) {
