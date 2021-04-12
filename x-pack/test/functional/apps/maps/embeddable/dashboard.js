@@ -35,6 +35,7 @@ export default function ({ getPageObjects, getService }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {
@@ -56,10 +57,8 @@ export default function ({ getPageObjects, getService }) {
     }
 
     it('should set "data-title" attribute', async () => {
-      await retry.try(async () => {
-        const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
-        expect(title).to.be('join example');
-      });
+      const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
+      expect(title).to.be('join example');
     });
 
     it('should pass index patterns to container', async () => {
