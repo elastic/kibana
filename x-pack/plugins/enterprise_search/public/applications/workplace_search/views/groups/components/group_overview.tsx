@@ -12,10 +12,12 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiConfirmModal,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -24,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { AppLogic } from '../../../app_logic';
+import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -177,12 +180,26 @@ export const GroupOverview: React.FC = () => {
   const sourcesSection = (
     <ContentSection
       title={GROUP_SOURCES_TITLE}
-      description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
+      description={GROUP_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
       data-test-subj="GroupContentSourcesSection"
     >
-      {hasContentSources && sourcesTable}
+      {sourcesTable}
     </ContentSection>
+  );
+
+  const sourcesEmptyState = (
+    <>
+      <EuiPanel paddingSize="none" color="subdued">
+        <EuiEmptyPrompt
+          iconType={noSharedSourcesIcon}
+          title={<h2>{GROUP_SOURCES_TITLE}</h2>}
+          body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
+          actions={manageSourcesButton}
+        />
+      </EuiPanel>
+      <EuiSpacer />
+    </>
   );
 
   const usersSection = !isFederatedAuth && (
@@ -258,7 +275,7 @@ export const GroupOverview: React.FC = () => {
     <>
       <ViewContentHeader title={truncatedName} />
       <EuiSpacer />
-      {sourcesSection}
+      {hasContentSources ? sourcesSection : sourcesEmptyState}
       {usersSection}
       {nameSection}
       {canDeleteGroup && deleteSection}
