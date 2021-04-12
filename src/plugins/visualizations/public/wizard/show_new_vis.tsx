@@ -29,7 +29,6 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
-  newVisType?: string;
 }
 
 /**
