@@ -77,7 +77,7 @@ export const getPrepackagedRules = (
 export const getLatestPrepackagedRules = async (
   client: RuleAssetSavedObjectsClient
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
-  // build a map of the most version of each rule
+  // build a map of the most recent version of each rule
   const prepackaged = getPrepackagedRules();
   const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
 
