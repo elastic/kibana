@@ -19,6 +19,10 @@ import classNames from 'classnames';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 
+/**
+ * Returning a generated id of a given ES document, since `_id` can be the same
+ * when using different indices and shard routing
+ */
 export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   const routing = doc._routing ? doc._routing : '';
   return [doc._index, doc._id, routing].join('::');
