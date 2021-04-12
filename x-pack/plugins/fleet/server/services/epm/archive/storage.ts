@@ -232,6 +232,7 @@ export const getEsPackage = async (
       const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
       dataStreams.push({
+        package: pkgName,
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
         ingest_pipeline: ingestPipeline || 'default',
         path: dataStreamPath,
