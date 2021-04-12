@@ -4,20 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { mountWithIntl } from '../../../__mocks__';
-import { setMockActions } from '../../../__mocks__';
+
+import '../../../__mocks__/shallow_useeffect.mock';
+
+import { setMockActions, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { shallow } from 'enzyme';
 
-import { FlashMessages } from '../../../shared/flash_messages';
+import { EuiCodeBlock } from '@elastic/eui';
+
+import { Loading } from '../../../shared/loading';
 
 import { SourceEngines } from '.';
 
 const MOCK_ACTIONS = {
   // FlashMessagesLogic
   dismissToastMessage: jest.fn(),
+  // SourceEnginesLogiuc
+  fetchSourceEngines: jest.fn(),
+};
+
+const MOCK_VALUES = {
+  dataLoading: false,
+  sourceEngines: [],
 };
 
 describe('SourceEngines', () => {
@@ -26,10 +37,22 @@ describe('SourceEngines', () => {
     setMockActions(MOCK_ACTIONS);
   });
 
-  it('renders', () => {
-    const wrapper = mountWithIntl(<SourceEngines engineBreadcrumb={[]} />);
+  describe('non-happy-path states', () => {
+    it('renders a loading component before data has loaded', () => {
+      setMockValues({ ...MOCK_VALUES, dataLoading: true });
+      const wrapper = shallow(<SourceEngines engineBreadcrumb={[]} />);
 
-    expect(wrapper.find(EuiPageHeader).text()).toContain('Manage Engines');
-    expect(wrapper.find(FlashMessages)).toHaveLength(1);
+      expect(wrapper.find(Loading)).toHaveLength(1);
+    });
+  });
+
+  describe('happy-path states', () => {
+    it('renders and calls a function to initialize data', () => {
+      setMockValues(MOCK_VALUES);
+      const wrapper = shallow(<SourceEngines engineBreadcrumb={[]} />);
+
+      expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
+      expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
+    });
   });
 });
