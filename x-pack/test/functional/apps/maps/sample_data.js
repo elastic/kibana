@@ -89,7 +89,10 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await kibanaServer.uiSettings.update({
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
-      await security.testUser.setRoles(['global_maps_all','geoall_data_writer','kibana_sample_admin'], false);
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'kibana_sample_admin'],
+        false
+      );
     });
 
     after(async () => {
@@ -120,7 +123,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-
       });
 
       it('should load layers', async () => {
