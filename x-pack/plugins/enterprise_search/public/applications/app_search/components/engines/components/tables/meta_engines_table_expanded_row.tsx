@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiHealth, EuiTextAlign, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiTitle } from '@elastic/eui';
 
 import { EngineDetails } from '../../../engine/types';
 import { SOURCE_ENGINES_TITLE } from '../../constants';
@@ -31,12 +31,10 @@ export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowPr
   sourceEngines,
   conflictingEngines,
 }) => (
-  <div className="meta-engines__source-engines-table">
-    <EuiTextAlign textAlign="center">
-      <EuiTitle size="xs">
-        <h3>{SOURCE_ENGINES_TITLE}</h3>
-      </EuiTitle>
-    </EuiTextAlign>
+  <div className="metaEnginesSourceEnginesTable">
+    <EuiTitle size="xs" className="eui-textCenter">
+      <h3>{SOURCE_ENGINES_TITLE}</h3>
+    </EuiTitle>
     <EuiBasicTable
       items={sourceEngines}
       columns={[

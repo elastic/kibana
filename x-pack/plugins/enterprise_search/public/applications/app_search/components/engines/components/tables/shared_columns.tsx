@@ -39,7 +39,7 @@ export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
 export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'created_at',
   name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.createdAt', {
-    defaultMessage: 'Created At',
+    defaultMessage: 'Created at',
   }),
   dataType: 'string',
   render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
@@ -50,7 +50,7 @@ export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> =
   name: i18n.translate(
     'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.documentCount',
     {
-      defaultMessage: 'Document Count',
+      defaultMessage: 'Document count',
     }
   ),
   dataType: 'number',
@@ -61,7 +61,7 @@ export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> =
 export const FIELD_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'field_count',
   name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.fieldCount', {
-    defaultMessage: 'Field Count',
+    defaultMessage: 'Field count',
   }),
   dataType: 'number',
   render: (number: number) => <FormattedNumber value={number} />,

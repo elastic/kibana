@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../../__mocks__';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -20,11 +18,10 @@ import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_col
 
 describe('MetaEnginesTableNameColumnContent', () => {
   it('includes the name of the engine', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = shallow(
       <MetaEnginesTableNameColumnContent
         showRow={jest.fn()}
         hideRow={jest.fn()}
-        name={'test-engine'}
         item={
           {
             name: 'test-engine',
@@ -41,7 +38,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
       />
     );
 
-    expect(wrapper.text()).toContain('test-engine');
+    expect(wrapper.find('[data-test-subj="EngineName"]')).toHaveLength(1);
   });
 
   describe('toggle button', () => {
@@ -52,7 +49,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
         <MetaEnginesTableNameColumnContent
           showRow={showRow}
           hideRow={jest.fn()}
-          name={'test-engine'}
           item={
             {
               name: 'test-engine',
@@ -68,7 +64,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
           sendEngineTableLinkClickTelemetry={jest.fn()}
         />
       );
-      wrapper.find('.meta-engines__expand-row').at(0).simulate('click');
+      wrapper.find('[data-test-subj="ExpandRowButton"]').at(0).simulate('click');
 
       expect(showRow).toHaveBeenCalled();
     });
@@ -80,7 +76,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
         <MetaEnginesTableNameColumnContent
           showRow={jest.fn()}
           hideRow={hideRow}
-          name={'test-engine'}
           item={
             {
               name: 'test-engine',
@@ -96,7 +91,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
           sendEngineTableLinkClickTelemetry={jest.fn()}
         />
       );
-      wrapper.find('.meta-engines__expand-row').at(0).simulate('click');
+      wrapper.find('[data-test-subj="ExpandRowButton"]').at(0).simulate('click');
 
       expect(hideRow).toHaveBeenCalled();
     });
@@ -104,11 +99,10 @@ describe('MetaEnginesTableNameColumnContent', () => {
 
   describe('engine count', () => {
     it('is included and labelled', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallow(
         <MetaEnginesTableNameColumnContent
           showRow={jest.fn()}
           hideRow={jest.fn()}
-          name={'test-engine'}
           item={
             {
               name: 'test-engine',
@@ -129,60 +123,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
         />
       );
 
-      const wrapperContent = wrapper.text();
-      expect(wrapperContent).toContain('2 Engines');
-    });
-    it('defaults to 0', () => {
-      const wrapper = mountWithIntl(
-        <MetaEnginesTableNameColumnContent
-          showRow={jest.fn()}
-          hideRow={jest.fn()}
-          name={'test-engine'}
-          item={
-            {
-              name: 'test-engine',
-              created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-              language: 'English',
-              isMeta: true,
-              document_count: 99999,
-              field_count: 10,
-              includedEngines: [] as EngineDetails[],
-            } as EngineDetails
-          }
-          isExpanded
-          sendEngineTableLinkClickTelemetry={jest.fn()}
-        />
-      );
-
-      const wrapperContent = wrapper.text();
-      expect(wrapperContent).toContain('0 Engines');
-    });
-
-    it('label loses pluralization with only 1 source engine', () => {
-      const wrapper = mountWithIntl(
-        <MetaEnginesTableNameColumnContent
-          showRow={jest.fn()}
-          hideRow={jest.fn()}
-          name={'test-engine'}
-          item={
-            {
-              name: 'test-engine',
-              created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-              language: 'English',
-              isMeta: true,
-              document_count: 99999,
-              field_count: 10,
-              engine_count: 1,
-              includedEngines: [{ name: 'source-engine-1' }] as EngineDetails[],
-            } as EngineDetails
-          }
-          isExpanded
-          sendEngineTableLinkClickTelemetry={jest.fn()}
-        />
-      );
-
-      const wrapperContent = wrapper.text();
-      expect(wrapperContent).toContain('1 Engine');
+      expect(wrapper.find('[data-test-subj="SourceEnginesCount"]')).toHaveLength(1);
     });
   });
 
@@ -191,7 +132,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
       <MetaEnginesTableNameColumnContent
         showRow={jest.fn()}
         hideRow={jest.fn()}
-        name={'test-engine'}
         item={
           {
             name: 'test-engine',

@@ -77,7 +77,7 @@ describe('MetaEnginesTableLogic', () => {
       });
     });
 
-    describe('sourceEngines is updated by addSourceEngines', () => {
+    it('sourceEngines is updated by addSourceEngines', () => {
       mount({
         ...DEFAULT_VALUES,
         sourceEngines: {
@@ -122,6 +122,16 @@ describe('MetaEnginesTableLogic', () => {
       });
 
       it('calls fetchSourceEngines when it needs to fetch data for the itemId', () => {
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            meta: {
+              page: {
+                total_pages: 1,
+              },
+            },
+            results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          })
+        );
         mount();
         jest.spyOn(MetaEnginesTableLogic.actions, 'fetchSourceEngines');
 
@@ -205,7 +215,6 @@ describe('MetaEnginesTableLogic', () => {
 
         MetaEnginesTableLogic.actions.fetchSourceEngines('test-engine-1');
         await nextTick();
-        await nextTick(); // I think I need this for multiple http.get calls
 
         expect(MetaEnginesTableLogic.actions.addSourceEngines).toHaveBeenCalledWith({
           'test-engine-1': [

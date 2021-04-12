@@ -25,7 +25,7 @@ describe('getConflictingEnginesFromConflictingField', () => {
   it('returns a flat array of all engines with conflicts across different schema types, including duplicates', () => {
     const result = getConflictingEnginesFromConflictingField(CONFLICTING_FIELD);
 
-    // we can't guaruntee ordering
+    // we can't guarantee ordering
     expect(result).toHaveLength(6);
     expect(result).toContain('source-engine-1');
     expect(result).toContain('source-engine-2');
@@ -55,7 +55,7 @@ describe('getConflictingEnginesFromSchemaConflicts', () => {
 
     const result = getConflictingEnginesFromSchemaConflicts(SCHEMA_CONFLICTS);
 
-    // we can't guaruntee ordering
+    // we can't guarantee ordering
     expect(result).toHaveLength(4);
     expect(result).toContain('source-engine-1');
     expect(result).toContain('source-engine-2');

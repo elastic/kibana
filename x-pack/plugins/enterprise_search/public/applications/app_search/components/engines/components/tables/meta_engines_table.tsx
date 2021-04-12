@@ -92,11 +92,10 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       ...NAME_COLUMN,
-      render: (name: string, item: EngineDetails) => (
+      render: (_, item: EngineDetails) => (
         <MetaEnginesTableNameColumnContent
-          name={name}
           item={item}
-          isExpanded={!!itemIdToExpandedRowMap[name]}
+          isExpanded={!!itemIdToExpandedRowMap[item.name]}
           hideRow={hideRow}
           showRow={fetchOrDisplayRow}
           sendEngineTableLinkClickTelemetry={sendEngineTableLinkClickTelemetry}

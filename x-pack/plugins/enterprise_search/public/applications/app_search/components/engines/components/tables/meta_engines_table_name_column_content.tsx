@@ -17,7 +17,6 @@ import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { EngineDetails } from '../../../engine/types';
 
 interface MetaEnginesTableNameContentProps {
-  name: string;
   isExpanded: boolean;
   item: EngineDetails;
   hideRow: (name: string) => void;
@@ -26,8 +25,7 @@ interface MetaEnginesTableNameContentProps {
 }
 
 export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameContentProps> = ({
-  name,
-  item,
+  item: { name, schemaConflicts, engine_count: engineCount },
   isExpanded,
   sendEngineTableLinkClickTelemetry,
   hideRow,
@@ -37,6 +35,7 @@ export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameCon
     <EuiLinkTo
       to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
       onClick={sendEngineTableLinkClickTelemetry}
+      data-test-subj="EngineName"
     >
       <strong>{name}</strong>
     </EuiLinkTo>
@@ -44,22 +43,22 @@ export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameCon
       type="button"
       onClick={() => (isExpanded ? hideRow(name) : showRow(name))}
       aria-expanded={isExpanded}
-      className="meta-engines__expand-row"
+      data-test-subj="ExpandRowButton"
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="SourceEnginesCount">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.sourceEnginesCount',
             {
-              defaultMessage: '{sourceEnginesCount, plural, one {# Engine} other {# Engines}}',
-              values: { sourceEnginesCount: item.engine_count || 0 },
+              defaultMessage: '{sourceEnginesCount, plural, one {# engine} other {# engines}}',
+              values: { sourceEnginesCount: engineCount || 0 },
             }
           )}
         </EuiFlexItem>
-        {item.schemaConflicts && Object.keys(item.schemaConflicts).length > 0 && (
+        {schemaConflicts && Object.keys(schemaConflicts).length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiHealth color="warning">
               {i18n.translate(

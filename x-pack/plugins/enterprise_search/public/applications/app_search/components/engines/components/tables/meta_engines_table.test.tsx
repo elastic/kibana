@@ -198,27 +198,25 @@ describe('MetaEnginesTable', () => {
     });
   });
 
-  describe('source engines', () => {
-    describe('source engine table', () => {
-      beforeEach(() => {
-        resetMocks();
-      });
+  describe('expanded source engines', () => {
+    beforeEach(() => {
+      resetMocks();
+    });
 
-      it('is hidden by default', () => {
-        const wrapper = shallow(<MetaEnginesTable {...props} />);
-        const table = wrapper.find(EuiBasicTable);
-        expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(0);
-      });
+    it('is hidden by default', () => {
+      const wrapper = shallow(<MetaEnginesTable {...props} />);
+      const table = wrapper.find(EuiBasicTable);
+      expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(0);
+    });
 
-      it('is visible when the row has been expanded', () => {
-        setMockValues({
-          ...DEFAULT_VALUES,
-          expandedSourceEngines: { 'test-engine': true },
-        });
-        const wrapper = shallow(<MetaEnginesTable {...props} />);
-        const table = wrapper.find(EuiBasicTable);
-        expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(1);
+    it('is visible when the row has been expanded', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        expandedSourceEngines: { 'test-engine': true },
       });
+      const wrapper = shallow(<MetaEnginesTable {...props} />);
+      const table = wrapper.find(EuiBasicTable);
+      expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(1);
     });
   });
 });
