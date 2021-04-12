@@ -11,3 +11,5 @@ VAULT_SECRET_ID="$(gcloud secrets versions access latest --secret=kibana-buildki
 # export VAULT_SECRET_ID
 
 vault login -no-print "$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")"
+
+export DOCKER_BUILDKIT=1

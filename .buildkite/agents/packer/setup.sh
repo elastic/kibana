@@ -21,13 +21,51 @@ apt-get install --yes \
   software-properties-common \
   buildkite-agent
 
+### Get rid of Ubuntu's snapd stuff and install the Google Cloud SDK the traditional way.
+{
+  apt-get -y remove --purge snapd
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+      tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+      apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+  apt-get -y update
+  apt-get -y install google-cloud-sdk
+}
+
+### Disable automatic upgrades, as they can interfere with our startup scripts.
+{
+  cat > /etc/apt/apt.conf.d/10periodic <<'EOF'
+APT::Periodic::Enable "0";
+EOF
+}
+
+### Increase file descriptor limits
+{
+  cat >> /etc/security/limits.conf <<'EOF'
+*                soft    nofile          100000
+*                hard    nofile          100000
+EOF
+}
+
+### Patch the filesystem options to increase I/O performance
+{
+  tune2fs -o ^acl,journal_data_writeback,nobarrier /dev/sda1
+  cat > /etc/fstab <<'EOF'
+LABEL=cloudimg-rootfs  /               ext4    defaults,noatime,commit=300,journal_async_commit        0 0
+LABEL=UEFI               /boot/efi     vfat    defaults,noatime        0 0
+EOF
+}
+
 # TODO
-curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-apt-get install -y nodejs
+### Install node + yarn
+{
+  curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+  apt-get install -y nodejs
 
-npm install -g yarn
+  npm install -g yarn
+}
 
-# Install GitHub cli (gh)
+### Install GitHub cli (gh)
 {
   apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
   apt-add-repository https://cli.github.com/packages
