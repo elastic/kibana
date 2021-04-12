@@ -344,12 +344,6 @@ export class SearchSource {
       searchSessionId: options.sessionId,
     });
 
-    try {
-      requestResponder?.json(this.getSearchRequestBody());
-    } catch (e) {
-      // ignore
-    }
-
     // Track request stats on first emit
     const first$ = s$
       .pipe(
@@ -376,6 +370,11 @@ export class SearchSource {
         }),
         last(undefined, null),
         tap((finalResponse) => {
+          try {
+            requestResponder?.json(this.getSearchRequestBody());
+          } catch (e) {
+            // ignore
+          }
           if (finalResponse) {
             requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
             requestResponder?.ok({ json: finalResponse });
