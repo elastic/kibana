@@ -31,6 +31,7 @@ import {
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
+  CommentPatchRequest,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -644,4 +645,19 @@ export const getComment = async (
     .expect(expectedHttpCode);
 
   return comment;
+};
+
+export const updateComment = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  req: CommentPatchRequest,
+  expectedHttpCode: number = 204
+): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .patch(`${CASES_URL}/${caseId}/comments`)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return res;
 };
