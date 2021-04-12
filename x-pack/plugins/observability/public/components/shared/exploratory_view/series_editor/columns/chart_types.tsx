@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { useFetcher } from '../../../../..';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { useUrlStorage } from '../../hooks/use_url_storage';
 import { SeriesType } from '../../../../../../../lens/public';
 
 export function SeriesChartTypes({
