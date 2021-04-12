@@ -92,7 +92,7 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
-  private navigateToNewTab?: (url: string) => void;
+  private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
 
@@ -118,9 +118,9 @@ export class ApplicationService {
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
     };
 
-    this.navigateToNewTab = (url) => {
-      // window.open copies session information if base url is same
-      return window.open(basename + url, '_blank');
+    this.openInNewTab = (url) => {
+      // window.open shares session information if base url is same
+      return window.open(appendAppPath(basename, url), '_blank');
     };
 
     this.redirectTo = redirectTo;
@@ -224,7 +224,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false, openInNewTab }: NavigateToAppOptions = {}
+      { path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -240,7 +240,7 @@ export class ApplicationService {
           this.appInternalStates.delete(this.currentAppId$.value!);
         }
         if (openInNewTab) {
-          this.navigateToNewTab!(getAppUrl(availableMounters, appId, path));
+          this.openInNewTab!(getAppUrl(availableMounters, appId, path));
         } else {
           this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         }

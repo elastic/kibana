@@ -687,7 +687,7 @@ export interface NavigateToAppOptions {
   replace?: boolean;
 
   /**
-   * if true, will try to open the app in new tab, will copy session information via window.open
+   * if true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: boolean;
 }
