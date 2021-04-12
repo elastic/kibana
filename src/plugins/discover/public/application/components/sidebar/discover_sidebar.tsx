@@ -367,7 +367,7 @@ export function DiscoverSidebar({
               });
             }}
           >
-            {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
+            {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
               defaultMessage: 'Manage index pattern fields',
             })}
           </EuiContextMenuItem>,
