@@ -45,6 +45,34 @@ function buildNumberColumn(sourceField: string) {
   };
 }
 
+export const parseCustomFieldName = (
+  sourceField: string,
+  reportViewConfig: DataSeries,
+  selectedDefinitions: Record<string, string>
+) => {
+  let fieldName = sourceField;
+  let columnType;
+
+  const rdf = reportViewConfig.reportDefinitions ?? [];
+
+  const customField = rdf.find(({ field }) => field === fieldName);
+
+  if (customField) {
+    if (selectedDefinitions[fieldName]) {
+      fieldName = selectedDefinitions[fieldName];
+      if (customField?.options)
+        columnType = customField?.options?.find(({ field }) => field === fieldName)?.columnType;
+    } else if (customField.defaultValue) {
+      fieldName = customField.defaultValue;
+    } else if (customField.options?.[0].field) {
+      fieldName = customField.options?.[0].field;
+      columnType = customField.options?.[0].columnType;
+    }
+  }
+
+  return { fieldName, columnType };
+};
+
 export class LensAttributes {
   indexPattern: IndexPattern;
   layers: Record<string, PersistedIndexPatternLayer>;
@@ -124,6 +152,18 @@ export class LensAttributes {
     };
   }
 
+  getNumberColumn(sourceField: string, columnType?: string, operationType?: string) {
+    if (columnType === 'operation' || operationType) {
+      if (operationType === 'median' || operationType === 'average') {
+        return this.getNumberOperationColumn(sourceField, operationType);
+      }
+      if (operationType?.includes('th')) {
+        return this.getPercentileNumberColumn(sourceField, operationType);
+      }
+    }
+    return this.getNumberRangeColumn(sourceField);
+  }
+
   getNumberOperationColumn(
     sourceField: string,
     operationType: 'average' | 'median'
@@ -186,15 +226,7 @@ export class LensAttributes {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      if (columnType === 'operation' || operationType) {
-        if (operationType === 'median' || operationType === 'average') {
-          return this.getNumberOperationColumn(fieldName, operationType);
-        }
-        if (operationType?.includes('th')) {
-          return this.getPercentileNumberColumn(sourceField, operationType);
-        }
-      }
-      return this.getNumberRangeColumn(fieldName);
+      return this.getNumberColumn(fieldName, columnType, operationType);
     }
 
     // FIXME review my approach again
@@ -202,27 +234,7 @@ export class LensAttributes {
   }
 
   getCustomFieldName(sourceField: string) {
-    let fieldName = sourceField;
-    let columnType = null;
-
-    const rdf = this.reportViewConfig.reportDefinitions ?? [];
-
-    const customField = rdf.find(({ field }) => field === fieldName);
-
-    if (customField) {
-      if (this.reportDefinitions[fieldName]) {
-        fieldName = this.reportDefinitions[fieldName];
-        if (customField?.options)
-          columnType = customField?.options?.find(({ field }) => field === fieldName)?.columnType;
-      } else if (customField.defaultValue) {
-        fieldName = customField.defaultValue;
-      } else if (customField.options?.[0].field) {
-        fieldName = customField.options?.[0].field;
-        columnType = customField.options?.[0].columnType;
-      }
-    }
-
-    return { fieldName, columnType };
+    return parseCustomFieldName(sourceField, this.reportViewConfig, this.reportDefinitions);
   }
 
   getFieldMeta(sourceField: string) {

@@ -81,14 +81,14 @@ export function SeriesBuilder() {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.dataType', {
         defaultMessage: 'Data Type',
       }),
-      width: '20%',
+      width: '15%',
       render: (val: string) => <DataTypesCol />,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.report', {
         defaultMessage: 'Report',
       }),
-      width: '20%',
+      width: '15%',
       render: (val: string) => (
         <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
@@ -116,7 +116,7 @@ export function SeriesBuilder() {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.filters', {
         defaultMessage: 'Filters',
       }),
-      width: '25%',
+      width: '20%',
       render: (val: string) =>
         reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
     },
@@ -124,7 +124,7 @@ export function SeriesBuilder() {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdown', {
         defaultMessage: 'Breakdowns',
       }),
-      width: '25%',
+      width: '20%',
       field: 'id',
       render: (val: string) =>
         reportType && indexPattern ? (

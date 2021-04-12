@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, Fragment, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { FormEvent, Fragment, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -15,20 +15,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
-
-export interface FieldValueSelectionProps {
-  value?: string;
-  label: string;
-  loading?: boolean;
-  onChange: (val?: string) => void;
-  values?: string[];
-  setQuery: Dispatch<SetStateAction<string>>;
-  anchorPosition?: PopoverAnchorPosition;
-  forceOpen?: boolean;
-  button?: JSX.Element;
-  width?: number;
-}
+import { FieldValueSelectionProps } from './types';
 
 const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
   return (values ?? []).map((val) => ({
@@ -47,6 +34,7 @@ export function FieldValueSelection({
   width,
   forceOpen,
   anchorPosition,
+  singleSelection,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(formatOptions(values, value));
@@ -98,7 +86,7 @@ export function FieldValueSelection({
       >
         <EuiSelectable
           searchable
-          singleSelection
+          singleSelection={singleSelection}
           searchProps={{
             placeholder: i18n.translate('xpack.observability.fieldValueSelection.placeholder', {
               defaultMessage: 'Filter {label}',

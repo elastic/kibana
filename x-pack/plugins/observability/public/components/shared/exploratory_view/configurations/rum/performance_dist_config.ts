@@ -43,7 +43,10 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     },
     hasOperationType: false,
     defaultFilters: [
-      TRANSACTION_URL,
+      {
+        field: TRANSACTION_URL,
+        negation: false,
+      },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,

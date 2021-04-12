@@ -75,7 +75,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                     onChange={(val?: string) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
-                    width={200}
+                    width={250}
                   />
                 </EuiFlexItem>
                 {rtd?.[field] && (
@@ -105,11 +105,11 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
             )}
           </EuiFlexItem>
         ))}
-      <EuiFlexItem style={{ width: 200 }}>
+      <EuiFlexItem style={{ width: 250 }}>
         <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
       </EuiFlexItem>
       {hasOperationType && (
-        <EuiFlexItem style={{ width: 200 }}>
+        <EuiFlexItem style={{ width: 250 }}>
           <OperationTypeSelect
             seriesId={NEW_SERIES_KEY}
             defaultOperationType={yAxisColumn.operationType}

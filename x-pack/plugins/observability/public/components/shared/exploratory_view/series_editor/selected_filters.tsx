@@ -45,7 +45,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
         {filters.map(({ field, values, notValues }) => (
           <Fragment key={field}>
             {(values ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false}>
+              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
                   seriesId={seriesId}
                   field={field}
@@ -57,7 +57,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
               </EuiFlexItem>
             ))}
             {(notValues ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false}>
+              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
                   seriesId={seriesId}
                   field={field}

@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiFilterGroup,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { UrlFilter } from '../../types';
@@ -52,7 +53,7 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, ne
   );
 
   return (
-    <>
+    <Wrapper>
       <EuiButtonEmpty iconType="arrowLeft" color="text" onClick={() => goBack()}>
         {label}
       </EuiButtonEmpty>
@@ -98,6 +99,10 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, ne
           <EuiSpacer size="s" />
         </Fragment>
       ))}
-    </>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  max-width: 400px;
+`;
