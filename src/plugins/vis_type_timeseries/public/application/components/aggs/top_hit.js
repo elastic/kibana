@@ -26,6 +26,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/panel_types';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -100,8 +101,9 @@ const TopHitAggUi = (props) => {
     order: 'desc',
   };
   const model = { ...defaults, ...props.model };
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
@@ -114,8 +116,8 @@ const TopHitAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+  const field = fields[fieldsSelector].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 

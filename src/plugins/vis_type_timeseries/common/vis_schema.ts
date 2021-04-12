@@ -213,8 +213,6 @@ export const panel = schema.object({
   bar_color_rules: schema.maybe(arrayNullable),
   background_color: stringOptionalNullable,
   background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
-  default_index_pattern: stringOptionalNullable,
-  default_timefield: stringOptionalNullable,
   drilldown_url: stringOptional,
   drop_last_bucket: numberIntegerOptional,
   filter: schema.maybe(queryObject),
