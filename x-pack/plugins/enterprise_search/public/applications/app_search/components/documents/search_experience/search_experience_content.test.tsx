@@ -6,6 +6,7 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
@@ -16,7 +17,6 @@ import { Results } from '@elastic/react-search-ui';
 
 import { SchemaTypes } from '../../../../shared/types';
 
-import { setMockSearchContextState } from './__mocks__/hooks.mock';
 import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
 import { ResultView } from './views';

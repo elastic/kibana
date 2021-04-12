@@ -32,7 +32,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const supertest = getService('supertest');
 
-  return new (class SendToBackgroundService {
+  return new (class SearchSessionsService {
     public async find(): Promise<WebElementWrapper> {
       return testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
     }

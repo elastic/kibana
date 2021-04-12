@@ -24,9 +24,12 @@ import {
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 import { YesNo } from './yes_no';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { LastValueModePopover } from './last_value_mode_popover';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,6 +44,7 @@ import { UI_SETTINGS } from '../../../../data/common';
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
 const LEVEL_OF_DETAIL_MIN_BUCKETS = 1;
+const HIDE_LAST_VALUE_INDICATOR = 'hide_last_value_indicator';
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -64,7 +68,8 @@ export const IndexPattern = ({
   onChange,
   disabled,
   model: _model,
-  allowLevelofDetail,
+  allowLevelOfDetail,
+  allowIndexSwitchingMode,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -73,6 +78,7 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
@@ -90,23 +96,22 @@ export const IndexPattern = ({
 
   const timeRangeOptions = [
     {
-      label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.lastValue', {
-        defaultMessage: 'Last value',
-      }),
-      value: TIME_RANGE_DATA_MODES.LAST_VALUE,
-      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.LAST_VALUE, uiRestrictions),
-    },
-    {
       label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.entireTimeRange', {
         defaultMessage: 'Entire time range',
       }),
       value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
       disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE, uiRestrictions),
     },
+    {
+      label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.lastValue', {
+        defaultMessage: 'Last value',
+      }),
+      value: TIME_RANGE_DATA_MODES.LAST_VALUE,
+      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.LAST_VALUE, uiRestrictions),
+    },
   ];
 
   const defaults = {
-    default_index_pattern: '',
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
@@ -116,7 +121,6 @@ export const IndexPattern = ({
 
   const model = { ...defaults, ..._model };
 
-  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
@@ -126,6 +130,11 @@ export const IndexPattern = ({
   useEffect(() => {
     updateControlValidity(intervalName, intervalValidation.isValid);
   }, [intervalName, intervalValidation.isValid, updateControlValidity]);
+
+  const toggleIndicatorDisplay = useCallback(
+    () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
+    [model.hide_last_value_indicator, onChange]
+  );
 
   return (
     <div className="index-pattern">
@@ -139,6 +148,7 @@ export const IndexPattern = ({
               })}
             >
               <EuiComboBox
+                data-test-subj="dataTimeRangeMode"
                 isClearable={false}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
@@ -151,6 +161,14 @@ export const IndexPattern = ({
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
                 isDisabled={disabled}
+                {...(!isEntireTimeRangeActive(model, isTimeSeries) && {
+                  append: (
+                    <LastValueModePopover
+                      isIndicatorDisplayed={!model.hide_last_value_indicator}
+                      toggleIndicatorDisplay={toggleIndicatorDisplay}
+                    />
+                  ),
+                })}
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
@@ -165,44 +183,27 @@ export const IndexPattern = ({
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('indexPattern')}
-            label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
-            })}
-            helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
-            }
-          >
-            <EuiFieldText
-              data-test-subj="metricsIndexPatternInput"
-              disabled={disabled}
-              placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName)}
-              value={model[indexPatternName]}
-            />
-          </EuiFormRow>
+          <IndexPatternSelect
+            value={model[indexPatternName]}
+            indexPatternName={indexPatternName}
+            onChange={onChange}
+            disabled={disabled}
+            allowIndexSwitchingMode={allowIndexSwitchingMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('timeField')}
+          <FieldSelect
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
             })}
-          >
-            <FieldSelect
-              restrict={RESTRICT_FIELDS}
-              value={model[timeFieldName]}
-              disabled={disabled}
-              onChange={handleSelectChange(timeFieldName)}
-              indexPattern={model[indexPatternName]}
-              fields={fields}
-              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
-            />
-          </EuiFormRow>
+            restrict={RESTRICT_FIELDS}
+            value={model[timeFieldName]}
+            disabled={disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
+            fields={fields}
+            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -245,7 +246,7 @@ export const IndexPattern = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {allowLevelofDetail && (
+      {allowLevelOfDetail && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -332,5 +333,6 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  allowLevelofDetail: PropTypes.bool,
+  allowLevelOfDetail: PropTypes.bool,
+  allowIndexSwitchingMode: PropTypes.bool,
 };

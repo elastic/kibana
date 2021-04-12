@@ -8,6 +8,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
@@ -19,6 +20,7 @@ import { Sort } from './sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { defaultRowRenderers } from './renderers';
 
 const mockSort: Sort[] = [
   {
@@ -39,8 +41,8 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useShallowEqualSelector: () => mockTimelineModel,
+  useDeepEqualSelector: () => mockTimelineModel,
 }));
 
 jest.mock('../../../../common/components/link_to');
@@ -76,6 +78,8 @@ describe('Body', () => {
     loadingEventIds: [],
     pinnedEventIds: {},
     refetch: jest.fn(),
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,

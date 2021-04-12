@@ -38,7 +38,7 @@ yarn test:jest
 yarn test:jest --watch
 ```
 
-Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific folder and only get coverage numbers for that folder:
+Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:
 
 ```bash
 # Running the jest.sh script from the `x-pack/plugins/enterprise_search` folder (vs. kibana root)
@@ -46,6 +46,8 @@ Unfortunately coverage collection does not work as automatically, and requires u
 sh jest.sh {YOUR_COMPONENT_DIR}
 sh jest.sh public/applications/shared/kibana
 sh jest.sh server/routes/app_search
+# When testing an individual file, remember to pass the path of the test file, not the source file.
+sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.ts
 ```
 
 ### E2E tests

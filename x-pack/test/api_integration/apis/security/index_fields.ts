@@ -7,27 +7,11 @@
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
-interface FLSMappingResponse {
-  flstest: {
-    mappings: {
-      runtime?: {
-        [fieldName: string]: {
-          type: string;
-        };
-      };
-      properties: {
-        [fieldName: string]: {
-          type: string;
-        };
-      };
-    };
-  };
-}
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Index Fields', () => {
     before(async () => {
@@ -59,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not include runtime fields', async () => {
         // First, make sure the mapping actually includes a runtime field
-        const mapping = (await es.indices.getMapping({ index: 'flstest' })) as FLSMappingResponse;
+        const { body: mapping } = await es.indices.getMapping({
+          index: 'flstest',
+        });
 
         expect(Object.keys(mapping.flstest.mappings)).to.contain('runtime');
         expect(Object.keys(mapping.flstest.mappings.runtime!)).to.contain('runtime_customer_ssn');
