@@ -8,8 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Chart, niceTimeFormatter, TooltipValue, PointerEvent } from '@elastic/charts';
-import moment from 'moment';
+import { Chart, niceTimeFormatter, PointerEvent } from '@elastic/charts';
 import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
