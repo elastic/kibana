@@ -217,6 +217,85 @@ describe('getSearchStatus', () => {
       // if not for `abort$` then this would be called 6 times!
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
     });
+
+    test('sorting is by "touched"', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'touched', sortOrder: 'asc' })
+      );
+    });
+
+    test('sessions fetched in the beginning are processed even if sessions in the end fail', async () => {
+      let i = 0;
+      savedObjectsClient.find.mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          if (++i === 2) {
+            reject(new Error('Fake find error...'));
+          }
+          resolve({
+            saved_objects:
+              i <= 5
+                ? [
+                    i === 1
+                      ? {
+                          id: '123',
+                          attributes: {
+                            persisted: false,
+                            status: SearchSessionStatus.IN_PROGRESS,
+                            created: moment().subtract(moment.duration(3, 'm')),
+                            touched: moment().subtract(moment.duration(2, 'm')),
+                            idMapping: {
+                              'map-key': {
+                                strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                                id: 'async-id',
+                              },
+                            },
+                          },
+                        }
+                      : emptySO,
+                    emptySO,
+                    emptySO,
+                    emptySO,
+                    emptySO,
+                  ]
+                : [],
+            total: 25,
+            page: i,
+          } as any);
+        });
+      });
+
+      await checkRunningSessions$(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      ).toPromise();
+
+      jest.runAllTimers();
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      // by checking that delete was called we validate that sessions from session that were successfully fetched were processed
+      expect(mockClient.asyncSearch.delete).toBeCalled();
+      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
+      expect(id).toBe('async-id');
+    });
   });
 
   describe('delete', () => {
