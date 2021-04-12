@@ -19,11 +19,7 @@ import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import {
-  GroupOverview,
-  EMPTY_SOURCES_DESCRIPTION,
-  EMPTY_USERS_DESCRIPTION,
-} from './group_overview';
+import { GroupOverview } from './group_overview';
 
 const deleteGroup = jest.fn();
 const showSharedSourcesModal = jest.fn();
