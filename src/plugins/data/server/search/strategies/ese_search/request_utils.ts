@@ -48,13 +48,15 @@ export async function getDefaultAsyncSubmitParams(
 > {
   return {
     batched_reduce_size: 64,
-    keep_on_completion: searchSessionsConfig ? !!options.sessionId : false, // Always return an ID, even if the request completes quickly
+    keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
-    ...(options.sessionId && searchSessionsConfig
+    ...(options.sessionId
       ? {
-          keep_alive: `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`,
+          keep_alive: searchSessionsConfig
+            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
+            : '1m',
         }
       : {}),
   };
