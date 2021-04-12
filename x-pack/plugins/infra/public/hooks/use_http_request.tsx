@@ -71,10 +71,10 @@ export function useHTTPRequest<Response>(
                       defaultMessage: `Message`,
                     })}
                   </h5>
-                  {err.body?.message}
+                  {err.body?.message || err.message}
                 </>
               ) : (
-                <h5>{err.body?.message}</h5>
+                <h5>{err.body?.message || err.message}</h5>
               )}
             </div>
           ),
