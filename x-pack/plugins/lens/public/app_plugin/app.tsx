@@ -14,6 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -37,6 +38,7 @@ import {
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
@@ -193,14 +195,19 @@ export function App({
 
     const autoRefreshSubscription = data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe({
-        next: () => {
+      .pipe(
+        tap(() => {
           setState((s) => ({
             ...s,
             searchSessionId: data.search.session.start(),
           }));
-        },
-      });
+        }),
+        switchMap((done) =>
+          // best way in lens to estimate that all panels are updated is to rely on search session service state
+          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
@@ -531,7 +538,13 @@ export function App({
 
   const { TopNavMenu } = navigation.ui;
 
-  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    state.isSaveable && application.capabilities.visualize.save
+  );
+  const savingToDashboardPermitted = Boolean(
+    state.isSaveable && application.capabilities.dashboard?.showWriteControls
+  );
+
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -545,8 +558,10 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
+    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingPermitted,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -577,7 +592,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingPermitted && lastKnownDoc) {
+        if (savingToDashboardPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -597,7 +612,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingPermitted) {
+        if (savingToDashboardPermitted || savingToLibraryPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },
@@ -697,6 +712,7 @@ export function App({
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}

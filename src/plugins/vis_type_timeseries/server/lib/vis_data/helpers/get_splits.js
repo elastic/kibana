@@ -23,9 +23,8 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
-
-  const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
-  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForMetaIndex);
+  const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
 
   if (buckets) {
     if (Array.isArray(buckets)) {
@@ -45,6 +44,7 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
+        bucket.splitByLabel = splitByLabel;
         bucket.color = filter.color;
         bucket.label = filter.label || filter.filter.query || '*';
         bucket.meta = meta;

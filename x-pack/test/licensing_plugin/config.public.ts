@@ -6,6 +6,7 @@
  */
 
 import path from 'path';
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { KIBANA_ROOT } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
