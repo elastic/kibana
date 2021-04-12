@@ -37,6 +37,6 @@ They are enabled by default.
 [cols="2*<"]
 |===
 | `xpack.painless_lab.enabled`
-  | When set to `true`, enables the <<xpack-painless_lab, Painless Lab>>. Defaults to `true`.
+  | When set to `true`, enables the <<painlesslab, Painless Lab>>. Defaults to `true`.
 
 |===
