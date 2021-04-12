@@ -13,10 +13,10 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 import { UI_SETTINGS } from '../../../../../../data/common';
 
-export function siblingBuckets(req, panel, esQueryConfig, indexPattern, capabilities, uiSettings) {
+export function siblingBuckets(req, panel, esQueryConfig, seriesIndex, capabilities, uiSettings) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { interval } = getIntervalAndTimefield(panel, {}, indexPattern);
+    const { interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
     const { bucketSize } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 
     panel.series.forEach((column) => {

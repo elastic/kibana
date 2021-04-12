@@ -23,20 +23,20 @@ import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
-import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_strorage';
+import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
 import {
   withNotifyOnErrors,
   createKbnUrlStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import * as fetcherHook from '../../../hooks/use_fetcher';
-import * as useUrlHook from './hooks/use_url_strorage';
+import * as useUrlHook from './hooks/use_url_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
-import indexPatternData from './configurations/data/test_index_pattern.json';
+import indexPatternData from './configurations/test_data/test_index_pattern.json';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
