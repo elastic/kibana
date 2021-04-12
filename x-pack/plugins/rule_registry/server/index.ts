@@ -12,7 +12,6 @@ import { RuleRegistryPlugin } from './plugin';
 export { RuleRegistryPluginSetupContract } from './plugin';
 export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
 export { createPersistenceRuleTypeFactory } from './rule_registry/rule_type_helpers/create_persistence_rule_type_factory';
-export { createThresholdRuleTypeFactory } from './rule_registry/rule_type_helpers/create_threshold_rule_type_factory';
 export { ecsFieldMap } from './generated/ecs_field_map';
 export { pickWithPatterns } from './rule_registry/field_map/pick_with_patterns';
 export { FieldMapOf } from './types';
