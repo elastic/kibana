@@ -23,7 +23,7 @@ addons.setConfig({
   panelPosition: 'bottom',
   isToolshown: true,
 });
-
+console.log('register');
 addons.register('kibana/eui-theme-switcher', () => {
   console.log('add?');
   addons.add('kibana/eui-theme-switcher', {
