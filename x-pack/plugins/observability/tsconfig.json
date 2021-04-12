@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.project.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -7,7 +7,14 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "typings/**/*",
+    "../../../typings/**/*"
+  ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
@@ -16,6 +23,7 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }

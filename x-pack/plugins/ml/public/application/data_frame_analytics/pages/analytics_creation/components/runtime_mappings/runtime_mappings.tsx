@@ -38,6 +38,7 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
+export type XJsonModeType = ReturnType<typeof XJsonMode>;
 
 interface Props {
   actions: CreateAnalyticsFormProps['actions'];
@@ -130,7 +131,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
           defaultMessage: 'Runtime mappings',
         })}
       >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {isPopulatedObject(runtimeMappings) ? (
               <EuiText size="s" grow={false}>

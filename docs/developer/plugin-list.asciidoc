@@ -456,10 +456,6 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
-|This plugin provides access to the detailed tile map services from Elastic.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.
@@ -491,6 +487,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/rule_registry/README.md[ruleRegistry]
+|The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]

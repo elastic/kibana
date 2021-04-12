@@ -1948,9 +1948,33 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.13.0 update pie visualization defaults', () => {
+  describe('7.13.0 tsvb - remove default_index_pattern and default_timefield from Model', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = () => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"default_index_pattern":"test", "default_timefield":"test"}}`,
+      },
+    });
+
+    it('should remove default_index_pattern and default_timefield', () => {
+      const migratedTestDoc = migrate(createTestDocWithType());
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(params).not.toHaveProperty('default_index_pattern');
+      expect(params).not.toHaveProperty('default_timefield');
+    });
+  });
+
+  describe('7.14.0 update pie visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );

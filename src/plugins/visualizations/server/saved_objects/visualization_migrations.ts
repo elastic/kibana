@@ -951,6 +951,36 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
+  doc
+) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const { params } = visState;
+
+      delete params.default_index_pattern;
+      delete params.default_timefield;
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [Pie Chart] Migrate vislib pie chart to use the new plugin vis_type_pie
 const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -1025,6 +1055,7 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.13.0': flow(
     addSupportOfDualIndexSelectionModeInTSVB,
     hideTSVBLastValueIndicator,
-    migrateVislibPie
+    removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
+  '7.14.0': flow(migrateVislibPie),
 };
