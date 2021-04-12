@@ -369,7 +369,6 @@ export function createSpatialFilterWithGeometry({
   geometryLabel,
   indexPatternId,
   geoFieldName,
-  geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
   preIndexedShape?: PreIndexedShape;
@@ -377,17 +376,14 @@ export function createSpatialFilterWithGeometry({
   geometryLabel: string;
   indexPatternId: string;
   geoFieldName: string;
-  geoFieldType: ES_GEO_FIELD_TYPE;
   relation: ES_SPATIAL_RELATIONS;
 }): GeoFilter {
-  ensureGeoField(geoFieldType);
-  const relationLabel = getEsSpatialRelationLabel(relation);
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     key: geoFieldName,
-    alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
+    alias: `${geoFieldName} ${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
     disabled: false,
   };
 

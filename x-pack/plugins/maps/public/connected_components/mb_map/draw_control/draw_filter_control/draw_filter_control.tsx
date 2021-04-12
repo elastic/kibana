@@ -84,9 +84,6 @@ export class DrawFilterControl extends Component<Props, {}> {
             : geometry,
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoFieldName,
-        geoFieldType: this.props.drawState.geoFieldType
-          ? this.props.drawState.geoFieldType
-          : ES_GEO_FIELD_TYPE.GEO_POINT,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
         relation: this.props.drawState.relation
           ? this.props.drawState.relation
