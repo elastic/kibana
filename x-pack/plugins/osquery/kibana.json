@@ -22,9 +22,7 @@
     "dataEnhanced",
     "discover",
     "fleet",
-    "lens",
     "navigation",
-    "share",
     "triggersActionsUi"
   ],
   "server": true,
