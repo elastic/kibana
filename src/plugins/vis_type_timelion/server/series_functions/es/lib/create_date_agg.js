@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { buildAggBody } from './agg_body';
 import { search } from '../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
+const OPERANDS_NUMBER = 2;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
@@ -30,7 +31,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
 
   dateAgg.time_buckets.aggs = {};
   _.each(config.metric, function (metric) {
-    metric = metric.split(':');
+    metric = metric.split(/:(.+)/).slice(0, OPERANDS_NUMBER);
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
       // It simplifies the aggregation tree walking code considerably
