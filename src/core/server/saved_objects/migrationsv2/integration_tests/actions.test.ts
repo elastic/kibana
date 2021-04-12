@@ -239,7 +239,7 @@ describe('migration actions', () => {
       client.indices.putSettings({
         index: 'red_then_yellow_index',
         body: {
-          // Disable all shard allocation so that the index status is red
+          // Enable all shard allocation so that the index status turns yellow
           index: { routing: { allocation: { enable: 'all' } } },
         },
       });
