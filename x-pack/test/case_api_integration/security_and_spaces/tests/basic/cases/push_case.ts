@@ -15,7 +15,7 @@ import {
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getConfiguration,
+  getConfigurationRequest,
   getServiceNowConnector,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should get 403 when trying to create a connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(
-          getConfiguration({
+          getConfigurationRequest({
             id: 'not-exist',
             name: 'Not exist',
             type: ConnectorTypes.serviceNowITSM,
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: 'not-exist',
             name: 'Not exist',
             type: ConnectorTypes.serviceNowITSM,

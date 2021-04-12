@@ -21,7 +21,7 @@ import {
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getConfiguration,
+  getConfigurationRequest,
   getServiceNowConnector,
 } from '../../../../common/lib/utils';
 import {
@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should push a case', async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -69,10 +69,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(
-          getConfiguration({
+          getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           })
         )
         .expect(200);
@@ -82,10 +82,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('pushes a comment appropriately', async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -138,10 +138,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(
-          getConfiguration({
+          getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           })
         )
         .expect(200);
@@ -151,10 +151,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should pushes a case and closes when closure_type: close-by-pushing', async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -196,10 +196,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...getConfiguration({
+          ...getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           }),
           closure_type: 'close-by-pushing',
         })
@@ -210,10 +210,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',
@@ -237,7 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -250,10 +250,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...getConfiguration({
+          ...getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           }),
           closure_type: 'close-by-pushing',
         })
@@ -264,10 +264,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCollectionReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',
@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration().connector,
+          connector: getConfigurationRequest().connector,
         })
         .expect(200);
 
@@ -315,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('unhappy path = 409s when case is closed', async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -329,10 +329,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(
-          getConfiguration({
+          getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           })
         )
         .expect(200);
@@ -342,10 +342,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',

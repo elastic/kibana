@@ -28,13 +28,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return the correct connectors', async () => {
       const { body: snConnector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getServiceNowConnector())
         .expect(200);
 
       const { body: emailConnector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           name: 'An email action',
@@ -51,13 +51,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const { body: jiraConnector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getJiraConnector())
         .expect(200);
 
       const { body: resilientConnector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getResilientConnector())
         .expect(200);

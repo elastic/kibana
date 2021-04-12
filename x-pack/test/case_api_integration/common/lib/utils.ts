@@ -12,7 +12,12 @@ import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
+import {
+  CASES_URL,
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_CONFIGURE_URL,
+  SUB_CASES_PATCH_DEL_URL,
+} from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -32,11 +37,13 @@ import {
   CasesPatchRequest,
   AllCommentsResponse,
   CommentPatchRequest,
+  CasesConfigurePatch,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 
 function toArray<T>(input: T | T[]): T[] {
@@ -154,11 +161,11 @@ export const createSubCase = async (args: {
  */
 export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromised.Test>) => {
   const { body: createdAction } = await supertest
-    .post('/api/actions/action')
+    .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'A case connector',
-      actionTypeId: '.case',
+      connector_type_id: '.case',
       config: {},
     })
     .expect(200);
@@ -172,7 +179,7 @@ export const deleteCaseAction = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   id: string
 ) => {
-  await supertest.delete(`/api/actions/action/${id}`).set('kbn-xsrf', 'foo');
+  await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
 };
 
 /**
@@ -241,7 +248,7 @@ export const createSubCaseComment = async ({
   }
 
   const caseConnector = await supertest
-    .post(`/api/actions/action/${actionIDToUse}/_execute`)
+    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
     .set('kbn-xsrf', 'foo')
     .send({
       params: {
@@ -258,7 +265,7 @@ export const createSubCaseComment = async ({
   return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
-export const getConfiguration = ({
+export const getConfigurationRequest = ({
   id = 'none',
   name = 'none',
   type = ConnectorTypes.none,
@@ -275,19 +282,23 @@ export const getConfiguration = ({
   };
 };
 
-export const getConfigurationOutput = (update = false): Partial<CasesConfigureResponse> => {
+export const getConfigurationOutput = (
+  update = false,
+  overwrite = {}
+): Partial<CasesConfigureResponse> => {
   return {
-    ...getConfiguration(),
+    ...getConfigurationRequest(),
     error: null,
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    ...overwrite,
   };
 };
 
 export const getServiceNowConnector = () => ({
   name: 'ServiceNow Connector',
-  actionTypeId: '.servicenow',
+  connector_type_id: '.servicenow',
   secrets: {
     username: 'admin',
     password: 'password',
@@ -299,7 +310,7 @@ export const getServiceNowConnector = () => ({
 
 export const getJiraConnector = () => ({
   name: 'Jira Connector',
-  actionTypeId: '.jira',
+  connector_type_id: '.jira',
   secrets: {
     email: 'elastic@elastic.co',
     apiToken: 'token',
@@ -330,7 +341,7 @@ export const getMappings = () => [
 
 export const getResilientConnector = () => ({
   name: 'Resilient Connector',
-  actionTypeId: '.resilient',
+  connector_type_id: '.resilient',
   secrets: {
     apiKeyId: 'id',
     apiKeySecret: 'secret',
@@ -338,6 +349,33 @@ export const getResilientConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     orgId: 'pkey',
+  },
+});
+
+export const getServiceNowSIRConnector = () => ({
+  name: 'ServiceNow Connector',
+  connector_type_id: '.servicenow-sir',
+  secrets: {
+    username: 'admin',
+    password: 'password',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+  },
+});
+
+export const getWebhookConnector = () => ({
+  name: 'A generic Webhook action',
+  connector_type_id: '.webhook',
+  secrets: {
+    user: 'user',
+    password: 'password',
+  },
+  config: {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+    url: 'http://some.non.existent.com',
   },
 });
 
@@ -660,4 +698,74 @@ export const updateComment = async (
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getConfiguration = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  expectedHttpCode: number = 200
+): Promise<CasesConfigureResponse> => {
+  const { body: configuration } = await supertest
+    .get(CASE_CONFIGURE_URL)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export const createConfiguration = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  req: CasesConfigureRequest = getConfigurationRequest(),
+  expectedHttpCode: number = 200
+): Promise<CasesConfigureResponse> => {
+  const { body: configuration } = await supertest
+    .post(CASE_CONFIGURE_URL)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & { connector_type_id: string };
+
+export const createConnector = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  req: Record<string, unknown>,
+  expectedHttpCode: number = 200
+): Promise<CreateConnectorResponse> => {
+  const { body: connector } = await supertest
+    .post('/api/actions/connector')
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return connector;
+};
+
+export const getCaseConnectors = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  expectedHttpCode: number = 200
+): Promise<FindActionResult[]> => {
+  const { body: connectors } = await supertest
+    .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return connectors;
+};
+
+export const updateConfiguration = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  req: CasesConfigurePatch,
+  expectedHttpCode: number = 200
+): Promise<CasesConfigureResponse> => {
+  const { body: configuration } = await supertest
+    .patch(CASE_CONFIGURE_URL)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return configuration;
 };
