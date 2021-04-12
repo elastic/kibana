@@ -21,7 +21,7 @@ export type {
   YAxisMode,
   XYCurveType,
 } from './xy_visualization/types';
-export type { DataType } from './types';
+export type { DataType, OperationMetadata } from './types';
 export type {
   PieVisualizationState,
   PieLayerState,
@@ -33,6 +33,7 @@ export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
   IndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
   FiltersIndexPatternColumn,

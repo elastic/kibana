@@ -16,7 +16,7 @@ import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
@@ -49,7 +49,14 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
 export function SeriesBuilder() {
   const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { dataType, reportType, reportDefinitions = {}, filters = [] } = series;
+  const {
+    dataType,
+    seriesType,
+    reportType,
+    reportDefinitions = {},
+    filters = [],
+    operationType,
+  } = series;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
 
@@ -121,9 +128,11 @@ export function SeriesBuilder() {
 
       const newSeriesN = {
         reportType,
-        time: { from: 'now-30m', to: 'now' },
+        seriesType,
         filters,
         reportDefinitions,
+        operationType,
+        time: { from: 'now-30m', to: 'now' },
       } as SeriesUrl;
 
       setSeries(newSeriesId, newSeriesN).then(() => {
@@ -145,7 +154,7 @@ export function SeriesBuilder() {
           columns={columns}
           cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
         />
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plus" color="primary" onClick={addSeries}>

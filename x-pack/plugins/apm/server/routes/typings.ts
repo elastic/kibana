@@ -60,21 +60,3 @@ export interface APMRouteHandlerResources {
     };
   };
 }
-
-// export type Client<
-//   TRouteState,
-//   TOptions extends { abortable: boolean } = { abortable: true }
-// > = <TEndpoint extends keyof TRouteState & string>(
-//   options: Omit<
-//     FetchOptions,
-//     'query' | 'body' | 'pathname' | 'method' | 'signal'
-//   > & {
-//     forceCache?: boolean;
-//     endpoint: TEndpoint;
-//   } & MaybeParams<TRouteState, TEndpoint> &
-//     (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
-// ) => Promise<
-//   TRouteState[TEndpoint] extends { ret: any }
-//     ? TRouteState[TEndpoint]['ret']
-//     : unknown
-// >;
