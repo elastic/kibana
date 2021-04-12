@@ -388,11 +388,11 @@ describe('migration actions', () => {
         }
       `);
 
-      const results = ((await searchForOutdatedDocuments(client, {
-        batchSize: 1000,
-        targetIndex: 'reindex_target_excluded_docs',
-        outdatedDocumentsQuery: undefined,
-      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const results = ((await searchForOutdatedDocuments(
+        client,
+        'reindex_target_excluded_docs',
+        undefined as any
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
           "doc 1",
@@ -757,10 +757,11 @@ describe('migration actions', () => {
       )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(resultsWithQuery.length).toBe(3);
 
-      const resultsWithoutQuery = ((await searchForOutdatedDocuments(client, {
-        targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: undefined,
-      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      const resultsWithoutQuery = ((await searchForOutdatedDocuments(
+        client,
+        'existing_index_with_docs',
+        undefined as any
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(resultsWithoutQuery.length).toBe(5);
     });
     it('resolves with _id, _source, _seq_no and _primary_term', async () => {
