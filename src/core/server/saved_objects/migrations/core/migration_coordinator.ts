@@ -85,11 +85,11 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
  * and is the cue for us to fall into a polling loop, waiting for some
  * other Kibana instance to complete the migration.
  */
-function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
+function handleIndexExists(error: any, log: SavedObjectsMigrationLogger): string | undefined {
   const isIndexExistsError =
     _.get(error, 'body.error.type') === 'resource_already_exists_exception';
   if (!isIndexExistsError) {
-    return null;
+    return undefined;
   }
 
   const index = _.get(error, 'body.error.index');
