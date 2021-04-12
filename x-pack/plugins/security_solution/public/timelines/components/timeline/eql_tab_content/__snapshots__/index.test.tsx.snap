@@ -140,6 +140,986 @@ In other use cases the message field can be used to concatenate different values
     ]
   }
   onEventClosed={[MockFunction]}
+  renderCellValue={[Function]}
+  rowRenderers={
+    Array [
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "auditd",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_dns",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "alerts",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "library",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "registry",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_fim",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_security_event",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_file",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system_socket",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "system",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "suricata",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "zeek",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "id": "netflow",
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+    ]
+  }
   showExpandedDetails={false}
   start="2018-03-23T18:49:23.132Z"
   timelineId="test"

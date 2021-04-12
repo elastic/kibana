@@ -24,6 +24,7 @@ export interface CliArgs {
   /** @deprecated */
   quiet?: boolean;
   silent?: boolean;
+  verbose?: boolean;
   watch: boolean;
   basePath: boolean;
   oss: boolean;

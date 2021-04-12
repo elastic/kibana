@@ -7,7 +7,7 @@
  */
 
 import { PluginServiceFactory } from '../create';
-import { PresentationCapabilitiesService } from '..';
+import { PresentationCapabilitiesService } from '../capabilities';
 
 type CapabilitiesServiceFactory = PluginServiceFactory<PresentationCapabilitiesService>;
 
@@ -15,4 +15,5 @@ export const capabilitiesServiceFactory: CapabilitiesServiceFactory = () => ({
   canAccessDashboards: () => true,
   canCreateNewDashboards: () => true,
   canEditDashboards: () => true,
+  canSaveVisualizations: () => true,
 });
