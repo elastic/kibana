@@ -22,7 +22,6 @@ import {
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
 
 /** @internal */
 export interface RequestHandlerParams {
@@ -39,6 +38,21 @@ export interface RequestHandlerParams {
   timeFields?: string[];
   timeRange?: TimeRange;
   getNow?: () => Date;
+}
+
+function getRequestMainResponder(inspectorAdapters: Adapters, searchSessionId?: string) {
+  return inspectorAdapters.requests?.start(
+    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+      defaultMessage: 'Data',
+    }),
+    {
+      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+        defaultMessage:
+          'This request queries Elasticsearch to fetch the data for the visualization.',
+      }),
+      searchSessionId,
+    }
+  );
 }
 
 export const handleRequest = async ({
@@ -113,52 +127,19 @@ export const handleRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  let request;
-  if (inspectorAdapters.requests) {
-    inspectorAdapters.requests.reset();
-    request = inspectorAdapters.requests.start(
-      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-        defaultMessage: 'Data',
-      }),
-      {
-        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the data for the visualization.',
-        }),
-        searchSessionId,
-      }
-    );
-    request.stats(getRequestInspectorStats(requestSearchSource));
-  }
+  inspectorAdapters.requests?.reset();
+  const requestResponder = getRequestMainResponder(inspectorAdapters, searchSessionId);
 
-  try {
-    const response = await requestSearchSource.fetch({
-      abortSignal,
-      sessionId: searchSessionId,
-    });
-
-    if (request) {
-      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
-    }
-
-    (searchSource as any).rawResponse = response;
-  } catch (e) {
-    // Log any error during request to the inspector
-    if (request) {
-      request.error({ json: e });
-    }
-    throw e;
-  } finally {
-    // Add the request body no matter if things went fine or not
-    if (request) {
-      request.json(await requestSearchSource.getSearchRequestBody());
-    }
-  }
+  const response$ = await requestSearchSource.fetch$({
+    abortSignal,
+    sessionId: searchSessionId,
+    requestResponder,
+  });
 
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
   // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
   // response data incorrectly in the inspector.
-  let response = (searchSource as any).rawResponse;
+  let response = await response$.toPromise();
   for (const agg of aggs.aggs) {
     if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
       response = await agg.type.postFlightRequest(
