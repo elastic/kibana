@@ -3,6 +3,7 @@
   docker_image:
     name: kibana
     load_path: /packages/kibana-{{ kibana_version }}-docker-image.tar.gz
+    timeout: 300
     source: load
     state: present
 
@@ -11,7 +12,6 @@
   docker_container:
     name: kibana
     image: docker.elastic.co/kibana/kibana:{{ kibana_version }}
-    container_default_behavior: no_defaults
     network_mode: host
     env:
       SERVER_HOST: 0.0.0.0
