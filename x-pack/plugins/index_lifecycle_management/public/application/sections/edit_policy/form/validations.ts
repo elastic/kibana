@@ -209,7 +209,7 @@ export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
       }
     ),
     greaterThanFrozenPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
+      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanFrozenPhaseError',
       {
         defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
         values: {
