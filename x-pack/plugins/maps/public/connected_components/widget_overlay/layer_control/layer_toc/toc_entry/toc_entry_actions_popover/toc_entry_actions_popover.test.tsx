@@ -31,10 +31,6 @@ class LayerMock extends AbstractLayer implements ILayer {
     super({ layerDescriptor, source });
   }
 
-  async supportsFitToBounds(): Promise<boolean> {
-    return supportsFitToBounds;
-  }
-
   isVisible() {
     return true;
   }

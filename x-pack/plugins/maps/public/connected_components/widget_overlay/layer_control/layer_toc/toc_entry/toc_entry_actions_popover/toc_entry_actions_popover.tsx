@@ -11,6 +11,7 @@ import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
+import { getVisibilityToggleLabel, EDIT_LAYER_LABEL, FIT_TO_DATA_LABEL } from '../action_labels';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -22,12 +23,12 @@ export interface Props {
   isReadOnly: boolean;
   layer: ILayer;
   removeLayer: (layerId: string) => void;
+  supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
 }
 
 interface State {
   isPopoverOpen: boolean;
-  supportsFitToBounds: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
@@ -40,18 +41,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadSupportsFitToBounds();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-  }
-
-  async _loadSupportsFitToBounds() {
-    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
-    if (this._isMounted) {
-      this.setState({ supportsFitToBounds });
-    }
   }
 
   _togglePopover = () => {
@@ -85,30 +78,22 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   _getActionsPanel() {
     const actionItems = [
       {
-        name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
-          defaultMessage: 'Fit to data',
-        }),
+        name: FIT_TO_DATA_LABEL,
         icon: <EuiIcon type="expand" size="m" />,
         'data-test-subj': 'fitToBoundsButton',
-        toolTipContent: this.state.supportsFitToBounds
+        toolTipContent: this.props.supportsFitToBounds
           ? null
           : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
               defaultMessage: 'Layer does not support fit to data',
             }),
-        disabled: !this.state.supportsFitToBounds,
+        disabled: !this.props.supportsFitToBounds,
         onClick: () => {
           this._closePopover();
           this._fitToBounds();
         },
       },
       {
-        name: this.props.layer.isVisible()
-          ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
-              defaultMessage: 'Hide layer',
-            })
-          : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
-              defaultMessage: 'Show layer',
-            }),
+        name: getVisibilityToggleLabel(this.props.layer.isVisible()),
         icon: <EuiIcon type={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
@@ -122,9 +107,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     if (!this.props.isReadOnly) {
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
-        name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
-          defaultMessage: 'Edit layer',
-        }),
+        name: EDIT_LAYER_LABEL,
         icon: <EuiIcon type="pencil" size="m" />,
         'data-test-subj': 'editLayerButton',
         toolTipContent: null,

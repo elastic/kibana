@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
+import { getVisibilityToggleLabel, EDIT_LAYER_LABEL, FIT_TO_DATA_LABEL } from './action_labels';
 
 function escapeLayerName(name) {
   return name ? name.split(' ').join('_') : '';
@@ -21,12 +22,14 @@ export class TOCEntry extends React.Component {
     displayName: null,
     hasLegendDetails: false,
     shouldShowModal: false,
+    supportsFitToBounds: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
     this._loadHasLegendDetails();
+    this._loadSupportsFitToBounds();
   }
 
   componentWillUnmount() {
@@ -45,6 +48,13 @@ export class TOCEntry extends React.Component {
       this.props.showTOCDetails(this.props.layer.getId());
     }
   };
+
+  async _loadSupportsFitToBounds() {
+    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  }
 
   async _loadHasLegendDetails() {
     const hasLegendDetails =
@@ -83,6 +93,14 @@ export class TOCEntry extends React.Component {
     this.props.openLayerPanel(this.props.layer.getId());
   };
 
+  _fitToBounds = () => {
+    this.props.fitToBounds(this.props.layer.getId());
+  };
+
+  _toggleVisible = () => {
+    this.props.toggleVisible(this.props.layer.getId());
+  };
+
   _renderCancelModal() {
     if (!this.state.shouldShowModal) {
       return null;
@@ -116,23 +134,40 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLayerIcons() {
-    if (this.props.isReadOnly) {
-      return null;
-    }
+    const fitToBoundsIcon = this.state.supportsFitToBounds ? (
+      <EuiButtonIcon
+        iconType="expand"
+        color="subdued"
+        title={FIT_TO_DATA_LABEL}
+        aria-label={FIT_TO_DATA_LABEL}
+        onClick={this._fitToBounds}
+      />
+    ) : null;
+
+    const editIcon = this.props.isReadOnly ? null : (
+      <EuiButtonIcon
+        isDisabled={this.props.isEditButtonDisabled}
+        iconType="pencil"
+        color="subdued"
+        aria-label={EDIT_LAYER_LABEL}
+        title={EDIT_LAYER_LABEL}
+        onClick={this._openLayerPanelWithCheck}
+      />
+    );
 
     return (
       <div className="mapTocEntry__layerIcons">
         <EuiButtonIcon
-          isDisabled={this.props.isEditButtonDisabled}
-          iconType="pencil"
-          aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
-            defaultMessage: 'Edit layer',
-          })}
-          title={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonTitle', {
-            defaultMessage: 'Edit layer',
-          })}
-          onClick={this._openLayerPanelWithCheck}
+          iconType={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'}
+          color="subdued"
+          title={getVisibilityToggleLabel(this.props.layer.isVisible())}
+          aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
+          onClick={this._toggleVisible}
         />
+
+        {fitToBoundsIcon}
+
+        {editIcon}
 
         <EuiButtonIcon
           iconType="grab"
@@ -206,6 +241,7 @@ export class TOCEntry extends React.Component {
           escapedDisplayName={escapeLayerName(this.state.displayName)}
           editLayer={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
+          supportsFitToBounds={this.state.supportsFitToBounds}
         />
 
         {this._renderLayerIcons()}
