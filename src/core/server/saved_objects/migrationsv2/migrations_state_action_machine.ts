@@ -32,7 +32,8 @@ const logStateTransition = (
   logger: Logger,
   logMessagePrefix: string,
   oldState: State,
-  newState: State
+  newState: State,
+  tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
     newState.logs
@@ -40,7 +41,9 @@ const logStateTransition = (
       .forEach((log) => logger[log.level](logMessagePrefix + log.message));
   }
 
-  logger.info(logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}`);
+  logger.info(
+    logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}. took: ${tookMs}ms.`
+  );
 };
 
 const logActionResponse = (
@@ -90,6 +93,7 @@ export async function migrationStateActionMachine({
   // configured by users to include several `.`'s we can't use a logger tag to
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
+  let prevTimestamp = Date.now();
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -116,7 +120,15 @@ export async function migrationStateActionMachine({
           controlState: newState.controlState,
           prevControlState: state.controlState,
         });
-        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State);
+        const now = Date.now();
+        logStateTransition(
+          logger,
+          logMessagePrefix,
+          state,
+          redactedNewState as State,
+          now - prevTimestamp
+        );
+        prevTimestamp = now;
         return newState;
       }
     );
