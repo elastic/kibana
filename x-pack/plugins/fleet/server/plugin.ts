@@ -64,6 +64,7 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
 import type {
   ESIndexPatternService,
@@ -274,6 +275,7 @@ export class FleetPlugin
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
       registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {

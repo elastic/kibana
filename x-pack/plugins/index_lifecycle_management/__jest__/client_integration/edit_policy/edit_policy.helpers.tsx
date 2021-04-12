@@ -247,25 +247,12 @@ export const setup = async (arg?: {
     };
   };
 
-  const createToggleDeletePhaseActions = () => {
-    const enablePhase = async () => {
-      await act(async () => {
-        find('enableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    const disablePhase = async () => {
-      await act(async () => {
-        find('disableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    return {
-      enablePhase,
-      disablePhase,
-    };
+  const enableDeletePhase = async (isEnabled: boolean) => {
+    const buttonSelector = isEnabled ? 'enableDeletePhaseButton' : 'disableDeletePhaseButton';
+    await act(async () => {
+      find(buttonSelector).simulate('click');
+    });
+    component.update();
   };
 
   const hasRolloverSettingRequiredCallout = (): boolean => exists('rolloverSettingsRequired');
@@ -393,6 +380,7 @@ export const setup = async (arg?: {
         setReplicas: setReplicas('cold'),
         setFreeze: createSetFreeze('cold'),
         freezeExists: createFreezeExists('cold'),
+        ...createReadonlyActions('cold'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
@@ -406,7 +394,7 @@ export const setup = async (arg?: {
       },
       delete: {
         isShown: () => exists('delete-phaseContent'),
-        ...createToggleDeletePhaseActions(),
+        enable: enableDeletePhase,
         ...createMinAgeActions('delete'),
       },
     },
