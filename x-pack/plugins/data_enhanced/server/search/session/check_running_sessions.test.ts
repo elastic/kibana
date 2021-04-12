@@ -26,6 +26,8 @@ import {
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+jest.useFakeTimers();
+
 const checkRunningSessions = (deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) =>
   checkRunningSessions$(deps, config).toPromise();
 
@@ -210,15 +212,9 @@ describe('getSearchStatus', () => {
         .pipe(takeUntil(abort$))
         .toPromise();
 
-      // wait a bit before final assertion
-      // to make sure that `find()` isn't called after the test is finished
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(void 0);
-        }, 1000);
-      });
+      jest.runAllTimers();
 
-      // if not for `abort$` then this would be called 5 times!
+      // if not for `abort$` then this would be called 6 times!
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
     });
   });
