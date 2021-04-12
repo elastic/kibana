@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/* This test is importing saved objects from 6.8.x to 7.x. Please note a separate pr
-*handled this for 7.x to 8.0.0 https://github.com/elastic/kibana/pull/91908
+/* This test is importing saved objects from 6.8.x to 7.x.
+ * Please note a separate pr handled this for 7.x to 8.0.0 https://github.com/elastic/kibana/pull/91908
  */
 
 import expect from '@kbn/expect';
