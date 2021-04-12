@@ -11,12 +11,24 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { NewVectorLayerEditor } from './index';
 import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
 import { CREATE_DRAWN_FEATURES_INDEX_STEP_ID, ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID } from './wizard';
+import { getFileUpload } from '../../../kibana_services';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
     defaultMessage: 'Draw points & shapes and save in Elasticsearch',
   }),
+  disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
+    defaultMessage:
+      'Unable to draw vector shapes, you are missing the Kibana privilege "Index Pattern Management".',
+  }),
+  getIsDisabled: async () => {
+    const hasImportPermission = await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+    });
+    return !hasImportPermission;
+  },
   icon: DocumentsLayerIcon,
   prerequisiteSteps: [
     {
