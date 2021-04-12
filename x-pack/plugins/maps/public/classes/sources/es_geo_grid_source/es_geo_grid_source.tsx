@@ -451,8 +451,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
 &requestType=${this._descriptor.requestType}\
-&geoFieldType=${geoField.type}\
-&token=${uuid()}`;
+&geoFieldType=${geoField.type}`;
 
     return {
       layerName: this.getLayerName(),
