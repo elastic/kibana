@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IndexPattern } from '..';
+import type { RequestResponder } from '../../../inspector/common';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -118,6 +119,8 @@ export interface ISearchOptions {
    */
 
   indexPattern?: IndexPattern;
+
+  requestResponder?: RequestResponder;
 }
 
 /**
