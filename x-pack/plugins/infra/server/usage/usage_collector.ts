@@ -1,19 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { InventoryItemType } from '../../common/inventory_models/types';
-
-const KIBANA_REPORTING_TYPE = 'infraops';
 
 interface InfraopsSum {
   infraopsHosts: number;
   infraopsDocker: number;
   infraopsKubernetes: number;
   logs: number;
+}
+
+interface Usage {
+  last_24_hours: {
+    hits: {
+      infraops_hosts: number;
+      infraops_docker: number;
+      infraops_kubernetes: number;
+      logs: number;
+    };
+  };
 }
 
 export class UsageCollector {
@@ -23,11 +33,21 @@ export class UsageCollector {
   }
 
   public static getUsageCollector(usageCollection: UsageCollectionSetup) {
-    return usageCollection.makeUsageCollector({
-      type: KIBANA_REPORTING_TYPE,
+    return usageCollection.makeUsageCollector<Usage>({
+      type: 'infraops',
       isReady: () => true,
       fetch: async () => {
         return this.getReport();
+      },
+      schema: {
+        last_24_hours: {
+          hits: {
+            infraops_hosts: { type: 'long' },
+            infraops_docker: { type: 'long' },
+            infraops_kubernetes: { type: 'long' },
+            logs: { type: 'long' },
+          },
+        },
       },
     });
   }
@@ -79,7 +99,7 @@ export class UsageCollector {
 
     // only keep the newest BUCKET_NUMBER buckets
     const cutoff = this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (parseInt(key, 10) < cutoff) {
         delete this.counters[key];
       }

@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { useListKeys } from './use_list_keys';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
 
 describe('use_list_keys', () => {
   function ListingComponent({ items }: { items: object[] }) {
@@ -36,7 +41,7 @@ describe('use_list_keys', () => {
     });
 
     expect(instance.find('li').length).toEqual(5);
-    instance.find('li').forEach(el => {
+    instance.find('li').forEach((el) => {
       expect(ids.has(el.key())).toEqual(true);
     });
   });
@@ -72,7 +77,7 @@ describe('use_list_keys', () => {
     });
 
     expect(instance.find('li').length).toEqual(4);
-    instance.find('li').forEach(el => {
+    instance.find('li').forEach((el) => {
       expect(ids.has(el.key())).toEqual(true);
     });
   });
@@ -80,7 +85,7 @@ describe('use_list_keys', () => {
 
 function collectIds(instance: ReactWrapper) {
   const ids = new Set<string>();
-  instance.find('li').forEach(el => {
+  instance.find('li').forEach((el) => {
     ids.add(el.key());
   });
   return ids;

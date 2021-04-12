@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,6 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
@@ -44,7 +34,6 @@ import { Field, getEditableValue } from '../field';
 import { FieldSetting, SettingsChanges, FieldState } from '../../types';
 
 type Category = string;
-const NAV_IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 interface FormProps {
   settings: Record<string, FieldSetting[]>;
@@ -57,6 +46,7 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 interface FormState {
@@ -81,7 +71,7 @@ export class Form extends PureComponent<FormProps> {
   getSettingByKey = (key: string): FieldSetting | undefined => {
     return Object.values(this.props.settings)
       .flat()
-      .find(el => el.name === key);
+      .find((el) => el.name === key);
   };
 
   getCountOfUnsavedChanges = (): number => {
@@ -91,8 +81,8 @@ export class Form extends PureComponent<FormProps> {
   getCountOfHiddenUnsavedChanges = (): number => {
     const shownSettings = Object.values(this.props.visibleSettings)
       .flat()
-      .map(setting => setting.name);
-    return Object.keys(this.state.unsavedChanges).filter(key => !shownSettings.includes(key))
+      .map((setting) => setting.name);
+    return Object.keys(this.state.unsavedChanges).filter((key) => !shownSettings.includes(key))
       .length;
   };
 
@@ -150,18 +140,25 @@ export class Form extends PureComponent<FormProps> {
       if (!setting) {
         return;
       }
-      const { defVal, type, requiresPageReload } = setting;
+      const { defVal, type, requiresPageReload, metric } = setting;
       let valueToSave = value;
       let equalsToDefault = false;
       switch (type) {
         case 'array':
-          valueToSave = valueToSave.split(',').map((val: string) => val.trim());
+          valueToSave = valueToSave.trim();
+          valueToSave =
+            valueToSave === '' ? [] : valueToSave.split(',').map((val: string) => val.trim());
           equalsToDefault = valueToSave.join(',') === (defVal as string[]).join(',');
           break;
         case 'json':
           const isArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
           valueToSave = valueToSave.trim();
           valueToSave = valueToSave || (isArray ? '[]' : '{}');
+        case 'boolean':
+          if (metric && this.props.trackUiMetric) {
+            const metricName = valueToSave ? `${metric.name}_on` : `${metric.name}_off`;
+            this.props.trackUiMetric(metric.type, metricName);
+          }
         default:
           equalsToDefault = valueToSave === defVal;
       }
@@ -255,7 +252,7 @@ export class Form extends PureComponent<FormProps> {
               </EuiFlexGroup>
             </EuiText>
             <EuiSpacer size="m" />
-            {settings.map(setting => {
+            {settings.map((setting) => {
               return (
                 <Field
                   key={setting.name}
@@ -325,12 +322,8 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-    const bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-      'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-        localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-    });
     return (
-      <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
+      <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
@@ -391,8 +384,15 @@ export class Form extends PureComponent<FormProps> {
     const { unsavedChanges } = this.state;
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
+    const hasUnsavedChanges = !isEmpty(unsavedChanges);
 
-    categories.forEach(category => {
+    if (hasUnsavedChanges) {
+      document.body.classList.add('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    } else {
+      document.body.classList.remove('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    }
+
+    categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {
         currentCategories.push(category);
       }
@@ -402,7 +402,7 @@ export class Form extends PureComponent<FormProps> {
       <Fragment>
         <div>
           {currentCategories.length
-            ? currentCategories.map(category => {
+            ? currentCategories.map((category) => {
                 return this.renderCategory(
                   category,
                   visibleSettings[category],
@@ -411,7 +411,7 @@ export class Form extends PureComponent<FormProps> {
               })
             : this.maybeRenderNoSettings(clearQuery)}
         </div>
-        {!isEmpty(unsavedChanges) && this.renderBottomBar()}
+        {hasUnsavedChanges && this.renderBottomBar()}
       </Fragment>
     );
   }

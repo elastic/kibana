@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "outDir": "target",
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-storybook",
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "*.ts",
+    "lib/*.ts"
+  ]
+}

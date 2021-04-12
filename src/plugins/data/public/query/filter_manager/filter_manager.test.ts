@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,14 +13,14 @@ import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { getFiltersArray } from './test_helpers/get_filters_array';
-import { Filter, FilterStateStore } from '../../../common';
+import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
   switch (key) {
-    case 'filters:pinnedByDefault':
+    case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return pinnedByDefault;
     default:
       throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);
@@ -154,7 +143,7 @@ describe('filter_manager', () => {
       expect(updateListener.callCount).toBe(2);
     });
 
-    test('changing a disabled filter should fire only update event', async function() {
+    test('changing a disabled filter should fire only update event', async function () {
       const updateStub = jest.fn();
       const fetchStub = jest.fn();
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, false, 'age', 34);
@@ -178,7 +167,7 @@ describe('filter_manager', () => {
       expect(updateStub).toBeCalledTimes(1);
     });
 
-    test('should merge multiple conflicting app filters', async function() {
+    test('should merge multiple conflicting app filters', async function () {
       filterManager.addFilters(readyFilters, true);
       const appFilter1 = _.cloneDeep(readyFilters[1]);
       appFilter1.meta.negate = true;
@@ -198,27 +187,28 @@ describe('filter_manager', () => {
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
       expect(
-        res.filter(function(filter) {
+        res.filter(function (filter) {
           return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
         }).length
       ).toBe(3);
     });
 
-    test('should set app filters and remove any duplicated global filters', async function() {
-      filterManager.addFilters(readyFilters, true);
+    test('should set app filters and merge them with duplicate global filters', async function () {
+      const [filter, ...otherFilters] = readyFilters;
+      filterManager.addFilters(otherFilters, true);
       const appFilter1 = _.cloneDeep(readyFilters[1]);
       const appFilter2 = _.cloneDeep(readyFilters[2]);
 
-      filterManager.setAppFilters([appFilter1, appFilter2]);
+      filterManager.setAppFilters([filter, appFilter1, appFilter2]);
 
       const newGlobalFilters = filterManager.getGlobalFilters();
       const newAppFilters = filterManager.getAppFilters();
 
-      expect(newGlobalFilters).toHaveLength(1);
-      expect(newAppFilters).toHaveLength(2);
+      expect(newGlobalFilters).toHaveLength(2);
+      expect(newAppFilters).toHaveLength(1);
     });
 
-    test('should set global filters and remove any duplicated app filters', async function() {
+    test('should set global filters and remove any duplicated app filters', async function () {
       filterManager.addFilters(readyFilters, false);
       const globalFilter1 = _.cloneDeep(readyFilters[1]);
       const globalFilter2 = _.cloneDeep(readyFilters[2]);
@@ -272,7 +262,7 @@ describe('filter_manager', () => {
   });
 
   describe('add filters', () => {
-    test('app state should accept a single filter', async function() {
+    test('app state should accept a single filter', async function () {
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       filterManager.addFilters(f1);
@@ -397,7 +387,7 @@ describe('filter_manager', () => {
       }
     });
 
-    test('should return app and global filters', async function() {
+    test('should return app and global filters', async function () {
       const filters = getFiltersArray();
       filterManager.addFilters(filters[0], false);
       filterManager.addFilters(filters[1], true);
@@ -420,7 +410,7 @@ describe('filter_manager', () => {
       expect(res).toHaveLength(3);
     });
 
-    test('should skip appStateStub filters that match globalStateStub filters', async function() {
+    test('should skip appStateStub filters that match globalStateStub filters', async function () {
       filterManager.addFilters(readyFilters, true);
       const appFilter = _.cloneDeep(readyFilters[1]);
       filterManager.addFilters(appFilter, false);
@@ -428,12 +418,12 @@ describe('filter_manager', () => {
       // global filters should be listed first
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.each(res, function(filter) {
+      _.each(res, function (filter) {
         expect(filter.$state && filter.$state.store).toBe(FilterStateStore.GLOBAL_STATE);
       });
     });
 
-    test('should allow overwriting a positive filter by a negated one', async function() {
+    test('should allow overwriting a positive filter by a negated one', async function () {
       // Add negate: false version of the filter
       const filter = _.cloneDeep(readyFilters[0]);
       filter.meta.negate = false;
@@ -452,7 +442,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()[0]).toEqual(negatedFilter);
     });
 
-    test('should allow overwriting a negated filter by a positive one', async function() {
+    test('should allow overwriting a negated filter by a positive one', async function () {
       // Add negate: true version of the same filter
       const negatedFilter = _.cloneDeep(readyFilters[0]);
       negatedFilter.meta.negate = true;
@@ -472,7 +462,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()[0]).toEqual(filter);
     });
 
-    test('should fire the update and fetch events', async function() {
+    test('should fire the update and fetch events', async function () {
       const updateStub = jest.fn();
       const fetchStub = jest.fn();
 
@@ -492,8 +482,8 @@ describe('filter_manager', () => {
     });
   });
 
-  describe('filter reconciliation', function() {
-    test('should de-dupe app filters being added', async function() {
+  describe('filter reconciliation', function () {
+    test('should de-dupe app filters being added', async function () {
       const newFilter = _.cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, false);
       expect(filterManager.getFilters()).toHaveLength(3);
@@ -502,7 +492,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(3);
     });
 
-    test('should de-dupe global filters being added', async function() {
+    test('should de-dupe global filters being added', async function () {
       const newFilter = _.cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, true);
       expect(filterManager.getFilters()).toHaveLength(3);
@@ -529,7 +519,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(1);
     });
 
-    test('should mutate global filters on appStateStub filter changes', async function() {
+    test('should mutate global filters on appStateStub filter changes', async function () {
       const idx = 1;
       filterManager.addFilters(readyFilters, true);
 
@@ -541,14 +531,14 @@ describe('filter_manager', () => {
       filterManager.addFilters(appFilter);
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
-      _.each(res, function(filter, i) {
+      _.each(res, function (filter, i) {
         expect(filter.$state && filter.$state.store).toBe('globalState');
         // make sure global filter actually mutated
         expect(filter.meta.negate).toBe(i === idx);
       });
     });
 
-    test('should merge conflicting app filters', async function() {
+    test('should merge conflicting app filters', async function () {
       filterManager.addFilters(readyFilters, true);
       const appFilter = _.cloneDeep(readyFilters[1]);
       appFilter.meta.negate = true;
@@ -561,15 +551,15 @@ describe('filter_manager', () => {
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
       expect(
-        res.filter(function(filter) {
+        res.filter(function (filter) {
           return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
         }).length
       ).toBe(3);
     });
 
-    test('should enable disabled filters - global state', async function() {
+    test('should enable disabled filters - global state', async function () {
       // test adding to globalStateStub
-      const disabledFilters = _.map(readyFilters, function(filter) {
+      const disabledFilters = _.map(readyFilters, function (filter) {
         const f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
@@ -580,15 +570,15 @@ describe('filter_manager', () => {
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
       expect(
-        res.filter(function(filter) {
+        res.filter(function (filter) {
           return filter.meta.disabled === false;
         }).length
       ).toBe(3);
     });
 
-    test('should enable disabled filters - app state', async function() {
+    test('should enable disabled filters - app state', async function () {
       // test adding to appStateStub
-      const disabledFilters = _.map(readyFilters, function(filter) {
+      const disabledFilters = _.map(readyFilters, function (filter) {
         const f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
@@ -599,7 +589,7 @@ describe('filter_manager', () => {
       const res = filterManager.getFilters();
       expect(res).toHaveLength(3);
       expect(
-        res.filter(function(filter) {
+        res.filter(function (filter) {
           return filter.meta.disabled === false;
         }).length
       ).toBe(3);
@@ -651,21 +641,21 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
     });
 
-    test('should remove the filter from appStateStub', async function() {
+    test('should remove the filter from appStateStub', async function () {
       filterManager.addFilters(readyFilters, false);
       expect(filterManager.getAppFilters()).toHaveLength(3);
       filterManager.removeFilter(readyFilters[0]);
       expect(filterManager.getAppFilters()).toHaveLength(2);
     });
 
-    test('should remove the filter from globalStateStub', async function() {
+    test('should remove the filter from globalStateStub', async function () {
       filterManager.addFilters(readyFilters, true);
       expect(filterManager.getGlobalFilters()).toHaveLength(3);
       filterManager.removeFilter(readyFilters[0]);
       expect(filterManager.getGlobalFilters()).toHaveLength(2);
     });
 
-    test('should fire the update and fetch events', async function() {
+    test('should fire the update and fetch events', async function () {
       const updateStub = jest.fn();
       const fetchStub = jest.fn();
 
@@ -686,7 +676,7 @@ describe('filter_manager', () => {
       expect(updateStub).toBeCalledTimes(1);
     });
 
-    test('should remove matching filters', async function() {
+    test('should remove matching filters', async function () {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
 
@@ -696,7 +686,7 @@ describe('filter_manager', () => {
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
     });
 
-    test('should remove matching filters by comparison', async function() {
+    test('should remove matching filters by comparison', async function () {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
 
@@ -710,7 +700,7 @@ describe('filter_manager', () => {
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
     });
 
-    test('should do nothing with a non-matching filter', async function() {
+    test('should do nothing with a non-matching filter', async function () {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
 
@@ -722,7 +712,7 @@ describe('filter_manager', () => {
       expect(filterManager.getGlobalFilters()).toHaveLength(2);
     });
 
-    test('should remove all the filters from both states', async function() {
+    test('should remove all the filters from both states', async function () {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
       expect(filterManager.getAppFilters()).toHaveLength(1);
@@ -735,7 +725,7 @@ describe('filter_manager', () => {
   });
 
   describe('invert', () => {
-    test('should fire the update and fetch events', async function() {
+    test('should fire the update and fetch events', async function () {
       filterManager.addFilters(readyFilters);
       expect(filterManager.getFilters()).toHaveLength(3);
 

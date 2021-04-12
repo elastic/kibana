@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -39,7 +40,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
                 disableImport ? (
                   <FormattedMessage
                     id="xpack.ml.fileDatavisualizer.bottomBar.missingImportPrivilegesMessage"
-                    defaultMessage="You don't have the privileges required to import data"
+                    defaultMessage="You require the ingest_admin role to enable data importing"
                   />
                 ) : null
               }

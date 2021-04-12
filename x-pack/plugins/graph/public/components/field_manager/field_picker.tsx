@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, ReactNode } from 'react';
@@ -55,6 +56,7 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldPicker__button--disabled': !hasFields,
           })}
           color="hollow"
@@ -88,8 +90,8 @@ export function FieldPicker({
           }}
           searchable
           options={fieldOptions}
-          onChange={newOptions => {
-            newOptions.forEach(option => {
+          onChange={(newOptions) => {
+            newOptions.forEach((option) => {
               if (option.checked === 'on' && !fieldMap[option.label].selected) {
                 selectField(option.label);
               } else if (option.checked !== 'on' && fieldMap[option.label].selected) {
@@ -119,8 +121,8 @@ function toOptions(
       // don't show non-aggregatable fields, except for the case when they are already selected.
       // this is necessary to ensure backwards compatibility with existing workspaces that might
       // contain non-aggregatable fields.
-      .filter(field => isExplorable(field) || field.selected)
-      .map(field => ({
+      .filter((field) => isExplorable(field) || field.selected)
+      .map((field) => ({
         label: field.name,
         prepend: <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />,
         checked: field.selected ? 'on' : undefined,

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -31,7 +20,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
@@ -39,7 +27,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
-import { PRIVACY_STATEMENT_URL } from '../../../../telemetry/common/constants';
 
 import { SampleDataCard } from './sample_data';
 interface Props {
@@ -60,8 +47,8 @@ export class Welcome extends React.Component<Props> {
     }
   };
 
-  private redirecToSampleData() {
-    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
+  private redirecToAddData() {
+    const path = this.services.addBasePath('#/tutorial_directory');
     window.location.href = path;
   }
 
@@ -72,13 +59,13 @@ export class Welcome extends React.Component<Props> {
 
   private onSampleDataConfirm = () => {
     this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
-    this.redirecToSampleData();
+    this.redirecToAddData();
   };
 
   componentDidMount() {
     const { telemetry } = this.props;
     this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (telemetry) {
+    if (telemetry?.telemetryService.userCanChangeSettings) {
       telemetry.telemetryNotifications.setOptedInNoticeSeen();
     }
     document.addEventListener('keydown', this.hideOnEsc);
@@ -90,7 +77,7 @@ export class Welcome extends React.Component<Props> {
 
   private renderTelemetryEnabledOrDisabledText = () => {
     const { telemetry } = this.props;
-    if (!telemetry) {
+    if (!telemetry || !telemetry.telemetryService.userCanChangeSettings) {
       return null;
     }
 
@@ -102,7 +89,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementDisableCollection"
             defaultMessage=" To stop collection, "
           />
-          <EuiLink href="#/management/kibana/settings">
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementDisableCollectionLink"
               defaultMessage="disable usage data here."
@@ -117,7 +104,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementEnableCollection"
             defaultMessage=" To start collection, "
           />
-          <EuiLink href="#/management/kibana/settings">
+          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
             <FormattedMessage
               id="home.dataManagementEnableCollectionLink"
               defaultMessage="enable usage data here."
@@ -141,20 +128,9 @@ export class Welcome extends React.Component<Props> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage
-                    id="home.welcomeTitle"
-                    defaultMessage="Welcome to Elastic Kibana"
-                  />
+                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
                 </h1>
               </EuiTitle>
-              <EuiText size="s" color="subdued" className="homWelcome__subtitle">
-                <p>
-                  <FormattedMessage
-                    id="home.welcomeDescription"
-                    defaultMessage="Your window into the Elastic Stack"
-                  />
-                </p>
-              </EuiText>
               <EuiSpacer size="m" />
             </div>
           </header>
@@ -174,7 +150,11 @@ export class Welcome extends React.Component<Props> {
                         id="home.dataManagementDisclaimerPrivacy"
                         defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
                       />
-                      <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+                      <EuiLink
+                        href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
+                        target="_blank"
+                        rel="noopener"
+                      >
                         <FormattedMessage
                           id="home.dataManagementDisclaimerPrivacyLink"
                           defaultMessage="Privacy Statement."

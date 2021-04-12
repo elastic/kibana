@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useContext, useState, useEffect } from 'react';
@@ -42,20 +43,20 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
 
-  const options: EuiComboBoxOptionOption[] = fields.map(f => {
+  const options: EuiComboBoxOptionOption[] = fields.map((f) => {
     const aggOption: DropDownOption = { label: f.name, options: [] };
     if (typeof f.aggs !== 'undefined') {
       aggOption.options = f.aggs
-        .filter(a => a.dslName !== null) // don't include aggs which have no ES equivalent
+        .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
         .map(
-          a =>
+          (a) =>
             ({
               label: `${a.title}(${f.name})`,
               agg: a,
               field: f,
             } as DropDownLabel)
         )
-        .filter(o => removeLabels.includes(o.label) === false);
+        .filter((o) => removeLabels.includes(o.label) === false);
     }
     return aggOption;
   });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
@@ -22,7 +11,7 @@ import { createCustomFieldFormat } from './converters/custom';
 import {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
-  IFieldFormatType,
+  FieldFormatInstanceType,
   FieldFormatConvert,
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
@@ -83,6 +72,7 @@ export abstract class FieldFormat {
    * @private
    */
   public type: any = this.constructor;
+  public allowsNumericalAggregations?: boolean;
 
   protected readonly _params: any;
   protected getConfig: FieldFormatsGetConfigFn | undefined;
@@ -127,12 +117,12 @@ export abstract class FieldFormat {
    */
   getConverterFor(
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
-  ): FieldFormatConvertFunction | null {
+  ): FieldFormatConvertFunction {
     if (!this.convertObject) {
       this.convertObject = this.setupContentType();
     }
 
-    return this.convertObject[contentType] || null;
+    return this.convertObject[contentType];
   }
 
   /**
@@ -185,7 +175,8 @@ export abstract class FieldFormat {
 
     const params = transform(
       this._params,
-      (uniqParams, val, param) => {
+      (uniqParams: any, val, param: string) => {
+        if (param === 'parsedUrl') return;
         if (param && val !== get(defaultsParams, param)) {
           uniqParams[param] = val;
         }
@@ -195,11 +186,11 @@ export abstract class FieldFormat {
 
     return {
       id,
-      params: size(params) ? params : undefined,
+      params: size(params) ? (params as any) : undefined,
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
+  static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
     return createCustomFieldFormat(convertFn);
   }
 

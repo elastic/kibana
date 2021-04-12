@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SlmPolicyPayload } from '../../../../common/types';
 import { textService } from '../text';
 
@@ -25,21 +27,32 @@ const isSnapshotNameNotLowerCase = (str: string): boolean => {
   return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
 };
 
+export interface ValidatePolicyHelperData {
+  /**
+   * Whether to block on the indices configured for this snapshot.
+   *
+   * By default ES will back up all indices and data streams if this is an empty array or left blank.
+   * However, in the UI, under certain conditions, like when displaying indices to select for backup,
+   * we want to block users from submitting an empty array, but not block the entire form if they
+   * are not configuring this value - like when they are on a previous step.
+   */
+  validateIndicesCount?: boolean;
+
+  /**
+   * A policy might be configured with a repository that no longer exists. We want the form to
+   * block in this case because just having a repository configured is not enough for validity.
+   */
+  repositoryDoesNotExist?: boolean;
+}
+
 export const validatePolicy = (
   policy: SlmPolicyPayload,
-  validationHelperData: {
-    managedRepository?: {
-      name: string;
-      policy: string;
-    };
-    isEditing?: boolean;
-    policyName?: string;
-  }
+  validationHelperData: ValidatePolicyHelperData
 ): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository, isEditing, policyName } = validationHelperData;
+  const { validateIndicesCount, repositoryDoesNotExist } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -48,6 +61,7 @@ export const validatePolicy = (
       snapshotName: [],
       schedule: [],
       repository: [],
+      dataStreams: [],
       indices: [],
       expireAfterValue: [],
       minCount: [],
@@ -87,7 +101,7 @@ export const validatePolicy = (
     );
   }
 
-  if (isStringEmpty(repository)) {
+  if (isStringEmpty(repository) || repositoryDoesNotExist) {
     validation.errors.repository.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage', {
         defaultMessage: 'Repository is required.',
@@ -95,7 +109,12 @@ export const validatePolicy = (
     );
   }
 
-  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
+  if (
+    validateIndicesCount &&
+    config &&
+    typeof config.indices === 'string' &&
+    config.indices.trim().length === 0
+  ) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
         defaultMessage: 'At least one index pattern is required.',
@@ -103,10 +122,15 @@ export const validatePolicy = (
     );
   }
 
-  if (config && Array.isArray(config.indices) && config.indices.length === 0) {
+  if (
+    validateIndicesCount &&
+    config &&
+    Array.isArray(config.indices) &&
+    config.indices.length === 0
+  ) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
-        defaultMessage: 'You must select at least one index.',
+        defaultMessage: 'You must select at least one data stream or index.',
       })
     );
   }
@@ -120,22 +144,6 @@ export const validatePolicy = (
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Minimum count cannot be greater than maximum count.',
-      })
-    );
-  }
-
-  if (
-    managedRepository &&
-    managedRepository.name === repository &&
-    managedRepository.policy &&
-    !(isEditing && managedRepository.policy === policyName)
-  ) {
-    validation.errors.repository.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
-        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
-        values: {
-          policyName: managedRepository.policy,
-        },
       })
     );
   }

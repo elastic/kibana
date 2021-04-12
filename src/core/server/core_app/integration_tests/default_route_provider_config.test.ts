@@ -1,33 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
-const { startES } = kbnTestServer.createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
-let esServer: kbnTestServer.TestElasticsearchUtils;
-
 describe('default route provider', () => {
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
+    const { startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
     esServer = await startES();
     root = kbnTestServer.createRootWithCorePlugins({
       server: {
@@ -44,16 +33,16 @@ describe('default route provider', () => {
     await root.shutdown();
   });
 
-  it('redirects to the configured default route respecting basePath', async function() {
+  it('redirects to the configured default route respecting basePath', async function () {
     const { status, header } = await kbnTestServer.request.get(root, '/');
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
-  it('ignores invalid values', async function() {
+  it('ignores invalid values', async function () {
     const invalidRoutes = [
       'http://not-your-kibana.com',
       '///example.com',
@@ -71,11 +60,11 @@ describe('default route provider', () => {
     const { status, header } = await kbnTestServer.request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
-  it('consumes valid values', async function() {
+  it('consumes valid values', async function () {
     await kbnTestServer.request
       .post(root, '/api/kibana/settings/defaultRoute')
       .send({ value: '/valid' })

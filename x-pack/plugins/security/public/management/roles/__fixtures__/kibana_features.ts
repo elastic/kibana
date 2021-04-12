@@ -1,41 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Feature, FeatureConfig } from '../../../../../features/public';
+import type { KibanaFeatureConfig } from '../../../../../features/public';
+import { KibanaFeature } from '../../../../../features/public';
 
 export const createFeature = (
-  config: Pick<FeatureConfig, 'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'> & {
+  config: Pick<
+    KibanaFeatureConfig,
+    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+  > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
+    privileges?: KibanaFeatureConfig['privileges'];
+    category?: KibanaFeatureConfig['category'];
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, ...rest } = config;
-  return new Feature({
-    icon: 'discoverApp',
-    navLinkId: 'kibana:discover',
+  const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
+  return new KibanaFeature({
     app: [],
+    category: category ?? { id: 'foo', label: 'foo' },
     catalogue: [],
-    privileges: {
-      all: {
-        excludeFromBasePrivileges: excludeFromBaseAll,
-        savedObject: {
-          all: ['all-type'],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
-      },
-      read: {
-        excludeFromBasePrivileges: excludeFromBaseRead,
-        savedObject: {
-          all: [],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', `read-${config.id}`],
-      },
-    },
+    privileges:
+      privileges === null
+        ? null
+        : {
+            all: {
+              excludeFromBasePrivileges: excludeFromBaseAll,
+              savedObject: {
+                all: ['all-type'],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
+            },
+            read: {
+              excludeFromBasePrivileges: excludeFromBaseRead,
+              savedObject: {
+                all: [],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', `read-${config.id}`],
+            },
+          },
     ...rest,
   });
 };

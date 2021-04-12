@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EMPTY, Subscription } from 'rxjs';
@@ -27,28 +16,60 @@ import { BaseState } from '../../common/state_containers';
 import { applyDiff } from '../state_management/utils/diff_object';
 
 /**
+ * @public
+ */
+export type StopSyncStateFnType = () => void;
+/**
+ * @public
+ */
+export type StartSyncStateFnType = () => void;
+
+/**
+ * @public
+ */
+export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> {
+  /**
+   * stop state syncing
+   */
+  stop: StopSyncStateFnType;
+  /**
+   * start state syncing
+   */
+  start: StartSyncStateFnType;
+}
+
+/**
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
  *
- * Examples:
+ * Go {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
  *
- * 1. the simplest use case
+ * @example
+ *
+ * the simplest use case
+ * ```ts
  * const stateStorage = createKbnUrlStateStorage();
  * syncState({
  *   storageKey: '_s',
  *   stateContainer,
  *   stateStorage
  * });
+ * ```
  *
- * 2. conditionally configuring sync strategy
+ * @example
+ * conditionally configuring sync strategy
+ * ```ts
  * const stateStorage = createKbnUrlStateStorage({useHash: config.get('state:stateContainerInSessionStorage')})
  * syncState({
  *   storageKey: '_s',
  *   stateContainer,
  *   stateStorage
  * });
+ * ```
  *
- * 3. implementing custom sync strategy
+ * @example
+ * implementing custom sync strategy
+ * ```ts
  * const localStorageStateStorage = {
  *   set: (storageKey, state) => localStorage.setItem(storageKey, JSON.stringify(state)),
  *   get: (storageKey) => localStorage.getItem(storageKey) ? JSON.parse(localStorage.getItem(storageKey)) : null
@@ -58,12 +79,15 @@ import { applyDiff } from '../state_management/utils/diff_object';
  *   stateContainer,
  *   stateStorage: localStorageStateStorage
  * });
+ * ```
  *
- * 4. Transform state before serialising
+ * @example
+ * transforming state before serialising
  *  Useful for:
  *  * Migration / backward compatibility
  *  * Syncing part of state
  *  * Providing default values
+ * ```ts
  * const stateToStorage = (s) => ({ tab: s.tab });
  * syncState({
  *   storageKey: '_s',
@@ -74,20 +98,12 @@ import { applyDiff } from '../state_management/utils/diff_object';
  *   },
  *   stateStorage
  * });
+ * ```
  *
- * Caveats:
- *
- * 1. It is responsibility of consumer to make sure that initial app state and storage are in sync before starting syncing
- *    No initial sync happens when syncState() is called
+ * @param - syncing config {@link IStateSyncConfig}
+ * @returns - {@link ISyncStateRef}
+ * @public
  */
-export type StopSyncStateFnType = () => void;
-export type StartSyncStateFnType = () => void;
-export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> {
-  // stop syncing state with storage
-  stop: StopSyncStateFnType;
-  // start syncing state with storage
-  start: StartSyncStateFnType;
-}
 export function syncState<
   State extends BaseState,
   StateStorage extends IStateStorage = IStateStorage
@@ -146,7 +162,7 @@ export function syncState<
         stateStorage.cancel();
       }
 
-      subscriptions.forEach(s => s.unsubscribe());
+      subscriptions.forEach((s) => s.unsubscribe());
       subscriptions.splice(0, subscriptions.length);
     },
     start: () => {
@@ -159,7 +175,9 @@ export function syncState<
 }
 
 /**
- * multiple different sync configs
+ * @example
+ * sync multiple different sync configs
+ * ```ts
  * syncStates([
  *   {
  *     storageKey: '_s1',
@@ -172,16 +190,17 @@ export function syncState<
  *     stateContainer: stateContainer2,
  *   },
  * ]);
- * @param stateSyncConfigs - Array of IStateSyncConfig to sync
+ * ```
+ * @param stateSyncConfigs - Array of {@link IStateSyncConfig} to sync
  */
 export function syncStates(stateSyncConfigs: Array<IStateSyncConfig<any>>): ISyncStateRef {
-  const syncRefs = stateSyncConfigs.map(config => syncState(config));
+  const syncRefs = stateSyncConfigs.map((config) => syncState(config));
   return {
     stop: () => {
-      syncRefs.forEach(s => s.stop());
+      syncRefs.forEach((s) => s.stop());
     },
     start: () => {
-      syncRefs.forEach(s => s.start());
+      syncRefs.forEach((s) => s.start());
     },
   };
 }

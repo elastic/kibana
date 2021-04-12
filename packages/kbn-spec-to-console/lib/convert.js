@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const convertParams = require('./convert/params');
@@ -22,7 +11,7 @@ const convertMethods = require('./convert/methods');
 const convertPaths = require('./convert/paths');
 const convertParts = require('./convert/parts');
 
-module.exports = spec => {
+module.exports = (spec) => {
   const result = {};
   /**
    * TODO:
@@ -34,16 +23,19 @@ module.exports = spec => {
    * from being used in autocompletion. It would be really nice if we could use this information
    * instead of just not including it.
    */
-  Object.keys(spec).forEach(api => {
+  Object.keys(spec).forEach((api) => {
     const source = spec[api];
-
-    if (source.url.paths.every(path => Boolean(path.deprecated))) {
-      return;
-    }
 
     if (!source.url) {
       return result;
     }
+
+    if (source.url.path) {
+      if (source.url.paths.every((path) => Boolean(path.deprecated))) {
+        return;
+      }
+    }
+
     const convertedSpec = (result[api] = {});
     if (source.params) {
       const urlParams = convertParams(source.params);
@@ -58,10 +50,10 @@ module.exports = spec => {
 
     if (source.url.paths) {
       // We filter out all deprecated url patterns here.
-      const paths = source.url.paths.filter(path => !path.deprecated);
+      const paths = source.url.paths.filter((path) => !path.deprecated);
       patterns = convertPaths(paths);
-      paths.forEach(pathsObject => {
-        pathsObject.methods.forEach(method => methodSet.add(method));
+      paths.forEach((pathsObject) => {
+        pathsObject.methods.forEach((method) => methodSet.add(method));
         if (pathsObject.parts) {
           for (const partName of Object.keys(pathsObject.parts)) {
             urlComponents[partName] = pathsObject.parts[partName];
@@ -76,7 +68,7 @@ module.exports = spec => {
     if (Object.keys(urlComponents).length) {
       const components = convertParts(urlComponents);
       const hasComponents =
-        Object.keys(components).filter(c => {
+        Object.keys(components).filter((c) => {
           return Boolean(components[c]);
         }).length > 0;
       if (hasComponents) {

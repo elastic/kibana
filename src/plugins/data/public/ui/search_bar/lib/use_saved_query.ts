@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useState, useEffect } from 'react';
@@ -27,9 +16,7 @@ import { clearStateFromSavedQuery } from './clear_saved_query';
 
 interface UseSavedQueriesProps {
   queryService: DataPublicPluginStart['query'];
-  setQuery: Function;
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
   savedQueryId?: string;
 }
 
@@ -41,7 +28,6 @@ interface UseSavedQueriesReturn {
 
 export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesReturn => {
   // Handle saved queries
-  const defaultLanguage = props.uiSettings.get('search:queryLanguage');
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>();
 
   // Effect is used to convert a saved query id into an object
@@ -53,12 +39,12 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
         // Make sure we set the saved query to the most recent one
         if (newSavedQuery && newSavedQuery.id === savedQueryId) {
           setSavedQuery(newSavedQuery);
-          populateStateFromSavedQuery(props.queryService, props.setQuery, newSavedQuery);
+          populateStateFromSavedQuery(props.queryService, newSavedQuery);
         }
       } catch (error) {
         // Clear saved query
         setSavedQuery(undefined);
-        clearStateFromSavedQuery(props.queryService, props.setQuery, defaultLanguage);
+        clearStateFromSavedQuery(props.queryService);
         // notify of saving error
         props.notifications.toasts.addWarning({
           title: i18n.translate('data.search.unableToGetSavedQueryToastTitle', {
@@ -73,23 +59,21 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
     if (props.savedQueryId) fetchSavedQuery(props.savedQueryId);
     else setSavedQuery(undefined);
   }, [
-    defaultLanguage,
     props.notifications.toasts,
     props.queryService,
     props.queryService.savedQueries,
     props.savedQueryId,
-    props.setQuery,
   ]);
 
   return {
     savedQuery,
     setSavedQuery: (q: SavedQuery) => {
       setSavedQuery(q);
-      populateStateFromSavedQuery(props.queryService, props.setQuery, q);
+      populateStateFromSavedQuery(props.queryService, q);
     },
     clearSavedQuery: () => {
       setSavedQuery(undefined);
-      clearStateFromSavedQuery(props.queryService, props.setQuery, defaultLanguage);
+      clearStateFromSavedQuery(props.queryService);
     },
   };
 };

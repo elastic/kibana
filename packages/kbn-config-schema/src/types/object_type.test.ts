@@ -1,23 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { expectType } from 'tsd';
 import { schema } from '..';
+import { TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -349,4 +340,152 @@ test('unknowns = `ignore` affects only own keys', () => {
       },
     })
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+});
+
+test('handles optional properties', () => {
+  const type = schema.object({
+    required: schema.string(),
+    optional: schema.maybe(schema.string()),
+  });
+
+  type SchemaType = TypeOf<typeof type>;
+
+  expectType<SchemaType>({
+    required: 'foo',
+  });
+  expectType<SchemaType>({
+    required: 'hello',
+    optional: undefined,
+  });
+  expectType<SchemaType>({
+    required: 'hello',
+    optional: 'bar',
+  });
+});
+
+describe('#extends', () => {
+  it('allows to extend an existing schema by adding new properties', () => {
+    const origin = schema.object({
+      initial: schema.string(),
+    });
+
+    const extended = origin.extends({
+      added: schema.number(),
+    });
+
+    expect(() => {
+      extended.validate({ initial: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[added]: expected value of type [number] but got [undefined]"`
+    );
+
+    expect(() => {
+      extended.validate({ initial: 'foo', added: 42 });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      added: 12,
+      initial: 'foo',
+    });
+  });
+
+  it('allows to extend an existing schema by removing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    });
+
+    const extended = origin.extends({ number: undefined });
+
+    expect(() => {
+      extended.validate({ string: 'foo', number: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+
+    expect(() => {
+      extended.validate({ string: 'foo' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      string: 'foo',
+    });
+  });
+
+  it('allows to extend an existing schema by overriding an existing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      mutated: schema.number(),
+    });
+
+    const extended = origin.extends({
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [number]"`
+    );
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      string: 'foo',
+      mutated: 'bar',
+    });
+  });
+
+  it('properly infer the type from optional properties', () => {
+    const origin = schema.object({
+      original: schema.maybe(schema.string()),
+      mutated: schema.maybe(schema.number()),
+      removed: schema.maybe(schema.string()),
+    });
+
+    const extended = origin.extends({
+      removed: undefined,
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    expectType<TypeOf<typeof extended>>({
+      original: 'foo',
+      mutated: 'bar',
+    });
+    expectType<TypeOf<typeof extended>>({
+      mutated: 'bar',
+    });
+  });
+
+  it(`allows to override the original schema's options`, () => {
+    const origin = schema.object(
+      {
+        initial: schema.string(),
+      },
+      { defaultValue: { initial: 'foo' } }
+    );
+
+    const extended = origin.extends(
+      {
+        added: schema.number(),
+      },
+      { defaultValue: { initial: 'bar', added: 42 } }
+    );
+
+    expect(extended.validate(undefined)).toEqual({ initial: 'bar', added: 42 });
+  });
 });

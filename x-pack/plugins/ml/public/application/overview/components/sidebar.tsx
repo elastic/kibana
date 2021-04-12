@@ -1,36 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlKibana } from '../../contexts/kibana';
-
-const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
-const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
-}
-
-function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
-  return createAnomalyDetectionJobDisabled === true ? (
-    <FormattedMessage
-      id="xpack.ml.overview.gettingStartedSectionCreateJob"
-      defaultMessage="creating a new job"
-    />
-  ) : (
-    <EuiLink href={createJobLink} target="blank">
-      <FormattedMessage
-        id="xpack.ml.overview.gettingStartedSectionCreateJob"
-        defaultMessage="creating a new job"
-      />
-    </EuiLink>
-  );
 }
 
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
@@ -41,9 +23,8 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
     },
   } = useMlKibana();
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const docsLink = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-ml.html`;
-  const transformsLink = `${basePath.get()}/app/kibana#/management/elasticsearch/transform`;
+  const docsLink = docLinks.links.ml.guide;
+  const transformsLink = `${basePath.get()}/app/management/data/transform`;
 
   return (
     <EuiFlexItem grow={1}>
@@ -60,7 +41,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. For more information about machine learning in the Elastic stack please see {whatIsMachineLearning}. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or creating a new job. We recommend using {transforms} to create feature indices for analytics jobs."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
@@ -70,20 +51,11 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
                   />
                 </EuiLink>
               ),
-              createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
               transforms: (
                 <EuiLink href={transformsLink} target="blank">
                   <FormattedMessage
                     id="xpack.ml.overview.gettingStartedSectionTransforms"
                     defaultMessage="Elasticsearch's transforms"
-                  />
-                </EuiLink>
-              ),
-              whatIsMachineLearning: (
-                <EuiLink href={whatIsMachineLearningLink} target="blank">
-                  <FormattedMessage
-                    id="xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning"
-                    defaultMessage="here"
                   />
                 </EuiLink>
               ),
@@ -96,7 +68,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.feedbackSectionText"
-            defaultMessage="If you have input or suggestions regarding your experience with Machine Learning please feel free to submit {feedbackLink}."
+            defaultMessage="If you have input or suggestions regarding your experience, please submit {feedbackLink}."
             values={{
               feedbackLink: (
                 <EuiLink href={feedbackLink} target="blank">

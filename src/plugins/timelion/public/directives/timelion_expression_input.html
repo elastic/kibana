@@ -1,0 +1,41 @@
+<div
+  class="timExpressionInput__container"
+  role="combobox"
+  aria-expanded="{{suggestions.isVisible}}"
+  aria-owns="timelionSuggestionList"
+  aria-haspopup="true"
+>
+  <!-- The `role=textbox` is required by VoiceOver to properly detect the autocompletion.
+       For some reasons it doesn't work without it (even though the default role of
+       the element is textbox anyway). -->
+  <textarea
+    data-expression-input
+    role="textbox"
+    rows="{{ rows }}"
+    class="timExpressionInput timFormTextarea fullWidth"
+    placeholder="{{ ::'timelion.expressionInputPlaceholder' | i18n: { defaultMessage: 'Try a query with {esQuery}', values: { esQuery: '.es(*)' } } }}"
+    ng-model="sheet"
+    ng-focus="onFocusInput()"
+    ng-keydown="onKeyDownInput($event)"
+    ng-keyup="onKeyUpInput($event)"
+    ng-blur="onBlurInput()"
+    ng-mousedown="onMouseDownInput()"
+    ng-mouseup="onMouseUpInput()"
+    ng-click="onClickExpression()"
+    aria-label="{{ ::'timelion.expressionInputAriaLabel' | i18n: { defaultMessage: 'Timelion expression' } }}"
+    aria-multiline="false"
+    aria-autocomplete="list"
+    aria-controls="timelionSuggestionList"
+    aria-activedescendant="{{ getActiveSuggestionId() }}"
+    data-test-subj="timelionExpressionTextArea"
+  ></textarea>
+
+  <timelion-expression-suggestions
+    ng-show="suggestions.isVisible"
+    suggestions="suggestions.list"
+    suggestions-type="suggestions.type"
+    selected-index="suggestions.index"
+    on-click-suggestion="onClickSuggestion(suggestionIndex)"
+    should-popover="shouldPopoverSuggestions"
+  ></timelion-expression-suggestions>
+</div>

@@ -2,8 +2,8 @@
 [[configuring-reporting]]
 == Reporting configuration
 
-You can configure settings in `kibana.yml` to control how {reporting}
-communicates with the {kib} server, manages background jobs, and captures
+You can configure settings in `kibana.yml` to control how the {report-features}
+communicate with the {kib} server, manages background jobs, and captures
 screenshots. See <<reporting-settings-kb, Reporting Settings>> for the complete
 list of settings.
 
@@ -11,9 +11,9 @@ list of settings.
 [[encryption-keys]]
 === Encryption keys for multiple {kib} instances
 
-By default, a new encryption key is generated for {reporting} each time
-you start {kib}. This means if a static encryption key is not persisted in the
-{kib} configuration, any pending reports will fail when you restart {kib}.
+By default, a new encryption key is generated for the {report-features} each
+time you start {kib}. This means if a static encryption key is not persisted in
+the {kib} configuration, any pending reports will fail when you restart {kib}.
 
 If you are load balancing across multiple {kib} instances, they need to have
 the same reporting encryption key. Otherwise, report generation will fail if a
@@ -23,7 +23,7 @@ reporting job metadata.
 
 To set a static encryption key for reporting, set the
 `xpack.reporting.encryptionKey` property in the `kibana.yml`
-configuration file. You can use any text string as the encryption key.
+configuration file. You can use any alphanumeric, at least 32 characters long text string as the encryption key.
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -75,3 +75,4 @@ to point to a proxy host requires that the Kibana server has network access to
 the proxy.
 
 include::{kib-repo-dir}/user/security/reporting.asciidoc[]
+include::network-policy.asciidoc[]

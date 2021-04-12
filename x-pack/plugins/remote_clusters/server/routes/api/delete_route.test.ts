@@ -1,19 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
+
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
+  coreMock,
 } from '../../../../../../src/core/server/mocks';
 
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 interface TestOptions {
   licenseCheckResult?: LicenseStatus;
   apiResponses?: Array<() => Promise<unknown>>;
@@ -29,19 +45,22 @@ describe('DELETE remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, params }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
         getLicenseStatus: () => licenseCheckResult,
         elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
         elasticsearch: elasticsearchMock,
+        config: {
+          isCloudEnabled: false,
+        },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {
@@ -58,14 +77,8 @@ describe('DELETE remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
-
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(asserts.statusCode);
@@ -84,6 +97,20 @@ describe('DELETE remote clusters', () => {
   describe('success', () => {
     deleteRemoteClustersTest('deletes remote cluster', {
       apiResponses: [
+        async () => ({
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  seeds: ['127.0.0.1:9300'],
+                  skip_unavailable: false,
+                  mode: 'sniff',
+                },
+              },
+            },
+          },
+          transient: {},
+        }),
         async () => ({
           test: {
             connected: true,
@@ -143,7 +170,17 @@ describe('DELETE remote clusters', () => {
     deleteRemoteClustersTest(
       'returns errors array with 404 error if remote cluster does not exist',
       {
-        apiResponses: [async () => ({})],
+        apiResponses: [
+          async () => ({
+            persistent: {
+              cluster: {
+                remote: {},
+              },
+            },
+            transient: {},
+          }),
+          async () => ({}),
+        ],
         params: {
           nameOrNames: 'test',
         },
@@ -178,6 +215,20 @@ describe('DELETE remote clusters', () => {
       'returns errors array with 400 error if ES still returns cluster information',
       {
         apiResponses: [
+          async () => ({
+            persistent: {
+              cluster: {
+                remote: {
+                  test: {
+                    seeds: ['127.0.0.1:9300'],
+                    skip_unavailable: false,
+                    mode: 'sniff',
+                  },
+                },
+              },
+            },
+            transient: {},
+          }),
           async () => ({
             test: {
               connected: true,

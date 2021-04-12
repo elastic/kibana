@@ -1,29 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { fromRoot, pkg } from '../../core/server/utils';
-import install from './install';
-import Logger from '../lib/logger';
-import { getConfigPath } from '../../core/server/path';
+import { getConfigPath, kibanaPackageJson as pkg } from '@kbn/utils';
+import { install } from './install';
+import { Logger } from '../lib/logger';
 import { parse, parseMilliseconds } from './settings';
-import logWarnings from '../lib/log_warnings';
-import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
+import { logWarnings } from '../lib/log_warnings';
 
 function processCommand(command, options) {
   let settings;
@@ -37,12 +24,11 @@ function processCommand(command, options) {
 
   const logger = new Logger(settings);
 
-  warnIfUsingPluginDirOption(settings, fromRoot('plugins'), logger);
   logWarnings(settings, logger);
   install(settings, logger);
 }
 
-export default function pluginInstall(program) {
+export function installCommand(program) {
   program
     .command('install <plugin/url>')
     .option('-q, --quiet', 'disable all process messaging except errors')
@@ -53,15 +39,9 @@ export default function pluginInstall(program) {
       'length of time before failing; 0 for never fail',
       parseMilliseconds
     )
-    .option(
-      '-d, --plugin-dir <path>',
-      'path to the directory where plugins are stored (DEPRECATED, known to not work for all plugins)',
-      fromRoot('plugins')
-    )
     .description(
       'install a plugin',
       `Common examples:
-  install x-pack
   install file:///Path/to/my/x-pack.zip
   install https://path.to/my/x-pack.zip`
     )

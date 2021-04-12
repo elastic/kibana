@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../lib/is_es_error';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { isEsError } from '../../shared_imports';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -16,7 +17,7 @@ const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),
 });
 
-function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
+function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) {
   const params = {
     index: indexes,
     fields: ['*'],
@@ -56,7 +57,7 @@ export function registerListFieldsRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

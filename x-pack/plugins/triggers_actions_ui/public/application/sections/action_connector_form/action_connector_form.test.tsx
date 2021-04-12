@@ -1,77 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, ActionConnector } from '../../../types';
+import {
+  UserConfiguredActionConnector,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
-import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
+jest.mock('../../../common/lib/kibana');
 
 describe('action_connector_form', () => {
-  let deps: ActionsConnectorsContextValue;
-  beforeAll(async () => {
-    const mocks = coreMock.createSetup();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      actionTypeRegistry: actionTypeRegistry as any,
-    };
-  });
-
   it('renders action_connector_form', () => {
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
-      actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const initialConnector = {
+    const initialConnector: UserConfiguredActionConnector<{}, {}> = {
+      id: '123',
+      name: '',
       actionTypeId: actionType.id,
       config: {},
       secrets: {},
-    } as ActionConnector;
-    let wrapper;
-    if (deps) {
-      wrapper = mountWithIntl(
-        <ActionConnectorForm
-          actionTypeName={'my-action-type-name'}
-          connector={initialConnector}
-          dispatch={() => {}}
-          errors={{ name: [] }}
-          actionTypeRegistry={deps.actionTypeRegistry}
-          http={deps.http}
-        />
-      );
-    }
+      isPreconfigured: false,
+    };
+    const wrapper = mountWithIntl(
+      <ActionConnectorForm
+        actionTypeName={'my-action-type-name'}
+        connector={initialConnector}
+        dispatch={() => {}}
+        errors={{ name: [] }}
+        actionTypeRegistry={actionTypeRegistry}
+      />
+    );
     const connectorNameField = wrapper?.find('[data-test-subj="nameInput"]');
     expect(connectorNameField?.exists()).toBeTruthy();
     expect(connectorNameField?.first().prop('value')).toBe('');

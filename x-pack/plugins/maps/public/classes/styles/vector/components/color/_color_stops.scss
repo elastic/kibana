@@ -1,0 +1,7 @@
+.mapColorStop {
+  position: relative;
+
+  & + & {
+    margin-top: $euiSizeS;
+  }
+}

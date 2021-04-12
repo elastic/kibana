@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -10,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
-import { serializeCluster, deserializeCluster, Cluster, ClusterEs } from '../../../common/lib';
+import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),
@@ -24,6 +25,7 @@ const bodyValidation = schema.object({
   proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),
   serverName: schema.nullable(schema.string()),
+  hasDeprecatedProxySetting: schema.maybe(schema.boolean()),
 });
 
 const paramsValidation = schema.object({
@@ -41,7 +43,7 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
       const { name } = request.params;
 
@@ -68,7 +70,10 @@ export const register = (deps: RouteDependencies): void => {
       });
 
       const acknowledged = get(updateClusterResponse, 'acknowledged');
-      const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`) as ClusterEs;
+      const cluster = get(
+        updateClusterResponse,
+        `persistent.cluster.remote.${name}`
+      ) as ClusterInfoEs;
 
       if (acknowledged && cluster) {
         const body = {
@@ -95,7 +100,7 @@ export const register = (deps: RouteDependencies): void => {
       if (isEsError(error)) {
         return response.customError({ statusCode: error.statusCode, body: error });
       }
-      return response.internalError({ body: error });
+      throw error;
     }
   };
 

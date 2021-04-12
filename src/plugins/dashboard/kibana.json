@@ -5,12 +5,24 @@
     "data",
     "embeddable",
     "inspector",
+    "kibanaLegacy",
+    "navigation",
+    "savedObjects",
+    "share",
     "uiActions",
-    "savedObjects"
+    "urlForwarding",
+    "presentationUtil"
   ],
   "optionalPlugins": [
-    "share"
-  ],
-  "server": false,
-  "ui": true
+    "home",
+    "spacesOss",
+    "savedObjectsTaggingOss",
+    "usageCollection"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

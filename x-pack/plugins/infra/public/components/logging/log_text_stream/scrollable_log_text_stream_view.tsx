@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,11 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
@@ -26,9 +26,11 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
+import { LogEntry } from '../../../../common/log_entry';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -37,7 +39,7 @@ interface ScrollableLogTextStreamViewProps {
   hasMoreBeforeStart: boolean;
   hasMoreAfterEnd: boolean;
   isStreaming: boolean;
-  lastLoadedTime: Date | null;
+  lastLoadedTime?: Date;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (params: {
@@ -48,16 +50,16 @@ interface ScrollableLogTextStreamViewProps {
     endKey: TimeKey | null;
     fromScroll: boolean;
   }) => any;
-  loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem: (id: string) => void;
-  setFlyoutVisibility: (visible: boolean) => void;
+  onOpenLogEntryFlyout?: (logEntryId?: string) => void;
+  setContextEntry?: (entry: LogEntry) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
   startDateExpression: string;
   endDateExpression: string;
   updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
+  hideScrollbar?: boolean;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -140,9 +142,16 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       updateDateRange,
       startLiveStreaming,
+      onOpenLogEntryFlyout,
+      setContextEntry,
     } = this.props;
+    const hideScrollbar = this.props.hideScrollbar ?? true;
+
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
+    const hasFlyoutAction = !!onOpenLogEntryFlyout;
+    const hasContextAction = !!setContextEntry;
+
     return (
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && (!isStreaming || !hasItems) ? (
@@ -187,12 +196,12 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         width={width}
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
                         target={targetId}
-                        hideScrollbar={true}
+                        hideScrollbar={hideScrollbar}
                         data-test-subj={'logStream'}
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
                       >
-                        {registerChild =>
+                        {(registerChild) =>
                           items.length > 0 ? (
                             <>
                               <LogTextStreamLoadingItemView
@@ -203,7 +212,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 isStreaming={false}
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
-                                onExtendRange={newDateExpression =>
+                                onExtendRange={(newDateExpression) =>
                                   updateDateRange({ startDateExpression: newDateExpression })
                                 }
                               />
@@ -223,11 +232,18 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                       register={registerChild}
                                       registrationKey={getStreamItemId(item)}
                                     >
-                                      {itemMeasureRef => (
+                                      {(itemMeasureRef) => (
                                         <LogEntryRow
                                           columnConfigurations={columnConfigurations}
                                           columnWidths={columnWidths}
-                                          openFlyoutWithItem={this.handleOpenFlyout}
+                                          openFlyoutWithItem={
+                                            hasFlyoutAction ? this.handleOpenFlyout : undefined
+                                          }
+                                          openViewLogInContext={
+                                            hasContextAction
+                                              ? this.handleOpenViewLogInContext
+                                              : undefined
+                                          }
                                           boundingBoxRef={itemMeasureRef}
                                           logEntry={item.logEntry}
                                           highlights={item.highlights}
@@ -260,7 +276,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 }
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
-                                onExtendRange={newDateExpression =>
+                                onExtendRange={(newDateExpression) =>
                                   updateDateRange({ endDateExpression: newDateExpression })
                                 }
                                 onStreamStart={() => startLiveStreaming()}
@@ -287,8 +303,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   private handleOpenFlyout = (id: string) => {
-    this.props.setFlyoutItem(id);
-    this.props.setFlyoutVisibility(true);
+    this.props.onOpenLogEntryFlyout?.(id);
+  };
+
+  private handleOpenViewLogInContext = (entry: LogEntry) => {
+    const { setContextEntry } = this.props;
+    if (setContextEntry) {
+      setContextEntry(entry);
+    }
   };
 
   private handleReload = () => {
@@ -299,8 +321,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     }
   };
 
-  // this is actually a method but not recognized as such
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private handleVisibleChildrenChange = callWithoutRepeats(
     ({
       topChild,
@@ -352,7 +372,7 @@ const WithColumnWidths: React.FunctionComponent<{
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
   }) => React.ReactElement<any> | null;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {
   const childParams = useColumnWidths({ columnConfigurations, scale });

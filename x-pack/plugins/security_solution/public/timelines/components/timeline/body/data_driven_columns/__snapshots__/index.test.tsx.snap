@@ -1,0 +1,652 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Columns it renders the expected columns 1`] = `
+<styled.div
+  data-test-subj="data-driven-columns"
+>
+  <styled.div
+    $ariaColumnIndex={2}
+    key="message"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 2
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "message",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={3}
+    key="event.category"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 3
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "event.category",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={4}
+    key="event.action"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 4
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "event.action",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={5}
+    key="host.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 5
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "host.name",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={6}
+    key="source.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 6
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "source.ip",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={7}
+    key="destination.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 7
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "destination.ip",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    $ariaColumnIndex={8}
+    key="user.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
+    width={180}
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 8
+        </p>
+      </EuiScreenReaderOnly>
+      <Memo(StatefulCellComponent)
+        ariaRowindex={2}
+        data={
+          Array [
+            Object {
+              "field": "@timestamp",
+              "value": Array [
+                "2018-11-05T19:03:25.937Z",
+              ],
+            },
+            Object {
+              "field": "event.severity",
+              "value": Array [
+                "3",
+              ],
+            },
+            Object {
+              "field": "event.category",
+              "value": Array [
+                "Access",
+              ],
+            },
+            Object {
+              "field": "event.action",
+              "value": Array [
+                "Action",
+              ],
+            },
+            Object {
+              "field": "host.name",
+              "value": Array [
+                "apache",
+              ],
+            },
+            Object {
+              "field": "source.ip",
+              "value": Array [
+                "192.168.0.1",
+              ],
+            },
+            Object {
+              "field": "destination.ip",
+              "value": Array [
+                "192.168.0.3",
+              ],
+            },
+            Object {
+              "field": "destination.bytes",
+              "value": Array [
+                "123456",
+              ],
+            },
+            Object {
+              "field": "user.name",
+              "value": Array [
+                "john.dee",
+              ],
+            },
+          ]
+        }
+        eventId="1"
+        header={
+          Object {
+            "columnHeaderType": "not-filtered",
+            "id": "user.name",
+            "width": 180,
+          }
+        }
+        linkValues={Array []}
+        renderCellValue={[Function]}
+        timelineId="test"
+      />
+    </styled.div>
+  </styled.div>
+</styled.div>
+`;

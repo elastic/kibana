@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
@@ -46,7 +47,15 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
-    setValidation(jobValidator.duplicateDetectors);
+    if (!jobValidator.duplicateDetectors.valid) {
+      setValidation(jobValidator.duplicateDetectors);
+    }
+    if (!jobValidator.categorizerVaryingPerPartitionField.valid) {
+      setValidation(jobValidator.categorizerVaryingPerPartitionField);
+    }
+    if (!jobValidator.categorizerMissingPerPartition.valid) {
+      setValidation(jobValidator.categorizerMissingPerPartition);
+    }
   }, [jobValidatorUpdated]);
 
   const Buttons: FC<{ index: number }> = ({ index }) => {
@@ -129,7 +138,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      <DuplicateDetectorsWarning validation={validation} />
+      <DetectorsValidationWarning validation={validation} />
     </Fragment>
   );
 };
@@ -159,7 +168,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   );
 };
 
-const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation }) => {
+const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation }) => {
   if (validation.valid === true) {
     return null;
   }

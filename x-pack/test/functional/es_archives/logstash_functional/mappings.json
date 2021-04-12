@@ -19,6 +19,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {
@@ -127,6 +133,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -384,6 +393,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {
@@ -749,6 +764,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {

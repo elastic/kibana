@@ -1,0 +1,147 @@
+.canvasPageManager {
+  .canvasPageManager__pages {
+    position: relative;
+  }
+
+  .canvasPageManager__pages,
+  .canvasPageManager__addPage {
+    height: 144px;
+  }
+
+  .canvasPageManager--trayPop > div {
+    animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  @for $i from 1 through 20 {
+    .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
+      animation-delay: #{$i * .05}s;
+    }
+  }
+
+  .canvasPageManager__pageList {
+    @include euiScrollBar;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+  .canvasPageManager__addPage {
+    width: $euiSizeXXL + $euiSize;
+    background: $euiColorSecondary;
+    color: $euiColorGhost;
+    opacity: 0;
+    animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    animation-fill-mode: forwards;
+  }
+
+  .canvasPageManager__addPageTip {
+    display: block;
+    height: 100%;
+  }
+
+  .canvasPageManager__page {
+    padding: $euiSize $euiSize $euiSize $euiSizeS;
+
+    &:focus,
+    &-isActive {
+      background-color: transparentize(darken($euiColorLightestShade, 30%), .5);
+      outline: none;
+      text-decoration: none;
+    }
+
+    &-isActive:focus {
+      .canvasPageManager__pagePreview {
+        outline-color: $euiColorVis0;
+      }
+    }
+
+    &:hover,
+    &:focus {
+      text-decoration: none;
+
+      .canvasPageManager__pagePreview {
+        @include euiBottomShadowMedium;
+      }
+
+      .canvasPageManager__controls {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+
+    &-isActive {
+      .canvasPageManager__pagePreview {
+        @include euiBottomShadowMedium;
+        outline: $euiBorderThick;
+        outline-color: $euiColorDarkShade;
+      }
+    }
+  }
+
+  .canvasPageManager__pageNumber {
+    color: $euiColorDarkShade;
+  }
+
+  .canvasPageManager__pagePreview {
+    @include euiBottomShadowSmall;
+    position: relative;
+    overflow: hidden;
+    color: $euiTextColor;
+
+    .canvasPositionable {
+      position: absolute;
+    }
+  }
+
+  .canvasPageManager__controls {
+    position: absolute;
+    right: $euiSizeS;
+    top: $euiSizeS;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition-delay: $euiAnimSpeedNormal;
+    background: transparentize($euiColorGhost, .5);
+    border-radius: $euiBorderRadius;
+  }
+}
+
+@keyframes buttonPop {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  1% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trayPop {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  1% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -48,11 +49,11 @@ export class ItemsGridPagination extends Component {
     });
   };
 
-  onPageClick = pageNumber => {
+  onPageClick = (pageNumber) => {
     this.props.setActivePage(pageNumber);
   };
 
-  onChangeItemsPerPage = pageSize => {
+  onChangeItemsPerPage = (pageSize) => {
     this.closePopover();
     this.props.setItemsPerPage(pageSize);
   };
@@ -78,7 +79,7 @@ export class ItemsGridPagination extends Component {
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
-    const items = itemsPerPageOptions.map(pageSize => {
+    const items = itemsPerPageOptions.map((pageSize) => {
       return (
         <EuiContextMenuItem
           key={`${pageSize} items`}

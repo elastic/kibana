@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { AlertsUsage } from './types';
 
 const alertTypeMetric = {
   scripted_metric: {
@@ -32,14 +34,22 @@ const alertTypeMetric = {
   },
 };
 
-export async function getTotalCountAggregations(callCluster: APICaller, kibanaInex: string) {
+export async function getTotalCountAggregations(
+  esClient: ElasticsearchClient,
+  kibanaInex: string
+): Promise<
+  Pick<
+    AlertsUsage,
+    'count_total' | 'count_by_type' | 'throttle_time' | 'schedule_time' | 'connectors_per_alert'
+  >
+> {
   const throttleTimeMetric = {
     scripted_metric: {
       init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
       map_script: `
         if (doc['alert.throttle'].size() > 0) {
           def throttle = doc['alert.throttle'].value;
-          
+
           if (throttle.length() > 1) {
               // get last char
               String timeChar = throttle.substring(throttle.length() - 1);
@@ -49,7 +59,7 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
               if (throttle.chars().allMatch(Character::isDigit)) {
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(throttle);
-                
+
                 if (timeChar.equals("s")) {
                   parsed = parsed;
                 } else if (timeChar.equals("m")) {
@@ -105,7 +115,7 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
       map_script: `
         if (doc['alert.schedule.interval'].size() > 0) {
           def interval = doc['alert.schedule.interval'].value;
-          
+
           if (interval.length() > 1) {
               // get last char
               String timeChar = interval.substring(interval.length() - 1);
@@ -115,7 +125,7 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
               if (interval.chars().allMatch(Character::isDigit)) {
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(interval);
-                
+
                 if (timeChar.equals("s")) {
                   parsed = parsed;
                 } else if (timeChar.equals("m")) {
@@ -212,9 +222,8 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
     },
   };
 
-  const results = await callCluster('search', {
+  const { body: results } = await esClient.search({
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -237,50 +246,66 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
     },
   });
 
-  const totalAlertsCount = Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+  const aggregations = results.aggregations as {
+    byAlertTypeId: { value: { types: Record<string, string> } };
+    throttleTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
+    intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
+    connectorsAgg: {
+      connectors: {
+        value: { min: number; max: number; totalActionsCount: number; totalAlertsCount: number };
+      };
+    };
+  };
+
+  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.types).reduce(
     (total: number, key: string) =>
-      parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
+      parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
     0
   );
 
   return {
     count_total: totalAlertsCount,
-    count_by_type: results.aggregations.byAlertTypeId.value.types,
+    count_by_type: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
+      }),
+      {}
+    ),
     throttle_time: {
-      min: `${results.aggregations.throttleTime.value.min}s`,
+      min: `${aggregations.throttleTime.value.min}s`,
       avg: `${
-        results.aggregations.throttleTime.value.totalCount > 0
-          ? results.aggregations.throttleTime.value.totalSum /
-            results.aggregations.throttleTime.value.totalCount
+        aggregations.throttleTime.value.totalCount > 0
+          ? aggregations.throttleTime.value.totalSum / aggregations.throttleTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.throttleTime.value.max}s`,
+      max: `${aggregations.throttleTime.value.max}s`,
     },
     schedule_time: {
-      min: `${results.aggregations.intervalTime.value.min}s`,
+      min: `${aggregations.intervalTime.value.min}s`,
       avg: `${
-        results.aggregations.intervalTime.value.totalCount > 0
-          ? results.aggregations.intervalTime.value.totalSum /
-            results.aggregations.intervalTime.value.totalCount
+        aggregations.intervalTime.value.totalCount > 0
+          ? aggregations.intervalTime.value.totalSum / aggregations.intervalTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.intervalTime.value.max}s`,
+      max: `${aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
-      min: results.aggregations.connectorsAgg.connectors.value.min,
+      min: aggregations.connectorsAgg.connectors.value.min,
       avg:
         totalAlertsCount > 0
-          ? results.aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
+          ? aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
           : 0,
-      max: results.aggregations.connectorsAgg.connectors.value.max,
+      max: aggregations.connectorsAgg.connectors.value.max,
     },
   };
 }
 
-export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: string) {
-  const searchResult = await callCluster('search', {
+export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string) {
+  const { body: searchResult } = await esClient.search({
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -292,14 +317,34 @@ export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: str
       },
     },
   });
+
+  const aggregations = searchResult.aggregations as {
+    byAlertTypeId: { value: { types: Record<string, string> } };
+  };
+
   return {
-    countTotal: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+    countTotal: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
       (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byAlertTypeId.value.types[key], 0) + total,
+        parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
       0
     ),
-    countByType: searchResult.aggregations.byAlertTypeId.value.types,
+    countByType: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
+      }),
+      {}
+    ),
   };
+}
+
+function replaceFirstAndLastDotSymbols(strToReplace: string) {
+  const hasFirstSymbolDot = strToReplace.startsWith('.');
+  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
+  const hasLastSymbolDot = strToReplace.endsWith('.');
+  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index

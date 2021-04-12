@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import clonedeep from 'lodash.clonedeep';
+import { cloneDeep } from 'lodash';
 import { summarizeWorkpads } from './workpad_collector';
-import { workpads } from '../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
+import { workpads } from '../../__fixtures__/workpads';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {
@@ -49,11 +50,19 @@ describe('usage collector handle es response data', () => {
           'shape',
         ],
       },
+      variables: {
+        total: 7,
+        per_workpad: {
+          avg: 1.1666666666666667,
+          min: 0,
+          max: 3,
+        },
+      },
     });
   });
 
   it('should collect correctly if an expression has null as an argument (possible sub-expression)', () => {
-    const workpad = clonedeep(workpads[0]);
+    const workpad = cloneDeep(workpads[0]);
     workpad.pages[0].elements[0].expression = 'toast butter=null';
 
     const mockWorkpads = [workpad];
@@ -63,11 +72,12 @@ describe('usage collector handle es response data', () => {
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
       functions: { total: 1, in_use: ['toast'], per_element: { avg: 1, min: 1, max: 1 } },
+      variables: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
     });
   });
 
   it('should fail gracefully if workpad has 0 pages (corrupted workpad)', () => {
-    const workpad = clonedeep(workpads[0]);
+    const workpad = cloneDeep(workpads[0]);
     workpad.pages = [];
     const mockWorkpadsCorrupted = [workpad];
     const usage = summarizeWorkpads(mockWorkpadsCorrupted);
@@ -76,6 +86,39 @@ describe('usage collector handle es response data', () => {
       pages: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } },
       elements: undefined,
       functions: undefined,
+      variables: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } }, // Variables still possible even with no pages
+    });
+  });
+
+  it('should handle cases where the version workpad might not have variables', () => {
+    const workpad = cloneDeep(workpads[0]);
+    // @ts-ignore
+    workpad.variables = undefined;
+
+    const mockWorkpadsOld = [workpad];
+    const usage = summarizeWorkpads(mockWorkpadsOld);
+    expect(usage).toEqual({
+      workpads: { total: 1 },
+      pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
+      elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
+      functions: {
+        total: 7,
+        in_use: [
+          'demodata',
+          'ply',
+          'rowCount',
+          'as',
+          'staticColumn',
+          'math',
+          'mapColumn',
+          'sort',
+          'pointseries',
+          'plot',
+          'seriesStyle',
+        ],
+        per_element: { avg: 7, min: 7, max: 7 },
+      },
+      variables: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } }, // Variables still possible even with no pages
     });
   });
 

@@ -54,11 +54,22 @@
   .embPanel__titleInner {
     overflow: hidden;
     display: flex;
+    align-items: center;
     padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleTooltipAnchor {
+    max-width: 100%;
   }
 
   .embPanel__titleText {
     @include euiTextTruncate;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .embPanel__placeholderTitleText {
+    color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
   }
 }
 
@@ -83,7 +94,7 @@
   */
 
 .embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorDarkestShade, 0.9);
+  background-color: transparentize($euiColorDarkestShade, .9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
 
@@ -132,11 +143,31 @@
   }
 }
 
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
 .embPanel__error {
   text-align: center;
   justify-content: center;
   flex-direction: column;
   overflow: auto;
-  text-align: center;
   padding: $euiSizeS;
+}
+
+.embPanel__label {
+  position: absolute;
+  padding-left: $euiSizeS;
+}
+
+.embPanel__content[data-error],
+.embPanel__content[data-loading] {
+  pointer-events: none;
+  filter: grayscale(100%);
+  /* stylelint-disable-next-line color-named */
+  filter: gray;
 }

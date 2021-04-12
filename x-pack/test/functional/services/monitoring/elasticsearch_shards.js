@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
 
-const generateVisibleTextString = text => {
+const generateVisibleTextString = (text) => {
   return text.split('\n').join(' | ');
 };
 
@@ -30,7 +31,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
   const SUBJ_UNASSIGNED_SHARDS = `clusterView-Unassigned > shardIcon`;
   const SUBJ_ASSIGNED_CONTAINER_PREFIX = 'clusterView-Assigned-';
   const SUBJ_SHOW_SYSTEM_INDICES = 'shardShowSystemIndices';
-  const getAssignedShardsSelector = parent => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
+  const getAssignedShardsSelector = (parent) => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
 
   return new (class ElasticsearchShards {
     async getUnassignedIndexAllocation() {

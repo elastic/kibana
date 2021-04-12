@@ -1,7 +1,0 @@
-{
-  "name": "foo_plugin",
-  "version": "0.0.0",
-  "kibana": {
-    "version": "kibana"
-  }
-}

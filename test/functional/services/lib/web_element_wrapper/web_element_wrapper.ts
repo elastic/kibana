@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -28,12 +17,6 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
-
-interface Driver {
-  driver: WebDriver;
-  By: typeof By;
-  until: typeof until;
-}
 
 interface TypeOptions {
   charByChar: boolean;
@@ -51,19 +34,18 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By = this.webDriver.By;
-  private driver: WebDriver = this.webDriver.driver;
+  private By = By;
   private Keys = Key;
-  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
+  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
     locator: By | null,
-    webDriver: Driver,
+    driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
-    browserType: string
+    browserType: Browsers
   ): WebElementWrapper {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -72,7 +54,7 @@ export class WebElementWrapper {
     return new WebElementWrapper(
       webElement,
       locator,
-      webDriver,
+      driver,
       timeout,
       fixedHeaderHeight,
       logger,
@@ -83,11 +65,11 @@ export class WebElementWrapper {
   constructor(
     public _webElement: WebElement,
     private locator: By | null,
-    private webDriver: Driver,
+    private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
-    private browserType: string
+    private browserType: Browsers
   ) {}
 
   private async _findWithCustomTimeout(
@@ -108,7 +90,7 @@ export class WebElementWrapper {
     return WebElementWrapper.create(
       otherWebElement,
       locator,
-      this.webDriver,
+      this.driver,
       this.timeout,
       this.fixedHeaderHeight,
       this.logger,
@@ -117,7 +99,7 @@ export class WebElementWrapper {
   }
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
-    return otherWebElements.map(e => this._wrap(e));
+    return otherWebElements.map((e) => this._wrap(e));
   }
 
   private async retryCall<T>(
@@ -147,7 +129,7 @@ export class WebElementWrapper {
   }
 
   private getActions() {
-    return this.isW3CEnabled ? this.driver.actions() : this.driver.actions({ bridge: true });
+    return this.driver.actions();
   }
 
   /**
@@ -200,9 +182,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click() {
+  public async click(topOffset?: number) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper._webElement.click();
     });
   }
@@ -239,11 +221,8 @@ export class WebElementWrapper {
    * @default { withJS: false }
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
-    if (this.browserType === Browsers.InternetExplorer) {
-      return this.clearValueWithKeyboard();
-    }
     await this.retryCall(async function clearValue(wrapper) {
-      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+      if (wrapper.isChromium || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
         await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
       } else {
@@ -258,16 +237,6 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
-    if (this.browserType === Browsers.InternetExplorer) {
-      const value = await this.getAttribute('value');
-      // For IE testing, the text field gets clicked in the middle so
-      // first go HOME and then DELETE all chars
-      await this.pressKeys(this.Keys.HOME);
-      for (let i = 0; i <= value.length; i++) {
-        await this.pressKeys(this.Keys.DELETE);
-      }
-      return;
-    }
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -275,7 +244,7 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      if (this.browserType === Browsers.Chrome) {
+      if (this.isChromium) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper) {
           await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
@@ -435,22 +404,11 @@ export class WebElementWrapper {
   public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .perform();
     });
   }
 
@@ -465,24 +423,12 @@ export class WebElementWrapper {
   public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .click()
+        .perform();
     });
   }
 
@@ -495,10 +441,7 @@ export class WebElementWrapper {
   public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper
-        .getActions()
-        .doubleClick(wrapper._webElement)
-        .perform();
+      await wrapper.getActions().doubleClick(wrapper._webElement).perform();
     });
   }
 
@@ -750,11 +693,11 @@ export class WebElementWrapper {
    * @nonstandard
    * @return {Promise<void>}
    */
-  public async scrollIntoViewIfNecessary(): Promise<void> {
+  public async scrollIntoViewIfNecessary(topOffset?: number): Promise<void> {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
-      this.fixedHeaderHeight
+      topOffset || this.fixedHeaderHeight
     );
   }
 

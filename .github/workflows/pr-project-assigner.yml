@@ -18,4 +18,4 @@ jobs:
 
 # { "label": "Team:AppArch", "projectNumber": 37, "columnName": "Review in progress" },
 # { "label": "Feature:Lens", "projectNumber": 32, "columnName": "In progress" },
-# { "label": "Team:Canvas", "projectNumber": 38, "columnName": "Review in progress" }
+# { "label": "Feature:Canvas", "projectNumber": 38, "columnName": "Review in progress" }

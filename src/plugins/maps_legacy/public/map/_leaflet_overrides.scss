@@ -1,0 +1,158 @@
+// stylelint-disable selector-no-qualifying-type
+// SASSTODO: Create these tooltip variables in EUI
+// And/Or create a tooltip mixin
+$tempEUITooltipBackground: tintOrShade($euiColorFullShade, 25%, 90%);
+$tempEUITooltipText: $euiColorGhost;
+
+// Converted leaflet icon sprite into background svg for custom coloring (dark mode)
+$visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 60' height='60' width='600'%3E%3Cg fill='#{hexToRGB($euiTextColor)}'%3E%3Cg%3E%3Cpath d='M18 36v6h6v-6h-6zm4 4h-2v-2h2v2z'/%3E%3Cpath d='M36 18v6h6v-6h-6zm4 4h-2v-2h2v2z'/%3E%3Cpath d='M23.142 39.145l-2.285-2.29 16-15.998 2.285 2.285z'/%3E%3C/g%3E%3Cpath d='M100 24.565l-2.096 14.83L83.07 42 76 28.773 86.463 18z'/%3E%3Cpath d='M140 20h20v20h-20z'/%3E%3Cpath d='M221 30c0 6.078-4.926 11-11 11s-11-4.922-11-11c0-6.074 4.926-11 11-11s11 4.926 11 11z'/%3E%3Cpath d='M270,19c-4.971,0-9,4.029-9,9c0,4.971,5.001,12,9,14c4.001-2,9-9.029,9-14C279,23.029,274.971,19,270,19z M270,31.5c-2.484,0-4.5-2.014-4.5-4.5c0-2.484,2.016-4.5,4.5-4.5c2.485,0,4.5,2.016,4.5,4.5C274.5,29.486,272.485,31.5,270,31.5z'/%3E%3Cg%3E%3Cpath d='M337,30.156v0.407v5.604c0,1.658-1.344,3-3,3h-10c-1.655,0-3-1.342-3-3v-10c0-1.657,1.345-3,3-3h6.345 l3.19-3.17H324c-3.313,0-6,2.687-6,6v10c0,3.313,2.687,6,6,6h10c3.314,0,6-2.687,6-6v-8.809L337,30.156'/%3E%3Cpath d='M338.72 24.637l-8.892 8.892H327V30.7l8.89-8.89z'/%3E%3Cpath d='M338.697 17.826h4v4h-4z' transform='rotate(-134.99 340.703 19.817)'/%3E%3C/g%3E%3Cg%3E%3Cpath d='M381 42h18V24h-18v18zm14-16h2v14h-2V26zm-4 0h2v14h-2V26zm-4 0h2v14h-2V26zm-4 0h2v14h-2V26z'/%3E%3Cpath d='M395 20v-4h-10v4h-6v2h22v-2h-6zm-2 0h-6v-2h6v2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A";
+
+.leaflet-touch .leaflet-bar,
+.leaflet-draw-actions {
+  @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: .2);
+  border: none;
+}
+
+.leaflet-container {
+  background: $euiColorEmptyShade;
+
+  //the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
+  min-width: 1px !important;
+  min-height: 1px !important;
+}
+
+.leaflet-clickable {
+  &:hover {
+    stroke-width: $euiSizeS;
+    stroke-opacity: .8;
+  }
+}
+
+/**
+ * 1. Since Leaflet is an external library, we also have to provide EUI variables
+ *    to non-override colors for darkmode.
+ */
+
+.leaflet-draw-actions,
+.leaflet-control {
+  a {
+    background-color: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightShade); /* 1 */
+    border-color: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade) !important; /* 1 */
+    color: $euiTextColor !important; /* 1 */
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+  }
+}
+
+.leaflet-touch .leaflet-bar a:first-child {
+  border-top-left-radius: $euiBorderRadius;
+  border-top-right-radius: $euiBorderRadius;
+}
+
+.leaflet-touch .leaflet-bar a:last-child {
+  border-bottom-left-radius: $euiBorderRadius;
+  border-bottom-right-radius: $euiBorderRadius;
+}
+
+.leaflet-retina .leaflet-draw-toolbar a {
+  background-image: url($visMapLeafletSprite); /* 1 */
+}
+
+.leaflet-control-layers-expanded {
+  padding: 0;
+  margin: 0;
+  @include fontSize(11px);
+  font-family: $euiFontFamily;
+  font-weight: $euiFontWeightMedium;
+  line-height: $euiLineHeight;
+
+  label {
+    font-weight: $euiFontWeightMedium;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* over-rides leaflet popup styles to look like kibana tooltip */
+.leaflet-popup-content-wrapper {
+  margin: 0;
+  padding: 0;
+  background: $tempEUITooltipBackground;
+  color: $tempEUITooltipText;
+  border-radius: $euiBorderRadius !important; // Override all positions the popup might be at
+}
+
+.leaflet-popup {
+  pointer-events: none;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  @include euiFontSizeS;
+  font-weight: $euiFontWeightRegular;
+  word-wrap: break-word;
+  overflow: hidden;
+  pointer-events: none;
+
+  > * {
+    margin: $euiSizeS $euiSizeS 0;
+  }
+
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
+
+  table {
+    td,th {
+      padding: $euiSizeXS;
+    }
+  }
+}
+
+.leaflet-popup-tip-container,
+.leaflet-popup-close-button,
+.leaflet-draw-tooltip {
+  display: none !important;
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background-color: transparentize($euiColorEmptyShade, .7);
+  color: $euiColorDarkShade;
+
+  // attributions are appended in blocks of <p> tags, this will allow them to display in one line
+  p {
+    display: inline;
+  }
+}
+
+.leaflet-touch .leaflet-control-zoom-in,
+.leaflet-touch .leaflet-control-zoom-out {
+  text-indent: -10000px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+// Custom SVG as background for zoom controls based off of EUI glyphs plusInCircleFilled and minusInCircleFilled
+.leaflet-touch .leaflet-control-zoom-in {
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{hexToRGB($euiTextColor)}' d='M8,7 L8,3.5 C8,3.22385763 7.77614237,3 7.5,3 C7.22385763,3 7,3.22385763 7,3.5 L7,7 L3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L7,8 L7,11.5 C7,11.7761424 7.22385763,12 7.5,12 C7.77614237,12 8,11.7761424 8,11.5 L8,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L8,7 Z M7.5,15 C3.35786438,15 0,11.6421356 0,7.5 C0,3.35786438 3.35786438,0 7.5,0 C11.6421356,0 15,3.35786438 15,7.5 C15,11.6421356 11.6421356,15 7.5,15 Z' /%3E%3C/svg%3E");
+}
+
+.leaflet-touch .leaflet-control-zoom-out {
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{hexToRGB($euiTextColor)}' d='M7.5,0 C11.6355882,0 15,3.36441176 15,7.5 C15,11.6355882 11.6355882,15 7.5,15 C3.36441176,15 0,11.6355882 0,7.5 C0,3.36441176 3.36441176,0 7.5,0 Z M3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L3.5,7 Z' /%3E%3C/svg%3E");
+}
+
+// Filter to desaturate mapquest tiles
+
+img.leaflet-tile {
+  @if (lightness($euiTextColor) < 50) {
+    filter: brightness(1.03) grayscale(.73);
+  } @else {
+    filter: invert(1) brightness(1.75) grayscale(1);
+  }
+}
+
+img.leaflet-tile.filters-off {
+  filter: none;
+}

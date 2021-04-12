@@ -1,26 +1,59 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+
+const testMigrateMatchAllQuery = (migrate: Function) => {
+  it('should migrate obsolete match_all query', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: {
+              match_all: {},
+            },
+          }),
+        },
+      },
+    });
+
+    const migratedSearchSource = JSON.parse(
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(migratedSearchSource).toEqual({
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  });
+
+  it('should return original doc if searchSourceJSON cannot be parsed', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+
+    expect(migratedDoc).toEqual({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+  });
+};
 
 describe('migration visualization', () => {
   describe('6.7.2', () => {
@@ -30,6 +63,10 @@ describe('migration visualization', () => {
         savedObjectMigrationContext
       );
     let doc: any;
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
+    });
 
     describe('date histogram time zone removal', () => {
       beforeEach(() => {
@@ -181,13 +218,13 @@ describe('migration visualization', () => {
         },
       });
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{}",
-  },
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{}",
+          },
+          "references": Array [],
+        }
+      `);
     });
 
     it('skips errors when searchSourceJSON is null', () => {
@@ -205,25 +242,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": null,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": null,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips errors when searchSourceJSON is undefined', () => {
@@ -241,25 +278,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": undefined,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": undefined,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when searchSourceJSON is not a string', () => {
@@ -276,25 +313,25 @@ Object {
       };
 
       expect(migrate(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": 123,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": 123,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when searchSourceJSON is invalid json', () => {
@@ -311,25 +348,25 @@ Object {
       };
 
       expect(migrate(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{abc123}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{abc123}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
@@ -347,25 +384,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts "index" attribute from doc', () => {
@@ -383,30 +420,30 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts index patterns from the filter', () => {
@@ -431,30 +468,30 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "my-index",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "my-index",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts index patterns from controls', () => {
@@ -482,22 +519,22 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "control_0_index_pattern",
-      "type": "index-pattern",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "foo": true,
+            "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "control_0_index_pattern",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -513,17 +550,17 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     it('extract savedSearchId from doc', () => {
@@ -540,24 +577,24 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+        }
+      `);
     });
 
     it('delete savedSearchId when empty string in doc', () => {
@@ -574,17 +611,17 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     it('should return a new object if vis is table and has multiple split aggs', () => {
@@ -597,12 +634,12 @@ Object {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -630,7 +667,7 @@ Object {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
@@ -655,7 +692,7 @@ Object {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -675,12 +712,12 @@ Object {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
         {
           id: '4',
@@ -705,15 +742,15 @@ Object {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
-      const expected = [{}, { foo: 'bar', row: true }, { hey: 'ya' }];
+      const expected = [{}, { foo: 'bar' }, { hey: 'ya' }];
       const migrated = migrate(generateDoc('table', aggs));
       const actual = JSON.parse(migrated.attributes.visState);
 
@@ -904,12 +941,12 @@ Object {
         },
       });
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
+          },
+        }
+      `);
     });
 
     it('migrates type = gauge verticalSplit: false to alignment: horizontal', () => {
@@ -920,12 +957,12 @@ Object {
       });
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
+          },
+        }
+      `);
     });
 
     it('doesnt migrate type = gauge containing invalid visState object, adds message to log', () => {
@@ -936,18 +973,18 @@ Object {
       });
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\"}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\"}",
+          },
+        }
+      `);
       expect(logMsgArr).toMatchInlineSnapshot(`
-Array [
-  "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
-  "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
-]
-`);
+        Array [
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
+        ]
+      `);
     });
 
     describe('filters agg query migration', () => {
@@ -1351,6 +1388,593 @@ Array [
 
       expect(timeSeriesParams.series[0].split_filters[0].filter.query).toEqual('bytes:>1000');
       expect(timeSeriesParams.series[0].split_filters[0].filter.language).toEqual('lucene');
+    });
+  });
+
+  describe('7.7.0 tsvb opperator typo migration', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.7.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (visState: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(visState),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should remove the misspelled opperator key if it exists', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene',
+        },
+        series: [],
+        gauge_color_rules: [
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            opperator: 'lt',
+          },
+        ],
+      };
+      const timeSeriesDoc = generateDoc({ params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+
+      expect(migratedParams.gauge_color_rules[0]).toMatchInlineSnapshot(`
+        Object {
+          "gauge": "rgba(69,39,217,1)",
+          "id": "020e3d50-75a6-11ea-8f61-71579ff7f64d",
+          "opperator": "lt",
+          "value": 0,
+        }
+      `);
+    });
+
+    it('should not change color rules with the correct spelling', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene',
+        },
+        series: [],
+        gauge_color_rules: [
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            opperator: 'lt',
+          },
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            operator: 'lt',
+          },
+        ],
+      };
+      const timeSeriesDoc = generateDoc({ params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+
+      expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
+    });
+
+    it('should move "row" field on split chart by a row or column to vis.params', () => {
+      const visData = {
+        type: 'area',
+        aggs: [
+          {
+            id: '1',
+            schema: 'metric',
+            params: {},
+          },
+          {
+            id: '2',
+            type: 'terms',
+            schema: 'split',
+            params: { foo: 'bar', row: true },
+          },
+        ],
+        params: {},
+      };
+
+      const migrated = migrate(generateDoc(visData));
+      const actual = JSON.parse(migrated.attributes.visState);
+
+      expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
+      expect(actual.params.row).toBeTruthy();
+    });
+  });
+
+  describe('7.9.3', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.9.3'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
+    });
+  });
+
+  describe('7.8.0 tsvb split_color_mode', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.8.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const generateDoc = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        type: 'visualization',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(params),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should change a missing split_color_mode to gradient', () => {
+      const params = { type: 'metrics', params: { series: [{}] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is set', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'gradient' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is non-default', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'rainbow' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('rainbow');
+    });
+
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', params: { series: [{}] } };
+      const doc = generateDoc(params);
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toBeUndefined();
+    });
+  });
+
+  describe('7.10.0 tsvb filter_ratio migration', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.10.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc1 = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries",
+        "series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417",
+        "type":"filter_ratio","numerator":"Filter Bytes Test:>1000","denominator":"Filter Bytes Test:<1000"}]}]}}`,
+      },
+    };
+
+    it('should replace numerator string with a query object', () => {
+      const migratedTestDoc1 = migrate(testDoc1);
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+
+      expect(metric.numerator).toHaveProperty('query');
+      expect(metric.numerator).toHaveProperty('language');
+    });
+
+    it('should replace denominator string with a query object', () => {
+      const migratedTestDoc1 = migrate(testDoc1);
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+
+      expect(metric.denominator).toHaveProperty('query');
+      expect(metric.denominator).toHaveProperty('language');
+    });
+  });
+
+  describe('7.10.0 remove tsvb search source', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.10.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (visState: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(visState),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            filter: [],
+            query: {
+              query: {
+                query_string: {
+                  query: '*',
+                },
+              },
+              language: 'lucene',
+            },
+          }),
+        },
+      },
+    });
+
+    it('should remove the search source JSON', () => {
+      const timeSeriesDoc = generateDoc({ type: 'metrics' });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
+      const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+      const {
+        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
+        ...oldAttributes
+      } = migratedtimeSeriesDoc.attributes;
+      expect(attributes).toEqual(oldAttributes);
+    });
+  });
+
+  describe('7.11.0 Data table vis - enable toolbar', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.11.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc = {
+      attributes: {
+        title: 'My data table vis',
+        description: 'Data table vis for test.',
+        visState: `{"type":"table","params": {"perPage": 10,"showPartialRows": false,"showTotal": false,"totalFunc": "sum"}}`,
+      },
+    };
+
+    it('should enable toolbar in visState.params', () => {
+      const migratedDataTableVisDoc = migrate(testDoc);
+      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState);
+      expect(visState.params.showToolbar).toEqual(true);
+    });
+  });
+
+  describe('7.12.0 update vislib visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (
+      type = 'area',
+      categoryAxes?: object[],
+      valueAxes?: object[],
+      hasPalette = false
+    ) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type,
+          title: '[Flights] Delay Type',
+          params: {
+            type: type === 'horizontal_bar' ? 'histogram' : type,
+            categoryAxes: categoryAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+            valueAxes: valueAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+            ...(hasPalette && {
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+            }),
+          },
+        }),
+      },
+    });
+
+    it('should return original doc if not area, line or histogram chart', () => {
+      const doc = getTestDoc('pie');
+      const migratedTestDoc = migrate(doc);
+      expect(migratedTestDoc).toEqual(doc);
+    });
+
+    it('should decorate existing docs with isVislibVis flag', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(isVislibVis).toEqual(true);
+    });
+
+    it('should decorate existing docs without a predefined palette with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
+      const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('default');
+    });
+
+    describe('labels.filter', () => {
+      it('should keep existing categoryAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should keep existing valueAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(
+          getTestDoc('area', undefined, [{ labels: { filter: true } }])
+        );
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to true for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to false for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to false for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to true for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+    });
+  });
+
+  describe('7.12.0 update "schema" in aggregations', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const testDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+                schema: {
+                  name: 'bucketAgg',
+                },
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: {
+                  name: 'metricAgg',
+                },
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    const expectedDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+                schema: 'bucketAgg',
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    it('should replace all schema object with schema name', () => {
+      const migratedTestDoc = migrate(testDoc);
+
+      expect(migratedTestDoc).toEqual(expectedDoc);
+    });
+  });
+
+  describe('7.13.0 tsvb hide Last value indicator by default', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (type: string) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"type":"${type}"}}`,
+      },
+    });
+
+    it('should set hide_last_value_indicator param to true', () => {
+      const migratedTestDoc = migrate(createTestDocWithType('markdown'));
+      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState).params
+        .hide_last_value_indicator;
+
+      expect(hideLastValueIndicator).toBeTruthy();
+    });
+
+    it('should ignore timeseries type', () => {
+      const migratedTestDoc = migrate(createTestDocWithType('timeseries'));
+      const hideLastValueIndicator = JSON.parse(migratedTestDoc.attributes.visState).params
+        .hide_last_value_indicator;
+
+      expect(hideLastValueIndicator).toBeUndefined();
+    });
+  });
+
+  describe('7.13.0 tsvb - remove default_index_pattern and default_timefield from Model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = () => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"default_index_pattern":"test", "default_timefield":"test"}}`,
+      },
+    });
+
+    it('should remove default_index_pattern and default_timefield', () => {
+      const migratedTestDoc = migrate(createTestDocWithType());
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(params).not.toHaveProperty('default_index_pattern');
+      expect(params).not.toHaveProperty('default_timefield');
     });
   });
 });

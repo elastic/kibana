@@ -29,6 +29,7 @@ exports[`it renders without crashing 1`] = `
       }
       selectedOptions={Array []}
       singleSelection={false}
+      sortMatchesBy="none"
     />
   </EuiFlexItem>
 </EuiFlexGroup>

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -21,7 +22,7 @@ export default function({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 1000);
     });
 
-    it('should add new role a_viewssnrole', async function() {
+    it('should add new role a_viewssnrole', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('a_viewssnrole', {
@@ -42,13 +43,13 @@ export default function({ getService, getPageObjects }) {
       });
 
       await PageObjects.common.sleep(1000);
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('a_viewssnrole');
       expect(roles.a_viewssnrole.reserved).to.be(false);
     });
 
-    it('should add new role a_view_no_ssn_role', async function() {
+    it('should add new role a_view_no_ssn_role', async function () {
       await PageObjects.security.addRole('a_view_no_ssn_role', {
         elasticsearch: {
           indices: [
@@ -64,45 +65,41 @@ export default function({ getService, getPageObjects }) {
         },
       });
       await PageObjects.common.sleep(1000);
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('a_view_no_ssn_role');
       expect(roles.a_view_no_ssn_role.reserved).to.be(false);
     });
 
-    it('should add new user customer1 ', async function() {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+    it('should add new user customer1 ', async function () {
+      await PageObjects.security.createUser({
         username: 'customer1',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer one',
+        confirm_password: 'changeme',
+        full_name: 'customer one',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_viewssnrole'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.customer1.roles).to.eql(['kibana_admin', 'a_viewssnrole']);
     });
 
-    it('should add new user customer2 ', async function() {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+    it('should add new user customer2 ', async function () {
+      await PageObjects.security.createUser({
         username: 'customer2',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer two',
+        confirm_password: 'changeme',
+        full_name: 'customer two',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.customer2.roles).to.eql(['kibana_admin', 'a_view_no_ssn_role']);
     });
 
-    it('user customer1 should see ssn', async function() {
+    it('user customer1 should see ssn', async function () {
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer1', 'changeme');
       await PageObjects.common.navigateToApp('discover');
@@ -112,11 +109,11 @@ export default function({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
+        'customer_name:ABC Company customer_name.keyword:ABC Company customer_region:WEST customer_region.keyword:WEST customer_ssn:444.555.6666 customer_ssn.keyword:444.555.6666 runtime_customer_ssn:444.555.6666 calculated at runtime _id:2 _index:flstest _score:0 _type: -'
       );
     });
 
-    it('user customer2 should not see ssn', async function() {
+    it('user customer2 should not see ssn', async function () {
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer2', 'changeme');
       await PageObjects.common.navigateToApp('discover');
@@ -126,11 +123,11 @@ export default function({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0'
+        'customer_name:ABC Company customer_name.keyword:ABC Company customer_region:WEST customer_region.keyword:WEST _id:2 _index:flstest _score:0 _type: -'
       );
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.security.forceLogout();
     });
   });

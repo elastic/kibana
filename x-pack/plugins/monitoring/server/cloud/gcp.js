@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isString } from 'lodash';
@@ -23,7 +24,7 @@ class GCPCloudService extends CloudService {
     const fields = ['id', 'machine-type', 'zone'];
 
     const create = this._createRequestForField;
-    const allRequests = fields.map(field => promisify(request)(create(field)));
+    const allRequests = fields.map((field) => promisify(request)(create(field)));
     return (
       Promise.all(allRequests)
         /*
@@ -31,8 +32,8 @@ class GCPCloudService extends CloudService {
       responses are arrays containing [fullResponse, body];
       because GCP returns plaintext, we have no way of validating without using the response code
      */
-        .then(responses => {
-          return responses.map(response => {
+        .then((responses) => {
+          return responses.map((response) => {
             return this._extractBody(response, response.body);
           });
         })

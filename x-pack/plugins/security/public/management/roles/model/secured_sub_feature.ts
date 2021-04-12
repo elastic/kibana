@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SubFeature, SubFeatureConfig } from '../../../../../features/common';
+import type { SubFeatureConfig } from '../../../../../features/common';
+import { SubFeature } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 
@@ -24,7 +26,7 @@ export class SecuredSubFeature extends SubFeature {
   }
 
   public getPrivilegeGroups() {
-    return this.privilegeGroups.map(pg => new SubFeaturePrivilegeGroup(pg, this.actionMapping));
+    return this.privilegeGroups.map((pg) => new SubFeaturePrivilegeGroup(pg, this.actionMapping));
   }
 
   public *privilegeIterator({
@@ -34,8 +36,8 @@ export class SecuredSubFeature extends SubFeature {
   } = {}): IterableIterator<SubFeaturePrivilege> {
     for (const group of this.privilegeGroups) {
       yield* group.privileges
-        .map(gp => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
-        .filter(privilege => predicate(privilege, this));
+        .map((gp) => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
+        .filter((privilege) => predicate(privilege, this));
     }
   }
 }

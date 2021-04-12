@@ -1,0 +1,112 @@
+<form
+  role="form"
+>
+  <div class="timSearchBar">
+      <div class="timSearchBar__section">
+        <icon class="timSearchBar__icon" type="'search'"></icon>
+        <input
+          class="timSearchBar__input"
+          input-focus
+          disable-input-focus="disableAutoFocus"
+          ng-model="filter"
+          ng-attr-placeholder="{{ finder.getLabel() }} Filter..."
+          ng-keydown="finder.filterKeyDown($event)"
+          name="filter"
+          type="text"
+          autocomplete="off"
+          data-test-subj="savedObjectFinderSearchInput"
+        >
+    </div>
+
+    <div>
+      <p class="timSearchBar__pagecount"
+        i18n-id="timelion.savedObjectFinder.pageItemsFromHitCountDescription"
+        i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
+        i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
+      ></p>
+      <div>
+        <button
+          class="timApp__button"
+          ng-if="onAddNew"
+          ng-click="onAddNew()"
+          data-test-subj="addNewSavedObjectLink"
+          i18n-id="timelion.savedObjectFinder.addNewItemButtonLabel"
+          i18n-default-message="Add new {item}"
+          i18n-values="{item: finder.properties.noun}"
+          i18n-description="{item} can be a type of object in Kibana, like 'visualization', 'dashboard', etc"
+        ></button>
+
+        <button
+          class="timApp__button--secondary"
+          ng-if="!useLocalManagement"
+          ng-click="finder.manageObjects(finder.properties.name)"
+          i18n-id="timelion.savedObjectFinder.manageItemsButtonLabel"
+          i18n-default-message="Manage {items}"
+          i18n-values="{items: finder.properties.nouns}"
+          i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
+        ></button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<paginate
+  list="finder.hits"
+  per-page="20"
+>
+  <button
+    class="paginate-heading list-group-item list-sort-button"
+    ng-click="finder.sortHits(finder.hits)"
+    aria-live="assertive"
+  >
+    <span class="euiScreenReaderOnly"
+      i18n-id="timelion.savedObjectFinder.sortByButtonLabelScreenReaderOnly"
+      i18n-default-message="Sort by"
+    ></span>
+    <span
+      i18n-id="timelion.savedObjectFinder.sortByButtonLabel"
+      i18n-default-message="Name"
+    ></span>
+    <icon type="'sortUp'" ng-if="finder.isAscending"></icon>
+    <icon type="'sortDown'" ng-if="!finder.isAscending"></icon>
+      <span class="euiScreenReaderOnly"
+        ng-if="finder.isAscending"
+        i18n-id="timelion.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly"
+        i18n-default-message="ascending"
+      ></span>
+      <span class="euiScreenReaderOnly"
+        ng-if="!finder.isAscending"
+        i18n-id="timelion.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly"
+        i18n-default-message="descending"
+      ></span>
+    </span>
+  </button>
+  <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
+    <li
+      class="list-group-item list-group-menu-item"
+      ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
+      ng-repeat="hit in page"
+      ng-keydown="finder.hitKeyDown($event, page, paginate)"
+      ng-click="finder.onChoose(hit, $event)">
+
+      <a ng-href="{{finder.makeUrl(hit)}}"
+          ng-blur="finder.hitBlur($event)"
+          ng-click="finder.preventClick($event)">
+          <icon aria-hidden="true" class="finder-type" ng-if="hit.icon" ng-class="hit.icon"></icon>
+          <icon type="'beaker'" ng-if="hit.type.shouldMarkAsExperimentalInUI()"></icon>
+          <span>{{hit.title}}</span>
+          <p ng-if="hit.description" ng-bind="hit.description"></p>
+      </a>
+    </li>
+    <li
+      class="list-group-item list-group-no-results"
+      ng-if="finder.hits.length === 0"
+    >
+      <p i18n-id="timelion.savedObjectFinder.noMatchesFoundDescription"
+        i18n-default-message="No matching {items} found."
+        i18n-values="{items: finder.properties.nouns}"
+        i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
+      ></p>
+    </li>
+  </ul>
+</paginate>

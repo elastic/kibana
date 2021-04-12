@@ -1,0 +1,69 @@
+.appSearchResult {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'drag content actions'
+    'drag toggle actions';
+  overflow: hidden; // Prevents child background-colors from clipping outside of panel border-radius
+  border: $euiBorderThin; // TODO: Remove after EUI version is bumped beyond 31.8.0
+
+  &__content {
+    grid-area: content;
+    width: 100%;
+    padding: $euiSize;
+    overflow: hidden;
+    color: $euiTextColor;
+  }
+
+  &__hiddenFieldsToggle {
+    grid-area: toggle;
+    display: flex;
+    justify-content: center;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
+    font-size: $euiFontSizeXS;
+    color: $euiColorPrimary;
+
+    &:hover,
+    &:focus {
+      background-color: $euiPageBackgroundColor;
+    }
+
+    .euiIcon {
+      margin-left: $euiSizeXS;
+    }
+  }
+
+  &__actionButtons {
+    grid-area: actions;
+    display: flex;
+    flex-wrap: no-wrap;
+  }
+
+  &__actionButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: $euiSize * 2;
+    border-left: $euiBorderThin;
+
+    &:first-child {
+      border-left: none;
+    }
+
+    &:hover,
+    &:focus {
+      background-color: $euiPageBackgroundColor;
+    }
+  }
+
+  &__dragHandle {
+    grid-area: drag;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: $euiSizeXL;
+    border-right: $euiBorderThin;
+  }
+}

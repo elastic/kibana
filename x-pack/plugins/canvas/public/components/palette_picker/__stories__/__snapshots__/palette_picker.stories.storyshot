@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/PalettePicker clearable 1`] = `
+<div
+  style={
+    Object {
+      "width": "350px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/PalettePicker default 1`] = `
+<div
+  style={
+    Object {
+      "width": "350px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/PalettePicker interactive 1`] = `
+<div
+  style={
+    Object {
+      "width": "350px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    />
+  </div>
+</div>
+`;

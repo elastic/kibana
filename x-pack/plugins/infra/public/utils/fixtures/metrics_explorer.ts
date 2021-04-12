@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,7 +15,7 @@ import {
   MetricsExplorerChartType,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
-} from '../../containers/metrics_explorer/use_metrics_explorer_options';
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
   limit: 3,
@@ -29,6 +30,8 @@ export const source = {
   logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
   logColumns: [],
+  inventoryDefaultView: 'host',
+  metricsExplorerDefaultView: 'host',
   fields: {
     host: 'host.name',
     container: 'container.id',
@@ -37,6 +40,7 @@ export const source = {
     message: ['message'],
     tiebreaker: '@timestamp',
   },
+  anomalyThreshold: 20,
 };
 
 export const chartOptions: MetricsExplorerChartOptions = {

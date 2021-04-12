@@ -1,19 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import './expanded_row_details_pane.scss';
 
 import React, { Fragment, FC, ReactElement } from 'react';
 
-import {
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 export interface SectionItem {
   title: string;
@@ -34,13 +30,33 @@ export const Section: FC<SectionProps> = ({ section }) => {
     return null;
   }
 
+  const columns = [
+    {
+      field: 'title',
+      name: '',
+      render: (v: SectionItem['title']) => <strong>{v}</strong>,
+    },
+    {
+      field: 'description',
+      name: '',
+      render: (v: SectionItem['description']) => <>{v}</>,
+    },
+  ];
+
   return (
-    <EuiPanel>
+    <>
       <EuiTitle size="xs">
         <span>{section.title}</span>
       </EuiTitle>
-      <EuiDescriptionList compressed type="column" listItems={section.items} />
-    </EuiPanel>
+      <EuiBasicTable<SectionItem>
+        compressed
+        items={section.items}
+        columns={columns}
+        tableCaption={section.title}
+        tableLayout="auto"
+        className="mlExpandedRowDetailsSection"
+      />
+    </>
   );
 };
 
@@ -50,11 +66,11 @@ interface ExpandedRowDetailsPaneProps {
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup className="mlExpandedRowDetails">
       <EuiFlexItem style={{ width: '50%' }}>
         {sections
-          .filter(s => s.position === 'left')
-          .map(s => (
+          .filter((s) => s.position === 'left')
+          .map((s) => (
             <Fragment key={s.title}>
               <EuiSpacer size="s" />
               <Section section={s} />
@@ -63,8 +79,8 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sectio
       </EuiFlexItem>
       <EuiFlexItem style={{ width: '50%' }}>
         {sections
-          .filter(s => s.position === 'right')
-          .map(s => (
+          .filter((s) => s.position === 'right')
+          .map((s) => (
             <Fragment key={s.title}>
               <EuiSpacer size="s" />
               <Section section={s} />

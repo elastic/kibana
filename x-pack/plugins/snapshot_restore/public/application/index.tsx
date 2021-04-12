@@ -1,27 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
 
 import { App } from './app';
 import { AppProviders } from './app_providers';
 import { AppDependencies } from './app_context';
 
-const AppWithRouter = () => (
-  <HashRouter>
+interface AppWithRouterProps {
+  history: ScopedHistory;
+}
+
+const AppWithRouter = ({ history }: AppWithRouterProps) => (
+  <Router history={history}>
     <App />
-  </HashRouter>
+  </Router>
 );
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   render(
     <AppProviders appDependencies={dependencies}>
-      <AppWithRouter />
+      <AppWithRouter history={dependencies.services.history} />
     </AppProviders>,
     elem
   );

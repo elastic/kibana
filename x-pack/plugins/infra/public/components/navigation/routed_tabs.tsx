@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { useLinkProps } from '../../hooks/use_link_props';
 import { LinkDescriptor } from '../../hooks/use_link_props';
 
@@ -27,7 +28,7 @@ const noop = () => {};
 export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
-      {tabs.map(tab => {
+      {tabs.map((tab) => {
         return <Tab key={`${tab.pathname}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>
@@ -42,7 +43,6 @@ const Tab = ({ title, pathname, app }: TabConfiguration) => {
       children={({ match, history }) => {
         return (
           <TabContainer className="euiTab">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${pathname}`}>
               <EuiTab onClick={noop} isSelected={match !== null}>
                 {title}

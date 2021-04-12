@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control_panel ControlPanel should render grid selection correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="row"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiText
+      color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
+      size="xs"
+    >
+      0 trusted applications
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ViewTypeToggle
+      onToggle={[Function]}
+      selectedOption="grid"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`control_panel ControlPanel should render list selection correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="row"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiText
+      color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
+      size="xs"
+    >
+      0 trusted applications
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ViewTypeToggle
+      onToggle={[Function]}
+      selectedOption="list"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`control_panel ControlPanel should render plural count correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="row"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiText
+      color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
+      size="xs"
+    >
+      100 trusted applications
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ViewTypeToggle
+      onToggle={[Function]}
+      selectedOption="grid"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`control_panel ControlPanel should render singular count correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="row"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiText
+      color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
+      size="xs"
+    >
+      1 trusted application
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <ViewTypeToggle
+      onToggle={[Function]}
+      selectedOption="grid"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -2,9 +2,8 @@
   "id": "urlGeneratorsExplorer",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["url_generators_explorer"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["share", "urlGeneratorsExamples"],
+  "requiredPlugins": ["share", "urlGeneratorsExamples", "developerExamples"],
   "optionalPlugins": []
 }

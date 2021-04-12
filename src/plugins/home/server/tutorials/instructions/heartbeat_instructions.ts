@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +11,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createHeartbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -30,8 +20,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html' },
+        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
@@ -44,8 +34,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html' },
+        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-amd64.deb',
@@ -61,8 +51,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html' },
+        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-x86_64.rpm',
@@ -81,7 +71,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.heartbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Heartbeat? See the [Getting Started Guide]({heartbeatLink}).\n\
+            'First time using Heartbeat? See the [Quick Start]({heartbeatLink}).\n\
  1. Download the Heartbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Heartbeat`.\n\
@@ -91,7 +81,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`heartbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            heartbeatLink: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html',
+            heartbeatLink:
+              '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/heartbeat',
           },
         }
@@ -280,13 +271,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.debTitle', {
@@ -302,13 +287,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.rpmTitle', {
@@ -324,13 +303,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate(
@@ -349,13 +322,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -380,7 +347,7 @@ export function heartbeatEnableInstructionsOnPrem() {
         'Where {hostTemplate} is your monitored URL, For more details on how to configure Monitors in \
       Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
       values: {
-        configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html',
+        configureLink: '{config.docs.beats.heartbeat}/configuring-howto-heartbeat.html',
         hostTemplate: '`<http://localhost:9200>`',
       },
     }
@@ -451,7 +418,7 @@ export function heartbeatEnableInstructionsCloud() {
     {
       defaultMessage:
         'For more details on how to configure Monitors in Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
-      values: { configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html' },
+      values: { configureLink: '{config.docs.beats.heartbeat}/configuring-howto-heartbeat.html' },
     }
   );
   return {

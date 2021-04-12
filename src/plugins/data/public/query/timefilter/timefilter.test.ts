@@ -1,39 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.useFakeTimers();
 
-jest.mock('./lib/parse_querystring', () => ({
-  parseQueryString: () => {
-    return {
-      // Can not access local variable from within a mock
-      // @ts-ignore
-      forceNow: global.nowTime,
-    };
-  },
-}));
-
 import sinon from 'sinon';
 import moment from 'moment';
-import { Timefilter } from './timefilter';
+import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from '../../../common';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
@@ -42,17 +22,21 @@ const timefilterConfig = {
   timeDefaults: { from: 'now-15m', to: 'now' },
   refreshIntervalDefaults: { pause: false, value: 0 },
 };
-const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history);
+
+const nowProviderMock = createNowProviderMock();
+const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history, nowProviderMock);
 
 function stubNowTime(nowTime: any) {
-  // @ts-ignore
-  global.nowTime = nowTime;
+  nowProviderMock.get.mockImplementation(() => (nowTime ? new Date(nowTime) : new Date()));
 }
 
 function clearNowTimeStub() {
-  // @ts-ignore
-  delete global.nowTime;
+  nowProviderMock.get.mockReset();
 }
+
+test('isTimeTouched is initially set to false', () => {
+  expect(timefilter.isTimeTouched()).toBe(false);
+});
 
 describe('setTime', () => {
   let update: sinon.SinonSpy;
@@ -82,6 +66,10 @@ describe('setTime', () => {
       from: '5',
       to: '10',
     });
+  });
+
+  test('should update isTimeTouched', () => {
+    expect(timefilter.isTimeTouched()).toBe(true);
   });
 
   test('should not add unexpected object keys to time state', () => {
@@ -133,7 +121,7 @@ describe('setRefreshInterval', () => {
   beforeEach(() => {
     update = sinon.spy();
     fetch = sinon.spy();
-    autoRefreshFetch = sinon.spy();
+    autoRefreshFetch = sinon.spy((done) => done());
     timefilter.setRefreshInterval({
       pause: false,
       value: 0,
@@ -354,5 +342,46 @@ describe('calculateBounds', () => {
 
     stubNowTime('not_a_parsable_date');
     expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
+  });
+});
+
+describe('getAutoRefreshFetch$', () => {
+  test('next auto refresh loop starts after "done" called', () => {
+    const autoRefreshFetch = jest.fn();
+    let doneCb: AutoRefreshDoneFn | undefined;
+    timefilter.getAutoRefreshFetch$().subscribe((done) => {
+      autoRefreshFetch();
+      doneCb = done;
+    });
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+
+    expect(autoRefreshFetch).toBeCalledTimes(0);
+    jest.advanceTimersByTime(5000);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+
+    if (doneCb) doneCb();
+
+    jest.advanceTimersByTime(1005);
+    expect(autoRefreshFetch).toBeCalledTimes(2);
+  });
+
+  test('new getAutoRefreshFetch$ subscription restarts refresh loop', () => {
+    const autoRefreshFetch = jest.fn();
+    const fetch$ = timefilter.getAutoRefreshFetch$();
+    const sub1 = fetch$.subscribe((done) => {
+      autoRefreshFetch();
+      // this done will be never called, but loop will be reset by another subscription
+    });
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+
+    expect(autoRefreshFetch).toBeCalledTimes(0);
+    jest.advanceTimersByTime(5000);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+
+    fetch$.subscribe(autoRefreshFetch);
+    expect(autoRefreshFetch).toBeCalledTimes(1);
+    sub1.unsubscribe();
+    jest.advanceTimersByTime(1005);
+    expect(autoRefreshFetch).toBeCalledTimes(2);
   });
 });

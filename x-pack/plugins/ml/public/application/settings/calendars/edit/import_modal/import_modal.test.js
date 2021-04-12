@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ImportModal } from './import_modal';
 
@@ -51,7 +52,7 @@ describe('ImportModal', () => {
     instance.setState(testState);
     wrapper.update();
     expect(wrapper.state('selectedEvents').length).toBe(2);
-    const deleteButton = wrapper.find('[data-test-subj="event_delete"]');
+    const deleteButton = wrapper.find('[data-test-subj="mlCalendarEventDeleteButton"]');
     const button = deleteButton.find('EuiButtonEmpty').first();
     button.simulate('click');
 

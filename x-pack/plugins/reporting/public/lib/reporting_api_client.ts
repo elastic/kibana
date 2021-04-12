@@ -1,25 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-
 import { HttpSetup } from 'src/core/public';
-import { add } from './job_completion_notifications';
 import {
-  API_LIST_URL,
-  API_BASE_URL,
   API_BASE_GENERATE,
+  API_BASE_URL,
+  API_LIST_URL,
   REPORTING_MANAGEMENT_HOME,
-} from '../../constants';
-import { JobId, SourceJob } from '../..';
+} from '../../common/constants';
+import {
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ReportDocument,
+  ReportSource,
+} from '../../common/types';
+import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;
-  _source: any;
+  _source: ReportSource;
 }
 
 export interface JobContent {
@@ -27,42 +34,14 @@ export interface JobContent {
   content_type: boolean;
 }
 
-export interface JobInfo {
-  kibana_name: string;
-  kibana_id: string;
-  browser_type: string;
-  created_at: string;
-  priority: number;
-  jobtype: string;
-  created_by: string;
-  timeout: number;
-  output: {
-    content_type: string;
-    size: number;
-    warnings: string[];
-  };
-  process_expiration: string;
-  completed_at: string;
-  payload: {
-    layout: { id: string; dimensions: { width: number; height: number } };
-    objects: Array<{ relativeUrl: string }>;
-    type: string;
-    title: string;
-    forceNow: string;
-    browserTimezone: string;
-  };
-  meta: {
-    layout: string;
-    objectType: string;
-  };
-  max_attempts: number;
-  started_at: string;
-  attempts: number;
-  status: string;
-}
-
 interface JobParams {
   [paramName: string]: any;
+}
+
+export interface DiagnoseResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
 }
 
 export class ReportingAPIClient {
@@ -116,25 +95,30 @@ export class ReportingAPIClient {
     });
   }
 
-  public getInfo(jobId: string): Promise<JobInfo> {
+  public getInfo(jobId: string): Promise<ReportApiJSON> {
     return this.http.get(`${API_LIST_URL}/info/${jobId}`, {
       asSystemRequest: true,
     });
   }
 
-  public findForJobIds = (jobIds: JobId[]): Promise<SourceJob[]> => {
+  public findForJobIds = (jobIds: JobId[]): Promise<ReportDocument[]> => {
     return this.http.fetch(`${API_LIST_URL}/list`, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
     });
   };
 
+  /*
+   * Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+   */
   public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
     const params = stringify({ jobParams: rison.encode(jobParams) });
-
-    return `${this.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   };
 
+  /*
+   * Sends a request to queue a job, with the job params in the POST body
+   */
   public createReportingJob = async (exportType: string, jobParams: any) => {
     const jobParamsRison = rison.encode(jobParams);
     const resp = await this.http.post(`${API_BASE_GENERATE}/${exportType}`, {
@@ -149,10 +133,38 @@ export class ReportingAPIClient {
     return resp;
   };
 
-  public getManagementLink = () => this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
+  public getManagementLink: ManagementLinkFn = () =>
+    this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
-  public getDownloadLink = (jobId: JobId) =>
+  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
-  public getBasePath = () => this.http.basePath.get();
+  /*
+   * provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
+   */
+  public getServerBasePath = () => this.http.basePath.serverBasePath;
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyConfig = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/config`, {
+      asSystemRequest: true,
+    });
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyBrowser = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+      asSystemRequest: true,
+    });
+
+  /*
+   * Diagnostic-related API calls
+   */
+  public verifyScreenCapture = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
+      asSystemRequest: true,
+    });
 }

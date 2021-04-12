@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
+<HostsTable
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "beats-ci-immutable-ubuntu-1804-1615475026535098510",
+        },
+        "node": Object {
+          "_id": "beats-ci-immutable-ubuntu-1804-1615475026535098510",
+          "host": Object {
+            "name": Array [
+              "beats-ci-immutable-ubuntu-1804-1615475026535098510",
+            ],
+            "os": Object {
+              "name": Array [
+                "Ubuntu",
+              ],
+              "version": Array [
+                "18.04.5 LTS (Bionic Beaver)",
+              ],
+            },
+          },
+          "lastSeen": Array [
+            "2021-03-11T15:05:36.783Z",
+          ],
+        },
+      },
+    ]
+  }
+  fakeTotalCount={0}
+  id="hostsQuery"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={false}
+  totalCount={-1}
+  type="page"
+/>
+`;

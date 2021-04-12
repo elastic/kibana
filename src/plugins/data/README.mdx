@@ -1,0 +1,648 @@
+---
+id: kibDataPlugin
+slug: /kibana-dev-docs/services/data-plugin
+title: Data services
+image: https://source.unsplash.com/400x175/?Search
+summary: The data plugin contains services for searching, querying and filtering.
+date: 2020-12-02
+tags: ['kibana', 'dev', 'contributor', 'api docs']
+---
+
+# data
+
+The data plugin provides common data access services, such as `search` and `query`, for solutions and application developers.
+
+## Autocomplete
+
+The autocomplete service provides suggestions for field names and values.
+
+It is wired into the `TopNavMenu` component, but can be used independently.
+
+### Fetch Query Suggestions
+
+The `getQuerySuggestions` function helps to construct a query.
+
+```.ts
+
+    // `inputValue` is the user input
+    const querySuggestions = await autocomplete.getQuerySuggestions({
+        language: 'kuery',
+        indexPatterns: [indexPattern],
+        query: inputValue,
+    });
+
+```
+
+### Fetch Value Suggestions
+
+The `getValueSuggestions` function returns suggestions for field values.
+This is helpful when you want to provide a user with options, for example when constructing a filter.
+
+```.ts
+
+    // `inputValue` is the user input
+    const valueSuggestions = await autocomplete.getValueSuggestions({
+      indexPattern,
+      field,
+      query: inputValue,
+    });
+
+```
+
+## Field Formats
+
+Coming soon.
+
+## Index Patterns
+
+The Index Patterns API provides a consistent method of structuring and formatting documents
+and field lists across the various Kibana apps. Its typically used in conjunction with
+SearchSource for composing queries.
+
+### Index Patterns API
+
+- Get list of index patterns
+- Get default index pattern and examine fields
+- Get index pattern by id
+- Find index pattern by title
+- Create index pattern
+- Create index pattern and save it
+- Modify index pattern and save it
+- Delete index pattern
+
+#### Get list of index pattern titles and ids
+
+```
+const idsAndTitles = await data.indexPatterns.getIdsWithTitle();
+idsAndTitles.forEach(({id, title}) => console.log(`Index pattern id: ${id} title: ${title}`));
+```
+
+#### Get default index pattern and examine fields
+
+```
+const defaultIndexPattern = await data.indexPatterns.getDefault();
+defaultIndexPattern.fields.forEach(({name}) => { console.log(name); })
+```
+
+#### Get index pattern by id
+
+```
+const id = 'xxxxxx-xxx-xxxxxx';
+const indexPattern = await data.indexPatterns.get(id);
+```
+
+#### Find index pattern by title
+
+```
+const title = 'kibana-*';
+const [indexPattern] = await data.indexPatterns.find(title);
+```
+
+#### Create index pattern
+
+```
+const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
+```
+
+#### Create index pattern and save it immediately
+
+```
+const indexPattern = await data.indexPatterns.createAndSave({ title: 'kibana-*' });
+```
+
+#### Create index pattern, modify, and save
+
+```
+const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
+indexPattern.setFieldCustomLabel('customer_name', 'Customer Name');
+data.indexPatterns.createSavedObject(indexPattern);
+```
+
+#### Modify index pattern and save it
+
+```
+indexPattern.setFieldCustomLabel('customer_name', 'Customer Name');
+await data.indexPatterns.updateSavedObject(indexPattern);
+```
+
+#### Delete index pattern
+
+```
+await data.indexPatterns.delete(indexPatternId);
+```
+
+### Index Patterns HTTP API
+
+Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
+
+- Index Patterns API
+  - Create an index pattern &mdash; `POST /api/index_patterns/index_pattern`
+  - Fetch an index pattern by `{id}` &mdash; `GET /api/index_patterns/index_pattern/{id}`
+  - Delete an index pattern by `{id}` &mdash; `DELETE /api/index_patterns/index_pattern/{id}`
+  - Partially update an index pattern by `{id}` &mdash; `POST /api/index_patterns/index_pattern/{id}`
+- Fields API
+  - Update field &mdash; `POST /api/index_patterns/index_pattern/{id}/fields`
+- Scripted Fields API
+  - Create a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Upsert a scripted field &mdash; `PUT /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Fetch a scripted field &mdash; `GET /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Remove a scripted field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Update a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+
+### Index Patterns API
+
+Index Patterns REST API allows you to create, retrieve and delete index patterns. I also
+exposes an update endpoint which allows you to update specific fields without changing
+the rest of the index pattern object.
+
+#### Create an index pattern
+
+Create an index pattern with a custom title.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+Customize creation behavior with:
+
+- `override` &mdash; if set to `true`, replaces an existing index pattern if an
+  index pattern with the provided title already exists. Defaults to `false`.
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "override": false,
+    "refresh_fields": true,
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+At creation all index pattern fields are option and you can provide them.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "id": "...",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "intervalName": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {}
+    }
+}
+```
+
+The endpoint returns the created index pattern object.
+
+```json
+{
+  "index_pattern": {}
+}
+```
+
+#### Fetch an index pattern by ID
+
+Retrieve an index pattern by its ID.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an index pattern object.
+
+```json
+{
+  "index_pattern": {
+    "id": "...",
+    "version": "...",
+    "title": "...",
+    "type": "...",
+    "intervalName": "...",
+    "timeFieldName": "...",
+    "sourceFilters": [],
+    "fields": {},
+    "typeMeta": {},
+    "fieldFormats": {},
+    "fieldAttrs": {}
+  }
+}
+```
+
+#### Delete an index pattern by ID
+
+Delete and index pattern by its ID.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an '200 OK` response with empty body on success.
+
+#### Partially update an index pattern by ID
+
+Update part of an index pattern. Only provided fields will be updated on the
+index pattern, missing fields will stay as they are persisted.
+
+These fields can be update partially:
+
+- `title`
+- `timeFieldName`
+- `intervalName`
+- `fields` (optionally refresh fields)
+- `sourceFilters`
+- `fieldFormatMap`
+- `type`
+- `typeMeta`
+
+Update a title of an index pattern.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+{
+    "index_pattern": {
+        "title": "new_title"
+    }
+}
+```
+
+All update fields are optional, you can specify the following fields.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "...",
+        "timeFieldName": "...",
+        "intervalName": "...",
+        "sourceFilters": [],
+        "fieldFormats": {},
+        "type": "...",
+        "typeMeta": {},
+        "fields": {}
+    }
+}
+```
+
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "refresh_fields": true,
+    "index_pattern": {
+        "fields": {}
+    }
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+  "index_pattern": {}
+}
+```
+
+### Fields API
+
+Fields API allows to change field metadata, such as `count`, `customLabel`, and `format`.
+
+#### Update fields
+
+Update endpoint allows you to update fields presentation metadata, such as `count`,
+`customLabel`, and `format`. You can update multiple fields in one request. Updates
+are merges with persisted metadata. To remove existing metadata specify `null` as value.
+
+Set popularity `count` for field `foo`:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}
+```
+
+Update multiple metadata values and fields in one request:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123,
+            "customLabel": "Foo"
+        },
+        "bar": {
+            "customLabel": "Bar"
+        }
+    }
+}
+```
+
+Use `null` value to delete metadata:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "customLabel": null
+        }
+    }
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+  "index_pattern": {}
+}
+```
+
+### Scripted Fields API
+
+Scripted Fields API provides CRUD API for scripted fields of an index pattern.
+
+#### Create a scripted field
+
+Create a field by simply specifying its name, will default to `string` type. Returns
+an error if a field with the provided name already exists.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+#### Upsert a scripted field
+
+Creates a new field or updates an existing one, if one already exists with the same name.
+
+Create a field by simply specifying its name.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+#### Fetch a scripted field
+
+Fetch an existing index pattern field by field name.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+```
+
+Returns the field object.
+
+```json
+{
+  "field": {}
+}
+```
+
+#### Delete a scripted field
+
+Delete a field of an index pattern.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+```
+
+#### Update a an existing scripted field
+
+Updates an exiting field by mergin provided properties with the existing ones. If
+there is no existing field with the specified name, returns a `404 Not Found` error.
+
+You can specify any field properties, except `name` which is specified in the URL path.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+{
+    "field": {
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+## Query
+
+The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
+
+It contains sub-services for each of those configurations:
+
+- `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
+- `data.query.timefilter` - Responsible for the time range filter and the auto refresh behavior settings.
+- `data.query.queryString` - Responsible for the query string and query language settings.
+- `data.query.savedQueries` - Responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and used by other applications.
+
+Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
+
+A simple use case is:
+
+```.ts
+function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
+   data.query.state$.subscribe(() => {
+
+       // Constuct the query portion of the search request
+       const query = data.query.getEsQuery(indexPattern);
+
+       // Construct a request
+       const request = {
+           params: {
+               index: indexPattern.title,
+               body: {
+                   aggs: aggConfigs.toDsl(),
+                   query,
+               },
+           },
+       };
+
+       // Search with the `data.query` config
+       const search$ = data.search.search(request);
+
+       ...
+   });
+}
+
+```
+
+### Timefilter
+
+`data.query.timefilter` is responsible for the time range filter and the auto refresh behavior settings.
+
+#### Autorefresh
+
+Timefilter provides an API for setting and getting current auto refresh state:
+
+```ts
+const { pause, value } = data.query.timefilter.timefilter.getRefreshInterval();
+
+data.query.timefilter.timefilter.setRefreshInterval({ pause: false, value: 5000 }); // start auto refresh with 5 seconds interval
+```
+
+Timefilter API also provides an `autoRefreshFetch$` observables that apps should use to get notified
+when it is time to refresh data because of auto refresh.
+This API expects apps to confirm when they are done with reloading the data.
+The confirmation mechanism is needed to prevent excessive queue of fetches.
+
+```
+import { refetchData } from '../my-app'
+
+const autoRefreshFetch$ = data.query.timefilter.timefilter.getAutoRefreshFetch$()
+autoRefreshFetch$.subscribe((done) => {
+  try {
+    await refetchData();
+  } finally {
+    // confirm that data fetching was finished
+    done();
+  }
+})
+
+function unmount() {
+  // don't forget to unsubscribe when leaving the app
+  autoRefreshFetch$.unsubscribe()
+}
+
+```
+
+## Search
+
+Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
+
+### SearchSource
+
+The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.
+
+```.tsx
+
+    const searchSource = await data.search.searchSource.create();
+    const searchResponse = await searchSource
+      .setParent(undefined)
+      .setField('index', indexPattern)
+      .setField('filter', filters)
+      .fetch();
+
+```
+
+### Low-level search
+
+#### Default Search Strategy
+
+One benefit of using the low-level search API, is partial response support in X-Pack, allowing for a better and more responsive user experience.
+In OSS only the final result is returned.
+
+```.ts
+    import { isCompleteResponse } from '../plugins/data/public';
+
+    const search$ = data.search.search(request)
+        .subscribe({
+        next: (response) => {
+            if (isCompleteResponse(response)) {
+                // Final result
+                search$.unsubscribe();
+            } else {
+                // Partial result - you can update the UI, but data is still loading
+            }
+        },
+        error: (e: Error) => {
+            // Show customized toast notifications.
+            // You may choose to handle errors differently if you prefer.
+            data.search.showError(e);
+        },
+    });
+```

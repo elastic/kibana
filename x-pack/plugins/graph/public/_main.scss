@@ -20,8 +20,14 @@
  * Utilities
  */
 
-.gphNoUserSelect{
+.gphNoUserSelect {
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.gphAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }

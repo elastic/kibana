@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AlertType } from '../common';
+import { AlertType, RecoveredActionGroup } from '../common';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
-import { loadAlert, loadAlertState, loadAlertType, loadAlertTypes } from './alert_api';
+import { loadAlert, loadAlertType, loadAlertTypes } from './alert_api';
 import uuid from 'uuid';
 
 const http = httpServiceMock.createStartContract();
@@ -22,6 +23,9 @@ describe('loadAlertTypes', () => {
         actionVariables: ['var1'],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
+        producer: 'alerts',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -30,7 +34,7 @@ describe('loadAlertTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -44,6 +48,9 @@ describe('loadAlertType', () => {
       actionVariables: ['var1'],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
+      producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
 
@@ -51,7 +58,7 @@ describe('loadAlertType', () => {
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -63,6 +70,9 @@ describe('loadAlertType', () => {
       actionVariables: [],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
+      producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
 
@@ -77,6 +87,9 @@ describe('loadAlertType', () => {
         actionVariables: [],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
+        producer: 'alerts',
       },
     ]);
 
@@ -107,70 +120,6 @@ describe('loadAlert', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
-  });
-});
-
-describe('loadAlertState', () => {
-  test('should call get API with base parameters', async () => {
-    const alertId = uuid.v4();
-    const resolvedValue = {
-      alertTypeState: {
-        some: 'value',
-      },
-      alertInstances: {
-        first_instance: {},
-        second_instance: {},
-      },
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
-
-    expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
-  });
-
-  test('should parse AlertInstances', async () => {
-    const alertId = uuid.v4();
-    const resolvedValue = {
-      alertTypeState: {
-        some: 'value',
-      },
-      alertInstances: {
-        first_instance: {
-          state: {},
-          meta: {
-            lastScheduledActions: {
-              group: 'first_group',
-              date: '2020-02-09T23:15:41.941Z',
-            },
-          },
-        },
-      },
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
-
-    expect(await loadAlertState({ http, alertId })).toEqual({
-      ...resolvedValue,
-      alertInstances: {
-        first_instance: {
-          state: {},
-          meta: {
-            lastScheduledActions: {
-              group: 'first_group',
-              date: new Date('2020-02-09T23:15:41.941Z'),
-            },
-          },
-        },
-      },
-    });
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
-  });
-
-  test('should handle empty response from api', async () => {
-    const alertId = uuid.v4();
-    http.get.mockResolvedValueOnce('');
-
-    expect(await loadAlertState({ http, alertId })).toEqual({});
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}`);
   });
 });

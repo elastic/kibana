@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
+<Details>
+  <AuditdGenericFileLine
+    contextId="contextid-123"
+    fileIcon="document"
+    filePath="/proc/15990/attr/current"
+    hostName="zeek-london"
+    id="28"
+    primary="unset"
+    processExecutable="/lib/systemd/systemd-journald"
+    processName="systemd-journal"
+    processPid={27244}
+    processTitle="/lib/systemd/systemd-journald"
+    result="success"
+    secondary="root"
+    session="242"
+    text="generic-text-123"
+    userName="root"
+    workingDirectory="/"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NetflowRenderer
+    data={
+      Object {
+        "_id": "28",
+        "auditd": Object {
+          "result": Array [
+            "success",
+          ],
+          "session": Array [
+            "242",
+          ],
+          "summary": Object {
+            "actor": Object {
+              "primary": Array [
+                "unset",
+              ],
+              "secondary": Array [
+                "root",
+              ],
+            },
+            "how": Array [
+              "/lib/systemd/systemd-journald",
+            ],
+            "object": Object {
+              "primary": Array [
+                "/proc/15990/attr/current",
+              ],
+              "type": Array [
+                "file",
+              ],
+            },
+          },
+        },
+        "event": Object {
+          "action": Array [
+            "opened-file",
+          ],
+          "category": Array [
+            "audit-rule",
+          ],
+          "module": Array [
+            "auditd",
+          ],
+        },
+        "file": Object {
+          "device": Array [
+            "00:00",
+          ],
+          "gid": Array [
+            "0",
+          ],
+          "group": Array [
+            "root",
+          ],
+          "inode": Array [
+            "27672309",
+          ],
+          "mode": Array [
+            "0666",
+          ],
+          "owner": Array [
+            "root",
+          ],
+          "path": Array [
+            "/proc/15990/attr/current",
+          ],
+          "uid": Array [
+            "0",
+          ],
+        },
+        "host": Object {
+          "id": Array [
+            "7c21f5ed03b04d0299569d221fe18bbc",
+          ],
+          "ip": Array [
+            "46.101.3.136",
+            "10.16.0.5",
+            "fe80::4066:42ff:fe19:b3b9",
+          ],
+          "name": Array [
+            "zeek-london",
+          ],
+        },
+        "process": Object {
+          "executable": Array [
+            "/lib/systemd/systemd-journald",
+          ],
+          "name": Array [
+            "systemd-journal",
+          ],
+          "pid": Array [
+            27244,
+          ],
+          "ppid": Array [
+            1,
+          ],
+          "title": Array [
+            "/lib/systemd/systemd-journald",
+          ],
+          "working_directory": Array [
+            "/",
+          ],
+        },
+        "timestamp": "2019-03-26T22:12:18.609Z",
+        "user": Object {
+          "name": Array [
+            "root",
+          ],
+        },
+      }
+    }
+    timelineId="test"
+  />
+</Details>
+`;

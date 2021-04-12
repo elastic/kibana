@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,7 +11,7 @@ import nodesListingFixtureRed from './fixtures/nodes_listing_red';
 import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup';
 import nodesListingFixturePagination from './fixtures/nodes_listing_pagination';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -129,7 +130,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination })
           .expect(200);
 
-        const names = body.nodes.map(node => node.name);
+        const names = body.nodes.map((node) => node.name);
         expect(body.nodes.length).to.be(pagination.size);
         expect(names).to.eql(nodesListingFixturePagination.defaultPagination);
       });
@@ -145,14 +146,14 @@ export default function({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange, pagination })
           .expect(200);
-        const names1 = body1.nodes.map(node => node.name);
+        const names1 = body1.nodes.map((node) => node.name);
 
         const { body: body2 } = await supertest
           .post('/api/monitoring/v1/clusters/Pawu2etQQ9uPwl22Vm_Tug/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange, pagination: { size: 12, index: 1 } })
           .expect(200);
-        const names2 = body2.nodes.map(node => node.name);
+        const names2 = body2.nodes.map((node) => node.name);
 
         for (const name1 of names1) {
           expect(names2.includes(name1)).to.be(false);
@@ -200,8 +201,8 @@ export default function({ getService }) {
           .send({ timeRange, pagination, sort: { ...sort, direction: 'desc' } })
           .expect(200);
 
-        const names1 = body1.nodes.map(node => node.name);
-        const names2 = body2.nodes.map(node => node.name);
+        const names1 = body1.nodes.map((node) => node.name);
+        const names2 = body2.nodes.map((node) => node.name);
 
         expect(names1).to.eql(nodesListingFixturePagination.sortByNameAsc);
         expect(names2).to.eql(nodesListingFixturePagination.sortByNameDesc);
@@ -227,7 +228,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination, sort })
           .expect(200);
 
-        const cpuUsage = body.nodes.map(node => ({
+        const cpuUsage = body.nodes.map((node) => ({
           name: node.name,
           cpu_usage: node.node_cpu_utilization.summary,
         }));
@@ -251,7 +252,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination, sort })
           .expect(200);
 
-        const loadAverage = body.nodes.map(node => ({
+        const loadAverage = body.nodes.map((node) => ({
           name: node.name,
           load_average: node.node_load_average.summary,
         }));
@@ -275,7 +276,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination, sort })
           .expect(200);
 
-        const jvmMemory = body.nodes.map(node => ({
+        const jvmMemory = body.nodes.map((node) => ({
           name: node.name,
           jvm_memory: node.node_jvm_mem_percent.summary,
         }));
@@ -299,7 +300,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination, sort })
           .expect(200);
 
-        const freeSpace = body.nodes.map(node => ({
+        const freeSpace = body.nodes.map((node) => ({
           name: node.name,
           free_space: node.node_free_space.summary,
         }));
@@ -335,7 +336,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination, queryText })
           .expect(200);
 
-        const names = body.nodes.map(node => node.name);
+        const names = body.nodes.map((node) => node.name);
         expect(names).to.eql(nodesListingFixturePagination.simpleQuery);
       });
     });

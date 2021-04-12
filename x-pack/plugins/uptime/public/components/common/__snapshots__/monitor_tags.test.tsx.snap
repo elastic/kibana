@@ -1,0 +1,590 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
+<div
+  class="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
+>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <a
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
+      rel="noreferrer"
+      style="max-width:120px"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          red
+        </span>
+      </span>
+    </a>
+  </span>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <a
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
+      rel="noreferrer"
+      style="max-width:120px"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          green
+        </span>
+      </span>
+    </a>
+  </span>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <a
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
+      rel="noreferrer"
+      style="max-width:120px"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          blue
+        </span>
+      </span>
+    </a>
+  </span>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <a
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
+      rel="noreferrer"
+      style="max-width:120px"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          black
+        </span>
+      </span>
+    </a>
+  </span>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <a
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
+      href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
+      rel="noreferrer"
+      style="max-width:120px"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          purple
+        </span>
+      </span>
+    </a>
+  </span>
+  <span
+    class="euiBadgeGroup__item"
+  >
+    <button
+      aria-label="Click to view remaining tags"
+      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          +1
+        </span>
+      </span>
+    </button>
+  </span>
+</div>
+`;
+
+exports[`MonitorTags component render against summary 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <MonitorTags
+      summary={
+        Object {
+          "minInterval": 75000,
+          "monitor_id": "android-homepage",
+          "state": Object {
+            "monitor": Object {
+              "name": "Android Homepage",
+              "type": "http",
+            },
+            "observer": Object {
+              "geo": Object {
+                "name": Array [
+                  "Europe",
+                ],
+              },
+            },
+            "summary": Object {
+              "down": 0,
+              "status": "up",
+              "up": 1,
+            },
+            "summaryPings": Array [
+              Object {
+                "@timestamp": "2020-12-09T17:08:22.200Z",
+                "agent": Object {
+                  "ephemeral_id": "a4d0d3eb-d162-4cc7-b14d-eaaad8b3d224",
+                  "id": "1f122196-6a5e-4bd4-8288-ef084e2ec982",
+                  "name": "Elastic-Mac",
+                  "type": "heartbeat",
+                  "version": "8.0.0",
+                },
+                "docId": "jBR5SHYBjTkd_7K7sM41",
+                "ecs": Object {
+                  "version": "1.6.0",
+                },
+                "event": Object {
+                  "dataset": "uptime",
+                },
+                "http": Object {
+                  "response": Object {
+                    "body": Object {
+                      "bytes": 176335,
+                      "hash": "8367430abf690d75f3c0277b31a16cfcc622e2b315e338f803ae850127d37f48",
+                    },
+                    "headers": Object {
+                      "Accept-Ranges": "bytes",
+                      "Alt-Svc": "h3-29=\\":443\\"; ma=2592000,h3-T051=\\":443\\"; ma=2592000,h3-Q050=\\":443\\"; ma=2592000,h3-Q046=\\":443\\"; ma=2592000,h3-Q043=\\":443\\"; ma=2592000,quic=\\":443\\"; ma=2592000; v=\\"46,43\\"",
+                      "Cache-Control": "private, max-age=0",
+                      "Content-Length": "176335",
+                      "Content-Type": "text/html",
+                      "Cross-Origin-Resource-Policy": "cross-origin",
+                      "Date": "Wed, 09 Dec 2020 17:08:22 GMT",
+                      "Expires": "Wed, 09 Dec 2020 17:08:22 GMT",
+                      "Last-Modified": "Thu, 03 Dec 2020 21:45:00 GMT",
+                      "Server": "sffe",
+                      "Vary": "Accept-Encoding",
+                      "X-Content-Type-Options": "nosniff",
+                      "X-Xss-Protection": "0",
+                    },
+                    "status_code": 200,
+                  },
+                },
+                "monitor": Object {
+                  "check_group": "12a21140-3a41-11eb-ae8d-a683e72ee74d",
+                  "duration": Object {
+                    "us": 247752,
+                  },
+                  "id": "android-homepage",
+                  "ip": "172.217.16.206",
+                  "name": "Android Homepage",
+                  "status": "up",
+                  "timespan": Object {
+                    "gte": "2020-12-09T17:08:22.200Z",
+                    "lt": "2020-12-09T17:08:52.200Z",
+                  },
+                  "type": "http",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "location": "51.5074, -0.1278",
+                    "name": "Europe",
+                  },
+                },
+                "resolve": Object {
+                  "ip": "172.217.16.206",
+                  "rtt": Object {
+                    "us": 7025,
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+                "tags": Array [
+                  "org:google",
+                ],
+                "tcp": Object {
+                  "rtt": Object {
+                    "connect": Object {
+                      "us": 30719,
+                    },
+                  },
+                },
+                "timestamp": "2020-12-09T17:08:22.200Z",
+                "tls": Object {
+                  "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
+                  "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
+                  "cipher": "TLS-AES-128-GCM-SHA256",
+                  "established": true,
+                  "server": Object {
+                    "hash": Object {
+                      "sha1": "be647fa3de52eba57c89ac297c05604c4af69372",
+                      "sha256": "19321783f8f923a0220cee1599a58203faf4c401ab5728c730ab05a44d9e7a9c",
+                    },
+                    "x509": Object {
+                      "issuer": Object {
+                        "common_name": "GTS CA 1O1",
+                        "distinguished_name": "CN=GTS CA 1O1,O=Google Trust Services,C=US",
+                      },
+                      "not_after": "2021-01-26T07:38:14.000Z",
+                      "not_before": "2020-11-03T07:38:14.000Z",
+                      "public_key_algorithm": "ECDSA",
+                      "public_key_curve": "P-256",
+                      "serial_number": "264575002113234958015854475703440562297",
+                      "signature_algorithm": "SHA256-RSA",
+                      "subject": Object {
+                        "common_name": "www.android.com",
+                        "distinguished_name": "CN=www.android.com,O=Google LLC,L=Mountain View,ST=California,C=US",
+                      },
+                    },
+                  },
+                },
+                "url": Object {
+                  "domain": "www.android.com",
+                  "full": "https://www.android.com",
+                  "port": 443,
+                  "scheme": "https",
+                },
+              },
+            ],
+            "timestamp": "2020-12-09T17:08:22.200Z",
+            "tls": Object {
+              "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
+              "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
+              "cipher": "TLS-AES-128-GCM-SHA256",
+              "established": true,
+              "rtt": Object {
+                "handshake": Object {
+                  "us": 39344,
+                },
+              },
+              "version": "1.3",
+              "version_protocol": "tls",
+            },
+            "url": Object {
+              "domain": "www.android.com",
+              "full": "https://www.android.com",
+              "port": 443,
+              "scheme": "https",
+            },
+          },
+        }
+      }
+    />
+  </ContextProvider>
+</ContextProvider>
+`;
+
+exports[`MonitorTags component renders against ping 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <MonitorTags
+      ping={
+        Object {
+          "@timestamp": "2020-12-09T17:08:22.200Z",
+          "agent": Object {
+            "ephemeral_id": "a4d0d3eb-d162-4cc7-b14d-eaaad8b3d224",
+            "id": "1f122196-6a5e-4bd4-8288-ef084e2ec982",
+            "name": "Elastic-Mac",
+            "type": "heartbeat",
+            "version": "8.0.0",
+          },
+          "docId": "jBR5SHYBjTkd_7K7sM41",
+          "ecs": Object {
+            "version": "1.6.0",
+          },
+          "event": Object {
+            "dataset": "uptime",
+          },
+          "http": Object {
+            "response": Object {
+              "body": Object {
+                "bytes": 176335,
+                "hash": "8367430abf690d75f3c0277b31a16cfcc622e2b315e338f803ae850127d37f48",
+              },
+              "headers": Object {
+                "Accept-Ranges": "bytes",
+                "Alt-Svc": "h3-29=\\":443\\"; ma=2592000,h3-T051=\\":443\\"; ma=2592000,h3-Q050=\\":443\\"; ma=2592000,h3-Q046=\\":443\\"; ma=2592000,h3-Q043=\\":443\\"; ma=2592000,quic=\\":443\\"; ma=2592000; v=\\"46,43\\"",
+                "Cache-Control": "private, max-age=0",
+                "Content-Length": "176335",
+                "Content-Type": "text/html",
+                "Cross-Origin-Resource-Policy": "cross-origin",
+                "Date": "Wed, 09 Dec 2020 17:08:22 GMT",
+                "Expires": "Wed, 09 Dec 2020 17:08:22 GMT",
+                "Last-Modified": "Thu, 03 Dec 2020 21:45:00 GMT",
+                "Server": "sffe",
+                "Vary": "Accept-Encoding",
+                "X-Content-Type-Options": "nosniff",
+                "X-Xss-Protection": "0",
+              },
+              "status_code": 200,
+            },
+          },
+          "monitor": Object {
+            "check_group": "12a21140-3a41-11eb-ae8d-a683e72ee74d",
+            "duration": Object {
+              "us": 247752,
+            },
+            "id": "android-homepage",
+            "ip": "172.217.16.206",
+            "name": "Android Homepage",
+            "status": "up",
+            "timespan": Object {
+              "gte": "2020-12-09T17:08:22.200Z",
+              "lt": "2020-12-09T17:08:52.200Z",
+            },
+            "type": "http",
+          },
+          "observer": Object {
+            "geo": Object {
+              "location": "51.5074, -0.1278",
+              "name": "Europe",
+            },
+          },
+          "resolve": Object {
+            "ip": "172.217.16.206",
+            "rtt": Object {
+              "us": 7025,
+            },
+          },
+          "summary": Object {
+            "down": 0,
+            "up": 1,
+          },
+          "tags": Array [
+            "org:google",
+          ],
+          "tcp": Object {
+            "rtt": Object {
+              "connect": Object {
+                "us": 30719,
+              },
+            },
+          },
+          "timestamp": "2020-12-09T17:08:22.200Z",
+          "tls": Object {
+            "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
+            "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
+            "cipher": "TLS-AES-128-GCM-SHA256",
+            "established": true,
+            "server": Object {
+              "hash": Object {
+                "sha1": "be647fa3de52eba57c89ac297c05604c4af69372",
+                "sha256": "19321783f8f923a0220cee1599a58203faf4c401ab5728c730ab05a44d9e7a9c",
+              },
+              "x509": Object {
+                "issuer": Object {
+                  "common_name": "GTS CA 1O1",
+                  "distinguished_name": "CN=GTS CA 1O1,O=Google Trust Services,C=US",
+                },
+                "not_after": "2021-01-26T07:38:14.000Z",
+                "not_before": "2020-11-03T07:38:14.000Z",
+                "public_key_algorithm": "ECDSA",
+                "public_key_curve": "P-256",
+                "serial_number": "264575002113234958015854475703440562297",
+                "signature_algorithm": "SHA256-RSA",
+                "subject": Object {
+                  "common_name": "www.android.com",
+                  "distinguished_name": "CN=www.android.com,O=Google LLC,L=Mountain View,ST=California,C=US",
+                },
+              },
+            },
+          },
+          "url": Object {
+            "domain": "www.android.com",
+            "full": "https://www.android.com",
+            "port": 443,
+            "scheme": "https",
+          },
+        }
+      }
+    />
+  </ContextProvider>
+</ContextProvider>
+`;

@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import _ from 'lodash';
-import { SearchSource } from '../../../../data/public';
+
+import { once } from 'lodash';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
@@ -31,12 +20,27 @@ import {
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
+import { SavedObjectDecorator } from '../decorators';
+
+const applyDecorators = (
+  object: SavedObject,
+  config: SavedObjectConfig,
+  decorators: SavedObjectDecorator[]
+) => {
+  decorators.forEach((decorator) => {
+    decorator.decorateConfig(config);
+    decorator.decorateObject(object);
+  });
+};
 
 export function buildSavedObject(
   savedObject: SavedObject,
-  config: SavedObjectConfig = {},
-  services: SavedObjectKibanaServices
+  config: SavedObjectConfig,
+  services: SavedObjectKibanaServices,
+  decorators: SavedObjectDecorator[] = []
 ) {
+  applyDecorators(savedObject, config, decorators);
+
   const { indexPatterns, savedObjectsClient } = services;
   // type name for this object, used as the ES-type
   const esType = config.type || '';
@@ -55,7 +59,9 @@ export function buildSavedObject(
   savedObject.isSaving = false;
   savedObject.defaults = config.defaults || {};
   // optional search source which this object configures
-  savedObject.searchSource = config.searchSource ? new SearchSource() : undefined;
+  savedObject.searchSource = config.searchSource
+    ? services.search.searchSource.createEmpty()
+    : undefined;
   // the id of the document
   savedObject.id = config.id || void 0;
   // the migration version of the document, should only be set on imports
@@ -79,9 +85,9 @@ export function buildSavedObject(
    * @return {Promise}
    * @resolved {SavedObject}
    */
-  savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
+  savedObject.init = once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config);
+  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config, services);
 
   /**
    * Serialize this object

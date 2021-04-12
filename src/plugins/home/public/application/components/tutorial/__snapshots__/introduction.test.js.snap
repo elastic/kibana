@@ -15,7 +15,6 @@ exports[`props exportedFieldsUrl 1`] = `
         >
           <h1>
             Great tutorial
-              
           </h1>
         </EuiTitle>
       </EuiFlexItem>
@@ -56,6 +55,7 @@ exports[`props iconType 1`] = `
       >
         <EuiIcon
           size="xl"
+          title=""
           type="logoElastic"
         />
       </EuiFlexItem>
@@ -67,7 +67,6 @@ exports[`props iconType 1`] = `
         >
           <h1>
             Great tutorial
-              
           </h1>
         </EuiTitle>
       </EuiFlexItem>
@@ -97,7 +96,7 @@ exports[`props isBeta 1`] = `
         >
           <h1>
             Great tutorial
-              
+             
             <EuiBetaBadge
               label="Beta"
             />
@@ -130,7 +129,6 @@ exports[`props previewUrl 1`] = `
         >
           <h1>
             Great tutorial
-              
           </h1>
         </EuiTitle>
       </EuiFlexItem>
@@ -169,7 +167,6 @@ exports[`render 1`] = `
         >
           <h1>
             Great tutorial
-              
           </h1>
         </EuiTitle>
       </EuiFlexItem>

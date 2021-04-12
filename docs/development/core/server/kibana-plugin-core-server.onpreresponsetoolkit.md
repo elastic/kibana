@@ -4,7 +4,7 @@
 
 ## OnPreResponseToolkit interface
 
-A tool set defining an outcome of OnPreAuth interceptor for incoming request.
+A tool set defining an outcome of OnPreResponse interceptor for incoming request.
 
 <b>Signature:</b>
 
@@ -17,4 +17,5 @@ export interface OnPreResponseToolkit
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) | <code>(responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult</code> | To pass request to the next handler |
+|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) | <code>(responseRender: OnPreResponseRender) =&gt; OnPreResponseResult</code> | To override the response with a different body |
 

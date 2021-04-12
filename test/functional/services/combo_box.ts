@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 // @ts-ignore not supported yet
@@ -59,6 +49,17 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     /**
+     * Finds combobox element options
+     *
+     * @param comboBoxSelector data-test-subj selector
+     */
+    public async getOptions(comboBoxSelector: string) {
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      await this.openOptionsList(comboBoxElement);
+      return await find.allByCssSelector('.euiFilterSelectItem', WAIT_FOR_EXISTS_TIME);
+    }
+
+    /**
      * Sets value for specified combobox element
      *
      * @param comboBoxElement element that wraps up EuiComboBox
@@ -90,7 +91,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
           await this.clickOption(options.clickWithMouse, selectOptions[0]);
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          const firstOption = await find.byCssSelector('.euiFilterSelectItem');
+          const firstOption = await find.byCssSelector('.euiFilterSelectItem', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
       } else {
@@ -200,7 +201,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBox.parseDomContent();
       return $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
     }
 
     /**
@@ -264,8 +265,10 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (!isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
-        await toggleBtn.click();
+        await retry.try(async () => {
+          const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxInput');
+          await toggleBtn.click();
+        });
       }
     }
 
@@ -283,7 +286,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBoxElement.parseDomContent();
       const selectedOptions = $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       return selectedOptions.length === 1 && selectedOptions[0] === value;
     }
 

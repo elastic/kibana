@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { kibanaResponseFactory } from 'src/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
@@ -80,7 +82,7 @@ describe('cluster checkup API', () => {
 
     it('returns an 403 error if it throws forbidden', async () => {
       const e: any = new Error(`you can't go here!`);
-      e.status = 403;
+      e.statusCode = 403;
 
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({
@@ -94,12 +96,12 @@ describe('cluster checkup API', () => {
     it('returns an 500 error if it throws', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(new Error(`scary error!`));
 
-      const resp = await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
-
-      expect(resp.status).toEqual(500);
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'get',
+          pathPattern: '/api/upgrade_assistant/status',
+        })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
+      ).rejects.toThrow('scary error!');
     });
   });
 });

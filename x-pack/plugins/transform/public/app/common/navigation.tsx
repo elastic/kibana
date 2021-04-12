@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 import rison from 'rison-node';
 
-import { CLIENT_BASE_PATH, SECTION_SLUG } from '../constants';
+import { SECTION_SLUG } from '../constants';
 
 /**
  * Gets a url for navigating to Discover page.
@@ -23,15 +24,13 @@ export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string 
     index: indexPatternId,
   });
 
-  const hash = `#/discover?_g=${_g}&_a=${_a}`;
+  const hash = `/discover#?_g=${_g}&_a=${_a}`;
 
-  return `${baseUrl}${hash}`;
+  return `${baseUrl}/app${hash}`;
 }
 
-export const RedirectToTransformManagement: FC = () => (
-  <Redirect from={CLIENT_BASE_PATH} to={CLIENT_BASE_PATH + SECTION_SLUG.HOME} />
-);
+export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
 
 export const RedirectToCreateTransform: FC<{ savedObjectId: string }> = ({ savedObjectId }) => (
-  <Redirect to={`${CLIENT_BASE_PATH}${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
+  <Redirect to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
 );

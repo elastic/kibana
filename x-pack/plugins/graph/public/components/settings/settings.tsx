@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,7 +12,7 @@ import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
-import { BlacklistForm } from './blacklist_form';
+import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
 import { WorkspaceNode, AdvancedSettings, UrlTemplate, WorkspaceField } from '../../types';
 import {
@@ -33,9 +34,9 @@ const tabs = [
     component: AdvancedSettingsForm,
   },
   {
-    id: 'blacklist',
-    title: i18n.translate('xpack.graph.settings.blacklistTitle', { defaultMessage: 'Block list' }),
-    component: BlacklistForm,
+    id: 'blocklist',
+    title: i18n.translate('xpack.graph.settings.blocklistTitle', { defaultMessage: 'Block list' }),
+    component: BlocklistForm,
   },
   {
     id: 'drillDowns',
@@ -51,8 +52,8 @@ const tabs = [
  * to catch update outside updates
  */
 export interface AngularProps {
-  blacklistedNodes: WorkspaceNode[];
-  unblacklistNode: (node: WorkspaceNode) => void;
+  blocklistedNodes: WorkspaceNode[];
+  unblocklistNode: (node: WorkspaceNode) => void;
   canEditDrillDownUrls: boolean;
 }
 
@@ -123,7 +124,7 @@ export const Settings = connect<StateProps, DispatchProps, AsObservable<AngularP
     urlTemplates: templatesSelector(state),
     allFields: fieldsSelector(state),
   }),
-  dispatch =>
+  (dispatch) =>
     bindActionCreators(
       {
         updateSettings,

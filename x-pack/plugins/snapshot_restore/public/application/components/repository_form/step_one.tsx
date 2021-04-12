@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,13 +25,15 @@ import {
 } from '@elastic/eui';
 
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
-import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common';
+import { SectionError, Error } from '../../../shared_imports';
 
-import { documentationLinksService } from '../../services/documentation';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError, SectionLoading, RepositoryTypeLogo, Error } from '../';
+import { SectionLoading, RepositoryTypeLogo } from '../';
+import { useCore } from '../../app_context';
+import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
 interface Props {
   repository: Repository | EmptyRepository;
@@ -51,6 +55,8 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     data: repositoryTypes = [],
   } = useLoadRepositoryTypes();
 
+  const { docLinks } = useCore();
+
   const hasValidationErrors: boolean = !validation.isValid;
 
   const onTypeChange = (newType: RepositoryType) => {
@@ -69,7 +75,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   };
 
   const pluginDocLink = (
-    <EuiLink href={documentationLinksService.getRepositoryPluginDocUrl()} target="_blank">
+    <EuiLink href={docLinks.links.plugins.snapshotRestoreRepos} target="_blank">
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
         defaultMessage="Learn more about plugins."
@@ -111,7 +117,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiFieldText
           defaultValue={repository.name}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updateRepository({
               name: e.target.value,
             });
@@ -137,7 +143,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
-              href={documentationLinksService.getRepositoryTypeDocUrl(type)}
+              href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
               iconType="iInCircle"
@@ -281,7 +287,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             values={{
               docLink: (
                 <EuiLink
-                  href={documentationLinksService.getRepositoryTypeDocUrl(REPOSITORY_TYPES.source)}
+                  href={getRepositoryTypeDocUrl(docLinks, REPOSITORY_TYPES.source)}
                   target="_blank"
                 >
                   <FormattedMessage
@@ -305,7 +311,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             />
           }
           checked={repository.type === REPOSITORY_TYPES.source}
-          onChange={e => {
+          onChange={(e) => {
             if (e.target.checked) {
               updateRepository({
                 type: REPOSITORY_TYPES.source,

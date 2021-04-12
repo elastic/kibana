@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { APMBaseDoc } from './apm_base_doc';
-import { IStackframe } from './fields/stackframe';
-import { Observer } from './fields/observer';
+import { Stackframe } from './fields/stackframe';
+import { TimestampUs } from './fields/timestamp_us';
 
 interface Processor {
   name: 'transaction';
@@ -18,13 +19,19 @@ export interface SpanRaw extends APMBaseDoc {
   trace: { id: string }; // trace is required
   service: {
     name: string;
+    environment?: string;
   };
   span: {
+    destination?: {
+      service: {
+        resource: string;
+      };
+    };
     action?: string;
     duration: { us: number };
     id: string;
     name: string;
-    stacktrace?: IStackframe[];
+    stacktrace?: Stackframe[];
     subtype?: string;
     sync?: boolean;
     type: string;
@@ -48,8 +55,9 @@ export interface SpanRaw extends APMBaseDoc {
       headers?: Record<string, unknown>;
     };
   };
+  timestamp: TimestampUs;
   transaction?: {
     id: string;
   };
-  observer?: Observer;
+  child?: { id: string[] };
 }

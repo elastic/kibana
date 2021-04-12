@@ -10,17 +10,38 @@
     "data",
     "cloud",
     "features",
-    "home",
+    "fileUpload",
     "licensing",
-    "usageCollection",
-    "share"
+    "share",
+    "embeddable",
+    "uiActions",
+    "kibanaLegacy",
+    "indexPatternManagement",
+    "discover",
+    "triggersActionsUi"
   ],
   "optionalPlugins": [
+    "alerting",
+    "home",
     "security",
     "spaces",
     "management",
-    "licenseManagement"
+    "licenseManagement",
+    "maps",
+    "lens"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaUtils",
+    "kibanaReact",
+    "dashboard",
+    "savedObjects",
+    "home",
+    "maps"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
 }

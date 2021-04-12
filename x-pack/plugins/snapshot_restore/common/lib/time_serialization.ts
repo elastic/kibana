@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TIME_UNITS } from '../constants';
@@ -9,7 +10,7 @@ import { TIME_UNITS } from '../constants';
 export const deserializeTime = (time: string) => {
   const timeUnits = Object.values(TIME_UNITS);
 
-  const timeUnit = timeUnits.find(unit => {
+  const timeUnit = timeUnits.find((unit) => {
     const unitIndex = time.indexOf(unit);
     return unitIndex !== -1 && unitIndex === time.length - 1;
   });

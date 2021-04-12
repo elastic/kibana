@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Role } from '../../../../../../../common/model';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
+import type { Role } from '../../../../../../../common/model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
   const features = [
@@ -18,7 +22,7 @@ const buildProps = (customProps: any = {}) => {
       id: 'feature1',
       name: 'Feature 1',
       app: ['app'],
-      icon: 'spacesApp',
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['app'],
@@ -193,7 +197,7 @@ describe('<SimplePrivilegeForm>', () => {
 
     const featurePrivilegeToggles = wrapper.find(EuiButtonGroup);
     expect(featurePrivilegeToggles).toHaveLength(1);
-    expect(featurePrivilegeToggles.find('button')).toHaveLength(3);
+    expect(featurePrivilegeToggles.find('input')).toHaveLength(3);
 
     (featurePrivilegeToggles.props() as EuiButtonGroupProps).onChange('feature1_all', null);
 

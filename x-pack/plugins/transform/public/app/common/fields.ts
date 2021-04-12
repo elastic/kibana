@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dictionary } from '../../../common/types/common';
+import { EsFieldName } from '../../../common/types/fields';
 
 export type EsId = string;
 export type EsDocSource = Dictionary<any>;
-export type EsFieldName = string;
 
 export interface EsDoc extends Dictionary<any> {
   _id: EsId;
@@ -18,13 +19,13 @@ export interface EsDoc extends Dictionary<any> {
 export function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
-  newDocFields.forEach(f => {
+  newDocFields.forEach((f) => {
     const fieldValue = obj[f];
     if (typeof fieldValue !== 'object' || fieldValue === null || Array.isArray(fieldValue)) {
       flatDocFields.push(f);
     } else {
       const innerFields = getFlattenedFields(fieldValue);
-      const flattenedFields = innerFields.map(d => `${f}.${d}`);
+      const flattenedFields = innerFields.map((d) => `${f}.${d}`);
       flatDocFields.push(...flattenedFields);
     }
   });
@@ -48,9 +49,9 @@ export const getDefaultSelectableFields = (docs: EsDocSource[]): EsFieldName[] =
 
   const newDocFields = getFlattenedFields(docs[0]);
   newDocFields.sort();
-  return newDocFields.filter(k => {
+  return newDocFields.filter((k) => {
     let value = false;
-    docs.forEach(row => {
+    docs.forEach((row) => {
       const source = row;
       if (source[k] !== null) {
         value = true;

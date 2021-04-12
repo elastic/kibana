@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiHealth, EuiHighlight } from '@elastic/eui';
 import React, { Component } from 'react';
+
+import { i18n } from '@kbn/i18n';
+
+import type { Space } from '../../../../../../../../spaces/public';
 import { getSpaceColor } from '../../../../../../../../spaces/public';
-import { Space } from '../../../../../../../../spaces/common/model/space';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {
@@ -26,7 +30,7 @@ const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') =>
 };
 
 const spaceIdToOption = (spaces: Space[]) => (s: string) =>
-  spaceToOption(spaces.find(space => space.id === s));
+  spaceToOption(spaces.find((space) => space.id === s));
 
 interface Props {
   spaces: Space[];
@@ -65,11 +69,11 @@ export class SpaceSelector extends Component<Props, {}> {
   }
 
   private onChange = (selectedSpaces: EuiComboBoxOptionOption[]) => {
-    this.props.onChange(selectedSpaces.map(s => (s.id as string).split('spaceOption_')[1]));
+    this.props.onChange(selectedSpaces.map((s) => (s.id as string).split('spaceOption_')[1]));
   };
 
   private getOptions = () => {
-    const options = this.props.spaces.map(space =>
+    const options = this.props.spaces.map((space) =>
       spaceToOption(
         space,
         this.props.selectedSpaceIds.includes('*')

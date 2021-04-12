@@ -1,55 +1,35 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CommonPageProvider } from './common_page';
-// @ts-ignore not TS yet
 import { ConsolePageProvider } from './console_page';
-// @ts-ignore not TS yet
 import { ContextPageProvider } from './context_page';
 import { DashboardPageProvider } from './dashboard_page';
 import { DiscoverPageProvider } from './discover_page';
-// @ts-ignore not TS yet
 import { ErrorPageProvider } from './error_page';
-// @ts-ignore not TS yet
 import { HeaderPageProvider } from './header_page';
 import { HomePageProvider } from './home_page';
-// @ts-ignore not TS yet
-import { MonitoringPageProvider } from './monitoring_page';
 import { NewsfeedPageProvider } from './newsfeed_page';
-// @ts-ignore not TS yet
-import { PointSeriesPageProvider } from './point_series_page';
-// @ts-ignore not TS yet
 import { SettingsPageProvider } from './settings_page';
 import { SharePageProvider } from './share_page';
-// @ts-ignore not TS yet
-import { ShieldPageProvider } from './shield_page';
-// @ts-ignore not TS yet
-import { TimePickerPageProvider } from './time_picker';
-// @ts-ignore not TS yet
+import { LoginPageProvider } from './login_page';
+import { TimePickerProvider } from './time_picker';
 import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
 import { VisualizePageProvider } from './visualize_page';
 import { VisualizeEditorPageProvider } from './visualize_editor_page';
 import { VisualizeChartPageProvider } from './visualize_chart_page';
 import { TileMapPageProvider } from './tile_map_page';
+import { TimeToVisualizePageProvider } from './time_to_visualize_page';
 import { TagCloudPageProvider } from './tag_cloud_page';
 import { VegaChartPageProvider } from './vega_chart_page';
+import { SavedObjectsPageProvider } from './management/saved_objects_page';
+import { LegacyDataTableVisProvider } from './legacy/data_table_vis';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -60,19 +40,20 @@ export const pageObjects = {
   error: ErrorPageProvider,
   header: HeaderPageProvider,
   home: HomePageProvider,
-  monitoring: MonitoringPageProvider,
   newsfeed: NewsfeedPageProvider,
-  pointSeries: PointSeriesPageProvider,
   settings: SettingsPageProvider,
   share: SharePageProvider,
-  shield: ShieldPageProvider,
+  legacyDataTableVis: LegacyDataTableVisProvider,
+  login: LoginPageProvider,
   timelion: TimelionPageProvider,
-  timePicker: TimePickerPageProvider,
+  timePicker: TimePickerProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
   visEditor: VisualizeEditorPageProvider,
   visChart: VisualizeChartPageProvider,
   tileMap: TileMapPageProvider,
+  timeToVisualize: TimeToVisualizePageProvider,
   tagCloud: TagCloudPageProvider,
   vegaChart: VegaChartPageProvider,
+  savedObjects: SavedObjectsPageProvider,
 };

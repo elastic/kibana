@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useContext } from 'react';
@@ -14,6 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { ModelPlotSwitch } from './components/model_plot';
+import { AnnotationsSwitch } from './components/annotations';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -41,6 +43,7 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem>
             <ModelPlotSwitch />
+            <AnnotationsSwitch />
           </EuiFlexItem>
           <EuiFlexItem>
             <DedicatedIndexSwitch />
@@ -68,6 +71,7 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         >
           <EuiFlexItem>
             <ModelPlotSwitch />
+            <AnnotationsSwitch />
             <ModelMemoryLimitInput />
           </EuiFlexItem>
           <EuiFlexItem>

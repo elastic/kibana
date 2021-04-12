@@ -1,43 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
+  IExternalUrlPolicy,
   PackageInfo,
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { deepFreeze } from '../../utils/';
 import { AppCategory } from '../';
-
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  category?: AppCategory;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
-}
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -55,9 +34,13 @@ export interface InjectedMetadataParams {
     branch: string;
     basePath: string;
     serverBasePath: string;
+    publicBaseUrl: string;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
+    };
+    externalUrl: {
+      policy: IExternalUrlPolicy[];
     };
     vars: {
       [key: string]: unknown;
@@ -67,22 +50,8 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: {
-        id: string;
-        title: string;
-      };
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -120,6 +89,14 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getPublicBaseUrl: () => {
+        return this.state.publicBaseUrl;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -128,12 +105,12 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
-      getPlugins: () => {
-        return this.state.uiPlugins;
+      getExternalUrlConfig: () => {
+        return this.state.externalUrl;
       },
 
-      getLegacyMode: () => {
-        return this.state.legacyMode;
+      getPlugins: () => {
+        return this.state.uiPlugins;
       },
 
       getLegacyMetadata: () => {
@@ -167,32 +144,22 @@ export class InjectedMetadataService {
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
+  getPublicBaseUrl: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };
+  getExternalUrlConfig: () => {
+    policy: IExternalUrlPolicy[];
+  };
   /**
    * An array of frontend plugins in topological order.
    */
   getPlugins: () => InjectedPluginMetadata[];
-  /** Indicates whether or not we are rendering a known legacy app. */
-  getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: {
-      id: string;
-      title: string;
-    };
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
       defaults: Record<string, UiSettingsParams>;
       user?: Record<string, UserProvidedValues> | undefined;

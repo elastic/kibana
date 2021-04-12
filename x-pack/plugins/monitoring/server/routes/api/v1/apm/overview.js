@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -35,6 +36,12 @@ export function apmOverviewRoute(server) {
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+
+      const showCgroupMetrics = config.get('monitoring.ui.container.apm.enabled');
+      if (showCgroupMetrics) {
+        const metricCpu = metricSet.find((m) => m.name === 'apm_cpu');
+        metricCpu.keys = ['apm_cgroup_cpu'];
+      }
 
       try {
         const [stats, metrics] = await Promise.all([

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useContext, useState } from 'react';
@@ -24,6 +25,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { XJsonMode } from '@kbn/ace';
+
+const xJsonMode = new XJsonMode();
 
 import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
@@ -33,16 +37,18 @@ import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
-import { ErrableFormRow } from '../../../../components/form_errors';
+import { ErrableFormRow } from '../../../../components';
 import { executeWatch } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-import { useXJsonMode } from './use_x_json_mode';
+import { XJson } from '../../../../shared_imports';
 
-const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
+const { useXJsonMode } = XJson;
+
+const actionModeOptions = Object.keys(ACTION_MODES).map((mode) => ({
   text: ACTION_MODES[mode],
   value: ACTION_MODES[mode],
 }));
@@ -96,7 +102,7 @@ export const JsonWatchEditSimulate = ({
     ignoreCondition,
   } = executeDetails;
 
-  const { setXJson, convertToJson, xJsonMode, xJson } = useXJsonMode(alternativeInput);
+  const { setXJson, convertToJson, xJson } = useXJsonMode(alternativeInput);
 
   const columns = [
     {
@@ -124,7 +130,7 @@ export const JsonWatchEditSimulate = ({
           options={actionModeOptions}
           value={actionModes[row.actionId]}
           data-test-subj="actionModesSelect"
-          onChange={e => {
+          onChange={(e) => {
             setExecuteDetails(
               new ExecuteDetails({
                 ...executeDetails,
@@ -199,7 +205,7 @@ export const JsonWatchEditSimulate = ({
                   }
                   min={0}
                   data-test-subj="scheduledTimeInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     const value = e.target.value;
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -214,7 +220,7 @@ export const JsonWatchEditSimulate = ({
                 <EuiSelect
                   value={scheduledTimeUnit}
                   options={getScheduleTimeOptions(scheduledTimeValue)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setExecuteDetails(
                       new ExecuteDetails({
                         ...executeDetails,
@@ -247,7 +253,7 @@ export const JsonWatchEditSimulate = ({
                   {getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)}
                 </EuiText>
               }
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 setExecuteDetails(
                   new ExecuteDetails({
@@ -288,7 +294,7 @@ export const JsonWatchEditSimulate = ({
             )}
             checked={ignoreCondition}
             data-test-subj="ignoreConditionSwitch"
-            onChange={e => {
+            onChange={(e) => {
               setExecuteDetails(
                 new ExecuteDetails({ ...executeDetails, ignoreCondition: e.target.checked })
               );

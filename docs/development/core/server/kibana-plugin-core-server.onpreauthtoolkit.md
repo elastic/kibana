@@ -17,5 +17,4 @@ export interface OnPreAuthToolkit
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [next](./kibana-plugin-core-server.onpreauthtoolkit.next.md) | <code>() =&gt; OnPreAuthResult</code> | To pass request to the next handler |
-|  [rewriteUrl](./kibana-plugin-core-server.onpreauthtoolkit.rewriteurl.md) | <code>(url: string) =&gt; OnPreAuthResult</code> | Rewrite requested resources url before is was authenticated and routed to a handler |
 

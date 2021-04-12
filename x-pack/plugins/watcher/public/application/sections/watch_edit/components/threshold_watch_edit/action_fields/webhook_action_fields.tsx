@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useEffect } from 'react';
 
 import {
@@ -59,8 +61,8 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="method"
               value={method || 'get'}
               data-test-subj="webhookMethodSelect"
-              options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={e => {
+              options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
+              onChange={(e) => {
                 editAction({ key: 'method', value: e.target.value });
               }}
             />
@@ -80,8 +82,8 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="scheme"
               value={scheme}
               data-test-subj="webhookSchemeSelect"
-              options={SCHEME.map(verb => ({ text: verb, value: verb }))}
-              onChange={e => {
+              options={SCHEME.map((verb) => ({ text: verb, value: verb }))}
+              onChange={(e) => {
                 editAction({ key: 'scheme', value: e.target.value });
               }}
             />
@@ -107,7 +109,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="host"
               value={host || ''}
               data-test-subj="webhookHostInput"
-              onChange={e => {
+              onChange={(e) => {
                 editAction({ key: 'host', value: e.target.value });
               }}
               onBlur={() => {
@@ -139,7 +141,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="port"
               value={port || ''}
               data-test-subj="webhookPortInput"
-              onChange={e => {
+              onChange={(e) => {
                 editAction({ key: 'port', value: parseInt(e.target.value, 10) });
               }}
               onBlur={() => {
@@ -167,7 +169,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="path"
               value={path || ''}
               data-test-subj="webhookPathInput"
-              onChange={e => {
+              onChange={(e) => {
                 editAction({ key: 'path', value: e.target.value });
               }}
             />
@@ -193,7 +195,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="username"
               value={username || ''}
               data-test-subj="webhookUsernameInput"
-              onChange={e => {
+              onChange={(e) => {
                 editAction({ key: 'username', value: e.target.value });
               }}
             />
@@ -217,7 +219,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="password"
               value={password || ''}
               data-test-subj="webhookPasswordInput"
-              onChange={e => {
+              onChange={(e) => {
                 editAction({ key: 'password', value: e.target.value });
               }}
             />

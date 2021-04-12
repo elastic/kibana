@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, omit } from 'lodash';
@@ -32,8 +33,8 @@ class AzureCloudService extends CloudService {
     return (
       promisify(request)(req)
         // Note: there is no fallback option for Azure
-        .then(response => {
-          return this._parseResponse(response.body, body => this._parseBody(body));
+        .then((response) => {
+          return this._parseResponse(response.body, (body) => this._parseBody(body));
         })
     );
   }

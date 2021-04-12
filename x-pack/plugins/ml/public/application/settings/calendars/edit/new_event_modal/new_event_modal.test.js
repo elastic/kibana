@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { NewEventModal } from './new_event_modal';
 import moment from 'moment';
@@ -42,10 +43,7 @@ describe('NewEventModal', () => {
     // trigger handleChangeStart directly with startMoment
     instance.handleChangeStart(startMoment);
     // add 3 days to endMoment as it will be adjusted to be one day after startDate
-    const expected = endMoment
-      .startOf('day')
-      .add(3, 'days')
-      .format();
+    const expected = endMoment.startOf('day').add(3, 'days').format();
 
     expect(wrapper.state('endDate').format()).toBe(expected);
   });
@@ -66,10 +64,7 @@ describe('NewEventModal', () => {
     // trigger handleChangeStart directly with endMoment
     instance.handleChangeStart(endMoment);
     // subtract 3 days from startDate as it will be adjusted to be one day before endDate
-    const expected = startMoment
-      .startOf('day')
-      .subtract(2, 'days')
-      .format();
+    const expected = startMoment.startOf('day').subtract(2, 'days').format();
 
     expect(wrapper.state('startDate').format()).toBe(expected);
   });

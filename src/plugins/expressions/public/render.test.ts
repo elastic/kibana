@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { RenderError } from './types';
+import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
 import { IInterpreterRenderHandlers } from '../common';
@@ -50,7 +39,8 @@ jest.mock('./services', () => {
 });
 
 const mockMockErrorRenderFunction = jest.fn(
-  (el: HTMLElement, error: RenderError, handlers: IInterpreterRenderHandlers) => handlers.done()
+  (el: HTMLElement, error: ExpressionRenderError, handlers: IInterpreterRenderHandlers) =>
+    handlers.done()
 );
 // extracts data from mockMockErrorRenderFunction call to assert in tests
 const getHandledError = () => {
@@ -125,11 +115,36 @@ describe('ExpressionRenderHandler', () => {
       expect(getHandledError()!.message).toEqual('renderer error');
     });
 
+    it('should pass through provided "hasCompatibleActions" to the expression renderer', async () => {
+      const hasCompatibleActions = jest.fn();
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+        get: () => ({
+          render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
+            handlers.hasCompatibleActions!({
+              foo: 'bar',
+            });
+          },
+        }),
+      });
+
+      const expressionRenderHandler = new ExpressionRenderHandler(element, {
+        onRenderError: mockMockErrorRenderFunction,
+        hasCompatibleActions,
+      });
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(0);
+      await expressionRenderHandler.render({ type: 'render', as: 'something' });
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(1);
+      expect(hasCompatibleActions.mock.calls[0][0]).toEqual({
+        foo: 'bar',
+      });
+    });
+
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);
-      return new Promise(resolve => {
-        expressionRenderHandler.render$.subscribe(renderCount => {
+      return new Promise<void>((resolve) => {
+        expressionRenderHandler.render$.subscribe((renderCount) => {
           expect(renderCount).toBe(1);
           resolve();
         });

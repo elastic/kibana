@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,7 +26,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from './';
-import { CollapsibleIndicesList } from '../../collapsible_indices_list';
+import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -73,8 +75,8 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -249,7 +251,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListDescription>
                   <EuiText>
                     <ul>
-                      {ignoreIndexSettings.map(setting => (
+                      {ignoreIndexSettings.map((setting) => (
                         <li key={setting}>
                           <EuiTitle size="xs">
                             <span>{setting}</span>

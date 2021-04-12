@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import { esQuery, Query, esKuery } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
@@ -13,9 +15,23 @@ import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
 
+const DEFAULT_QUERY = {
+  bool: {
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+
+export function getDefaultDatafeedQuery() {
+  return cloneDeep(DEFAULT_QUERY);
+}
+
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: IIndexPattern,
+  indexPattern: IIndexPattern | undefined,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs
@@ -27,16 +43,7 @@ export function createSearchItems(
     language: 'lucene',
   };
 
-  let combinedQuery: any = {
-    bool: {
-      must: [
-        {
-          match_all: {},
-        },
-      ],
-    },
-  };
-
+  let combinedQuery: any = getDefaultDatafeedQuery();
   if (savedSearch !== null) {
     const data = getQueryFromSavedSearch(savedSearch);
 
@@ -52,12 +59,16 @@ export function createSearchItems(
       }
       const filterQuery = esQuery.buildQueryFromFilters(filters, indexPattern);
 
-      if (combinedQuery.bool.filter === undefined) {
-        combinedQuery.bool.filter = [];
+      if (Array.isArray(combinedQuery.bool.filter) === false) {
+        combinedQuery.bool.filter =
+          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
       }
-      if (combinedQuery.bool.must_not === undefined) {
-        combinedQuery.bool.must_not = [];
+
+      if (Array.isArray(combinedQuery.bool.must_not) === false) {
+        combinedQuery.bool.must_not =
+          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
       }
+
       combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
       combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
     } else {

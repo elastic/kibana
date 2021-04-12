@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -130,7 +131,7 @@ class OverridesUI extends Component {
     }
 
     if (originalTimestampFormat !== undefined) {
-      const optionExists = TIMESTAMP_OPTIONS.some(option => option === originalTimestampFormat);
+      const optionExists = TIMESTAMP_OPTIONS.some((option) => option === originalTimestampFormat);
       if (optionExists === false) {
         // Incoming format does not exist in dropdown. Display custom input with incoming format as default value.
         const overrides = { ...this.state.overrides };
@@ -177,7 +178,7 @@ class OverridesUI extends Component {
     }
   };
 
-  onCustomTimestampFormatChange = e => {
+  onCustomTimestampFormatChange = (e) => {
     this.setState({ customTimestampFormat: e.target.value });
     // check whether the value is valid and set that to state.
     const { isValid, errorMessage } = isTimestampFormatValid(e.target.value);
@@ -195,7 +196,7 @@ class OverridesUI extends Component {
     this.setOverride({ delimiter });
   };
 
-  onCustomDelimiterChange = e => {
+  onCustomDelimiterChange = (e) => {
     this.setState({ customDelimiter: e.target.value });
   };
 
@@ -204,11 +205,11 @@ class OverridesUI extends Component {
     this.setOverride({ quote });
   };
 
-  onHasHeaderRowChange = e => {
+  onHasHeaderRowChange = (e) => {
     this.setOverride({ hasHeaderRow: e.target.checked });
   };
 
-  onShouldTrimFieldsChange = e => {
+  onShouldTrimFieldsChange = (e) => {
     this.setOverride({ shouldTrimFields: e.target.checked });
   };
 
@@ -223,11 +224,11 @@ class OverridesUI extends Component {
     this.setOverride({ columnNames });
   };
 
-  grokPatternChange = e => {
+  grokPatternChange = (e) => {
     this.setOverride({ grokPattern: e.target.value });
   };
 
-  onLinesToSampleChange = e => {
+  onLinesToSampleChange = (e) => {
     const linesToSample = +e.target.value;
     this.setOverride({ linesToSample });
 
@@ -268,8 +269,7 @@ class OverridesUI extends Component {
 
     const fieldOptions = getSortedFields(fields);
     const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
-    const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
+    const docsUrl = this.props.kibana.services.docLinks.links.aggs.date_format_pattern;
 
     const timestampFormatHelp = (
       <EuiText size="xs">
@@ -493,7 +493,7 @@ class OverridesUI extends Component {
               <EuiFormRow label={f} key={f}>
                 <EuiFieldText
                   value={columnNames[i]}
-                  onChange={e => this.onColumnNameChange(e, i)}
+                  onChange={(e) => this.onColumnNameChange(e, i)}
                 />
               </EuiFormRow>
             ))}
@@ -514,7 +514,7 @@ function selectedOption(opt) {
 // also sort alphanumerically
 function getSortedFields(fields) {
   return fields
-    .map(f => ({ label: f }))
+    .map((f) => ({ label: f }))
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 }
 

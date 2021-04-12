@@ -1,92 +1,83 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
-import {
-  PROCESSOR_EVENT,
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_DURATION
-} from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
-import { getServicesProjection } from '../../../../common/projections/services';
+import { Logger } from '@kbn/logging';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { joinByKey } from '../../../../common/utils/join_by_key';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { getHealthStatuses } from './get_health_statuses';
+import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
-  const { start, end, client } = setup;
+export type ServicesItemsSetup = Setup & SetupTimeRange;
 
-  const projection = getServicesProjection({ setup });
+const MAX_NUMBER_OF_SERVICES = 500;
 
-  const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      aggs: {
-        services: {
-          terms: {
-            ...projection.body.aggs.services.terms,
-            size: 500
-          },
-          aggs: {
-            avg: {
-              avg: { field: TRANSACTION_DURATION }
-            },
-            agents: {
-              terms: { field: AGENT_NAME, size: 1 }
-            },
-            events: {
-              terms: { field: PROCESSOR_EVENT }
-            },
-            environments: {
-              terms: { field: SERVICE_ENVIRONMENT }
-            }
-          }
-        }
-      }
-    }
-  });
+export async function getServicesItems({
+  environment,
+  kuery,
+  setup,
+  searchAggregatedTransactions,
+  logger,
+}: {
+  environment?: string;
+  kuery?: string;
+  setup: ServicesItemsSetup;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
+}) {
+  return withApmSpan('get_services_items', async () => {
+    const params = {
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      maxNumServices: MAX_NUMBER_OF_SERVICES,
+    };
 
-  const resp = await client.search(params);
-  const aggs = resp.aggregations;
+    const [
+      transactionStats,
+      servicesFromMetricDocuments,
+      healthStatuses,
+    ] = await Promise.all([
+      getServiceTransactionStats(params),
+      getServicesFromMetricDocuments(params),
+      getHealthStatuses(params).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
+    ]);
 
-  const serviceBuckets = aggs?.services.buckets || [];
-
-  const items = serviceBuckets.map(bucket => {
-    const eventTypes = bucket.events.buckets;
-
-    const transactions = eventTypes.find(e => e.key === 'transaction');
-    const totalTransactions = transactions?.doc_count || 0;
-
-    const errors = eventTypes.find(e => e.key === 'error');
-    const totalErrors = errors?.doc_count || 0;
-
-    const deltaAsMinutes = (end - start) / 1000 / 60;
-    const transactionsPerMinute = totalTransactions / deltaAsMinutes;
-    const errorsPerMinute = totalErrors / deltaAsMinutes;
-
-    const environmentsBuckets = bucket.environments.buckets;
-    const environments = environmentsBuckets.map(
-      environmentBucket => environmentBucket.key as string
+    const foundServiceNames = transactionStats.map(
+      ({ serviceName }) => serviceName
     );
 
-    return {
-      serviceName: bucket.key as string,
-      agentName: bucket.agents.buckets[0]?.key as string | undefined,
-      transactionsPerMinute,
-      errorsPerMinute,
-      avgResponseTime: bucket.avg.value,
-      environments
-    };
-  });
+    const servicesWithOnlyMetricDocuments = servicesFromMetricDocuments.filter(
+      ({ serviceName }) => !foundServiceNames.includes(serviceName)
+    );
 
-  return items;
+    const allServiceNames = foundServiceNames.concat(
+      servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
+    );
+
+    // make sure to exclude health statuses from services
+    // that are not found in APM data
+    const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+      allServiceNames.includes(serviceName)
+    );
+
+    return joinByKey(
+      asMutableArray([
+        ...transactionStats,
+        ...servicesWithOnlyMetricDocuments,
+        ...matchedHealthStatuses,
+      ] as const),
+      'serviceName'
+    );
+  });
 }

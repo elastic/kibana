@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 /*
  * A handful of helper functions for testing the task manager.
@@ -11,19 +14,10 @@
 // Caching this here to avoid setTimeout mocking affecting our tests.
 const nativeTimeout = setTimeout;
 
-/**
- * Creates a mock task manager Logger.
- */
 export function mockLogger() {
-  return {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
+  return loggingSystemMock.createLogger();
 }
-
-interface Resolvable {
+export interface Resolvable {
   resolve: () => void;
 }
 
@@ -33,11 +27,11 @@ interface Resolvable {
  */
 export function resolvable(): PromiseLike<void> & Resolvable {
   let resolve: () => void;
-  const result = new Promise<void>(r => (resolve = r)) as any;
-
-  result.resolve = () => nativeTimeout(resolve, 0);
-
-  return result;
+  return Object.assign(new Promise<void>((r) => (resolve = r)), {
+    resolve() {
+      return nativeTimeout(resolve, 0);
+    },
+  });
 }
 
 /**
@@ -46,5 +40,5 @@ export function resolvable(): PromiseLike<void> & Resolvable {
  * @param {number} ms
  */
 export async function sleep(ms: number) {
-  return new Promise(r => nativeTimeout(r, ms));
+  return new Promise((r) => nativeTimeout(r, ms));
 }

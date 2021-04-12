@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -51,12 +52,19 @@ export const WorkpadAssetSchema = schema.object({
   value: schema.string(),
 });
 
+export const WorkpadVariable = schema.object({
+  name: schema.string(),
+  value: schema.oneOf([schema.string(), schema.number(), schema.boolean()]),
+  type: schema.string(),
+});
+
 export const WorkpadSchema = schema.object({
   '@created': schema.maybe(schema.string()),
   '@timestamp': schema.maybe(schema.string()),
   assets: schema.maybe(schema.recordOf(schema.string(), WorkpadAssetSchema)),
   colors: schema.arrayOf(schema.string()),
   css: schema.string(),
+  variables: schema.arrayOf(WorkpadVariable),
   height: schema.number(),
   id: schema.string(),
   isWriteable: schema.maybe(schema.boolean()),

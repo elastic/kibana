@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,7 +10,7 @@ import moment from 'moment';
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
   const es = getService('legacyEs');
@@ -44,9 +45,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });
@@ -99,8 +98,9 @@ export default function({ getService }) {
         .expect(400);
 
       expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Invalid enrollment token' },
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Invalid enrollment token',
       });
     });
 
@@ -117,9 +117,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: expiredEnrollmentToken,
-            expires_on: moment()
-              .subtract(1, 'minute')
-              .toJSON(),
+            expires_on: moment().subtract(1, 'minute').toJSON(),
           },
         },
       });
@@ -132,8 +130,9 @@ export default function({ getService }) {
         .expect(400);
 
       expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Expired enrollment token' },
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Expired enrollment token',
       });
     });
 
@@ -169,9 +168,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });

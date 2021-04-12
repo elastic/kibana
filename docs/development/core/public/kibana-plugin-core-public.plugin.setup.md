@@ -7,17 +7,17 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreSetup&lt;TPluginsStart&gt;</code> |  |
+|  core | <code>CoreSetup&lt;TPluginsStart, TStart&gt;</code> |  |
 |  plugins | <code>TPluginsSetup</code> |  |
 
 <b>Returns:</b>
 
-`TSetup | Promise<TSetup>`
+`TSetup`
 

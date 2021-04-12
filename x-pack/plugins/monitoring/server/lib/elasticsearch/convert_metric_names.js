@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -53,7 +54,7 @@ export function uncovertMetricNames(byDateBucketResponse) {
   const unconverted = {};
   for (const metricName of LISTING_METRICS_NAMES) {
     unconverted[metricName] = {
-      buckets: byDateBucketResponse.buckets.map(bucket => {
+      buckets: byDateBucketResponse.buckets.map((bucket) => {
         const {
           // eslint-disable-next-line camelcase
           key_as_string,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,7 @@ export function PipelineEditorProvider({ getService }) {
 
   // test subject selectors
   const SUBJ_CONTAINER = '~pipelineEdit';
-  const getContainerSubjForId = id => `~pipelineEdit-${id}`;
+  const getContainerSubjForId = (id) => `~pipelineEdit-${id}`;
   const SUBJ_INPUT_ID = '~pipelineEdit > inputId';
   const SUBJ_INPUT_DESCRIPTION = '~pipelineEdit > inputDescription';
   const SUBJ_UI_ACE_PIPELINE = '~pipelineEdit > acePipeline';

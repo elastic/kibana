@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Pane renders correctly against snapshot 1`] = `
+<Pane
+  timelineId="test"
+/>
+`;

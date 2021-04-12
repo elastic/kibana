@@ -1,24 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
-import { useAppDependencies } from '../../../app_context';
+import { useKibana } from '../../../../common/lib/kibana';
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/action_connector_api');
-
-jest.mock('../../../app_context', () => {
-  const http = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({
-      http,
-    })),
-  };
-});
 
 describe('with_action_api_operations', () => {
   beforeEach(() => {
@@ -36,7 +31,7 @@ describe('with_action_api_operations', () => {
   });
 
   it('loadActionTypes calls the loadActionTypes api', () => {
-    const { http } = useAppDependencies();
+    const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ loadActionTypes }: ComponentOpts) => {
       return <button onClick={() => loadActionTypes()}>{'call api'}</button>;
     };

@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
 
 /*
  * Filters:
@@ -51,7 +39,8 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '../common';
 
-import { FilterLabel } from './ui/filter_bar';
+import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
@@ -59,11 +48,14 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRangeString,
 } from './query';
 
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -96,11 +88,13 @@ export const esFilters = {
   onlyDisabledFiltersChanged,
 
   changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -156,7 +150,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -167,18 +160,16 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
-import { DateFormat } from './field_formats';
-export { baseFormattersPublic } from './field_formats';
+import { DateNanosFormat, DateFormat } from './field_formats';
+export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -200,16 +191,29 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
+
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
 
 /*
  * Index patterns:
@@ -224,11 +228,11 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
-  getRoutes,
   formatHitProvider,
 } from './index_patterns';
+
+export type { IndexPatternsService } from './index_patterns';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -240,21 +244,15 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  getRoutes,
   formatHitProvider,
 };
 
 export {
   IndexPatternsContract,
   IndexPattern,
-  Field as IndexPatternField,
-  TypeMeta as IndexPatternTypeMeta,
-  AggregationRestrictions as IndexPatternAggRestrictions,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
+  IIndexPatternFieldList,
+  IndexPatternField,
 } from './index_patterns';
 
 export {
@@ -264,7 +262,15 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
+  IndexPatternSpec,
+  IndexPatternLoadExpressionFunctionDefinition,
+  fieldList,
 } from '../common';
+
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -277,6 +283,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  AutocompleteStart,
 } from './autocomplete';
 
 /*
@@ -285,113 +292,125 @@ export {
 
 import {
   // aggs
-  AggConfigs,
-  aggTypeFilters,
-  aggGroupNamesMap,
   CidrMask,
-  convertDateRangeToString,
-  convertIPRangeToString,
-  intervalOptions, // only used in Discover
+  intervalOptions,
   isDateHistogramBucketAggConfig,
+  isNumberType,
   isStringType,
   isType,
   parentPipelineType,
   propFilter,
   siblingPipelineType,
   termsAggFilter,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
-} from './search';
-
-import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
-
-export { ParsedInterval } from '../common';
 
 export {
   // aggs
+  AggConfigSerialized,
+  AggGroupLabels,
+  AggGroupName,
   AggGroupNames,
-  AggParam, // only the type is used externally, only in vis editor
-  AggParamOption, // only the type is used externally
+  AggFunctionsMapping,
+  AggParam,
+  AggParamOption,
   AggParamType,
-  AggTypeFieldFilters, // TODO convert to interface
-  AggTypeFilters, // TODO convert to interface
   AggConfigOptions,
   BUCKET_TYPES,
-  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
-  IAggGroupNames,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  IpRangeKey, // only used in field formatter deserialization, which will live in data
   METRIC_TYPES,
-  OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
-  OptionedValueProp, // only type is used externally
+  OptionedValueProp,
+  ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
+} from '../common';
+
+export type { AggConfigs, AggConfig } from '../common';
+
+export {
   // search
   ES_SEARCH_STRATEGY,
-  SYNC_SEARCH_STRATEGY,
-  getEsPreference,
-  getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
-  ISearchStrategy,
-  ISearch,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchGeneric,
-  IEsSearchResponse,
-  IEsSearchRequest,
-  ISyncSearchRequest,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  SearchRequest,
-  SearchResponse,
-  SearchError,
-  SearchStrategyProvider,
-  ISearchSource,
-  SearchSource,
-  SearchSourceFields,
   EsQuerySortValue,
-  SortDirection,
-  FetchOptions,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
+  extractSearchSourceReferences,
+  getEsPreference,
+  getSearchParamsFromRequest,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectSearchSourceReferences,
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
+  ISearchGeneric,
+  ISearchSource,
+  parseSearchSourceJSON,
   SearchInterceptor,
-  RequestTimeoutError,
+  SearchInterceptorDeps,
+  SearchRequest,
+  SearchSourceFields,
+  SortDirection,
+  SearchSessionState,
+  // expression functions and types
+  EsdslExpressionFunctionDefinition,
+  EsRawResponseExpressionTypeDefinition,
+  // errors
+  SearchError,
+  SearchTimeoutError,
+  TimeoutErrorMode,
+  PainlessError,
+  noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './search';
+
+export type {
+  SearchSource,
+  ISessionService,
+  SearchSessionInfoProvider,
+  ISessionsClient,
+  SearchUsageCollector,
+} from './search';
+
+export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
   aggs: {
-    AggConfigs,
-    aggGroupNamesMap,
-    aggTypeFilters,
     CidrMask,
-    convertDateRangeToString,
-    convertIPRangeToString,
     dateHistogramInterval,
-    intervalOptions, // only used in Discover
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    isDateHistogramBucketAggConfig,
+    Ipv4Address,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
+    isNumberType,
     isStringType,
     isType,
     isValidEsInterval,
@@ -403,8 +422,10 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
@@ -418,9 +439,9 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
-  FilterBar,
+  IndexPatternSelectProps,
   QueryStringInput,
-  IndexPatternSelect,
+  QueryStringInputProps,
 } from './ui';
 
 /**
@@ -434,8 +455,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
-  getQueryLog,
   getDefaultQuery,
   FilterManager,
   SavedQuery,
@@ -445,13 +464,24 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  QueryStateChange,
+  QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
+export { AggsStart } from './search/aggs';
+
 export {
+  getTime,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
+export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup
@@ -459,11 +489,17 @@ export {
 
 import { DataPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);
 }
 
-export { DataPublicPluginSetup, DataPublicPluginStart, IDataPluginServices } from './types';
+export {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  IDataPluginServices,
+  DataPublicPluginStartUi,
+  DataPublicPluginStartActions,
+} from './types';
 
 // Export plugin after all other imports
 export { DataPublicPlugin as Plugin };

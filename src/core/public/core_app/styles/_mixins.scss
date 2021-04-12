@@ -1,0 +1,150 @@
+@import '../../variables';
+
+@mixin flexParent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
+  flex: $grow $shrink $basis;
+  display: flex;
+  flex-direction: $direction;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+// EUITODO: Add this
+@mixin kibanaCircleLogo() {
+  display: inline-block;
+  @include size($euiSizeXXL * 2);
+  line-height: $euiSizeXXL * 2;
+  text-align: center;
+  background-color: $euiColorEmptyShade;
+  border-radius: 100%;
+  padding: $euiSize;
+
+  .euiIcon {
+    vertical-align: baseline;
+  }
+}
+
+// Standardizes the look and layout of resizable area handles
+@mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
+  position: relative;
+  display: flex;
+  flex: 0 0 $size;
+  background-color: $euiPageBackgroundColor;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  user-select: none;
+
+  @if ($direction == horizontal) {
+    width: $size;
+  } @else if ($direction == vertical) {
+    height: $size;
+    width: 100%;
+  } @else {
+    @warn('Direction unknown for kbnResizer');
+  }
+
+  &:hover {
+    background-color: tintOrShade($euiColorPrimary, 80%, 60%);
+  }
+
+  &:focus,
+  &.active {
+    background-color: $euiColorPrimary;
+    color: $euiColorEmptyShade;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    @if ($direction == horizontal) {
+      cursor: ew-resize;
+    } @else if ($direction == vertical) {
+      cursor: ns-resize;
+    }
+  }
+}
+
+@mixin kibanaFullScreenGraphics($euiZLevel: $euiZLevel9) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $euiZLevel + 1000;
+  background: inherit;
+  background-color: $euiPageBackgroundColor;
+  opacity: 0;
+  overflow: auto;
+  animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
+
+  @at-root {
+    .kbnBody--hasHeaderBanner & {
+      top: $kbnHeaderBannerHeight;
+    }
+  }
+
+  &::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 310px;
+    height: 477px;
+    content: url(lightOrDarkTheme('~core_app_image_assets/bg_top_branded.svg', '~core_app_image_assets/bg_top_branded_dark.svg'));
+  }
+
+  &::after {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+    width: 313px;
+    height: 461px;
+    content: url(lightOrDarkTheme('~core_app_image_assets/bg_bottom_branded.svg', '~core_app_image_assets/bg_bottom_branded_dark.svg'));
+  }
+
+  @keyframes kibanaFullScreenGraphics_FadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@mixin kbnThemeStyle($theme, $mode: 'both') {
+  $themes:  'v7', 'v8';
+  @if (index($themes, $theme)) {
+    @if ($mode == 'both') {
+      $themeLight: $theme + 'light';
+      $themeDark: $theme + 'dark';
+      // $kbnThemeVersion comes from the active theme's globals file (e.g. _globals_v8light.scss)
+      @if ($kbnThemeVersion == $themeLight or $kbnThemeVersion == $themeDark) {
+        @content;
+      }
+    } @else if ($mode == 'light') {
+      $themeLight: $theme + 'light';
+      @if ($kbnThemeVersion == $themeLight) {
+        @content;
+      }
+    } @else if ($mode == 'dark') {
+      $themeDark: $theme + 'dark';
+      @if ($kbnThemeVersion == $themeDark) {
+        @content;
+      }
+    } @else {
+      @warn 'The second parameter must be a valid mode (light, dark, or both) -- got #{$mode}';
+    }
+  } @else {
+    @warn 'Invalid $theme. Valid options are: #{$themes}. Got #{$theme} instead';
+  }
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -21,19 +22,15 @@ export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDe
       },
     },
     async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
-      try {
-        return res.ok({
-          body: await putLicense({
-            acknowledge: Boolean(req.query.acknowledge),
-            callAsCurrentUser,
-            licensing,
-            license: req.body,
-          }),
-        });
-      } catch (e) {
-        return res.internalError({ body: e });
-      }
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      return res.ok({
+        body: await putLicense({
+          acknowledge: Boolean(req.query.acknowledge),
+          callAsCurrentUser,
+          licensing,
+          license: req.body,
+        }),
+      });
     }
   );
 }

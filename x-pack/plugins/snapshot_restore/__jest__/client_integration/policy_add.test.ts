@@ -1,21 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+// import helpers first, this also sets up the mocks
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+
+import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../test/fixtures';
 
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const { setup } = pageHelpers.policyAdd;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
+// mock for EuiSelectable's virtualization
+jest.mock('react-virtualized-auto-sizer', () => {
+  return ({
+    children,
+  }: {
+    children: (dimensions: { width: number; height: number }) => ReactElement;
+  }) => children({ width: 100, height: 500 });
 });
 
 const POLICY_NAME = 'my_policy';
@@ -37,7 +46,10 @@ describe('<PolicyAdd />', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repository] });
-      httpRequestsMockHelpers.setLoadIndicesResponse({ indices: ['my_index'] });
+      httpRequestsMockHelpers.setLoadIndicesResponse({
+        indices: ['my_index'],
+        dataStreams: ['my_data_stream', 'my_other_data_stream'],
+      });
 
       testBed = await setup();
       await nextTick();
@@ -56,34 +68,61 @@ describe('<PolicyAdd />', () => {
       expect(find('nextButton').props().disabled).toBe(true);
     });
 
+    test('should not show repository-not-found warning', () => {
+      const { exists } = testBed;
+      expect(exists('repositoryNotFoundWarning')).toBe(false);
+    });
+
     describe('form validation', () => {
       describe('logistics (step 1)', () => {
         test('should require a policy name', async () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           form.setInputValue('nameInput', '');
           find('nameInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Policy name is required.']);
+
+          // Enter valid policy name and verify no error messages
+          form.setInputValue('nameInput', 'my_policy');
+          find('nameInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
 
-        test('should require a snapshot name', () => {
+        test('should require a snapshot name that is lowercase', () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           form.setInputValue('snapshotNameInput', '');
           find('snapshotNameInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Snapshot name is required.']);
+
+          // Verify lowercase validation
+          form.setInputValue('snapshotNameInput', 'MY_SNAPSHOT');
+          find('snapshotNameInput').simulate('blur');
+          expect(form.getErrorsMessages()).toEqual(['Snapshot name needs to be lowercase.']);
+
+          // Enter valid snapshot name and verify no error messages
+          form.setInputValue('snapshotNameInput', 'my_snapshot');
+          find('snapshotNameInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
 
         it('should require a schedule', () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           find('showAdvancedCronLink').simulate('click');
           form.setInputValue('advancedCronInput', '');
           find('advancedCronInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Schedule is required.']);
+
+          // Enter valid schedule and verify no error messages
+          form.setInputValue('advancedCronInput', '0 30 1 * * ?');
+          find('advancedCronInput').simulate('blur');
+          expect(form.getErrorsMessages()).toEqual([]);
         });
       });
 
@@ -96,7 +135,7 @@ describe('<PolicyAdd />', () => {
           actions.clickNextButton();
         });
 
-        test('should require at least one index', async () => {
+        test('should require at least one index if no data streams are provided', async () => {
           const { find, form, component } = testBed;
 
           await act(async () => {
@@ -109,7 +148,22 @@ describe('<PolicyAdd />', () => {
           // Deselect all indices from list
           find('deselectIndicesLink').simulate('click');
 
-          expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
+          expect(form.getErrorsMessages()).toEqual([
+            'You must select at least one data stream or index.',
+          ]);
+        });
+
+        test('should correctly indicate data streams with a badge', async () => {
+          const { find, component, form } = testBed;
+
+          await act(async () => {
+            // Toggle "All indices" switch
+            form.toggleEuiSwitch('allIndicesToggle', false);
+            await nextTick();
+          });
+          component.update();
+
+          expect(find('dataStreamBadge').length).toBe(2);
         });
       });
 

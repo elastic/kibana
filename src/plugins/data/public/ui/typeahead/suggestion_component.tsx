@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { QuerySuggestion } from '../../autocomplete';
+import { SuggestionOnClick } from './types';
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -40,12 +30,14 @@ function getEuiIconType(type: string) {
 }
 
 interface Props {
-  onClick: (suggestion: QuerySuggestion) => void;
+  onClick: SuggestionOnClick;
   onMouseEnter: () => void;
   selected: boolean;
+  index: number;
   suggestion: QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
+  shouldDisplayDescription: boolean;
 }
 
 export function SuggestionComponent(props: Props) {
@@ -53,11 +45,12 @@ export function SuggestionComponent(props: Props) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         kbnTypeahead__item: true,
         active: props.selected,
       })}
       role="option"
-      onClick={() => props.onClick(props.suggestion)}
+      onClick={() => props.onClick(props.suggestion, props.index)}
       onMouseEnter={props.onMouseEnter}
       ref={props.innerRef}
       id={props.ariaId}
@@ -70,8 +63,12 @@ export function SuggestionComponent(props: Props) {
         <div className="kbnSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
-        <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
-        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
+          {props.suggestion.text}
+        </div>
+        {props.shouldDisplayDescription && (
+          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        )}
       </div>
     </div>
   );

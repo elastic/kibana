@@ -12,7 +12,7 @@
       "value": 10000,
       "relation": "gte"
     },
-    "max_score": null,
+    "max_score": 0,
     "hits": []
   },
   "aggregations": {

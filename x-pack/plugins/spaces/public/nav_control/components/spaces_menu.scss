@@ -1,0 +1,21 @@
+.spcMenu {
+  max-width: $euiSizeL * 10;
+}
+
+.spcMenu__spacesList {
+  max-height: $euiSizeXL * 10;
+  overflow-y: auto;
+}
+
+.spcMenu__searchFieldWrapper {
+  padding: $euiSizeM;
+}
+
+.spcMenu__manageButton {
+  margin: $euiSizeM;
+  width: calc(100% - #{$euiSizeM*2});
+}
+
+.spcMenu__item {
+  margin-left: $euiSizeM;
+}

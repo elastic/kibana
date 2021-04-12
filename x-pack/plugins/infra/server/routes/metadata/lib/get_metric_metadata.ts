@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
@@ -23,10 +24,11 @@ export interface InfraMetricsAdapterResponse {
 
 export const getMetricMetadata = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InventoryItemType
+  nodeType: InventoryItemType,
+  timeRange: { from: number; to: number }
 ): Promise<InfraMetricsAdapterResponse> => {
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
@@ -40,6 +42,15 @@ export const getMetricMetadata = async (
           filter: [
             {
               match: { [fields.id]: nodeId },
+            },
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
             },
           ],
         },

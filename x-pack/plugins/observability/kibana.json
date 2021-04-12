@@ -2,5 +2,10 @@
   "id": "observability",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "ui": true
+  "configPath": ["xpack", "observability"],
+  "optionalPlugins": ["licensing", "home", "usageCollection","lens", "ruleRegistry"],
+  "requiredPlugins": ["data"],
+  "ui": true,
+  "server": true,
+  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
 }

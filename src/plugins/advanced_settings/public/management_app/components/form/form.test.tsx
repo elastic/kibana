@@ -1,27 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { UiSettingsType } from '../../../../../../core/public';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';
@@ -91,6 +79,16 @@ const settings = {
       displayName: 'Test setting',
       description: 'foo',
       category: ['general'],
+    },
+    {
+      ...defaults,
+      name: 'general:test:array',
+      ariaName: 'array test',
+      displayName: 'Test array setting',
+      description: 'array foo',
+      type: 'array' as UiSettingsType,
+      category: ['general'],
+      defVal: ['test'],
     },
   ],
   'x-pack': [
@@ -256,5 +254,61 @@ describe('Form', () => {
         ),
       })
     );
+  });
+
+  it('should save an array typed field when user provides an empty string correctly', async () => {
+    const wrapper = mountWithI18nProvider(
+      <Form
+        settings={settings}
+        visibleSettings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
+        toasts={{} as any}
+        dockLinks={{} as any}
+      />
+    );
+
+    (wrapper.instance() as Form).setState({
+      unsavedChanges: {
+        'general:test:array': {
+          value: '',
+        },
+      },
+    });
+
+    findTestSubject(wrapper.update(), `advancedSetting-saveButton`).simulate('click');
+    expect(save).toHaveBeenCalledWith({ 'general:test:array': [] });
+  });
+
+  it('should save an array typed field when user provides a comma separated string correctly', async () => {
+    const wrapper = mountWithI18nProvider(
+      <Form
+        settings={settings}
+        visibleSettings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
+        toasts={{} as any}
+        dockLinks={{} as any}
+      />
+    );
+
+    (wrapper.instance() as Form).setState({
+      unsavedChanges: {
+        'general:test:array': {
+          value: 'test1, test2',
+        },
+      },
+    });
+
+    findTestSubject(wrapper.update(), `advancedSetting-saveButton`).simulate('click');
+    expect(save).toHaveBeenCalledWith({ 'general:test:array': ['test1', 'test2'] });
   });
 });

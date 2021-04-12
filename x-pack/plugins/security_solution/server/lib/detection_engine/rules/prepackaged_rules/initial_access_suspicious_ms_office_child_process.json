@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious child processes of frequently targeted Microsoft Office applications (Word, PowerPoint, Excel). These child processes are often launched during exploitation of Office applications or from documents with malicious macros.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious MS Office Child Process",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"eqnedt32.exe\", \"excel.exe\", \"fltldr.exe\", \"msaccess.exe\", \"mspub.exe\", \"powerpnt.exe\", \"winword.exe\") and\n  process.name : (\"Microsoft.Workflow.Compiler.exe\", \"arp.exe\", \"atbroker.exe\", \"bginfo.exe\", \"bitsadmin.exe\", \"cdb.exe\", \"certutil.exe\",\n                \"cmd.exe\", \"cmstp.exe\", \"cscript.exe\", \"csi.exe\", \"dnx.exe\", \"dsget.exe\", \"dsquery.exe\", \"forfiles.exe\", \"fsi.exe\",\n                \"ftp.exe\", \"gpresult.exe\", \"hostname.exe\", \"ieexec.exe\", \"iexpress.exe\", \"installutil.exe\", \"ipconfig.exe\", \"mshta.exe\",\n                \"msxsl.exe\", \"nbtstat.exe\", \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"odbcconf.exe\", \"ping.exe\",\n                \"powershell.exe\", \"pwsh.exe\", \"qprocess.exe\", \"quser.exe\", \"qwinsta.exe\", \"rcsi.exe\", \"reg.exe\", \"regasm.exe\", \"regsvcs.exe\",\n                \"regsvr32.exe\", \"sc.exe\", \"schtasks.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\", \"whoami.exe\",\n                \"wmic.exe\", \"wscript.exe\", \"xwizard.exe\", \"explorer.exe\", \"rundll32.exe\", \"hh.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "a624863f-a70d-417f-a7d2-7a404638d47f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "reference": "https://attack.mitre.org/techniques/T1566/",
+          "subtechnique": [
+            {
+              "id": "T1566.001",
+              "name": "Spearphishing Attachment",
+              "reference": "https://attack.mitre.org/techniques/T1566/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
+}

@@ -3,6 +3,7 @@
 exports[`Advanced Settings: Voice Announcement should render announcement 1`] = `
 <EuiScreenReaderOnly>
   <div
+    aria-label="Advanced Settings results info"
     aria-live="polite"
     role="region"
   >
@@ -28,6 +29,7 @@ exports[`Advanced Settings: Voice Announcement should render announcement 1`] = 
 exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
 <EuiScreenReaderOnly>
   <div
+    aria-label="Advanced Settings results info"
     aria-live="polite"
     role="region"
   >
@@ -35,12 +37,11 @@ exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
       delay={500}
     >
       <FormattedMessage
-        defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
-        id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
+        defaultMessage="There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+        id="advancedSettings.voiceAnnouncement.noSearchResultScreenReaderMessage"
         values={
           Object {
             "optionLenght": 1,
-            "query": "",
             "sectionLenght": 1,
           }
         }

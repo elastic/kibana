@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -24,6 +13,8 @@ import {
   HttpStart,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  SavedObjectsBatchResponse,
+  ApplicationStart,
 } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
@@ -37,6 +28,7 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 export interface TelemetryPluginSetup {
   telemetryService: TelemetryService;
@@ -45,6 +37,9 @@ export interface TelemetryPluginSetup {
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
   telemetryNotifications: TelemetryNotifications;
+  telemetryConstants: {
+    getPrivacyStatementUrl: () => string;
+  };
 }
 
 export interface TelemetryPluginConfig {
@@ -56,6 +51,7 @@ export interface TelemetryPluginConfig {
   optInStatusUrl: string;
   sendUsageFrom: 'browser' | 'server';
   telemetryNotifyUserAboutOptInDefault?: boolean;
+  userCanChangeSettings?: boolean;
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
@@ -64,6 +60,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
+  private canUserChangeSettings: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -72,7 +69,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
     const config = this.config;
-    this.telemetryService = new TelemetryService({ config, http, notifications });
+    const currentKibanaVersion = this.currentKibanaVersion;
+    this.telemetryService = new TelemetryService({
+      config,
+      http,
+      notifications,
+      currentKibanaVersion,
+    });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
@@ -86,7 +89,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       throw Error('Telemetry plugin failed to initialize properly.');
     }
 
+    this.canUserChangeSettings = this.getCanUserChangeSettings(application);
+    this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
+
     this.telemetryNotifications = new TelemetryNotifications({
+      http,
       overlays,
       telemetryService: this.telemetryService,
     });
@@ -114,7 +121,21 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       telemetryService: this.telemetryService,
       telemetryNotifications: this.telemetryNotifications,
+      telemetryConstants: {
+        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
+      },
     };
+  }
+
+  /**
+   * Can the user edit the saved objects?
+   * This is a security feature, not included in the OSS build, so we need to fallback to `true`
+   * in case it is `undefined`.
+   * @param application CoreStart.application
+   * @private
+   */
+  private getCanUserChangeSettings(application: ApplicationStart): boolean {
+    return (application.capabilities?.savedObjectsManagement?.edit as boolean | undefined) ?? true;
   }
 
   private getIsUnauthenticated(http: HttpStart) {
@@ -188,15 +209,21 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      userCanChangeSettings: this.canUserChangeSettings,
     };
   }
 
   private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
     try {
-      const { attributes } = await savedObjectsClient.get<TelemetrySavedObjectAttributes>(
-        'telemetry',
-        'telemetry'
-      );
+      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
+      const {
+        savedObjects: [{ attributes }],
+      } = (await savedObjectsClient.bulkGet([
+        {
+          id: 'telemetry',
+          type: 'telemetry',
+        },
+      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
       return attributes;
     } catch (error) {
       const errorCode = error[Symbol('SavedObjectsClientErrorCode')];

@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of Windows Management Instrumentation Command (WMIC) to discover certain System Security Settings such as AntiVirus or Host Firewall details.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Security Software Discovery using WMIC",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n   (process.name:\"wmic.exe\" or process.pe.original_file_name:\"wmic.exe\") and\n    process.args:\"/namespace:\\\\\\\\root\\\\SecurityCenter2\" and process.args:\"Get\"\n",
+  "risk_score": 47,
+  "rule_id": "6ea55c81-e2ba-42f2-a134-bccf857ba922",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1518",
+          "name": "Software Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1518/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Mock the mlJobService that is imported for saving rules.
@@ -11,11 +12,11 @@ jest.mock('../../services/job_service.js', () => 'mlJobService');
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
-jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: privilege => mockCheckPermission(privilege),
+jest.mock('../../capabilities/check_capabilities', () => ({
+  checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ScopeSection } from './scope_section';

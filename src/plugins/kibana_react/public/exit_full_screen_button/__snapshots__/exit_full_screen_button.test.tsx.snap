@@ -39,7 +39,7 @@ exports[`is rendered 1`] = `
                   size="l"
                   type="logoElastic"
                 >
-                  <div
+                  <span
                     data-euiicon-type="logoElastic"
                     size="l"
                   />
@@ -55,22 +55,12 @@ exports[`is rendered 1`] = `
                 data-test-subj="exitFullScreenModeText"
               >
                 <div>
-                  <EuiTitle
-                    className="dshExitFullScreenButton__title"
-                    size="xxxs"
-                  >
-                    <p
-                      className="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
-                    >
-                      Elastic Kibana
-                    </p>
-                  </EuiTitle>
                   <EuiText
                     className="dshExitFullScreenButton__text"
-                    size="xs"
+                    size="s"
                   >
                     <div
-                      className="euiText euiText--extraSmall dshExitFullScreenButton__text"
+                      className="euiText euiText--small dshExitFullScreenButton__text"
                     >
                       <p>
                         Exit full screen
@@ -90,7 +80,7 @@ exports[`is rendered 1`] = `
                   className="dshExitFullScreenButton__icon"
                   type="fullScreen"
                 >
-                  <div
+                  <span
                     className="dshExitFullScreenButton__icon"
                     data-euiicon-type="fullScreen"
                   />

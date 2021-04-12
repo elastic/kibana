@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Joi from 'joi';
@@ -26,7 +15,7 @@ const PARAM_TYPES = {
 
 const TUTORIAL_CATEGORY = {
   LOGGING: 'logging',
-  SIEM: 'siem',
+  SECURITY_SOLUTION: 'security solution',
   METRICS: 'metrics',
   OTHER: 'other',
 };
@@ -47,9 +36,7 @@ const artifactsSchema = Joi.object({
     documentationUrl: Joi.string().required(),
   }),
   // Kibana dashboards created by this product.
-  dashboards: Joi.array()
-    .items(dashboardSchema)
-    .required(),
+  dashboards: Joi.array().items(dashboardSchema).required(),
   application: Joi.object({
     path: Joi.string().required(),
     label: Joi.string().required(),
@@ -63,9 +50,7 @@ const statusCheckSchema = Joi.object({
   success: Joi.string(),
   error: Joi.string(),
   esHitsCheck: Joi.object({
-    index: Joi.alternatives()
-      .try(Joi.string(), Joi.array().items(Joi.string()))
-      .required(),
+    index: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())).required(),
     query: Joi.object().required(),
   }).required(),
 });
@@ -79,9 +64,7 @@ const instructionSchema = Joi.object({
 
 const instructionVariantSchema = Joi.object({
   id: Joi.string().required(),
-  instructions: Joi.array()
-    .items(instructionSchema)
-    .required(),
+  instructions: Joi.array().items(instructionSchema).required(),
 });
 
 const instructionSetSchema = Joi.object({
@@ -92,9 +75,7 @@ const instructionSetSchema = Joi.object({
     iconType: Joi.string(),
   }),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: Joi.array()
-    .items(instructionVariantSchema)
-    .required(),
+  instructionVariants: Joi.array().items(instructionVariantSchema).required(),
   statusCheck: statusCheckSchema,
 });
 
@@ -104,15 +85,11 @@ const paramSchema = Joi.object({
     .regex(/^[a-zA-Z_]+$/)
     .required(),
   label: Joi.string().required(),
-  type: Joi.string()
-    .valid(Object.values(PARAM_TYPES))
-    .required(),
+  type: Joi.string().valid(Object.values(PARAM_TYPES)).required(),
 });
 
 const instructionsSchema = Joi.object({
-  instructionSets: Joi.array()
-    .items(instructionSetSchema)
-    .required(),
+  instructionSets: Joi.array().items(instructionSetSchema).required(),
   params: Joi.array().items(paramSchema),
 });
 
@@ -120,10 +97,9 @@ export const tutorialSchema = {
   id: Joi.string()
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
-  category: Joi.string()
-    .valid(Object.values(TUTORIAL_CATEGORY))
-    .required(),
+  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
   name: Joi.string().required(),
+  moduleName: Joi.string(),
   isBeta: Joi.boolean().default(false),
   shortDescription: Joi.string().required(),
   euiIconType: Joi.string(), // EUI icon type string, one of https://elastic.github.io/eui/#/icons

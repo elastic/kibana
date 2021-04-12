@@ -18,6 +18,7 @@ export interface AppLeaveConfirmAction
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [callback](./kibana-plugin-core-public.appleaveconfirmaction.callback.md) | <code>() =&gt; void</code> |  |
 |  [text](./kibana-plugin-core-public.appleaveconfirmaction.text.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-core-public.appleaveconfirmaction.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-core-public.appleaveconfirmaction.type.md) | <code>AppLeaveActionType.confirm</code> |  |

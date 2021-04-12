@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -37,7 +38,7 @@ const wsState: any = {
       iconClass: 'fa-cube',
     },
   ],
-  blacklist: [],
+  blocklist: [],
   vertices: [
     {
       x: 324.55695700802687,
@@ -1589,7 +1590,7 @@ const wsState: any = {
   urlTemplates: [
     {
       url:
-        '/app/kibana#/discover?_a=(columns%3A!(_source)%2Cindex%3Ad3d7af60-4c81-11e8-b3d7-01146121b73d%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
+        '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3Ad3d7af60-4c81-11e8-b3d7-01146121b73d%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
       description: 'Raw documents',
       isDefault: true,
       encoderID: 'kql-loose',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -55,7 +56,7 @@ export class DifferenceMetric extends ElasticsearchMetric {
 
     this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
     };
   }
@@ -116,7 +117,7 @@ export class LatencyMetric extends ElasticsearchMetric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const timeInMillisDeriv = _.get(bucket, 'event_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'event_total_deriv.normalized_value', null);
 
@@ -244,7 +245,7 @@ export class WriteThreadPoolQueueMetric extends ElasticsearchMetric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const index = _.get(bucket, 'index.value', null);
       const bulk = _.get(bucket, 'bulk.value', null);
       const write = _.get(bucket, 'write.value', null);
@@ -303,13 +304,13 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
       },
     };
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       const index = _.get(bucket, 'index_deriv.normalized_value', null);
       const bulk = _.get(bucket, 'bulk_deriv.normalized_value', null);
       const write = _.get(bucket, 'write_deriv.normalized_value', null);
 
       if (index !== null || bulk !== null || write !== null) {
-        const valueOrZero = value => (value < 0 ? 0 : value || 0);
+        const valueOrZero = (value) => (value < 0 ? 0 : value || 0);
 
         return valueOrZero(index) + valueOrZero(bulk) + valueOrZero(write);
       }
@@ -329,7 +330,7 @@ export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
       }),
     });
 
-    this.calculation = bucket => {
+    this.calculation = (bucket) => {
       return _.get(bucket, 'metric.value') / 1000;
     };
   }

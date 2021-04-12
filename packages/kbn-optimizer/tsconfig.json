@@ -1,7 +1,17 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": false,
+    "outDir": "./target",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-optimizer/src"
+  },
   "include": [
-    "index.d.ts",
     "src/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*"
   ]
 }

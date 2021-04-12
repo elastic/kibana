@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -61,19 +62,19 @@ export class Datafeed extends Component {
     };
   }
 
-  onQueryChange = query => {
+  onQueryChange = (query) => {
     this.setDatafeed({ datafeedQuery: query });
   };
 
-  onQueryDelayChange = e => {
+  onQueryDelayChange = (e) => {
     this.setDatafeed({ datafeedQueryDelay: e.target.value });
   };
 
-  onFrequencyChange = e => {
+  onFrequencyChange = (e) => {
     this.setDatafeed({ datafeedFrequency: e.target.value });
   };
 
-  onScrollSizeChange = e => {
+  onScrollSizeChange = (e) => {
     this.setDatafeed({ datafeedScrollSize: +e.target.value });
   };
 

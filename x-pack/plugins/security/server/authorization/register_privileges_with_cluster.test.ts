@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IClusterClient, Logger } from 'kibana/server';
-import { RawKibanaPrivileges } from '../../common/model';
-import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+/* eslint-disable @typescript-eslint/naming-convention */
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import type { Logger } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import type { RawKibanaPrivileges } from '../../common/model';
+import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -32,29 +35,33 @@ const registerPrivilegesWithClusterTest = (
   }
 ) => {
   const createExpectUpdatedPrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
     mockLogger: jest.Mocked<Logger>,
     error: Error
   ) => {
     return (postPrivilegesBody: any, deletedPrivileges: string[] = []) => {
       expect(error).toBeUndefined();
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(
-        2 + deletedPrivileges.length
-      );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
-        privilege: application,
+      expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenCalledWith({
+        application,
       });
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.postPrivileges', {
+
+      expect(mockClusterClient.asInternalUser.security.putPrivileges).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asInternalUser.security.putPrivileges).toHaveBeenCalledWith({
         body: postPrivilegesBody,
       });
+
+      expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledTimes(
+        deletedPrivileges.length
+      );
       for (const deletedPrivilege of deletedPrivileges) {
         expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
+          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticsearch for ${application}`
         );
-        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-          'shield.deletePrivilege',
-          { application, privilege: deletedPrivilege }
-        );
+        expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledWith({
+          application,
+          name: deletedPrivilege,
+        });
       }
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -67,22 +74,22 @@ const registerPrivilegesWithClusterTest = (
   };
 
   const createExpectDidntUpdatePrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
     mockLogger: Logger,
     error: Error
   ) => {
     return () => {
       expect(error).toBeUndefined();
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenLastCalledWith('shield.getPrivilege', {
-        privilege: application,
+      expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenLastCalledWith({
+        application,
       });
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Registering Kibana Privileges with Elasticsearch for ${application}`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        `Kibana Privileges already registered with Elasticearch for ${application}`
+        `Kibana Privileges already registered with Elasticsearch for ${application}`
       );
     };
   };
@@ -101,36 +108,25 @@ const registerPrivilegesWithClusterTest = (
 
   test(description, async () => {
     const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockClusterClient.callAsInternalUser.mockImplementation(async api => {
-      switch (api) {
-        case 'shield.getPrivilege': {
-          if (throwErrorWhenGettingPrivileges) {
-            throw throwErrorWhenGettingPrivileges;
-          }
-
-          // ES returns an empty object if we don't have any privileges
-          if (!existingPrivileges) {
-            return {};
-          }
-
-          return existingPrivileges;
-        }
-        case 'shield.deletePrivilege': {
-          break;
-        }
-        case 'shield.postPrivileges': {
-          if (throwErrorWhenPuttingPrivileges) {
-            throw throwErrorWhenPuttingPrivileges;
-          }
-
-          return;
-        }
-        default: {
-          expect(true).toBe(false);
-        }
+    mockClusterClient.asInternalUser.security.getPrivileges.mockImplementation((async () => {
+      if (throwErrorWhenGettingPrivileges) {
+        throw throwErrorWhenGettingPrivileges;
       }
-    });
-    const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+
+      // ES returns an empty object if we don't have any privileges
+      if (!existingPrivileges) {
+        return { body: {} };
+      }
+
+      return { body: existingPrivileges };
+    }) as any);
+    mockClusterClient.asInternalUser.security.putPrivileges.mockImplementation((async () => {
+      if (throwErrorWhenPuttingPrivileges) {
+        throw throwErrorWhenPuttingPrivileges;
+      }
+    }) as any);
+
+    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
     let error;
     try {

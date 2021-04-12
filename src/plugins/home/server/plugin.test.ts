@@ -1,28 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin } from './plugin';
-import { coreMock } from '../../../core/server/mocks';
-import { CoreSetup } from '../../../core/server';
-
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+import { coreMock, httpServiceMock } from '../../../core/server/mocks';
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
@@ -33,8 +19,16 @@ describe('HomeServerPlugin', () => {
   });
 
   describe('setup', () => {
-    const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
-    const initContext = coreMock.createPluginInitializerContext();
+    let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+    let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
+    let routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+
+    beforeEach(() => {
+      mockCoreSetup = coreMock.createSetup();
+      routerMock = httpServiceMock.createRouter();
+      mockCoreSetup.http.createRouter.mockReturnValue(routerMock);
+      initContext = coreMock.createPluginInitializerContext();
+    });
 
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
       const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
@@ -51,6 +45,18 @@ describe('HomeServerPlugin', () => {
       expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
       expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
       expect(setup.sampleData).toHaveProperty('replacePanelInSampleDatasetDashboard');
+    });
+
+    test('registers the `/api/home/hits_status` route', () => {
+      new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+
+      expect(routerMock.post).toHaveBeenCalledTimes(1);
+      expect(routerMock.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/api/home/hits_status',
+        }),
+        expect.any(Function)
+      );
     });
   });
 

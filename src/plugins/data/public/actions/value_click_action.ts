@@ -1,118 +1,58 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../plugins/kibana_react/public';
-import {
-  ActionByType,
-  createAction,
-  IncompatibleActionError,
-} from '../../../../plugins/ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
-import { createFiltersFromEvent } from './filters/create_filters_from_event';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
+import { Datatable } from 'src/plugins/expressions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
+import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
+import type { Filter } from '../../common/es_query/filters';
 
+export type ValueClickActionContext = ValueClickContext;
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
-export interface ValueClickActionContext {
-  data: any;
-  timeFieldName: string;
+export interface ValueClickContext {
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
+  data: {
+    data: Array<{
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
+  };
 }
 
-async function isCompatible(context: ValueClickActionContext) {
-  try {
-    const filters: Filter[] =
-      (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
-      [];
-    return filters.length > 0;
-  } catch {
-    return false;
-  }
-}
-
-export function valueClickAction(
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract
-): ActionByType<typeof ACTION_VALUE_CLICK> {
-  return createAction<typeof ACTION_VALUE_CLICK>({
+export function createValueClickAction(
+  getStartServices: () => { uiActions: UiActionsStart }
+): Action {
+  return createAction({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
-    getDisplayName: () => {
-      return i18n.translate('data.filter.applyFilterActionTitle', {
-        defaultMessage: 'Apply filter to current view',
-      });
-    },
-    isCompatible,
-    execute: async ({ timeFieldName, data }: ValueClickActionContext) => {
-      if (!(await isCompatible({ timeFieldName, data }))) {
-        throw new IncompatibleActionError();
-      }
-
-      const filters: Filter[] =
-        (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
-
-      let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
-
-      if (selectedFilters.length > 1) {
-        const indexPatterns = await Promise.all(
-          filters.map(filter => {
-            return getIndexPatterns().get(filter.meta.index!);
-          })
-        );
-
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
-          const overlay = getOverlays().openModal(
-            toMountPoint(
-              applyFiltersPopover(
-                filters,
-                indexPatterns,
-                () => {
-                  overlay.close();
-                  resolve([]);
-                },
-                (filterSelection: Filter[]) => {
-                  overlay.close();
-                  resolve(filterSelection);
-                }
-              )
-            ),
-            {
-              'data-test-subj': 'selectFilterOverlay',
-            }
-          );
-        });
-
-        selectedFilters = await filterSelectionPromise;
-      }
-
-      if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          timeFieldName,
-          selectedFilters
-        );
-        filterManager.addFilters(restOfFilters);
-        if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+    shouldAutoExecute: async () => true,
+    execute: async (context: ValueClickActionContext) => {
+      try {
+        const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
+        if (filters.length > 0) {
+          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+            filters,
+            embeddable: context.embeddable,
+            timeFieldName: context.data.timeFieldName,
+          });
         }
-      } else {
-        filterManager.addFilters(selectedFilters);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Error [ACTION_EMIT_APPLY_FILTER_TRIGGER]: can\'t extract filters from action context`
+        );
       }
     },
   });

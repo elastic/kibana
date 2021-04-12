@@ -1,37 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/public/mocks';
-import { TriggerId } from './types';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    addTriggerAction: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
+    unregisterAction: jest.fn(),
   };
   return setupContract;
 };
@@ -39,16 +29,19 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     attachAction: jest.fn(),
-    registerAction: jest.fn(),
-    registerTrigger: jest.fn(),
-    getAction: jest.fn(),
+    unregisterAction: jest.fn(),
+    addTriggerAction: jest.fn(),
+    clear: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
-    getTrigger: jest.fn(),
-    getTriggerActions: jest.fn((id: TriggerId) => []),
-    getTriggerCompatibleActions: jest.fn(),
-    clear: jest.fn(),
     fork: jest.fn(),
+    getAction: jest.fn(),
+    hasAction: jest.fn(),
+    getTrigger: jest.fn(),
+    getTriggerActions: jest.fn((id: string) => []),
+    getTriggerCompatibleActions: jest.fn(),
+    registerAction: jest.fn(),
+    registerTrigger: jest.fn(),
   };
 
   return startContract;

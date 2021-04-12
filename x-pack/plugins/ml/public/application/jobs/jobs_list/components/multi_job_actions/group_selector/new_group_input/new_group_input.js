@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -13,7 +14,7 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiFormRow,
-  keyCodes,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +36,7 @@ export class NewGroupInput extends Component {
     };
   }
 
-  changeTempNewGroup = e => {
+  changeTempNewGroup = (e) => {
     const tempNewGroupName = e.target.value;
     let groupsValidationError = '';
 
@@ -59,9 +60,9 @@ export class NewGroupInput extends Component {
     });
   };
 
-  newGroupKeyPress = e => {
+  newGroupKeyPress = (e) => {
     if (
-      e.keyCode === keyCodes.ENTER &&
+      e.key === keys.ENTER &&
       this.state.groupsValidationError === '' &&
       this.state.tempNewGroupName !== ''
     ) {
@@ -82,7 +83,7 @@ export class NewGroupInput extends Component {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiFormRow
-              compressed
+              display="rowCompressed"
               isInvalid={groupsValidationError !== ''}
               error={groupsValidationError}
               className="new-group-input"

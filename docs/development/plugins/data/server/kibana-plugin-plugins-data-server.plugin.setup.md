@@ -7,11 +7,12 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
-        fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
-        };
+setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { bfetch, expressions, usageCollection }: DataPluginSetupDependencies): {
+        __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
+        fieldFormats: {
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+        };
     };
 ```
 
@@ -19,15 +20,16 @@ setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreSetup</code> |  |
-|  { usageCollection } | <code>DataPluginSetupDependencies</code> |  |
+|  core | <code>CoreSetup&lt;DataPluginStartDependencies, DataPluginStart&gt;</code> |  |
+|  { bfetch, expressions, usageCollection } | <code>DataPluginSetupDependencies</code> |  |
 
 <b>Returns:</b>
 
 `{
-        fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
-        };
+        __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
+        fieldFormats: {
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+        };
     }`
 

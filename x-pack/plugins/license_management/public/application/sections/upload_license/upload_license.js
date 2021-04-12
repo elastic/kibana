@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
-import { BASE_PATH } from '../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,7 +13,6 @@ import {
   EuiForm,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
@@ -25,6 +24,8 @@ import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+
 export class UploadLicense extends React.PureComponent {
   state = {
     isOptingInToTelemetry: false,
@@ -34,10 +35,10 @@ export class UploadLicense extends React.PureComponent {
     this.props.setBreadcrumb('upload');
     this.props.addUploadErrorMessage('');
   }
-  onOptInChange = isOptingInToTelemetry => {
+  onOptInChange = (isOptingInToTelemetry) => {
     this.setState({ isOptingInToTelemetry });
   };
-  send = acknowledge => {
+  send = (acknowledge) => {
     const file = this.file;
     const fr = new FileReader();
 
@@ -60,41 +61,39 @@ export class UploadLicense extends React.PureComponent {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-              defaultMessage="Confirm License Upload"
-            />
-          }
-          onCancel={this.cancel}
-          onConfirm={() => this.send(true)}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-              defaultMessage="Confirm"
-            />
-          }
-        >
-          <div>
-            <EuiText>{firstLine}</EuiText>
-            <EuiText>
-              <ul>
-                {messages.map(message => (
-                  <li key={message}>{message}</li>
-                ))}
-              </ul>
-            </EuiText>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+            defaultMessage="Confirm License Upload"
+          />
+        }
+        onCancel={this.cancel}
+        onConfirm={() => this.send(true)}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />
+        }
+      >
+        <div>
+          <EuiText>{firstLine}</EuiText>
+          <EuiText>
+            <ul>
+              {messages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </EuiText>
+        </div>
+      </EuiConfirmModal>
     );
   }
   errorMessage() {
@@ -110,7 +109,7 @@ export class UploadLicense extends React.PureComponent {
     }
     this.file = file;
   };
-  submit = event => {
+  submit = (event) => {
     event.preventDefault();
     if (this.file) {
       this.send();
@@ -124,7 +123,7 @@ export class UploadLicense extends React.PureComponent {
     }
   };
   render() {
-    const { currentLicenseType, applying, telemetry } = this.props;
+    const { currentLicenseType, applying, telemetry, history } = this.props;
 
     return (
       <Fragment>
@@ -189,7 +188,7 @@ export class UploadLicense extends React.PureComponent {
               <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty href={`#${BASE_PATH}home`}>
+                  <EuiButtonEmpty {...reactRouterNavigate(history, '/home')}>
                     <FormattedMessage
                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                       defaultMessage="Cancel"

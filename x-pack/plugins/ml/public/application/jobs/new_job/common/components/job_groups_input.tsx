@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
@@ -20,18 +21,18 @@ export interface JobGroupsInputProps {
 
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
-    const options = existingGroups.map<EuiComboBoxOptionOption>(g => ({
+    const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g),
     }));
 
-    const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>(g => ({
+    const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g),
     }));
 
     function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
-      onChange(optionsIn.map(g => g.label));
+      onChange(optionsIn.map((g) => g.label));
     }
 
     function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
@@ -48,7 +49,7 @@ export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
 
       if (
         flattenedOptions.findIndex(
-          option => option.label.trim().toLowerCase() === normalizedSearchValue
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
         ) === -1
       ) {
         options.push(newGroup);

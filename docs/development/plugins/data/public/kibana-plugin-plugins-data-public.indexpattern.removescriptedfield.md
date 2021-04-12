@@ -4,19 +4,21 @@
 
 ## IndexPattern.removeScriptedField() method
 
+Remove scripted field from field list
+
 <b>Signature:</b>
 
 ```typescript
-removeScriptedField(field: IFieldType): Promise<void | Error>;
+removeScriptedField(fieldName: string): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  field | <code>IFieldType</code> |  |
+|  fieldName | <code>string</code> |  |
 
 <b>Returns:</b>
 
-`Promise<void | Error>`
+`void`
 

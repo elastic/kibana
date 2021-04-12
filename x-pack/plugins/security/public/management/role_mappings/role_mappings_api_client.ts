@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { RoleMapping } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { RoleMapping } from '../../../common/model';
 
 interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;
@@ -36,22 +38,20 @@ export class RoleMappingsAPIClient {
   }
 
   public async saveRoleMapping(roleMapping: RoleMapping) {
-    const payload = { ...roleMapping };
-    delete payload.name;
+    const { name, ...payload } = roleMapping;
 
-    return this.http.post(
-      `/internal/security/role_mapping/${encodeURIComponent(roleMapping.name)}`,
-      { body: JSON.stringify(payload) }
-    );
+    return this.http.post(`/internal/security/role_mapping/${encodeURIComponent(name)}`, {
+      body: JSON.stringify(payload),
+    });
   }
 
   public async deleteRoleMappings(names: string[]): Promise<DeleteRoleMappingsResponse> {
     return Promise.all(
-      names.map(name =>
+      names.map((name) =>
         this.http
           .delete(`/internal/security/role_mapping/${encodeURIComponent(name)}`)
           .then(() => ({ success: true, name }))
-          .catch(error => ({ success: false, name, error }))
+          .catch((error) => ({ success: false, name, error }))
       )
     );
   }

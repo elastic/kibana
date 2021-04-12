@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
@@ -12,7 +13,7 @@ import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
-const waitForPromise = () => new Promise(r => setTimeout(r));
+const waitForPromise = () => new Promise((r) => setTimeout(r));
 
 describe('datasource saga', () => {
   let env: MockedGraphEnvironment;
@@ -25,7 +26,7 @@ describe('datasource saga', () => {
           get: jest.fn(() =>
             Promise.resolve({
               title: 'test-pattern',
-              getNonScriptedFields: () => [{ name: 'field1', type: 'string' }],
+              getNonScriptedFields: () => [{ name: 'field1', type: 'string', isMapped: true }],
             } as IndexPattern)
           ),
         },

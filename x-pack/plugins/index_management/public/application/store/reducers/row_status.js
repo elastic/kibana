@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions } from 'redux-actions';
@@ -31,7 +32,7 @@ export const rowStatus = handleActions(
     [clearRowStatus](state, action) {
       const { indexNames } = action.payload;
       const newState = { ...state };
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         delete newState[indexName];
       });
       return newState;
@@ -40,7 +41,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLOSING;
       });
 
@@ -53,7 +54,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_OPENING;
       });
 
@@ -66,7 +67,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_REFRESHING;
       });
 
@@ -79,7 +80,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FLUSHING;
       });
 
@@ -92,7 +93,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FORCEMERGING;
       });
 
@@ -105,7 +106,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLEARING_CACHE;
       });
 

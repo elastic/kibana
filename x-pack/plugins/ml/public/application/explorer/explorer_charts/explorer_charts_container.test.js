@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,16 +18,10 @@ import { ExplorerChartsContainer } from './explorer_charts_container';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
+import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
-// Mock TimeBuckets and mlFieldFormatService, they don't play well
-// with the jest based test setup yet.
-jest.mock('../../util/time_buckets', () => ({
-  TimeBuckets: function() {
-    this.setBounds = jest.fn();
-    this.setInterval = jest.fn();
-    this.getScaledDateFormat = jest.fn();
-  },
-}));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
@@ -38,6 +33,24 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: (comp) => {
+    return comp;
+  },
+}));
+
+const getUtilityProps = () => {
+  const mlUrlGenerator = {
+    createUrl: jest.fn(),
+  };
+  return {
+    mlUrlGenerator,
+    timefilter: timefilterMock,
+    timeBuckets: timeBucketsMock,
+    kibana: kibanaContextMock,
+  };
+};
+
 describe('ExplorerChartsContainer', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -48,12 +61,12 @@ describe('ExplorerChartsContainer', () => {
   test('Minimal Initialization', () => {
     const wrapper = shallow(
       <I18nProvider>
-        <ExplorerChartsContainer {...getDefaultChartsData()} />
+        <ExplorerChartsContainer {...getDefaultChartsData()} {...getUtilityProps()} severity={10} />
       </I18nProvider>
     );
 
     expect(wrapper.html()).toBe(
-      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive"></div>'
+      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
@@ -69,10 +82,11 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
+      severity: 10,
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 
@@ -96,10 +110,11 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
+      severity: 10,
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 

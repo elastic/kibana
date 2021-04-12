@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -51,6 +52,7 @@ function ListItem({
   return (
     <li
       className={classNames('gphGuidancePanel__item', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
@@ -59,6 +61,7 @@ function ListItem({
       {state !== 'disabled' && (
         <span
           className={classNames('gphGuidancePanel__itemIcon', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphGuidancePanel__itemIcon--done': state === 'done',
           })}
           aria-hidden={true}
@@ -147,10 +150,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   if (noIndexPatterns) {
     const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
-    const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
-    const sampleDataUrl = `${application.getUrlForApp(
-      'kibana'
-    )}#/home/tutorial_directory/sampleData`;
+    const indexPatternUrl = `${managementUrl}/kibana/indexPatterns`;
+    const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
     content = (
       <EuiPanel paddingSize="none">
         <EuiCallOut
@@ -219,7 +220,7 @@ export const GuidancePanel = connect(
       hasFields: hasFieldsSelector(state),
     };
   },
-  dispatch => ({
+  (dispatch) => ({
     onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
       dispatch(
         requestDatasource({

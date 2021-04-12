@@ -1,19 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './update_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
+
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
+  coreMock,
 } from '../../../../../../src/core/server/mocks';
 
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 interface TestOptions {
   licenseCheckResult?: LicenseStatus;
   apiResponses?: Array<() => Promise<unknown>>;
@@ -36,19 +52,22 @@ describe('UPDATE remote clusters', () => {
     }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
         getLicenseStatus: () => licenseCheckResult,
         elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
         elasticsearch: elasticsearchMock,
+        config: {
+          isCloudEnabled: false,
+        },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {
@@ -66,14 +85,8 @@ describe('UPDATE remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
-
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(asserts.statusCode);
@@ -168,6 +181,85 @@ describe('UPDATE remote clusters', () => {
           seeds: ['127.0.0.1:9300'],
           skipUnavailable: true,
           mode: 'sniff',
+        },
+      },
+    });
+    updateRemoteClustersTest('updates v1 proxy cluster', {
+      apiResponses: [
+        async () => ({
+          test: {
+            connected: true,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            seeds: ['127.0.0.1:9300'],
+          },
+        }),
+        async () => ({
+          acknowledged: true,
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  connected: true,
+                  proxy_address: '127.0.0.1:9300',
+                  initial_connect_timeout: '30s',
+                  skip_unavailable: true,
+                  mode: 'proxy',
+                  proxy_socket_connections: 18,
+                },
+              },
+            },
+          },
+          transient: {},
+        }),
+      ],
+      params: {
+        name: 'test',
+      },
+      payload: {
+        proxyAddress: '127.0.0.1:9300',
+        skipUnavailable: true,
+        mode: 'proxy',
+        hasDeprecatedProxySetting: true,
+        serverName: '',
+        proxySocketConnections: 18,
+      },
+      asserts: {
+        apiArguments: [
+          ['cluster.remoteInfo'],
+          [
+            'cluster.putSettings',
+            {
+              body: {
+                persistent: {
+                  cluster: {
+                    remote: {
+                      test: {
+                        proxy_address: '127.0.0.1:9300',
+                        skip_unavailable: true,
+                        mode: 'proxy',
+                        node_connections: null,
+                        seeds: null,
+                        proxy_socket_connections: 18,
+                        server_name: null,
+                        proxy: null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: {
+          initialConnectTimeout: '30s',
+          isConfiguredByNode: false,
+          isConnected: true,
+          proxyAddress: '127.0.0.1:9300',
+          name: 'test',
+          skipUnavailable: true,
+          mode: 'proxy',
         },
       },
     });

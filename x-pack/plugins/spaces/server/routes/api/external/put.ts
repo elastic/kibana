@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { Space } from '../../../../common/model/space';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService, getSavedObjects } = deps;
+  const { externalRouter, getSpacesService } = deps;
 
   externalRouter.put(
     {
@@ -25,8 +28,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const space = request.body;
       const id = request.params.id;
@@ -35,7 +37,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       try {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();
         }
         return response.customError(wrapError(error));

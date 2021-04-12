@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -57,13 +58,13 @@ export class RuleActionPanel extends Component {
         const filterId = scope[partitionFieldName].filter_id;
         ml.filters
           .filters({ filterId })
-          .then(filter => {
+          .then((filter) => {
             const filterItems = filter.items;
             if (filterItems.indexOf(partitionFieldValue[0]) === -1) {
               this.setState({ showAddToFilterListLink: true });
             }
           })
-          .catch(resp => {
+          .catch((resp) => {
             console.log(`Error loading filter ${filterId}:`, resp);
           });
       }

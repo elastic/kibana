@@ -1,22 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APICaller } from 'kibana/server';
-import { LicenseCheck } from '../license_checks';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { resultsServiceProvider } from '../../models/results_service';
+import { GetGuards } from '../shared_services';
+
+type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
 export interface ResultsServiceProvider {
-  resultsServiceProvider(callAsCurrentUser: APICaller): ReturnType<typeof resultsServiceProvider>;
+  resultsServiceProvider(
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ): {
+    getAnomaliesTableData: OrigResultsServiceProvider['getAnomaliesTableData'];
+  };
 }
 
-export function getResultsServiceProvider(isFullLicense: LicenseCheck): ResultsServiceProvider {
+export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceProvider {
   return {
-    resultsServiceProvider(callAsCurrentUser: APICaller) {
-      isFullLicense();
-      return resultsServiceProvider(callAsCurrentUser);
+    resultsServiceProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      return {
+        async getAnomaliesTableData(...args) {
+          return await getGuards(request, savedObjectsClient)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ mlClient }) => {
+              const { getAnomaliesTableData } = resultsServiceProvider(mlClient);
+              return getAnomaliesTableData(...args);
+            });
+        },
+      };
     },
   };
 }

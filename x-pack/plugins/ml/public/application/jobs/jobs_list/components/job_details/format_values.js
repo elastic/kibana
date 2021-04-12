@@ -1,22 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import numeral from '@elastic/numeral';
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
+import { timeFormatter } from '../../../../../../common/util/date_utils';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';
 
 function formatData(txt) {
   return numeral(txt).format(DATA_FORMAT);
 }
 
-export function formatValues([key, value]) {
+export function formatValues(obj) {
+  if (!obj) {
+    // catch case that formatValues is called without a value.
+    // caused by very rare race condition when loading jobs list after deleting a job.
+    return ['', ''];
+  }
+
+  const [key, value] = obj;
+
   // time
   switch (key) {
     case 'finished_time':
@@ -29,8 +37,7 @@ export function formatValues([key, value]) {
     case 'latest_empty_bucket_timestamp':
     case 'latest_sparse_bucket_timestamp':
     case 'latest_bucket_timestamp':
-      value = formatDate(value, TIME_FORMAT);
-      break;
+      return [key, timeFormatter(value)];
 
     // data
     case 'established_model_memory':
@@ -38,8 +45,8 @@ export function formatValues([key, value]) {
     case 'model_bytes':
     case 'model_bytes_exceeded':
     case 'model_bytes_memory_limit':
-      value = formatData(value);
-      break;
+    case 'peak_model_bytes':
+      return [key, formatData(value)];
 
     // numbers
     case 'processed_record_count':
@@ -57,19 +64,25 @@ export function formatValues([key, value]) {
     case 'total_partition_field_count':
     case 'bucket_allocation_failures_count':
     case 'search_count':
-      value = toLocaleString(value);
-      break;
+      return [key, toLocaleString(value)];
 
     // numbers rounded to 3 decimal places
     case 'average_search_time_per_bucket_ms':
     case 'exponential_average_search_time_per_hour_ms':
-      value = typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
-      break;
+    case 'total_bucket_processing_time_ms':
+    case 'minimum_bucket_processing_time_ms':
+    case 'maximum_bucket_processing_time_ms':
+    case 'average_bucket_processing_time_ms':
+    case 'exponential_average_bucket_processing_time_ms':
+    case 'exponential_average_bucket_processing_time_per_hour_ms':
+      return [
+        key,
+        typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value,
+      ];
 
     default:
-      break;
+      return [key, value];
   }
-  return [key, value];
 }
 
 // utility function to filter child object and arrays out of the supplied object.
@@ -78,9 +91,9 @@ export function formatValues([key, value]) {
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
     .filter(
-      k => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
+      (k) => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
     )
-    .map(k => {
+    .map((k) => {
       let item = obj[k];
       if (Array.isArray(item)) {
         item = item.join(', ');

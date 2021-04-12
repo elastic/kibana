@@ -1,35 +1,77 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { APICaller } from 'kibana/server';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
+import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
+import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { RuntimeMappings } from '../../../common/types/fields';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
-export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
+export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   const fieldsAggsCache = initCardinalityFieldsCache();
+
+  /**
+   * Caps the time range to the last 90 days if necessary
+   */
+  function getSafeTimeRange(earliestMs: number, latestMs: number): { start: number; end: number } {
+    const capOffsetMs = duration(3, 'months').asMilliseconds();
+    const capRangeStart = latestMs - capOffsetMs;
+
+    return {
+      start: Math.max(earliestMs, capRangeStart),
+      end: latestMs,
+    };
+  }
 
   /**
    * Gets aggregatable fields.
    */
   async function getAggregatableFields(
     index: string | string[],
-    fieldNames: string[]
+    fieldNames: string[],
+    datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const fieldCapsResp = await callAsCurrentUser('fieldCaps', {
+    const { body } = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
-    fieldNames.forEach(fieldName => {
-      const fieldInfo = fieldCapsResp.fields[fieldName];
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
+
+    fieldNames.forEach((fieldName) => {
+      if (
+        typeof datafeedConfig?.script_fields === 'object' &&
+        datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        typeof datafeedConfig?.runtime_mappings === 'object' &&
+        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        datafeedAggregations !== undefined &&
+        isValidAggregationField(datafeedAggregations, fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      const fieldInfo = body.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
         const fieldType = typeKeys[0];
@@ -53,26 +95,30 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
+    // getAggregatableFields doesn't account for scripted or aggregated fields
     if (aggregatableFields.length === 0) {
       return {};
     }
+
+    const { start, end } = getSafeTimeRange(earliestMs, latestMs);
 
     const cachedValues =
       fieldsAggsCache.getValues(
         index,
         timeFieldName,
-        earliestMs,
-        latestMs,
+        start,
+        end,
         'overallCardinality',
         fieldNames
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -84,8 +130,8 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       {
         range: {
           [timeFieldName]: {
-            gte: earliestMs,
-            lte: latestMs,
+            gte: start,
+            lte: end,
             format: 'epoch_millis',
           },
         },
@@ -96,10 +142,29 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       mustCriteria.push(query);
     }
 
-    const aggs = fieldsToAgg.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const runtimeMappings: any = {};
+    const aggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        if (
+          typeof datafeedConfig?.script_fields === 'object' &&
+          datafeedConfig.script_fields.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else if (
+          typeof datafeedConfig?.runtime_mappings === 'object' &&
+          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { field } };
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
+        } else {
+          obj[field] = { cardinality: { field } };
+        }
+        return obj;
+      },
+      {} as {
+        [field: string]: AggCardinality;
+      }
+    );
 
     const body = {
       query: {
@@ -112,25 +177,29 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
         excludes: [],
       },
       aggs,
+      ...runtimeMappings,
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      ...(datafeedConfig?.indices_options ?? {}),
+    });
 
     if (!aggregations) {
       return {};
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error fix search aggregation response
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
 
-    fieldsAggsCache.updateValues(index, timeFieldName, earliestMs, latestMs, {
+    fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       overallCardinality: aggResult,
     });
 
@@ -146,7 +215,9 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   async function getTimeFieldRange(
     index: string[] | string,
     timeFieldName: string,
-    query: any
+    query: any,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ): Promise<{
     success: boolean;
     start: { epoch: number; string: string };
@@ -154,7 +225,9 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const resp = await callAsCurrentUser('search', {
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -171,29 +244,36 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
             },
           },
         },
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     });
 
-    if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
-      obj.start.epoch = resp.aggregations.earliest.value;
-      obj.start.string = resp.aggregations.earliest.value_as_string;
+    if (aggregations && aggregations.earliest && aggregations.latest) {
+      // @ts-expect-error fix search aggregation response
+      obj.start.epoch = aggregations.earliest.value;
+      // @ts-expect-error fix search aggregation response
+      obj.start.string = aggregations.earliest.value_as_string;
 
-      obj.end.epoch = resp.aggregations.latest.value;
-      obj.end.string = resp.aggregations.latest.value_as_string;
+      // @ts-expect-error fix search aggregation response
+      obj.end.epoch = aggregations.latest.value;
+      // @ts-expect-error fix search aggregation response
+      obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
   }
 
   /**
-   * Caps provided time boundaries based on the interval.
-   * @param earliestMs
-   * @param latestMs
-   * @param interval
+   * Caps provided time boundaries based on the interval
    */
-  function getSafeTimeRange(
+  function getSafeTimeRangeForInterval(
+    interval: string,
+    ...timeRange: number[]
+  ): { start: number; end: number };
+  function getSafeTimeRangeForInterval(
+    interval: string,
     earliestMs: number,
-    latestMs: number,
-    interval: string
+    latestMs: number
   ): { start: number; end: number } {
     const maxNumberOfBuckets = 1000;
     const end = latestMs;
@@ -231,36 +311,40 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: string | undefined
+    interval: string | undefined,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
-      throw new Error('Interval is required to retrieve max bucket cardinalities.');
+      throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
     }
 
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
     if (aggregatableFields.length === 0) {
       return {};
     }
 
+    const { start, end } = getSafeTimeRangeForInterval(
+      interval,
+      ...Object.values(getSafeTimeRange(earliestMs, latestMs))
+    );
+
     const cachedValues =
       fieldsAggsCache.getValues(
         index,
         timeFieldName,
-        earliestMs,
-        latestMs,
+        start,
+        end,
         'maxBucketCardinality',
         fieldNames
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
     }
-
-    const { start, end } = getSafeTimeRange(earliestMs, latestMs, interval);
 
     const mustCriteria = [
       {
@@ -318,21 +402,28 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       },
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      ...(datafeedConfig?.indices_options ?? {}),
+    });
 
     if (!aggregations) {
       return cachedValues;
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error fix search aggregation response
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });
+
+    fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
+      maxBucketCardinality: aggResult,
+    });
 
     return {
       ...cachedValues,

@@ -1,0 +1,45 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "name": {
+      "type": "keyword"
+    },
+    "deserializer": {
+      "type": "keyword"
+    },
+    "serializer": {
+      "type": "keyword"
+    },
+    "description": {
+      "type": "keyword"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "tie_breaker_id": {
+      "type": "keyword"
+    },
+    "meta": {
+      "enabled": "false",
+      "type": "object"
+    },
+    "created_at": {
+      "type": "date"
+    },
+    "updated_at": {
+      "type": "date"
+    },
+    "created_by": {
+      "type": "keyword"
+    },
+    "updated_by": {
+      "type": "keyword"
+    },
+    "version": {
+      "type": "keyword"
+    },
+    "immutable": {
+      "type": "boolean"
+    }
+  }
+}

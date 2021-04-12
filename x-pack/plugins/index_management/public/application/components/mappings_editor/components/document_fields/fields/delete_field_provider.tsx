@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useMappingsState, useDispatch } from '../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../mappings_state_context';
 import { NormalizedField } from '../../../types';
 import { getAllDescendantAliases } from '../../../lib';
 import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
@@ -54,9 +55,9 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     );
   }
 
-  const deleteField: DeleteFieldFunc = field => {
+  const deleteField: DeleteFieldFunc = (field) => {
     const aliases = getAllDescendantAliases(field, fields)
-      .map(id => byId[id].path.join(' > '))
+      .map((id) => byId[id].path.join(' > '))
       .sort();
     const hasAliases = Boolean(aliases.length);
 

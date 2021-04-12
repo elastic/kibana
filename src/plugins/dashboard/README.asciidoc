@@ -1,0 +1,5 @@
+[[kibana-dashboard-plugin]]
+== Dashboard plugin
+
+- Registers the dashboard application.
+- Adds a dashboard embeddable that can be used in other applications.

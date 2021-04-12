@@ -1,94 +1,177 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first } from 'rxjs/operators';
-import { mapKeys, snakeCase } from 'lodash';
+import type { Observable } from 'rxjs';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
+import { catchError, first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller } from '../../../../../src/core/server';
-import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
-import {
-  ISearchContext,
-  TSearchStrategyProvider,
-  ISearch,
+import { from } from 'rxjs';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
   ISearchOptions,
-  ISearchCancel,
-  getDefaultSearchParams,
+  ISearchStrategy,
+  SearchStrategyDependencies,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
-import { IEnhancedEsSearchRequest } from '../../common';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  getTotalLoaded,
+  searchUsageObserver,
+  shimAbortSignal,
+  shimHitsTotal,
+} from '../../../../../src/plugins/data/server';
+import type { IAsyncSearchOptions } from '../../common';
+import { pollSearch } from '../../common';
+import {
+  getDefaultAsyncGetParams,
+  getDefaultAsyncSubmitParams,
+  getIgnoreThrottled,
+} from './request_utils';
+import { toAsyncKibanaSearchResponse } from './response_utils';
+import { ConfigSchema } from '../../config';
+import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
-export interface AsyncSearchResponse<T> {
-  id: string;
-  response: SearchResponse<T>;
-}
+export const enhancedEsSearchStrategyProvider = (
+  config: ConfigSchema,
+  legacyConfig$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy<IEsSearchRequest> => {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    try {
+      await esClient.asCurrentUser.asyncSearch.delete({ id });
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
+  }
 
-export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  caller: APICaller
-) => {
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
-    request: IEnhancedEsSearchRequest,
-    options
-  ) => {
-    const config = await context.config$.pipe(first()).toPromise();
-    const defaultParams = getDefaultSearchParams(config);
-    const params = { ...defaultParams, ...request.params };
+  function asyncSearch(
+    { id, ...request }: IEsSearchRequest,
+    options: IAsyncSearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ) {
+    const client = esClient.asCurrentUser.asyncSearch;
 
-    const response = await (request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options));
+    const search = async () => {
+      const params = id
+        ? getDefaultAsyncGetParams(options)
+        : {
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
+            ...request.params,
+          };
+      const promise = id ? client.get({ ...params, id }) : client.submit(params);
+      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      const response = shimHitsTotal(body.response, options);
 
-    const rawResponse =
-      request.indexType === 'rollup'
-        ? (response as SearchResponse<any>)
-        : (response as AsyncSearchResponse<any>).response;
+      return toAsyncKibanaSearchResponse(
+        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
+        { ...body, response }
+      );
+    };
 
-    const id = (response as AsyncSearchResponse<any>).id;
-    const { total, failed, successful } = rawResponse._shards;
-    const loaded = failed + successful;
-    return { id, total, loaded, rawResponse };
+    const cancel = async () => {
+      if (id) {
+        await cancelAsyncSearch(id, esClient);
+      }
+    };
+
+    return pollSearch(search, cancel, options).pipe(
+      tap((response) => (id = response.id)),
+      tap(searchUsageObserver(logger, usage)),
+      catchError((e) => {
+        throw getKbnServerError(e);
+      })
+    );
+  }
+
+  async function rollupSearch(
+    request: IEsSearchRequest,
+    options: ISearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ): Promise<IEsSearchResponse> {
+    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
+    const { body, index, ...params } = request.params!;
+    const method = 'POST';
+    const path = encodeURI(`/${index}/_rollup_search`);
+    const querystring = {
+      ...getShardTimeout(legacyConfig),
+      ...(await getIgnoreThrottled(uiSettingsClient)),
+      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...params,
+    };
+
+    try {
+      const promise = esClient.asCurrentUser.transport.request({
+        method,
+        path,
+        body,
+        querystring,
+      });
+
+      const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+      const response = esResponse.body as SearchResponse<any>;
+      return {
+        rawResponse: shimHitsTotal(response, options),
+        ...getTotalLoaded(response),
+      };
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
+  }
+
+  return {
+    /**
+     * @param request
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Observable<IEsSearchResponse<any>>`
+     * @throws `KbnServerError`
+     */
+    search: (request, options: IAsyncSearchOptions, deps) => {
+      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+      if (request.indexType && request.indexType !== 'rollup') {
+        throw new KbnServerError('Unknown indexType', 400);
+      }
+
+      if (request.indexType === undefined) {
+        return asyncSearch(request, options, deps);
+      } else {
+        return from(rollupSearch(request, options, deps));
+      }
+    },
+    /**
+     * @param id async search ID to cancel, as returned from _async_search API
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Promise<void>`
+     * @throws `KbnServerError`
+     */
+    cancel: async (id, options, { esClient }) => {
+      logger.debug(`cancel ${id}`);
+      await cancelAsyncSearch(id, esClient);
+    },
+    /**
+     *
+     * @param id async search ID to extend, as returned from _async_search API
+     * @param keepAlive
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Promise<void>`
+     * @throws `KbnServerError`
+     */
+    extend: async (id, keepAlive, options, { esClient }) => {
+      logger.debug(`extend ${id} by ${keepAlive}`);
+      try {
+        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
+    },
   };
-
-  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async id => {
-    const method = 'DELETE';
-    const path = `_async_search/${id}`;
-    await caller('transport.request', { method, path });
-  };
-
-  return { search, cancel };
 };
-
-function asyncSearch(
-  caller: APICaller,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-) {
-  const { body = undefined, index = undefined, ...params } = request.id ? {} : request.params;
-
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const method = request.id ? 'GET' : 'POST';
-  const path = request.id ? `_async_search/${request.id}` : `${index}/_async_search`;
-
-  // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletion: '1s', ...params });
-
-  return caller('transport.request', { method, path, body, query }, options);
-}
-
-async function rollupSearch(
-  caller: APICaller,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-) {
-  const { body, index, ...params } = request.params;
-  const method = 'POST';
-  const path = `${index}/_rollup_search`;
-  const query = toSnakeCase(params);
-  return caller('transport.request', { method, path, body, query }, options);
-}
-
-function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
-}

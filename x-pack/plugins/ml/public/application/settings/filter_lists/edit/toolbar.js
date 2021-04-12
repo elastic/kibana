@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -33,6 +34,7 @@ function renderToolsRight(
       disabled={selectedItemCount === 0 || canDeleteFilter === false}
       onClick={deleteSelectedItems}
       key="delete_item_btn"
+      data-test-subj="mlFilterListDeleteItemButton"
     >
       <FormattedMessage
         id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"

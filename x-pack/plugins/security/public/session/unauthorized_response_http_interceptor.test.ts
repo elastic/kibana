@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
+
+import { setup } from 'src/core/test_helpers/http_test_setup';
+
 import { SessionExpired } from './session_expired';
-import { setup } from '../../../../../src/test_utils/public/http_test_setup';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
+
 jest.mock('./session_expired');
 
 const drainPromiseQueue = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setImmediate(resolve);
   });
 };
@@ -20,7 +24,7 @@ const drainPromiseQueue = () => {
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 const setupHttp = (basePath: string) => {
-  const { http } = setup(injectedMetadata => {
+  const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
   return http;
@@ -34,7 +38,7 @@ afterEach(() => {
 it(`logs out 401 responses`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(`${http.basePath}/logout`, tenant);
-  const logoutPromise = new Promise(resolve => {
+  const logoutPromise = new Promise<void>((resolve) => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);

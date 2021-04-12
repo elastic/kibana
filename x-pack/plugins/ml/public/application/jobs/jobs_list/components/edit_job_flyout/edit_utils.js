@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { mlJobService } from '../../../../services/job_service';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
 import { getSavedObjectsClient } from '../../../../util/dependency_cache';
+import { ml } from '../../../../services/ml_api_service';
 
 export function saveJob(job, newJobData, finish) {
   return new Promise((resolve, reject) => {
@@ -16,6 +17,8 @@ export function saveJob(job, newJobData, finish) {
       ...extractDescription(job, newJobData),
       ...extractGroups(job, newJobData),
       ...extractMML(job, newJobData),
+      ...extractModelSnapshotRetentionDays(job, newJobData),
+      ...extractDailyModelSnapshotRetentionAfterDays(job, newJobData),
       ...extractDetectorDescriptions(job, newJobData),
       ...extractCustomSettings(job, newJobData),
     };
@@ -32,23 +35,18 @@ export function saveJob(job, newJobData, finish) {
         .then(() => {
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     };
 
     // if anything has changed, post the changes
     if (Object.keys(jobData).length) {
-      mlJobService
-        .updateJob(job.job_id, jobData)
-        .then(resp => {
-          if (resp.success) {
-            saveDatafeedWrapper();
-          } else {
-            reject(resp);
-          }
+      ml.updateJob({ jobId: job.job_id, job: jobData })
+        .then(() => {
+          saveDatafeedWrapper();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     } else {
@@ -57,17 +55,17 @@ export function saveJob(job, newJobData, finish) {
   });
 }
 
-function saveDatafeed(datafeedData, job) {
+function saveDatafeed(datafeedConfig, job) {
   return new Promise((resolve, reject) => {
-    if (Object.keys(datafeedData).length) {
+    if (Object.keys(datafeedConfig).length) {
       const datafeedId = job.datafeed_config.datafeed_id;
-      mlJobService.updateDatafeed(datafeedId, datafeedData).then(resp => {
-        if (resp.success) {
+      ml.updateDatafeed({ datafeedId, datafeedConfig })
+        .then(() => {
           resolve();
-        } else {
-          reject(resp);
-        }
-      });
+        })
+        .catch((error) => {
+          reject(error);
+        });
     } else {
       resolve();
     }
@@ -84,10 +82,10 @@ export function loadSavedDashboards(maxNumber) {
         fields: ['title'],
         perPage: maxNumber,
       })
-      .then(resp => {
+      .then((resp) => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
-          const dashboards = savedObjects.map(savedObj => {
+          const dashboards = savedObjects.map((savedObj) => {
             return { id: savedObj.id, title: savedObj.attributes.title };
           });
 
@@ -98,7 +96,7 @@ export function loadSavedDashboards(maxNumber) {
           resolve(dashboards);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -116,10 +114,10 @@ export function loadIndexPatterns(maxNumber) {
         fields: ['title'],
         perPage: maxNumber,
       })
-      .then(resp => {
+      .then((resp) => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
-          const indexPatterns = savedObjects.map(savedObj => {
+          const indexPatterns = savedObjects.map((savedObj) => {
             return { id: savedObj.id, title: savedObj.attributes.title };
           });
 
@@ -130,7 +128,7 @@ export function loadIndexPatterns(maxNumber) {
           resolve(indexPatterns);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -175,6 +173,22 @@ function extractMML(job, newJobData) {
   return mmlData;
 }
 
+function extractModelSnapshotRetentionDays(job, newJobData) {
+  const modelSnapshotRetentionDays = newJobData.modelSnapshotRetentionDays;
+  if (modelSnapshotRetentionDays !== job.model_snapshot_retention_days) {
+    return { model_snapshot_retention_days: modelSnapshotRetentionDays };
+  }
+  return {};
+}
+
+function extractDailyModelSnapshotRetentionAfterDays(job, newJobData) {
+  const dailyModelSnapshotRetentionAfterDays = newJobData.dailyModelSnapshotRetentionAfterDays;
+  if (dailyModelSnapshotRetentionAfterDays !== job.daily_model_snapshot_retention_after_days) {
+    return { daily_model_snapshot_retention_after_days: dailyModelSnapshotRetentionAfterDays };
+  }
+  return {};
+}
+
 function extractDetectorDescriptions(job, newJobData) {
   const detectors = [];
   const descriptions = newJobData.detectorDescriptions.map((d, i) => ({
@@ -183,7 +197,7 @@ function extractDetectorDescriptions(job, newJobData) {
   }));
 
   const originalDetectors = job.analysis_config.detectors;
-  originalDetectors.forEach(d => {
+  originalDetectors.forEach((d) => {
     if (descriptions[d.detector_index].description !== d.detector_description) {
       detectors.push(descriptions[d.detector_index]);
     }

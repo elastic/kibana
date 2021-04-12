@@ -1,31 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder } = getPageObjects(['visualBuilder', 'visualize']);
   const retry = getService('retry');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -86,8 +75,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
+        await retry.try(async () => {
+          const actualCount = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be(expectedLegendValue);
+        });
       });
 
       it('should show the correct count in the legend with percent formatter', async () => {
@@ -108,7 +99,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
-      it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
@@ -126,20 +117,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCountMin).to.be('3 hours');
       });
 
-      // --reversed class is not implemented in @elastic\chart
-      describe.skip('Dark mode', () => {
+      describe('Dark mode', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({
             'theme:darkMode': true,
           });
         });
 
-        it(`viz should have 'reversed' class when background color is white`, async () => {
+        it(`viz should have light class when background color is white`, async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
           await visualBuilder.setBackgroundColor('#FFFFFF');
 
-          const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-          expect(classNames.includes('tvbVisTimeSeries--reversed')).to.be(true);
+          expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
         });
 
         after(async () => {

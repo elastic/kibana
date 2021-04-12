@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { withTheme } from '../../../../../../src/plugins/kibana_react/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { withTheme } from '../../../../observability/public';
+import { LayoutPropsWithTheme } from '../../../public/pages/metrics/metric_detail/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
+import { Section } from '../../../public/pages/metrics/metric_detail/components/section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Section } from '../../../public/pages/metrics/components/section';
+import { SubSection } from '../../../public/pages/metrics/metric_detail/components/sub_section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SubSection } from '../../../public/pages/metrics/components/sub_section';
+import { GaugesSectionVis } from '../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
+import { ChartSectionVis } from '../../../public/pages/metrics/metric_detail/components/chart_section_vis';
 import * as Aws from '../shared/layouts/aws';
 import * as Ngnix from '../shared/layouts/nginx';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetadataDetails } from '../../../public/pages/metrics/components/metadata_details';
+import { MetadataDetails } from '../../../public/pages/metrics/metric_detail/components/metadata_details';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayoutContent } from '../../../public/pages/metrics/components/layout_content';
+import { LayoutContent } from '../../../public/pages/metrics/metric_detail/components/layout_content';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <MetadataDetails
       fields={[
@@ -52,6 +53,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection id="hostSystemOverview">
           <GaugesSectionVis
@@ -242,6 +244,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection id="hostK8sOverview">
           <GaugesSectionVis
@@ -371,8 +374,8 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           />
         </SubSection>
       </Section>
-      <Aws.Layout metrics={metrics} />
-      <Ngnix.Layout metrics={metrics} />
+      <Aws.Layout metrics={metrics} onChangeRangeTime={onChangeRangeTime} />
+      <Ngnix.Layout metrics={metrics} onChangeRangeTime={onChangeRangeTime} />
     </LayoutContent>
   </React.Fragment>
 ));

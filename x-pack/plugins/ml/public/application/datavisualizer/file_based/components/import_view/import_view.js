@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,17 +19,22 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { importerFactory } from './importer';
+import { debounce } from 'lodash';
+import { getFileUpload } from '../../../../util/dependency_cache';
 import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import {
+  addCombinedFieldsToPipeline,
+  addCombinedFieldsToMappings,
+  getDefaultCombinedFields,
+} from '../combined_fields';
 import { ExperimentalBadge } from '../experimental_badge';
 import { getIndexPatternNames, loadIndexPatterns } from '../../../../util/index_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { hasImportPermission } from '../utils';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -66,6 +72,8 @@ const DEFAULT_STATE = {
   indexPatternNameError: '',
   timeFieldName: undefined,
   isFilebeatFlyoutVisible: false,
+  checkingValidIndex: false,
+  combinedFields: [],
 };
 
 export class ImportView extends Component {
@@ -76,14 +84,12 @@ export class ImportView extends Component {
   }
 
   componentDidMount() {
-    this.loadIndexNames();
     this.loadIndexPatternNames();
   }
 
   clickReset = () => {
     const state = getDefaultState(this.state, this.props.results);
     this.setState(state, () => {
-      this.loadIndexNames();
       this.loadIndexPatternNames();
     });
   };
@@ -94,7 +100,7 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { fileContents, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
+    const { data, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -117,7 +123,13 @@ export class ImportView extends Component {
         },
         async () => {
           // check to see if the user has permission to create and ingest data into the specified index
-          if ((await hasImportPermission(index)) === false) {
+          if (
+            (await getFileUpload().hasImportPermission({
+              checkCreateIndexPattern: createIndexPattern,
+              checkHasManagePipeline: true,
+              indexName: index,
+            })) === false
+          ) {
             errors.push(
               i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
                 defaultMessage:
@@ -180,15 +192,9 @@ export class ImportView extends Component {
                   errors.push(`${parseError} ${error.message}`);
                 }
 
-                const indexCreationSettings = {
-                  settings,
-                  mappings,
-                };
-
                 try {
                   if (createPipeline) {
                     pipeline = JSON.parse(pipelineString);
-                    indexCreationSettings.pipeline = pipeline;
                   }
                 } catch (error) {
                   success = false;
@@ -209,15 +215,18 @@ export class ImportView extends Component {
                 // mappings, use this field as the time field.
                 // This relies on the field being populated by
                 // the ingest pipeline on ingest
-                if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
+                if (mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
                   timeFieldName = DEFAULT_TIME_FIELD;
                   this.setState({ timeFieldName });
                 }
 
                 if (success) {
-                  const importer = importerFactory(format, results, indexCreationSettings);
+                  const importer = await getFileUpload().importerFactory(format, {
+                    excludeLinesPattern: results.exclude_lines_pattern,
+                    multilineStartPattern: results.multiline_start_pattern,
+                  });
                   if (importer !== undefined) {
-                    const readResp = importer.read(fileContents, this.setReadProgress);
+                    const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
@@ -230,7 +239,12 @@ export class ImportView extends Component {
                     }
 
                     if (success) {
-                      const initializeImportResp = await importer.initializeImport(index);
+                      const initializeImportResp = await importer.initializeImport(
+                        index,
+                        settings,
+                        mappings,
+                        pipeline
+                      );
 
                       const indexCreated = initializeImportResp.index !== undefined;
                       this.setState({
@@ -319,29 +333,41 @@ export class ImportView extends Component {
     }
   }
 
-  onConfigModeChange = configMode => {
+  onConfigModeChange = (configMode) => {
     this.setState({
       configMode,
     });
   };
 
-  onIndexChange = e => {
-    const name = e.target.value;
-    const { indexNames, indexPattern, indexPatternNames } = this.state;
-
+  onIndexChange = (e) => {
+    const index = e.target.value;
     this.setState({
-      index: name,
-      indexNameError: isIndexNameValid(name, indexNames),
-      // if index pattern has been altered, check that it still matches the inputted index
-      ...(indexPattern === ''
-        ? {}
-        : {
-            indexPatternNameError: isIndexPatternNameValid(indexPattern, indexPatternNames, name),
-          }),
+      index,
+      checkingValidIndex: true,
     });
+    this.debounceIndexCheck(index);
   };
 
-  onIndexPatternChange = e => {
+  debounceIndexCheck = debounce(async (index) => {
+    if (index === '') {
+      this.setState({ checkingValidIndex: false });
+      return;
+    }
+
+    const { exists } = await ml.checkIndexExists({ index });
+    const indexNameError = exists ? (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        defaultMessage="Index name already exists"
+      />
+    ) : (
+      isIndexNameValid(index)
+    );
+
+    this.setState({ checkingValidIndex: false, indexNameError });
+  }, 500);
+
+  onIndexPatternChange = (e) => {
     const name = e.target.value;
     const { indexPatternNames, index } = this.state;
     this.setState({
@@ -350,37 +376,41 @@ export class ImportView extends Component {
     });
   };
 
-  onCreateIndexPatternChange = e => {
+  onCreateIndexPatternChange = (e) => {
     this.setState({
       createIndexPattern: e.target.checked,
     });
   };
 
-  onIndexSettingsStringChange = text => {
+  onIndexSettingsStringChange = (text) => {
     this.setState({
       indexSettingsString: text,
     });
   };
 
-  onMappingsStringChange = text => {
+  onMappingsStringChange = (text) => {
     this.setState({
       mappingsString: text,
     });
   };
 
-  onPipelineStringChange = text => {
+  onPipelineStringChange = (text) => {
     this.setState({
       pipelineString: text,
     });
   };
 
-  setImportProgress = progress => {
+  onCombinedFieldsChange = (combinedFields) => {
+    this.setState({ combinedFields });
+  };
+
+  setImportProgress = (progress) => {
     this.setState({
       uploadProgress: progress,
     });
   };
 
-  setReadProgress = progress => {
+  setReadProgress = (progress) => {
     this.setState({
       readProgress: progress,
     });
@@ -395,12 +425,6 @@ export class ImportView extends Component {
     this.setState({ isFilebeatFlyoutVisible: false });
     this.props.showBottomBar();
   };
-
-  async loadIndexNames() {
-    const indices = await ml.getIndices();
-    const indexNames = indices.map(i => i.name);
-    this.setState({ indexNames });
-  }
 
   async loadIndexPatternNames() {
     await loadIndexPatterns(this.props.indexPatterns);
@@ -437,6 +461,8 @@ export class ImportView extends Component {
       indexPatternNameError,
       timeFieldName,
       isFilebeatFlyoutVisible,
+      checkingValidIndex,
+      combinedFields,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -459,7 +485,8 @@ export class ImportView extends Component {
       index === '' ||
       indexNameError !== '' ||
       (createIndexPattern === true && indexPatternNameError !== '') ||
-      initialized === true;
+      initialized === true ||
+      checkingValidIndex === true;
 
     return (
       <EuiPage data-test-subj="mlPageFileDataVisImport">
@@ -505,6 +532,9 @@ export class ImportView extends Component {
               onPipelineStringChange={this.onPipelineStringChange}
               indexNameError={indexNameError}
               indexPatternNameError={indexPatternNameError}
+              combinedFields={combinedFields}
+              onCombinedFieldsChange={this.onCombinedFieldsChange}
+              results={this.props.results}
             />
 
             <EuiSpacer size="m" />
@@ -559,6 +589,7 @@ export class ImportView extends Component {
                     <EuiSpacer size="l" />
 
                     <ResultsLinks
+                      fieldStats={this.props.results?.field_stats}
                       index={index}
                       indexPatternId={indexPatternId}
                       timeFieldName={timeFieldName}
@@ -593,35 +624,18 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(
-  indexPatternName,
-  indexPatterns,
-  timeFieldName,
-  kibanaConfig
-) {
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName) {
   try {
-    const emptyPattern = await indexPatterns.make();
-
-    Object.assign(emptyPattern, {
-      id: '',
+    const emptyPattern = await indexPatterns.createAndSave({
       title: indexPatternName,
       timeFieldName,
     });
 
-    const id = await emptyPattern.create();
-
-    // check if there's a default index pattern, if not,
-    // set the newly created one as the default index pattern.
-    if (!kibanaConfig.get('defaultIndex')) {
-      await kibanaConfig.set('defaultIndex', id);
-    }
-
     return {
       success: true,
-      id,
+      id: emptyPattern.id,
     };
   } catch (error) {
-    console.error(error);
     return {
       success: false,
       error,
@@ -635,12 +649,22 @@ function getDefaultState(state, results) {
       ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
       : state.indexSettingsString;
 
+  const combinedFields = state.combinedFields.length
+    ? state.combinedFields
+    : getDefaultCombinedFields(results);
+
   const mappingsString =
-    state.mappingsString === '' ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+    state.mappingsString === ''
+      ? JSON.stringify(addCombinedFieldsToMappings(results.mappings, combinedFields), null, 2)
+      : state.mappingsString;
 
   const pipelineString =
     state.pipelineString === '' && results.ingest_pipeline !== undefined
-      ? JSON.stringify(results.ingest_pipeline, null, 2)
+      ? JSON.stringify(
+          addCombinedFieldsToPipeline(results.ingest_pipeline, combinedFields),
+          null,
+          2
+        )
       : state.pipelineString;
 
   const timeFieldName = results.timestamp_field;
@@ -651,19 +675,11 @@ function getDefaultState(state, results) {
     mappingsString,
     pipelineString,
     timeFieldName,
+    combinedFields,
   };
 }
 
-function isIndexNameValid(name, indexNames) {
-  if (indexNames.find(i => i === name)) {
-    return (
-      <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
-        defaultMessage="Index name already exists"
-      />
-    );
-  }
-
+function isIndexNameValid(name) {
   const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   if (
     name !== name.toLowerCase() || // name should be lowercase
@@ -688,7 +704,7 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     return '';
   }
 
-  if (indexPatternNames.find(i => i === name)) {
+  if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
         id="xpack.ml.fileDatavisualizer.importView.indexPatternNameAlreadyExistsErrorMessage"

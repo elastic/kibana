@@ -1,44 +1,56 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '../internal_types';
+import type { ConfigDeprecationProvider } from '../config';
 
-export type SavedObjectsMigrationConfigType = TypeOf<typeof savedObjectsMigrationConfig.schema>;
+const migrationSchema = schema.object({
+  batchSize: schema.number({ defaultValue: 1_000 }),
+  scrollDuration: schema.string({ defaultValue: '15m' }),
+  pollInterval: schema.number({ defaultValue: 1_500 }),
+  skip: schema.boolean({ defaultValue: false }),
+  enableV2: schema.boolean({ defaultValue: true }),
+  retryAttempts: schema.number({ defaultValue: 15 }),
+});
 
-export const savedObjectsMigrationConfig = {
+export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
+
+const migrationDeprecations: ConfigDeprecationProvider = () => [
+  (settings, fromPath, addDeprecation) => {
+    const migrationsConfig = settings[fromPath];
+    if (migrationsConfig?.enableV2 !== undefined) {
+      addDeprecation({
+        message:
+          '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
+        documentationUrl: 'https://ela.st/kbn-so-migration-v2',
+      });
+    }
+    return settings;
+  },
+];
+
+export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> = {
   path: 'migrations',
-  schema: schema.object({
-    batchSize: schema.number({ defaultValue: 100 }),
-    scrollDuration: schema.string({ defaultValue: '15m' }),
-    pollInterval: schema.number({ defaultValue: 1500 }),
-    skip: schema.boolean({ defaultValue: false }),
-  }),
+  schema: migrationSchema,
+  deprecations: migrationDeprecations,
 };
 
-export type SavedObjectsConfigType = TypeOf<typeof savedObjectsConfig.schema>;
+const soSchema = schema.object({
+  maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
+  maxImportExportSize: schema.number({ defaultValue: 10_000 }),
+});
 
-export const savedObjectsConfig = {
+export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
+
+export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType> = {
   path: 'savedObjects',
-  schema: schema.object({
-    maxImportPayloadBytes: schema.byteSize({ defaultValue: 10485760 }),
-    maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
-  }),
+  schema: soSchema,
 };
 
 export class SavedObjectConfig {
@@ -52,7 +64,7 @@ export class SavedObjectConfig {
     rawMigrationConfig: SavedObjectsMigrationConfigType
   ) {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
-    this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
+    this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
   }
 }

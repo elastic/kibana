@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
@@ -49,7 +51,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           name="projectKey"
           value={projectKey || ''}
           data-test-subj="jiraProjectKeyInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'projectKey', value: e.target.value });
           }}
           onBlur={() => {
@@ -78,7 +80,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           value={issueType || ''}
           name="issueType"
           data-test-subj="jiraIssueTypeInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'issueType', value: e.target.value });
           }}
           onBlur={() => {
@@ -107,7 +109,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           value={summary || ''}
           name="summary"
           data-test-subj="jiraSummaryInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'summary', value: e.target.value });
           }}
           onBlur={() => {

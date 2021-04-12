@@ -1,7 +1,7 @@
 {
   "id": "apache_ecs",
   "title": "Apache access logs",
-  "description": "Find unusual activity in HTTP access logs from filebeat (ECS)",
+  "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
   "type": "Web Access Logs",
   "logoFile": "logo.json",
   "defaultIndexPattern": "filebeat-*",

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +11,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createMetricbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -30,8 +20,10 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Metricbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-getting-started.html' },
+        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
@@ -44,8 +36,10 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Metricbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-getting-started.html' },
+        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
@@ -61,8 +55,10 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Metricbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-getting-started.html' },
+        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
@@ -81,7 +77,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.metricbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Metricbeat? See the [Getting Started Guide]({metricbeatLink}).\n\
+            'First time using Metricbeat? See the [Quick Start]({metricbeatLink}).\n\
  1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Metricbeat`.\n\
@@ -91,7 +87,8 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`metricbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            metricbeatLink: '{config.docs.beats.metricbeat}/metricbeat-getting-started.html',
+            metricbeatLink:
+              '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
           },
         }
@@ -295,13 +292,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.debTitle', {
@@ -317,13 +308,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.rpmTitle', {
@@ -339,13 +324,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate(
@@ -364,13 +343,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

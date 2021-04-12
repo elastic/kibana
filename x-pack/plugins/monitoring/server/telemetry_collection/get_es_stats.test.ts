@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -22,8 +23,8 @@ describe('get_es_stats', () => {
       ],
     },
   };
-  const expectedClusters = response.hits.hits.map(hit => hit._source);
-  const clusterUuids = expectedClusters.map(cluster => cluster.cluster_uuid);
+  const expectedClusters = response.hits.hits.map((hit) => hit._source);
+  const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const maxBucketSize = 1;
 
   describe('getElasticsearchStats', () => {

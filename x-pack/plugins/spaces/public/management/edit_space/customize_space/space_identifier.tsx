@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { Space } from '../../../../common/model/space';
-import { SpaceValidator, toSpaceIdentifier } from '../../lib';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpaceValidator } from '../../lib';
+import { toSpaceIdentifier } from '../../lib';
 
 interface Props {
   space: Partial<Space>;
@@ -46,6 +52,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
         >
           <EuiFieldText
             readOnly={!this.state.editing}
+            data-test-subj="spaceURLDisplay"
             placeholder={
               this.state.editing || !this.props.editable
                 ? undefined
@@ -57,7 +64,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
             }
             value={id}
             onChange={this.onChange}
-            inputRef={ref => (this.textFieldRef = ref)}
+            inputRef={(ref) => (this.textFieldRef = ref)}
             fullWidth
           />
         </EuiFormRow>
@@ -105,7 +112,11 @@ class SpaceIdentifierUI extends Component<Props, State> {
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           defaultMessage="URL identifier "
         />
-        <EuiLink onClick={this.onEditClick} aria-label={editLinkLabel}>
+        <EuiLink
+          data-test-subj="CustomizeOrReset"
+          onClick={this.onEditClick}
+          aria-label={editLinkLabel}
+        >
           {editLinkText}
         </EuiLink>
       </p>

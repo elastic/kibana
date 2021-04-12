@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiCallOut,
-  EuiText,
-  EuiSwitch,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { RoleTemplate } from '../../../../../common/model';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { RoleTemplate } from '../../../../../common/model';
 import {
   isInlineRoleTemplate,
-  isStoredRoleTemplate,
   isInvalidRoleTemplate,
+  isStoredRoleTemplate,
 } from '../services/role_template_type';
 import { RoleTemplateTypeSelect } from './role_template_type_select';
 
@@ -81,7 +84,7 @@ export const RoleTemplateEditor = ({
           checked={roleTemplate.format === 'json'}
           label={returnsJsonLabel}
           showLabel={false}
-          onChange={e => {
+          onChange={(e) => {
             onChange({
               ...roleTemplate,
               format: e.target.checked ? 'json' : 'string',
@@ -164,7 +167,7 @@ export const RoleTemplateEditor = ({
               <EuiFieldText
                 data-test-subj="roleTemplateSourceEditor"
                 value={roleTemplate.template.source}
-                onChange={e => {
+                onChange={(e) => {
                   onChange({
                     ...roleTemplate,
                     template: {
@@ -213,7 +216,7 @@ export const RoleTemplateEditor = ({
               <EuiFieldText
                 data-test-subj="roleTemplateScriptIdEditor"
                 value={roleTemplate.template.id}
-                onChange={e => {
+                onChange={(e) => {
                   onChange({
                     ...roleTemplate,
                     template: {

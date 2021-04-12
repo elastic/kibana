@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
@@ -57,7 +58,7 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
     current: newDatasource,
     loading: true,
   }))
-  .case(datasourceLoaded, datasource => ({
+  .case(datasourceLoaded, (datasource) => ({
     ...datasource,
     loading: false,
   }))
@@ -66,5 +67,5 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
 export const datasourceSelector = (state: GraphState) => state.datasource;
 export const hasDatasourceSelector = createSelector(
   datasourceSelector,
-  datasource => datasource.current.type !== 'none'
+  (datasource) => datasource.current.type !== 'none'
 );

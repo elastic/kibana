@@ -1,20 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import './login_page.scss';
+
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import { parse } from 'url';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
-import { LoginState } from '../../../common/login_state';
-import { LoginForm, DisabledLoginForm } from './components';
+import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { DisabledLoginForm, LoginForm } from './components';
 
 interface Props {
   http: HttpStart;
@@ -37,7 +46,7 @@ const infoMessageMap = new Map([
   [
     'LOGGED_OUT',
     i18n.translate('xpack.security.login.loggedOutDescription', {
-      defaultMessage: 'You have logged out of Kibana.',
+      defaultMessage: 'You have logged out of Elastic.',
     }),
   ],
 ]);
@@ -91,18 +100,10 @@ export class LoginPage extends Component<Props, State> {
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
-                  defaultMessage="Welcome to Elastic Kibana"
+                  defaultMessage="Welcome to Elastic"
                 />
               </h1>
             </EuiTitle>
-            <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.loginPage.welcomeDescription"
-                  defaultMessage="Your window into the Elastic Stack"
-                />
-              </p>
-            </EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
@@ -120,10 +121,9 @@ export class LoginPage extends Component<Props, State> {
     requiresSecureConnection,
     isSecureConnection,
     selector,
-    showLoginForm,
+    loginHelp,
   }: LoginState & { isSecureConnection: boolean }) => {
-    const isLoginExplicitlyDisabled =
-      !showLoginForm && (!selector.enabled || selector.providers.length === 0);
+    const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
       return (
         <DisabledLoginForm
@@ -219,14 +219,17 @@ export class LoginPage extends Component<Props, State> {
       );
     }
 
+    const query = parse(window.location.href, true).query;
     return (
       <LoginForm
         http={this.props.http}
         notifications={this.props.notifications}
-        showLoginForm={showLoginForm}
         selector={selector}
-        infoMessage={infoMessageMap.get(parse(window.location.href, true).query.msg?.toString())}
+        // @ts-expect-error Map.get is ok with getting `undefined`
+        infoMessage={infoMessageMap.get(query[LOGOUT_REASON_QUERY_STRING_PARAMETER]?.toString())}
         loginAssistanceMessage={this.props.loginAssistanceMessage}
+        loginHelp={loginHelp}
+        authProviderHint={query[AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]?.toString()}
       />
     );
   };

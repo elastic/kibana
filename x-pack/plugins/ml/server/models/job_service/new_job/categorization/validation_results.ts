@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,17 +29,19 @@ export class ValidationResults {
   }
 
   public get overallResult() {
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
+    if (this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)) {
+    if (
+      this._results.some((c) => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)
+    ) {
       return CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID;
     }
     return CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
   }
 
   private _resultExists(id: VALIDATION_RESULT) {
-    return this._results.some(r => r.id === id);
+    return this._results.some((r) => r.id === id);
   }
 
   public createTokenCountResult(examples: CategoryFieldExample[], sampleSize: number) {
@@ -53,7 +56,7 @@ export class ValidationResults {
       return;
     }
 
-    const validExamplesSize = examples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT).length;
+    const validExamplesSize = examples.filter((e) => e.tokens.length >= VALID_TOKEN_COUNT).length;
     const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
 
     let valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
@@ -119,17 +122,21 @@ export class ValidationResults {
   }
 
   public createNullValueResult(examples: Array<string | null | undefined>) {
-    const nullCount = examples.filter(e => e === null).length;
+    const nullCount = examples.filter((e) => e === null).length;
 
-    if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
-      this._results.push({
-        id: VALIDATION_RESULT.NULL_VALUES,
-        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
-        message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
-          defaultMessage: 'More than {percent}% of field values are null.',
-          values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
-        }),
-      });
+    // if all values are null, VALIDATION_RESULT.NO_EXAMPLES will be raised
+    // so we don't need to display this warning as well
+    if (nullCount !== examples.length) {
+      if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
+        this._results.push({
+          id: VALIDATION_RESULT.NULL_VALUES,
+          valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
+          message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
+            defaultMessage: 'More than {percent}% of field values are null.',
+            values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
+          }),
+        });
+      }
     }
   }
 
@@ -142,7 +149,7 @@ export class ValidationResults {
       this.createPrivilegesErrorResult(error);
       return;
     }
-    const message: string = error.message;
+    const message: string = error.body.error?.reason;
     if (message) {
       const rxp = /exceeded the allowed maximum of \[(\d+?)\]/;
       const match = rxp.exec(message);
@@ -168,7 +175,7 @@ export class ValidationResults {
   }
 
   public createPrivilegesErrorResult(error: any) {
-    const message: string = error.message;
+    const message: string = error.body.error?.reason;
     if (message) {
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,

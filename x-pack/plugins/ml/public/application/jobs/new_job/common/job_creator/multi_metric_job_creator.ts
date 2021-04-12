@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -14,20 +15,16 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import {
-  JOB_TYPE,
-  CREATED_BY_LABEL,
-  DEFAULT_MODEL_MEMORY_LIMIT,
-} from '../../../../../../common/constants/new_job';
-import { ml } from '../../../../services/ml_api_service';
+import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { isSparseDataJob } from './util/general';
 
 export class MultiMetricJobCreator extends JobCreator {
-  // a multi metric job has one optional overall partition field
+  // a multi-metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
-  private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
   constructor(
@@ -37,6 +34,7 @@ export class MultiMetricJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    this._wizardInitialized$.next(true);
   }
 
   // set the split field, applying it to each detector
@@ -53,7 +51,7 @@ export class MultiMetricJobCreator extends JobCreator {
   }
 
   public removeSplitField() {
-    this._detectors.forEach(d => {
+    this._detectors.forEach((d) => {
       delete d.partition_field_name;
     });
   }
@@ -86,60 +84,6 @@ export class MultiMetricJobCreator extends JobCreator {
     this._removeDetector(index);
   }
 
-  // called externally to set the model memory limit based current detector configuration
-  public async calculateModelMemoryLimit() {
-    if (this.jobConfig.analysis_config.detectors.length === 0) {
-      this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-    } else {
-      const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
-        analysisConfig: this.jobConfig.analysis_config,
-        indexPattern: this._indexPatternTitle,
-        query: this._datafeed_config.query,
-        timeFieldName: this._job_config.data_description.time_field,
-        earliestMs: this._start,
-        latestMs: this._end,
-      });
-
-      try {
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = modelMemoryLimit;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // it only gets set to the estimation if the current limit is either
-          // the default value or the value of the previous estimation.
-          // That's our best guess if the value hasn't been customized.
-          // It doesn't get it if the user intentionally for whatever reason (re)set
-          // the value to either the default or pervious estimate.
-          // Because the string based limit could contain e.g. MB/Mb/mb
-          // all strings get lower cased for comparison.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
-          if (
-            currentModelMemoryLimit === defaultModelMemoryLimit ||
-            currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit
-          ) {
-            this.modelMemoryLimit = modelMemoryLimit;
-          }
-        }
-        this._lastEstimatedModelMemoryLimit = modelMemoryLimit.toLowerCase();
-      } catch (error) {
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // the limit is reset to the default only if the current limit matches
-          // the previous estimated limit.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          if (currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit) {
-            this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-          }
-          // eslint-disable-next-line no-console
-          console.error('Model memory limit could not be calculated', error);
-        }
-      }
-    }
-  }
-
   public get aggFieldPairs(): AggFieldPair[] {
     return this.detectors.map((d, i) => ({
       field: this._fields[i],
@@ -150,6 +94,7 @@ export class MultiMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    this._sparseData = isSparseDataJob(job, datafeed);
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     if (datafeed.aggregations !== undefined) {

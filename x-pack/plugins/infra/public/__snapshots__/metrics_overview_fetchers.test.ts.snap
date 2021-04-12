@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
+Object {
+  "appLink": "/app/metrics/inventory?waffleTime=(currentTime:1593696311629,isAutoReloading:!f)",
+  "series": Array [],
+  "sort": [Function],
+}
+`;

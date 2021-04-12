@@ -1,5 +1,8 @@
 [[brew]]
 === Install {kib} on macOS with Homebrew
+++++
+<titleabbrev>Install on macOS with Homebrew</titleabbrev>
+++++
 
 Elastic publishes Homebrew formulae so you can install {kib} with the https://brew.sh/[Homebrew] package manager.
 
@@ -18,8 +21,7 @@ install the default distribution of {kib}:
 brew install elastic/tap/kibana-full
 -------------------------
 
-This installs the most recently released default distribution of {kib}. To install the OSS distribution,
-specify `elastic/tap/kibana-oss`.
+This installs the most recently released distribution of {kib}.
 
 [[brew-layout]]
 ==== Directory layout for Homebrew installs
@@ -44,7 +46,7 @@ and data directory are stored in the following locations.
 | conf
   | Configuration files including `kibana.yml`
   | /usr/local/etc/kibana
- d|  
+ d|
 
 | data
   | The location of the data files of each index / shard allocated

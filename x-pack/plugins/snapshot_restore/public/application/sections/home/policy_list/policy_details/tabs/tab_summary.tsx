@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,12 +27,14 @@ import { useServices } from '../../../../../app_context';
 import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   policy: SlmPolicy;
 }
 
 export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
 
   const {
     version,
@@ -180,7 +184,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToSnapshots(undefined, name)}>{snapshotName}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToSnapshots(undefined, name))}>
+                {snapshotName}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 
@@ -193,7 +199,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToRepository(repository)}>{repository}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToRepository(repository))}>
+                {repository}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -230,8 +238,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiFlexItem data-test-subj="indices">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.policyDetails.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
 

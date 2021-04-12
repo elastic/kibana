@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   NodeDetailsRequest,
   NodeDetailsMetricData,
@@ -23,7 +25,7 @@ export interface InfraMetricsRequestOptions
 
 export interface InfraMetricsAdapter {
   getMetrics(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     options: InfraMetricsRequestOptions,
     request: KibanaRequest
   ): Promise<NodeDetailsMetricData[]>;
@@ -40,12 +42,12 @@ export enum InfraMetricModelMetricType {
   min = 'min',
   calculation = 'calculation',
   cardinality = 'cardinality',
-  series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
-  positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
+  series_agg = 'series_agg',
+  positive_only = 'positive_only',
   derivative = 'derivative',
   count = 'count',
   sum = 'sum',
-  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
+  cumulative_sum = 'cumulative_sum',
 }
 
 export interface InfraMetricModel {
@@ -80,7 +82,7 @@ export interface InfraMetricModelBasicMetric {
 export interface InfraMetricModelSeriesAgg {
   id: string;
   function: string;
-  type: InfraMetricModelMetricType.series_agg; // eslint-disable-line @typescript-eslint/camelcase
+  type: InfraMetricModelMetricType.series_agg;
 }
 
 export interface InfraMetricModelDerivative {

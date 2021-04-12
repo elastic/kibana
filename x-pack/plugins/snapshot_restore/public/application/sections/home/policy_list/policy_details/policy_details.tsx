@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,8 +26,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
+import { SectionError, Error } from '../../../../../shared_imports';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
@@ -34,11 +39,9 @@ import { useLoadPolicy } from '../../../../services/http';
 import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
-  SectionError,
   SectionLoading,
   PolicyExecuteProvider,
   PolicyDeleteProvider,
-  Error,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
@@ -63,8 +66,8 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
-  const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
+  const { i18n, uiMetricService, history } = useServices();
+  const { error, data: policyDetails, resendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -96,7 +99,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
 
   const renderTabs = () => (
     <EuiTabs>
-      {tabOptions.map(tab => (
+      {tabOptions.map((tab) => (
         <EuiTab
           onClick={() => {
             uiMetricService.trackUiMetric(tabToUiMetricMap[tab.id]);
@@ -189,10 +192,10 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         {policyDetails ? (
           <EuiFlexItem grow={false}>
             <PolicyExecuteProvider>
-              {executePolicyPrompt => {
+              {(executePolicyPrompt) => {
                 return (
                   <PolicyDeleteProvider>
-                    {deletePolicyPrompt => {
+                    {(deletePolicyPrompt) => {
                       return (
                         <EuiPopover
                           id="policyActionMenu"
@@ -213,7 +216,6 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                           isOpen={isPopoverOpen}
                           closePopover={() => setIsPopoverOpen(false)}
                           panelPaddingSize="none"
-                          withTitle
                           anchorPosition="rightUp"
                           repositionOnScroll
                         >
@@ -259,7 +261,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                       }
                                     ),
                                     icon: 'pencil',
-                                    href: linkToEditPolicy(policyName),
+                                    ...reactRouterNavigate(history, linkToEditPolicy(policyName)),
                                   },
                                   {
                                     name: i18n.translate(
@@ -318,9 +320,12 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
             <SectionLoading inline={true} size="s">
               <EuiLink
-                href={linkToSnapshot(
-                  policyDetails.policy.repository,
-                  policyDetails.policy.inProgress.snapshotName
+                {...reactRouterNavigate(
+                  history,
+                  linkToSnapshot(
+                    policyDetails.policy.repository,
+                    policyDetails.policy.inProgress.snapshotName
+                  )
                 )}
                 data-test-subj="inProgressSnapshotLink"
               >

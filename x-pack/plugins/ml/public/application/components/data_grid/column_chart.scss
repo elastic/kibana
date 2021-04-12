@@ -1,0 +1,32 @@
+.mlDataGridChart__histogram {
+  width: 100%;
+  height: $euiSizeXL + $euiSizeXXL;
+}
+
+.mlDataGridChart__legend {
+  @include euiTextTruncate;
+  @include euiFontSizeXS;
+
+  color: $euiColorMediumShade;
+  display: block;
+  overflow-x: hidden;
+  margin: $euiSizeXS 0 0 0;
+  font-style: italic;
+  font-weight: normal;
+  text-align: left;
+}
+
+.mlDataGridChart__legend--numeric {
+  text-align: right;
+}
+
+.mlDataGridChart__legendBoolean {
+  width: 100%;
+  min-width: $euiButtonMinWidth;
+  td { text-align: center }
+}
+
+/* Override to align column header to bottom of cell when no chart is available */
+.mlDataGrid .euiDataGridHeaderCell__content {
+  margin-top: auto;
+}

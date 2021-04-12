@@ -70,14 +70,17 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             <EuiButtonGroup
               color="primary"
               idSelected="onPrem"
+              legend="Deployment type"
               onChange={[Function]}
               options={
                 Array [
                   Object {
+                    "data-test-subj": "selfManagedTutorial",
                     "id": "onPrem",
                     "label": "Self managed",
                   },
                   Object {
+                    "data-test-subj": "onCloudTutorial",
                     "id": "onPremElasticCloud",
                     "label": "Elastic Cloud",
                   },

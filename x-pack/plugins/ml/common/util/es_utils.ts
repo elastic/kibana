@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface WindowWithTextEncoder extends Window {
@@ -26,6 +27,7 @@ function isValidIndexNameLength(indexName: string) {
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 export function isValidIndexName(indexName: string) {
   return (
+    typeof indexName === 'string' &&
     // Lowercase only
     indexName === indexName.toLowerCase() &&
     // Cannot include \, /, *, ?, ", <, >, |, space character, comma, #, :

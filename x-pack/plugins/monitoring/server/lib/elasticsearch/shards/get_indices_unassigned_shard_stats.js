@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -20,7 +21,7 @@ async function getUnassignedShardData(req, esIndexPattern, cluster) {
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
@@ -67,10 +68,10 @@ export async function getIndicesUnassignedShardStats(req, esIndexPattern, cluste
     const index = bucket.key;
     const states = get(bucket, 'state.primary.buckets', []);
     const unassignedReplica = states
-      .filter(state => state.key_as_string === 'false')
+      .filter((state) => state.key_as_string === 'false')
       .reduce((total, state) => total + state.doc_count, 0);
     const unassignedPrimary = states
-      .filter(state => state.key_as_string === 'true')
+      .filter((state) => state.key_as_string === 'true')
       .reduce((total, state) => total + state.doc_count, 0);
 
     let status = 'green';

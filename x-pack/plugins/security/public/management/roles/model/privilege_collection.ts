@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaPrivilege } from './kibana_privilege';
+import type { KibanaPrivilege } from './kibana_privilege';
 
 export class PrivilegeCollection {
   private actions: ReadonlySet<string>;
@@ -20,7 +21,7 @@ export class PrivilegeCollection {
   }
 
   private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {
-    const missing = candidateActions.filter(action => !knownActions.has(action));
+    const missing = candidateActions.filter((action) => !knownActions.has(action));
 
     const hasAllRequested =
       knownActions.size > 0 && candidateActions.length > 0 && missing.length === 0;

@@ -1,25 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLogin } from '../../authentication';
-import { defineSAMLRoutes } from './saml';
-import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult, SAMLLogin } from '../../authentication';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
-  let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let router: jest.Mocked<SecurityRouter>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     defineSAMLRoutes(routeParamsMock);
   });
@@ -62,25 +68,23 @@ describe('SAML authentication routes', () => {
         `"[SAMLResponse]: expected value of type [string] but got [undefined]"`
       );
 
-      expect(() =>
-        bodyValidator.validate({ SAMLResponse: 'saml-response', UnknownArg: 'arg' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[UnknownArg]: definition for this key is missing"`);
+      expect(bodyValidator.validate({ SAMLResponse: 'saml-response', UnknownArg: 'arg' })).toEqual({
+        SAMLResponse: 'saml-response',
+      });
     });
 
     it('returns 500 if authentication throws unhandled exception.', async () => {
       const unhandledException = new Error('Something went wrong.');
       authc.login.mockRejectedValue(unhandledException);
 
-      const internalServerErrorResponse = Symbol('error');
       const responseFactory = httpServerMock.createResponseFactory();
-      responseFactory.internalError.mockReturnValue(internalServerErrorResponse as any);
 
       const request = httpServerMock.createKibanaRequest({
         body: { SAMLResponse: 'saml-response' },
       });
 
-      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
-        internalServerErrorResponse
+      await expect(routeHandler({} as any, request, responseFactory)).rejects.toThrow(
+        unhandledException
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
@@ -167,6 +171,35 @@ describe('SAML authentication routes', () => {
         value: {
           type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
+        },
+      });
+
+      expect(responseFactory.redirected).toHaveBeenCalledWith({
+        headers: { location: 'http://redirect-to/path' },
+      });
+    });
+
+    it('passes `RelayState` within login attempt.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const redirectResponse = Symbol('error');
+      const responseFactory = httpServerMock.createResponseFactory();
+      responseFactory.redirected.mockReturnValue(redirectResponse as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { SAMLResponse: 'saml-response', RelayState: '/app/kibana' },
+      });
+
+      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
+        redirectResponse
+      );
+
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { type: 'saml' },
+        value: {
+          type: SAMLLogin.LoginWithSAMLResponse,
+          samlResponse: 'saml-response',
+          relayState: '/app/kibana',
         },
       });
 

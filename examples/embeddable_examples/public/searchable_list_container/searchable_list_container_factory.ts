@@ -1,24 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactory, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import {
+  ContainerOutput,
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainer,
@@ -26,25 +20,28 @@ import {
 } from './searchable_list_container';
 
 interface StartServices {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  embeddableServices: EmbeddableStart;
 }
 
-export class SearchableListContainerFactory extends EmbeddableFactory {
+export type SearchableListContainerFactory = EmbeddableFactory<
+  SearchableContainerInput,
+  ContainerOutput
+>;
+export class SearchableListContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<SearchableContainerInput, ContainerOutput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;
   }
 
-  public async create(initialInput: SearchableContainerInput) {
-    const { getEmbeddableFactory } = await this.getStartServices();
-    return new SearchableListContainer(initialInput, getEmbeddableFactory);
-  }
+  public create = async (initialInput: SearchableContainerInput) => {
+    const { embeddableServices } = await this.getStartServices();
+    return new SearchableListContainer(initialInput, embeddableServices);
+  };
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.searchableListContainer.displayName', {

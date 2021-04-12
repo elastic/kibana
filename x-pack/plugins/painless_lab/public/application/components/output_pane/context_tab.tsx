@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import { painlessContextOptions } from '../../constants';
@@ -64,7 +66,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={nextContext => updatePayload({ context: nextContext })}
+          onChange={(nextContext: PainlessContext) => updatePayload({ context: nextContext })}
           itemLayoutAlign="top"
           hasDividers
           fullWidth
@@ -103,7 +105,7 @@ export const ContextTab: FunctionComponent = () => {
           <EuiFieldText
             fullWidth
             value={index || ''}
-            onChange={e => {
+            onChange={(e) => {
               const nextIndex = e.target.value;
               updatePayload({ index: nextIndex });
             }}
@@ -143,7 +145,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={150}
               value={query}
-              onChange={nextQuery => updatePayload({ query: nextQuery })}
+              onChange={(nextQuery) => updatePayload({ query: nextQuery })}
               options={{
                 fontSize: 12,
                 minimap: {
@@ -182,7 +184,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={400}
               value={document}
-              onChange={nextDocument => updatePayload({ document: nextDocument })}
+              onChange={(nextDocument) => updatePayload({ document: nextDocument })}
               options={{
                 fontSize: 12,
                 minimap: {

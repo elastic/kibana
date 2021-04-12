@@ -1,47 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { App, AppMount, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
 
-function mount() {}
-
-const app = (props: Partial<App> = {}): App => ({
-  mount: (mount as unknown) as AppMount,
+const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
   title: 'some-title',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.default,
   appRoute: `/app/some-id`,
-  legacy: false,
-  ...props,
-});
-
-const legacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
-  appUrl: '/my-app-url',
-  id: 'some-id',
-  title: 'some-title',
-  status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.default,
-  legacy: true,
+  meta: {
+    keywords: [],
+    searchDeepLinks: [],
+  },
   ...props,
 });
 
@@ -70,11 +49,6 @@ describe('toNavLink', () => {
     );
   });
 
-  it('flags legacy apps when converting to navLink', () => {
-    expect(toNavLink(app({}), basePath).properties.legacy).toEqual(false);
-    expect(toNavLink(legacyApp({}), basePath).properties.legacy).toEqual(true);
-  });
-
   it('handles applications with custom app route', () => {
     const link = toNavLink(
       app({
@@ -85,18 +59,24 @@ describe('toNavLink', () => {
     expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
   });
 
-  it('uses appUrl when converting legacy applications', () => {
-    expect(
-      toNavLink(
-        legacyApp({
-          appUrl: '/my-legacy-app/#foo',
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        baseUrl: 'http://localhost/base-path/my-legacy-app/#foo',
-      })
+  it('generates the `url` property', () => {
+    let link = toNavLink(
+      app({
+        appRoute: '/my-route/my-path',
+      }),
+      basePath
+    );
+    expect(link.properties.url).toEqual('http://localhost/base-path/my-route/my-path');
+
+    link = toNavLink(
+      app({
+        appRoute: '/my-route/my-path',
+        defaultPath: 'some/default/path',
+      }),
+      basePath
+    );
+    expect(link.properties.url).toEqual(
+      'http://localhost/base-path/my-route/my-path/some/default/path'
     );
   });
 

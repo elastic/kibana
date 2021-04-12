@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -19,10 +20,10 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const typeBuckets = get(response, 'aggregations.types.buckets', []);
   if (typeBuckets.length) {
     result.enabled = true;
-    result.types = typeBuckets.map(typeBucket => {
+    result.types = typeBuckets.map((typeBucket) => {
       return {
         type: typeBucket.key.split('.')[1],
-        levels: typeBucket.levels.buckets.map(levelBucket => {
+        levels: typeBucket.levels.buckets.map((levelBucket) => {
           return {
             level: levelBucket.key.toLowerCase(),
             count: levelBucket.doc_count,
@@ -65,7 +66,7 @@ export async function getLogTypes(
     filterPath: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignoreUnavailable: true,
     body: {
-      sort: { '@timestamp': { order: 'desc' } },
+      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter,

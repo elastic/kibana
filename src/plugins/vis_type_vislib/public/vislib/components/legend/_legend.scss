@@ -1,0 +1,81 @@
+@import '../../variables';
+
+// NOTE: Some of the styles attempt to align with the TSVB legend
+
+$visLegendWidth: 150px;
+
+.visLegend__toggle {
+  border-radius: $euiBorderRadius;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  padding: $euiSizeXS;
+  margin: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+
+  &:focus {
+    box-shadow: none;
+    background-color: $euiFocusBackgroundColor !important; // sass-lint:disable-line no-important
+  }
+}
+
+.visLegend__toggle--isOpen {
+  background-color: transparentize($euiColorDarkestShade, .9);
+  opacity: 1;
+}
+
+.visLegend {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+}
+
+.vislib--legend-left {
+  .visLegend__list {
+    margin-bottom: $euiSizeL;
+  }
+}
+
+.vislib--legend-bottom {
+  .visLegend__list {
+    margin-left: $euiSizeL;
+  }
+}
+
+.visLegend__list {
+  @include euiScrollBar;
+  display: flex;
+  width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .visLegend__button {
+    font-size: $euiFontSizeXS;
+    text-align: left;
+    overflow: hidden; // Ensures scrollbars don't appear because EuiButton__text has a high line-height
+
+    .visLegend__valueTitle {
+      vertical-align: middle;
+    }
+  }
+
+  .vislib--legend-top &,
+  .vislib--legend-bottom & {
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .visLegend__value {
+      flex-grow: 0;
+      max-width: $visLegendWidth;
+    }
+  }
+
+  &.hidden {
+    visibility: hidden;
+  }
+}

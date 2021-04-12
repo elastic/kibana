@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
-import { RoleMapping } from '../../../../../common/model';
-import { DeleteProvider } from '.';
+import React from 'react';
 
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { RoleMapping } from '../../../../../common/model';
 import { roleMappingsAPIClientMock } from '../../index.mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { DeleteProvider } from './delete_provider';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {
@@ -41,7 +42,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -55,6 +56,7 @@ describe('DeleteProvider', () => {
       wrapper.update();
     });
 
+    wrapper.update();
     const { title, confirmButtonText } = wrapper.find(EuiConfirmModal).props();
     expect(title).toMatchInlineSnapshot(`"Delete role mapping 'delete-me'?"`);
     expect(confirmButtonText).toMatchInlineSnapshot(`"Delete role mapping"`);
@@ -113,7 +115,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -127,6 +129,7 @@ describe('DeleteProvider', () => {
       wrapper.update();
     });
 
+    wrapper.update();
     const { title, confirmButtonText } = wrapper.find(EuiConfirmModal).props();
     expect(title).toMatchInlineSnapshot(`"Delete 2 role mappings?"`);
     expect(confirmButtonText).toMatchInlineSnapshot(`"Delete role mappings"`);
@@ -189,7 +192,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -204,6 +207,7 @@ describe('DeleteProvider', () => {
     });
 
     await act(async () => {
+      wrapper.update();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       await nextTick();
       wrapper.update();
@@ -253,7 +257,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -268,6 +272,7 @@ describe('DeleteProvider', () => {
     });
 
     await act(async () => {
+      wrapper.update();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       await nextTick();
       wrapper.update();

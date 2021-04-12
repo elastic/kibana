@@ -2,13 +2,18 @@
   "id": "metricbeat_system_ecs",
   "title": "Metricbeat System",
   "description": "Detect anomalies in Metricbeat System data (ECS)",
-  "type": "Metricbeat data",
+  "type": "Metricbeat data.",
   "logoFile": "logo.json",
   "defaultIndexPattern": "metricbeat-*",
   "query": {
     "bool": {
       "filter": {
-        "terms" : { "event.dataset" : ["system.cpu", "system.filesystem"]}
+        "terms": {
+          "event.dataset": [
+            "system.cpu",
+            "system.filesystem"
+          ]
+        }
       }
     }
   },

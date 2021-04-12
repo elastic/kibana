@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { JOB_STATE } from '../../constants/states';
@@ -45,6 +46,7 @@ export interface ModelSizeStats {
   model_bytes: number;
   model_bytes_exceeded: number;
   model_bytes_memory_limit: number;
+  peak_model_bytes?: number;
   total_by_field_count: number;
   total_over_field_count: number;
   total_partition_field_count: number;

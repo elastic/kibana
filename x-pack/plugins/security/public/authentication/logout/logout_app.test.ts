@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AppMount, ScopedHistory } from 'src/core/public';
-import { logoutApp } from './logout_app';
+import type { AppMount } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { logoutApp } from './logout_app';
 
 describe('logoutApp', () => {
   beforeAll(() => {
@@ -19,11 +20,6 @@ describe('logoutApp', () => {
       value: { href: 'https://some-host/bar?arg=true', search: '?arg=true' },
       writable: true,
     });
-  });
-
-  afterAll(() => {
-    delete (window as any).sessionStorage;
-    delete (window as any).location;
   });
 
   it('properly registers application', () => {
@@ -57,7 +53,8 @@ describe('logoutApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      setHeaderActionMenu: jest.fn(),
+      history: scopedHistoryMock.create(),
     });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);

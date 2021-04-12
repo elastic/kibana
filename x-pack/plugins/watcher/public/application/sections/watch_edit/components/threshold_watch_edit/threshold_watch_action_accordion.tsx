@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useContext, useState } from 'react';
 
 import {
@@ -85,9 +87,9 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
 
   if (actions && actions.length >= 1) {
     return actions.map((action: any) => {
-      const FieldsComponent = actionFieldsComponentMap[action.type];
+      const FieldsComponent = actionFieldsComponentMap[action.type] as any;
       const errors = actionErrors[action.id];
-      const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+      const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
       return (
         <EuiAccordion

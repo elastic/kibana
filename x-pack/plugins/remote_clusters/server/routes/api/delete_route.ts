@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -14,7 +15,7 @@ import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 
 const paramsValidation = schema.object({
   nameOrNames: schema.string(),
@@ -29,13 +30,15 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
       const { nameOrNames } = request.params;
       const names = nameOrNames.split(',');
 
       const itemsDeleted: any[] = [];
       const errors: any[] = [];
+
+      const clusterSettings = await callAsCurrentUser('cluster.getSettings');
 
       // Validator that returns an error if the remote cluster does not exist.
       const validateClusterDoesExist = async (name: string) => {
@@ -60,9 +63,12 @@ export const register = (deps: RouteDependencies): void => {
       };
 
       // Send the request to delete the cluster and return an error if it could not be deleted.
-      const sendRequestToDeleteCluster = async (name: string) => {
+      const sendRequestToDeleteCluster = async (
+        name: string,
+        hasDeprecatedProxySetting: boolean
+      ) => {
         try {
-          const body = serializeCluster({ name });
+          const body = serializeCluster({ name, hasDeprecatedProxySetting });
           const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', { body });
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
@@ -89,7 +95,7 @@ export const register = (deps: RouteDependencies): void => {
           if (isEsError(error)) {
             return response.customError({ statusCode: error.statusCode, body: error });
           }
-          return response.internalError({ body: error });
+          throw error;
         }
       };
 
@@ -98,8 +104,12 @@ export const register = (deps: RouteDependencies): void => {
         let error: any = await validateClusterDoesExist(clusterName);
 
         if (!error) {
+          // Check if cluster contains deprecated proxy setting
+          const hasDeprecatedProxySetting = Boolean(
+            get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
+          );
           // Delete the cluster.
-          error = await sendRequestToDeleteCluster(clusterName);
+          error = await sendRequestToDeleteCluster(clusterName, hasDeprecatedProxySetting);
         }
 
         if (error) {
@@ -122,7 +132,7 @@ export const register = (deps: RouteDependencies): void => {
       if (isEsError(error)) {
         return response.customError({ statusCode: error.statusCode, body: error });
       }
-      return response.internalError({ body: error });
+      throw error;
     }
   };
 

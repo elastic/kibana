@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-
-import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
 
 import { LicenseStatus, PLUGIN } from '../common';
 import { AppServerPluginDependencies } from './types';
@@ -22,18 +21,17 @@ export class SearchProfilerServerPlugin implements Plugin {
     this.licenseStatus = { valid: false };
   }
 
-  async setup({ http }: CoreSetup, { licensing, elasticsearch }: AppServerPluginDependencies) {
+  setup({ http }: CoreSetup, { licensing }: AppServerPluginDependencies) {
     const router = http.createRouter();
     profileRoute.register({
-      elasticsearch,
       router,
       getLicenseStatus: () => this.licenseStatus,
       log: this.log,
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
       } else {

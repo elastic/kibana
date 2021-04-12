@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /** Base interface for all metrics gatherers */
@@ -85,6 +74,33 @@ export interface OpsOsMetrics {
   };
   /** the OS uptime */
   uptime_in_millis: number;
+
+  /** cpu accounting metrics, undefined when not running in a cgroup */
+  cpuacct?: {
+    /** name of this process's cgroup */
+    control_group: string;
+    /** cpu time used by this process's cgroup */
+    usage_nanos: number;
+  };
+
+  /** cpu cgroup metrics, undefined when not running in a cgroup */
+  cpu?: {
+    /** name of this process's cgroup */
+    control_group: string;
+    /** the length of the cfs period */
+    cfs_period_micros: number;
+    /** total available run-time within a cfs period */
+    cfs_quota_micros: number;
+    /** current stats on the cfs periods */
+    stat: {
+      /** number of cfs periods that elapsed */
+      number_of_elapsed_periods: number;
+      /** number of times the cgroup has been throttled */
+      number_of_times_throttled: number;
+      /** total amount of time the cgroup has been throttled for */
+      time_throttled_nanos: number;
+    };
+  };
 }
 
 /**

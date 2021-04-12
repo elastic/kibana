@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
-import { useAppDependencies } from '../app_context';
+import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -17,6 +19,7 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  setIsLoadingState,
 }: {
   idsToDelete: string[];
   apiDeleteCall: ({
@@ -31,10 +34,20 @@ export const DeleteModalConfirmation = ({
   onErrors: () => void;
   singleTitle: string;
   multipleTitle: string;
+  setIsLoadingState: (isLoading: boolean) => void;
 }) => {
-  const { http, toastNotifications } = useAppDependencies();
+  const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
+
+  useEffect(() => {
+    setDeleteModalVisibility(idsToDelete.length > 0);
+  }, [idsToDelete]);
+
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const numIdsToDelete = idsToDelete.length;
-  if (!numIdsToDelete) {
+  if (!deleteModalFlyoutVisible) {
     return null;
   }
   const confirmModalText = i18n.translate(
@@ -60,49 +73,54 @@ export const DeleteModalConfirmation = ({
     }
   );
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="deleteIdsConfirmation"
-        title={confirmButtonText}
-        onCancel={() => onCancel()}
-        onConfirm={async () => {
-          const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
-          const numSuccesses = successes.length;
-          const numErrors = errors.length;
-          onDeleted(successes);
-          if (numSuccesses > 0) {
-            toastNotifications.addSuccess(
-              i18n.translate(
-                'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
-                {
-                  defaultMessage:
-                    'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
-                  values: { numSuccesses, singleTitle, multipleTitle },
-                }
-              )
-            );
-          }
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="deleteIdsConfirmation"
+      title={confirmButtonText}
+      onCancel={() => {
+        setDeleteModalVisibility(false);
+        onCancel();
+      }}
+      onConfirm={async () => {
+        setDeleteModalVisibility(false);
+        setIsLoadingState(true);
+        const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
+        setIsLoadingState(false);
 
-          if (numErrors > 0) {
-            toastNotifications.addDanger(
-              i18n.translate(
-                'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
-                {
-                  defaultMessage:
-                    'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
-                  values: { numErrors, singleTitle, multipleTitle },
-                }
-              )
-            );
-            onErrors();
-          }
-        }}
-        cancelButtonText={cancelButtonText}
-        confirmButtonText={confirmButtonText}
-      >
-        {confirmModalText}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        const numSuccesses = successes.length;
+        const numErrors = errors.length;
+        if (numSuccesses > 0) {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
+              {
+                defaultMessage:
+                  'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+                values: { numSuccesses, singleTitle, multipleTitle },
+              }
+            )
+          );
+        }
+
+        if (numErrors > 0) {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
+              {
+                defaultMessage:
+                  'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+                values: { numErrors, singleTitle, multipleTitle },
+              }
+            )
+          );
+          await onErrors();
+        }
+        await onDeleted(successes);
+      }}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={confirmButtonText}
+    >
+      {confirmModalText}
+    </EuiConfirmModal>
   );
 };

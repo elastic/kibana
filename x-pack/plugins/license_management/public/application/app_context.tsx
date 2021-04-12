@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useContext } from 'react';
+import { ScopedHistory } from 'kibana/public';
 
 import { CoreStart } from '../../../../../src/core/public';
 import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
-import { TelemetryPluginSetup } from '../../../../../src/plugins/telemetry/public';
+import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
 import { ClientConfigType } from '../types';
 import { BreadcrumbService } from './breadcrumbs';
 
@@ -18,10 +20,11 @@ export interface AppDependencies {
   core: CoreStart;
   services: {
     breadcrumbService: BreadcrumbService;
+    history: ScopedHistory;
   };
   plugins: {
     licensing: LicensingPluginSetup;
-    telemetry?: TelemetryPluginSetup;
+    telemetry?: TelemetryPluginStart;
   };
   docLinks: {
     security: string;

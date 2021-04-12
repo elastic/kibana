@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Based on the original Kibana ui/time_buckets/calc_auto_interval.js but with
@@ -81,7 +82,7 @@ export function timeBucketsCalcAutoIntervalProvider() {
       return moment.duration(ms, 'ms');
     }
 
-    return function(buckets, duration) {
+    return function (buckets, duration) {
       const interval = pick(buckets, duration);
       if (interval) {
         return moment.duration(interval._data);
@@ -111,7 +112,7 @@ export function timeBucketsCalcAutoIntervalProvider() {
       true
     ),
 
-    lessThan: find(revRoundingRules, function(upperBound, lowerBound, target) {
+    lessThan: find(revRoundingRules, function (upperBound, lowerBound, target) {
       // upperBound - first duration in rule
       // lowerBound - second duration in rule
       // target - target interval in milliseconds. Must not return intervals less than this duration.

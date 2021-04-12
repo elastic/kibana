@@ -1,0 +1,44 @@
+title: NewAgentEvent
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - STATE
+      - ERROR
+      - ACTION_RESULT
+      - ACTION
+  subtype:
+    type: string
+    enum:
+      - RUNNING
+      - STARTING
+      - IN_PROGRESS
+      - CONFIG
+      - FAILED
+      - STOPPING
+      - STOPPED
+      - DEGRADED
+      - DATA_DUMP
+      - ACKNOWLEDGED
+      - UNKNOWN
+  timestamp:
+    type: string
+  message:
+    type: string
+  payload:
+    type: string
+  agent_id:
+    type: string
+  policy_id:
+    type: string
+  stream_id:
+    type: string
+  action_id:
+    type: string
+required:
+  - type
+  - subtype
+  - timestamp
+  - message
+  - agent_id

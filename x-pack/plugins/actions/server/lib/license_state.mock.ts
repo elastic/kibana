@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ILicenseState } from './license_state';
-import { LICENSE_CHECK_STATE } from '../../../licensing/server';
 
 export const createLicenseStateMock = () => {
   const licenseState: jest.Mocked<ILicenseState> = {
@@ -13,8 +13,9 @@ export const createLicenseStateMock = () => {
     getLicenseInformation: jest.fn(),
     ensureLicenseForActionType: jest.fn(),
     isLicenseValidForActionType: jest.fn(),
+    setNotifyUsage: jest.fn(),
     checkLicense: jest.fn().mockResolvedValue({
-      state: LICENSE_CHECK_STATE.Valid,
+      state: 'valid',
     }),
   };
   return licenseState;

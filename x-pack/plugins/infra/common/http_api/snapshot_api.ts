@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
+import { MetricsAPISeriesRT } from './metrics_api';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -21,10 +23,11 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
   value: rt.union([rt.number, rt.null]),
   avg: rt.union([rt.number, rt.null]),
   max: rt.union([rt.number, rt.null]),
+  timeseries: MetricsAPISeriesRT,
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
-  name: SnapshotMetricTypeRT,
+  name: rt.union([SnapshotMetricTypeRT, rt.string]),
 });
 
 export const SnapshotNodeMetricRT = rt.intersection([
@@ -32,8 +35,9 @@ export const SnapshotNodeMetricRT = rt.intersection([
   SnapshotNodeMetricOptionalRT,
 ]);
 export const SnapshotNodeRT = rt.type({
-  metric: SnapshotNodeMetricRT,
+  metrics: rt.array(SnapshotNodeMetricRT),
   path: rt.array(SnapshotNodePathRT),
+  name: rt.string,
 });
 
 export const SnapshotNodeResponseRT = rt.type({
@@ -41,11 +45,18 @@ export const SnapshotNodeResponseRT = rt.type({
   interval: rt.string,
 });
 
-export const InfraTimerangeInputRT = rt.type({
-  interval: rt.string,
-  to: rt.number,
-  from: rt.number,
-});
+export const InfraTimerangeInputRT = rt.intersection([
+  rt.type({
+    interval: rt.string,
+    to: rt.number,
+    from: rt.number,
+  }),
+  rt.partial({
+    lookbackSize: rt.number,
+    ignoreLookback: rt.boolean,
+    forceInterval: rt.boolean,
+  }),
+]);
 
 export const SnapshotGroupByRT = rt.array(
   rt.partial({
@@ -88,8 +99,8 @@ export const SnapshotMetricInputRT = rt.union([
 export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
-    metric: SnapshotMetricInputRT,
-    groupBy: SnapshotGroupByRT,
+    metrics: rt.array(SnapshotMetricInputRT),
+    groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
   }),
@@ -97,6 +108,8 @@ export const SnapshotRequestRT = rt.intersection([
     accountId: rt.string,
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
+    includeTimeseries: rt.boolean,
+    overrideCompositeSize: rt.number,
   }),
 ]);
 

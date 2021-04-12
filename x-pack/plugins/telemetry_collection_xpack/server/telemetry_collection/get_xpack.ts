@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
 /**
@@ -14,12 +15,7 @@ import { TIMEOUT } from './constants';
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
-export function getXPackUsage(callCluster: CallCluster) {
-  return callCluster('transport.request', {
-    method: 'GET',
-    path: '/_xpack/usage',
-    query: {
-      master_timeout: TIMEOUT,
-    },
-  });
+export async function getXPackUsage(esClient: ElasticsearchClient) {
+  const { body } = await esClient.xpack.usage({ master_timeout: TIMEOUT });
+  return body;
 }

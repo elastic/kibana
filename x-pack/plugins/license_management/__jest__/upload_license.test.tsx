@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { httpServiceMock } from '../../../../src/core/public/mocks';
-import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+import { LocationDescriptorObject } from 'history';
+import { httpServiceMock, scopedHistoryMock } from '../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
 
 // @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';
@@ -28,10 +30,12 @@ import {
   // @ts-ignore
 } from './api_responses';
 
-window.location.reload = () => {};
-
 let store: any = null;
 let component: any = null;
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+});
 
 const appDependencies = {
   plugins: {
@@ -39,14 +43,15 @@ const appDependencies = {
       refresh: jest.fn(),
     },
   },
+  services: {
+    history,
+  },
   docLinks: {},
 };
 
 const thunkServices = {
   http: httpServiceMock.createSetupContract(),
-  history: {
-    replace: jest.fn(),
-  },
+  history,
   breadcrumbService: {
     setBreadcrumbs() {},
   },
@@ -54,12 +59,20 @@ const thunkServices = {
 };
 
 describe('UploadLicense', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        reload: jest.fn(),
+      },
+    });
+  });
+
   beforeEach(() => {
     store = licenseManagementStore({}, thunkServices);
     component = (
       <AppContextProvider value={appDependencies as any}>
         <Provider store={store}>
-          <UploadLicense />
+          <UploadLicense history={history} />
         </Provider>
       </AppContextProvider>
     );

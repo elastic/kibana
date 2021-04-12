@@ -1,0 +1,100 @@
+{
+/*
+
+Welcome to Vega visualizations.  Here you can design your own dataviz from scratch using a declarative language called Vega, or its simpler form Vega-Lite.  In Vega, you have the full control of what data is loaded, even from multiple sources, how that data is transformed, and what visual elements are used to show it.  Use help icon to view Vega examples, tutorials, and other docs.  Use the wrench icon to reformat this text, or to remove comments.
+
+This example graph shows the document count in all indexes in the current time range.  You might need to adjust the time filter in the upper right corner.
+*/
+
+  $schema: https://vega.github.io/schema/vega-lite/v5.json
+  title: Event counts from all indexes
+
+  // Define the data source
+  data: {
+    url: {
+/*
+An object instead of a string for the "url" param is treated as an Elasticsearch query. Anything inside this object is not part of the Vega language, but only understood by Kibana and Elasticsearch server. This query counts the number of documents per time interval, assuming you have a @timestamp field in your data.
+
+Kibana has a special handling for the fields surrounded by "%".  They are processed before the the query is sent to Elasticsearch. This way the query becomes context aware, and can use the time range and the dashboard filters.
+*/
+
+      // Apply dashboard context filters when set
+      %context%: true
+      // Filter the time picker (upper right corner) with this field
+      %timefield%: @timestamp
+
+/*
+See .search() documentation for :  https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
+*/
+
+      // Which index to search
+      index: _all
+      // Aggregate data by the time field into time buckets, counting the number of documents in each bucket.
+      body: {
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              // Use date histogram aggregation on @timestamp field
+              field: @timestamp
+              // The interval value will depend on the daterange picker (true), or use an integer to set an approximate bucket count
+              interval: {%autointerval%: true}
+              // Make sure we get an entire range, even if it has no data
+              extended_bounds: {
+                // Use the current time range's start and end
+                min: {%timefilter%: "min"}
+                max: {%timefilter%: "max"}
+              }
+              // Use this for linear (e.g. line, area) graphs.  Without it, empty buckets will not show up
+              min_doc_count: 0
+            }
+          }
+        }
+        // Speed up the response by only including aggregation results
+        size: 0
+      }
+    }
+/*
+Elasticsearch will return results in this format:
+
+aggregations: {
+  time_buckets: {
+    buckets: [
+      {
+        key_as_string: 2015-11-30T22:00:00.000Z
+        key: 1448920800000
+        doc_count: 0
+      },
+      {
+        key_as_string: 2015-11-30T23:00:00.000Z
+        key: 1448924400000
+        doc_count: 0
+      }
+      ...
+    ]
+  }
+}
+
+For our graph, we only need the list of bucket values.  Use the format.property to discard everything else.
+*/
+    format: {property: "aggregations.time_buckets.buckets"}
+  }
+
+  // "mark" is the graphics element used to show our data.  Other mark values are: area, bar, circle, line, point, rect, rule, square, text, and tick.  See https://vega.github.io/vega-lite/docs/mark.html
+  mark: line
+
+  // "encoding" tells the "mark" what data to use and in what way.  See https://vega.github.io/vega-lite/docs/encoding.html
+  encoding: {
+    x: {
+      // The "key" value is the timestamp in milliseconds.  Use it for X axis.
+      field: key
+      type: temporal
+      axis: {title: false} // Customize X axis format
+    }
+    y: {
+      // The "doc_count" is the count per bucket.  Use it for Y axis.
+      field: doc_count
+      type: quantitative
+      axis: {title: "Document count"}
+    }
+  }
+}

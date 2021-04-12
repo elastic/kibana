@@ -1,20 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExplorerNoInfluencersFound snapshot 1`] = `
-<EuiEmptyPrompt
-  title={
-    <h2>
-      <FormattedMessage
-        defaultMessage="No {viewBySwimlaneFieldName} influencers found"
-        id="xpack.ml.explorer.noInfluencersFoundTitle"
-        values={
-          Object {
-            "viewBySwimlaneFieldName": "field_name",
-          }
-        }
-      />
-    </h2>
+<FormattedMessage
+  defaultMessage="No {viewBySwimlaneFieldName} influencers found"
+  id="xpack.ml.explorer.noInfluencersFoundTitle"
+  values={
+    Object {
+      "viewBySwimlaneFieldName": "field_name",
+    }
   }
-  titleSize="xs"
 />
 `;

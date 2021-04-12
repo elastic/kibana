@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
-import {
+import type { Subscription } from 'rxjs';
+
+import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type {
   ManagementApp,
+  ManagementSection,
   ManagementSetup,
-  ManagementStart,
-} from '../../../../../src/plugins/management/public';
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticationServiceSetup } from '../authentication';
-import { PluginStartDependencies } from '../plugin';
+} from 'src/plugins/management/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { PluginStartDependencies } from '../plugin';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
@@ -29,36 +31,29 @@ interface SetupParams {
 }
 
 interface StartParams {
-  management: ManagementStart;
+  capabilities: Capabilities;
 }
 
 export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
+  private securitySection?: ManagementSection;
 
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
+    this.securitySection = management.sections.section.security;
 
-    const securitySection = management.sections.register({
-      id: 'security',
-      title: i18n.translate('xpack.security.management.securityTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 100,
-      euiIconType: 'securityApp',
-    });
-
-    securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
-    securitySection.registerApp(
+    this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
+    this.securitySection.registerApp(
       rolesManagementApp.create({ fatalErrors, license, getStartServices })
     );
-    securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
-    securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 
-  start({ management }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe(async features => {
-      const securitySection = management.sections.getSection('security')!;
+  start({ capabilities }: StartParams) {
+    this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
+      const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],
@@ -73,6 +68,11 @@ export class ManagementService {
       // Iterate over all registered apps and update their enable status depending on the available
       // license features.
       for (const [app, enableStatus] of securityManagementAppsStatuses) {
+        if (capabilities.management.security[app.id] !== true) {
+          app.disable();
+          continue;
+        }
+
         if (app.enabled === enableStatus) {
           continue;
         }

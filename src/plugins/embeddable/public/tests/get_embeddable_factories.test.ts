@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { testPlugin } from './test_plugin';
@@ -35,16 +24,16 @@ test('returns empty list if there are no embeddable factories', () => {
 
 test('returns existing embeddable factories', () => {
   const { setup, doStart } = testPlugin();
-  const start = doStart();
-  const { length } = [...start.getEmbeddableFactories()];
 
-  const factory1 = new FilterableContainerFactory(start.getEmbeddableFactory);
-  const factory2 = new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any);
+  const factory1 = new FilterableContainerFactory(async () => await start.getEmbeddableFactory);
+  const factory2 = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
   setup.registerEmbeddableFactory(factory1.type, factory1);
   setup.registerEmbeddableFactory(factory2.type, factory2);
 
+  const start = doStart();
+
   const list = [...start.getEmbeddableFactories()];
-  expect(list.length - length).toBe(2);
+  expect(list.length).toBe(2);
   expect(!!list.find(({ type }) => factory1.type === type)).toBe(true);
   expect(!!list.find(({ type }) => factory2.type === type)).toBe(true);
 });

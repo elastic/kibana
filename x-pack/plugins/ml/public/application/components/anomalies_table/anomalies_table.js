@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -9,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { get } from 'lodash';
 
 import React, { Component } from 'react';
 
@@ -25,8 +26,9 @@ import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
+import { usePageUrlState } from '../../util/url_state';
 
-class AnomaliesTable extends Component {
+export class AnomaliesTableInternal extends Component {
   constructor(props) {
     super(props);
 
@@ -44,8 +46,8 @@ class AnomaliesTable extends Component {
     // Update the itemIdToExpandedRowMap state if a change to the table data has resulted
     // in an anomaly that was previously expanded no longer being in the data.
     const itemIdToExpandedRowMap = prevState.itemIdToExpandedRowMap;
-    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find(rowId => {
-      const matching = nextProps.tableData.anomalies.find(anomaly => {
+    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find((rowId) => {
+      const matching = nextProps.tableData.anomalies.find((anomaly) => {
         return anomaly.rowId === rowId;
       });
 
@@ -70,7 +72,7 @@ class AnomaliesTable extends Component {
     } else {
       const examples =
         item.entityName === 'mlcategory'
-          ? _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
+          ? get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
           : undefined;
       let definition = undefined;
 
@@ -108,7 +110,7 @@ class AnomaliesTable extends Component {
     this.setState({ itemIdToExpandedRowMap });
   };
 
-  onMouseOverRow = record => {
+  onMouseOverRow = (record) => {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
@@ -132,7 +134,7 @@ class AnomaliesTable extends Component {
     }
   };
 
-  setShowRuleEditorFlyoutFunction = func => {
+  setShowRuleEditorFlyoutFunction = (func) => {
     this.setState({
       showRuleEditorFlyout: func,
     });
@@ -145,8 +147,20 @@ class AnomaliesTable extends Component {
     });
   };
 
+  onTableChange = ({ page, sort }) => {
+    const { tableState, updateTableState } = this.props;
+    const result = {
+      pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
+      pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
+      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      sortDirection:
+        sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
+    };
+    updateTableState(result);
+  };
+
   render() {
-    const { bounds, tableData, filter, influencerFilter } = this.props;
+    const { bounds, tableData, filter, influencerFilter, tableState } = this.props;
 
     if (
       tableData === undefined ||
@@ -186,12 +200,12 @@ class AnomaliesTable extends Component {
 
     const sorting = {
       sort: {
-        field: 'severity',
-        direction: 'desc',
+        field: tableState.sortField,
+        direction: tableState.sortDirection,
       },
     };
 
-    const getRowProps = item => {
+    const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),
@@ -199,8 +213,15 @@ class AnomaliesTable extends Component {
       };
     };
 
+    const pagination = {
+      pageIndex: tableState.pageIndex,
+      pageSize: tableState.pageSize,
+      totalItemCount: tableData.anomalies.length,
+      pageSizeOptions: [10, 25, 100],
+    };
+
     return (
-      <React.Fragment>
+      <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
@@ -209,26 +230,46 @@ class AnomaliesTable extends Component {
           className="ml-anomalies-table eui-textOverflowWrap"
           items={tableData.anomalies}
           columns={columns}
-          pagination={{
-            pageSizeOptions: [10, 25, 100],
-            initialPageSize: 25,
-          }}
+          pagination={pagination}
           sorting={sorting}
           itemId="rowId"
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           compressed={true}
           rowProps={getRowProps}
           data-test-subj="mlAnomaliesTable"
+          onTableChange={this.onTableChange}
         />
-      </React.Fragment>
+      </>
     );
   }
 }
-AnomaliesTable.propTypes = {
+
+export const getDefaultAnomaliesTableState = () => ({
+  pageIndex: 0,
+  pageSize: 25,
+  sortField: 'severity',
+  sortDirection: 'desc',
+});
+
+export const AnomaliesTable = (props) => {
+  const [tableState, updateTableState] = usePageUrlState(
+    'mlAnomaliesTable',
+    getDefaultAnomaliesTableState()
+  );
+  return (
+    <AnomaliesTableInternal
+      {...props}
+      tableState={tableState}
+      updateTableState={updateTableState}
+    />
+  );
+};
+
+AnomaliesTableInternal.propTypes = {
   bounds: PropTypes.object.isRequired,
   tableData: PropTypes.object,
   filter: PropTypes.func,
   influencerFilter: PropTypes.func,
+  tableState: PropTypes.object.isRequired,
+  updateTableState: PropTypes.func.isRequired,
 };
-
-export { AnomaliesTable };

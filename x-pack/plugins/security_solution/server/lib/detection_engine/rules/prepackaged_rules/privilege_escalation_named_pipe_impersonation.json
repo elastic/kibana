@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a privilege escalation attempt via named pipe impersonation. An adversary may abuse this technique by utilizing a framework such Metasploit's meterpreter getsystem command.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Privilege Escalation via Named Pipe Impersonation",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name in (\"Cmd.Exe\", \"PowerShell.EXE\") and \n process.args : \"echo\" and process.args : \">\" and process.args : \"\\\\\\\\.\\\\pipe\\\\*\"\n",
+  "references": [
+    "https://www.ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation"
+  ],
+  "risk_score": 73,
+  "rule_id": "3ecbdc9e-e4f2-43fa-8cca-63802125e582",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1134",
+          "name": "Access Token Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1134/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

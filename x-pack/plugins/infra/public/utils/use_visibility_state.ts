@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -11,7 +12,7 @@ export const useVisibilityState = (initialState: boolean) => {
 
   const hide = useCallback(() => setIsVisible(false), []);
   const show = useCallback(() => setIsVisible(true), []);
-  const toggle = useCallback(() => setIsVisible(state => !state), []);
+  const toggle = useCallback(() => setIsVisible((state) => !state), []);
 
   return useMemo(
     () => ({

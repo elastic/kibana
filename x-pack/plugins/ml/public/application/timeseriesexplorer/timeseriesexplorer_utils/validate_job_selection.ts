@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../util/dependency_cache';
-
+import { ToastsStart } from 'kibana/public';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { getTimeRangeFromSelection } from '../../components/job_selector/job_select_service_utils';
@@ -24,9 +24,9 @@ import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
 export function validateJobSelection(
   jobsWithTimeRange: MlJobWithTimeRange[],
   selectedJobIds: string[],
-  setGlobalState: (...args: any) => void
+  setGlobalState: (...args: any) => void,
+  toastNotifications: ToastsStart
 ) {
-  const toastNotifications = getToastNotifications();
   const jobs = createTimeSeriesJobData(mlJobService.jobs);
   const timeSeriesJobIds: string[] = jobs.map((j: any) => j.id);
 
@@ -34,7 +34,30 @@ export function validateJobSelection(
   // (e.g. if switching to this view straight from the Anomaly Explorer).
   const invalidIds: string[] = difference(selectedJobIds, timeSeriesJobIds);
   const validSelectedJobIds = without(selectedJobIds, ...invalidIds);
-  if (invalidIds.length > 0) {
+
+  // show specific reason why we can't show the single metric viewer
+  if (invalidIds.length === 1) {
+    const selectedJobId = invalidIds[0];
+    const selectedJob = jobsWithTimeRange.find((j) => j.id === selectedJobId);
+    if (selectedJob !== undefined && selectedJob.isNotSingleMetricViewerJobMessage !== undefined) {
+      const warningText = i18n.translate(
+        'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningWithReasonMessage',
+        {
+          defaultMessage: `You can't view {selectedJobId} in this dashboard because {reason}.`,
+          values: {
+            selectedJobId,
+            reason: selectedJob.isNotSingleMetricViewerJobMessage,
+          },
+        }
+      );
+      toastNotifications.addWarning({
+        title: warningText,
+        'data-test-subj': 'mlTimeSeriesExplorerDisabledJobReasonWarningToast',
+      });
+    }
+  }
+
+  if (invalidIds.length > 1) {
     let warningText = i18n.translate(
       'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
       {
@@ -45,6 +68,7 @@ export function validateJobSelection(
         },
       }
     );
+
     if (validSelectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
       warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
         defaultMessage: ', auto selecting first job',

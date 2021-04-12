@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
-import { ClustersHighLevelStats } from './get_high_level_stats';
-import { coreMock } from 'src/core/server/mocks';
+import { LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 describe('get_all_stats', () => {
-  const start = 0;
-  const end = 1;
+  const timestamp = Date.now();
   const callCluster = sinon.stub();
 
   const esClusters = [
@@ -146,13 +145,13 @@ describe('get_all_stats', () => {
             logstash: {
               count: 1,
               versions: [{ version: '2.3.4-beta2', count: 1 }],
-              os: {
-                platforms: [],
-                platformReleases: [],
-                distros: [],
-                distroReleases: [],
+              cluster_stats: {
+                collection_types: {
+                  internal_collection: 1,
+                },
+                pipelines: {},
+                plugins: [],
               },
-              cloud: undefined,
             },
           },
         },
@@ -171,23 +170,7 @@ describe('get_all_stats', () => {
         .onCall(4)
         .returns(Promise.resolve({})); // Beats state
 
-      expect(
-        await getAllStats(
-          [{ clusterUuid: 'a' }],
-          {
-            callCluster: callCluster as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            isDev: true,
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual(allClusters);
+      expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
 
     it('returns empty clusters', async () => {
@@ -197,23 +180,7 @@ describe('get_all_stats', () => {
 
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
-      expect(
-        await getAllStats(
-          [],
-          {
-            callCluster: callCluster as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            isDev: true,
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual([]);
+      expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });
   });
 
@@ -221,7 +188,7 @@ describe('get_all_stats', () => {
     it('handles response', () => {
       const clusters = handleAllStats(esClusters as ESClusterStats[], {
         kibana: (kibanaStats as unknown) as KibanaStats,
-        logstash: (logstashStats as unknown) as ClustersHighLevelStats,
+        logstash: (logstashStats as unknown) as LogstashStatsByClusterUuid,
         beats: {},
       });
 

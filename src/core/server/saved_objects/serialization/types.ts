@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
@@ -27,7 +16,6 @@ import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 export interface SavedObjectsRawDoc {
   _id: string;
   _source: SavedObjectsRawDocSource;
-  _type?: string;
   _seq_no?: number;
   _primary_term?: number;
 }
@@ -36,29 +24,29 @@ export interface SavedObjectsRawDoc {
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
+  namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];
+  originId?: string;
 
   [typeMapping: string]: any;
 }
 
 /**
- * A saved object type definition that allows for miscellaneous, unknown
- * properties, as current discussions around security, ACLs, etc indicate
- * that future props are likely to be added. Migrations support this
- * scenario out of the box.
+ * Saved Object base document
  */
-interface SavedObjectDoc {
-  attributes: any;
-  id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
+interface SavedObjectDoc<T = unknown> {
+  attributes: T;
+  id: string;
   type: string;
   namespace?: string;
+  namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  coreMigrationVersion?: string;
   version?: string;
   updated_at?: string;
-
-  [rootProp: string]: any;
+  originId?: string;
 }
 
 interface Referencable {
@@ -66,14 +54,34 @@ interface Referencable {
 }
 
 /**
- * We want to have two types, one that guarantees a "references" attribute
- * will exist and one that allows it to be null. Since we're not migrating
- * all the saved objects to have a "references" array, we need to support
- * the scenarios where it may be missing (ex migrations).
+ * Describes Saved Object documents from Kibana < 7.0.0 which don't have a
+ * `references` root property defined. This type should only be used in
+ * migrations.
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
-/** @public */
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+/**
+ * Describes Saved Object documents that have passed through the migration
+ * framework and are guaranteed to have a `references` root property.
+ *
+ * @public
+ */
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
+
+/**
+ * Options that can be specified when using the saved objects serializer to parse a raw document.
+ *
+ * @public
+ */
+export interface SavedObjectsRawDocParseOptions {
+  /**
+   * Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously
+   * single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade
+   * migrations.
+   *
+   * If not specified, the default treatment is `strict`.
+   */
+  namespaceTreatment?: 'strict' | 'lax';
+}

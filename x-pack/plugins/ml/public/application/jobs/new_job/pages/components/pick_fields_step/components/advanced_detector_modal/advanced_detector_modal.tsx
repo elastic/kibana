@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
 import {
   EuiComboBox,
@@ -58,7 +60,12 @@ const emptyOption: EuiComboBoxOptionOption = {
   label: '',
 };
 
-const excludeFrequentOptions: EuiComboBoxOptionOption[] = [{ label: 'all' }, { label: 'none' }];
+const excludeFrequentOptions: EuiComboBoxOptionOption[] = [
+  { label: 'all' },
+  { label: 'none' },
+  { label: 'by' },
+  { label: 'over' },
+];
 
 export const AdvancedDetectorModal: FC<Props> = ({
   payload,
@@ -91,7 +98,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // list of aggregation combobox options.
 
   const aggOptions: EuiComboBoxOptionOption[] = aggs
-    .filter(agg => filterAggs(agg, usingScriptFields))
+    .filter((agg) => filterAggs(agg, usingScriptFields))
     .map(createAggOption);
 
   // fields available for the selected agg
@@ -110,7 +117,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ].sort(comboBoxOptionsSort);
 
-  const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
+  const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
   const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
     selectedOptions: EuiComboBoxOptionOption[]
@@ -119,15 +126,15 @@ export const AdvancedDetectorModal: FC<Props> = ({
   };
 
   function getAgg(title: string) {
-    return aggs.find(a => a.id === title) || null;
+    return aggs.find((a) => a.id === title) || null;
   }
   function getField(title: string) {
     if (title === mlCategory.id) {
       return mlCategory;
     }
     return (
-      fields.find(f => f.id === title) ||
-      jobCreator.additionalFields.find(f => f.id === title) ||
+      fields.find((f) => f.id === title) ||
+      jobCreator.additionalFields.find((f) => f.id === title) ||
       null
     );
   }
@@ -164,6 +171,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       byField,
       overField,
       partitionField,
+      // @ts-expect-error
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
@@ -301,7 +309,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 fullWidth={true}
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
-                onChange={e => setDescriptionOption(e.target.value)}
+                onChange={(e) => setDescriptionOption(e.target.value)}
                 data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>
@@ -337,7 +345,9 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
   };
 }
 
-function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionOption {
+function createExcludeFrequentOption(
+  excludeFrequent: estypes.ExcludeFrequent | null
+): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;
   }

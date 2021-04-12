@@ -1,33 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../../util/dependency_cache';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { CoreSetup } from 'src/core/public';
+
+import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
+import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
-import { FieldRequestConfig } from '../common';
+import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
+import { RuntimeMappings } from '../../../../../common/types/fields';
+import {
+  ToastNotificationService,
+  toastNotificationServiceProvider,
+} from '../../../services/toast_notification_service';
 
-// List of system fields we don't want to display.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
 
 export class DataLoader {
   private _indexPattern: IndexPattern;
+  private _runtimeMappings: RuntimeMappings;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
+  private _toastNotificationsService: ToastNotificationService;
 
-  constructor(indexPattern: IndexPattern, kibanaConfig: any) {
+  constructor(
+    indexPattern: IndexPattern,
+    toastNotifications: CoreSetup['notifications']['toasts']
+  ) {
     this._indexPattern = indexPattern;
+    this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = indexPattern.title;
+    this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
   }
 
   async loadOverallData(
@@ -38,10 +52,10 @@ export class DataLoader {
   ): Promise<any> {
     const aggregatableFields: string[] = [];
     const nonAggregatableFields: string[] = [];
-    this._indexPattern.fields.forEach(field => {
+    this._indexPattern.fields.forEach((field) => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
       if (this.isDisplayField(fieldName) === true) {
-        if (field.aggregatable === true) {
+        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
           aggregatableFields.push(fieldName);
         } else {
           nonAggregatableFields.push(fieldName);
@@ -63,6 +77,7 @@ export class DataLoader {
       latest,
       aggregatableFields,
       nonAggregatableFields,
+      runtimeMappings: this._runtimeMappings,
     });
 
     return stats;
@@ -74,7 +89,7 @@ export class DataLoader {
     earliest: number | undefined,
     latest: number | undefined,
     fields: FieldRequestConfig[],
-    interval?: string
+    interval?: number
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldStats({
       indexPatternTitle: this._indexPatternTitle,
@@ -86,15 +101,33 @@ export class DataLoader {
       interval,
       fields,
       maxExamples: this._maxExamples,
+      runtimeMappings: this._runtimeMappings,
+    });
+
+    return stats;
+  }
+
+  async loadFieldHistograms(
+    fields: FieldHistogramRequestConfig[],
+    query: string | SavedSearchQuery,
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
+    editorRuntimeMappings?: RuntimeMappings
+  ): Promise<any[]> {
+    const stats = await ml.getVisualizerFieldHistograms({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+      runtimeMappings: editorRuntimeMappings || this._runtimeMappings,
     });
 
     return stats;
   }
 
   displayError(err: any) {
-    const toastNotifications = getToastNotifications();
     if (err.statusCode === 500) {
-      toastNotifications.addDanger(
+      this._toastNotificationsService.displayErrorToast(
+        err,
         i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
           defaultMessage:
             'Error loading data in index {index}. {message}. ' +
@@ -106,7 +139,8 @@ export class DataLoader {
         })
       );
     } else {
-      toastNotifications.addDanger(
+      this._toastNotificationsService.displayErrorToast(
+        err,
         i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
           defaultMessage: 'Error loading data in index {index}. {message}',
           values: {

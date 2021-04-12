@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import mockAnomaliesTableData from '../../explorer/__mocks__/mock_anomalies_table_data.json';
 import { getColumns } from './anomalies_table_columns';
 
-jest.mock('../../privilege/check_privilege', () => ({
+jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: () => false,
 }));
 jest.mock('../../license', () => ({
   hasLicenseExpired: () => false,
 }));
-jest.mock('../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+jest.mock('../../capabilities/get_capabilities', () => ({
+  getCapabilities: () => {},
 }));
 jest.mock('../../services/field_format_service', () => ({
   getFieldFormat: () => {},

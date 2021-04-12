@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Windows programs run from unexpected parent processes. This could indicate masquerading or other strange activity on a system.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Parent-Child Relationship",
+  "query": "process where event.type in (\"start\", \"process_started\") and\nprocess.parent.name != null and\n (\n   /* suspicious parent processes */\n   (process.name:\"autochk.exe\" and not process.parent.name:\"smss.exe\") or\n   (process.name:(\"fontdrvhost.exe\", \"dwm.exe\") and not process.parent.name:(\"wininit.exe\", \"winlogon.exe\")) or\n   (process.name:(\"consent.exe\", \"RuntimeBroker.exe\", \"TiWorker.exe\") and not process.parent.name:\"svchost.exe\") or\n   (process.name:\"SearchIndexer.exe\" and not process.parent.name:\"services.exe\") or\n   (process.name:\"SearchProtocolHost.exe\" and not process.parent.name:(\"SearchIndexer.exe\", \"dllhost.exe\")) or\n   (process.name:\"dllhost.exe\" and not process.parent.name:(\"services.exe\", \"svchost.exe\")) or\n   (process.name:\"smss.exe\" and not process.parent.name:(\"System\", \"smss.exe\")) or\n   (process.name:\"csrss.exe\" and not process.parent.name:(\"smss.exe\", \"svchost.exe\")) or\n   (process.name:\"wininit.exe\" and not process.parent.name:\"smss.exe\") or\n   (process.name:\"winlogon.exe\" and not process.parent.name:\"smss.exe\") or\n   (process.name:(\"lsass.exe\", \"LsaIso.exe\") and not process.parent.name:\"wininit.exe\") or\n   (process.name:\"LogonUI.exe\" and not process.parent.name:(\"wininit.exe\", \"winlogon.exe\")) or\n   (process.name:\"services.exe\" and not process.parent.name:\"wininit.exe\") or\n   (process.name:\"svchost.exe\" and not process.parent.name:(\"MsMpEng.exe\", \"services.exe\")) or\n   (process.name:\"spoolsv.exe\" and not process.parent.name:\"services.exe\") or\n   (process.name:\"taskhost.exe\" and not process.parent.name:(\"services.exe\", \"svchost.exe\")) or\n   (process.name:\"taskhostw.exe\" and not process.parent.name:(\"services.exe\", \"svchost.exe\")) or\n   (process.name:\"userinit.exe\" and not process.parent.name:(\"dwm.exe\", \"winlogon.exe\")) or\n   (process.name:(\"wmiprvse.exe\", \"wsmprovhost.exe\", \"winrshost.exe\") and not process.parent.name:\"svchost.exe\") or\n   /* suspicious child processes */\n   (process.parent.name:(\"SearchProtocolHost.exe\", \"taskhost.exe\", \"csrss.exe\") and not process.name:(\"werfault.exe\", \"wermgr.exe\", \"WerFaultSecure.exe\")) or\n   (process.parent.name:\"autochk.exe\" and not process.name:(\"chkdsk.exe\", \"doskey.exe\", \"WerFault.exe\")) or\n   (process.parent.name:\"smss.exe\" and not process.name:(\"autochk.exe\", \"smss.exe\", \"csrss.exe\", \"wininit.exe\", \"winlogon.exe\", \"setupcl.exe\", \"WerFault.exe\")) or\n   (process.parent.name:\"wermgr.exe\" and not process.name:(\"WerFaultSecure.exe\", \"wermgr.exe\", \"WerFault.exe\")) or\n   (process.parent.name:\"conhost.exe\" and not process.name:(\"mscorsvw.exe\", \"wermgr.exe\", \"WerFault.exe\", \"WerFaultSecure.exe\"))\n  )\n",
+  "references": [
+    "https://github.com/sbousseaden/Slides/blob/master/Hunting MindMaps/PNG/Windows Processes TH.map.png",
+    "https://www.andreafortuna.org/2017/06/15/standard-windows-processes-a-brief-reference/"
+  ],
+  "risk_score": 47,
+  "rule_id": "35df0dd8-092d-4a83-88c1-5151a804f31b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/",
+          "subtechnique": [
+            {
+              "id": "T1055.012",
+              "name": "Process Hollowing",
+              "reference": "https://attack.mitre.org/techniques/T1055/012/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
+}

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { sortBy, each } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
@@ -25,7 +26,7 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
     displayRecords = aggregateAnomalies(anomalyRecords, aggregationInterval, dateFormatTz);
   } else {
     // Show all anomaly records.
-    displayRecords = anomalyRecords.map(record => {
+    displayRecords = anomalyRecords.map((record) => {
       return {
         time: record.timestamp,
         source: record,
@@ -55,10 +56,10 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
 
     if (source.influencers !== undefined) {
       const influencers = [];
-      const sourceInfluencers = _.sortBy(source.influencers, 'influencer_field_name');
-      sourceInfluencers.forEach(influencer => {
+      const sourceInfluencers = sortBy(source.influencers, 'influencer_field_name');
+      sourceInfluencers.forEach((influencer) => {
         const influencerFieldName = influencer.influencer_field_name;
-        influencer.influencer_field_values.forEach(influencerFieldValue => {
+        influencer.influencer_field_values.forEach((influencerFieldValue) => {
           influencers.push({
             [influencerFieldName]: influencerFieldValue,
           });
@@ -125,17 +126,12 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   }
 
   const aggregatedData = {};
-  anomalyRecords.forEach(record => {
+  anomalyRecords.forEach((record) => {
     // Use moment.js to get start of interval.
     const roundedTime =
       dateFormatTz !== undefined
-        ? moment(record.timestamp)
-            .tz(dateFormatTz)
-            .startOf(interval)
-            .valueOf()
-        : moment(record.timestamp)
-            .startOf(interval)
-            .valueOf();
+        ? moment(record.timestamp).tz(dateFormatTz).startOf(interval).valueOf()
+        : moment(record.timestamp).startOf(interval).valueOf();
     if (aggregatedData[roundedTime] === undefined) {
       aggregatedData[roundedTime] = {};
     }
@@ -177,10 +173,10 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   // Flatten the aggregatedData to give a list of records with
   // the highest score per bucketed time / jobId / detectorIndex.
   const summaryRecords = [];
-  _.each(aggregatedData, (times, roundedTime) => {
-    _.each(times, jobIds => {
-      _.each(jobIds, entityDetectors => {
-        _.each(entityDetectors, record => {
+  each(aggregatedData, (times, roundedTime) => {
+    each(times, (jobIds) => {
+      each(jobIds, (entityDetectors) => {
+        each(entityDetectors, (record) => {
           summaryRecords.push({
             time: +roundedTime,
             source: record,

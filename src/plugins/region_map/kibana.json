@@ -1,0 +1,21 @@
+{
+  "id": "regionMap",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [
+    "visualizations",
+    "expressions",
+    "mapsLegacy",
+    "mapsEms",
+    "kibanaLegacy",
+    "data",
+    "share"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "charts",
+    "visDefaultEditor"
+  ]
+}

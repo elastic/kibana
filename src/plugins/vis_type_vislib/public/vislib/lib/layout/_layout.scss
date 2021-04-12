@@ -1,0 +1,340 @@
+// Typical layout
+//  .visWrapper
+//     .visAxis--y
+//         .visAxis__spacer--y.visAxis__spacer--y-[position]
+//         .visAxis__column--y.visAxis__column--[position]
+//             .visAxis__splitTitles--y
+//             .visAxis__splitAxes--y
+//         .visAxis__spacer--y.visAxis__spacer--y-[position]
+//     .visWrapper__column
+//         .visAxis--x.visAxis__column--[position]
+//             .visAxis__splitAxes--x
+//         .visWrapper__chart
+//         .visWrapper__alerts
+//         .visAxis--x.visAxis__column--[position]
+//             .visAxis__splitAxes--x
+//             .visAxis__splitTitles--x
+//     .visAxis--y
+//         .visAxis__spacer--y.visAxis__spacer--y-[position]
+//         .visAxis__column--y.visAxis__column--[position]
+//             .visAxis__splitAxes--y
+//         .visAxis__spacer--y.visAxis__spacer--y-[position]
+
+//
+// LAYOUT ONLY
+// Numbers in here are brittle
+//
+
+//
+// STYLE
+//
+
+// BEM NOTE: These selectors could not be renamed.
+// Most come from an external libray, others are too general for
+// search and replace. The SVG itself doesn't have a class, nor
+// could it be easily found to apply to all chart types.
+// At least wrapping selectors inside .visWrapper will narrow scope.
+
+// sass-lint:disable-block no-mergeable-selectors
+// Keep SVG and non-renamable selectors separately
+.visWrapper {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: $euiSizeS 0;
+
+  svg {
+    overflow: visible;
+  }
+
+  // SVG Element Default Styling
+  rect {
+    opacity: 1;
+
+    &:hover {
+      opacity: .8;
+    }
+  }
+
+  circle {
+    opacity: 0;
+
+    &:hover {
+      opacity: 1;
+      stroke-width: $euiSizeS;
+      stroke-opacity: .8;
+    }
+  }
+
+  .grid > path {
+    stroke: $visLineColor;
+  }
+
+  .label-line {
+    fill: none;
+    stroke-width: 2px;
+    stroke: $visLineColor;
+  }
+
+  .label-text {
+    @include fontSize($euiFontSizeXS);
+    font-weight: $euiFontWeightRegular;
+  }
+
+  .y-axis-div {
+    flex: 1 1 $euiSizeL;
+    min-width: 1px;
+    min-height: $euiSizeM;
+    margin: ($euiSizeXS + 1px) 0;
+  }
+
+  .x-axis-div {
+    min-height: 0;
+    min-width: 1px;
+    margin: 0 ($euiSizeXS + 1px);
+    width: 100%;
+
+    svg {
+      float: left; /* for some reason svg wont get positioned in top left corner of container div without this */
+    }
+  }
+
+  .tick text {
+    @include fontSize($euiFontSizeXS - 1px);
+    fill: $visTextColor;
+  }
+
+  .axis-title text {
+    @include fontSize($euiFontSizeXS);
+    font-weight: $euiFontWeightBold;
+    fill: $euiTextColor;
+  }
+
+  .y-axis-title {
+    min-height: ($euiSizeM + 2px);
+    min-width: 1px;
+  }
+
+  .x-axis-title {
+    min-width: $euiSize;
+  }
+
+  .chart-title {
+    flex: 1 1 100%;
+    min-height: ($euiSizeM + 2px);
+    min-width: ($euiSizeM + 2px);
+
+    text {
+      @include fontSize($euiFontSizeXS - 1px);
+      fill: $visTextColor;
+    }
+  }
+
+  .chart {
+    @include euiScrollBar;
+    flex: 1 1 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: visible;
+
+    > svg {
+      display: block;
+    }
+  }
+
+  .chart-row,
+  .chart-column {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  // Needs to come after .y-axis-div
+  .visWrapper__chart--first {
+    margin-top: 0;
+    margin-left: 0;
+  }
+
+  .visWrapper__chart--last {
+    margin-bottom: 0;
+    margin-right: 0;
+  }
+
+  .axis {
+    shape-rendering: crispEdges;
+    stroke-width: 1px;
+
+    line,
+    path {
+      stroke: $euiBorderColor;
+      fill: none;
+      shape-rendering: crispEdges;
+    }
+  }
+
+  .chart-label,
+  .label-text,
+  .chart-text {
+    fill: $visTextColor;
+  }
+
+  /* Brush Styling */
+  .brush .extent {
+    shape-rendering: crispEdges;
+    fill: $visHoverBackgroundColor;
+  }
+
+  .visAreaChart__overlapArea {
+    opacity: .8;
+  }
+
+  .series > path,
+  .series > rect {
+    stroke-opacity: 1;
+    stroke-width: 0;
+  }
+
+  .series > path {
+    fill-opacity: .8;
+  }
+
+  .blur_shape {
+    // sass-lint:disable-block no-important
+    opacity: .3 !important;
+  }
+
+  .slice {
+    stroke-width: $euiSizeXS / 2;
+    stroke: $euiColorEmptyShade;
+
+    &:hover {
+      opacity: .8;
+    }
+  }
+
+  .line {
+    circle {
+      opacity: 1;
+
+      &:hover {
+        stroke-width: $euiSizeS;
+        stroke-opacity: .8;
+      }
+    }
+  }
+
+  .endzone {
+    pointer-events: none;
+    fill: $visHoverBackgroundColor;
+  }
+}
+
+.visWrapper__column {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visWrapper__splitCharts--column {
+  display: flex;
+  flex: 1 0 20px;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+
+  .visWrapper__chart {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+.visWrapper__splitCharts--row {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  min-height: 0;
+  min-width: 0;
+
+  .visWrapper__chart {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.visWrapper__chart {
+  display: flex;
+  flex: 1 0 0;
+  overflow: visible;
+  margin: 5px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visWrapper__alerts {
+  position: relative;
+}
+
+// General Axes
+
+.visAxis__column--top .axis-div svg {
+  margin-bottom: -5px;
+}
+
+// Y Axes
+
+.visAxis--x,
+.visAxis--y {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visAxis--x {
+  overflow: visible;
+}
+
+.visAxis__spacer--y {
+  min-height: 0;
+}
+
+.visAxis__column--y {
+  display: flex;
+  flex-direction: row;
+  flex: 1 0 ($euiSizeXL + $euiSizeXS);
+  min-height: 0;
+  min-width: 0;
+}
+
+.visAxis__splitTitles--y {
+  display: flex;
+  flex-direction: column;
+  min-height: $euiSizeM;
+  min-width: 0;
+}
+
+.visAxis__splitTitles--x {
+  display: flex;
+  flex-direction: row;
+  min-height: 1px;
+  max-height: $euiSize;
+  min-width: $euiSize;
+}
+
+.visAxis__splitAxes--x,
+.visAxis__splitAxes--y {
+  display: flex;
+  flex-direction: column;
+  min-height: ($euiSize + $euiSizeXS);
+  min-width: 0;
+}
+
+.visAxis__splitAxes--x {
+  flex-direction: row;
+  min-height: 0;
+}

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -11,7 +13,6 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from '../../reducer';
 import { ComboBoxOption } from '../../types';
 
 const { containsCharsField, isJsonField } = fieldValidators;
@@ -26,10 +27,10 @@ const fieldPathComboBoxConfig = {
   type: FIELD_TYPES.COMBO_BOX,
   defaultValue: [],
   serializer: (options: ComboBoxOption[]): string[] => options.map(({ label }) => label),
-  deserializer: (values: string[]): ComboBoxOption[] => values.map(value => ({ label: value })),
+  deserializer: (values: string[]): ComboBoxOption[] => values.map((value) => ({ label: value })),
 };
 
-export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
+export const configurationFormSchema: FormSchema = {
   metaField: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
@@ -48,10 +49,30 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
         validator: isJsonField(
           i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorJsonError', {
             defaultMessage: 'The _meta field JSON is not valid.',
-          })
+          }),
+          { allowEmptyString: true }
         ),
       },
     ],
+    deserializer: (value: any) => {
+      if (value === '') {
+        return value;
+      }
+      return JSON.stringify(value, null, 2);
+    },
+    serializer: (value: string) => {
+      try {
+        const parsed = JSON.parse(value);
+        // If an empty object was passed, strip out this value entirely.
+        if (!Object.keys(parsed).length) {
+          return undefined;
+        }
+        return parsed;
+      } catch (error) {
+        // swallow error and return non-parsed value;
+        return value;
+      }
+    },
   },
   sourceField: {
     enabled: {

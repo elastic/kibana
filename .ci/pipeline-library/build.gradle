@@ -1,0 +1,46 @@
+plugins {
+  id 'groovy'
+  id 'idea'
+}
+
+group = 'co.elastic.kibana.pipeline'
+version = '0.0.1'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  maven { url 'https://repo.jenkins-ci.org/releases/' }
+  maven { url 'https://repo.maven.apache.org/maven2' }
+}
+
+dependencies {
+  implementation 'org.codehaus.groovy:groovy-all:2.4.12'
+  implementation 'org.jenkins-ci.main:jenkins-core:2.23'
+  implementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.19@jar'
+  testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.4'
+  testImplementation 'junit:junit:4.12'
+  testImplementation 'org.mockito:mockito-core:2.+'
+  testImplementation 'org.assertj:assertj-core:3.15+' // Temporary https://github.com/jenkinsci/JenkinsPipelineUnit/issues/209
+}
+
+sourceSets {
+  main {
+    groovy {
+      srcDirs = ['vars']
+    }
+  }
+
+  test {
+    groovy {
+      srcDirs = ['src/test']
+    }
+  }
+}
+
+test {
+  testLogging {
+    events 'passed', 'skipped', 'failed'
+    exceptionFormat = 'full'
+  }
+}

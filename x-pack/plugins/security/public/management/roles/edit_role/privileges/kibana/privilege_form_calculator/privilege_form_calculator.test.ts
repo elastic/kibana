@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { Role } from '../../../../../../../common/model';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from './privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -515,10 +516,10 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
-      const coolSubFeature = feature.getSubFeatures().find(sf => sf.name === 'Cool Sub Feature')!;
+      const coolSubFeature = feature.getSubFeatures().find((sf) => sf.name === 'Cool Sub Feature')!;
       const subFeatureGroup = coolSubFeature
         .getPrivilegeGroups()
-        .find(pg => pg.groupType === 'mutually_exclusive')!;
+        .find((pg) => pg.groupType === 'mutually_exclusive')!;
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(
@@ -543,10 +544,10 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
-      const coolSubFeature = feature.getSubFeatures().find(sf => sf.name === 'Cool Sub Feature')!;
+      const coolSubFeature = feature.getSubFeatures().find((sf) => sf.name === 'Cool Sub Feature')!;
       const subFeatureGroup = coolSubFeature
         .getPrivilegeGroups()
-        .find(pg => pg.groupType === 'mutually_exclusive')!;
+        .find((pg) => pg.groupType === 'mutually_exclusive')!;
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(
@@ -573,10 +574,10 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
-      const coolSubFeature = feature.getSubFeatures().find(sf => sf.name === 'Cool Sub Feature')!;
+      const coolSubFeature = feature.getSubFeatures().find((sf) => sf.name === 'Cool Sub Feature')!;
       const subFeatureGroup = coolSubFeature
         .getPrivilegeGroups()
-        .find(pg => pg.groupType === 'mutually_exclusive')!;
+        .find((pg) => pg.groupType === 'mutually_exclusive')!;
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(

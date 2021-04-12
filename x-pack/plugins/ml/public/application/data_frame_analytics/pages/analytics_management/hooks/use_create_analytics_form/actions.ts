@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DeepReadonly } from '../../../../../../../common/types/common';
@@ -17,7 +18,6 @@ export enum ACTION {
   RESET_FORM,
   SET_ADVANCED_EDITOR_RAW_STRING,
   SET_FORM_STATE,
-  SET_INDEX_NAMES,
   SET_INDEX_PATTERN_TITLES,
   SET_IS_JOB_CREATED,
   SET_IS_JOB_STARTED,
@@ -26,6 +26,7 @@ export enum ACTION {
   SET_JOB_CONFIG,
   SET_JOB_IDS,
   SWITCH_TO_ADVANCED_EDITOR,
+  SWITCH_TO_FORM,
   SET_ESTIMATED_MODEL_MEMORY_LIMIT,
   SET_JOB_CLONE,
 }
@@ -39,7 +40,8 @@ export type Action =
         | ACTION.OPEN_MODAL
         | ACTION.RESET_ADVANCED_EDITOR_MESSAGES
         | ACTION.RESET_FORM
-        | ACTION.SWITCH_TO_ADVANCED_EDITOR;
+        | ACTION.SWITCH_TO_ADVANCED_EDITOR
+        | ACTION.SWITCH_TO_FORM;
     }
   // Actions with custom payloads:
   | { type: ACTION.ADD_REQUEST_MESSAGE; requestMessage: FormMessage }
@@ -48,7 +50,6 @@ export type Action =
       advancedEditorRawString: State['advancedEditorRawString'];
     }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
-  | { type: ACTION.SET_INDEX_NAMES; indexNames: State['indexNames'] }
   | {
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {
@@ -57,11 +58,6 @@ export type Action =
     }
   | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }
   | { type: ACTION.SET_IS_JOB_STARTED; isJobStarted: State['isJobStarted'] }
-  | {
-      type: ACTION.SET_IS_MODAL_BUTTON_DISABLED;
-      isModalButtonDisabled: State['isModalButtonDisabled'];
-    }
-  | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: State['isModalVisible'] }
   | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
   | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] }
   | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] }
@@ -70,15 +66,15 @@ export type Action =
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
   closeModal: () => void;
-  createAnalyticsJob: () => void;
-  openModal: () => Promise<void>;
+  createAnalyticsJob: () => Promise<boolean>;
+  initiateWizard: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;
   setFormState: (payload: Partial<State['form']>) => void;
-  setIsModalVisible: (payload: State['isModalVisible']) => void;
   setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
+  switchToForm: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
   setJobClone: (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => Promise<void>;
 }

@@ -1,64 +1,82 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
-export async function getDistributionMax(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+export async function getDistributionMax({
+  environment,
+  kuery,
+  serviceName,
+  transactionName,
+  transactionType,
+  setup,
+  searchAggregatedTransactions,
+}: {
+  environment?: string;
+  kuery?: string;
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
+  return withApmSpan('get_latency_distribution_max', async () => {
+    const { start, end, apmEventClient } = setup;
 
-  const params = {
-    index: indices['apm_oss.transactionIndices'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [TRANSACTION_NAME]: transactionName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            },
-            ...uiFiltersES
-          ]
-        }
+    const params = {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
-      aggs: {
-        stats: {
-          extended_stats: {
-            field: TRANSACTION_DURATION
-          }
-        }
-      }
-    }
-  };
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              { term: { [TRANSACTION_NAME]: transactionName } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
+          },
+        },
+        aggs: {
+          stats: {
+            max: {
+              field: getTransactionDurationFieldForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            },
+          },
+        },
+      },
+    };
 
-  const resp = await client.search(params);
-  return resp.aggregations ? resp.aggregations.stats.max : null;
+    const resp = await apmEventClient.search(params);
+    return resp.aggregations?.stats.value ?? null;
+  });
 }

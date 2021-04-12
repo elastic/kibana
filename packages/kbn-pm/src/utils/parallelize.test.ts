@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { parallelizeBatches } from './parallelize';
@@ -22,7 +11,7 @@ import { parallelizeBatches } from './parallelize';
 // As promises resolve async, we use this helper to wait for all promises that
 // have been resolved to complete (aka call `then`).
 const tick = () =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 
@@ -32,7 +21,7 @@ test('parallelizes batches', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     obj.called = true;
     await obj.promise;
   });
@@ -82,7 +71,7 @@ test('schedules at most 4 calls at the same time (concurrency)', async () => {
   const foobar = createPromiseWithResolve();
 
   const batches = [[foo, bar, baz, quux, foobar]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     obj.called = true;
     await obj.promise;
   });
@@ -113,7 +102,7 @@ test('rejects if any promise rejects', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     await obj.promise;
   });
 

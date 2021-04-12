@@ -1,29 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, startWith, tap } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
+  basicJobAndDatafeedValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_creator';
-import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { cardinalityValidator, CardinalityValidatorResult } from './validators';
+import { populateValidationMessages } from './util';
+import {
+  cardinalityValidator,
+  CardinalityValidatorResult,
+  jobIdValidator,
+  groupIdsValidator,
+  JobExistsResult,
+  GroupsExistResult,
+} from './validators';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
 // after every keystroke
-const VALIDATION_DELAY_MS = 500;
+export const VALIDATION_DELAY_MS = 500;
 
-type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
+type AsyncValidatorsResult = Partial<
+  CardinalityValidatorResult & JobExistsResult & GroupsExistResult
+>;
 
 /**
  * Union of possible validation results.
@@ -50,6 +61,9 @@ export interface BasicValidations {
   queryDelay: Validation;
   frequency: Validation;
   scrollSize: Validation;
+  categorizerMissingPerPartition: Validation;
+  categorizerVaryingPerPartitionField: Validation;
+  summaryCountField: Validation;
 }
 
 export interface AdvancedValidations {
@@ -64,7 +78,6 @@ export class JobValidator {
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _asyncValidators$: Array<Observable<AsyncValidatorsResult>> = [];
   private _asyncValidatorsResult$: Observable<AsyncValidatorsResult>;
-  private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
     groupIds: { valid: true },
@@ -75,6 +88,9 @@ export class JobValidator {
     queryDelay: { valid: true },
     frequency: { valid: true },
     scrollSize: { valid: true },
+    categorizerMissingPerPartition: { valid: true },
+    categorizerVaryingPerPartitionField: { valid: true },
+    summaryCountField: { valid: true },
   };
   private _advancedValidations: AdvancedValidations = {
     categorizationFieldValid: { valid: true },
@@ -89,7 +105,7 @@ export class JobValidator {
    */
   public validationResult$: Observable<JobValidationResult>;
 
-  constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
+  constructor(jobCreator: JobCreatorType) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
     this._lastDatafeedConfig = this._jobCreator.formattedDatafeedJson;
@@ -97,19 +113,23 @@ export class JobValidator {
       basic: false,
       advanced: false,
     };
-    this._existingJobsAndGroups = existingJobsAndGroups;
 
-    this._asyncValidators$ = [cardinalityValidator(this._jobCreatorSubject$)];
+    this._asyncValidators$ = [
+      cardinalityValidator(this._jobCreatorSubject$),
+      jobIdValidator(this._jobCreatorSubject$),
+      groupIdsValidator(this._jobCreatorSubject$),
+    ];
 
     this._asyncValidatorsResult$ = combineLatest(this._asyncValidators$).pipe(
-      map(res => {
+      map((res) => {
         return res.reduce((acc, curr) => {
           return {
             ...acc,
             ...(curr ? curr : {}),
           };
         }, {});
-      })
+      }),
+      startWith({})
     );
 
     this.validationResult$ = combineLatest([
@@ -122,7 +142,7 @@ export class JobValidator {
           ...asyncValidatorsResult,
         };
       }),
-      tap(latestValidationResult => {
+      tap((latestValidationResult) => {
         this.latestValidationResult = latestValidationResult;
       })
     );
@@ -135,6 +155,7 @@ export class JobValidator {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
 
+    this._runAdvancedValidation();
     // only validate if the config has changed
     if (
       forceValidate ||
@@ -149,7 +170,6 @@ export class JobValidator {
       this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
-        this._runAdvancedValidation();
 
         this._jobCreatorSubject$.next(this._jobCreator);
 
@@ -166,7 +186,7 @@ export class JobValidator {
 
   private _resetBasicValidations() {
     this._validationSummary.basic = true;
-    Object.values(this._basicValidations).forEach(v => {
+    Object.values(this._basicValidations).forEach((v) => {
       v.valid = true;
       delete v.message;
     });
@@ -191,13 +211,13 @@ export class JobValidator {
       datafeedConfig
     );
 
-    // run addition job and group id validation
-    const idResults = checkForExistingJobAndGroupIds(
-      this._jobCreator.jobId,
-      this._jobCreator.groups,
-      this._existingJobsAndGroups
+    const basicJobAndDatafeedResults = basicJobAndDatafeedValidation(jobConfig, datafeedConfig);
+    populateValidationMessages(
+      basicJobAndDatafeedResults,
+      this._basicValidations,
+      jobConfig,
+      datafeedConfig
     );
-    populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
     // Update validation results subject
@@ -212,7 +232,7 @@ export class JobValidator {
   }
 
   private _isOverallBasicValid() {
-    return Object.values(this._basicValidations).some(v => v.valid === false) === false;
+    return Object.values(this._basicValidations).some((v) => v.valid === false) === false;
   }
 
   public get validationSummary(): ValidationSummary {
@@ -221,6 +241,9 @@ export class JobValidator {
 
   public get bucketSpan(): Validation {
     return this._basicValidations.bucketSpan;
+  }
+  public get summaryCountField(): Validation {
+    return this._basicValidations.summaryCountField;
   }
 
   public get duplicateDetectors(): Validation {
@@ -269,5 +292,42 @@ export class JobValidator {
 
   public set categorizationField(valid: boolean) {
     this._advancedValidations.categorizationFieldValid.valid = valid;
+  }
+
+  public get categorizerMissingPerPartition() {
+    return this._basicValidations.categorizerMissingPerPartition;
+  }
+
+  public get categorizerVaryingPerPartitionField() {
+    return this._basicValidations.categorizerVaryingPerPartitionField;
+  }
+
+  /**
+   * Indicates if the Pick Fields step has a valid input
+   */
+  public get isPickFieldsStepValid(): boolean {
+    return (
+      this._jobCreator.detectors.length > 0 &&
+      (this._jobCreator.type !== JOB_TYPE.ADVANCED ||
+        (this._jobCreator.type === JOB_TYPE.ADVANCED && this.modelMemoryLimit.valid)) &&
+      this.bucketSpan.valid &&
+      this.duplicateDetectors.valid &&
+      this.categorizerMissingPerPartition.valid &&
+      this.categorizerVaryingPerPartitionField.valid &&
+      this.summaryCountField.valid &&
+      !this.validating &&
+      (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
+    );
+  }
+
+  public get isModelMemoryEstimationPayloadValid(): boolean {
+    return (
+      this._jobCreator.detectors.length > 0 &&
+      this.bucketSpan.valid &&
+      this.duplicateDetectors.valid &&
+      (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
+    );
   }
 }

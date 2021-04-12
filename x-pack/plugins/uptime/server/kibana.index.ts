@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Request, Server } from 'hapi';
-import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
+import { Request, Server } from '@hapi/hapi';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
@@ -27,34 +29,49 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const { features } = plugins;
   const libs = compose(server);
 
-  features.registerFeature({
+  features.registerKibanaFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
     order: 1000,
-    navLinkId: PLUGIN.ID,
-    icon: 'uptimeApp',
+    category: DEFAULT_APP_CATEGORIES.observability,
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
+    management: {
+      insightsAndAlerting: ['triggersActions'],
+    },
+    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
     privileges: {
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'uptime-write'],
+        api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [umDynamicSettings.name],
+          all: [umDynamicSettings.name, 'alert'],
           read: [],
         },
-        ui: ['save', 'configureSettings', 'show'],
+        alerting: {
+          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read'],
+        api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: [],
+          all: ['alert'],
           read: [umDynamicSettings.name],
         },
-        ui: ['show'],
+        alerting: {
+          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['show', 'alerting:save'],
       },
     },
   });

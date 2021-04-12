@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export enum FilterStateStore {
@@ -22,9 +11,10 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-export interface FilterState {
+// eslint-disable-next-line
+export type FilterState = {
   store: FilterStateStore;
-}
+};
 
 type FilterFormatterFunction = (value: any) => string;
 export interface FilterValueFormatter {
@@ -32,7 +22,8 @@ export interface FilterValueFormatter {
   getConverterFor: (type: string) => FilterFormatterFunction;
 }
 
-export interface FilterMeta {
+// eslint-disable-next-line
+export type FilterMeta = {
   alias: string | null;
   disabled: boolean;
   negate: boolean;
@@ -43,14 +34,15 @@ export interface FilterMeta {
   type?: string;
   key?: string;
   params?: any;
-  value?: string | ((formatter?: FilterValueFormatter) => string);
-}
+  value?: string;
+};
 
-export interface Filter {
+// eslint-disable-next-line
+export type Filter = {
   $state?: FilterState;
   meta: FilterMeta;
   query?: any;
-}
+};
 
 export interface LatLon {
   lat: number;
@@ -107,3 +99,13 @@ export const pinFilter = (filter: Filter) =>
 
 export const unpinFilter = (filter: Filter) =>
   !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
+
+export const isFilter = (x: unknown): x is Filter =>
+  !!x &&
+  typeof x === 'object' &&
+  !!(x as Filter).meta &&
+  typeof (x as Filter).meta === 'object' &&
+  typeof (x as Filter).meta.disabled === 'boolean';
+
+export const isFilters = (x: unknown): x is Filter[] =>
+  Array.isArray(x) && !x.find((y) => !isFilter(y));

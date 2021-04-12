@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createSavedQueryService } from './saved_query_service';
@@ -89,7 +78,7 @@ describe('saved query service', () => {
     mockSavedObjectsClient.delete.mockReset();
   });
 
-  describe('saveQuery', function() {
+  describe('saveQuery', function () {
     it('should create a saved object for the given attributes', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
@@ -165,7 +154,7 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
   });
-  describe('findSavedQueries', function() {
+  describe('findSavedQueries', function () {
     it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -276,7 +265,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQuery', function() {
+  describe('getSavedQuery', function () {
     it('should retrieve a saved query by id', async () => {
       mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
@@ -291,14 +280,14 @@ describe('saved query service', () => {
     });
   });
 
-  describe('deleteSavedQuery', function() {
+  describe('deleteSavedQuery', function () {
     it('should delete the saved query for the given ID', async () => {
       await deleteSavedQuery('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
     });
   });
 
-  describe('getAllSavedQueries', function() {
+  describe('getAllSavedQueries', function () {
     it('should return all the saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -324,7 +313,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQueryCount', function() {
+  describe('getSavedQueryCount', function () {
     it('should return the total number of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         total: 1,

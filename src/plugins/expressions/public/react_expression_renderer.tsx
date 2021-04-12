@@ -1,33 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { useRef, useEffect, useState, useLayoutEffect } from 'react';
-import React from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import classNames from 'classnames';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, RenderError } from './types';
+import { IExpressionLoaderParams, ExpressionRenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
+import { ExpressionRendererEvent } from './render';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -35,8 +24,18 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAstExpression;
-  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+  renderError?: (
+    message?: string | null,
+    error?: ExpressionRenderError | null
+  ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  onEvent?: (event: ExpressionRendererEvent) => void;
+  onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+  /**
+   * An observable which can be used to re-run the expression without destroying the component
+   */
+  reload$?: Observable<unknown>;
+  debounce?: number;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -44,7 +43,7 @@ export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRen
 interface State {
   isEmpty: boolean;
   isLoading: boolean;
-  error: null | RenderError;
+  error: null | ExpressionRenderError;
 }
 
 export type ExpressionRendererComponent = React.FC<ReactExpressionRendererProps>;
@@ -61,6 +60,10 @@ export const ReactExpressionRenderer = ({
   padding,
   renderError,
   expression,
+  onEvent,
+  onData$,
+  reload$,
+  debounce,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -75,12 +78,35 @@ export const ReactExpressionRenderer = ({
   const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
     null
   );
+  const [debouncedExpression, setDebouncedExpression] = useState(expression);
+  const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
+  useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    if (debounce === undefined) {
+      return;
+    }
+    setDebouncePending(true);
+    const handler = setTimeout(() => {
+      setDebouncedExpression(expression);
+      setDebouncePending(false);
+    }, debounce);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [expression, expressionLoaderOptions, debounce]);
+
+  const activeExpression = debounce !== undefined ? debouncedExpression : expression;
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
   useEffect(() => {
     const subs: Subscription[] = [];
-    expressionLoaderRef.current = new ExpressionLoader(mountpoint.current!, expression, {
+    expressionLoaderRef.current = new ExpressionLoader(mountpoint.current!, activeExpression, {
       ...expressionLoaderOptions,
       // react component wrapper provides different
       // error handling api which is easier to work with from react
@@ -100,14 +126,28 @@ export const ReactExpressionRenderer = ({
           }
         : expressionLoaderOptions.onRenderError,
     });
+    if (onEvent) {
+      subs.push(
+        expressionLoaderRef.current.events$.subscribe((event) => {
+          onEvent(event);
+        })
+      );
+    }
+    if (onData$) {
+      subs.push(
+        expressionLoaderRef.current.data$.subscribe((newData) => {
+          onData$(newData, expressionLoaderRef.current?.inspect());
+        })
+      );
+    }
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
-        setState(prevState => ({ ...prevState, isLoading: true }));
+        setState((prevState) => ({ ...prevState, isLoading: true }));
       }),
       expressionLoaderRef.current.render$
         .pipe(filter(() => !hasHandledErrorRef.current))
-        .subscribe(item => {
+        .subscribe((item) => {
           setState(() => ({
             ...defaultState,
             isEmpty: false,
@@ -116,7 +156,7 @@ export const ReactExpressionRenderer = ({
     );
 
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
       if (expressionLoaderRef.current) {
         expressionLoaderRef.current.destroy();
         expressionLoaderRef.current = null;
@@ -124,17 +164,35 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler]);
+  }, [
+    hasCustomRenderErrorHandler,
+    onEvent,
+    expressionLoaderOptions.renderMode,
+    expressionLoaderOptions.syncColors,
+  ]);
+
+  useEffect(() => {
+    const subscription = reload$?.subscribe(() => {
+      if (expressionLoaderRef.current) {
+        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
+      }
+    });
+    return () => subscription?.unsubscribe();
+  }, [reload$, activeExpression, ...Object.values(expressionLoaderOptions)]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
     () => {
-      if (expressionLoaderRef.current) {
-        expressionLoaderRef.current.update(expression, expressionLoaderOptions);
+      // only update the loader if the debounce period is over
+      if (expressionLoaderRef.current && !waitingForDebounceToComplete) {
+        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
       }
     },
-    // when expression is changed by reference and when any other loaderOption is changed by reference
-    [{ expression, ...expressionLoaderOptions }]
+    // when debounced, wait for debounce status to change to update loader.
+    // Otherwise, update when expression is changed by reference and when any other loaderOption is changed by reference
+    debounce === undefined
+      ? [{ activeExpression, ...expressionLoaderOptions }]
+      : [{ waitingForDebounceToComplete }]
   );
 
   /* eslint-enable react-hooks/exhaustive-deps */
@@ -147,10 +205,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};
@@ -162,8 +219,13 @@ export const ReactExpressionRenderer = ({
   return (
     <div {...dataAttrs} className={classes}>
       {state.isEmpty && <EuiLoadingChart mono size="l" />}
-      {state.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {!state.isLoading && state.error && renderError && renderError(state.error.message)}
+      {(state.isLoading || waitingForDebounceToComplete) && (
+        <EuiProgress size="xs" color="accent" position="absolute" />
+      )}
+      {!state.isLoading &&
+        state.error &&
+        renderError &&
+        renderError(state.error.message, state.error)}
       <div
         className="expExpressionRenderer__expression"
         style={expressionStyles}

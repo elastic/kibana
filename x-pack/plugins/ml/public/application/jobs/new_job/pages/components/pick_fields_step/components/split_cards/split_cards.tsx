@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo, Fragment } from 'react';
@@ -48,7 +49,7 @@ export const SplitCards: FC<Props> = memo(
 
       if (animate === true) {
         setTimeout(() => {
-          panels.forEach(p => (p.panel.style.marginBottom = `${p.marginBottom}px`));
+          panels.forEach((p) => (p.panel.style.marginBottom = `${p.marginBottom}px`));
         }, 100);
       }
 
@@ -68,7 +69,7 @@ export const SplitCards: FC<Props> = memo(
           ...(animate ? { transition: 'margin 0.5s' } : {}),
         };
         return (
-          <div key={fieldName} ref={ref => storePanels(ref, marginBottom)} style={style}>
+          <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} style={style}>
             <EuiPanel
               paddingSize="m"
               style={{ paddingTop: '4px' }}

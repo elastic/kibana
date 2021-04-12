@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -15,14 +16,14 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
 
   return {
     async navigateTo(params?: TabsParams['stream']) {
-      pageObjects.infraLogs.navigateToTab('stream', params);
+      await pageObjects.infraLogs.navigateToTab('stream', params);
     },
 
     async getColumnHeaderLabels(): Promise<string[]> {
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
         '~logColumnHeader'
       );
-      return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 
     async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {

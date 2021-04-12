@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -58,7 +59,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
     } = getSorting();
     const { pageIndex, pageSize } = getPagination();
 
-    const sortedRestores = sortByOrder(newRestoresList, [field], [direction]);
+    const sortedRestores = orderBy(newRestoresList, [field], [direction]);
     return sortedRestores.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
   };
 
@@ -153,7 +154,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       render: (shards: SnapshotRestore['shards']) => {
-        return shards.filter(shard => Boolean(shard.stopTimeInMillis)).length;
+        return shards.filter((shard) => Boolean(shard.stopTimeInMillis)).length;
       },
     },
     {
@@ -163,7 +164,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       render: (shards: SnapshotRestore['shards']) => {
-        return shards.filter(shard => !Boolean(shard.stopTimeInMillis)).length;
+        return shards.filter((shard) => !Boolean(shard.stopTimeInMillis)).length;
       },
     },
     {

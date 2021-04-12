@@ -70,6 +70,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
   <EuiFormRow
@@ -82,12 +83,12 @@ exports[`Overrides render overrides 1`] = `
       <EuiText
         size="xs"
       >
-        <ForwardRef
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/jest-metadata-mock-branch/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern"
+        <EuiLink
+          href="jest-metadata-mock-url"
           target="_blank"
         >
           See more on accepted formats
-        </ForwardRef>
+        </EuiLink>
       </EuiText>
     }
     label={
@@ -322,6 +323,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
   <EuiFormRow
@@ -358,6 +360,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
 </EuiForm>

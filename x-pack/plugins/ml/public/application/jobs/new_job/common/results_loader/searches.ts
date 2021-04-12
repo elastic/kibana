@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../../common/constants/index_patterns';
 import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -33,7 +33,7 @@ export function getScoresByRecord(
   jobId: string,
   earliestMs: number,
   latestMs: number,
-  interval: string,
+  intervalMs: number,
   firstSplitField: SplitFieldWithValue | null
 ): Promise<ProcessedResults> {
   return new Promise((resolve, reject) => {
@@ -53,63 +53,48 @@ export function getScoresByRecord(
       jobIdFilterStr += `"${String(firstSplitField.value).replace(/\\/g, '\\\\')}"`;
     }
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                },
-              },
-              {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        timestamp: {
-                          gte: earliestMs,
-                          lte: latestMs,
-                          format: 'epoch_millis',
+    ml.results
+      .anomalySearch(
+        {
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:record',
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
+                          range: {
+                            timestamp: {
+                              gte: earliestMs,
+                              lte: latestMs,
+                              format: 'epoch_millis',
+                            },
+                          },
                         },
-                      },
+                        {
+                          query_string: {
+                            query: jobIdFilterStr,
+                          },
+                        },
+                      ],
                     },
-                    {
-                      query_string: {
-                        query: jobIdFilterStr,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          detector_index: {
-            terms: {
-              field: 'detector_index',
-              order: {
-                recordScore: 'desc',
+                  },
+                ],
               },
             },
             aggs: {
-              recordScore: {
-                max: {
-                  field: 'record_score',
-                },
-              },
-              byTime: {
-                date_histogram: {
-                  field: 'timestamp',
-                  interval,
-                  min_doc_count: 1,
-                  extended_bounds: {
-                    min: earliestMs,
-                    max: latestMs,
+              detector_index: {
+                terms: {
+                  field: 'detector_index',
+                  order: {
+                    recordScore: 'desc',
                   },
                 },
                 aggs: {
@@ -118,13 +103,31 @@ export function getScoresByRecord(
                       field: 'record_score',
                     },
                   },
+                  byTime: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: `${intervalMs}ms`,
+                      min_doc_count: 1,
+                      extended_bounds: {
+                        min: earliestMs,
+                        max: latestMs,
+                      },
+                    },
+                    aggs: {
+                      recordScore: {
+                        max: {
+                          field: 'record_score',
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
           },
         },
-      },
-    })
+        [jobId]
+      )
       .then((resp: any) => {
         const detectorsByIndex = get(resp, ['aggregations', 'detector_index', 'buckets'], []);
         detectorsByIndex.forEach((dtr: any) => {

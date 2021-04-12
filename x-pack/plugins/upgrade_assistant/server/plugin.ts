@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import {
@@ -11,44 +13,50 @@ import {
   CoreStart,
   PluginInitializerContext,
   Logger,
-  ElasticsearchServiceSetup,
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
 
 import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
+import { versionService } from './lib/version';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
+import { registerUpdateSettingsRoute } from './routes/update_index_settings';
+import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+
 import { RouteDependencies } from './types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   cloud?: CloudSetup;
 }
 
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
+  private readonly kibanaVersion: string;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
-  private elasticSearchService?: ElasticsearchServiceSetup;
 
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger }: PluginInitializerContext) {
+  constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory();
+    this.kibanaVersion = env.packageInfo.version;
   }
 
   private getWorker() {
@@ -59,11 +67,26 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, elasticsearch, getStartServices, capabilities }: CoreSetup,
-    { usageCollection, cloud, licensing }: PluginsSetup
+    { http, getStartServices, capabilities, savedObjects }: CoreSetup,
+    { usageCollection, cloud, features, licensing }: PluginsSetup
   ) {
-    this.elasticSearchService = elasticsearch;
     this.licensing = licensing;
+
+    savedObjects.registerType(reindexOperationSavedObjectType);
+    savedObjects.registerType(telemetrySavedObjectType);
+
+    features.registerElasticsearchFeature({
+      id: 'upgrade_assistant',
+      management: {
+        stack: ['upgrade_assistant'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
 
     const router = http.createRouter();
 
@@ -81,20 +104,28 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       licensing,
     };
 
+    // Initialize version service with current kibana version
+    versionService.setup(this.kibanaVersion);
+
     registerClusterCheckupRoutes(dependencies);
     registerDeprecationLoggingRoutes(dependencies);
     registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this));
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(dependencies);
+    registerUpdateSettingsRoute(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects }]) => {
-        registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
+      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+        registerUpgradeAssistantUsageCollector({
+          elasticsearch,
+          usageCollection,
+          savedObjects: savedObjectsService,
+        });
       });
     }
   }
 
-  start({ savedObjects }: CoreStart) {
+  start({ savedObjects, elasticsearch }: CoreStart) {
     this.savedObjectsServiceStart = savedObjects;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
@@ -107,7 +138,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.worker = createReindexWorker({
       credentialStore: this.credentialStore,
       licensing: this.licensing!,
-      elasticsearchService: this.elasticSearchService!,
+      elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(
         this.savedObjectsServiceStart.createInternalRepository()

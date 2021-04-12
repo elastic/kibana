@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -23,7 +24,7 @@ export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvali
         defaultMessage: 'Bucket span',
       })}
       value={bucketSpan}
-      onChange={e => setBucketSpan(e.target.value)}
+      onChange={(e) => setBucketSpan(e.target.value)}
       isInvalid={isInvalid}
       data-test-subj="mlJobWizardInputBucketSpan"
     />

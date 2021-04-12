@@ -1,33 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Chance from 'chance';
 
+import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
-import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
-describe('uiSettings/createOrUpgradeSavedConfig', function() {
+describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());
 
   const version = '4.0.1';
@@ -35,7 +24,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
   const buildNum = chance.integer({ min: 1000, max: 5000 });
 
   function setup() {
-    const logger = loggingServiceMock.create();
+    const logger = loggingSystemMock.create();
     const getUpgradeableConfig = getUpgradeableConfigMock;
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.create.mockImplementation(
@@ -73,7 +62,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     };
   }
 
-  describe('nothing is upgradeable', function() {
+  describe('nothing is upgradeable', function () {
     it('should create config with current version and buildNum', async () => {
       const { run, savedObjectsClient } = setup();
 
@@ -137,7 +126,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       });
 
       await run();
-      expect(loggingServiceMock.collect(logger).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Upgrade config from 4.0.0 to 4.0.1",
@@ -169,7 +158,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         expect(error.message).toBe('foo');
       }
 
-      expect(loggingServiceMock.collect(logger).debug).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).debug).toHaveLength(0);
     });
   });
 

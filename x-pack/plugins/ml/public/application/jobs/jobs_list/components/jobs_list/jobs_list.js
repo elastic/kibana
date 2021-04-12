@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -14,15 +15,15 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../utils';
+import { JobSpacesList } from '../../../../components/job_spaces_list';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
-const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -31,11 +32,7 @@ export class JobsList extends Component {
 
     this.state = {
       jobsSummaryList: props.jobsSummaryList,
-      pageIndex: 0,
-      pageSize: PAGE_SIZE,
       itemIdToExpandedRowMap: {},
-      sortField: 'id',
-      sortDirection: 'asc',
     };
   }
 
@@ -53,7 +50,7 @@ export class JobsList extends Component {
 
     const { field: sortField, direction: sortDirection } = sort;
 
-    this.setState({
+    this.props.onJobsViewStateUpdate({
       pageIndex,
       pageSize,
       sortField,
@@ -61,7 +58,7 @@ export class JobsList extends Component {
     });
   };
 
-  toggleRow = item => {
+  toggleRow = (item) => {
     this.props.toggleRow(item.id);
   };
 
@@ -71,12 +68,12 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl(id)}>{id}</EuiLink>;
+    return <AnomalyDetectionJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
     let list = this.state.jobsSummaryList;
-    list = sortBy(this.state.jobsSummaryList, item => item[sortField]);
+    list = sortBy(this.state.jobsSummaryList, (item) => item[sortField]);
     list = sortDirection === 'asc' ? list : list.reverse();
     const listLength = list.length;
 
@@ -87,7 +84,7 @@ export class JobsList extends Component {
       pageStart = Math.floor((listLength - 1) / size) * size;
       // set the state out of the render cycle
       setTimeout(() => {
-        this.setState({
+        this.props.onJobsViewStateUpdate({
           pageIndex: pageStart / size,
         });
       }, 0);
@@ -99,9 +96,9 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable } = this.props;
+    const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
-      selectable: job => job.deleting !== true,
+      selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -119,8 +116,8 @@ export class JobsList extends Component {
       onSelectionChange: this.props.selectJobChange,
     };
     // Adding 'width' props to columns for use in the Kibana management jobs list table
-    // The version of the table used in ML > Job Managment depends on many EUI class overrides that set the width explicitly.
-    // The ML > Job Managment table won't change as the overwritten class styles take precedence, though these values may need to
+    // The version of the table used in ML > Job Management depends on many EUI class overrides that set the width explicitly.
+    // The ML > Job Management table won't change as the overwritten class styles take precedence, though these values may need to
     // be updated if we move to always using props for width.
     const columns = [
       {
@@ -134,7 +131,7 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
-        render: item => (
+        render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             isDisabled={item.deleting === true}
@@ -166,7 +163,7 @@ export class JobsList extends Component {
         truncateText: false,
         width: '20%',
         scope: 'row',
-        render: isManagementTable ? id => this.getJobIdLink(id) : undefined,
+        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
       },
       {
         field: 'auditMessage',
@@ -180,7 +177,7 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
-        render: item => <JobIcon message={item} showTooltip={true} />,
+        render: (item) => <JobIcon message={item} showTooltip={true} />,
       },
       {
         name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
@@ -189,7 +186,9 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => <JobDescription job={item} />,
+        render: (description, item) => (
+          <JobDescription job={item} isManagementTable={isManagementTable} />
+        ),
         textOnly: true,
         width: '20%',
       },
@@ -202,7 +201,7 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         dataType: 'number',
-        render: count => toLocaleString(count),
+        render: (count) => toLocaleString(count),
         width: '10%',
       },
       {
@@ -239,18 +238,28 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: item => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} />,
       },
     ];
 
     if (isManagementTable === true) {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
-        name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
-          defaultMessage: 'Spaces',
-        }),
-        render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
-      });
+      if (spacesApi) {
+        // insert before last column
+        columns.splice(columns.length - 1, 0, {
+          name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
+            defaultMessage: 'Spaces',
+          }),
+          render: (item) => (
+            <JobSpacesList
+              spacesApi={spacesApi}
+              spaceIds={item.spaceIds}
+              jobId={item.id}
+              jobType="anomaly-detector"
+              refresh={this.props.refreshJobs}
+            />
+          ),
+        });
+      }
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {
         columns.pop();
@@ -290,12 +299,13 @@ export class JobsList extends Component {
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showStartDatafeedModal,
-          this.props.refreshJobs
+          this.props.refreshJobs,
+          this.props.showCreateAlertFlyout
         ),
       });
     }
 
-    const { pageIndex, pageSize, sortField, sortDirection } = this.state;
+    const { pageIndex, pageSize, sortField, sortDirection } = this.props.jobsViewState;
 
     const { pageOfItems, totalItemCount } = this.getPageOfJobs(
       pageIndex,
@@ -344,7 +354,7 @@ export class JobsList extends Component {
         isExpandable={true}
         sorting={sorting}
         hasActions={true}
-        rowProps={item => ({
+        rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
       />
@@ -362,9 +372,12 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCreateAlertFlyout: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
+  jobsViewState: PropTypes.object,
+  onJobsViewStateUpdate: PropTypes.func,
 };
 JobsList.defaultProps = {
   isManagementTable: false,

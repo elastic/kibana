@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useState } from 'react';
@@ -63,7 +64,7 @@ const EXECUTE_DETAILS_INITIAL_STATE = {
 
 function getActions(watch: BaseWatch) {
   const actions = (watch.watch && watch.watch.actions) || {};
-  return Object.keys(actions).map(actionKey => ({
+  return Object.keys(actions).map((actionKey) => ({
     actionId: actionKey,
     type: getActionType(actions[actionKey]),
     actionMode: ACTION_MODES.SIMULATE,
@@ -93,7 +94,7 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
   const executeWatchErrors = executeDetails.validate();
   const hasExecuteWatchErrors = !!Object.keys(executeWatchErrors).find(
-    errorKey => executeWatchErrors[errorKey].length >= 1
+    (errorKey) => executeWatchErrors[errorKey].length >= 1
   );
   return (
     <EuiPageContent>

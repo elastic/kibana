@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { SpaceAvatar } from '../../space_avatar';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { SpacesGridPage } from './spaces_grid_page';
-import { httpServiceMock } from 'src/core/public/mocks';
-import { notificationServiceMock } from 'src/core/public/mocks';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { KibanaFeature } from '../../../../features/public';
 import { featuresPluginMock } from '../../../../features/public/mocks';
-import { Feature } from '../../../../features/public';
+import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
+import type { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {
@@ -42,16 +45,19 @@ spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
-  new Feature({
+  new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
-    icon: 'spacesApp',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
   }),
 ]);
 
 describe('SpacesGridPage', () => {
+  const getUrlForApp = (appId: string) => appId;
+  const history = scopedHistoryMock.create();
+
   it('renders as expected', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
@@ -62,7 +68,8 @@ describe('SpacesGridPage', () => {
           spacesManager={(spacesManager as unknown) as SpacesManager}
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
-          securityEnabled={true}
+          getUrlForApp={getUrlForApp}
+          history={history}
           capabilities={{
             navLinks: {},
             management: {},
@@ -83,7 +90,8 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -93,12 +101,12 @@ describe('SpacesGridPage', () => {
       />
     );
 
-    // allow spacesManager to load spaces
-    await nextTick();
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
     wrapper.update();
 
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(spaces.length);
-    expect(wrapper.find(SpaceAvatar)).toMatchSnapshot();
+    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(spaces.length);
+    expect(wrapper.find(SpaceAvatarInternal)).toMatchSnapshot();
   });
 
   it('notifies when spaces fail to load', async () => {
@@ -115,7 +123,8 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notifications}
-        securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -125,11 +134,11 @@ describe('SpacesGridPage', () => {
       />
     );
 
-    // allow spacesManager to load spaces
-    await nextTick();
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
     wrapper.update();
 
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(0);
+    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(0);
     expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Error loading spaces',
     });
@@ -148,7 +157,8 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -158,11 +168,11 @@ describe('SpacesGridPage', () => {
       />
     );
 
-    // allow spacesManager to load spaces
-    await nextTick();
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
     wrapper.update();
 
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(0);
+    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(0);
     // For end-users, the effect is that spaces won't load, even though this was a request to retrieve features.
     expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Error loading spaces',

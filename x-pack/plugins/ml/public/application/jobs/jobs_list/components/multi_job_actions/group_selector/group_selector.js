@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -22,18 +25,16 @@ import {
 import { cloneDeep } from 'lodash';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { mlMessageBarService } from '../../../../../components/messagebar';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { getToastNotificationService } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
-  const jobIds = jobs.map(j => j.id);
+  const jobIds = jobs.map((j) => j.id);
   const groupCounts = {};
-  jobs.forEach(j => {
-    j.groups.forEach(g => {
+  jobs.forEach((j) => {
+    j.groups.forEach((g) => {
       if (groupCounts[g] === undefined) {
         groupCounts[g] = 0;
       }
@@ -42,7 +43,7 @@ function createSelectedGroups(jobs, groups) {
   });
 
   const selectedGroups = groups.reduce((p, c) => {
-    if (c.jobIds.some(j => jobIds.includes(j))) {
+    if (c.jobIds.some((j) => jobIds.includes(j))) {
       p[c.id] = {
         partial: groupCounts[c.id] !== jobIds.length,
       };
@@ -89,7 +90,7 @@ export class GroupSelector extends Component {
     } else {
       ml.jobs
         .groups()
-        .then(groups => {
+        .then((groups) => {
           const selectedGroups = createSelectedGroups(this.props.jobs, groups);
 
           this.setState({
@@ -99,7 +100,7 @@ export class GroupSelector extends Component {
             groups,
           });
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
         });
     }
@@ -112,7 +113,7 @@ export class GroupSelector extends Component {
     });
   };
 
-  selectGroup = group => {
+  selectGroup = (group) => {
     const newSelectedGroups = cloneDeep(this.state.selectedGroups);
 
     if (newSelectedGroups[group.id] === undefined) {
@@ -134,7 +135,7 @@ export class GroupSelector extends Component {
   applyChanges = () => {
     const { selectedGroups } = this.state;
     const { jobs } = this.props;
-    const newJobs = jobs.map(j => ({
+    const newJobs = jobs.map((j) => ({
       id: j.id,
       oldGroups: j.groups,
       newGroups: [],
@@ -143,7 +144,7 @@ export class GroupSelector extends Component {
     for (const gId in selectedGroups) {
       if (selectedGroups.hasOwnProperty(gId)) {
         const group = selectedGroups[gId];
-        newJobs.forEach(j => {
+        newJobs.forEach((j) => {
           if (group.partial === false || (group.partial === true && j.oldGroups.includes(gId))) {
             j.newGroups.push(gId);
           }
@@ -151,16 +152,16 @@ export class GroupSelector extends Component {
       }
     }
 
-    const tempJobs = newJobs.map(j => ({ job_id: j.id, groups: j.newGroups }));
+    const tempJobs = newJobs.map((j) => ({ job_id: j.id, groups: j.newGroups }));
     ml.jobs
       .updateGroups(tempJobs)
-      .then(resp => {
+      .then((resp) => {
         let success = true;
         for (const jobId in resp) {
           // check success of each job update
           if (resp.hasOwnProperty(jobId)) {
             if (resp[jobId].success === false) {
-              mlMessageBarService.notify.error(resp[jobId].error);
+              getToastNotificationService().displayErrorToast(resp[jobId].error);
               success = false;
             }
           }
@@ -174,13 +175,13 @@ export class GroupSelector extends Component {
           console.error(resp);
         }
       })
-      .catch(error => {
-        mlMessageBarService.notify.error(error);
+      .catch((error) => {
+        getToastNotificationService().displayErrorToast(error);
         console.error(error);
       });
   };
 
-  addNewGroup = id => {
+  addNewGroup = (id) => {
     const newGroup = {
       id,
       calendarIds: [],
@@ -188,7 +189,7 @@ export class GroupSelector extends Component {
     };
 
     const groups = this.state.groups;
-    if (groups.some(g => g.id === newGroup.id) === false) {
+    if (groups.some((g) => g.id === newGroup.id) === false) {
       groups.push(newGroup);
     }
 
@@ -219,6 +220,7 @@ export class GroupSelector extends Component {
           )}
           onClick={() => this.togglePopover()}
           disabled={this.canUpdateJob === false}
+          data-test-subj="mlADJobListMultiSelectEditJobGroupsButton"
         />
       </EuiToolTip>
     );

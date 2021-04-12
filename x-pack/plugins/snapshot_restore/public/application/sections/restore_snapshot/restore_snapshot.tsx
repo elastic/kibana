@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { SectionError, Error } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
-import { SectionError, SectionLoading, RestoreSnapshotForm, Error } from '../../components';
+import { SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   repositoryName: string;
@@ -21,12 +25,10 @@ interface MatchParams {
 }
 
 export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { repositoryName, snapshotId },
-  },
   history,
 }) => {
   const { i18n } = useServices();
+  const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
 
   // Set breadcrumb and page title
   useEffect(() => {

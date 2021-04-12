@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -9,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
-const executor: ExecutorType = async options => {
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -49,7 +50,7 @@ test('should validate when there are no individual validators', () => {
 });
 
 test('should validate when validators return incoming value', () => {
-  const selfValidator = { validate: (value: any) => value };
+  const selfValidator = { validate: (value: Record<string, unknown>) => value };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -76,8 +77,8 @@ test('should validate when validators return incoming value', () => {
 });
 
 test('should validate when validators return different values', () => {
-  const returnedValue: any = { something: { shaped: 'differently' } };
-  const selfValidator = { validate: (value: any) => returnedValue };
+  const returnedValue = { something: { shaped: 'differently' } };
+  const selfValidator = { validate: () => returnedValue };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -105,7 +106,7 @@ test('should validate when validators return different values', () => {
 
 test('should throw with expected error when validators fail', () => {
   const erroringValidator = {
-    validate: (value: any) => {
+    validate: () => {
       throw new Error('test error');
     },
   };

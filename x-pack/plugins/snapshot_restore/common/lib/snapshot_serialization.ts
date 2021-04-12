@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy } from 'lodash';
@@ -16,6 +17,8 @@ import {
 } from '../types';
 
 import { deserializeTime, serializeTime } from './time_serialization';
+
+import { csvToArray } from './utils';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -33,6 +36,7 @@ export function deserializeSnapshotDetails(
     version_id: versionId,
     version,
     indices = [],
+    data_streams: dataStreams = [],
     include_global_state: includeGlobalState,
     state,
     start_time: startTime,
@@ -60,7 +64,7 @@ export function deserializeSnapshotDetails(
   }, {});
 
   // Sort all failures by their shard.
-  Object.keys(indexToFailuresMap).forEach(index => {
+  Object.keys(indexToFailuresMap).forEach((index) => {
     indexToFailuresMap[index].failures = sortBy(
       indexToFailuresMap[index].failures,
       ({ shard }) => shard
@@ -77,6 +81,7 @@ export function deserializeSnapshotDetails(
     versionId,
     version,
     indices: [...indices].sort(),
+    dataStreams: [...dataStreams].sort(),
     includeGlobalState,
     state,
     startTime,
@@ -127,8 +132,10 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
 export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
   const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
 
+  const maybeIndicesArray = csvToArray(indices);
+
   const snapshotConfigEs: SnapshotConfigEs = {
-    indices,
+    indices: maybeIndicesArray,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
     partial,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,8 +13,7 @@ import {
   JOB_ID_MAX_LENGTH,
 } from '../../../../../../common/constants/validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { ValidationResults, ValidationMessage } from '../../../../../../common/util/job_utils';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { ValidationResults } from '../../../../../../common/util/job_utils';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,
@@ -129,6 +129,29 @@ export function populateValidationMessages(
     basicValidations.duplicateDetectors.message = msg;
   }
 
+  if (validationResults.contains('categorizer_detector_missing_per_partition_field')) {
+    basicValidations.categorizerMissingPerPartition.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.categorizerMissingPerPartitionFieldMessage',
+      {
+        defaultMessage:
+          'Partition field must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
+      }
+    );
+    basicValidations.categorizerMissingPerPartition.message = msg;
+  }
+  if (validationResults.contains('categorizer_varying_per_partition_fields')) {
+    basicValidations.categorizerVaryingPerPartitionField.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.categorizerVaryingPerPartitionFieldNamesMessage',
+      {
+        defaultMessage:
+          'Detectors with keyword "mlcategory" cannot have different partition_field_name when per-partition categorization is enabled.',
+      }
+    );
+    basicValidations.categorizerVaryingPerPartitionField.message = msg;
+  }
+
   if (validationResults.contains('bucket_span_empty')) {
     basicValidations.bucketSpan.valid = false;
     const msg = i18n.translate(
@@ -141,7 +164,7 @@ export function populateValidationMessages(
     basicValidations.bucketSpan.message = msg;
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
-    basicValidations.bucketSpan.message = invalidTimeFormatMessage(
+    basicValidations.bucketSpan.message = invalidTimeIntervalMessage(
       jobConfig.analysis_config.bucket_span
     );
   }
@@ -162,55 +185,36 @@ export function populateValidationMessages(
 
   if (validationResults.contains('query_delay_invalid')) {
     basicValidations.queryDelay.valid = false;
-    basicValidations.queryDelay.message = invalidTimeFormatMessage(datafeedConfig.query_delay);
+    basicValidations.queryDelay.message = invalidTimeIntervalMessage(datafeedConfig.query_delay);
   }
 
   if (validationResults.contains('frequency_invalid')) {
     basicValidations.frequency.valid = false;
-    basicValidations.frequency.message = invalidTimeFormatMessage(datafeedConfig.frequency);
+    basicValidations.frequency.message = invalidTimeIntervalMessage(datafeedConfig.frequency);
+  }
+  if (validationResults.contains('missing_summary_count_field_name')) {
+    basicValidations.summaryCountField.valid = false;
+    basicValidations.summaryCountField.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.summaryCountFieldMissing',
+      {
+        defaultMessage: 'Required field as the datafeed uses aggregations.',
+      }
+    );
   }
 }
 
-export function checkForExistingJobAndGroupIds(
-  jobId: string,
-  groupIds: string[],
-  existingJobsAndGroups: ExistingJobsAndGroups
-): ValidationResults {
-  const messages: ValidationMessage[] = [];
-
-  // check that job id does not already exist as a job or group or a newly created group
-  if (
-    existingJobsAndGroups.jobIds.includes(jobId) ||
-    existingJobsAndGroups.groupIds.includes(jobId) ||
-    groupIds.includes(jobId)
-  ) {
-    messages.push({ id: 'job_id_already_exists' });
-  }
-
-  // check that groups that have been newly added in this job do not already exist as job ids
-  const newGroups = groupIds.filter(g => !existingJobsAndGroups.groupIds.includes(g));
-  if (existingJobsAndGroups.jobIds.some(g => newGroups.includes(g))) {
-    messages.push({ id: 'job_group_id_already_exists' });
-  }
-
-  return {
-    messages,
-    valid: messages.length === 0,
-    contains: (id: string) => messages.some(m => id === m.id),
-    find: (id: string) => messages.find(m => id === m.id),
-  };
-}
-
-function invalidTimeFormatMessage(value: string | undefined) {
+export function invalidTimeIntervalMessage(value: string | undefined) {
   return i18n.translate(
     'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
     {
       defaultMessage:
-        '{value} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+        '{value} is not a valid time interval format e.g. {thirtySeconds}, {tenMinutes}, {oneHour}, {sevenDays}. It also needs to be higher than zero.',
       values: {
         value,
+        thirtySeconds: '30s',
         tenMinutes: '10m',
         oneHour: '1h',
+        sevenDays: '7d',
       },
     }
   );

@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
 
 import { EuiForm, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { AggName, PivotAggsConfigDict } from '../../../../common';
+import { AggName } from '../../../../../../common/types/aggregations';
+
+import { PivotAggsConfigDict } from '../../../../common';
 
 export interface AggListSummaryProps {
   list: PivotAggsConfigDict;

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UrlFormat } from './url';
@@ -167,8 +156,8 @@ describe('UrlFormat', () => {
     });
   });
 
-  describe('whitelist', () => {
-    test('should assume a relative url if the value is not in the whitelist without a base path', () => {
+  describe('allow-list', () => {
+    test('should assume a relative url if the value is not in the allow-list without a base path', () => {
       const parsedUrl = {
         origin: 'http://kibana',
         basePath: '',
@@ -193,7 +182,7 @@ describe('UrlFormat', () => {
       );
     });
 
-    test('should assume a relative url if the value is not in the whitelist with a basepath', () => {
+    test('should assume a relative url if the value is not in the allow-list with a basepath', () => {
       const parsedUrl = {
         origin: 'http://kibana',
         basePath: '/xyz',
@@ -246,18 +235,18 @@ describe('UrlFormat', () => {
     test('should support multiple types of relative urls', () => {
       const parsedUrl = {
         origin: 'http://kibana.host.com',
-        pathname: '/nbc/app/kibana#/discover',
+        pathname: '/nbc/app/discover#/',
         basePath: '/nbc',
       };
       const url = new UrlFormat({ parsedUrl });
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('#/foo')).toBe(
-        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
+        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/discover#/#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
       );
 
-      expect(converter('/nbc/app/kibana#/discover')).toBe(
-        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover" target="_blank" rel="noopener noreferrer">/nbc/app/kibana#/discover</a></span>'
+      expect(converter('/nbc/app/discover#/')).toBe(
+        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/discover#/" target="_blank" rel="noopener noreferrer">/nbc/app/discover#/</a></span>'
       );
 
       expect(converter('../foo/bar')).toBe(

@@ -1,0 +1,71 @@
+@import '../mixins';
+
+/**
+ * stretch the root element of the Kibana application to set the base-size that
+ * flexed children should keep. Only works when paired with root styles applied
+ * by core service from new platform
+ */
+// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
+#kibana-body {
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+#app-fixed-viewport {
+  pointer-events: none;
+  visibility: hidden;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0 auto;
+
+  @include kibanaFullBodyMinHeight();
+}
+
+.app-wrapper-panel {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+// adapted from euiHeaderAffordForFixed as we need to handle the top banner
+@mixin kbnAffordForHeader($headerHeight) {
+  padding-top: $headerHeight;
+
+  #app-fixed-viewport {
+    top: $headerHeight;
+  }
+
+  .euiFlyout,
+  .euiCollapsibleNav {
+    top: $headerHeight;
+    height: calc(100% - #{$headerHeight});
+  }
+}
+
+.kbnBody {
+  @include kbnAffordForHeader($kbnHeaderOffset);
+
+  &.kbnBody--hasHeaderBanner {
+    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+  }
+  &.kbnBody--chromeHidden {
+    @include kbnAffordForHeader(0);
+  }
+  &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
+    @include kbnAffordForHeader($kbnHeaderBannerHeight);
+  }
+}

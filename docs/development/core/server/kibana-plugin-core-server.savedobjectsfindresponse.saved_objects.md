@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-saved_objects: Array<SavedObject<T>>;
+saved_objects: Array<SavedObjectsFindResult<T>>;
 ```

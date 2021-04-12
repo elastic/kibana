@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import moment from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
+import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ActionType } from './types';
+import { ActionType, ActionsApiRequestHandlerContext } from './types';
+import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
   ActionsPluginsSetup,
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
+import { AlertHistoryEsIndexConnectorId } from '../common';
 
 describe('Actions Plugin', () => {
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = ({
-    makeUsageCollector: jest.fn(),
-    registerCollector: jest.fn(),
-  } as unknown) as jest.Mocked<UsageCollectionSetup>;
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
@@ -31,7 +33,17 @@ describe('Actions Plugin', () => {
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
-      context = coreMock.createPluginInitializerContext();
+      context = coreMock.createPluginInitializerContext<ActionsConfig>({
+        enabled: true,
+        enabledActionTypes: ['*'],
+        allowedHosts: ['*'],
+        preconfiguredAlertHistoryEsIndex: false,
+        preconfigured: {},
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
+        maxResponseContentLength: new ByteSizeValue(1000000),
+        responseTimeout: moment.duration(60000),
+      });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
 
@@ -40,66 +52,76 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
-        usageCollection: usageCollectionMock,
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
     });
 
-    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+    it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       await plugin.setup(coreSetup, pluginsSetup);
-      expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+      expect(pluginsSetup.encryptedSavedObjects.canEncrypt).toEqual(false);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
-      it('should not throw error when ESO plugin not using a generated key', async () => {
+      it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {
           ...pluginsSetup,
           encryptedSavedObjects: {
             ...pluginsSetup.encryptedSavedObjects,
-            usingEphemeralEncryptionKey: false,
+            canEncrypt: true,
           },
         });
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
-          {
+        const actionsContextHandler = ((await handler[1](
+          ({
             core: {
               savedObjects: {
                 client: {},
               },
+              elasticsearch: {
+                client: jest.fn(),
+              },
             },
-          } as any,
+          } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as any;
-        actionsContextHandler.getActionsClient();
+        )) as unknown) as ActionsApiRequestHandlerContext;
+        actionsContextHandler!.getActionsClient();
       });
 
-      it('should throw error when ESO plugin using a generated key', async () => {
+      it('should throw error when ESO plugin is missing encryption key', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
-          {
+        const actionsContextHandler = ((await handler[1](
+          ({
             core: {
               savedObjects: {
                 client: {},
               },
             },
-          } as any,
+          } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as any;
-        expect(() => actionsContextHandler.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+        )) as unknown) as ActionsApiRequestHandlerContext;
+        expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
+          `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });
@@ -110,17 +132,23 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
-        async executor() {},
+        async executor(options) {
+          return { status: 'ok', actionId: options.actionId };
+        },
       };
 
       beforeEach(async () => {
-        setup = await plugin.setup(coreSetup, pluginsSetup);
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setup = await plugin.setup(coreSetup as any, pluginsSetup);
       });
 
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
             ...sampleActionType,
+            // we're faking an invalid value, this requires stripping the typing
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             minimumLicenseRequired: 'foo' as any,
           })
         ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
@@ -152,7 +180,9 @@ describe('Actions Plugin', () => {
       });
     });
   });
+
   describe('start()', () => {
+    let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let coreStart: ReturnType<typeof coreMock.createStart>;
@@ -160,7 +190,24 @@ describe('Actions Plugin', () => {
     let pluginsStart: jest.Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
-      const context = coreMock.createPluginInitializerContext();
+      context = coreMock.createPluginInitializerContext<ActionsConfig>({
+        enabled: true,
+        enabledActionTypes: ['*'],
+        allowedHosts: ['*'],
+        preconfiguredAlertHistoryEsIndex: false,
+        preconfigured: {
+          preconfiguredServerLog: {
+            actionTypeId: '.server-log',
+            name: 'preconfigured-server-log',
+            config: {},
+            secrets: {},
+          },
+        },
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
+        maxResponseContentLength: new ByteSizeValue(1000000),
+        responseTimeout: moment.duration(60000),
+      });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
       coreStart = coreMock.createStart();
@@ -169,37 +216,176 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
-        usageCollection: usageCollectionMock,
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
+        licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       };
     });
 
     describe('getActionsClientWithRequest()', () => {
-      it('should not throw error when ESO plugin not using a generated key', async () => {
+      it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {
           ...pluginsSetup,
           encryptedSavedObjects: {
             ...pluginsSetup.encryptedSavedObjects,
-            usingEphemeralEncryptionKey: false,
+            canEncrypt: true,
           },
         });
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
 
-      it('should throw error when ESO plugin using generated key', async () => {
+      it('should throw error when ESO plugin is missing encryption key', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-        expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+        expect(pluginsSetup.encryptedSavedObjects.canEncrypt).toEqual(false);
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+        );
+      });
+    });
+
+    describe('Preconfigured connectors', () => {
+      function getConfig(overrides = {}) {
+        return {
+          enabled: true,
+          enabledActionTypes: ['*'],
+          allowedHosts: ['*'],
+          preconfiguredAlertHistoryEsIndex: false,
+          preconfigured: {
+            preconfiguredServerLog: {
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+            },
+          },
+          proxyRejectUnauthorizedCertificates: true,
+          proxyBypassHosts: undefined,
+          proxyOnlyHosts: undefined,
+          rejectUnauthorized: true,
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration('60s'),
+          ...overrides,
+        };
+      }
+
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        coreStart = coreMock.createStart();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+        pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        };
+      }
+
+      it('should handle preconfigured actions', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        expect(pluginStart.preconfiguredActions.length).toEqual(1);
+        expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
+      });
+
+      it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
+        setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
+
+        await plugin.setup(coreSetup, pluginsSetup);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        expect(pluginStart.preconfiguredActions.length).toEqual(2);
+        expect(
+          pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
+        ).toBe(true);
+      });
+
+      it('should not allow preconfigured connector with same ID as AlertHistoryEsIndexConnectorId', async () => {
+        setup(
+          getConfig({
+            preconfigured: {
+              [AlertHistoryEsIndexConnectorId]: {
+                actionTypeId: '.index',
+                name: 'clashing preconfigured index connector',
+                config: {},
+                secrets: {},
+              },
+            },
+          })
+        );
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        expect(pluginStart.preconfiguredActions.length).toEqual(0);
+        expect(context.logger.get().warn).toHaveBeenCalledWith(
+          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+        );
+      });
+    });
+
+    describe('isActionTypeEnabled()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
+
+    describe('isActionExecutable()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
         );
       });
     });

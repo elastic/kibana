@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ConfirmDeleteUsers } from './confirm_delete_users';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { userAPIClientMock } from '../../index.mock';
+import { ConfirmDeleteUsers } from './confirm_delete_users';
 
 describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {
@@ -80,7 +82,7 @@ describe('ConfirmDeleteUsers', () => {
     const onCancel = jest.fn();
 
     const apiClientMock = userAPIClientMock.create();
-    apiClientMock.deleteUser.mockImplementation(user => {
+    apiClientMock.deleteUser.mockImplementation((user) => {
       if (user === 'foo') {
         return Promise.reject('something terrible happened');
       }

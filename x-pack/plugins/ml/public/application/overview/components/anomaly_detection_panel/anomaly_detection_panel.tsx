@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
@@ -16,12 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -39,11 +41,9 @@ type MaxScoresByGroup = Dictionary<{
   index?: number;
 }>;
 
-const createJobLink = '#/jobs/new_job/step/index_or_search';
-
 function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
   const anomalyScores: MaxScoresByGroup = {};
-  groups.forEach(group => {
+  groups.forEach((group) => {
     anomalyScores[group.id] = { maxScore: 0 };
   });
 
@@ -52,12 +52,30 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const {
     services: { notifications },
   } = useMlKibana();
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+
+  const redirectToJobsManagementPage = async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    });
+    await navigateToPath(path, true);
+  };
+
+  const redirectToCreateJobSelectIndexPage = async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    });
+    await navigateToPath(path, true);
+  };
+
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
@@ -68,10 +86,14 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const loadJobs = async () => {
     setIsLoading(true);
 
+    let lazyJobCount = 0;
     try {
       const jobsResult: MlSummaryJobs = await ml.jobs.jobsSummary([]);
       const jobsSummaryList = jobsResult.map((job: MlSummaryJob) => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
+        if (job.awaitingNodeAssignment) {
+          lazyJobCount++;
+        }
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
@@ -84,6 +106,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
       setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
       loadMaxAnomalyScores(jobsGroups);
+      setLazyJobCount(lazyJobCount);
     } catch (e) {
       setErrorMessage(e.message !== undefined ? e.message : JSON.stringify(e));
       setIsLoading(false);
@@ -96,7 +119,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
 
     try {
       const promises = groupsList
-        .filter(group => group.jobIds.length > 0)
+        .filter((group) => group.jobIds.length > 0)
         .map((group, i) => {
           scores[group.id].index = i;
           const latestTimestamp = group.latest_timestamp;
@@ -108,7 +131,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
       const results = await Promise.all(promises);
       const tempGroups = { ...groupsObject };
       // Check results for each group's promise index and update state
-      Object.keys(scores).forEach(groupId => {
+      Object.keys(scores).forEach((groupId) => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
         // maxScore will be null if it was not loaded correctly
         const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
@@ -157,7 +180,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   return (
     <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}   
+      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
@@ -172,7 +195,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
             <Fragment>
               <p>
                 {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
-                  defaultMessage: `Machine learning makes it easy to detect anomalies in time series data stored in Elasticsearch. Track one metric from a single machine or hundreds of metrics across thousands of machines. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
+                  defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
                 })}
               </p>
             </Fragment>
@@ -180,10 +203,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
           actions={
             <EuiButton
               color="primary"
-              href={createJobLink}
+              onClick={redirectToCreateJobSelectIndexPage}
               fill
               iconType="plusInCircle"
               isDisabled={jobCreationDisabled}
+              data-test-subj="mlOverviewCreateADJobButton"
             >
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
                 defaultMessage: 'Create job',
@@ -202,7 +226,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
                 defaultMessage: 'Refresh',
               })}
             </EuiButtonEmpty>
-            <EuiButton size="s" fill href="#/jobs?">
+            <EuiButton size="s" fill onClick={redirectToJobsManagementPage}>
               {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
                 defaultMessage: 'Manage jobs',
               })}

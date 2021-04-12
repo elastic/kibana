@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+
+import type { SecuredFeature } from '../../../../model';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { SubFeatureForm } from './sub_feature_form';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;
@@ -31,13 +35,13 @@ export const FeatureTableExpandedRow = ({
   const [isCustomizing, setIsCustomizing] = useState(() => {
     return feature
       .getMinimalFeaturePrivileges()
-      .some(p => selectedFeaturePrivileges.includes(p.id));
+      .some((p) => selectedFeaturePrivileges.includes(p.id));
   });
 
   useEffect(() => {
     const hasMinimalFeaturePrivilegeSelected = feature
       .getMinimalFeaturePrivileges()
-      .some(p => selectedFeaturePrivileges.includes(p.id));
+      .some((p) => selectedFeaturePrivileges.includes(p.id));
 
     if (!hasMinimalFeaturePrivilegeSelected && isCustomizing) {
       setIsCustomizing(false);
@@ -75,7 +79,7 @@ export const FeatureTableExpandedRow = ({
           }
         />
       </EuiFlexItem>
-      {feature.getSubFeatures().map(subFeature => {
+      {feature.getSubFeatures().map((subFeature) => {
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
@@ -83,7 +87,7 @@ export const FeatureTableExpandedRow = ({
               privilegeIndex={privilegeIndex}
               featureId={feature.id}
               subFeature={subFeature}
-              onChange={updatedPrivileges => onChange(feature.id, updatedPrivileges)}
+              onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}
               disabled={disabled || !isCustomizing}
             />

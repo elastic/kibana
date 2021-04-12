@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
-import { Field } from '../models/data_visualizer/data_visualizer';
+import { Field, HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
+  dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
+  indexPatternTitleSchema,
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
+import { RuntimeMappings } from '../../common/types/fields';
 
 function getOverallStats(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: object,
   aggregatableFields: string[],
@@ -23,9 +27,10 @@ function getOverallStats(
   samplerShardSize: number,
   timeFieldName: string,
   earliestMs: number,
-  latestMs: number
+  latestMs: number,
+  runtimeMappings: RuntimeMappings
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(client);
   return dv.getOverallStats(
     indexPatternTitle,
     query,
@@ -34,12 +39,13 @@ function getOverallStats(
     samplerShardSize,
     timeFieldName,
     earliestMs,
-    latestMs
+    latestMs,
+    runtimeMappings
   );
 }
 
 function getStatsForFields(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: Field[],
@@ -48,9 +54,10 @@ function getStatsForFields(
   earliestMs: number,
   latestMs: number,
   interval: number,
-  maxExamples: number
+  maxExamples: number,
+  runtimeMappings: RuntimeMappings
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(client);
   return dv.getStatsForFields(
     indexPatternTitle,
     query,
@@ -60,29 +67,105 @@ function getStatsForFields(
     earliestMs,
     latestMs,
     interval,
-    maxExamples
+    maxExamples,
+    runtimeMappings
+  );
+}
+
+function getHistogramsForFields(
+  client: IScopedClusterClient,
+  indexPatternTitle: string,
+  query: any,
+  fields: HistogramField[],
+  samplerShardSize: number,
+  runtimeMappings: RuntimeMappings
+) {
+  const dv = new DataVisualizer(client);
+  return dv.getHistogramsForFields(
+    indexPatternTitle,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings
   );
 }
 
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {post} /api/ml/data_visualizer/get_field_histograms/:indexPatternTitle Get histograms for fields
+   * @apiName GetHistogramsForFields
+   * @apiDescription Returns the histograms on a list fields in the specified index pattern.
+   *
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldHistogramsSchema
+   *
+   * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
+   */
+  router.post(
+    {
+      path: '/api/ml/data_visualizer/get_field_histograms/{indexPatternTitle}',
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldHistogramsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const {
+          params: { indexPatternTitle },
+          body: { query, fields, samplerShardSize, runtimeMappings },
+        } = request;
+
+        const results = await getHistogramsForFields(
+          client,
+          indexPatternTitle,
+          query,
+          fields,
+          samplerShardSize,
+          runtimeMappings
+        );
+
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
   /**
    * @apiGroup DataVisualizer
    *
    * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
    * @apiName GetStatsForFields
-   * @apiDescription Returns fields stats of the index pattern.
+   * @apiDescription Returns the stats on individual fields in the specified index pattern.
    *
-   * @apiParam {String} indexPatternTitle Index pattern title.
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldStatsSchema
+   *
+   * @apiSuccess {Object} fieldName stats by field, keyed on the name of the field.
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
-      validate: dataVisualizerFieldStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -95,11 +178,11 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
             latest,
             interval,
             maxExamples,
+            runtimeMappings,
           },
         } = request;
-
         const results = await getStatsForFields(
-          context,
+          client,
           indexPatternTitle,
           query,
           fields,
@@ -108,7 +191,8 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
           earliest,
           latest,
           interval,
-          maxExamples
+          maxExamples,
+          runtimeMappings
         );
 
         return response.ok({
@@ -125,16 +209,29 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    *
    * @api {post} /api/ml/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
    * @apiName GetOverallStats
-   * @apiDescription Returns overall stats of the index pattern.
+   * @apiDescription Returns the top level overall stats for the specified index pattern.
    *
-   * @apiParam {String} indexPatternTitle Index pattern title.
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerOverallStatsSchema
+   *
+   * @apiSuccess {number} totalCount total count of documents.
+   * @apiSuccess {Object} aggregatableExistsFields stats on aggregatable fields that exist in documents.
+   * @apiSuccess {Object} aggregatableNotExistsFields stats on aggregatable fields that do not exist in documents.
+   * @apiSuccess {Object} nonAggregatableExistsFields stats on non-aggregatable fields that exist in documents.
+   * @apiSuccess {Object} nonAggregatableNotExistsFields stats on non-aggregatable fields that do not exist in documents.
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
-      validate: dataVisualizerOverallStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerOverallStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -146,11 +243,12 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
             timeFieldName,
             earliest,
             latest,
+            runtimeMappings,
           },
         } = request;
 
         const results = await getOverallStats(
-          context,
+          client,
           indexPatternTitle,
           query,
           aggregatableFields,
@@ -158,7 +256,8 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
           samplerShardSize,
           timeFieldName,
           earliest,
-          latest
+          latest,
+          runtimeMappings
         );
 
         return response.ok({

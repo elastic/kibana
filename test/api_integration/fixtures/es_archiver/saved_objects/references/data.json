@@ -1,0 +1,120 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:only-ref-1",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Vis with ref to ref-1",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": [
+        {
+          "type": "ref-type",
+          "id": "ref-1",
+          "name": "ref-1"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:ref-1-and-ref-2",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Vis with ref to ref-1 and ref-2",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": [
+        {
+          "type": "ref-type",
+          "id": "ref-1",
+          "name": "ref-1"
+        },
+        {
+          "type": "ref-type",
+          "id": "ref-2",
+          "name": "ref-2"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:only-ref-2",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Vis with ref to ref-2",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": [
+        {
+          "type": "ref-type",
+          "id": "ref-2",
+          "name": "ref-2"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:only-ref-3",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "visualization": {
+        "title": "Vis with ref to ref-3",
+        "visState": "{}",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      },
+      "references": [
+        {
+          "type": "ref-type",
+          "id": "ref-3",
+          "name": "ref-3"
+        }
+      ]
+    }
+  }
+}

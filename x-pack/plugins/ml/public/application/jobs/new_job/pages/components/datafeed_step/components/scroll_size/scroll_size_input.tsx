@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useContext, useEffect } from 'react';
@@ -41,7 +42,7 @@ export const ScrollSizeInput: FC = () => {
         min={0}
         placeholder={scrollSizeDefault}
         value={scrollSizeString === '' ? scrollSizeString : +scrollSizeString}
-        onChange={e => setScrollSize(e.target.value)}
+        onChange={(e) => setScrollSize(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputScrollSize"
       />

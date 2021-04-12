@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-/* eslint-disable max-classes-per-file */
 
 import {
   EuiText,
@@ -18,7 +17,7 @@ import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/re
 import * as React from 'react';
 import { Unit } from '@elastic/datemath';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
 
@@ -97,10 +96,10 @@ const LoadingItemViewExtra = euiStyled(EuiFlexGroup)`
 `;
 
 const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
-  padding-left: ${props => props.theme.eui.euiSizeS};
-  padding-top: ${props =>
+  padding-left: ${(props) => props.theme.eui.euiSizeS};
+  padding-top: ${(props) =>
     props.position === 'start' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
-  padding-bottom: ${props =>
+  padding-bottom: ${(props) =>
     props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
 `;
 

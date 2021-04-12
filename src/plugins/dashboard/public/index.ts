@@ -1,64 +1,36 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import './index.scss';
 
 import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+import { DashboardPlugin } from './plugin';
 
-/**
- * These types can probably be internal once all of dashboard app is migrated into this plugin. Right
- * now, migrations are still in legacy land.
- */
-export {
-  DashboardDoc730ToLatest,
-  DashboardDoc700To720,
-  RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
-  RawSavedDashboardPanel630,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanel730ToLatest,
-  DashboardDocPre700,
-} from './bwc';
-
-export {} from './types';
-export {} from './actions';
 export {
   DashboardContainer,
   DashboardContainerInput,
-  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
-  DashboardPanelState,
-  // Types below here can likely be made private when dashboard app moved into this NP plugin.
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-  GridData,
-} from './embeddable';
+} from './application';
+export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { SavedObjectDashboard } from './saved_dashboards';
-export { DashboardStart } from './plugin';
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
+export {
+  DashboardSetup,
+  DashboardStart,
+  DashboardUrlGenerator,
+  DashboardFeatureFlagConfig,
+} from './plugin';
+export {
+  DASHBOARD_APP_URL_GENERATOR,
+  createDashboardUrlGenerator,
+  DashboardUrlGeneratorState,
+} from './url_generator';
+export { DashboardSavedObject } from './saved_dashboards';
+export { SavedDashboardPanel } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return new DashboardPlugin(initializerContext);
 }

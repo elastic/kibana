@@ -1,0 +1,7 @@
+[
+  {
+    "output": "src/plugins/telemetry/schema/oss_plugins.json",
+    "root": "src/plugins/",
+    "exclude": []
+  }
+]

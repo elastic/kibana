@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LicensingPluginSetup } from '../../../../licensing/public';
+import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
 
 let mlLicense: MlClientLicense | null = null;
@@ -16,9 +18,12 @@ let mlLicense: MlClientLicense | null = null;
  * @param {LicensingPluginSetup} licensingSetup
  * @returns {MlClientLicense}
  */
-export function setLicenseCache(licensingSetup: LicensingPluginSetup) {
+export function setLicenseCache(
+  licensingSetup: LicensingPluginSetup,
+  postInitFunctions?: Array<(lic: MlLicense) => void>
+) {
   mlLicense = new MlClientLicense();
-  mlLicense.setup(licensingSetup.license$);
+  mlLicense.setup(licensingSetup.license$, postInitFunctions);
   return mlLicense;
 }
 

@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { initAppAuthorization } from './app_authorization';
-
 import {
-  loggingServiceMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
-  return {
-    getFeatures: () => [{ id: 'foo', name: 'Foo', app: ['foo'], privileges: {} }],
-  } as FeaturesSetupContract;
+  const mock = featuresPluginMock.createSetup();
+  mock.getKibanaFeatures.mockReturnValue([
+    { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as any,
+  ]);
+  return mock;
 };
 
 describe('initAppAuthorization', () => {
@@ -27,7 +31,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       authorizationMock.create(),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -49,7 +53,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -74,7 +78,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -100,7 +104,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -117,7 +121,7 @@ describe('initAppAuthorization', () => {
 
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
-    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
       // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
       expect(request.headers).toMatchObject(headers);
@@ -129,7 +133,7 @@ describe('initAppAuthorization', () => {
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
     expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
@@ -140,7 +144,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -157,7 +161,7 @@ describe('initAppAuthorization', () => {
 
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
-    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
       // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
       expect(request.headers).toMatchObject(headers);
@@ -167,9 +171,9 @@ describe('initAppAuthorization', () => {
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
-    expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
+    expect(mockResponse.forbidden).toHaveBeenCalledTimes(1);
     expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 });

@@ -65,7 +65,7 @@ To prevent bugs caused by missing history updates, make sure your app uses one i
 For example, if you use `react-router`:
 
 ```tsx
-const App = props => {
+const App = (props) => {
   useEffect(() => {
     const stateStorage = createKbnUrlStateStorage({
       useHash: props.uiSettings.get('state:storeInSessionStorage'),
@@ -96,11 +96,11 @@ setTimeout(() => {
 }, 0);
 ```
 
-For cases, where granular control over URL updates is needed, `kbnUrlStateStorage` provides these advanced apis:
+For cases, where granular control over URL updates is needed, `kbnUrlStateStorage` exposes `kbnUrlStateStorage.kbnUrlControls` that exposes these advanced apis:
 
-- `kbnUrlStateStorage.flush({replace: boolean})` - allows to synchronously apply any pending updates.
-  `replace` option allows to use `history.replace()` instead of `history.push()`. Returned boolean indicates if any update happened
-- `kbnUrlStateStorage.cancel()` - cancels any pending updates
+- `kbnUrlStateStorage.kbnUrlControls.flush({replace: boolean})` - allows to synchronously apply any pending updates.
+  `replace` option allows using `history.replace()` instead of `history.push()`.
+- `kbnUrlStateStorage.kbnUrlControls.cancel()` - cancels any pending updates.
 
 ### Sharing one `kbnUrlStateStorage` instance
 
@@ -159,4 +159,59 @@ const { start, stop } = syncStates([
 ]);
 
 <Router history={history} />;
+```
+
+### Error handling
+
+Errors could occur both during `kbnUrlStateStorage.get()` and `kbnUrlStateStorage.set()`
+
+#### Handling kbnUrlStateStorage.get() errors
+
+Possible error scenarios during `kbnUrlStateStorage.get()`:
+
+1. Rison in URL is malformed. Parsing exception.
+2. useHash is enabled and current hash is missing in `sessionStorage`
+
+In all the cases error is handled internally and `kbnUrlStateStorage.get()` returns `null`, just like if there is no state in the URL anymore
+
+You can pass callback to get notified about errors. Use it, for example, for notifying users
+
+```ts
+const kbnUrlStateStorage = createKbnUrlStateStorage({
+  history,
+  onGetError: (error) => {
+    alert(error.message);
+  },
+});
+```
+
+#### Handling kbnUrlStateStorage.set() errors
+
+Possible errors during `kbnUrlStateStorage.set()`:
+
+1. `useHash` is enabled and can't store state in `sessionStorage` (overflow or no access)
+
+In all the cases error is handled internally and URL update is skipped
+
+You can pass callback to get notified about errors. Use it, for example, for notifying users:
+
+```ts
+const kbnUrlStateStorage = createKbnUrlStateStorage({
+  history,
+  onSetError: (error) => {
+    alert(error.message);
+  },
+});
+```
+
+#### Helper to integrate with core.notifications.toasts
+
+The most common scenario is to notify users about issues with state syncing using toast service from core
+There is a convenient helper for this:
+
+```ts
+const kbnUrlStateStorage = createKbnUrlStateStorage({
+  history,
+  ...withNotifyOnErrors(core.notifications.toasts),
+});
 ```

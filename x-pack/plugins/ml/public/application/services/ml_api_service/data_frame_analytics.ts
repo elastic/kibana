@@ -1,15 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
+import { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
+import {
+  DataFrameAnalyticsConfig,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import {
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  AnalyticsMapReturnType,
+} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -27,17 +36,31 @@ export type GetDataFrameAnalyticsStatsResponse =
   | GetDataFrameAnalyticsStatsResponseOk
   | GetDataFrameAnalyticsStatsResponseError;
 
-interface GetDataFrameAnalyticsResponse {
+export interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
+export interface DeleteDataFrameAnalyticsWithIndexResponse {
+  acknowledged: boolean;
+  analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+}
+
+export interface JobsExistsResponse {
+  results: {
+    [jobId: string]: boolean;
+  };
+}
+
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string) {
+  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
+      ...(excludeGenerated ? { query: { excludeGenerated } } : {}),
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
@@ -64,6 +87,34 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  updateDataFrameAnalytics(analyticsId: string, updateConfig: UpdateDataFrameAnalyticsConfig) {
+    const body = JSON.stringify(updateConfig);
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      method: 'POST',
+      body,
+    });
+  },
+  getDataFrameAnalyticsMap(
+    id: string,
+    treatAsRoot: boolean,
+    type?: string
+  ): Promise<AnalyticsMapReturnType> {
+    const idString = id !== undefined ? `/${id}` : '';
+    return http({
+      path: `${basePath()}/data_frame/analytics/map${idString}`,
+      method: 'GET',
+      query: { treatAsRoot, type },
+    });
+  },
+  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ analyticsIds, allSpaces });
+    return http<JobsExistsResponse>({
+      path: `${basePath()}/data_frame/analytics/jobs_exist`,
+      method: 'POST',
+      body,
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
@@ -86,6 +137,17 @@ export const dataFrameAnalytics = {
       method: 'DELETE',
     });
   },
+  deleteDataFrameAnalyticsAndDestIndex(
+    analyticsId: string,
+    deleteDestIndex: boolean,
+    deleteDestIndexPattern: boolean
+  ) {
+    return http<DeleteDataFrameAnalyticsWithIndexResponse>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      query: { deleteDestIndex, deleteDestIndexPattern },
+      method: 'DELETE',
+    });
+  },
   startDataFrameAnalytics(analyticsId: string) {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/_start`,
@@ -103,6 +165,14 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
+    });
+  },
+  validateDataFrameAnalytics(analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>) {
+    const body = JSON.stringify(analyticsConfig);
+    return http<ValidateAnalyticsJobResponse>({
+      path: `${basePath()}/data_frame/analytics/validate`,
+      method: 'POST',
+      body,
     });
   },
 };

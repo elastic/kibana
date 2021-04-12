@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createQuery } from '../create_query';
@@ -83,7 +84,7 @@ function fetchPipelineVersions(...args) {
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query,
       aggs,
     },
@@ -98,7 +99,7 @@ export function _handleResponse(response) {
     'aggregations.pipelines.scoped.by_pipeline_hash.buckets',
     []
   );
-  return pipelineHashes.map(pipelineHash => ({
+  return pipelineHashes.map((pipelineHash) => ({
     hash: pipelineHash.key,
     firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
     lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),

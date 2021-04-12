@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
@@ -23,7 +24,7 @@ export function setInfluencerFilterSettings(
 
   const { selectedCells, viewBySwimlaneOptions } = state;
   let selectedViewByFieldName = state.viewBySwimlaneFieldName;
-  const filteredViewBySwimlaneOptions = viewBySwimlaneOptions.filter(d =>
+  const filteredViewBySwimlaneOptions = viewBySwimlaneOptions.filter((d) =>
     filteredFields.includes(d)
   );
 
@@ -57,5 +58,6 @@ export function setInfluencerFilterSettings(
       filteredFields.includes(selectedViewByFieldName) === false,
     viewBySwimlaneFieldName: selectedViewByFieldName,
     viewBySwimlaneOptions: filteredViewBySwimlaneOptions,
+    viewByFromPage: 1,
   };
 }

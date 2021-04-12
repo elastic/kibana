@@ -1,7 +1,7 @@
 {
   "id": "logs_ui_categories",
   "title": "Log entry categories",
-  "description": "Detect anomalies in count of log entries by category",
+  "description": "Detect anomalies in count of log entries by category.",
   "type": "Logs",
   "logoFile": "logo.json",
   "jobs": [

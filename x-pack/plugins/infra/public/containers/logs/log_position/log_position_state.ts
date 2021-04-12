@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { useSetState } from 'react-use';
+import useSetState from 'react-use/lib/useSetState';
+import useInterval from 'react-use/lib/useInterval';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -18,6 +21,7 @@ interface DateRange {
   startTimestamp: number;
   endTimestamp: number;
   timestampsLastUpdate: number;
+  lastCompleteDateRangeExpressionUpdate: number;
 }
 
 interface VisiblePositions {
@@ -43,6 +47,7 @@ export interface LogPositionStateParams {
   startTimestamp: number | null;
   endTimestamp: number | null;
   timestampsLastUpdate: number;
+  lastCompleteDateRangeExpressionUpdate: number;
 }
 
 export interface LogPositionCallbacks {
@@ -55,7 +60,6 @@ export interface LogPositionCallbacks {
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
 
-const DEFAULT_DATE_RANGE = { startDateExpression: 'now-1d', endDateExpression: 'now' };
 const DESIRED_BUFFER_PAGES = 2;
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
@@ -80,7 +84,18 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
   return store.currentValue;
 };
 
+const TIME_DEFAULTS = { from: 'now-1d', to: 'now' };
+const STREAMING_INTERVAL = 5000;
+
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
+  const [getTime, setTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { from: start, to: end } = getTime();
+
+  const DEFAULT_DATE_RANGE = {
+    startDateExpression: start,
+    endDateExpression: end,
+  };
+
   // Flag to determine if `LogPositionState` has been fully initialized.
   //
   // When the page loads, there might be initial state in the URL. We want to
@@ -108,7 +123,19 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     startTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.startDateExpression)!,
     endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
     timestampsLastUpdate: Date.now(),
+    lastCompleteDateRangeExpressionUpdate: Date.now(),
   });
+
+  useEffect(() => {
+    if (isInitialized) {
+      if (
+        TIME_DEFAULTS.from !== dateRange.startDateExpression ||
+        TIME_DEFAULTS.to !== dateRange.endDateExpression
+      ) {
+        setTime({ from: dateRange.startDateExpression, to: dateRange.endDateExpression });
+      }
+    }
+  }, [isInitialized, dateRange.startDateExpression, dateRange.endDateExpression, setTime]);
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
@@ -147,12 +174,18 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         jumpToTargetPosition(null);
       }
 
-      setDateRange({
+      setDateRange((prevState) => ({
         ...newDateRange,
         startTimestamp: nextStartTimestamp,
         endTimestamp: nextEndTimestamp,
         timestampsLastUpdate: Date.now(),
-      });
+        // NOTE: Complete refers to the last time an update was requested with both expressions. These require a full refresh (unless streaming). Timerange expansion
+        // and pagination however do not.
+        lastCompleteDateRangeExpressionUpdate:
+          'startDateExpression' in newDateRange && 'endDateExpression' in newDateRange
+            ? Date.now()
+            : prevState.lastCompleteDateRangeExpressionUpdate,
+      }));
     },
     [setDateRange, dateRange, targetPosition]
   );
@@ -171,6 +204,21 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
       });
     }
   }, [dateRange.endDateExpression, visiblePositions, setDateRange]);
+
+  const startLiveStreaming = useCallback(() => {
+    setIsStreaming(true);
+    jumpToTargetPosition(null);
+    updateDateRange({ startDateExpression: 'now-1d', endDateExpression: 'now' });
+  }, [updateDateRange]);
+
+  const stopLiveStreaming = useCallback(() => {
+    setIsStreaming(false);
+  }, []);
+
+  useInterval(
+    () => updateDateRange({ startDateExpression: 'now-1d', endDateExpression: 'now' }),
+    isStreaming ? STREAMING_INTERVAL : null
+  );
 
   const state = {
     isInitialized,
@@ -193,12 +241,8 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
       [jumpToTargetPosition]
     ),
     reportVisiblePositions,
-    startLiveStreaming: useCallback(() => {
-      setIsStreaming(true);
-      jumpToTargetPosition(null);
-      updateDateRange({ startDateExpression: 'now-1d', endDateExpression: 'now' });
-    }, [setIsStreaming, updateDateRange]),
-    stopLiveStreaming: useCallback(() => setIsStreaming(false), [setIsStreaming]),
+    startLiveStreaming,
+    stopLiveStreaming,
     updateDateRange,
   };
 

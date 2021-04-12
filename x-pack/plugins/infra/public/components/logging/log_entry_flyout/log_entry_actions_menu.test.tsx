@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import testSubject from '@kbn/test-subj-selector';
@@ -28,11 +29,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
-              fields: [{ field: 'host.ip', value: 'HOST_IP' }],
+            logEntry={{
+              fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -58,11 +59,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
-              fields: [{ field: 'container.id', value: 'CONTAINER_ID' }],
+            logEntry={{
+              fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -88,11 +89,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
-              fields: [{ field: 'kubernetes.pod.uid', value: 'POD_UID' }],
+            logEntry={{
+              fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -118,15 +119,15 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [
-                { field: 'container.id', value: 'CONTAINER_ID' },
-                { field: 'host.ip', value: 'HOST_IP' },
-                { field: 'kubernetes.pod.uid', value: 'POD_UID' },
+                { field: 'container.id', value: ['CONTAINER_ID'] },
+                { field: 'host.ip', value: ['HOST_IP'] },
+                { field: 'kubernetes.pod.uid', value: ['POD_UID'] },
               ],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -154,11 +155,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -188,11 +189,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
-              fields: [{ field: 'trace.id', value: '1234567' }],
+            logEntry={{
+              fields: [{ field: 'trace.id', value: ['1234567'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -219,14 +220,14 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [
-                { field: 'trace.id', value: '1234567' },
-                { field: '@timestamp', value: timestamp },
+                { field: 'trace.id', value: ['1234567'] },
+                { field: '@timestamp', value: [timestamp] },
               ],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -252,11 +253,11 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },

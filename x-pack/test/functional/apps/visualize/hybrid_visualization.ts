@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'visChart']);
   const inspector = getService('inspector');
@@ -79,7 +81,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const toTime = 'Aug 22, 2019 @ 23:09:36.205';
 
       await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.clickVisualizationByName('hybrid_histogram_line_chart');
+      await PageObjects.visualize.openSavedVisualization('hybrid_histogram_line_chart');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await inspector.open();

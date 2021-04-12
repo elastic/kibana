@@ -1,0 +1,49 @@
+// sass-lint:disable-block indentation, no-color-keywords
+
+// SASSTODO: Create this in EUI
+@mixin lnsOverflowShadowHorizontal {
+  $hideHeight: $euiScrollBarCorner * 1.25;
+  mask-image: linear-gradient(
+    to right,
+    transparentize($euiColorDanger, .9) 0%,
+    transparentize($euiColorDanger, 0) $hideHeight,
+    transparentize($euiColorDanger, 0) calc(100% - #{$hideHeight}),
+    transparentize($euiColorDanger, .9) 100%
+  );
+}
+
+// Static styles for a draggable item
+@mixin lnsDraggable {
+  @include euiSlightShadow;
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  border: $euiBorderWidthThin dashed transparent;
+  cursor: grab;
+}
+
+// Static styles for a drop area
+@mixin lnsDroppable {
+  border: $euiBorderWidthThin dashed $euiBorderColor;
+}
+
+// Hovering state for drag item and drop area
+@mixin lnsDragDropHover {
+  &:hover {
+    border: $euiBorderWidthThin dashed $euiColorMediumShade;
+  }
+}
+
+// Style for drop area when there's an item being dragged
+@mixin lnsDroppableActive {
+  background-color: transparentize($euiColorVis0, .9);
+}
+
+// Style for drop area while hovering with item
+@mixin lnsDroppableActiveHover {
+  background-color: transparentize($euiColorVis0, .75);
+  border: $euiBorderWidthThin dashed $euiColorVis0;
+}
+
+// Style for drop area that is not allowed for current item
+@mixin lnsDroppableNotAllowed {
+  opacity: .5;
+}

@@ -1,0 +1,35 @@
+parameters:
+  - schema:
+      type: string
+    name: agentPolicyId
+    in: path
+    required: true
+post:
+  summary: Agent policy - copy one policy
+  operationId: agent-policy-copy
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/agent_policy.yaml
+            required:
+              - item
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+          required:
+            - name
+    description: ''
+  description: Copies one agent policy

@@ -1,30 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set, isEmpty } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
 function checkMetric(metric, fields) {
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (!metric[field]) {
       throw new Error(
         i18n.translate('visTypeTimeseries.metricMissingErrorMessage', {
@@ -63,6 +53,16 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
+function getPercentileHdrParam(bucket) {
+  return bucket.numberOfSignificantValueDigits
+    ? {
+        hdr: {
+          number_of_significant_value_digits: bucket.numberOfSignificantValueDigits,
+        },
+      }
+    : undefined;
+}
+
 export const bucketTransform = {
   count: () => {
     return {
@@ -76,7 +76,7 @@ export const bucketTransform = {
       },
     };
   },
-  static: bucket => {
+  static: (bucket) => {
     checkMetric(bucket, ['value']);
     // Anything containing a decimal point or an exponent is considered decimal value
     const isDecimalValue = Boolean(bucket.value.match(/[.e]/i));
@@ -101,7 +101,7 @@ export const bucketTransform = {
   variance: extendStats,
   std_deviation: extendStats,
 
-  top_hit: bucket => {
+  top_hit: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'size']);
     const body = {
       filter: {
@@ -117,7 +117,8 @@ export const bucketTransform = {
       },
     };
     if (bucket.order_by) {
-      set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
+      const orderField = bucket.order_by;
+      set(body, 'aggs.docs.top_hits.sort', [{ [orderField]: { order: bucket.order } }]);
     }
     return body;
   },
@@ -130,30 +131,32 @@ export const bucketTransform = {
   std_deviation_bucket: extendStatsBucket,
   variance_bucket: extendStatsBucket,
 
-  percentile: bucket => {
+  percentile: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.map(p => (p.value ? Number(p.value) : 0));
-    if (bucket.percentiles.some(p => p.mode === 'band')) {
+    let percents = bucket.percentiles.map((p) => (p.value ? Number(p.value) : 0));
+    if (bucket.percentiles.some((p) => p.mode === 'band')) {
       percents = percents.concat(
-        bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
+        bucket.percentiles.filter((p) => p.percentile).map((p) => p.percentile)
       );
     }
-    const agg = {
+
+    return {
       percentiles: {
         field: bucket.field,
         percents,
+        ...getPercentileHdrParam(bucket),
       },
     };
-    return agg;
   },
 
-  percentile_rank: bucket => {
+  percentile_rank: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'values']);
 
     return {
       percentile_ranks: {
         field: bucket.field,
-        values: (bucket.values || []).map(value => (isEmpty(value) ? 0 : value)),
+        values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
+        ...getPercentileHdrParam(bucket),
       },
     };
   },

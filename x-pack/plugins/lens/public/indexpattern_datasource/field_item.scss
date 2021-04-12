@@ -1,0 +1,72 @@
+.lnsFieldItem {
+  width: 100%;
+  .lnsFieldItem__infoIcon {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  &:hover:not([class*='isActive']) {
+    cursor: grab;
+
+    .lnsFieldItem__infoIcon {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity $euiAnimSpeedFast ease-in-out 1s;
+    }
+  }
+
+  &:focus,
+  &:focus-within,
+  &.kbnFieldButton-isActive {
+    animation: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .kbnFieldButton__name span,
+  &:focus-within .kbnFieldButton__name span,
+  &.kbnFieldButton-isActive .kbnFieldButton__name span {
+    background-color: transparentize($euiColorVis1, .9) !important;
+    text-decoration: underline !important;
+  }
+}
+
+.kbnFieldButton.lnsDragDrop_ghost {
+  .lnsFieldItem__infoIcon {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+.kbnFieldButton__name {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsFieldItem--missing {
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  color: $euiColorDarkShade;
+}
+
+.lnsFieldItem__topValue {
+  margin-bottom: $euiSizeS;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.lnsFieldItem__topValueProgress {
+  background-color: $euiColorLightestShade;
+
+  // sass-lint:disable-block no-vendor-prefixes
+  &::-webkit-progress-bar {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.lnsFieldItem__fieldPanel {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+.lnsFieldItem__fieldPanelTitle {
+  text-transform: none;
+}

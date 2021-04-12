@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
-import { SecuredFeature, SubFeaturePrivilegeGroup, SubFeaturePrivilege } from '../../../../model';
-import { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+
+import type {
+  SecuredFeature,
+  SubFeaturePrivilege,
+  SubFeaturePrivilegeGroup,
+} from '../../../../model';
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 
 interface Props {
   feature: SecuredFeature;
@@ -18,7 +25,7 @@ interface Props {
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
   return (
     <EuiFlexGroup direction="column">
-      {props.feature.getSubFeatures().map(subFeature => {
+      {props.feature.getSubFeatures().map((subFeature) => {
         return (
           <EuiFlexItem key={subFeature.name} data-test-subj="subFeatureEntry">
             <EuiFlexGroup>
@@ -107,7 +114,7 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
+    const firstSelectedPrivilege = privilegeGroup.privileges.find((p) =>
       effectiveSubFeaturePrivileges.includes(p.id)
     )?.name;
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -34,8 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { Field } from '../../../advanced_settings/public';
+import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
+import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
+import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -44,48 +35,62 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 interface Props {
   telemetryService: TelemetryService;
   onQueryMatchChange: (searchTermMatches: boolean) => void;
+  isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: any;
+  query?: { text: string };
   toasts: ToastsStart;
 }
 
 interface State {
   processing: boolean;
   showExample: boolean;
+  showSecurityExample: boolean;
   queryMatches: boolean | null;
   enabled: boolean;
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
-  state: State = {
-    processing: false,
-    showExample: false,
-    queryMatches: null,
-    enabled: this.props.telemetryService.getIsOptedIn() || false,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      processing: false,
+      showExample: false,
+      showSecurityExample: false,
+      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
+      enabled: this.props.telemetryService.getIsOptedIn() || false,
+    };
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
+    const queryMatches = this.checkQueryMatch(query);
 
-    const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches = SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
-
-    if (searchTermMatches !== this.state.queryMatches) {
+    if (queryMatches !== this.state.queryMatches) {
       this.setState(
         {
-          queryMatches: searchTermMatches,
+          queryMatches,
         },
         () => {
-          this.props.onQueryMatchChange(searchTermMatches);
+          this.props.onQueryMatchChange(queryMatches);
         }
       );
     }
   }
 
+  checkQueryMatch(query?: { text: string }): boolean {
+    const searchTerm = (query?.text ?? '').toLowerCase();
+    return (
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+    );
+  }
+
   render() {
-    const { telemetryService } = this.props;
-    const { showExample, queryMatches, enabled, processing } = this.state;
+    const { telemetryService, isSecurityExampleEnabled } = this.props;
+    const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
+    const securityExampleEnabled = isSecurityExampleEnabled();
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -98,10 +103,17 @@ export class TelemetryManagementSection extends Component<Props, State> {
     return (
       <Fragment>
         {showExample && (
-          <OptInExampleFlyout
-            fetchExample={telemetryService.fetchExample}
-            onClose={this.toggleExample}
-          />
+          <TrackApplicationView viewId="optInExampleFlyout">
+            <OptInExampleFlyout
+              fetchExample={telemetryService.fetchExample}
+              onClose={this.toggleExample}
+            />
+          </TrackApplicationView>
+        )}
+        {showSecurityExample && securityExampleEnabled && (
+          <TrackApplicationView viewId="optInSecurityExampleFlyout">
+            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          </TrackApplicationView>
         )}
         <EuiPanel paddingSize="l">
           <EuiForm>
@@ -117,7 +129,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
-            <Field
+            <LazyField
               setting={
                 {
                   type: 'boolean',
@@ -175,35 +187,63 @@ export class TelemetryManagementSection extends Component<Props, State> {
     );
   };
 
-  renderDescription = () => (
-    <Fragment>
-      <p>
-        <FormattedMessage
-          id="telemetry.telemetryConfigAndLinkDescription"
-          defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
-          See our {privacyStatementLink} for more details."
-          values={{
-            privacyStatementLink: (
-              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-                <FormattedMessage
-                  id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-                  defaultMessage="Privacy Statement"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-      <p>
-        <EuiLink onClick={this.toggleExample}>
+  renderDescription = () => {
+    const { isSecurityExampleEnabled } = this.props;
+    const securityExampleEnabled = isSecurityExampleEnabled();
+    const clusterDataLink = (
+      <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
+        <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
+      </EuiLink>
+    );
+
+    const endpointSecurityDataLink = (
+      <EuiLink onClick={this.toggleSecurityExample} data-test-id="endpoint_security_example">
+        <FormattedMessage id="telemetry.securityData" defaultMessage="endpoint security data" />
+      </EuiLink>
+    );
+
+    return (
+      <Fragment>
+        <p>
           <FormattedMessage
-            id="telemetry.seeExampleOfWhatWeCollectLinkText"
-            defaultMessage="See an example of what we collect"
+            id="telemetry.telemetryConfigAndLinkDescription"
+            defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+            See our {privacyStatementLink} for more details."
+            values={{
+              privacyStatementLink: (
+                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                  <FormattedMessage
+                    id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                    defaultMessage="Privacy Statement"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
-        </EuiLink>
-      </p>
-    </Fragment>
-  );
+        </p>
+        <p>
+          {securityExampleEnabled ? (
+            <FormattedMessage
+              id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
+              defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+              values={{
+                clusterData: clusterDataLink,
+                endpointSecurityData: endpointSecurityDataLink,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="telemetry.seeExampleOfClusterData"
+              defaultMessage="See an example of the {clusterData} that we collect."
+              values={{
+                clusterData: clusterDataLink,
+              }}
+            />
+          )}
+        </p>
+      </Fragment>
+    );
+  };
 
   toggleOptIn = async (): Promise<boolean> => {
     const { telemetryService, toasts } = this.props;
@@ -243,4 +283,17 @@ export class TelemetryManagementSection extends Component<Props, State> {
       showExample: !this.state.showExample,
     });
   };
+
+  toggleSecurityExample = () => {
+    const { isSecurityExampleEnabled } = this.props;
+    const securityExampleEnabled = isSecurityExampleEnabled();
+    if (!securityExampleEnabled) return;
+    this.setState({
+      showSecurityExample: !this.state.showSecurityExample,
+    });
+  };
 }
+
+// required for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default TelemetryManagementSection;

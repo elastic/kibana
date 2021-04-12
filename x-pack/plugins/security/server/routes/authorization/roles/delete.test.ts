@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
-import { defineDeleteRolesRoutes } from './delete';
+import Boom from '@hapi/boom';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-} from '../../../../../../../src/core/server/mocks';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineDeleteRolesRoutes } from './delete';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
@@ -25,20 +24,19 @@ interface TestOptions {
 describe('DELETE role', () => {
   const deleteRoleTest = (
     description: string,
-    {
-      name,
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponse,
-      asserts,
-    }: TestOptions
+    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
+        mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRole.mockImplementation(
+          (async () => ({ body: await apiResponse() })) as any
+        );
       }
 
       defineDeleteRolesRoutes(mockRouteDefinitionParams);
@@ -51,22 +49,15 @@ describe('DELETE role', () => {
         params: { name },
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-          'shield.deleteRole',
-          { name }
-        );
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+        expect(
+          mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRole
+        ).toHaveBeenCalledWith({ name });
       }
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
@@ -75,7 +66,7 @@ describe('DELETE role', () => {
   describe('failure', () => {
     deleteRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 

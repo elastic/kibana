@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { Annotation } from '../../../common/types/annotations';
 
 /*
@@ -79,3 +80,25 @@ export const annotation$ = new BehaviorSubject<AnnotationState>(null);
 */
 export const annotationsRefresh$ = new BehaviorSubject(Date.now());
 export const annotationsRefreshed = () => annotationsRefresh$.next(Date.now());
+
+export class AnnotationUpdatesService {
+  private _annotation$: BehaviorSubject<AnnotationState> = new BehaviorSubject<AnnotationState>(
+    null
+  );
+
+  public update$() {
+    return this._annotation$.asObservable();
+  }
+  public isAnnotationInitialized$(): Observable<AnnotationState> {
+    return this._annotation$.asObservable().pipe(
+      distinctUntilChanged((prev, curr) => {
+        // prevent re-rendering
+        return prev !== null && curr !== null;
+      })
+    );
+  }
+
+  public setValue(annotation: AnnotationState) {
+    this._annotation$.next(annotation);
+  }
+}

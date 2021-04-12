@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FilterBarProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -31,11 +21,28 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * @param key field name
      * @param value filter value
      * @param enabled filter status
+     * @param pinned filter pinned status
+     * @param negated filter including or excluding value
      */
-    public async hasFilter(key: string, value: string, enabled: boolean = true): Promise<boolean> {
+    public async hasFilter(
+      key: string,
+      value: string,
+      enabled: boolean = true,
+      pinned: boolean = false,
+      negated: boolean = false
+    ): Promise<boolean> {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
+      const filterPinnedState = pinned ? 'pinned' : 'unpinned';
+      const filterNegatedState = negated ? 'filter-negated' : '';
       return testSubjects.exists(
-        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value}`,
+        classNames(
+          'filter',
+          `filter-${filterActivationState}`,
+          key !== '' && `filter-key-${key}`,
+          value !== '' && `filter-value-${value}`,
+          `filter-${filterPinnedState}`,
+          filterNegatedState
+        ),
         {
           allowHidden: true,
         }
@@ -80,6 +87,11 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
+    public async isFilterPinned(key: string): Promise<boolean> {
+      const filter = await testSubjects.find(`~filter & ~filter-key-${key}`);
+      return (await filter.getAttribute('data-test-subj')).includes('filter-pinned');
+    }
+
     public async getFilterCount(): Promise<number> {
       const filters = await testSubjects.findAll('~filter');
       return filters.length;
@@ -109,9 +121,10 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramsComboBoxes = await params.findAllByCssSelector(
-        '[data-test-subj~="filterParamsComboBox"]'
+        '[data-test-subj~="filterParamsComboBox"]',
+        1000
       );
-      const paramFields = await params.findAllByTagName('input');
+      const paramFields = await params.findAllByTagName('input', 1000);
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
         if (!Array.isArray(fieldValues)) {
@@ -176,10 +189,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('addFilter');
       const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
       await this.ensureFieldEditorModalIsClosed();
-      return indexPatterns
-        .trim()
-        .split('\n')
-        .join(',');
+      return indexPatterns.trim().split('\n').join(',');
     }
 
     /**

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fetchIndices } from '../../../lib/fetch_indices';
@@ -14,7 +15,7 @@ export function registerListRoute({ router, license, indexDataEnricher, lib }: R
     license.guardApiRoute(async (ctx, req, res) => {
       try {
         const indices = await fetchIndices(
-          ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
           indexDataEnricher
         );
         return res.ok({ body: indices });
@@ -26,7 +27,7 @@ export function registerListRoute({ router, license, indexDataEnricher, lib }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

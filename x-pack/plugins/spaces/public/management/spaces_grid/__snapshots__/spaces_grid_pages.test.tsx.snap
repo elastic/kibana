@@ -38,8 +38,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
         grow={false}
       >
         <EuiButton
+          data-test-subj="createSpace"
           fill={true}
-          href="#/management/kibana/spaces/create"
+          onClick={[Function]}
         >
           <FormattedMessage
             defaultMessage="Create a space"
@@ -111,6 +112,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
       }
       pagination={true}
       responsive={true}
+      rowHeader="name"
       search={
         Object {
           "box": Object {
@@ -119,16 +121,16 @@ exports[`SpacesGridPage renders as expected 1`] = `
         }
       }
       sorting={true}
+      tableCaption="Kibana spaces"
       tableLayout="fixed"
     />
   </EuiPageContent>
-  <SecureSpaceMessage />
 </div>
 `;
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
-  <SpaceAvatar
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -170,8 +172,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </SpaceAvatarInternal>,
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -212,8 +214,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </SpaceAvatarInternal>,
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -257,6 +259,6 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
+  </SpaceAvatarInternal>,
 ]
 `;

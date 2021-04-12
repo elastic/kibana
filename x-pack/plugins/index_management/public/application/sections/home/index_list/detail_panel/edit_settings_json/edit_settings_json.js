@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -45,7 +46,7 @@ export class EditSettingsJson extends React.PureComponent {
     const newSettings = { ...filteredDefaults, ...flattenedSettings };
     //store these to be used as autocomplete values later
     this.settingsKeys = Object.keys(newSettings);
-    readOnlySettings.forEach(e => delete newSettings[e]);
+    readOnlySettings.forEach((e) => delete newSettings[e]);
     //can't change codec on open index
     if (isOpen) {
       delete newSettings['index.codec'];
@@ -80,7 +81,7 @@ export class EditSettingsJson extends React.PureComponent {
     const json = this.editor.getValue();
     const settings = JSON.parse(json);
     //don't set if the values have not changed
-    Object.keys(this.originalSettings).forEach(key => {
+    Object.keys(this.originalSettings).forEach((key) => {
       if (_.isEqual(this.originalSettings[key], settings[key])) {
         delete settings[key];
       }
@@ -148,7 +149,7 @@ export class EditSettingsJson extends React.PureComponent {
         <EuiSpacer />
         <div
           data-test-subj="indexJsonEditor"
-          ref={aceDiv => {
+          ref={(aceDiv) => {
             this.aceDiv = aceDiv;
           }}
         />

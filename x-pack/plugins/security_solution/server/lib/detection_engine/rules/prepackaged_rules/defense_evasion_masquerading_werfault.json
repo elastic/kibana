@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious instances of the Windows Error Reporting process (WerFault.exe or Wermgr.exe) with matching command-line and process executable values performing outgoing network connections. This may be indicative of a masquerading attempt to evade suspicious child process behavior detections.",
+  "false_positives": [
+    "Legit Application Crash with rare Werfault commandline value"
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Windows Error Manager Masquerading",
+  "query": "sequence by host.id, process.entity_id with maxspan = 5s\n  [process where event.type:\"start\" and process.name : (\"wermgr.exe\", \"WerFault.exe\") and process.args_count == 1]\n  [network where process.name : (\"wermgr.exe\", \"WerFault.exe\") and network.protocol != \"dns\" and\n    network.direction == \"outgoing\" and destination.ip !=\"::1\" and destination.ip !=\"127.0.0.1\"\n  ]\n",
+  "references": [
+    "https://twitter.com/SBousseaden/status/1235533224337641473",
+    "https://www.hexacorn.com/blog/2019/09/20/werfault-command-line-switches-v0-1/",
+    "https://app.any.run/tasks/26051d84-b68e-4afb-8a9a-76921a271b81/"
+  ],
+  "risk_score": 47,
+  "rule_id": "6ea41894-66c3-4df7-ad6b-2c5074eb3df8",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 3
+}

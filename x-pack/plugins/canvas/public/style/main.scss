@@ -1,0 +1,69 @@
+/*
+  Canvas global SASS varialbes
+*/
+$canvasElementCardWidth: 210px;
+
+.canvas.canvasContainerWrapper {
+  display: flex;
+  flex-grow: 1;
+}
+
+.canvas.canvasContainer {
+  display: flex;
+  flex-grow: 1;
+  background-color: $euiPageBackgroundColor;
+}
+
+.canvasContainer--loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+}
+
+.canvasCheckered {
+  background-color: $euiColorGhost;
+
+  // sass-lint:disable-block indentation
+  background-image: linear-gradient(45deg, $euiColorLightShade 25%, transparent 25%),
+    linear-gradient(-45deg, $euiColorLightShade 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, $euiColorLightShade 75%),
+    linear-gradient(-45deg, transparent 75%, $euiColorLightShade 75%);
+  background-size: $euiSizeS $euiSizeS;
+  position: relative;
+}
+
+.canvasTextArea__code {
+  @include euiScrollBar;
+  font-size: $euiFontSizeS;
+  font-family: $euiCodeFontFamily;
+  width: 100%;
+  max-width: 100%;
+}
+
+.canvasContextMenu--topBorder {
+  border-top: $euiBorderThin;
+}
+
+// sass-lint:disable-block no-ids
+#canvas-app {
+  overflow-y: hidden;
+
+  .window-error {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: $euiColorDanger;
+    color: $euiColorGhost;
+    display: block;
+    z-index: 2000;
+    padding: 10px;
+    max-width: 500px;
+
+    a {
+      color: $euiColorGhost;
+      font-weight: bold;
+    }
+  }
+}

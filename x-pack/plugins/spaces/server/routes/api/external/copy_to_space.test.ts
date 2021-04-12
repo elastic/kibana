@@ -1,73 +1,92 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
+
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
-  createSpaces,
-  createLegacyAPI,
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
+import { usageStatsClientMock } from '../../../usage_stats/usage_stats_client.mock';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createExportSavedObjectsToStreamMock,
+  createImportSavedObjectsFromStreamMock,
   createMockSavedObjectsRepository,
+  createMockSavedObjectsService,
+  createResolveSavedObjectsImportErrorsMock,
+  createSpaces,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
-import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
-  httpServiceMock,
-  httpServerMock,
-} from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
-import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
-import { ObjectType } from '@kbn/config-schema';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const legacyAPI = createLegacyAPI({ spaces });
+    const router = httpService.createRouter();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
-    const spacesService = await service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
-      authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of(spacesConfig),
+    const coreStart = coreMock.createStart();
+    const {
+      savedObjects,
+      savedObjectsExporter,
+      savedObjectsImporter,
+    } = createMockSavedObjectsService(spaces);
+    coreStart.savedObjects = savedObjects;
+    savedObjectsExporter.exportByObjects.mockImplementation(createExportSavedObjectsToStreamMock());
+    savedObjectsImporter.import.mockImplementation(createImportSavedObjectsFromStreamMock());
+    savedObjectsImporter.resolveImportErrors.mockImplementation(
+      createResolveSavedObjectsImportErrorsMock()
+    );
+
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    const usageStatsClient = usageStatsClientMock.create();
+    const usageStatsServicePromise = Promise.resolve(
+      usageStatsServiceMock.createSetupContract(usageStatsClient)
+    );
+
+    const clientServiceStart = clientService.start(coreStart);
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
     });
 
     initCopyToSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
       log,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     const [
@@ -76,6 +95,7 @@ describe('copy to space', () => {
     ] = router.post.mock.calls;
 
     return {
+      coreStart,
       copyToSpace: {
         routeValidation: ctsRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: ctsRouteHandler,
@@ -85,7 +105,9 @@ describe('copy to space', () => {
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
-      legacyAPI,
+      savedObjectsExporter,
+      savedObjectsImporter,
+      usageStatsClient,
     };
   };
 
@@ -109,13 +131,12 @@ describe('copy to space', () => {
       });
     });
 
-    it(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
-      const payload = {
-        spaces: ['a-space'],
-        objects: [],
-      };
+    it(`records usageStats data`, async () => {
+      const createNewCopies = Symbol();
+      const overwrite = Symbol();
+      const payload = { spaces: ['a-space'], objects: [], createNewCopies, overwrite };
 
-      const { copyToSpace, legacyAPI } = await setup();
+      const { copyToSpace, usageStatsClient } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -124,12 +145,31 @@ describe('copy to space', () => {
 
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          excludedWrappers: ['spaces'],
-        }
-      );
+      expect(usageStatsClient.incrementCopySavedObjects).toHaveBeenCalledWith({
+        headers: request.headers,
+        createNewCopies,
+        overwrite,
+      });
+    });
+
+    it(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
+      const payload = {
+        spaces: ['a-space'],
+        objects: [],
+      };
+
+      const { copyToSpace, coreStart } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        excludedWrappers: ['spaces'],
+      });
     });
 
     it(`requires space IDs to be unique`, async () => {
@@ -160,6 +200,21 @@ describe('copy to space', () => {
       );
     });
 
+    it(`does not allow "overwrite" to be used with "createNewCopies"`, async () => {
+      const payload = {
+        spaces: ['a-space'],
+        objects: [{ type: 'foo', id: 'bar' }],
+        overwrite: true,
+        createNewCopies: true,
+      };
+
+      const { copyToSpace } = await setup();
+
+      expect(() =>
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
+    });
+
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
@@ -176,48 +231,13 @@ describe('copy to space', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        spaces: ['a-space'],
-        objects: [
-          { type: 'globalType', id: 'bar' },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { copyToSpace, legacyAPI } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await copyToSpace.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.importSavedObjects).toHaveBeenCalledTimes(1);
-      const [importCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[0];
-
-      expect(importCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
-    });
-
     it('copies to multiple spaces', async () => {
       const payload = {
         spaces: ['a-space', 'b-space'],
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      const { copyToSpace, legacyAPI } = await setup();
+      const { copyToSpace, savedObjectsImporter } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -233,16 +253,14 @@ describe('copy to space', () => {
       const { status } = response;
 
       expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.importSavedObjects).toHaveBeenCalledTimes(2);
-      const [firstImportCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[0];
+      expect(savedObjectsImporter.import).toHaveBeenCalledTimes(2);
+      const [firstImportCallOptions] = savedObjectsImporter.import.mock.calls[0];
 
       expect(firstImportCallOptions).toMatchObject({
         namespace: 'a-space',
       });
 
-      const [secondImportCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[1];
+      const [secondImportCallOptions] = savedObjectsImporter.import.mock.calls[1];
 
       expect(secondImportCallOptions).toMatchObject({
         namespace: 'b-space',
@@ -270,6 +288,25 @@ describe('copy to space', () => {
       });
     });
 
+    it(`records usageStats data`, async () => {
+      const createNewCopies = Symbol();
+      const payload = { retries: {}, objects: [], createNewCopies };
+
+      const { resolveConflicts, usageStatsClient } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(usageStatsClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
+        headers: request.headers,
+        createNewCopies,
+      });
+    });
+
     it(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
       const payload = {
         retries: {
@@ -284,7 +321,7 @@ describe('copy to space', () => {
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      const { resolveConflicts, legacyAPI } = await setup();
+      const { resolveConflicts, coreStart } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -293,12 +330,9 @@ describe('copy to space', () => {
 
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          excludedWrappers: ['spaces'],
-        }
-      );
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        excludedWrappers: ['spaces'],
+      });
     });
 
     it(`requires objects to be unique`, async () => {
@@ -340,57 +374,6 @@ describe('copy to space', () => {
       );
     });
 
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        retries: {
-          ['a-space']: [
-            {
-              type: 'visualization',
-              id: 'bar',
-              overwrite: true,
-            },
-            {
-              type: 'globalType',
-              id: 'bar',
-              overwrite: true,
-            },
-          ],
-        },
-        objects: [
-          {
-            type: 'globalType',
-            id: 'bar',
-          },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { resolveConflicts, legacyAPI } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await resolveConflicts.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.resolveImportErrors).toHaveBeenCalledTimes(1);
-      const [resolveImportErrorsCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[0];
-
-      expect(resolveImportErrorsCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
-    });
-
     it('resolves conflicts for multiple spaces', async () => {
       const payload = {
         objects: [{ type: 'visualization', id: 'bar' }],
@@ -412,7 +395,7 @@ describe('copy to space', () => {
         },
       };
 
-      const { resolveConflicts, legacyAPI } = await setup();
+      const { resolveConflicts, savedObjectsImporter } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -428,22 +411,18 @@ describe('copy to space', () => {
       const { status } = response;
 
       expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.resolveImportErrors).toHaveBeenCalledTimes(2);
-      const [resolveImportErrorsFirstCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[0];
+      expect(savedObjectsImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+      const [
+        resolveImportErrorsFirstCallOptions,
+      ] = savedObjectsImporter.resolveImportErrors.mock.calls[0];
 
-      expect(resolveImportErrorsFirstCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsFirstCallOptions).toMatchObject({ namespace: 'a-space' });
 
-      const [resolveImportErrorsSecondCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[1];
+      const [
+        resolveImportErrorsSecondCallOptions,
+      ] = savedObjectsImporter.resolveImportErrors.mock.calls[1];
 
-      expect(resolveImportErrorsSecondCallOptions).toMatchObject({
-        namespace: 'b-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsSecondCallOptions).toMatchObject({ namespace: 'b-space' });
     });
   });
 });

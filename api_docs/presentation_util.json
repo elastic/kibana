@@ -1,0 +1,253 @@
+{
+  "id": "presentationUtil",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "id": "def-public.DashboardPicker",
+        "type": "Function",
+        "label": "DashboardPicker",
+        "signature": [
+          "(props: ",
+          "DashboardPickerProps",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.DashboardPickerProps",
+                "text": "DashboardPickerProps"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedObjectSaveModalDashboard",
+        "type": "Function",
+        "label": "SavedObjectSaveModalDashboard",
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.SaveModalDashboardProps",
+                "text": "SaveModalDashboardProps"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 37
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+          "lineNumber": 37
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "def-public.SaveModalDashboardProps",
+        "type": "Interface",
+        "label": "SaveModalDashboardProps",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.documentInfo",
+            "type": "Object",
+            "label": "documentInfo",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 30
+            },
+            "signature": [
+              "SaveModalDocumentInfo"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.objectType",
+            "type": "string",
+            "label": "objectType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 31
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.onClose",
+            "type": "Function",
+            "label": "onClose",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 32
+            },
+            "signature": [
+              "() => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.onSave",
+            "type": "Function",
+            "label": "onSave",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 33
+            },
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.OnSaveProps",
+                "text": "OnSaveProps"
+              },
+              " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.tagOptions",
+            "type": "CompoundType",
+            "label": "tagOptions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+              "lineNumber": 34
+            },
+            "signature": [
+              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveModalState",
+                "text": "SaveModalState"
+              },
+              ") => React.ReactNode) | null | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
+          "lineNumber": 29
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-public.PresentationUtilPluginSetup",
+      "type": "Interface",
+      "label": "PresentationUtilPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "src/plugins/presentation_util/public/types.ts",
+        "lineNumber": 10
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-public.PresentationUtilPluginStart",
+      "type": "Interface",
+      "label": "PresentationUtilPluginStart",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-public.PresentationUtilPluginStart.ContextProvider",
+          "type": "Function",
+          "label": "ContextProvider",
+          "description": [],
+          "source": {
+            "path": "src/plugins/presentation_util/public/types.ts",
+            "lineNumber": 13
+          },
+          "signature": [
+            "React.FC<{}>"
+          ]
+        }
+      ],
+      "source": {
+        "path": "src/plugins/presentation_util/public/types.ts",
+        "lineNumber": 12
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

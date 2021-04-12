@@ -1,0 +1,11 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "invalid"
+  },
+  "id": "invalid",
+  "references": [],
+  "type": "invalid-type"
+}

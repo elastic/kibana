@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
@@ -68,7 +69,7 @@ describe('ML - field type utils', () => {
       const mlKeys = Object.keys(ML_JOB_FIELD_TYPES);
       const receivedMlLabels: Record<string, string | null> = {};
       const testStorage = mlJobTypeAriaLabels;
-      mlKeys.forEach(constant => {
+      mlKeys.forEach((constant) => {
         receivedMlLabels[constant] = getMLJobTypeAriaLabel(
           ML_JOB_FIELD_TYPES[constant as keyof typeof ML_JOB_FIELD_TYPES]
         );

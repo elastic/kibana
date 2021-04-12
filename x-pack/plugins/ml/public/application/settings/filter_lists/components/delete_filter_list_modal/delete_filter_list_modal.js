@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButton, EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { deleteFilterLists } from './delete_filter_lists';
 
@@ -58,7 +59,7 @@ export class DeleteFilterListModal extends Component {
       const title = (
         <FormattedMessage
           id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
-          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}"
+          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
           values={{
             selectedFilterListsLength: selectedFilterLists.length,
             selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
@@ -66,39 +67,27 @@ export class DeleteFilterListModal extends Component {
         />
       );
       modal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={title}
-            className="eui-textBreakWord"
-            onCancel={this.closeModal}
-            onConfirm={this.onConfirmDelete}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel"
-                defaultMessage="Delete"
-              />
-            }
-            buttonColor="danger"
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage"
-                defaultMessage="Are you sure you want to delete
-{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
-                values={{
-                  selectedFilterListsLength: selectedFilterLists.length,
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={title}
+          className="eui-textBreakWord"
+          onCancel={this.closeModal}
+          onConfirm={this.onConfirmDelete}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+          data-test-subj={'mlFilterListDeleteConfirmation'}
+        />
       );
     }
 
@@ -114,6 +103,7 @@ export class DeleteFilterListModal extends Component {
             selectedFilterLists.length === 0 ||
             canDeleteFilter === false
           }
+          data-test-subj="mlFilterListsDeleteButton"
         >
           <FormattedMessage
             id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"

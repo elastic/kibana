@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -64,7 +65,7 @@ export function esNodeRoute(server) {
         const showCgroupMetricsElasticsearch = config.get(
           'monitoring.ui.container.elasticsearch.enabled'
         );
-        const metricCpu = metricSet.find(m => m.name === 'node_cpu_metric');
+        const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
           metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];
         } else {

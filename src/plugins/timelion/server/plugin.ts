@@ -1,97 +1,74 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { configSchema } from '../config';
-import loadFunctions from './lib/load_functions';
-import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
-import { runRoute } from './routes/run';
-import { ConfigManager } from './lib/config_manager';
+import { schema } from '@kbn/config-schema';
+import { TimelionConfigType } from './config';
+import { timelionSheetSavedObjectType } from './saved_objects';
+import { getDeprecations, showWarningMessageIfTimelionSheetWasFound } from './deprecations';
 
-/**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
+export class TimelionPlugin implements Plugin {
+  private logger: Logger;
 
-/**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
- */
-export class Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof configSchema>>()
-      .pipe(first())
-      .toPromise();
-
-    const configManager = new ConfigManager(this.initializerContext.config);
-
-    const functions = loadFunctions('series_functions');
-
-    const getFunction = (name: string) => {
-      if (functions[name]) {
-        return functions[name];
-      }
-
-      throw new Error(
-        i18n.translate('timelion.noFunctionErrorMessage', {
-          defaultMessage: 'No such function: {name}',
-          values: { name },
-        })
-      );
-    };
-
-    const logger = this.initializerContext.logger.get('timelion');
-
-    const router = core.http.createRouter();
-
-    const deps = {
-      configManager,
-      functions,
-      getFunction,
-      logger,
-    };
-
-    functionsRoute(router, deps);
-    runRoute(router, deps);
-    validateEsRoute(router);
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
+  constructor(context: PluginInitializerContext<TimelionConfigType>) {
+    this.logger = context.logger.get();
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
+  public setup(core: CoreSetup) {
+    core.capabilities.registerProvider(() => ({
+      timelion: {
+        save: true,
+        show: true,
+      },
+    }));
+    core.savedObjects.registerType(timelionSheetSavedObjectType);
 
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
+    core.uiSettings.register({
+      'timelion:showTutorial': {
+        name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
+          defaultMessage: 'Show tutorial',
+        }),
+        value: false,
+        description: i18n.translate('timelion.uiSettings.showTutorialDescription', {
+          defaultMessage: 'Should I show the tutorial by default when entering the timelion app?',
+        }),
+        category: ['timelion'],
+        schema: schema.boolean(),
+      },
+      'timelion:default_columns': {
+        name: i18n.translate('timelion.uiSettings.defaultColumnsLabel', {
+          defaultMessage: 'Default columns',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultColumnsDescription', {
+          defaultMessage: 'Number of columns on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+      'timelion:default_rows': {
+        name: i18n.translate('timelion.uiSettings.defaultRowsLabel', {
+          defaultMessage: 'Default rows',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultRowsDescription', {
+          defaultMessage: 'Number of rows on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+    });
+
+    core.deprecations.registerDeprecations({ getDeprecations });
   }
+  start(core: CoreStart) {
+    showWarningMessageIfTimelionSheetWasFound(core, this.logger);
+  }
+  stop() {}
 }

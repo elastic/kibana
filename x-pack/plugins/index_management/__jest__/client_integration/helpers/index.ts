@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setup as homeSetup } from './home.helpers';
-import { setup as templateCreateSetup } from './template_create.helpers';
-import { setup as templateCloneSetup } from './template_clone.helpers';
-import { setup as templateEditSetup } from './template_edit.helpers';
+import './mocks';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
 
-export { setupEnvironment } from './setup_environment';
+export { setupEnvironment, WithAppDependencies, services } from './setup_environment';
 
-export const pageHelpers = {
-  home: { setup: homeSetup },
-  templateCreate: { setup: templateCreateSetup },
-  templateClone: { setup: templateCloneSetup },
-  templateEdit: { setup: templateEditSetup },
-};
+export { TestSubjects } from './test_subjects';
+
+export { BRANCH } from './constants';

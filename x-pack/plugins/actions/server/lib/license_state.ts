@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
-import { assertNever } from '../../../../../src/core/utils';
-import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
+import { assertNever } from '@kbn/std';
+import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
 import { ActionTypeDisabledError } from './errors';
+import { LicensingPluginStart } from '../../../licensing/server';
+import { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -24,6 +28,7 @@ export class LicenseState {
   private licenseInformation: ActionsLicenseInformation = this.checkLicense(undefined);
   private subscription: Subscription;
   private license?: ILicense;
+  private _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'] | null = null;
 
   constructor(license$: Observable<ILicense>) {
     this.subscription = license$.subscribe(this.updateInformation.bind(this));
@@ -32,6 +37,10 @@ export class LicenseState {
   private updateInformation(license: ILicense | undefined) {
     this.license = license;
     this.licenseInformation = this.checkLicense(license);
+  }
+
+  public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
+    this._notifyUsage = notifyUsage;
   }
 
   public clean() {
@@ -43,8 +52,13 @@ export class LicenseState {
   }
 
   public isLicenseValidForActionType(
-    actionType: ActionType
+    actionType: ActionType,
+    { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }
   ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
+    if (notifyUsage) {
+      this.notifyUsage(actionType);
+    }
+
     if (!this.license?.isAvailable) {
       return { isValid: false, reason: 'unavailable' };
     }
@@ -52,20 +66,29 @@ export class LicenseState {
     const check = this.license.check(actionType.id, actionType.minimumLicenseRequired);
 
     switch (check.state) {
-      case LICENSE_CHECK_STATE.Expired:
+      case 'expired':
         return { isValid: false, reason: 'expired' };
-      case LICENSE_CHECK_STATE.Invalid:
+      case 'invalid':
         return { isValid: false, reason: 'invalid' };
-      case LICENSE_CHECK_STATE.Unavailable:
+      case 'unavailable':
         return { isValid: false, reason: 'unavailable' };
-      case LICENSE_CHECK_STATE.Valid:
+      case 'valid':
         return { isValid: true };
       default:
         return assertNever(check.state);
     }
   }
 
+  private notifyUsage(actionType: ActionType) {
+    // No need to notify usage on basic action types
+    if (this._notifyUsage && actionType.minimumLicenseRequired !== 'basic') {
+      this._notifyUsage(getActionTypeFeatureUsageName(actionType));
+    }
+  }
+
   public ensureLicenseForActionType(actionType: ActionType) {
+    this.notifyUsage(actionType);
+
     const check = this.isLicenseValidForActionType(actionType);
 
     if (check.isValid) {
@@ -125,20 +148,20 @@ export class LicenseState {
     const check = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
 
     switch (check.state) {
-      case LICENSE_CHECK_STATE.Expired:
+      case 'expired':
         return {
           showAppLink: true,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Invalid:
-      case LICENSE_CHECK_STATE.Unavailable:
+      case 'invalid':
+      case 'unavailable':
         return {
           showAppLink: false,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Valid:
+      case 'valid':
         return {
           showAppLink: true,
           enableAppLink: true,

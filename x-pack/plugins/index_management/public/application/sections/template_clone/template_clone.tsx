@@ -1,17 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
+
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
-import { Template } from '../../../../common/types';
+import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
+import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -21,17 +26,20 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   match: {
     params: { name },
   },
+  location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
+  const isLegacy = getIsLegacyFromQueryParams(location);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-
   const { error: templateToCloneError, data: templateToClone, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName
+    decodedTemplateName,
+    isLegacy
   );
 
-  const onSave = async (template: Template) => {
+  const onSave = async (template: TemplateDeserialized) => {
     setIsSaving(true);
     setSaveError(null);
 
@@ -46,7 +54,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getTemplateDetailsLink(newTemplateName));
+    history.push(getTemplateDetailsLink(newTemplateName, template._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {
@@ -85,34 +93,34 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     const templateData = {
       ...templateToClone,
       name: `${decodedTemplateName}-copy`,
-    } as Template;
+    } as TemplateDeserialized;
 
     content = (
       <TemplateForm
+        title={
+          <EuiTitle size="l">
+            <h1 data-test-subj="pageTitle">
+              <FormattedMessage
+                id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
+                defaultMessage="Clone template '{name}'"
+                values={{ name: decodedTemplateName }}
+              />
+            </h1>
+          </EuiTitle>
+        }
         defaultValue={templateData}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
         clearSaveError={clearSaveError}
+        isLegacy={isLegacy}
       />
     );
   }
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
-              defaultMessage="Clone template '{name}'"
-              values={{ name: decodedTemplateName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
+      <EuiPageContent>{content}</EuiPageContent>
     </EuiPageBody>
   );
 };

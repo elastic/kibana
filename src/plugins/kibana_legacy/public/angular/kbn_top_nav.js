@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import angular from 'angular';
@@ -24,7 +13,7 @@ export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
-    compile: elem => {
+    compile: (elem) => {
       const child = document.createElement('kbn-top-nav-helper');
 
       // Copy attributes to the child directive
@@ -44,7 +33,7 @@ export function createTopNavDirective() {
         $scope.$watch(
           () => {
             const config = $scope.$eval($attr.config) || [];
-            return config.map(item => {
+            return config.map((item) => {
               // Copy key into id, as it's a reserved react propery.
               // This is done for Angular directive backward compatibility.
               // In React only id is recognized.
@@ -59,7 +48,7 @@ export function createTopNavDirective() {
               return item.disableButton;
             });
           },
-          newVal => {
+          (newVal) => {
             $scope.disabledButtons = newVal;
           },
           true
@@ -71,9 +60,10 @@ export function createTopNavDirective() {
   };
 }
 
-export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
+export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(TopNavMenu, [
     ['config', { watchDepth: 'value' }],
+    ['setMenuMountPoint', { watchDepth: 'reference' }],
     ['disabledButtons', { watchDepth: 'reference' }],
 
     ['query', { watchDepth: 'reference' }],
@@ -94,11 +84,11 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     // All modifiers default to true.
     // Set to false to hide subcomponents.
     'showSearchBar',
-    'showFilterBar',
     'showQueryBar',
     'showQueryInput',
-    'showDatePicker',
     'showSaveQuery',
+    'showDatePicker',
+    'showFilterBar',
 
     'appName',
     'screenTitle',

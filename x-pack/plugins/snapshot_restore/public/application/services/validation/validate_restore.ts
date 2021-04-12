@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { RestoreSettings } from '../../../../common/types';
 import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../constants';
 import { textService } from '../text';
@@ -48,7 +50,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
   if (Array.isArray(indices) && indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.indicesRequiredError', {
-        defaultMessage: 'You must select at least one index.',
+        defaultMessage: 'You must select at least one data stream or index.',
       })
     );
   }
@@ -76,7 +78,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
       const modifiedSettingsCount = modifiedSettings.length;
       const unmodifiableSettings =
         modifiedSettingsCount > 0
-          ? modifiedSettings.filter(setting => UNMODIFIABLE_INDEX_SETTINGS.includes(setting))
+          ? modifiedSettings.filter((setting) => UNMODIFIABLE_INDEX_SETTINGS.includes(setting))
           : null;
 
       if (modifiedSettingsCount === 0) {
@@ -93,7 +95,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
             'xpack.snapshotRestore.restoreValidation.indexSettingsNotModifiableError',
             {
               defaultMessage: 'You can’t modify: {settings}',
-              // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
               values: {
                 settings: unmodifiableSettings.map((setting: string, index: number) =>
                   index === 0 ? `${setting} ` : setting
@@ -116,7 +117,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
     const ignoredSettingsCount = ignoreIndexSettings.length;
     const unremovableSettings =
       ignoredSettingsCount > 0
-        ? ignoreIndexSettings.filter(setting => UNREMOVABLE_INDEX_SETTINGS.includes(setting))
+        ? ignoreIndexSettings.filter((setting) => UNREMOVABLE_INDEX_SETTINGS.includes(setting))
         : null;
 
     if (ignoredSettingsCount === 0) {
@@ -131,7 +132,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
       validation.errors.ignoreIndexSettings.push(
         i18n.translate('xpack.snapshotRestore.restoreValidation.indexSettingsNotRemovableError', {
           defaultMessage: 'You can’t reset: {settings}',
-          // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
           values: {
             settings: unremovableSettings.map((setting: string, index: number) =>
               index === 0 ? `${setting} ` : setting

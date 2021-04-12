@@ -1,37 +1,67 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
-import { SpacesService } from '../plugin';
-import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
+import type { KibanaRequest } from 'src/core/server';
+
+import { ALL_SPACES_ID } from '../../common/constants';
+import type { SpacesService } from '../plugin';
+import type { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest
 ) => CheckSavedObjectsPrivileges;
+
 export type CheckSavedObjectsPrivileges = (
   actions: string | string[],
-  namespace?: string
-) => Promise<CheckPrivilegesAtResourceResponse>;
+  namespaceOrNamespaces?: string | Array<undefined | string>
+) => Promise<CheckPrivilegesResponse>;
+
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set<T>(arr));
+}
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   getSpacesService: () => SpacesService | undefined
 ): CheckSavedObjectsPrivilegesWithRequest => {
-  return function checkSavedObjectsPrivilegesWithRequest(request: KibanaRequest) {
+  return function checkSavedObjectsPrivilegesWithRequest(
+    request: KibanaRequest
+  ): CheckSavedObjectsPrivileges {
     return async function checkSavedObjectsPrivileges(
       actions: string | string[],
-      namespace?: string
+      namespaceOrNamespaces?: string | Array<undefined | string>
     ) {
       const spacesService = getSpacesService();
-      return spacesService
-        ? await checkPrivilegesWithRequest(request).atSpace(
-            spacesService.namespaceToSpaceId(namespace),
-            actions
-          )
-        : await checkPrivilegesWithRequest(request).globally(actions);
+      const privileges = { kibana: actions };
+
+      if (spacesService) {
+        if (Array.isArray(namespaceOrNamespaces)) {
+          // Spaces enabled, authorizing against multiple spaces
+          if (!namespaceOrNamespaces.length) {
+            throw new Error(`Can't check saved object privileges for 0 namespaces`);
+          }
+          const spaceIds = uniq(
+            namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x))
+          );
+
+          if (!spaceIds.includes(ALL_SPACES_ID)) {
+            return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, privileges);
+          }
+        } else {
+          // Spaces enabled, authorizing against a single space
+          const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
+          if (spaceId !== ALL_SPACES_ID) {
+            return await checkPrivilegesWithRequest(request).atSpace(spaceId, privileges);
+          }
+        }
+      }
+
+      // Spaces plugin is disabled OR we are checking privileges for "all spaces", authorizing globally
+      return await checkPrivilegesWithRequest(request).globally(privileges);
     };
   };
 };

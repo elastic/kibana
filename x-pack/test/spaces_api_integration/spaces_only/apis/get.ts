@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
 import { getTestSuiteFactory } from '../../common/suites/get';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function getSpaceTestSuite({ getService }: TestInvoker) {
+export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -39,7 +40,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         currentSpaceId: SPACES.SPACE_1.spaceId,
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getTest(`can access ${scenario.spaceId} from within the ${scenario.currentSpaceId} space`, {
         spaceId: scenario.spaceId,
         currentSpaceId: scenario.currentSpaceId,
@@ -58,7 +59,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         currentSpaceId: SPACES.DEFAULT.spaceId,
         spaceId: nonExistantSpaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getTest(`can't access ${scenario.spaceId} from within the ${scenario.currentSpaceId} space`, {
         spaceId: scenario.spaceId,
         currentSpaceId: scenario.currentSpaceId,

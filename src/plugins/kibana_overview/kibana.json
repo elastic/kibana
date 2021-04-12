@@ -1,0 +1,9 @@
+{
+  "id": "kibanaOverview",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "home"],
+  "optionalPlugins": ["newsfeed", "usageCollection"],
+  "requiredBundles": ["kibanaReact", "newsfeed"]
+}

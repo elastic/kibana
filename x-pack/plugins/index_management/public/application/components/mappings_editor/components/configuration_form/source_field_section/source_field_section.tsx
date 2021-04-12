@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -65,7 +67,7 @@ export const SourceFieldSection = () => {
   );
 
   const renderFormFields = () => (
-    <>
+    <div data-test-subj="sourceField">
       <UseField path="sourceField.includes">
         {({ label, helpText, value, setValue }) => (
           <EuiFormRow label={label} helpText={helpText} fullWidth>
@@ -78,7 +80,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -89,6 +91,7 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="includesField"
             />
           </EuiFormRow>
         )}
@@ -108,7 +111,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -119,11 +122,12 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="excludesField"
             />
           </EuiFormRow>
         )}
       </UseField>
-    </>
+    </div>
   );
 
   return (
@@ -152,8 +156,10 @@ export const SourceFieldSection = () => {
       }
     >
       <FormDataProvider pathsToWatch={['sourceField.enabled']}>
-        {formData => {
-          const { 'sourceField.enabled': enabled } = formData;
+        {(formData) => {
+          const {
+            sourceField: { enabled },
+          } = formData;
 
           if (enabled === undefined) {
             return null;

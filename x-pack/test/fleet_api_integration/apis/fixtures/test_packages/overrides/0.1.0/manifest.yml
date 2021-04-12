@@ -1,0 +1,20 @@
+format_version: 1.0.0
+name: overrides
+title: Mappings Settings Test
+description: This is a test package for testing that the mappings and settings sections in the dataset manifest are applied.
+version: 0.1.0
+categories: ['security']
+release: beta
+type: integration
+license: basic
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

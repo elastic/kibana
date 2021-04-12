@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -86,14 +75,29 @@ export interface SavedObject<T = unknown> {
   version?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
-  };
+  error?: SavedObjectError;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** A semver value that is used when upgrading objects between Kibana versions. */
+  coreMigrationVersion?: string;
+  /** Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. */
+  namespaces?: string[];
+  /**
+   * The ID of the saved object this originated from. This is set if this object's `id` was regenerated; that can happen during migration
+   * from a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import
+   * to ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given
+   * space.
+   */
+  originId?: string;
+}
+
+export interface SavedObjectError {
+  error: string;
+  message: string;
+  statusCode: number;
+  metadata?: Record<string, unknown>;
 }

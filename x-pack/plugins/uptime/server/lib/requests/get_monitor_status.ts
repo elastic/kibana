@@ -1,45 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { JsonObject } from 'src/plugins/kibana_utils/public';
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+import { Ping } from '../../../common/runtime_types/ping';
 
 export interface GetMonitorStatusParams {
-  filters?: string;
+  filters?: JsonObject;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
 }
 
 export interface GetMonitorStatusResult {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
   count: number;
+  monitorInfo: Ping;
 }
-
-interface MonitorStatusKey {
-  monitor_id: string;
-  status: string;
-  location: string;
-}
-
-const formatBuckets = async (
-  buckets: any[],
-  numTimes: number
-): Promise<GetMonitorStatusResult[]> => {
-  return buckets
-    .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
-};
 
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
-      ...locations.map(location => ({
+      ...locations.map((location) => ({
         term: {
           'observer.geo.name': location,
         },
@@ -48,68 +38,81 @@ const getLocationClause = (locations: string[]) => ({
   },
 });
 
+export type AfterKey = Record<string, string | number | null> | undefined;
+
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
-  const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
-  let afterKey: MonitorStatusKey | undefined;
+> = async ({ uptimeEsClient, filters, locations, numTimes, timerange: { from, to } }) => {
+  let afterKey: AfterKey;
 
+  const STATUS = 'down';
+  let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
-    const STATUS = 'down';
-    const esParams: any = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.status': STATUS,
+    const esParams = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.status': STATUS,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: from,
-                    lte: to,
-                  },
-                },
-              },
-            ],
-          },
+            },
+            // append user filters, if defined
+            ...(filters?.bool ? [filters] : []),
+          ] as QueryContainer[],
         },
-        size: 0,
-        aggs: {
-          monitors: {
-            composite: {
-              size: 2000,
-              sources: [
-                {
-                  monitor_id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            size: 2000,
+            /**
+             * We "paginate" results by utilizing the `afterKey` field
+             * to tell Elasticsearch where it should start on subsequent queries.
+             */
+            ...(afterKey ? { after: afterKey } : {}),
+            sources: asMutableArray([
+              {
+                monitorId: {
+                  terms: {
+                    field: 'monitor.id',
                   },
                 },
-                {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
-                    },
+              },
+              {
+                status: {
+                  terms: {
+                    field: 'monitor.status',
                   },
                 },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
+              },
+              {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                    missing_bucket: true,
                   },
                 },
-              ],
+              },
+            ] as const),
+          },
+          aggs: {
+            fields: {
+              top_hits: {
+                size: 1,
+              },
             },
           },
         },
@@ -117,34 +120,26 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     };
 
     /**
-     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
-     * to the bool of the parsed filters.
-     */
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
-    }
-
-    /**
      * Perform a logical `and` against the selected location filters.
      */
     if (locations.length) {
-      esParams.body.query.bool.filter.push(getLocationClause(locations));
+      esParams.query.bool.filter.push(getLocationClause(locations));
     }
 
-    /**
-     * We "paginate" results by utilizing the `afterKey` field
-     * to tell Elasticsearch where it should start on subsequent queries.
-     */
-    if (afterKey) {
-      esParams.body.aggs.monitors.composite.after = afterKey;
-    }
+    const { body: result } = await uptimeEsClient.search({
+      body: esParams,
+    });
 
-    const result = await callES('search', esParams);
-    afterKey = result?.aggregations?.monitors?.after_key;
+    afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
 
-    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], numTimes));
+    monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);
   } while (afterKey !== undefined);
 
-  return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);
+  return monitors
+    .filter((monitor: any) => monitor?.doc_count >= numTimes)
+    .map(({ key, doc_count: count, fields }: any) => ({
+      ...key,
+      count,
+      monitorInfo: fields?.hits?.hits?.[0]?._source,
+    }));
 };

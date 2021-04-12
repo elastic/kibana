@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inspect } from 'util';
@@ -80,7 +69,7 @@ function createOptimizerState(
  * calculate the total state, given a set of compiler messages
  */
 function getStatePhase(states: CompilerMsg[]) {
-  const types = states.map(s => s.type);
+  const types = states.map((s) => s.type);
 
   if (types.includes('running')) {
     return 'running';
@@ -90,7 +79,7 @@ function getStatePhase(states: CompilerMsg[]) {
     return 'issue';
   }
 
-  if (types.every(s => s === 'compiler success')) {
+  if (types.every((s) => s === 'compiler success')) {
     return 'success';
   }
 
@@ -127,7 +116,7 @@ export function createOptimizerStateSummarizer(
     }
 
     if (event.type === 'worker stdio' || event.type === 'worker started') {
-      // same state, but updated to the event is shared externally
+      // same state, but updated so the event is shared externally
       return createOptimizerState(state);
     }
 
@@ -173,7 +162,7 @@ export function createOptimizerStateSummarizer(
       event.type === 'running'
     ) {
       const compilerStates: CompilerMsg[] = [
-        ...state.compilerStates.filter(c => c.bundleId !== event.bundleId),
+        ...state.compilerStates.filter((c) => c.bundleId !== event.bundleId),
         event,
       ];
       return createOptimizerState(state, {

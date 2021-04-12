@@ -1,0 +1,3 @@
+{
+  "types": "../target/jest/index.d.ts"
+}

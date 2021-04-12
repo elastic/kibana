@@ -1,0 +1,53 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "k8s",
+    "metrics"
+  ],
+  "description": "Metrics: Kubernetes - Identify unusual spikes in memory usage across Kubernetes pods.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "max('kubernetes.pod.memory.usage.node.pct')",
+        "function": "max",
+        "field_name": "kubernetes.pod.memory.usage.node.pct",
+        "partition_field_name": "kubernetes.namespace",
+        "custom_rules": [
+          {
+            "actions": [
+              "skip_result"
+            ],
+            "conditions": [
+              {
+                "applies_to": "actual",
+                "operator": "lt",
+                "value": 0.1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "influencers": [
+      "kubernetes.namespace",
+      "kubernetes.node.name",
+      "kubernetes.pod.uid"
+    ]
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "analysis_limits": {
+    "model_memory_limit": "64mb"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-metrics-ui-k8s",
+    "custom_urls": [
+      {
+        "url_name": "Pod Metrics",
+        "url_value": "metrics/detail/pod/$kubernetes.pod.uid$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
+      }
+    ]
+  }
+}
