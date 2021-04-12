@@ -39,6 +39,11 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
   }
   return (val) => {
     let value;
+
+    if (val === DEFAULT_VALUE) {
+      return val;
+    }
+
     if (!isNumber(val)) {
       value = val;
     } else {
@@ -49,7 +54,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
       }
     }
     try {
-      return value === DEFAULT_VALUE ? value : render({ value });
+      return render({ value });
     } catch (e) {
       return String(value);
     }
