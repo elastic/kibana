@@ -45,7 +45,7 @@ export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => 
     <LineAnnotation
       id="__current-time__"
       hideTooltips
-      domainType={AnnotationDomainTypes.XDomain}
+      domainType={AnnotationDomainType.XDomain}
       dataValues={lineAnnotationData}
       style={lineAnnotationStyle}
     />

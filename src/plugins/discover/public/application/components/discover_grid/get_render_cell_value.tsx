@@ -76,6 +76,9 @@ export const getRenderCellValueFn = (
     const sourcePairs: Array<[string, string]> = [];
     Object.entries(innerColumns).forEach(([key, values]) => {
       const subField = indexPattern.getFieldByName(key);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
         : { convert: (v: string, ...rest: unknown[]) => String(v) };
@@ -89,7 +92,7 @@ export const getRenderCellValueFn = (
         )
         .join(', ');
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, formatted]);
+      pairs.push([displayKey ? displayKey : key, formatted]);
     });
 
     return (
@@ -129,7 +132,10 @@ export const getRenderCellValueFn = (
 
     Object.entries(formatted).forEach(([key, val]) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, val as string]);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
+      pairs.push([displayKey ? displayKey : key, val as string]);
     });
 
     return (

@@ -118,4 +118,5 @@ export interface UsageStats {
   'banners:placement': string;
   'banners:textColor': string;
   'banners:backgroundColor': string;
+  'labs:presentation:unifiedToolbar': boolean;
 }
