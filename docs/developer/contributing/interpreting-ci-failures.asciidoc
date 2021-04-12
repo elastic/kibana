@@ -86,7 +86,7 @@ We know the test was not on the correct page to find the element to click.  We s
 
 And we can confirm that looking at the test code.
 
-So we need to backtrack further to find where the test opens the Spaces page.  It turns out that the test before this one would have navigated to the proper page but the test is skipped. 
+So we need to backtrack further to find where the test opens the Spaces page.  It turns out that the test before this one would have navigated to the proper page but the test is skipped (marked `it.skip` in a PR). 
 
     it.skip('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
