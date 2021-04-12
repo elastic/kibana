@@ -12,7 +12,7 @@ import { Ecs } from '../../../../../../../common/ecs';
 import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 import { threatMatchSubFields } from './constants';
 
-export const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] =>
+const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] =>
   get(data, INDICATOR_DESTINATION_PATH) ?? [];
 
 export const hasThreatMatchValue = (data: Ecs): boolean =>

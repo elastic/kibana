@@ -11,6 +11,19 @@ import React from 'react';
 
 import { Fields } from '../../../../../../../common/search_strategy';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
+import {
+  EVENT_DATASET,
+  EVENT_REFERENCE,
+  INDICATOR_DATASET,
+  INDICATOR_MATCHED_FIELD,
+  INDICATOR_MATCHED_TYPE,
+  INDICATOR_PROVIDER,
+  INDICATOR_REFERENCE,
+  MATCHED_ATOMIC,
+  MATCHED_FIELD,
+  MATCHED_TYPE,
+  PROVIDER,
+} from './constants';
 
 export interface ThreatMatchRowProps {
   contextId: string;
@@ -35,12 +48,12 @@ export const ThreatMatchRow = ({
   const props = {
     contextId: `threat-match-row-${timelineId}-${eventId}`,
     eventId,
-    indicatorDataset: get(data, 'event.dataset')[0] as string,
-    indicatorReference: get(data, 'event.reference')[0] as string,
-    indicatorProvider: get(data, 'provider')[0] as string,
-    indicatorType: get(data, 'matched.type')[0] as string,
-    sourceField: get(data, 'matched.field')[0] as string,
-    sourceValue: get(data, 'matched.atomic')[0] as string,
+    indicatorDataset: get(data, EVENT_DATASET)[0] as string,
+    indicatorReference: get(data, EVENT_REFERENCE)[0] as string,
+    indicatorProvider: get(data, PROVIDER)[0] as string,
+    indicatorType: get(data, MATCHED_TYPE)[0] as string,
+    sourceField: get(data, MATCHED_FIELD)[0] as string,
+    sourceValue: get(data, MATCHED_ATOMIC)[0] as string,
   };
 
   return <ThreatMatchRowView {...props} />;
@@ -60,6 +73,7 @@ export const ThreatMatchRowView = ({
     <>
       <EuiFlexGroup
         alignItems="flexStart"
+        data-test-subj="threat-match-group"
         direction="row"
         justifyContent="center"
         gutterSize="none"
@@ -69,7 +83,7 @@ export const ThreatMatchRowView = ({
             contextId={contextId}
             data-test-subj="threat-match-row-indicator-type"
             eventId={eventId}
-            field={'threat.indicator.matched.type'}
+            field={INDICATOR_MATCHED_TYPE}
             value={indicatorType}
           />
         </EuiFlexItem>
@@ -79,7 +93,7 @@ export const ThreatMatchRowView = ({
             contextId={contextId}
             data-test-subj="threat-match-row-source-field"
             eventId={eventId}
-            field={'threat.indicator.matched.field'}
+            field={INDICATOR_MATCHED_FIELD}
             value={sourceField}
           />
         </EuiFlexItem>
@@ -96,7 +110,7 @@ export const ThreatMatchRowView = ({
       </EuiFlexGroup>
       <EuiFlexGroup
         alignItems="flexStart"
-        data-test-subj="threat-match-row"
+        data-test-subj="threat-match-indicator-group"
         direction="row"
         justifyContent="center"
         gutterSize="none"
@@ -106,7 +120,7 @@ export const ThreatMatchRowView = ({
             contextId={contextId}
             data-test-subj="threat-match-row-indicator-dataset"
             eventId={eventId}
-            field={'threat.indicator.event.dataset'}
+            field={INDICATOR_DATASET}
             value={indicatorDataset}
           />
         </EuiFlexItem>
@@ -116,7 +130,7 @@ export const ThreatMatchRowView = ({
             contextId={contextId}
             data-test-subj="threat-match-row-indicator-provider"
             eventId={eventId}
-            field={'threat.indicator.provider'}
+            field={INDICATOR_PROVIDER}
             value={indicatorProvider}
           />
         </EuiFlexItem>
@@ -126,7 +140,7 @@ export const ThreatMatchRowView = ({
             contextId={contextId}
             data-test-subj="threat-match-row-indicator-reference"
             eventId={eventId}
-            field={'threat.indicator.event.reference'}
+            field={INDICATOR_REFERENCE}
             value={indicatorReference}
           />
         </EuiFlexItem>
