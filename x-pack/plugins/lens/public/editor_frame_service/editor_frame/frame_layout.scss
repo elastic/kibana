@@ -29,7 +29,7 @@
   // This also means needing to add same amount of margin to page content and suggestion items
   padding: $euiSize $euiSize 0;
   position: relative;
-  z-index: $euiZLevel1;
+  z-index: $lnsZLevel1;
   &:first-child {
     padding-left: $euiSize;
   }

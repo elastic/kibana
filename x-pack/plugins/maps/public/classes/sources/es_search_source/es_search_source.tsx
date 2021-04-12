@@ -60,53 +60,12 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { TopHitsUpdateSourceEditor } from './top_hits';
+import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
-
-export interface ScriptField {
-  source: string;
-  lang: string;
-}
-
-function getDocValueAndSourceFields(
-  indexPattern: IndexPattern,
-  fieldNames: string[],
-  dateFormat: string
-): {
-  docValueFields: Array<string | { format: string; field: string }>;
-  sourceOnlyFields: string[];
-  scriptFields: Record<string, { script: ScriptField }>;
-} {
-  const docValueFields: Array<string | { format: string; field: string }> = [];
-  const sourceOnlyFields: string[] = [];
-  const scriptFields: Record<string, { script: ScriptField }> = {};
-  fieldNames.forEach((fieldName) => {
-    const field = getField(indexPattern, fieldName);
-    if (field.scripted) {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script || '',
-          lang: field.lang || '',
-        },
-      };
-    } else if (field.readFromDocValues) {
-      const docValueField =
-        field.type === 'date'
-          ? {
-              field: fieldName,
-              format: dateFormat,
-            }
-          : fieldName;
-      docValueFields.push(docValueField);
-    } else {
-      sourceOnlyFields.push(fieldName);
-    }
-  });
-
-  return { docValueFields, sourceOnlyFields, scriptFields };
-}
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
@@ -166,6 +125,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+    if (this._isTopHits()) {
+      return (
+        <TopHitsUpdateSourceEditor
+          source={this}
+          indexPatternId={this.getIndexPatternId()}
+          onChange={sourceEditorArgs.onChange}
+          tooltipFields={this._tooltipFields}
+          sortField={this._descriptor.sortField}
+          sortOrder={this._descriptor.sortOrder}
+          filterByMapBounds={this.isFilterByMapBounds()}
+          topHitsSplitField={this._descriptor.topHitsSplitField}
+          topHitsSize={this._descriptor.topHitsSize}
+        />
+      );
+    }
+
     const getGeoField = () => {
       return this._getGeoField();
     };
@@ -180,8 +155,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        topHitsSplitField={this._descriptor.topHitsSplitField}
-        topHitsSize={this._descriptor.topHitsSize}
       />
     );
   }
@@ -658,6 +631,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
+      filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
       scalingType: this._descriptor.scalingType,
@@ -732,7 +706,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const dsl = await searchSource.getSearchRequestBody();
+    const dsl = searchSource.getSearchRequestBody();
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
