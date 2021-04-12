@@ -68,6 +68,7 @@ export function Discover({
   searchSource,
   state,
   unmappedFieldsConfig,
+  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -203,6 +204,12 @@ export function Discover({
     [opts, state]
   );
 
+  const onEditRuntimeField = () => {
+    if (refreshAppState) {
+      refreshAppState();
+    }
+  };
+
   const columns = useMemo(() => {
     if (!state.columns) {
       return [];
@@ -245,6 +252,7 @@ export function Discover({
                 trackUiMetric={trackUiMetric}
                 unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
+                onEditRuntimeField={onEditRuntimeField}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
