@@ -30,7 +30,7 @@ const props = {
   timelineId: 'detections-page',
 };
 
-describe('AlertSummaryViewComponent', () => {
+describe('AlertSummaryView', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {

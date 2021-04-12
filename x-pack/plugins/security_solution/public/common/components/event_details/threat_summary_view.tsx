@@ -12,7 +12,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { SummaryView } from './summary_view';
-import { getSummaryColumns, Summary, SummaryRow, ThreatSummaryRow } from './helpers';
+import { getSummaryColumns, SummaryRow, ThreatSummaryRow } from './helpers';
 import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
 
 const getDescription = ({
@@ -34,7 +34,7 @@ const getDescription = ({
   </>
 );
 
-const getSummary = ({
+const getSummaryRows = ({
   data,
   timelineId: contextId,
   eventId,
@@ -45,7 +45,7 @@ const getSummary = ({
   eventId: string;
 }) => {
   if (!data) return [];
-  return data.reduce<Summary>((acc, { field, originalValue }) => {
+  return data.reduce<SummaryRow[]>((acc, { field, originalValue }) => {
     if (field.startsWith(`${INDICATOR_DESTINATION_PATH}.`) && originalValue) {
       return [
         ...acc,
@@ -71,7 +71,7 @@ const ThreatSummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ data, eventId, timelineId }) => {
-  const summaryList = useMemo(() => getSummary({ data, eventId, timelineId }), [
+  const summaryRows = useMemo(() => getSummaryRows({ data, eventId, timelineId }), [
     data,
     eventId,
     timelineId,
@@ -80,7 +80,7 @@ const ThreatSummaryViewComponent: React.FC<{
   return (
     <SummaryView
       summaryColumns={summaryColumns}
-      summaryList={summaryList}
+      summaryRows={summaryRows}
       dataTestSubj="threat-summary-view"
     />
   );

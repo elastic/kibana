@@ -19,17 +19,23 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableRowCell {
     border: none;
   }
+
+  .euiTableCellContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 export const SummaryViewComponent: React.FC<{
   summaryColumns: Array<EuiBasicTableColumn<SummaryRow>>;
-  summaryList: SummaryRow[];
+  summaryRows: SummaryRow[];
   dataTestSubj?: string;
-}> = ({ summaryColumns, summaryList, dataTestSubj = 'summary-view' }) => {
+}> = ({ summaryColumns, summaryRows, dataTestSubj = 'summary-view' }) => {
   return (
     <StyledEuiInMemoryTable
       data-test-subj={dataTestSubj}
-      items={summaryList}
+      items={summaryRows}
       columns={summaryColumns}
       compressed
     />

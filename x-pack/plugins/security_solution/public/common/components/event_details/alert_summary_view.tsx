@@ -31,7 +31,7 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
-import { AlertSummaryRow, getSummaryColumns, Summary, SummaryRow } from './helpers';
+import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 import * as i18n from './translations';
 import { LineClamp } from '../line_clamp';
@@ -77,7 +77,7 @@ const getDescription = ({
   />
 );
 
-const getSummary = ({
+const getSummaryRows = ({
   data,
   browserFields,
   timelineId,
@@ -89,7 +89,7 @@ const getSummary = ({
   eventId: string;
 }) => {
   return data != null
-    ? fields.reduce<Summary>((acc, item) => {
+    ? fields.reduce<SummaryRow[]>((acc, item) => {
         const field = data.find((d) => d.field === item.id);
         if (!field) {
           return acc;
@@ -167,7 +167,7 @@ const AlertSummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ browserFields, data, eventId, timelineId }) => {
-  const summaryList = useMemo(() => getSummary({ browserFields, data, eventId, timelineId }), [
+  const summaryRows = useMemo(() => getSummaryRows({ browserFields, data, eventId, timelineId }), [
     browserFields,
     data,
     eventId,
@@ -184,9 +184,9 @@ const AlertSummaryViewComponent: React.FC<{
 
   return (
     <>
-      <SummaryView summaryColumns={summaryColumns} summaryList={summaryList} />
+      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} />
       {maybeRule?.note && (
-        <StyledEuiDescriptionList data-test-subj={`summary-table-guide`} compressed>
+        <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <LineClamp content={maybeRule?.note} />

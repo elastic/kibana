@@ -658,8 +658,8 @@ export const mockAlertDetailsData = [
   {
     category: 'threat',
     field: 'threat.indicator',
-    values: [`{"verybad":true}`],
-    originalValue: [`{"verybad":true}`],
+    values: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
+    originalValue: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
   },
   {
     category: 'threat',

@@ -16,11 +16,14 @@ import React, { useMemo } from 'react';
 
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { SummaryView } from './summary_view';
-import { getSummaryColumns, Summary, SummaryRow, ThreatDetailsRow } from './helpers';
+import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from './helpers';
 import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
 import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
 
-const getDescription = ({ fieldName, value }: ThreatDetailsRow['description']): JSX.Element => (
+const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
+  fieldName,
+  value,
+}) => (
   <EuiToolTip
     data-test-subj="message-tool-tip"
     content={
@@ -31,66 +34,51 @@ const getDescription = ({ fieldName, value }: ThreatDetailsRow['description']): 
       </EuiFlexGroup>
     }
   >
-    <>{value}</>
+    <span>{value}</span>
   </EuiToolTip>
 );
 
-const getSummaries = ({ data }: { data: TimelineEventsDetailsItem[] }): Summary[] => {
+const getSummaryRowsArray = ({ data }: { data: TimelineEventsDetailsItem[] }): SummaryRow[][] => {
   if (!data) return [[]];
-  return data.reduce<Summary[]>((acc, { category, field, originalValue }) => {
-    if (field === INDICATOR_DESTINATION_PATH && originalValue) {
-      const isOriginalValueArray = Array.isArray(originalValue);
-      const isArrayIndexPresentInFieldName = isOriginalValueArray && originalValue.length > 1;
-      const threatData = isArrayIndexPresentInFieldName
-        ? originalValue.map((threatDataItem: string) => JSON.parse(threatDataItem))
-        : isOriginalValueArray
-        ? JSON.parse(originalValue[0])
-        : JSON.parse(originalValue);
-
-      let originalValueArrayIndex = -1;
-      getDataFromSourceHits(threatData).forEach((threatInfoItem) => {
-        const fieldName = `${INDICATOR_DESTINATION_PATH}.${
-          isArrayIndexPresentInFieldName
-            ? threatInfoItem.field.split('.').slice(1).join('.')
-            : threatInfoItem.field
-        }`;
-        if (
-          (!isArrayIndexPresentInFieldName && originalValueArrayIndex === -1) ||
-          (isArrayIndexPresentInFieldName &&
-            +threatInfoItem.field.split('.')[0] > originalValueArrayIndex)
-        ) {
-          originalValueArrayIndex++;
-          acc.push([]);
-        }
-        acc[originalValueArrayIndex].push({
-          title: fieldName.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
-          description: { fieldName, value: threatInfoItem.originalValue },
-        });
-      });
-    }
-    return acc;
-  }, []);
+  const threatInfo = data.find(
+    ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
+  );
+  if (!threatInfo) return [[]];
+  const { originalValue } = threatInfo;
+  const values = Array.isArray(originalValue) ? originalValue : [originalValue];
+  return values.map((value) =>
+    getDataFromSourceHits(JSON.parse(value)).map((threatInfoItem) => ({
+      title: threatInfoItem.field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
+      description: { fieldName: threatInfoItem.field, value: threatInfoItem.originalValue },
+    }))
+  );
 };
 
-const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(getDescription);
+const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(
+  ThreatDetailsDescription
+);
 
 const ThreatDetailsViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
 }> = ({ data }) => {
-  const summaryLists = useMemo(() => getSummaries({ data }), [data]);
-
+  const summaryRowsArray = useMemo(() => getSummaryRowsArray({ data }), [data]);
   return (
     <>
-      {summaryLists.map((summaryList, index, arr) => (
-        <div key={`threat-details-view-${index}`}>
-          <SummaryView
-            summaryColumns={summaryColumns}
-            summaryList={summaryList}
-            dataTestSubj={`threat-details-view-${index}`}
-          />
-          {index < arr.length - 1 && <EuiHorizontalRule />}
-        </div>
-      ))}
+      {summaryRowsArray.map((summaryRows, index, arr) => {
+        const key = (summaryRows.find(
+          (threat) => threat.title === 'matched.id'
+        ) as ThreatDetailsRow)?.description.value[0];
+        return (
+          <div key={key}>
+            <SummaryView
+              summaryColumns={summaryColumns}
+              summaryRows={summaryRows}
+              dataTestSubj={`threat-details-view-${index}`}
+            />
+            {index < arr.length - 1 && <EuiHorizontalRule />}
+          </div>
+        );
+      })}
     </>
   );
 };

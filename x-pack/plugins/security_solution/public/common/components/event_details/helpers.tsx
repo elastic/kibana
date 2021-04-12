@@ -85,8 +85,6 @@ export interface ThreatDetailsRow {
 
 export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
 
-export type Summary = SummaryRow[];
-
 export const getColumnHeaderFromBrowserField = ({
   browserField,
   width = DEFAULT_COLUMN_MIN_WIDTH,
@@ -217,10 +215,10 @@ const getTitle = (title: string) => (
 getTitle.displayName = 'getTitle';
 
 export const getSummaryColumns = (
-  getDescription:
-    | ((description: ThreatSummaryRow['description']) => JSX.Element)
-    | ((description: AlertSummaryRow['description']) => JSX.Element)
-    | ((description: ThreatDetailsRow['description']) => JSX.Element)
+  DescriptionComponent:
+    | React.FC<ThreatSummaryRow['description']>
+    | React.FC<AlertSummaryRow['description']>
+    | React.FC<ThreatDetailsRow['description']>
 ): Array<EuiBasicTableColumn<SummaryRow>> => {
   return [
     {
@@ -233,7 +231,7 @@ export const getSummaryColumns = (
     {
       field: 'description',
       truncateText: false,
-      render: getDescription,
+      render: DescriptionComponent,
       name: '',
     },
   ];
