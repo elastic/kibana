@@ -28,19 +28,8 @@ const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
 const tasks = new Listr(
   [
     {
-      title: 'Jest',
-      task: () =>
-        execa(
-          'node',
-          [
-            resolve(__dirname, './jest.js'),
-            '--reporters',
-            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
-            '--collect-coverage',
-            'false',
-          ],
-          execaOpts
-        ),
+      title: 'Lint',
+      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
     },
     {
       title: 'Typescript',
@@ -72,11 +61,22 @@ const tasks = new Listr(
         ),
     },
     {
-      title: 'Lint',
-      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
+      title: 'Jest',
+      task: () =>
+        execa(
+          'node',
+          [
+            resolve(__dirname, './jest.js'),
+            '--reporters',
+            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
+            '--collect-coverage',
+            'false',
+          ],
+          execaOpts
+        ),
     },
   ],
-  { exitOnError: true, concurrent: true }
+  { exitOnError: true, concurrent: false }
 );
 
 tasks.run().catch((error) => {
