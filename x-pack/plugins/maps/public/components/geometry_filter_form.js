@@ -90,7 +90,7 @@ export class GeometryFilterForm extends Component {
         ? Object.values(ES_SPATIAL_RELATIONS)
         : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
             // - can not filter by within relation when filtering geometry is not closed
-            //  - do not distinguish between intersects/within for filtering for points as they are equivalent
+            // - do not distinguish between intersects/within for filtering for points as they are equivalent
             return relation !== ES_SPATIAL_RELATIONS.WITHIN;
           });
 
