@@ -33,7 +33,7 @@ to `false`. For more details see <<xpack-security-audit-logging>>.
 You configure the authentication settings in the `xpack.security.authc.providers` namespace. For more information, refer to <<kibana-authentication>>.
 
 `xpack.security.authc.providers`::
-Identifies the authentication method.
+Specifies the types of authentication providers.
 +
 For example:
 +
@@ -43,10 +43,10 @@ xpack.security.authc.providers: [saml, basic, oidc]
 --------------------------------------------------
 
 `xpack.security.authc.saml.realm`::
-The SAML realm in {es} that the provider should use.
+When specified in `xpack.security.authc.providers`, the SAML realm in {es} that the `saml` provider should use.
 
 `xpack.security.authc.oidc.realm`::
-The OpenID Connect realm in {es} that the provider should use.
+When specified in `xpack.security.authc.providers`, the OpenID Connect realm in {es} that the `oidc` provider should use.
 
 [float]
 [[security-ui-settings]]
