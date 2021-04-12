@@ -178,7 +178,6 @@ export class KibanaMigrator {
       if (this.soMigrationsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
-            // TINA: adapt runResilientMigrator to handle the new return format for v2 version of migrateRawDocs => migrateRawDocsNonThrowing
             return runResilientMigrator({
               client: this.client,
               kibanaVersion: this.kibanaVersion,
@@ -192,12 +191,6 @@ export class KibanaMigrator {
                   rawDocs,
                   new MigrationLogger(this.log)
                 ),
-              // migrateRawDocs(
-              //   this.serializer,
-              //   this.documentMigrator.migrateAndConvert,
-              //   rawDocs,
-              //   new MigrationLogger(this.log)
-              // ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
               migrationsConfig: this.soMigrationsConfig,
@@ -261,33 +254,4 @@ export function mergeTypes(types: SavedObjectsType[]): SavedObjectsTypeMappingDe
       [type]: mappings,
     };
   }, {});
-}
-
-export interface LogCaptureTransformRawDocsErrors {
-  (existing: Error[], newCollection: Error[], log: MigrationLogger): string;
-  (arg0: Error[] | undefined, arg1: unknown): void;
-}
-
-export type LogCorruptSavedObjectsErrors = (
-  existing: Error[],
-  newCollection: Error[],
-  log: MigrationLogger
-) => string;
-// TINA there's a better way to handle this and I don't think we even need
-// to but I'm trying to not have to throw in OUTDATED_DOCUMENTS_TRANSFORM
-// don't need to do this, we just throw from next. These will be different errors though thrown from the transform raw docs function
-export function logCorruptSavedObjectsErrors(
-  existing: Error[],
-  newCollection: Error[],
-  logger: MigrationLogger
-) {
-  if (newCollection && newCollection.length > 0) {
-    newCollection.map((entry) => {
-      existing.push(entry);
-    });
-  }
-  if (existing && existing.length > 0) {
-    existing.forEach((accumulatedError) => logger.info(accumulatedError.message));
-  }
-  return 'logging complete';
 }

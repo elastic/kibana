@@ -41,11 +41,9 @@ import {
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
 
-// How do i handle this type now that transformRawDocs is actually running migrateRawDocsNonThrowing
-// migrateRawDocsNonThrowing returns an Either.left with failed docs or an Either.right with successfylly processed/transformed docs
 export type TransformRawDocs = (
-  processedDocs: SavedObjectsRawDoc[] | { corruptSavedObjectIds: string[]; type: string }
-) => Promise<DocumentsTransformSuccess | DocumentsTransformFailed>;
+  processedDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -97,22 +95,9 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         outdatedDocumentsQuery: state.outdatedDocumentsQuery,
       }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
-      // this needs to change because we're no longer throwing anything from the transformRawDocs method
-      TaskEither.tryCatch(
-        () => transformRawDocs(state.outdatedDocuments), // one of { processedDocs } or { type: 'document_transform_failed', corruptSavedObjectIds }
-        (e) => {
-          // TINA: we throw for realy bad errors
-          throw e;
-        }
-      ),
+      transformRawDocs(state.outdatedDocuments),
     TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: any) =>
-      // The call to this action was being handled in OUTDATES_DOCUMENTS_TRANSFORM:
-      //         TaskEither.chain((docs) =>
-      //     Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
-      //   )
-      // ),
-      // How to I get access to the processedDocs now?
-      Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs.processedDocs),
+      Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, state.processedDocs),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>

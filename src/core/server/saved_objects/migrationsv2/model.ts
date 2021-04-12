@@ -202,6 +202,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             indices[aliases[stateP.currentAlias]].mappings
           ),
           versionIndexReadyActions: Option.none,
+          failedDocumentIds: [],
         };
       } else if (
         // `.kibana` is pointing to an index that belongs to a later
@@ -563,6 +564,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+        failedDocumentIds: [],
       };
     } else {
       const left = res.left;
@@ -575,6 +577,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+          failedDocumentIds: [],
         };
       } else {
         throwBadResponse(stateP, left);
@@ -592,45 +595,55 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           outdatedDocuments: res.right.outdatedDocuments,
         };
       } else {
-        // If there are no more results we have transformed all outdated
-        // documents and can proceed to the next step
-        return {
-          ...stateP,
-          controlState: 'UPDATE_TARGET_MAPPINGS',
-        };
+        if (stateP.failedDocumentIds.length > 0) {
+          // We have documents that couldn't be transformed and exit out of the migration
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `Migrations failed because of the following corrupt saved object documents: ${JSON.stringify(
+              stateP.failedDocumentIds
+            )}. To allow migrations to proceed, please delete thse documents.`,
+          };
+        } else {
+          // If there are no more results we have transformed all outdated
+          // documents and can proceed to the next step
+          return {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS',
+          };
+        }
       }
     } else {
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
-    // if any docs can't be migrated we don't try to index any ones that can and continue with the search to build up a complete list of all the error docs
-    // res should have processedDocs and the corruptSavedObjectIds (actual error with the doc Ids embedded in the error message string.
-    // there may be more than document Id in the error string and we'll need to split the string to do a count)
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>; // we actually need both the success and failed results here.
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // if we don't have any corrupt documents on state then index the transformed docs
-      // state needs a new property for corruptSavedObjects
-      if (stateP.corruptSavedObjectIds.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        };
+      if (res.right.processedDocs.length > 0) {
+        if (stateP.failedDocumentIds.length === 0) {
+          return { ...stateP, controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX' };
+        } else {
+          return { ...stateP, controlState: 'OUTDATED_DOCUMENTS_SEARCH' };
+        }
       } else {
-        // we do have a collection of corruptSavedObjectDocs and need to reissue the OUTDATED_DOCUMENTS_SEARCH
-        // carry on searching through the rest of the batches
+        return { ...stateP, controlState: 'OUTDATED_DOCUMENTS_SEARCH' };
+      }
+    } else if (Either.isLeft(res) && isLeftTypeof(res.left, 'documents_transform_failed')) {
+      if (stateP.failedDocumentIds.length === 0) {
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+          failedDocumentIds: [...res.left.failedDocumentIds],
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+          failedDocumentIds: [...stateP.failedDocumentIds, ...res.left.failedDocumentIds],
         };
       }
     } else {
-      // handles the case when we return a Either.Left situation that is when the return from migrateRawDocsNonThrowing is an instance of Either.Left containing the function that returns the promise of corruptSavedObjects (they're errors right now but we might want to change that to a list of raw._id)
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-        corruptSavedObjectIds: [...stateP.corruptSavedObjectIds, res.corruptSavedObjectIds],
-      };
-      // throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -639,6 +652,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
         updateTargetMappingsTaskId: res.right.taskId,
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+        failedDocumentIds: [],
       };
     } else {
       throwBadResponse(stateP, res);

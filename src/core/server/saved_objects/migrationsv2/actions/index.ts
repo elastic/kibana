@@ -21,6 +21,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import { DocumentsTransformFailed } from '../../migrations/core/migrate_raw_docs';
 export type { RetryableEsClientError };
 
 /**
@@ -45,6 +46,7 @@ export interface ActionErrorTypeMap {
   incompatible_mapping_exception: IncompatibleMappingException;
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
+  documents_transform_failed: DocumentsTransformFailed;
 }
 
 /**

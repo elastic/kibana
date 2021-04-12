@@ -9,7 +9,8 @@
 /*
  * This file provides logic for migrating raw documents.
  */
-import { TaskEither } from 'fp-ts/lib/TaskEither';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/lib/Either';
 import {
   SavedObjectsRawDoc,
   SavedObjectsSerializer,
@@ -78,24 +79,22 @@ export async function migrateRawDocs(
  */
 export interface DocumentsTransformFailed {
   type: string;
-  corruptSavedObjectIds: string[];
+  failedDocumentIds: string[];
 }
 export interface DocumentsTransformSuccess {
   processedDocs: SavedObjectsRawDoc[];
 }
 
-export async function migrateRawDocsNonThrowing(
+export function migrateRawDocsNonThrowing(
   serializer: SavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
   rawDocs: SavedObjectsRawDoc[],
   log: SavedObjectsMigrationLogger
-  // This method should never fail because we're returning an array of something, either transformed raw saved objects or an array of saved object ids.
-  // According to the docs we should be using a Task for process that will never fail
-): TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
-  const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
-  const processedDocs: SavedObjectsRawDoc[] = [];
-  const corruptSavedObjectIds: string[] = [];
-  try {
+): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
+  return async () => {
+    const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
+    const processedDocs: SavedObjectsRawDoc[] = [];
+    const corruptSavedObjectIds: string[] = [];
     for (const raw of rawDocs) {
       const options = { namespaceTreatment: 'lax' as const };
       if (serializer.isRawSavedObject(raw, options)) {
@@ -110,19 +109,17 @@ export async function migrateRawDocsNonThrowing(
           )
         );
       } else {
-        // should we be pushing only the id onto this array or the whole doc?
         corruptSavedObjectIds.push(raw._id);
       }
     }
     if (corruptSavedObjectIds.length > 0) {
-      // Do we need to return an error in order to transform the method into a TaskEither? i.e. should we return an error for a bulk failure. e.g.
-      // return Either.left({ type: 'document_transform_failed', new DocumentTransformFailuresError(corruptSavedObjectIds.toString())})
-      return { type: 'document_transform_failed', corruptSavedObjectIds };
+      return Either.left({
+        type: 'documents_transform_failed',
+        failedDocumentIds: [...corruptSavedObjectIds],
+      });
     }
-    return { processedDocs };
-  } catch (e) {
-    throw e;
-  }
+    return Either.right({ processedDocs });
+  };
 }
 /**
  * Migration transform functions are potentially CPU heavy e.g. doing decryption/encryption
