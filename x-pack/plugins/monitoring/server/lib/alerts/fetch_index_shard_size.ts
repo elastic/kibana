@@ -143,7 +143,7 @@ export async function fetchIndexShardSize(
 
       const { primaries: totalPrimaryShards } = indexStats.shards;
       const { size_in_bytes: primaryShardSizeBytes = 0 } = indexStats.primaries.store || {};
-      if (!primaryShardSizeBytes) {
+      if (!primaryShardSizeBytes || !totalPrimaryShards) {
         continue;
       }
       /**
