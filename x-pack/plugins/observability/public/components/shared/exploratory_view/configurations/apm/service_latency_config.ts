@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../types';
-import { FieldLabels } from './constants';
-import { buildPhraseFilter } from './utils';
-import { OperationType } from '../../../../../../lens/public';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { buildPhraseFilter } from '../utils';
+import { OperationType } from '../../../../../../../lens/public';
 
-export function getServiceThroughputLensConfig({
-  seriesId,
-  indexPattern,
-}: ConfigProps): DataSeries {
+export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'service-latency',
@@ -23,9 +20,9 @@ export function getServiceThroughputLensConfig({
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'avg' as OperationType,
+      operationType: 'average' as OperationType,
       sourceField: 'transaction.duration.us',
-      label: 'Throughput',
+      label: 'Latency',
     },
     hasMetricType: true,
     defaultFilters: [
