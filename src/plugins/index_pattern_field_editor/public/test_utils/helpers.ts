@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { act } from 'react-dom/test-utils';
 import { TestBed } from './test_utils';
 
 export const getCommonActions = (testBed: TestBed) => {
@@ -21,7 +22,20 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.form.toggleEuiSwitch(testSubj);
   };
 
+  const changeFieldType = async (value: string, label?: string) => {
+    await act(async () => {
+      testBed.find('typeField').simulate('change', [
+        {
+          value,
+          label: label ?? value,
+        },
+      ]);
+    });
+    testBed.component.update();
+  };
+
   return {
     toggleFormRow,
+    changeFieldType,
   };
 };

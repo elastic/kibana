@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
-    it('should create or update the fleet_enroll user if called multiple times with forceRecreate flag', async () => {
+    it.skip('should create or update the fleet_enroll user if called multiple times with forceRecreate flag', async () => {
       await supertest.post(`/api/fleet/agents/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseFirstTime } = await es.security.getUser({
