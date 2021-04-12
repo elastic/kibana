@@ -9,7 +9,9 @@ import { useCallback } from 'react';
 import { useFormContext } from '../../common/shared_imports';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
-export const InsertTimeline = ({ fieldName }: { fieldName: string }) => {
+type InsertFields = 'comment' | 'description';
+
+export const InsertTimeline = ({ fieldName }: { fieldName: InsertFields }) => {
   const { setFieldValue, getFormData } = useFormContext();
   const timelineHooks = useTimelineContext()?.hooks;
   const formData = getFormData();

@@ -851,7 +851,7 @@ describe('AllCases', () => {
     wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
     await waitFor(() => {
       expect(setQueryParams).toBeCalledWith({
-        sortField: 'createdAt',
+        sortField: 'updatedAt',
       });
     });
   });

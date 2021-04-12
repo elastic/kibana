@@ -11,11 +11,7 @@ import { useHistory } from 'react-router-dom';
 
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  parsingPlugins,
-  processingPlugins,
-  uiPlugins,
-} from '../../../common/components/markdown_editor/plugins';
+import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { useInsertTimeline } from '../use_insert_timeline';
 
 export const Create = React.memo(() => {
@@ -39,9 +35,9 @@ export const Create = React.memo(() => {
         onSuccess,
         timelineIntegration: {
           editor_plugins: {
-            parsingPlugins,
-            processingPlugins,
-            uiPlugins,
+            parsingPlugin: timelineMarkdownPlugin.parser,
+            processingPluginRenderer: timelineMarkdownPlugin.renderer,
+            uiPlugin: timelineMarkdownPlugin.plugin,
           },
           hooks: {
             useInsertTimeline,

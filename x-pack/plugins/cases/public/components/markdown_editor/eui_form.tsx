@@ -9,9 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
-
 import { MarkdownEditor } from './editor';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -35,7 +33,6 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   idAria,
   bottomRightContent,
 }) => {
-  const timelinePlugins = useTimelineContext()?.editor_plugins;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -56,9 +53,6 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
           onChange={field.setValue}
           value={field.value as string}
           data-test-subj={`${dataTestSubj}-markdown-editor`}
-          parsingPlugins={timelinePlugins?.parsingPlugins}
-          processingPlugins={timelinePlugins?.processingPlugins}
-          uiPlugins={timelinePlugins?.uiPlugins}
         />
         {bottomRightContent && (
           <BottomContentWrapper justifyContent={'flexEnd'}>

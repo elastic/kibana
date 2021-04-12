@@ -9,7 +9,7 @@ import React, { memo, useEffect, useState, useCallback } from 'react';
 import { PluggableList } from 'unified';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { defaultParsingPlugins, defaultProcessingPlugins, defaultUiPlugins } from './plugins';
+import { usePlugins } from './use_plugins';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -19,7 +19,7 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   parsingPlugins?: PluggableList;
   processingPlugins?: PluggableList;
-  uiPlugins?: Array<EuiMarkdownEditorUiPlugin<any>> | undefined;
+  uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
   value: string;
 }
 
@@ -29,15 +29,13 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   editorId,
   height,
   onChange,
-  parsingPlugins,
-  processingPlugins,
-  uiPlugins,
   value,
 }) => {
   const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
   const onParse = useCallback((err, { messages }) => {
     setMarkdownErrorMessages(err ? [err] : messages);
   }, []);
+  const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
 
   useEffect(
     () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
@@ -50,9 +48,9 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
       editorId={editorId}
       onChange={onChange}
       value={value}
-      uiPlugins={uiPlugins ?? defaultUiPlugins}
-      parsingPluginList={parsingPlugins ?? defaultParsingPlugins}
-      processingPluginList={processingPlugins ?? defaultProcessingPlugins}
+      uiPlugins={uiPlugins}
+      parsingPluginList={parsingPlugins}
+      processingPluginList={processingPlugins}
       onParse={onParse}
       errors={markdownErrorMessages}
       data-test-subj={dataTestSubj}

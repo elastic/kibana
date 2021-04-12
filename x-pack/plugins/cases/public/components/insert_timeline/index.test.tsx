@@ -24,7 +24,7 @@ const useFormMock = useForm as jest.Mock;
 const useTimelineContextMock = useTimelineContext as jest.Mock;
 
 describe('InsertTimeline ', () => {
-  const formHookMock = getFormMock({ someField: 'someValue' });
+  const formHookMock = getFormMock({ comment: 'someValue' });
   const mockTimelineIntegration = { ...timelineIntegrationMock };
   const useInsertTimelineMock = jest.fn();
   let attachTimeline = jest.fn();
@@ -38,7 +38,7 @@ describe('InsertTimeline ', () => {
       <TestProviders>
         <CasesTimelineIntegrationProvider>
           <Form form={(formHookMock as unknown) as FormHook}>
-            <InsertTimeline fieldName="someField" />
+            <InsertTimeline fieldName="comment" />
           </Form>
         </CasesTimelineIntegrationProvider>
       </TestProviders>
@@ -60,7 +60,7 @@ describe('InsertTimeline ', () => {
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
           <Form form={(formHookMock as unknown) as FormHook}>
-            <InsertTimeline fieldName="someField" />
+            <InsertTimeline fieldName="comment" />
           </Form>
         </CasesTimelineIntegrationProvider>
       </TestProviders>

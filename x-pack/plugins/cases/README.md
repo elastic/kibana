@@ -41,9 +41,9 @@ cases: CasesUiStart;
     onSuccess,
     timelineIntegration?: {
       plugins: {
-        parsingPlugins,
-        processingPlugins,
-        uiPlugins,
+        parsingPlugin,
+        processingPluginRenderer,
+        uiPlugin,
       },
       hooks: {
         useInsertTimeline,
@@ -89,9 +89,9 @@ Arguments:
 |showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
 |subCaseId?|: `string;` subcase id
 |timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
-|timelineIntegration?.editor_plugins.parsingPlugins|: `PluggableList;`
-|timelineIntegration?.editor_plugins.processingPlugins|: `PluggableList`
-|timelineIntegration?.editor_plugins.uiPlugins?|: `Array<EuiMarkdownEditorUiPlugin<any>>`
+|timelineIntegration?.editor_plugins.parsingPlugin|: `Plugin;`
+|timelineIntegration?.editor_plugins.processingPluginRenderer|: `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
+|timelineIntegration?.editor_plugins.uiPlugin?|: `EuiMarkdownEditorUiPlugin`
 |timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
 |timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
 |timelineIntegration?.ui?renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
@@ -110,9 +110,9 @@ Arguments:
 |onCancel|`() => void;` callback when create case is canceled
 |onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
 |timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
-|timelineIntegration?.editor_plugins.parsingPlugins|: `PluggableList;`
-|timelineIntegration?.editor_plugins.processingPlugins|: `PluggableList`
-|timelineIntegration?.editor_plugins.uiPlugins?|: `Array<EuiMarkdownEditorUiPlugin<any>>`
+|timelineIntegration?.editor_plugins.parsingPlugin|: `Plugin;`
+|timelineIntegration?.editor_plugins.processingPluginRenderer|: `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
+|timelineIntegration?.editor_plugins.uiPlugin?|: `EuiMarkdownEditorUiPlugin`
 |timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
 
 UI component:

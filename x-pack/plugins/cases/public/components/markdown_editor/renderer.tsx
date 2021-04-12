@@ -9,8 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
 import { EuiMarkdownFormat, EuiLinkAnchorProps } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import { defaultParsingPlugins, defaultProcessingPlugins } from './plugins';
+import { usePlugins } from './use_plugins';
 
 interface Props {
   children: string;
@@ -18,15 +17,11 @@ interface Props {
 }
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
-  const timelinePlugins = useTimelineContext()?.editor_plugins;
+  const { processingPlugins, parsingPlugins } = usePlugins();
   const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = useMemo(
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );
-
-  const processingPlugins = timelinePlugins?.processingPlugins ?? defaultProcessingPlugins;
-  const parsingPlugins = timelinePlugins?.parsingPlugins ?? defaultParsingPlugins;
-
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

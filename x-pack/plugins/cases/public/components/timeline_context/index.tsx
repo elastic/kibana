@@ -6,9 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { PluggableList } from 'unified';
-import { TemporaryProcessingPluginsType } from '../markdown_editor';
+import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import { Plugin } from 'unified';
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
  * @TODO - To better encapsulate the timeline logic needed by cases, we are managing it in this top level context.
@@ -20,11 +19,21 @@ interface UseInsertTimelineReturn {
   handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
 }
 
+interface TimelineProcessingPluginRendererProps {
+  id: string | null;
+  title: string;
+  graphEventId?: string;
+  type: 'timeline';
+  [key: string]: string | null | undefined;
+}
+
 export interface CasesTimelineIntegration {
   editor_plugins: {
-    parsingPlugins: PluggableList;
-    processingPlugins: TemporaryProcessingPluginsType;
-    uiPlugins: Array<EuiMarkdownEditorUiPlugin<any>> | undefined;
+    parsingPlugin: Plugin;
+    processingPluginRenderer: React.FC<
+      TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }
+    >;
+    uiPlugin: EuiMarkdownEditorUiPlugin;
   };
   hooks: {
     useInsertTimeline: (

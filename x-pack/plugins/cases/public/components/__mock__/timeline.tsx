@@ -5,31 +5,26 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-  getDefaultEuiMarkdownUiPlugins,
-} from '@elastic/eui';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import { TemporaryProcessingPluginsType } from '../markdown_editor/types';
 jest.mock('../timeline_context');
 
 const mockTimelineComponent = (name: string) => <span data-test-subj={name}>{name}</span>;
-const defaultParsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
-const defaultUiPlugins = getDefaultEuiMarkdownUiPlugins();
 
 export const timelineIntegrationMock = {
   editor_plugins: {
-    parsingPlugins: defaultParsingPlugins,
-    processingPlugins: defaultProcessingPlugins,
-    uiPlugins: defaultUiPlugins,
+    parsingPlugin: jest.fn(),
+    processingPluginRenderer: () => mockTimelineComponent('plugin-renderer'),
+    uiPlugin: {
+      name: 'mock-timeline',
+      button: { label: 'mock-timeline-button', iconType: 'mock-timeline-icon' },
+      editor: () => mockTimelineComponent('plugin-timeline-editor'),
+    },
   },
   hooks: {
     useInsertTimeline: jest.fn(),
   },
   ui: {
-    renderInvestigateInTimelineActionComponent: (alertIds: string[]) =>
+    renderInvestigateInTimelineActionComponent: () =>
       mockTimelineComponent('investigate-in-timeline'),
     renderTimelineDetailsPanel: () => mockTimelineComponent('timeline-details-panel'),
   },
