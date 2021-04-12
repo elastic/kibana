@@ -49,8 +49,7 @@ export class LargeShardSizeAlert extends BaseAlert {
           description: i18n.translate(
             'xpack.monitoring.alerts.shardSize.actionVariables.shardIndex',
             {
-              defaultMessage:
-                'List of indices which are experiencing large (primary average) shard size.',
+              defaultMessage: 'List of indices which are experiencing large average shard size.',
             }
           ),
         },
@@ -101,7 +100,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { shardIndex, shardSize } = item.meta as IndexShardSizeUIMeta;
     return {
       text: i18n.translate('xpack.monitoring.alerts.shardSize.ui.firingMessage', {
-        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large (primary average) shard size of: {shardSize}GB at #absolute`,
+        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large average shard size of: {shardSize}GB at #absolute`,
         values: {
           shardIndex,
           shardSize,

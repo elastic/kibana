@@ -477,7 +477,7 @@ export const ALERT_DETAILS = {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
-          defaultMessage: `Notify when primary average shard size exceeds this value`,
+          defaultMessage: `Notify when average shard size exceeds this value`,
         }),
         type: AlertParamType.Number,
         append: 'GB',
