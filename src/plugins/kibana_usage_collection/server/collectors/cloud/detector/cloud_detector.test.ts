@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CloudDetector } from './cloud_detector';
+import type { CloudService } from './cloud_service';
 
 describe('CloudDetector', () => {
   const cloudService1 = {
@@ -28,8 +30,10 @@ describe('CloudDetector', () => {
       };
     },
   };
-  // this service is theoretically a better match for the current server, but order dictates that it should
-  // never be checked (at least until we have some sort of "confidence" metric returned, if we ever run into this problem)
+  // this service is theoretically a better match for the current server,
+  // but order dictates that it should never be checked (at least until
+  // we have some sort of "confidence" metric returned, if we ever run
+  // into this problem)
   const cloudService4 = {
     checkIfService: () => {
       return {
@@ -40,7 +44,12 @@ describe('CloudDetector', () => {
       };
     },
   };
-  const cloudServices = [cloudService1, cloudService2, cloudService3, cloudService4];
+  const cloudServices = ([
+    cloudService1,
+    cloudService2,
+    cloudService3,
+    cloudService4,
+  ] as unknown) as CloudService[];
 
   describe('getCloudDetails', () => {
     it('returns undefined by default', () => {
@@ -51,35 +60,34 @@ describe('CloudDetector', () => {
   });
 
   describe('detectCloudService', () => {
-    it('awaits _getCloudService', async () => {
+    it('returns first match', async () => {
       const detector = new CloudDetector({ cloudServices });
 
-      expect(detector.getCloudDetails()).toBe(undefined);
+      expect(detector.getCloudDetails()).toBeUndefined();
       await detector.detectCloudService();
-      expect(detector.getCloudDetails()).toEqual({ name: 'good-match' });
-    });
-  });
-
-  describe('_getCloudService', () => {
-    it('returns first match', async () => {
-      const detector = new CloudDetector();
-
       // note: should never use better-match
-      expect(await detector._getCloudService(cloudServices)).toEqual({ name: 'good-match' });
+      expect(detector.getCloudDetails()).toEqual({ name: 'good-match' });
     });
 
     it('returns undefined if none match', async () => {
-      const detector = new CloudDetector();
+      const services = ([cloudService1, cloudService2] as unknown) as CloudService[];
 
-      expect(await detector._getCloudService([cloudService1, cloudService2])).toBe(undefined);
-      expect(await detector._getCloudService([])).toBe(undefined);
+      const detector1 = new CloudDetector({ cloudServices: services });
+      await detector1.detectCloudService();
+      expect(detector1.getCloudDetails()).toBeUndefined();
+
+      const detector2 = new CloudDetector({ cloudServices: [] });
+      await detector2.detectCloudService();
+      expect(detector2.getCloudDetails()).toBeUndefined();
     });
 
     // this is already tested above, but this just tests it explicitly
     it('ignores exceptions from cloud services', async () => {
-      const detector = new CloudDetector();
+      const services = ([cloudService2] as unknown) as CloudService[];
+      const detector = new CloudDetector({ cloudServices: services });
 
-      expect(await detector._getCloudService([cloudService2])).toBe(undefined);
+      await detector.detectCloudService();
+      expect(detector.getCloudDetails()).toBeUndefined();
     });
   });
 });
