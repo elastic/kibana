@@ -381,7 +381,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     dataFilters: MapFilters,
     source: IVectorSource,
     style: IVectorStyle
-  ): VectorSourceRequestMeta {
+  ): Promise<VectorSourceRequestMeta> {
     const fieldNames = [
       ...source.getFieldNames(),
       ...style.getSourceFieldNames(),

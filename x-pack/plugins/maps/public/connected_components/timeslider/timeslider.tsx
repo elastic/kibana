@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiRangeTick, EuiText } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
 import { TimeRange } from '../../../../../../src/plugins/data/common';
@@ -27,18 +28,18 @@ interface State {
   max: number;
   min: number;
   range: number;
-  timeslice: number[];
+  timeslice: [number, number];
   timesliceText: string;
   ticks: EuiRangeTick[];
 }
 
-function prettyPrintTimeslice(timeslice: number[]) {
+function prettyPrintTimeslice(timeslice: [number, number]) {
   return `${epochToKbnDateFormat(timeslice[0])} - ${epochToKbnDateFormat(timeslice[1])}`;
 }
 
 // Why Timeslider and KeyedTimeslider?
 // Using react 'key' property to ensure new KeyedTimeslider instance whenever props.timeRange changes
-export function Timeslider(props: props) {
+export function Timeslider(props: Props) {
   return props.isTimesliderOpen ? (
     <KeyedTimeslider key={`${props.timeRange.from}-${props.timeRange.to}`} {...props} />
   ) : null;
@@ -50,10 +51,15 @@ class KeyedTimeslider extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timeRangeBounds = getTimeFilter().calculateBounds(props.timeRange);
+    if (timeRangeBounds.min === undefined || timeRangeBounds.max === undefined) {
+      throw new Error(
+        'Unable to create Timeslider component instance, timeRangeBounds min or max are undefined'
+      );
+    }
     const min = timeRangeBounds.min.valueOf();
     const max = timeRangeBounds.max.valueOf();
     const interval = getInterval(min, max);
-    const timeslice = [min, max];
+    const timeslice: [number, number] = [min, max];
 
     this.state = {
       max,
@@ -77,13 +83,13 @@ class KeyedTimeslider extends Component<Props, State> {
     return this.state.timeslice[0] === this.state.min && this.state.timeslice[1] === this.state.max;
   }
 
-  _onDualControlChange = (value: number[]) => {
-    this.setState({ range: value[1] - value[0] }, () => {
-      this._onChange(value);
+  _onDualControlChange = (value: [number | string, number | string]) => {
+    this.setState({ range: (value[1] as number) - (value[0] as number) }, () => {
+      this._onChange(value as [number, number]);
     });
   };
 
-  _onChange = (value: number[]) => {
+  _onChange = (value: [number, number]) => {
     this.setState({
       timeslice: value,
       timesliceText: prettyPrintTimeslice(value),
@@ -109,7 +115,7 @@ class KeyedTimeslider extends Component<Props, State> {
     this._onChange([from < this.state.min ? this.state.min : from, to]);
   };
 
-  _propagateChange = _.debounce((value: number[]) => {
+  _propagateChange = _.debounce((value: [number, number]) => {
     if (this._isMounted) {
       this.props.setTimeslice({ from: value[0], to: value[1] });
     }
@@ -124,7 +130,9 @@ class KeyedTimeslider extends Component<Props, State> {
             iconType="cross"
             color="subdued"
             className="mapTimeslider__close"
-            aria-label="Close timeslider"
+            aria-label={i18n.translate('xpack.maps.timeslider.closeLabel', {
+              defaultMessage: 'Close timeslider',
+            })}
           />
 
           <div className="mapTimeslider__timeWindow">
@@ -137,13 +145,17 @@ class KeyedTimeslider extends Component<Props, State> {
                 onClick={this._onPrevious}
                 iconType={PreviousTimesliceIcon}
                 color="text"
-                aria-label="Previous time window"
+                aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
+                  defaultMessage: 'Previous time window',
+                })}
               />
               <EuiButtonIcon
                 onClick={this._onNext}
                 iconType={NextTimesliceIcon}
                 color="text"
-                aria-label="Next time window"
+                aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
+                  defaultMessage: 'Next time window',
+                })}
               />
             </div>
           </div>

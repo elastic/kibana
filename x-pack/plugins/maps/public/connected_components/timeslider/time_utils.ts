@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment-timezone';
-import { EuiRangeTick } from '@elastic/eui';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { calcAutoIntervalNear } from '../../../../../../src/plugins/data/common';
-import { getTimeFilter, getUiSettings } from '../../kibana_services';
+import { getUiSettings } from '../../kibana_services';
 
 function getTimezone() {
   const detectedTimezone = moment.tz.guess();
@@ -18,27 +18,27 @@ function getTimezone() {
 }
 
 function getScaledDateFormat(interval: number): string {
-  if (interval >= moment.duration(1, 'y')) {
+  if (interval >= moment.duration(1, 'y').asMilliseconds()) {
     return 'YYYY';
   }
 
-  if (interval >= moment.duration(1, 'd')) {
+  if (interval >= moment.duration(1, 'd').asMilliseconds()) {
     return 'MMM D';
   }
 
-  if (interval >= moment.duration(6, 'h')) {
+  if (interval >= moment.duration(6, 'h').asMilliseconds()) {
     return 'MMM D HH:mm';
   }
 
-  if (interval >= moment.duration(1, 'h')) {
+  if (interval >= moment.duration(1, 'h').asMilliseconds()) {
     return 'HH:mm';
   }
 
-  if (interval >= moment.duration(1, 'm')) {
+  if (interval >= moment.duration(1, 'm').asMilliseconds()) {
     return 'HH:mm';
   }
 
-  if (interval >= moment.duration(1, 's')) {
+  if (interval >= moment.duration(1, 's').asMilliseconds()) {
     return 'HH:mm:ss';
   }
 
@@ -53,7 +53,7 @@ export function epochToKbnDateFormat(epoch: number): string {
 
 export function getInterval(min: number, max: number, steps = 6): number {
   const duration = max - min;
-  let interval = calcAutoIntervalNear(steps, duration);
+  let interval = calcAutoIntervalNear(steps, duration).asMilliseconds();
   // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
   // Adjust the interval to get the requested number of ticks
   const actualSteps = duration / interval;

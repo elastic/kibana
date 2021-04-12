@@ -221,6 +221,10 @@ export class MVTSingleLayerVectorSource
     }
     return tooltips;
   }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    return null;
+  }
 }
 
 registerSource({

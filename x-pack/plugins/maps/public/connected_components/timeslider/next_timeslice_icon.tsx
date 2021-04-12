@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, HTMLAttributes } from 'react';
-import { CommonProps } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
-type Props = CommonProps & HTMLAttributes<HTMLDivElement>;
+interface Props {
+  title?: string;
+  titleId?: string;
+}
 
 export const NextTimesliceIcon: FunctionComponent<Props> = ({ title, titleId, ...props }) => (
   <svg

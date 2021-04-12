@@ -215,7 +215,7 @@ describe('ESSearchSource', () => {
       test('Can mask timeslice when source is cluster', () => {
         const esSearchSource = new ESSearchSource({
           ...mockDescriptor,
-          scalingType: SCALING_TYPES.CLUSTER,
+          scalingType: SCALING_TYPES.CLUSTERS,
         });
         expect(esSearchSource.canMaskTimeslice(resultsNotTrimmedMeta)).toBe(true);
       });
@@ -280,7 +280,7 @@ describe('ESSearchSource', () => {
       test('Can not mask timeslice when source is cluster', () => {
         const esSearchSource = new ESSearchSource({
           ...mockDescriptor,
-          scalingType: SCALING_TYPES.CLUSTER,
+          scalingType: SCALING_TYPES.CLUSTERS,
         });
         expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
       });
@@ -300,7 +300,7 @@ describe('ESSearchSource', () => {
       test('Can not mask timeslice when source is cluster', () => {
         const esSearchSource = new ESSearchSource({
           ...mockDescriptor,
-          scalingType: SCALING_TYPES.CLUSTER,
+          scalingType: SCALING_TYPES.CLUSTERS,
         });
         expect(esSearchSource.canMaskTimeslice(resultsTrimmedMeta)).toBe(false);
       });

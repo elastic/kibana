@@ -136,7 +136,7 @@ export class TiledVectorLayer extends VectorLayer {
     return this._getMbSourceId() === mbSourceId;
   }
 
-  _syncStylePropertiesWithMb(mbMap: MbMap) {
+  async _syncStylePropertiesWithMb(mbMap: MbMap) {
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {

@@ -40,7 +40,7 @@ export interface BoundsFilters {
   query?: MapQuery;
   sourceQuery?: MapQuery;
   timeFilters: TimeRange;
-  timeslice: Timeslice;
+  timeslice?: Timeslice;
 }
 
 export interface IVectorSource extends ISource {
