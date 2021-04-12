@@ -21,6 +21,20 @@ export const getOutcomeAggregation = () => ({
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
+export const getTimeseriesAggregation = (
+  start: number,
+  end: number,
+  intervalString: string
+) => ({
+  date_histogram: {
+    field: '@timestamp',
+    fixed_interval: intervalString,
+    min_doc_count: 0,
+    extended_bounds: { min: start, max: end },
+  },
+  aggs: { outcomes: getOutcomeAggregation() },
+});
+
 export function calculateTransactionErrorPercentage(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {

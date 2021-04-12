@@ -1,5 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": false,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-i18n/src",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
@@ -7,15 +20,6 @@
     "types/intl_relativeformat.d.ts"
   ],
   "exclude": [
-    "target"
-  ],
-  "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
-  }
+    "**/__fixtures__/**/*"
+  ]
 }
