@@ -120,10 +120,9 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
                 <EuiSpacer />
 
                 <EuiFormRow
-                  label={i18nTexts.getDeprecationLoggingLabel(
+                  helpText={i18nTexts.getDeprecationLoggingLabel(
                     docLinks.links.elasticsearch.deprecationLogging
                   )}
-                  hasChildLabel={false}
                   data-test-subj="deprecationLoggingFormRow"
                 >
                   <DeprecationLoggingToggle />
