@@ -25,6 +25,7 @@ describe('ResultSettings', () => {
       foo: 'text',
     },
     dataLoading: false,
+    stagedUpdates: true,
   };
 
   const actions = {
@@ -70,6 +71,16 @@ describe('ResultSettings', () => {
     const saveButton = shallow(buttons[0]);
     saveButton.simulate('click');
     expect(actions.saveResultSettings).toHaveBeenCalled();
+  });
+
+  it('renders the "save" button as disabled if the user has made no changes since the page loaded', () => {
+    setMockValues({
+      ...values,
+      stagedUpdates: false,
+    });
+    const buttons = findButtons(subject());
+    const saveButton = shallow(buttons[0]);
+    expect(saveButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {

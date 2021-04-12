@@ -44,7 +44,7 @@ interface Props {
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { dataLoading, schema } = useValues(ResultSettingsLogic);
+  const { dataLoading, schema, stagedUpdates } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -76,6 +76,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
                   color="primary"
                   fill
                   onClick={saveResultSettings}
+                  disabled={!stagedUpdates}
                 >
                   {SAVE_BUTTON_LABEL}
                 </EuiButton>,
