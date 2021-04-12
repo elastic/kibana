@@ -7,7 +7,7 @@
 
 import { Duration } from 'moment';
 import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -33,8 +33,8 @@ function searchSessionRunner(
   core: CoreSetup<DataEnhancedStartDependencies>,
   { logger, config }: SearchSessionTaskDeps
 ): TaskRunCreatorFunction {
-  const aborted$ = new Subject<void>();
   return ({ taskInstance }: RunContext) => {
+    const aborted$ = new BehaviorSubject<boolean>(false);
     return {
       async run() {
         const sessionConfig = config.search.sessions;
@@ -43,6 +43,8 @@ function searchSessionRunner(
           logger.debug('Search sessions are disabled. Skipping task.');
           return;
         }
+        if (aborted$.getValue()) return;
+
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
         await checkRunningSessions(
@@ -61,7 +63,7 @@ function searchSessionRunner(
         };
       },
       cancel: async () => {
-        aborted$.next();
+        aborted$.next(true);
       },
     };
   };
