@@ -91,6 +91,8 @@ import {
   Filter,
   UI_SETTINGS,
   isCompleteResponse,
+  isErrorResponse,
+  isPartialResponse,
   IKibanaSearchResponse,
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -338,20 +340,29 @@ export class SearchSource {
 
   private inspectSearch(s$: Observable<estypes.SearchResponse<any>>, options: ISearchOptions) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
+
     const requestResponder = adapter?.start(title, {
       id,
       description,
       searchSessionId: options.sessionId,
     });
 
-    // Track request stats on first emit
+    const trackRequestBody = () => {
+      try {
+        requestResponder?.json(this.getSearchRequestBody());
+      } catch (e) {} // eslint-disable-line no-empty
+    };
+
+    // Track request stats on first emit, swallow errors
     const first$ = s$
       .pipe(
         first(undefined, null),
         tap(() => {
+          trackRequestBody();
           requestResponder?.stats(getRequestInspectorStats(this));
         }),
-        catchError((e) => {
+        catchError(() => {
+          trackRequestBody();
           return EMPTY;
         }),
         finalize(() => {
@@ -360,8 +371,7 @@ export class SearchSource {
       )
       .subscribe();
 
-    // Track response stats on last emit
-    // Also track errors
+    // Track response stats on last emit, as well as errors
     const last$ = s$
       .pipe(
         catchError((e) => {
@@ -370,11 +380,6 @@ export class SearchSource {
         }),
         last(undefined, null),
         tap((finalResponse) => {
-          try {
-            requestResponder?.json(this.getSearchRequestBody());
-          } catch (e) {
-            // ignore
-          }
           if (finalResponse) {
             requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
             requestResponder?.ok({ json: finalResponse });
@@ -422,7 +427,7 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
+   * @return {Observable<SearchResponse<any>>}
    */
   private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
@@ -434,7 +439,9 @@ export class SearchSource {
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
         return new Observable<IKibanaSearchResponse<any>>((obs) => {
-          if (!isCompleteResponse(response)) {
+          if (isErrorResponse(response)) {
+            obs.error(response);
+          } else if (isPartialResponse(response)) {
             obs.next(response);
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -443,6 +450,7 @@ export class SearchSource {
                 obs.complete();
               }
             } else {
+              // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
                 ...response,
                 isPartial: true,
@@ -455,9 +463,13 @@ export class SearchSource {
                     rawResponse: responseWithOther,
                   });
                 },
-                complete: () => {
+                error: (e) => {
+                  obs.error(e);
                   sub.unsubscribe();
+                },
+                complete: () => {
                   obs.complete();
+                  sub.unsubscribe();
                 },
               });
             }
