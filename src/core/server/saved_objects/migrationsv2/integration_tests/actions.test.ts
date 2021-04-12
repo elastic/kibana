@@ -30,6 +30,7 @@ import {
   UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
+  waitForIndexStatusYellow,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -203,6 +204,51 @@ describe('migration actions', () => {
       await expect(task()).rejects.toMatchInlineSnapshot(
         `[ResponseError: index_not_found_exception]`
       );
+    });
+  });
+
+  describe('waitForIndexStatusYellow', () => {
+    afterAll(async () => {
+      await client.indices.delete({ index: 'red_then_yellow_index' });
+    });
+    it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
+      // Create a red index
+      await client.indices.create(
+        {
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
+            },
+          },
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      );
+
+      // Start tracking the index status
+      const indexStatusPromise = waitForIndexStatusYellow(client, 'red_then_yellow_index')();
+
+      const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(redStatusResponse.body.status).toBe('red');
+
+      client.indices.putSettings({
+        index: 'red_then_yellow_index',
+        body: {
+          // Disable all shard allocation so that the index status is red
+          index: { routing: { allocation: { enable: 'all' } } },
+        },
+      });
+
+      await indexStatusPromise;
+      // Assert that the promise didn't resolve before the index became green
+
+      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(yellowStatusResponse.body.status).toBe('yellow');
     });
   });
 
