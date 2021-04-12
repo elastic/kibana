@@ -102,16 +102,16 @@ Following are some example KQL queries.  For more detailed examples, refer to <<
 | `http.response.body.content.text:"quick brown fox"`
 
 | Terms query
-| http.response.status_code:400 401 404+
+| http.response.status_code:400 401 404
 
 | Boolean query
-| `response:200 or extension:php`+
+| `response:200 or extension:php`
 
 | Range query
-| `account_number >= 100 and items_sold <= 200`+
+| `account_number >= 100 and items_sold <= 200`
 
 | Wildcard query
-| `machine.os:win*`+
+| `machine.os:win*`
 |===
 
 [float]
