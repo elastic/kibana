@@ -243,7 +243,7 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
+      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         if (input.timeRange) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
@@ -252,6 +252,7 @@ export class LensPlugin {
           core.application.currentAppId$
         );
         transfer.navigateToEditor('lens', {
+          openInNewTab,
           path: getEditPath(undefined),
           state: {
             originatingApp: '',

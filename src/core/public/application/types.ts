@@ -685,6 +685,12 @@ export interface NavigateToAppOptions {
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    */
   replace?: boolean;
+
+  /**
+   * if true, will try to open the app in new tab, will keep state, if respective app is implementating
+   * state recover mechanism
+   */
+  openInNewTab?: boolean;
 }
 
 /** @public */
