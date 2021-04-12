@@ -48,7 +48,11 @@ async function runBazelCommandWithRunner(
   ).subscribe(bazelLogs$);
 
   // Wait for process and logs to finish, unsubscribing in the end
-  await bazelProc;
+  try {
+    await bazelProc;
+  } catch {
+    // no-op
+  }
   await bazelLogs$.toPromise();
   await bazelLogSubscription.unsubscribe();
 }

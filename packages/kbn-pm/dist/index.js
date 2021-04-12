@@ -48416,7 +48416,11 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
 
   const bazelLogSubscription = rxjs__WEBPACK_IMPORTED_MODULE_1__["merge"](Object(_kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_3__["observeLines"])(bazelProc.stdout).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["tap"])(line => _log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`))), Object(_kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_3__["observeLines"])(bazelProc.stderr).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["tap"])(line => _log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`)))).subscribe(bazelLogs$); // Wait for process and logs to finish, unsubscribing in the end
 
-  await bazelProc;
+  try {
+    await bazelProc;
+  } catch {// no-op
+  }
+
   await bazelLogs$.toPromise();
   await bazelLogSubscription.unsubscribe();
 }
