@@ -11,7 +11,7 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import { VisualizeInput } from '../../../../visualizations/public';
+// import { VisualizeInput } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -163,16 +163,14 @@ export function DashboardTopNav({
 
   const createNewVisType = useCallback(
     (newVisType: string) => async () => {
-      const type = 'visualization';
-      const factory = embeddable.getEmbeddableFactory(type);
-
-      if (!factory) {
-        throw new EmbeddableFactoryNotFoundError(type);
-      }
-
-      await factory.create({ newVisType, id: newVisType } as VisualizeInput, dashboardContainer);
+      embeddable.getStateTransfer().navigateToEditor('visualize', {
+        path: `#/create?type=${encodeURIComponent(newVisType)}`,
+        state: {
+          originatingApp: 'dashboards',
+        },
+      });
     },
-    [dashboardContainer, embeddable]
+    [embeddable]
   );
 
   const clearAddPanel = useCallback(() => {
