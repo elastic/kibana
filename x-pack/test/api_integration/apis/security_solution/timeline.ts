@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createBasicTimeline(supertest, titleToSaved);
 
       const resp = await supertest
-        .get('/api/timelines?pageSize=1&pageIndex=1')
+        .get('/api/timelines?page_size=1&page_index=1')
         .set('kbn-xsrf', 'true');
 
       const timelines = resp.body.timeline;
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createBasicTimelineTemplate(supertest, titleToSaved);
 
       const resp = await supertest
-        .get('/api/timelines?timelineType=template')
+        .get('/api/timelines?timeline_type=template')
         .set('kbn-xsrf', 'true');
 
       const templates: SavedTimeline[] = resp.body.timeline;
