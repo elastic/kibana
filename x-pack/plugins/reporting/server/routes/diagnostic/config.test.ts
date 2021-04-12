@@ -13,9 +13,12 @@ import {
   createMockReportingCore,
   createMockLevelLogger,
   createMockPluginSetup,
+  createMockConfigSchema,
+  createMockConfig,
 } from '../../test_helpers';
 import { registerDiagnoseConfig } from './config';
 import type { ReportingRequestHandlerContext } from '../../types';
+import { ReportingConfigType } from '../../config';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -25,7 +28,7 @@ describe('POST /diagnose/config', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let core: ReportingCore;
   let mockSetupDeps: any;
-  let config: any;
+  let config: ReportingConfigType;
 
   const mockLogger = createMockLevelLogger();
 
@@ -34,7 +37,7 @@ describe('POST /diagnose/config', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: () => false })
     );
 
     mockSetupDeps = createMockPluginSetup({
@@ -44,19 +47,7 @@ describe('POST /diagnose/config', () => {
       router: httpSetup.createRouter(''),
     } as unknown) as any;
 
-    config = {
-      get: jest.fn().mockImplementation((...keys) => {
-        const key = keys.join('.');
-        switch (key) {
-          case 'queue.timeout':
-            return 120000;
-          case 'csv.maxSizeBytes':
-            return 1024;
-        }
-      }),
-      kbnConfig: { get: jest.fn() },
-    };
-
+    config = createMockConfigSchema({ queue: { timeout: 120000 }, csv: { maxSizeBytes: 1024 } });
     core = await createMockReportingCore(config, mockSetupDeps);
   });
 
@@ -93,7 +84,11 @@ describe('POST /diagnose/config', () => {
   });
 
   it('returns a 200 with help text when not configured properly', async () => {
-    config.get.mockImplementation(() => 10485760);
+    core.setConfig(
+      createMockConfig(
+        createMockConfigSchema({ queue: { timeout: 120000 }, csv: { maxSizeBytes: 10485760 } })
+      )
+    );
     mockSetupDeps.elasticsearch.legacy.client.callAsInternalUser.mockImplementation(() =>
       Promise.resolve({
         defaults: {

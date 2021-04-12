@@ -7,9 +7,8 @@
 
 import sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'src/core/server';
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingCore } from '../../';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -19,20 +18,14 @@ import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
 
   const callClusterStub = sinon.stub();
   const mockElasticsearch = { legacy: { client: { callAsInternalUser: callClusterStub } } };
 
   beforeEach(async () => {
-    const reportingConfig = {
-      index: '.reporting-test',
-      queue: { indexInterval: 'week' },
-    };
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockCore = await createMockReportingCore(mockConfig);
+    const reportingConfig = { index: '.reporting-test', queue: { indexInterval: 'week' } };
+    mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
     callClusterStub.reset();
     callClusterStub.withArgs('indices.exists').resolves({});
@@ -76,9 +69,7 @@ describe('ReportingStore', () => {
         index: '.reporting-test',
         queue: { indexInterval: 'centurially' },
       };
-      const mockSchema = createMockConfigSchema(reportingConfig);
-      mockConfig = createMockConfig(mockSchema);
-      mockCore = await createMockReportingCore(mockConfig);
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({

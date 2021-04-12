@@ -53,9 +53,7 @@ beforeEach(async () => {
     'kibanaServer.protocol': 'http',
   };
   const mockSchema = createMockConfigSchema(reportingConfig);
-  const mockReportingConfig = createMockConfig(mockSchema);
-
-  mockReporting = await createMockReportingCore(mockReportingConfig);
+  mockReporting = await createMockReportingCore(mockSchema);
 
   const mockElasticsearch = {
     legacy: {
@@ -67,8 +65,7 @@ beforeEach(async () => {
   const mockGetElasticsearch = jest.fn();
   mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
   mockReporting.getElasticsearchService = mockGetElasticsearch;
-  // @ts-ignore over-riding config
-  mockReporting.config = mockReportingConfig;
+  mockReporting.setConfig(createMockConfig(mockSchema));
 
   (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });

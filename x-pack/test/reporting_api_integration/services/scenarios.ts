@@ -58,6 +58,39 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const createTestReportingUserRole = async () => {
+    await security.role.create('test_reporting_user', {
+      metadata: {},
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          {
+            names: ['ecommerce'],
+            privileges: ['read', 'view_index_metadata'],
+            allow_restricted_indices: false,
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            dashboard: [
+              'minimal_read',
+              'download_csv_dashboard_panel',
+              'generate_screenshot_report',
+            ],
+            discover: ['minimal_read', 'generate_csv_report'],
+            canvas: ['minimal_read', 'generate_screenshot_report'],
+            visualize: ['minimal_read', 'generate_screenshot_report'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+  };
+
   const createDataAnalyst = async () => {
     await security.user.create('data_analyst', {
       password: 'data_analyst-password',
@@ -69,7 +102,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const createTestReportingUser = async () => {
     await security.user.create('reporting_user', {
       password: 'reporting_user-password',
-      roles: ['data_analyst', 'reporting_user'],
+      roles: ['test_reporting_user'],
       full_name: 'Reporting User',
     });
   };
@@ -142,6 +175,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_PASSWORD,
     createDataAnalystRole,
     createDataAnalyst,
+    createTestReportingUserRole,
     createTestReportingUser,
     downloadCsv,
     generatePdf,

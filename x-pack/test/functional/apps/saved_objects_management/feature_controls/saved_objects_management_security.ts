@@ -262,7 +262,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                visualize: ['all'],
+                visualize: ['minimal_all'],
               },
               spaces: ['*'],
             },

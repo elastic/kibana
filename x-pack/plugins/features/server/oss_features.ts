@@ -6,15 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureConfig } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
   includeTimelion: boolean;
+  includeReporting: boolean;
 }
 
-export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSSFeaturesParams) => {
+export const buildOSSFeatures = ({
+  savedObjectTypes,
+  includeTimelion,
+  includeReporting,
+}: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
     {
       id: 'discover',
@@ -23,6 +28,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       management: {
         kibana: ['search_sessions'],
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
       },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -107,6 +113,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        ...(includeReporting ? [reportingFeatures.generateCsvDiscover] : []),
       ],
     },
     {
@@ -114,6 +121,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.visualizeFeatureName', {
         defaultMessage: 'Visualize Library',
       }),
+      management: {
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+      },
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['visualize', 'lens', 'kibana'],
@@ -166,6 +176,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        ...(includeReporting ? [reportingFeatures.generateScreenshotVisualize] : []),
       ],
     },
     {
@@ -175,6 +186,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       management: {
         kibana: ['search_sessions'],
+        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
       },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -279,6 +291,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        ...(includeReporting
+          ? [reportingFeatures.downloadCsvDashboard, reportingFeatures.generateScreenshotDashboard]
+          : []),
       ],
     },
     {
@@ -466,5 +481,120 @@ const timelionFeature: KibanaFeatureConfig = {
       },
       ui: [],
     },
+  },
+};
+
+const reportingFeatures: {
+  [Property in
+    | 'generateCsvDiscover'
+    | 'downloadCsvDashboard'
+    | 'generateScreenshotDashboard'
+    | 'generateScreenshotVisualize']: SubFeatureConfig;
+} = {
+  generateCsvDiscover: {
+    name: i18n.translate('xpack.features.ossFeatures.reporting.discoverGenerateCSVFeatureName', {
+      defaultMessage: 'CSV Reports',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_csv_report',
+            name: i18n.translate('xpack.features.ossFeatures.reporting.discoverGenerateCSV', {
+              defaultMessage: 'Generate CSV reports',
+            }),
+            includeIn: 'all',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateCsv'],
+          },
+        ],
+      },
+    ],
+  },
+  downloadCsvDashboard: {
+    name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSVFeatureName', {
+      defaultMessage: 'Download Saved Search CSV',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'download_csv_dashboard_panel',
+            name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
+              defaultMessage: 'Download CSV reports from saved searches',
+            }),
+            includeIn: 'all',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['downloadCsv'],
+            ui: ['downloadCsv'],
+          },
+        ],
+      },
+    ],
+  },
+  generateScreenshotDashboard: {
+    name: i18n.translate(
+      'xpack.features.ossFeatures.reporting.dashboardGenerateScreenshotFeatureName',
+      {
+        defaultMessage: 'PDF / PNG Reports',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_screenshot_report',
+            name: i18n.translate(
+              'xpack.features.ossFeatures.reporting.dashboardGenerateScreenshot',
+              {
+                defaultMessage: 'Generate PDF or PNG reports',
+              }
+            ),
+            includeIn: 'all',
+            minimumLicense: 'platinum' as 'platinum',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateScreenshot'],
+          },
+        ],
+      },
+    ],
+  },
+  generateScreenshotVisualize: {
+    name: i18n.translate(
+      'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshotFeatureName',
+      {
+        defaultMessage: 'PDF / PNG Reports',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'generate_screenshot_report',
+            name: i18n.translate(
+              'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshot',
+              {
+                defaultMessage: 'Generate PDF or PNG reports',
+              }
+            ),
+            includeIn: 'all',
+            minimumLicense: 'platinum' as 'platinum',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['generateReport'],
+            ui: ['generateScreenshot'],
+          },
+        ],
+      },
+    ],
   },
 };

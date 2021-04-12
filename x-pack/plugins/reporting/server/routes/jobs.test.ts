@@ -13,7 +13,6 @@ import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
@@ -29,8 +28,8 @@ describe('GET /api/reporting/jobs/download', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
+  let mockSetupDeps: ReportingInternalSetup;
 
-  const config = createMockConfig(createMockConfigSchema());
   const getHits = (...sources: any) => {
     return {
       hits: {
@@ -44,11 +43,11 @@ describe('GET /api/reporting/jobs/download', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: jest.fn() })
     );
-    const mockSetupDeps = createMockPluginSetup({
+    mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
+        legacy: { client: { callAsInternalUser: jest.fn().mockResolvedValue({}) } },
       },
       security: {
         license: {
@@ -72,7 +71,10 @@ describe('GET /api/reporting/jobs/download', () => {
       },
     });
 
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      createMockConfigSchema({ roles: { enabled: false } }),
+      mockSetupDeps
+    );
     // @ts-ignore
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
@@ -137,36 +139,6 @@ describe('GET /api/reporting/jobs/download', () => {
       .expect(401)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
-      );
-  });
-
-  it('fails on users without the appropriate role', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps = ({
-      // @ts-ignore
-      ...core.pluginSetupDeps,
-      security: {
-        license: {
-          isEnabled: () => true,
-        },
-        authc: {
-          getCurrentUser: () => ({
-            id: '123',
-            roles: ['peasant'],
-            username: 'Tom Riddle',
-          }),
-        },
-      },
-    } as unknown) as ReportingInternalSetup;
-    registerJobInfoRoutes(core);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dope')
-      .expect(403)
-      .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
       );
   });
 
@@ -359,6 +331,40 @@ describe('GET /api/reporting/jobs/download', () => {
             statusCode: 400,
           });
         });
+    });
+  });
+
+  describe('Deprecated: role-based access control', () => {
+    it('fails on users without the appropriate role', async () => {
+      const deprecatedConfig = createMockConfigSchema({ roles: { enabled: true } });
+      core = await createMockReportingCore(deprecatedConfig, mockSetupDeps);
+      // @ts-ignore
+      core.pluginSetupDeps = ({
+        // @ts-ignore
+        ...core.pluginSetupDeps,
+        security: {
+          license: {
+            isEnabled: () => true,
+          },
+          authc: {
+            getCurrentUser: () => ({
+              id: '123',
+              roles: ['peasant'],
+              username: 'Tom Riddle',
+            }),
+          },
+        },
+      } as unknown) as ReportingInternalSetup;
+      registerJobInfoRoutes(core);
+
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .get('/api/reporting/jobs/download/dope')
+        .expect(403)
+        .then(({ body }) =>
+          expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
+        );
     });
   });
 });
