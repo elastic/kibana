@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
-
 import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/types';
 import { EngineDetails } from '../../../engine/types';
 
@@ -16,8 +14,7 @@ export const getConflictingEnginesFromConflictingField = (
 
 export const getConflictingEnginesFromSchemaConflicts = (
   schemaConflicts: SchemaConflicts
-): string[] =>
-  flatten(Object.values(schemaConflicts).map(getConflictingEnginesFromConflictingField));
+): string[] => Object.values(schemaConflicts).flatMap(getConflictingEnginesFromConflictingField);
 
 // Given a meta-engine (represented by IEngineDetails), generate a Set of all source engines
 // who have schema conflicts in the context of that meta-engine
