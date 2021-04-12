@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues, rerender } from '../../../__mocks__';
+import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
@@ -79,24 +80,49 @@ describe('MultiInputRows', () => {
     expect(button.prop('isDisabled')).toEqual(true);
   });
 
-  it('calls the passed onSubmit callback when the submit button is clicked', () => {
-    setMockValues({ ...values, values: ['some value'] });
-    const wrapper = shallow(<MultiInputRows {...props} />);
-    wrapper.find('[data-test-subj="submitInputValuesButton"]').simulate('click');
+  describe('submit on button click', () => {
+    it('calls the passed onSubmit callback when the submit button is clicked', () => {
+      setMockValues({ ...values, values: ['some value'] });
+      const wrapper = shallow(<MultiInputRows {...props} />);
+      wrapper.find('[data-test-subj="submitInputValuesButton"]').simulate('click');
 
-    expect(props.onSubmit).toHaveBeenCalledWith(['some value']);
+      expect(props.onSubmit).toHaveBeenCalledWith(['some value']);
+    });
+
+    it('disables the submit button if no value fields have been filled', () => {
+      setMockValues({
+        ...values,
+        values: [''],
+        hasOnlyOneValue: true,
+        hasEmptyValues: true,
+      });
+      const wrapper = shallow(<MultiInputRows {...props} />);
+      const button = wrapper.find('[data-test-subj="submitInputValuesButton"]');
+
+      expect(button.prop('isDisabled')).toEqual(true);
+    });
+
+    it('does not render the submit button if the component submits on change', () => {
+      const wrapper = shallow(<MultiInputRows {...props} submitsOnChange />);
+
+      expect(wrapper.find('[data-test-subj="submitInputValuesButton"]').exists()).toBe(false);
+    });
   });
 
-  it('disables the submit button if no value fields have been filled', () => {
-    setMockValues({
-      ...values,
-      values: [''],
-      hasOnlyOneValue: true,
-      hasEmptyValues: true,
-    });
-    const wrapper = shallow(<MultiInputRows {...props} />);
-    const button = wrapper.find('[data-test-subj="submitInputValuesButton"]');
+  describe('submit on change', () => {
+    it('submits the current values dynamically on change', () => {
+      const wrapper = shallow(<MultiInputRows {...props} submitsOnChange />);
+      setMockValues({ ...values, values: ['updated'] });
+      rerender(wrapper);
 
-    expect(button.prop('isDisabled')).toEqual(true);
+      expect(props.onSubmit).toHaveBeenCalledWith(['updated']);
+    });
+
+    it('does not submit on initial render/mount (due to useRef)', () => {
+      setMockValues({ ...values, values: ['initial value'] });
+      shallow(<MultiInputRows {...props} submitsOnChange />);
+
+      expect(props.onSubmit).not.toHaveBeenCalled();
+    });
   });
 });

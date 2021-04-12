@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -25,6 +25,7 @@ import { filterEmptyValues } from './utils';
 interface Props {
   values: string[];
   onSubmit(values: string[]): void;
+  submitsOnChange?: boolean;
   submitButtonText?: string;
   addRowText?: string;
   deleteRowLabel?: string;
@@ -34,6 +35,7 @@ interface Props {
 export const MultiInputRows: React.FC<Props> = ({
   values: initialValues,
   onSubmit,
+  submitsOnChange = false,
   submitButtonText = CONTINUE_BUTTON_LABEL,
   addRowText = ADD_VALUE_BUTTON_LABEL,
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
@@ -42,6 +44,14 @@ export const MultiInputRows: React.FC<Props> = ({
   const logic = MultiInputRowsLogic({ values: initialValues });
   const { values, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
+
+  const hasChanged = useRef(false);
+  useEffect(() => {
+    if (submitsOnChange && hasChanged.current) {
+      onSubmit(filterEmptyValues(values));
+    }
+    hasChanged.current = true;
+  }, [values]);
 
   return (
     <>
@@ -65,15 +75,19 @@ export const MultiInputRows: React.FC<Props> = ({
       >
         {addRowText}
       </EuiButtonEmpty>
-      <EuiSpacer />
-      <EuiButton
-        fill
-        isDisabled={hasOnlyOneValue && hasEmptyValues}
-        onClick={() => onSubmit(filterEmptyValues(values))}
-        data-test-subj="submitInputValuesButton"
-      >
-        {submitButtonText}
-      </EuiButton>
+      {!submitsOnChange && (
+        <>
+          <EuiSpacer />
+          <EuiButton
+            fill
+            isDisabled={hasOnlyOneValue && hasEmptyValues}
+            onClick={() => onSubmit(filterEmptyValues(values))}
+            data-test-subj="submitInputValuesButton"
+          >
+            {submitButtonText}
+          </EuiButton>
+        </>
+      )}
     </>
   );
 };
