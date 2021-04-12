@@ -19,6 +19,7 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
 } from '../../common';
+import { PRECONFIGURATION_METADATA_INDEX } from '../constants';
 
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
@@ -69,13 +70,36 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
     policies.map(async (preconfiguredAgentPolicy) => {
-      const { created, policy, deleted } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
+      // Check to see if a preconfigured policy with te same preconfigurationId was already deleted by the user
+      try {
+        const preconfigurationId = String(preconfiguredAgentPolicy.preconfiguration_id);
+        const deletionRecord = await esClient.search({
+          index: PRECONFIGURATION_METADATA_INDEX,
+          body: {
+            query: {
+              match: {
+                deleted_preconfiguration_id: preconfigurationId,
+              },
+            },
+          },
+        });
+
+        const { total } = deletionRecord.body.hits;
+        const wasDeleted = (typeof total === 'number' ? total : total.value) > 0;
+        if (wasDeleted) {
+          return { created: false, deleted: preconfigurationId };
+        }
+      } catch (e) {
+        // If ES failed on an index not found error, ignore it. This means nothing has been deleted yet.
+        if (e.body.status !== 404) throw e;
+      }
+      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
         omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
 
-      if (!created) return { created, policy, deleted };
+      if (!created) return { created, policy };
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
       const installedPackagePolicies = await Promise.all(

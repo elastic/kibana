@@ -152,7 +152,6 @@ class AgentPolicyService {
   ): Promise<{
     created: boolean;
     policy?: AgentPolicy;
-    deleted?: string;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
     const preconfigurationId = String(id);
@@ -160,29 +159,6 @@ class AgentPolicyService {
       searchFields: ['preconfiguration_id'],
       search: escapeSearchQueryPhrase(preconfigurationId),
     };
-
-    // Check to see if a preconfigured policy with te same preconfigurationId was already deleted by the user
-    try {
-      const deletionRecord = await esClient.search({
-        index: PRECONFIGURATION_METADATA_INDEX,
-        body: {
-          query: {
-            match: {
-              deleted_preconfiguration_id: preconfigurationId,
-            },
-          },
-        },
-      });
-
-      const { total } = deletionRecord.body.hits;
-      const wasDeleted = (typeof total === 'number' ? total : total.value) > 0;
-      if (wasDeleted) {
-        return { created: false, deleted: preconfigurationId };
-      }
-    } catch (e) {
-      // If ES failed on an index not found error, ignore it. This means nothing has been deleted yet.
-      if (e.body.status !== 404) throw e;
-    }
 
     const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
       namespace: 'default',
