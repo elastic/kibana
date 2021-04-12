@@ -115,6 +115,28 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
       });
 
+      it('should create an ES ApiKey with metadata', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+          })
+          .expect(200);
+
+        const { body: apiKeyRes } = await es.security.getApiKey({
+          id: apiResponse.item.api_key_id,
+        });
+
+        // @ts-expect-error Metadata not yet in the client type
+        expect(apiKeyRes.api_keys[0].metadata).eql({
+          policy_id: 'policy1',
+          managed_by: 'fleet',
+          managed: true,
+          type: 'enroll',
+        });
+      });
+
       it('should create an ES ApiKey with limited privileges', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
