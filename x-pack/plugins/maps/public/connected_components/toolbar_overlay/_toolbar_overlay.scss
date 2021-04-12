@@ -39,30 +39,11 @@
 }
 
 .mapToolbarOverlay__buttonGroup {
+  @include mapToolbarButtonGroupBorderRadius;
   display: flex;
   flex-direction: column;
 
   .euiButtonIcon {
     border-radius: 0;
-
-    @include kbnThemeStyle($theme: 'v7') {
-      &:first-child {
-        border-radius: $euiBorderRadius $euiBorderRadius 0 0;
-      }
-
-      &:last-child {
-        border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
-      }
-    }
-
-    @include kbnThemeStyle($theme: 'v8') {
-      &:first-child {
-        border-radius: ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3)) 0 0;
-      }
-
-      &:last-child {
-        border-radius: 0 0 ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3));
-      }
-    }
   }
 }
