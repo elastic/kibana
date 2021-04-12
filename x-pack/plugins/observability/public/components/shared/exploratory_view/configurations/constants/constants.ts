@@ -8,6 +8,8 @@
 import { AppDataType, ReportViewTypeId } from '../../types';
 import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
 
+export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
+
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
   'user_agent.version': 'Browser version',

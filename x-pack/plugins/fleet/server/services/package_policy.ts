@@ -319,20 +319,14 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (parentAgentPolicy.is_managed) {
-        throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
-      }
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) =>
-            siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new IngestManagerError(
-          'There is already a package with the same name on this agent policy'
-        );
-      }
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) =>
+          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
