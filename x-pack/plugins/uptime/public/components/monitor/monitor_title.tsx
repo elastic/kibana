@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useMonitorId } from '../../hooks';
@@ -38,22 +39,40 @@ export const MonitorPageTitle: React.FC = () => {
 
   const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
 
+  const isBrowser = selectedMonitor?.monitor?.type === 'browser';
+
   useBreadcrumbs([{ text: nameOrId }]);
 
   return (
-    <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
-      <EuiFlexItem grow={false}>
-        <EuiTitle>
-          <h1 className="eui-textNoWrap">{nameOrId}</h1>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-        <EnableMonitorAlert
-          monitorId={monitorId}
-          monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h1 className="eui-textNoWrap">{nameOrId}</h1>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EnableMonitorAlert
+            monitorId={monitorId}
+            monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isBrowser && (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.uptime.monitorDetails.title.disclaimer.description"
+            defaultMessage="Beta"
+          />{' '}
+          <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" external>
+            <FormattedMessage
+              id="xpack.uptime.monitorDetails.title.disclaimer.link"
+              defaultMessage="See more"
+            />
+          </EuiLink>
+        </EuiText>
+      )}
+    </>
   );
 };
