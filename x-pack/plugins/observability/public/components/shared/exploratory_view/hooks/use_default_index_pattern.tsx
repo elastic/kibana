@@ -39,6 +39,7 @@ export function IndexPatternContextProvider({
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const loadIndexPattern = async (dataType: AppDataType) => {
+    setIndexPattern(undefined);
     const obsvIndexP = new ObservabilityIndexPatterns(data);
     const indPattern = await obsvIndexP.getIndexPattern(dataType);
     setIndexPattern(indPattern!);
