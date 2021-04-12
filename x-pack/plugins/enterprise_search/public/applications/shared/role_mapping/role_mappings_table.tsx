@@ -154,7 +154,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
                       {authProvider.map(getAuthProviderDisplayValue).join(', ')}
                     </EuiTableRowCell>
                   )}
-                  <EuiTableRowCell>
+                  <EuiTableRowCell align="right">
                     {id && <EuiLinkTo to={getRoleMappingPath(id)}>{MANAGE_BUTTON_LABEL}</EuiLinkTo>}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
