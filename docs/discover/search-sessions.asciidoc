@@ -11,16 +11,25 @@ allows {kib} to continue processing your request in the
 background.  Save your search session from *Discover* or *Dashboard*,
 and when your session is complete, view and manage it in *Stack Management*.
 
-[role="screenshot"]
-image::images/search-session.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
-
 Search sessions are <<search-session-settings-kb,enabled by default>>. Saving
 a search session is only available when
 <<set-time-filter,auto refresh>> is off.
 
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/mLR3mSW3N3utQrunxcn3Do.jpg"
+data-uuid="mLR3mSW3N3utQrunxcn3Do"
+data-v="4"
+data-type="inline"
+/>
+++++
 
 [float]
-==== Requirements
+==== Prerequisites
 
 
 * To save a session, you must have permissions for *Discover* and *Dashboard*,
