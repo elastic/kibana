@@ -35,7 +35,7 @@ describe('import_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -43,7 +43,7 @@ describe('import_rules_route', () => {
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules

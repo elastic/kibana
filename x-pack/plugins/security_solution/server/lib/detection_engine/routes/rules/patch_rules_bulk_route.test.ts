@@ -25,12 +25,12 @@ jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.alertsClient.update.mockResolvedValue(getResult(getQueryRuleParams())); // update succeeds
