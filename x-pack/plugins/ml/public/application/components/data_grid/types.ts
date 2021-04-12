@@ -59,6 +59,7 @@ export interface UseIndexDataReturnType
     UseDataGridReturnType,
     | 'chartsVisible'
     | 'chartsButtonVisible'
+    | 'ccsWarning'
     | 'columnsWithCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
@@ -84,6 +85,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
+  ccsWarning: boolean;
   chartsVisible: ChartsVisible;
   chartsButtonVisible: boolean;
   columnsWithCharts: EuiDataGridColumn[];
@@ -97,6 +99,7 @@ export interface UseDataGridReturnType {
   resetPagination: () => void;
   rowCount: number;
   rowCountRelation: RowCountRelation;
+  setCcsWarning: Dispatch<SetStateAction<boolean>>;
   setColumnCharts: Dispatch<SetStateAction<ChartData[]>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;

@@ -426,6 +426,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
       await actions.cold.setFreeze(true);
+      await actions.cold.toggleReadonly(true);
       await actions.cold.setIndexPriority('123');
 
       await actions.savePolicy();
@@ -445,6 +446,7 @@ describe('<EditPolicy /> serialization', () => {
                     },
                   },
                   "freeze": Object {},
+                  "readonly": Object {},
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -479,21 +481,84 @@ describe('<EditPolicy /> serialization', () => {
     });
   });
 
-  test('delete phase', async () => {
-    const { actions } = testBed;
-    await actions.delete.enable(true);
-    await actions.setWaitForSnapshotPolicy('test');
-    await actions.savePolicy();
-    const latestRequest = server.requests[server.requests.length - 1];
-    const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-    expect(entirePolicy.phases.delete).toEqual({
-      min_age: '365d',
-      actions: {
-        delete: {},
-        wait_for_snapshot: {
-          policy: 'test',
+  describe('frozen phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.frozen.enable(true);
+      await actions.frozen.setSearchableSnapshot('myRepo');
+
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.frozen).toEqual({
+        min_age: '0d',
+        actions: {
+          searchable_snapshot: { snapshot_repository: 'myRepo' },
         },
-      },
+      });
+    });
+
+    describe('deserialization', () => {
+      beforeEach(async () => {
+        const policyToEdit = getDefaultHotPhasePolicy('my_policy');
+        policyToEdit.policy.phases.frozen = {
+          min_age: '1234m',
+          actions: { searchable_snapshot: { snapshot_repository: 'myRepo' } },
+        };
+
+        httpRequestsMockHelpers.setLoadPolicies([policyToEdit]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('default value', async () => {
+        const { actions } = testBed;
+
+        await actions.savePolicy();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy.phases.frozen).toEqual({
+          min_age: '1234m',
+          actions: {
+            searchable_snapshot: {
+              snapshot_repository: 'myRepo',
+            },
+          },
+        });
+      });
+    });
+  });
+
+  describe('delete phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.delete.enable(true);
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
     });
   });
 });

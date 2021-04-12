@@ -15,6 +15,7 @@ const allowedExperimentalValues = Object.freeze({
   fleetServerEnabled: false,
   trustedAppsByPolicyEnabled: false,
   metricsEntitiesEnabled: false,
+  eventFilteringEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
