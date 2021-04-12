@@ -437,7 +437,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       null // needs to be stripped server-side
     );
 
-    const dsl = await searchSource.getSearchRequestBody();
+    const dsl = searchSource.getSearchRequestBody();
 
     const risonDsl = rison.encode(dsl);
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption } from '../../../../../../vis_default_editor/public';
 
-import { SeriesParam, ValueAxis } from '../../../../types';
+import { SeriesParam, ValueAxis, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
@@ -38,6 +38,7 @@ function ChartOptions({
   changeValueAxis,
   setParamByIndex,
 }: ChartOptionsParams) {
+  const [disabledMode, setDisabledMode] = useState<boolean>(false);
   const setChart: SetChart = useCallback(
     (paramName, value) => {
       setParamByIndex('seriesParams', index, paramName, value);
@@ -67,6 +68,20 @@ function ChartOptions({
     ],
     [valueAxes]
   );
+
+  useEffect(() => {
+    const valueAxisToMetric = valueAxes.find((valueAxis) => valueAxis.id === chart.valueAxis);
+    if (valueAxisToMetric) {
+      if (valueAxisToMetric.scale.mode === AxisMode.Percentage) {
+        setDisabledMode(true);
+        if (chart.mode !== ChartMode.Stacked) {
+          setChart('mode', ChartMode.Stacked);
+        }
+      } else if (disabledMode) {
+        setDisabledMode(false);
+      }
+    }
+  }, [valueAxes, chart, disabledMode, setChart, setDisabledMode]);
 
   return (
     <>
@@ -104,6 +119,7 @@ function ChartOptions({
             })}
             options={collections.chartModes}
             paramName="mode"
+            disabled={disabledMode}
             value={chart.mode}
             setValue={setChart}
           />
