@@ -52,6 +52,7 @@ import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
+import { DashboardConstants } from '../../dashboard_constants';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
@@ -109,6 +110,8 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
+  const stateTransferService = embeddable.getStateTransfer();
+
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
@@ -163,14 +166,14 @@ export function DashboardTopNav({
 
   const createNewVisType = useCallback(
     (newVisType: string) => async () => {
-      embeddable.getStateTransfer().navigateToEditor('visualize', {
+      stateTransferService.navigateToEditor('visualize', {
         path: `#/create?type=${encodeURIComponent(newVisType)}`,
         state: {
-          originatingApp: 'dashboards',
+          originatingApp: DashboardConstants.DASHBOARDS_ID,
         },
       });
     },
-    [embeddable]
+    [stateTransferService]
   );
 
   const clearAddPanel = useCallback(() => {
