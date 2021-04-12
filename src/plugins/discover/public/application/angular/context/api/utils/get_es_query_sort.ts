@@ -23,7 +23,6 @@ export function getEsQuerySort(
   nanos?: string
 ): [EsQuerySortValue, EsQuerySortValue] {
   const time = {} as Record<string, any>;
-  time[timeField] = {};
   time[timeField] = {
     order: sortDir,
     format: nanos ? 'strict_date_optional_time_nanos' : 'strict_date_optional_time',
