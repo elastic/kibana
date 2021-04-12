@@ -159,12 +159,13 @@ export class AnomalyExplorerChartsService {
     const halfPoints = Math.ceil(plotPoints / 2);
     const bounds = timeFilter.getActiveBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
+    const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
     let chartRange: ChartRange = {
       min: boundsMin
         ? Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin)
         : midpointMs - halfPoints * minBucketSpanMs,
-      max: bounds?.max
-        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf())
+      max: boundsMax
+        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, boundsMax)
         : midpointMs + halfPoints * minBucketSpanMs,
     };
 
@@ -210,15 +211,21 @@ export class AnomalyExplorerChartsService {
     }
 
     // Elasticsearch aggregation returns points at start of bucket,
-    // so align the min to the length of the longest bucket.
+    // so align the min to the length of the longest bucket,
+    // and use the start of the latest selected bucket in the check
+    // for too many selected buckets, respecting the max bounds set in the view.
     chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
     if (boundsMin !== undefined && chartRange.min < boundsMin) {
       chartRange.min = chartRange.min + maxBucketSpanMs;
     }
 
+    const selectedLatestBucketStart = boundsMax
+      ? Math.floor(Math.min(selectedLatestMs, boundsMax) / maxBucketSpanMs) * maxBucketSpanMs
+      : Math.floor(selectedLatestMs / maxBucketSpanMs) * maxBucketSpanMs;
+
     if (
-      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) &&
-      chartRange.max - chartRange.min < selectedLatestMs - selectedEarliestMs
+      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestBucketStart) &&
+      chartRange.max - chartRange.min < selectedLatestBucketStart - selectedEarliestMs
     ) {
       tooManyBuckets = true;
     }
