@@ -55,6 +55,7 @@ export const metricVisualization: Visualization<MetricState> = {
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
         defaultMessage: 'Tabular and single value',
       }),
+      sortPriority: 1,
     },
   ],
 
