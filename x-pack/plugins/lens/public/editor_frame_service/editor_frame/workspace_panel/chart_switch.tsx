@@ -219,12 +219,15 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       // reorganize visualizations in groups
       const grouped: Record<
         string,
-        Array<
-          VisualizationType & {
-            visualizationId: string;
-            selection: VisualizationSelection;
-          }
-        >
+        {
+          priority: number;
+          visualizations: Array<
+            VisualizationType & {
+              visualizationId: string;
+              selection: VisualizationSelection;
+            }
+          >;
+        }
       > = {};
       // Will need it later on to quickly pick up the metadata from it
       const lookup: Record<
@@ -240,13 +243,17 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
-            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || [];
+            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || {
+              priority: 0,
+              visualizations: [],
+            };
             const visualizationEntry = {
               ...visualizationType,
               visualizationId,
               selection: getSelection(visualizationId, visualizationType.id),
             };
-            grouped[visualizationType.groupLabel].push(visualizationEntry);
+            grouped[visualizationType.groupLabel].priority += visualizationType.sortPriority || 0;
+            grouped[visualizationType.groupLabel].visualizations.push(visualizationEntry);
             lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
           }
         }
@@ -254,9 +261,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 
       return {
         visualizationTypes: Object.keys(grouped)
-          .sort()
+          .sort((groupA, groupB) => {
+            return grouped[groupB].priority - grouped[groupA].priority;
+          })
           .flatMap((group): SelectableEntry[] => {
-            const visualizations = grouped[group];
+            const { visualizations } = grouped[group];
             if (visualizations.length === 0) {
               return [];
             }

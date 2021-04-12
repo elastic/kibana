@@ -176,9 +176,6 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -265,8 +262,6 @@ export const search = {
     toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };
