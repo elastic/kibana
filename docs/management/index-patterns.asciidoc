@@ -87,6 +87,11 @@ To query across all {es} clusters that have been configured for {ccs},
 use a standalone wildcard for your cluster name in your index
 pattern: `*:logstash-*`.
 
+You can use exclusions to exclude indices that might contain mapping errors.
+To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from 
+all clusters having a name starting with `cluster_`, you can use `cluster_*:logstash-*,cluster*:logstash-old*`.
+To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
+
 Once an index pattern is configured using the {ccs} syntax, all searches and
 aggregations using that index pattern in {kib} take advantage of {ccs}.
 
