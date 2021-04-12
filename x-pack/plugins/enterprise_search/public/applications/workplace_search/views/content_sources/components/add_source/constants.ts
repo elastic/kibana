@@ -188,28 +188,28 @@ export const CONFIGURED_SOURCES_EMPTY_STATE = i18n.translate(
 );
 
 export const CONFIGURED_ORG_SOURCES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.title',
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredOrgSources.title',
   {
     defaultMessage: 'Organization sources',
   }
 );
 
 export const CONFIGURED_ORG_SOURCES_BODY = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredOrgSources.body',
   {
     defaultMessage: 'These sources use one account to provide content for the search experience.',
   }
 );
 
 export const CONFIGURED_PRIVATE_SOURCES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.title',
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredPrivateSources.title',
   {
     defaultMessage: 'Private sources',
   }
 );
 
 export const CONFIGURED_PRIVATE_SOURCES_BODY = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredPrivateSources.body',
   {
     defaultMessage:
       "These sources allow your organization's users to use their own accounts and content in the search experience.",
