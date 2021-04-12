@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { DataType } from '../types';
 import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
@@ -15,6 +16,7 @@ import type {
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import { dateHistogramOperation } from './operations/definitions';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -44,6 +46,27 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     fieldCandidate !== null &&
     ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
   );
+}
+
+export function getBoundTimeFields(
+  layer: IndexPatternLayer | undefined,
+  indexPattern: { timeFieldName?: string | null }
+) {
+  const allDateHistogramFields = Object.values(layer?.columns || {})
+    .map((column) =>
+      column.operationType === dateHistogramOperation.type ? column.sourceField : null
+    )
+    .filter((field): field is string => Boolean(field));
+
+  if (allDateHistogramFields.length > 0) {
+    return uniq(allDateHistogramFields).sort();
+  }
+
+  if (indexPattern.timeFieldName) {
+    return [indexPattern.timeFieldName];
+  }
+
+  return [];
 }
 
 export function isColumnInvalid(

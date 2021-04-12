@@ -31,6 +31,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             fromDate: schema.string(),
             toDate: schema.string(),
             fieldName: schema.string(),
+            timeFieldNames: schema.arrayOf(schema.string()),
           },
           { unknowns: 'allow' }
         ),
@@ -38,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery, timeFieldNames } = req.body;
 
       const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -51,26 +52,23 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       try {
         const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
 
-        const timeFieldName = indexPattern.timeFieldName;
         const field = indexPattern.fields.find((f) => f.name === fieldName);
 
         if (!field) {
           throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
         }
 
-        const filter = timeFieldName
-          ? [
-              {
-                range: {
-                  [timeFieldName]: {
-                    gte: fromDate,
-                    lte: toDate,
-                  },
-                },
+        const filter = [
+          ...timeFieldNames.map((timeFieldName) => ({
+            range: {
+              [timeFieldName]: {
+                gte: fromDate,
+                lte: toDate,
               },
-              dslQuery,
-            ]
-          : [dslQuery];
+            },
+          })),
+          dslQuery,
+        ];
 
         const query = {
           bool: {

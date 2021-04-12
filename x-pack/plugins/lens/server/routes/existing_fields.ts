@@ -47,7 +47,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           dslQuery: schema.object({}, { unknowns: 'allow' }),
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
-          timeFieldName: schema.maybe(schema.string()),
+          timeFieldNames: schema.arrayOf(schema.string()),
         }),
       },
     },
@@ -94,7 +94,7 @@ async function fetchFieldExistence({
   dslQuery = { match_all: {} },
   fromDate,
   toDate,
-  timeFieldName,
+  timeFieldNames,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
@@ -102,7 +102,7 @@ async function fetchFieldExistence({
   dslQuery: object;
   fromDate?: string;
   toDate?: string;
-  timeFieldName?: string;
+  timeFieldNames: string[];
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const indexPattern = await indexPatternsService.get(indexPatternId);
@@ -114,7 +114,7 @@ async function fetchFieldExistence({
     dslQuery,
     client: context.core.elasticsearch.client.asCurrentUser,
     index: indexPattern.title,
-    timeFieldName: timeFieldName || indexPattern.timeFieldName,
+    timeFieldNames,
     fields,
   });
 
@@ -146,7 +146,7 @@ async function fetchIndexPatternStats({
   client,
   index,
   dslQuery,
-  timeFieldName,
+  timeFieldNames,
   fromDate,
   toDate,
   fields,
@@ -154,25 +154,22 @@ async function fetchIndexPatternStats({
   client: ElasticsearchClient;
   index: string;
   dslQuery: object;
-  timeFieldName?: string;
+  timeFieldNames: string[];
   fromDate?: string;
   toDate?: string;
   fields: Field[];
 }) {
-  const filter =
-    timeFieldName && fromDate && toDate
-      ? [
-          {
-            range: {
-              [timeFieldName]: {
-                gte: fromDate,
-                lte: toDate,
-              },
-            },
-          },
-          dslQuery,
-        ]
-      : [dslQuery];
+  const filter = [
+    ...timeFieldNames.map((timeFieldName) => ({
+      range: {
+        [timeFieldName]: {
+          gte: fromDate,
+          lte: toDate,
+        },
+      },
+    })),
+    dslQuery,
+  ];
 
   const query = {
     bool: {
@@ -187,7 +184,10 @@ async function fetchIndexPatternStats({
     body: {
       size: SAMPLE_SIZE,
       query,
-      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+      sort:
+        fromDate && toDate
+          ? timeFieldNames.map((timeFieldName) => ({ [timeFieldName]: 'desc' }))
+          : [],
       fields: ['*'],
       _source: false,
       runtime_mappings: runtimeFields.reduce((acc, field) => {

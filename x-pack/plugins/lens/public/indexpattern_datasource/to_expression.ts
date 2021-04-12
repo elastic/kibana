@@ -22,7 +22,7 @@ import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
-import { dateHistogramOperation } from './operations/definitions';
+import { getBoundTimeFields } from './utils';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -196,11 +196,7 @@ function getExpressionForLayer(
       }
     );
 
-    const allDateHistogramFields = Object.values(columns)
-      .map((column) =>
-        column.operationType === dateHistogramOperation.type ? column.sourceField : null
-      )
-      .filter((field): field is string => Boolean(field));
+    const boundTimeFields = getBoundTimeFields(layer, indexPattern);
 
     return {
       type: 'expression',
@@ -215,7 +211,7 @@ function getExpressionForLayer(
           aggs,
           metricsAtAllLevels: false,
           partialRows: false,
-          timeFields: allDateHistogramFields,
+          timeFields: boundTimeFields,
         }).toAst(),
         {
           type: 'function',

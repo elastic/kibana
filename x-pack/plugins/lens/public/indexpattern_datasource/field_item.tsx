@@ -75,6 +75,7 @@ export interface FieldItemProps {
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  boundTimeFields: string[];
 }
 
 interface State {
@@ -102,6 +103,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     exists,
     query,
     dateRange,
+    boundTimeFields,
     filters,
     hideDetails,
     itemIndex,
@@ -167,6 +169,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           fieldName: field.name,
+          timeFieldNames: boundTimeFields,
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {

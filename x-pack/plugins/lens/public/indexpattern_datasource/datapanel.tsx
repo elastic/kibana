@@ -6,7 +6,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, groupBy } from 'lodash';
+import { uniq, groupBy, isEqual } from 'lodash';
 import React, { useState, memo, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   EuiFlexGroup,
@@ -57,6 +57,7 @@ import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { FieldGroups, FieldList } from './field_list';
+import { getBoundTimeFields } from './utils';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
@@ -141,21 +142,39 @@ export function IndexPatternDataPanel({
     [setState]
   );
 
-  const indexPatternList = uniq(
-    Object.values(state.layers)
-      .map((l) => l.indexPatternId)
-      .concat(currentIndexPatternId)
-  )
-    .filter((id) => !!indexPatterns[id])
-    .sort((a, b) => a.localeCompare(b))
-    .map((id) => ({
-      id,
-      title: indexPatterns[id].title,
-      timeFieldName: indexPatterns[id].timeFieldName,
-      fields: indexPatterns[id].fields,
-      hasRestrictions: indexPatterns[id].hasRestrictions,
-    }));
+  const indexPatternList = useMemo(
+    () =>
+      uniq(
+        Object.values(state.layers)
+          .map((l) => l.indexPatternId)
+          .concat(currentIndexPatternId)
+      )
+        .filter((id) => !!indexPatterns[id])
+        .sort((a, b) => a.localeCompare(b))
+        .map((id) => ({
+          id,
+          title: indexPatterns[id].title,
+          timeFieldNames: getBoundTimeFields(
+            Object.values(state.layers).find((layer) => layer.indexPatternId === id),
+            indexPatterns[id]
+          ),
+          fields: indexPatterns[id].fields,
+          hasRestrictions: indexPatterns[id].hasRestrictions,
+        })),
+    [state.layers, indexPatterns, currentIndexPatternId]
+  );
 
+  const currentIndexPatternBoundTimeFields = indexPatternList.find(
+    (pattern) => pattern.id === currentIndexPatternId
+  )?.timeFieldNames;
+  const boundTimeFieldsRef = useRef<string[]>([]);
+  // only change the reference if the list actually changed
+  if (
+    currentIndexPatternBoundTimeFields &&
+    !isEqual(currentIndexPatternBoundTimeFields, boundTimeFieldsRef.current)
+  ) {
+    boundTimeFieldsRef.current = currentIndexPatternBoundTimeFields;
+  }
   const dslQuery = buildSafeEsQuery(
     indexPatterns[currentIndexPatternId] as IIndexPattern,
     query,
@@ -183,7 +202,7 @@ export function IndexPatternDataPanel({
           filters,
           dateRange.fromDate,
           dateRange.toDate,
-          indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
+          indexPatternList.map((x) => `${x.title}:${x.timeFieldNames.join(',')}`).join(','),
           state.indexPatterns,
         ]}
       />
@@ -232,6 +251,7 @@ export function IndexPatternDataPanel({
           existenceFetchFailed={state.existenceFetchFailed}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
+          boundTimeFields={boundTimeFieldsRef.current}
         />
       )}
     </>
@@ -284,6 +304,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts,
   dropOntoWorkspace,
   hasSuggestionForField,
+  boundTimeFields,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
   core: CoreStart;
@@ -297,6 +318,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   existenceFetchFailed?: boolean;
+  boundTimeFields: string[];
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -568,6 +590,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       query,
       filters,
       chartsThemeService: charts.theme,
+      boundTimeFields,
     }),
     [
       core,
@@ -576,6 +599,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       dateRange,
       query,
       filters,
+      boundTimeFields,
       localState.nameFilter,
       charts.theme,
     ]

@@ -398,7 +398,7 @@ export async function syncExistingFields({
     id: string;
     title: string;
     fields: IndexPatternField[];
-    timeFieldName?: string | null;
+    timeFieldNames: string[];
     hasRestrictions: boolean;
   }>;
   fetchJson: HttpSetup['post'];
@@ -419,11 +419,8 @@ export async function syncExistingFields({
       dslQuery,
       fromDate: dateRange.fromDate,
       toDate: dateRange.toDate,
+      timeFieldNames: pattern.timeFieldNames,
     };
-
-    if (pattern.timeFieldName) {
-      body.timeFieldName = pattern.timeFieldName;
-    }
 
     return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
       body: JSON.stringify(body),
