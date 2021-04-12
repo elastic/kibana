@@ -11,11 +11,7 @@ import { Map as MbMap } from 'mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';
-import {
-  DRAW_TYPE,
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../../../../common/constants';
+import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
