@@ -118,12 +118,15 @@ export class ExpressionLoader {
     return this.execution ? (this.execution.inspect() as Adapters) : undefined;
   }
 
-  update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
+  async update(
+    expression?: string | ExpressionAstExpression,
+    params?: IExpressionLoaderParams
+  ): Promise<void> {
     this.setParams(params);
 
     this.loadingSubject.next(true);
     if (expression) {
-      this.loadData(expression, this.params);
+      await this.loadData(expression, this.params);
     } else if (this.data) {
       this.render(this.data);
     }
