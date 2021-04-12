@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
-  describe('Cross cluster search test', async () => {
+  describe('Cross cluster search test in discover', async () => {
     const PageObjects = getPageObjects([
       'common',
       'settings',
@@ -22,10 +22,12 @@ export default ({ getService, getPageObjects }) => {
     const browser = getService('browser');
     const appsMenu = getService('appsMenu');
     const kibanaServer = getService('kibanaServer');
+    const queryBar = getService('queryBar');
+    const filterBar = getService('filterBar');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      // pincking relative time in timepicker isn't working.  This is also faster.
+      // picking relative time in timepicker isn't working.  This is also faster.
       // It's the default set, plus new "makelogs" +/- 3 days from now
       await kibanaServer.uiSettings.replace({
         'timepicker:quickRanges': `[
@@ -170,6 +172,35 @@ export default ({ getService, getPageObjects }) => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);
         expect(hitCount).to.be('28,010');
+      });
+    });
+
+    it('should reload the saved search with persisted query to show the initial hit count', async function () {
+      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      // apply query some changes
+      await queryBar.setQuery('success');
+      await queryBar.submitQuery();
+      await retry.try(async () => {
+        const hitCountNumber = await PageObjects.discover.getHitCount();
+        const hitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+        log.debug('### hit count = ' + hitCount);
+        expect(hitCount).to.be.greaterThan(25000);
+        expect(hitCount).to.be.lessThan(28000);
+      });
+    });
+
+    it('should add a phrases filter', async function () {
+      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      const hitCountNumber = await PageObjects.discover.getHitCount();
+      const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+      await filterBar.addFilter('extension.keyword', 'is', 'jpg');
+      expect(await filterBar.hasFilter('extension.keyword', 'jpg')).to.be(true);
+      await retry.try(async () => {
+        const hitCountNumber = await PageObjects.discover.getHitCount();
+        const hitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+        log.debug('### hit count = ' + hitCount);
+        expect(hitCount).to.be.greaterThan(15000);
+        expect(hitCount).to.be.lessThan(originalHitCount);
       });
     });
   });
