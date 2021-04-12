@@ -176,7 +176,8 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
-      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
+      ephemeralRunNow: (task: EphemeralTask, options?: Record<string, unknown>) =>
+        taskScheduling.ephemeralRunNow(task),
     };
   }
 

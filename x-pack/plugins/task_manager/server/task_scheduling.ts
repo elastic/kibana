@@ -126,6 +126,7 @@ export class TaskScheduling {
     task: EphemeralTask,
     options?: Record<string, unknown>
   ): Promise<RunNowResult> {
+    // console.log('ephemeralRunNow()', { task })
     const id = uuid.v4();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,

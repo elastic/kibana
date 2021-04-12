@@ -24,7 +24,11 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import {
+  EphemeralTask,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -143,6 +147,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
+  private ephemeralRunNow?: (task: EphemeralTask, options?: Record<string, unknown>) => void;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get('actions');
@@ -273,6 +278,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getUnsecuredSavedObjectsClient,
     } = this;
 
+    this.ephemeralRunNow = plugins.taskManager.ephemeralRunNow;
+
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
@@ -308,6 +315,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
+        ephemeralRunNow: this.ephemeralRunNow!,
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -442,6 +450,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       instantiateAuthorization,
       security,
+      ephemeralRunNow,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -465,6 +474,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
+            ephemeralRunNow: ephemeralRunNow!,
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

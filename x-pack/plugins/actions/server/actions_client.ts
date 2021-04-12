@@ -41,6 +41,7 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { EphemeralTask } from '../../task_manager/server';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -69,6 +70,7 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
+  ephemeralRunNow: (task: EphemeralTask) => void;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -89,6 +91,10 @@ export class ActionsClient {
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly ephemeralRunNow: (
+    task: EphemeralTask,
+    options?: Record<string, unknown>
+  ) => void;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -99,6 +105,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    ephemeralRunNow,
     request,
     authorization,
     auditLogger,
@@ -110,6 +117,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.ephemeralRunNow = ephemeralRunNow;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -483,6 +491,20 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async executeEphemeralTask(
+    task: EphemeralTask,
+    options?: Record<string, unknown>
+  ): Promise<void> {
+    // const { source } = options;
+    // if (
+    //   (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+    //   AuthorizationMode.RBAC
+    // ) {
+    //   await this.authorization.ensureAuthorized('execute');
+    // }
+    return this.ephemeralRunNow(task, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {
