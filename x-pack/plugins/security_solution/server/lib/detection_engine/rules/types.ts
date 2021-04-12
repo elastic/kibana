@@ -173,7 +173,7 @@ export interface IRuleAssetSOAttributes extends Record<string, any> {
 export interface IRuleAssetSavedObject {
   type: string;
   id: string;
-  attributes: Array<SavedObject<IRuleAssetSOAttributes & SavedObjectAttributes>>;
+  attributes: IRuleAssetSOAttributes & SavedObjectAttributes;
 }
 
 export interface HapiReadableStream extends Readable {

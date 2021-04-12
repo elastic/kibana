@@ -20,6 +20,8 @@ import { BadRequestError } from '../errors/bad_request_error';
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
 import { RuleAssetSavedObjectsClient } from './rule_asset_saved_objects_client';
+import { IRuleAssetSOAttributes } from './types';
+import { SavedObjectAttributes } from '../../../../../../../src/core/types';
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -54,17 +56,44 @@ export const validateAllPrepackagedRules = (
 };
 
 /**
+ * Validate the rules from Saved Objects created by Fleet.
+ */
+export const validateAllRuleSavedObjects = (
+  rules: Array<IRuleAssetSOAttributes & SavedObjectAttributes>
+): AddPrepackagedRulesSchemaDecoded[] => {
+  return rules.map((rule) => {
+    const decoded = addPrepackagedRulesSchema.decode(rule);
+    const checked = exactCheck(rule, decoded);
+
+    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchemaDecoded => {
+      const ruleName = rule.name ? rule.name : '(rule name unknown)';
+      const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
+      throw new BadRequestError(
+        `name: "${ruleName}", rule_id: "${ruleId}" within the security-rule saved object ` +
+          `is not a valid detection engine rule. Expect the system ` +
+          `to not work with pre-packaged rules until this rule is fixed ` +
+          `or the file is removed. Error is: ${formatErrors(
+            errors
+          ).join()}, Full rule contents are:\n${JSON.stringify(rule, null, 2)}`
+      );
+    };
+
+    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchemaDecoded => {
+      return schema as AddPrepackagedRulesSchemaDecoded;
+    };
+    return pipe(checked, fold(onLeft, onRight));
+  });
+};
+
+/**
  * Retrieve and validate rules that were installed from Fleet as saved objects.
  */
 export const getFleetInstalledRules = async (
   client: RuleAssetSavedObjectsClient
 ): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
   const fleetResponse = await client.all();
-  const fleetRules = fleetResponse.map(
-    // @ts-expect-error data is too loosely typed
-    (so) => so.attributes as AddPrepackagedRulesSchema
-  );
-  return validateAllPrepackagedRules(fleetRules);
+  const fleetRules = fleetResponse.map((so) => so.attributes);
+  return validateAllRuleSavedObjects(fleetRules);
 };
 
 export const getPrepackagedRules = (
