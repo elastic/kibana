@@ -21,8 +21,5 @@ export const isoToEpochRt = new t.Type<number, string, unknown>(
         ? t.failure(input, context)
         : t.success(epochDate);
     }),
-  (a) => {
-    const d = new Date(a);
-    return d.toISOString();
-  }
+  (output) => new Date(output).toISOString()
 );

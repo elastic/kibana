@@ -206,6 +206,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_DELETE",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_DELETE",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -248,6 +249,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -262,6 +270,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_DELETE -> FATAL",
           Object {
+            "batchSize": 1000,
             "controlState": "FATAL",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -307,6 +316,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -413,6 +429,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_REINDEX",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_REINDEX",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -453,6 +470,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -464,6 +488,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_DELETE",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -507,6 +532,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",

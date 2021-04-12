@@ -46,6 +46,7 @@ describe('migrations v2 model', () => {
     retryCount: 0,
     retryDelay: 0,
     retryAttempts: 15,
+    batchSize: 1000,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -68,6 +69,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    unusedTypesToExclude: Option.some(['unused-fleet-agent-events']),
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -1182,6 +1184,7 @@ describe('migrations v2 model', () => {
   describe('createInitialState', () => {
     const migrationsConfig = ({
       retryAttempts: 15,
+      batchSize: 1000,
     } as unknown) as SavedObjectsMigrationConfigType;
     it('creates the initial state for the model based on the passed in paramaters', () => {
       expect(
@@ -1197,6 +1200,7 @@ describe('migrations v2 model', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
+          "batchSize": 1000,
           "controlState": "INIT",
           "currentAlias": ".kibana_task_manager",
           "indexPrefix": ".kibana_task_manager",
@@ -1238,6 +1242,13 @@ describe('migrations v2 model', () => {
                 "type": "keyword",
               },
             },
+          },
+          "unusedTypesToExclude": Object {
+            "_tag": "Some",
+            "value": Array [
+              "fleet-agent-events",
+              "tsvb-validation-telemetry",
+            ],
           },
           "versionAlias": ".kibana_task_manager_8.1.0",
           "versionIndex": ".kibana_task_manager_8.1.0_001",

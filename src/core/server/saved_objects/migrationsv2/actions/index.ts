@@ -9,11 +9,12 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { flow } from 'fp-ts/lib/function';
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { flow } from 'fp-ts/lib/function';
+import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
@@ -24,13 +25,10 @@ import {
 export type { RetryableEsClientError };
 
 /**
- * Batch size for updateByQuery, reindex & search operations. Smaller batches
- * reduce the memory pressure on Elasticsearch and Kibana so are less likely
- * to cause failures.
- * TODO (profile/tune): How much smaller can we make this number before it
- * starts impacting how long migrations take to perform?
+ * Batch size for updateByQuery and reindex operations.
+ * Uses the default value of 1000 for Elasticsearch reindex operation.
  */
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 1_000;
 const DEFAULT_TIMEOUT = '60s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
@@ -439,7 +437,12 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>,
-  requireAlias: boolean
+  requireAlias: boolean,
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be availble in the upgraded index.
+   */
+  unusedTypesToExclude: Option.Option<string[]>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -453,6 +456,15 @@ export const reindex = (
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
+          // Exclude saved object types
+          query: Option.fold<string[], QueryContainer | undefined>(
+            () => undefined,
+            (types) => ({
+              bool: {
+                must_not: types.map((type) => ({ term: { type } })),
+              },
+            })
+          )(unusedTypesToExclude),
         },
         dest: {
           index: targetIndex,
@@ -839,6 +851,12 @@ export interface SearchResponse {
   outdatedDocuments: SavedObjectsRawDoc[];
 }
 
+interface SearchForOutdatedDocumentsOptions {
+  batchSize: number;
+  targetIndex: string;
+  outdatedDocumentsQuery?: estypes.QueryContainer;
+}
+
 /**
  * Search for outdated saved object documents with the provided query. Will
  * return one batch of documents. Searching should be repeated until no more
@@ -846,18 +864,17 @@ export interface SearchResponse {
  */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
-  index: string,
-  query: Record<string, unknown>
+  options: SearchForOutdatedDocumentsOptions
 ): TaskEither.TaskEither<RetryableEsClientError, SearchResponse> => () => {
   return client
     .search<SavedObjectsRawDocSource>({
-      index,
+      index: options.targetIndex,
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
-      size: BATCH_SIZE,
+      size: options.batchSize,
       body: {
-        query,
+        query: options.outdatedDocumentsQuery,
         // Optimize search performance by sorting by the "natural" index order
         sort: ['_doc'],
       },
