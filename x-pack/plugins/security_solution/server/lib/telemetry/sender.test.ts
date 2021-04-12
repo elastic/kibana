@@ -41,6 +41,7 @@ describe('TelemetryEventsSender', () => {
           },
           file: {
             size: 3,
+            created: 0,
             path: 'X',
             test: 'me',
             another: 'nope',
@@ -66,6 +67,20 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          process: {
+            name: 'foo.exe',
+            nope: 'nope',
+            executable: null, // null fields are never allowlisted
+          },
+          Target: {
+            process: {
+              name: 'bar.exe',
+              nope: 'nope',
+              thread: {
+                id: 1234,
+              },
+            },
+          },
         },
       ];
 
@@ -85,6 +100,7 @@ describe('TelemetryEventsSender', () => {
           },
           file: {
             size: 3,
+            created: 0,
             path: 'X',
             Ext: {
               code_signature: {
@@ -104,6 +120,17 @@ describe('TelemetryEventsSender', () => {
           host: {
             os: {
               name: 'windows',
+            },
+          },
+          process: {
+            name: 'foo.exe',
+          },
+          Target: {
+            process: {
+              name: 'bar.exe',
+              thread: {
+                id: 1234,
+              },
             },
           },
         },

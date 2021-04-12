@@ -78,7 +78,6 @@ async function migrateAgents() {
           .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, so.id);
 
         await invalidateAPIKeys(
-          soClient,
           [attributes.access_api_key_id, attributes.default_api_key_id].filter(
             (keyId): keyId is string => keyId !== undefined
           )
@@ -178,6 +177,7 @@ async function migrateAgentPolicies() {
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
         track_total_hits: true,
+        ignore_unavailable: true,
       });
 
       // @ts-expect-error value is number | TotalHits

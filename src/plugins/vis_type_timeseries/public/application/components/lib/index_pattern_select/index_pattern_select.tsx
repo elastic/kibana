@@ -23,6 +23,7 @@ import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
+import { DefaultIndexPatternContext } from '../../../contexts/default_index_context';
 
 const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
 
@@ -61,6 +62,8 @@ export const IndexPatternSelect = ({
 }: IndexPatternSelectProps) => {
   const htmlId = htmlIdGenerator();
   const panelModel = useContext(PanelModelContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
+
   const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>();
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
@@ -146,7 +149,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={panelModel?.default_index_pattern ?? ''}
+        placeholder={defaultIndex?.title ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>
