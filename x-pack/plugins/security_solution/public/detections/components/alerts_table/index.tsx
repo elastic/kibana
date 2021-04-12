@@ -15,7 +15,6 @@ import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
-import { REQUIRED_INDICATOR_MATCH_FIELDS } from '../../../../common/cti/constants';
 import { HeaderSection } from '../../../common/components/header_section';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -319,10 +318,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       id: timelineId,
       loadingText: i18n.LOADING_ALERTS,
       selectAll: false,
-      // TODO in the future, our alerts timeline fields should be derived from the
-      // fields required by enabled row renderers and other functionality; for now we unconditionally
-      // add the superset of fields.
-      queryFields: [...requiredFieldsForActions, ...REQUIRED_INDICATOR_MATCH_FIELDS],
+      queryFields: requiredFieldsForActions,
       title: '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
