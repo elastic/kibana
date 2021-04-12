@@ -20,7 +20,7 @@ export default function upgradeAssistantFunctionalTests({
   const testSubjects = getService('testSubjects');
 
   // Updated for the hiding of the UA UI.
-  describe('Upgrade Checkup', function () {
+  describe.only('Upgrade Checkup', function () {
     this.tags('includeFirefox');
 
     before(async () => {
