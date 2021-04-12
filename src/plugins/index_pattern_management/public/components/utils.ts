@@ -14,7 +14,7 @@ export async function getIndexPatterns(
   indexPatternManagementStart: IndexPatternManagementStart,
   indexPatternsService: IndexPatternsContract
 ) {
-  const existingIndexPatterns = await indexPatternsService.getIdsWithTitle();
+  const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
   const indexPatternsListItems = await Promise.all(
     existingIndexPatterns.map(async ({ id, title }) => {
       const isDefault = defaultIndex === id;
