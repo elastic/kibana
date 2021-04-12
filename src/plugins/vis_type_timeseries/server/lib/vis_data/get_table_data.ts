@@ -58,8 +58,8 @@ export async function getTableData(
   });
 
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && panelIndex.indexPattern?.title) {
-      const fields = await extractFields(panelIndex.indexPattern.title);
+    if (panel.pivot_id && panelIndex.indexPattern?.id) {
+      const fields = await extractFields({ id: panelIndex.indexPattern.id });
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
