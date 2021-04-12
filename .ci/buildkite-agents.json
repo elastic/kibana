@@ -45,7 +45,7 @@
         "idleTimeoutSecs": 600,
         "exitAfterOneJob": false,
         "imageFamily": "kibana-bk-dev-agents",
-        "machineType": "c2-standard-4",
+        "machineType": "c2-standard-8",
         "diskType": "pd-ssd",
         "diskSizeGb": 128
       },
