@@ -30,7 +30,8 @@ const paths = [
 export const calculateLabel = (
   metric: MetricsItemsSchema,
   metrics: MetricsItemsSchema[] = [],
-  fields: SanitizedFieldType[] = []
+  fields: SanitizedFieldType[] = [],
+  isThrowErrorOnFieldNotFound: boolean = true
 ): string => {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
@@ -68,7 +69,7 @@ export const calculateLabel = (
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: extractFieldLabel(fields, metric.field!) },
+      values: { field: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound) },
     });
   }
   if (metric.type === 'static') {
@@ -112,7 +113,7 @@ export const calculateLabel = (
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {
       lookupMetricType: lookup[metric.type],
-      metricField: extractFieldLabel(fields, metric.field!),
+      metricField: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound),
     },
   });
 };

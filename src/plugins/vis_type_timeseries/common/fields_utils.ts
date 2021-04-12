@@ -30,15 +30,20 @@ export class FieldNotFoundError extends Error {
   }
 }
 
-export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
+export const extractFieldLabel = (
+  fields: SanitizedFieldType[],
+  name: string,
+  isThrowErrorOnFieldNotFound: boolean = true
+) => {
   if (fields.length && name) {
     const field = fields.find((f) => f.name === name);
 
     if (field) {
       return field.label || field.name;
     }
-
-    throw new FieldNotFoundError(name);
+    if (isThrowErrorOnFieldNotFound) {
+      throw new FieldNotFoundError(name);
+    }
   }
   return name;
 };
