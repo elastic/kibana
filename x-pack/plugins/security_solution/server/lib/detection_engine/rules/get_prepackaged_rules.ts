@@ -83,10 +83,10 @@ export const getLatestPrepackagedRules = async (
 
   // check the rules installed via fleet and create/update if the version is newer
   const fleetRules = await getFleetInstalledRules(client);
-  const fleetUpdates = fleetRules.filter(
-    // @ts-expect-error data ruleMap.get() is safe because of ruleMap.has() check
-    (r) => !ruleMap.has(r.rule_id) || ruleMap.get(r.rule_id).version < r.version
-  );
+  const fleetUpdates = fleetRules.filter((r) => {
+    const rule = ruleMap.get(r.rule_id);
+    return rule == null || rule.version < r.version;
+  });
 
   // add the new or updated rules to the map
   fleetUpdates.forEach((r) => ruleMap.set(r.rule_id, r));
