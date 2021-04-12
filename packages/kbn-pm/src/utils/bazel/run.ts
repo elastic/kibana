@@ -13,6 +13,7 @@ import { tap } from 'rxjs/operators';
 import { observeLines } from '@kbn/dev-utils/stdio';
 import { spawn } from '../child_process';
 import { log } from '../log';
+import { CliError } from '../errors';
 
 type BazelCommandRunner = 'bazel' | 'ibazel';
 
@@ -51,7 +52,7 @@ async function runBazelCommandWithRunner(
   try {
     await bazelProc;
   } catch {
-    // no-op
+    throw new CliError(`The bazel command that was running failed to complete.`);
   }
   await bazelLogs$.toPromise();
   await bazelLogSubscription.unsubscribe();
