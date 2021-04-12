@@ -78,7 +78,7 @@ describe('ResultHeader', () => {
       expect(wrapper.find(ResultActions).exists()).toBe(true);
     });
 
-    it('does not render an', () => {
+    it('does not render ResultActions if no actions are passed', () => {
       const wrapper = shallow(<ResultHeader {...props} actions={[]} />);
       expect(wrapper.find(ResultActions).exists()).toBe(false);
     });
