@@ -78,6 +78,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       title: PLUGIN_NAME,
       order: 9030,
       updater$: this.appUpdater$,
+      navLinkStatus: AppNavLinkStatus.hidden,
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
