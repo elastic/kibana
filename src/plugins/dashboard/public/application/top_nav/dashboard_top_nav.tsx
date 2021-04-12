@@ -11,7 +11,6 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
-// import { VisualizeInput } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
