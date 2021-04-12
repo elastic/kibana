@@ -9,7 +9,7 @@
 import moment, { Moment } from 'moment';
 import React, { FC } from 'react';
 
-import { LineAnnotation, AnnotationDomainTypes, LineAnnotationStyle } from '@elastic/charts';
+import { LineAnnotation, AnnotationDomainType, LineAnnotationStyle } from '@elastic/charts';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 interface CurrentTimeProps {
