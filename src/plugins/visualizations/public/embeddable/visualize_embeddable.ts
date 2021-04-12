@@ -149,8 +149,9 @@ export class VisualizeEmbeddable
     }
 
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getUpdated$().subscribe((value) => {
         const isDirty = this.handleChanges();
+
         if (isDirty && this.handler) {
           this.updateHandler();
         }
