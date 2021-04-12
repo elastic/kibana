@@ -1,7 +1,7 @@
 {
   "id": "security_network",
   "title": "Security: Network",
-  "description": "Detect anomalous network activity in your ECS_compatable network logs.",
+  "description": "Detect anomalous network activity in your ECS-compatible network logs.",
   "type": "network data",
   "logoFile": "logo.json",
   "defaultIndexPattern": [
