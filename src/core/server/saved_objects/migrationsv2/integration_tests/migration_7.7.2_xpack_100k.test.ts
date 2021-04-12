@@ -17,7 +17,7 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
+describe('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
