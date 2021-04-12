@@ -211,6 +211,8 @@ export function registerTransactionDurationAnomalyAlertType({
 
           const parsedEnvironment = parseEnvironmentUrlParam(environment);
 
+          const severityLevel = getSeverity(score);
+
           services
             .alertWithLifecycle({
               id: [
@@ -227,6 +229,8 @@ export function registerTransactionDurationAnomalyAlertType({
                   ? { [SERVICE_ENVIRONMENT]: environment }
                   : {}),
                 [TRANSACTION_TYPE]: transactionType,
+                'kibana.rac.alert.severity.level': severityLevel,
+                'kibana.rac.alert.severity.value': score,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -234,7 +238,7 @@ export function registerTransactionDurationAnomalyAlertType({
               transactionType,
               environment,
               threshold: selectedOption?.label,
-              triggerValue: getSeverity(score),
+              triggerValue: severityLevel,
             });
         });
 

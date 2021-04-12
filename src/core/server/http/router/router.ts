@@ -8,6 +8,7 @@
 
 import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from '@hapi/boom';
+import { inspect } from 'util';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
@@ -272,7 +273,7 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
-      this.log.error(e);
+      this.log.error(inspect(e, { depth: null }));
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(

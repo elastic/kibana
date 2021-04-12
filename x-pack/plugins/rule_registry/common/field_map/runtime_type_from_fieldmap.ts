@@ -54,9 +54,7 @@ const createCastSingleRt = <T extends t.Type<any>>(type: T): CastSingle<T> => {
   return new t.Type('castSingle', union.is, union.validate, (a) => (Array.isArray(a) ? a[0] : a));
 };
 
-type SetOptional<
-  T extends Record<string, { required?: boolean; array?: boolean; type: string }>
-> = Optional<
+type SetOptional<T extends FieldMap> = Optional<
   T,
   {
     [key in keyof T]: T[key]['required'] extends true ? never : key;
@@ -71,11 +69,11 @@ type TypeOfField<T extends { type: string; array?: boolean }> =
   | t.TypeOf<EsFieldTypeOf<T['type']>>
   | Array<t.TypeOf<EsFieldTypeOf<T['type']>>>;
 
-type OutputOf<T extends Partial<FieldMap>> = {
+type OutputOf<T extends FieldMap> = {
   [key in keyof T]: OutputOfField<Exclude<T[key], undefined>>;
 };
 
-type TypeOf<T extends Partial<FieldMap>> = {
+type TypeOf<T extends FieldMap> = {
   [key in keyof T]: TypeOfField<Exclude<T[key], undefined>>;
 };
 

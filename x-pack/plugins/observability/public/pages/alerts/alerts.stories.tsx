@@ -11,7 +11,7 @@ import { AlertsPage } from '.';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { AlertsFlyout } from './alerts_flyout';
-import { AlertItem } from './alerts_table';
+import { TopAlert } from './alerts_table';
 import { eventLogPocData, wireframeData } from './example_data';
 
 export default {

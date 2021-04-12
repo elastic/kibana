@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type FieldMap = Record<string, { type: string; required?: boolean; array?: boolean }>;
+export interface FieldMap {
+  [key: string]: { type: string; required?: boolean; array?: boolean };
+}

@@ -15,7 +15,8 @@ import {
   EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
+import { parse, format } from 'url';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -33,16 +34,13 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const {
     core,
     appMountParameters: { history },
+    observabilityRuleRegistry,
   } = usePluginContext();
   const { prepend } = core.http.basePath;
 
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
   } = routeParams;
-
-  const { start, end } = useMemo(() => {
-    return getAbsoluteDateRange({ rangeFrom, rangeTo });
-  }, [rangeFrom, rangeTo]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
@@ -52,6 +50,8 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   const { data: topAlerts } = useFetcher(
     ({ signal }) => {
+      const { start, end } = getAbsoluteDateRange({ rangeFrom, rangeTo });
+
       if (!start || !end) {
         return;
       }
@@ -65,9 +65,40 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             kuery,
           },
         },
+      }).then((alerts) => {
+        return alerts.map((alert) => {
+          const ruleType = observabilityRuleRegistry.getTypeByRuleId(alert['rule.id']);
+          const formatted = {
+            link: undefined,
+            reason: alert['rule.name'],
+            ...(ruleType?.format?.({ alert }) ?? {}),
+          };
+
+          const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
+
+          return {
+            ...formatted,
+            link: parsedLink
+              ? format({
+                  ...parsedLink,
+                  query: {
+                    ...parsedLink.query,
+                    rangeFrom,
+                    rangeTo,
+                  },
+                })
+              : undefined,
+            active: alert['event.action'] !== 'close',
+            severityLevel: alert['kibana.rac.alert.severity.level'],
+            start: new Date(alert['kibana.rac.alert.start']).getTime(),
+            duration: alert['kibana.rac.alert.duration.us'],
+            ruleCategory: alert['rule.category'],
+            ruleName: alert['rule.name'],
+          };
+        });
       });
     },
-    [start, end, kuery]
+    [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
   );
 
   return (

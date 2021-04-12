@@ -19,32 +19,31 @@ import React from 'react';
 import { asDuration } from '../../../common/utils/formatters';
 import { TopAlert } from './alerts_table';
 
-type AlertsFlyoutProps = TopAlert & EuiFlyoutProps;
+type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
 
 export function AlertsFlyout(props: AlertsFlyoutProps) {
-  const { onClose, active, duration, ruleCategory, ruleName } = props;
-  const timestamp = props['@timestamp'];
+  const { onClose, alert } = props;
 
   const overviewListItems = [
     {
       title: 'Status',
-      description: active ? 'Active' : 'Recovered',
+      description: alert.active ? 'Active' : 'Recovered',
     },
-    // {
-    //   title: 'Severity',
-    //   description: severity || '-', // TODO: badge and "(changed 2 min ago)"
-    // },
+    {
+      title: 'Severity',
+      description: alert.severityLevel || '-', // TODO: badge and "(changed 2 min ago)"
+    },
     // {
     //   title: 'Affected entity',
     //   description: affectedEntity || '-', // TODO: link to entity
     // },
     {
       title: 'Triggered',
-      description: timestamp, // TODO: format date
+      description: alert.start, // TODO: format date
     },
     {
       title: 'Duration',
-      description: asDuration(duration, { extended: true }) || '-', // TODO: format duration
+      description: asDuration(alert.duration, { extended: true }) || '-', // TODO: format duration
     },
     // {
     //   title: 'Expected value',
@@ -55,8 +54,8 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
     //   description: actualValue || '-',
     // },
     {
-      title: 'Type',
-      description: ruleCategory || '-',
+      title: 'Rule type',
+      description: alert.ruleCategory || '-',
     },
   ];
 
@@ -112,7 +111,7 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="xs">
-          <h2>{ruleName}</h2>
+          <h2>{alert.ruleName}</h2>
         </EuiTitle>
         <EuiTabbedContent size="s" tabs={tabs} />
       </EuiFlyoutHeader>
