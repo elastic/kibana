@@ -31,6 +31,50 @@ You do not need to configure any additional settings to use the
 |===
 
 [float]
+[[authentication-security-settings]]
+==== Authentication security settings
+
+You configure the authentication settings in the `xpack.security.authc.providers` namespace. For more information, refer to <<kibana-authentication>>.
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers`
+| Specifies the types of authentication providers.
+|===
+
+For example:
+
+[source,yml]
+--------------------------------------------------
+xpack.security.authc.providers: [saml, basic, oidc]
+--------------------------------------------------
+
+[float]
+[[saml-authentication-provider-settings]]
+===== SAML authentication provider settings
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`saml.<provider-name>.realm`
+| When specified in `xpack.security.authc.providers`, the SAML realm in {es} that the `saml` provider should use.
+
+| `xpack.security.authc.saml.maxRedirectURLSize`
+| Specifies the maximum size of the URL that {kib} is allowed to store during the SAML handshake.
+|===
+
+[float]
+[[oidc-authentication-provider-settings]]
+===== OpenID Connect authentication provider setting
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`oidc.<provider-name>.realm`
+| When specified in `xpack.security.authc.providers`, the OpenID Connect realm in {es} that the `oidc` provider should use.
+|===
+
+[float]
 [[security-ui-settings]]
 ==== User interface security settings
 
