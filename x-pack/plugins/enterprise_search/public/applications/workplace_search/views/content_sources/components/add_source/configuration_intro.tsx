@@ -54,7 +54,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
       responsive={false}
     >
       <EuiFlexItem>
-        <EuiPanel color="subdued">
+        <EuiPanel color="subdued" paddingSize="none">
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="stretch"
