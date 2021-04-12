@@ -53,7 +53,6 @@ search: {
             timeRange: import("../common").TimeRange | undefined;
         } | undefined;
     };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
     tabifyAggResponse: typeof tabifyAggResponse;
     tabifyGetColumns: typeof tabifyGetColumns;

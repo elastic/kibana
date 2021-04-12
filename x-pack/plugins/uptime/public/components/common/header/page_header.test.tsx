@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { PageHeader } from './page_header';
 import { Ping } from '../../../../common/runtime_types';
-import { renderWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { renderWithRouter } from '../../../lib';
 import { mockReduxHooks } from '../../../lib/helper/test_helpers';
 
 describe('PageHeader', () => {

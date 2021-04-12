@@ -2089,6 +2089,38 @@ describe('state_helpers', () => {
       });
     });
 
+    it('should remove operations indirectly referencing unavailable fields', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            label: '',
+            dataType: 'number',
+            operationType: 'moving_average',
+            isBucketed: false,
+            scale: 'ratio',
+            references: ['col2'],
+            timeScale: undefined,
+            filter: undefined,
+            params: {
+              window: 7,
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'average',
+            sourceField: 'xxx',
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      expect(updatedLayer.columnOrder).toEqual([]);
+      expect(updatedLayer.columns).toEqual({});
+    });
+
     it('should remove operations referencing fields with insufficient capabilities', () => {
       const layer: IndexPatternLayer = {
         columnOrder: ['col1', 'col2'],
