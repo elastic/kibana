@@ -10,7 +10,6 @@ import {
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { environmentQuery, kqlQuery, rangeQuery } from '../../utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -64,25 +63,16 @@ export async function getServiceInstanceMetadataDetails({
       },
     });
 
-    const sample = response.hits.hits[0]?._source as TransactionRaw | undefined;
+    const sample = response.hits.hits[0]?._source;
 
     if (!sample) {
       return {};
     }
 
-    const {
-      agent,
-      service,
-      container,
-      kubernetes,
-      host,
-      cloud,
-      timestamp,
-    } = sample;
+    const { agent, service, container, kubernetes, host, cloud } = sample;
 
     return {
       '@timestamp': sample['@timestamp'],
-      timestamp,
       agent,
       service,
       container,

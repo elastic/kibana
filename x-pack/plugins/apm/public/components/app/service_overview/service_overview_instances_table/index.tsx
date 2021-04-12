@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -74,6 +74,11 @@ export function ServiceOverviewInstancesTable({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>
   >({});
+
+  useEffect(() => {
+    // Closes any open rows when fetching new items
+    setItemIdToExpandedRowMap({});
+  }, [status]);
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;

@@ -57,8 +57,8 @@ export function getMenuSections({
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
-  const time = instanceDetails.timestamp?.us
-    ? Math.round(instanceDetails.timestamp.us / 1000)
+  const time = instanceDetails['@timestamp']
+    ? new Date(instanceDetails['@timestamp']).valueOf()
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
 

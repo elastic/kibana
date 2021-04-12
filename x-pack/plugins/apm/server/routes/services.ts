@@ -716,6 +716,7 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceThroughputRoute)
   .add(serviceInstancesPrimaryStatisticsRoute)
   .add(serviceInstancesComparisonStatisticsRoute)
+  .add(serviceInstancesMetadataDetails)
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute);
