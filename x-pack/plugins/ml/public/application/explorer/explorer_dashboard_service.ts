@@ -107,6 +107,9 @@ const setFilterDataActionCreator = (
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
+  clearExplorerData: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
+  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
@@ -136,6 +139,9 @@ export const explorerService = {
   },
   setFilterData: (payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>) => {
     explorerAction$.next(setFilterDataActionCreator(payload));
+  },
+  setChartsDataLoading: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
   },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({
