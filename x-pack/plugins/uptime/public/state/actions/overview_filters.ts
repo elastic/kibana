@@ -30,5 +30,3 @@ export const fetchOverviewFiltersFail = createAction<Error>('FETCH_OVERVIEW_FILT
 export const fetchOverviewFiltersSuccess = createAction<OverviewFilters>(
   'FETCH_OVERVIEW_FILTERS_SUCCESS'
 );
-
-export const setOverviewFilters = createAction<OverviewFilters>('SET_OVERVIEW_FILTERS');

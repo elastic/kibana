@@ -12,7 +12,8 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects"
+    "savedObjects",
+    "indexPatternFieldEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact"]
