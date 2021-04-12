@@ -44,14 +44,14 @@ export const getTimelinesRoute = (
           getTimelinesQuerySchema.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const onlyUserFavorite = queryParams?.onlyUserFavorite === 'true' ? true : false;
-        const pageSize = queryParams?.pageSize ? parseInt(queryParams.pageSize, 10) : null;
-        const pageIndex = queryParams?.pageIndex ? parseInt(queryParams.pageIndex, 10) : null;
+        const onlyUserFavorite = queryParams?.only_user_favorite === 'true' ? true : false;
+        const pageSize = queryParams?.page_size ? parseInt(queryParams.page_size, 10) : null;
+        const pageIndex = queryParams?.page_index ? parseInt(queryParams.page_index, 10) : null;
         const search = queryParams?.search ?? null;
-        const sortField = queryParams?.sortField ?? null;
-        const sortOrder = queryParams?.sortOrder ?? null;
+        const sortField = queryParams?.sort_field ?? null;
+        const sortOrder = queryParams?.sort_order ?? null;
         const status = queryParams?.status ?? null;
-        const timelineType = queryParams?.timelineType ?? null;
+        const timelineType = queryParams?.timeline_type ?? null;
         const sort =
           sortField && sortOrder
             ? {

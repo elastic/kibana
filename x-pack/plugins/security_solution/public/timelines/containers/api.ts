@@ -295,14 +295,14 @@ export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: Abort
   const response = await KibanaServices.get().http.fetch<AllTimelinesResponse>(TIMELINES_URL, {
     method: 'GET',
     query: {
-      ...(args.onlyUserFavorite ? { onlyUserFavorite: args.onlyUserFavorite } : {}),
-      ...(args?.pageInfo?.pageSize ? { pageSize: args.pageInfo.pageSize } : {}),
-      ...(args?.pageInfo?.pageIndex ? { pageIndex: args.pageInfo.pageIndex } : {}),
+      ...(args.onlyUserFavorite ? { only_user_favorite: args.onlyUserFavorite } : {}),
+      ...(args?.pageInfo?.pageSize ? { page_size: args.pageInfo.pageSize } : {}),
+      ...(args?.pageInfo?.pageIndex ? { page_index: args.pageInfo.pageIndex } : {}),
       ...(args.search ? { search: args.search } : {}),
-      ...(args?.sort?.sortField ? { sortField: args?.sort?.sortField } : {}),
-      ...(args?.sort?.sortOrder ? { sortOrder: args?.sort?.sortOrder } : {}),
+      ...(args?.sort?.sortField ? { sort_field: args?.sort?.sortField } : {}),
+      ...(args?.sort?.sortOrder ? { sort_order: args?.sort?.sortOrder } : {}),
       ...(args.status ? { status: args.status } : {}),
-      ...(args.timelineType ? { timelineType: args.timelineType } : {}),
+      ...(args.timelineType ? { timeline_type: args.timelineType } : {}),
     },
     signal: abortSignal,
   });

@@ -641,17 +641,17 @@ kbn-version: 8.0.0
 ##### Query params
 
 optional:
-onlyUserFavorite={boolean}
-pageIndex={number}
-pageSize={number}
+only_user_favorite={boolean}
+page_index={number}
+page_size={number}
 search={string}
-sortField={title|description|updated|created}
-sortOrder={asc|desc}
+sort_field={title|description|updated|created}
+sort_order={asc|desc}
 status={active|draft|immutable}
-timelineType={default|template}
+timeline_type={default|template}
 
 ##### example
-api/timelines?pageSize=10&pageIndex=1&sortField=updated&sortOrder=desc&timelineType=default
+api/timelines?page_size=10&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default
 
 ##### Response
 
