@@ -314,8 +314,6 @@ import {
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
   getDateHistogramMetaDataByDatatableColumn,
-  // expressions utils
-  getRequestInspectorStats,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
@@ -428,7 +426,6 @@ export const search = {
     getNumberHistogramIntervalByDatatableColumn,
     getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
