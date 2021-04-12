@@ -38,10 +38,7 @@ export const ruleAssetSavedObjectsClientFactory = (
       });
       const responses: IRuleAssetSavedObject[] = [];
       for await (const response of finder.find()) {
-        response.saved_objects.forEach((so) => responses.push(so as IRuleAssetSavedObject));
-        if (response.total === 0) {
-          break;
-        }
+        responses.push(...response.saved_objects.map((so) => so as IRuleAssetSavedObject));
       }
       await finder.close();
       return responses;
