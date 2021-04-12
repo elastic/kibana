@@ -8,16 +8,16 @@
 import { get, isEmpty } from 'lodash';
 
 import { INDICATOR_DESTINATION_PATH } from '../../../../../../../common/constants';
+import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
 import { Ecs } from '../../../../../../../common/ecs';
 import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
-import { threatMatchSubFields } from './constants';
 
 const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] =>
   get(data, INDICATOR_DESTINATION_PATH) ?? [];
 
 export const hasThreatMatchValue = (data: Ecs): boolean =>
   getIndicatorEcs(data).some((indicator) =>
-    threatMatchSubFields.some(
-      (threatMatchSubField) => !isEmpty(get(indicator, threatMatchSubField))
+    INDICATOR_MATCH_SUBFIELDS.some(
+      (indicatorMatchSubField) => !isEmpty(get(indicator, indicatorMatchSubField))
     )
   );

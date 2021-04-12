@@ -15,6 +15,7 @@ import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import { REQUIRED_INDICATOR_MATCH_FIELDS } from '../../../../common/cti/constants';
 import { HeaderSection } from '../../../common/components/header_section';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -47,7 +48,6 @@ import {
 } from '../../../common/components/toasters';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { requiredFields as requiredThreatMatchFields } from '../../../timelines/components/timeline/body/renderers/cti/constants';
 import { buildTimeRangeFilter } from './helpers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -322,7 +322,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       // TODO in the future, our alerts timeline fields should be derived from the
       // fields required by enabled row renderers and other functionality; for now we unconditionally
       // add the superset of fields.
-      queryFields: [...requiredFieldsForActions, ...requiredThreatMatchFields],
+      queryFields: [...requiredFieldsForActions, ...REQUIRED_INDICATOR_MATCH_FIELDS],
       title: '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

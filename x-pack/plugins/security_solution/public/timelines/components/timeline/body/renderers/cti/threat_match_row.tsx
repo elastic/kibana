@@ -23,7 +23,7 @@ import {
   MATCHED_FIELD,
   MATCHED_TYPE,
   PROVIDER,
-} from './constants';
+} from '../../../../../../../common/cti/constants';
 
 export interface ThreatMatchRowProps {
   contextId: string;

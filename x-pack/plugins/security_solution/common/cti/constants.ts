@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { INDICATOR_DESTINATION_PATH } from '../../../../../../../common/constants';
+import { INDICATOR_DESTINATION_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
 export const MATCHED_TYPE = 'matched.type';
-export const threatMatchSubFields = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
+export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
 export const INDICATOR_MATCHED_ATOMIC = `${INDICATOR_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
 export const INDICATOR_MATCHED_FIELD = `${INDICATOR_DESTINATION_PATH}.${MATCHED_FIELD}`;
@@ -24,7 +24,8 @@ export const INDICATOR_DATASET = `${INDICATOR_DESTINATION_PATH}.${EVENT_DATASET}
 export const INDICATOR_REFERENCE = `${INDICATOR_DESTINATION_PATH}.${EVENT_REFERENCE}`;
 export const INDICATOR_PROVIDER = `${INDICATOR_DESTINATION_PATH}.${PROVIDER}`;
 
-export const requiredFields = [
+// fields used to populate the CTI row renderer
+export const REQUIRED_INDICATOR_MATCH_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,
   INDICATOR_MATCHED_FIELD,
   INDICATOR_MATCHED_TYPE,
