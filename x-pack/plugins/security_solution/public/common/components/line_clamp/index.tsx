@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
-const LINE_CLAMP_HEIGHT = 4.5;
+const LINE_CLAMP_HEIGHT = 5.5;
 
 const StyledLineClamp = styled.div`
   display: -webkit-box;
@@ -26,6 +26,13 @@ const ReadMore = styled(EuiButtonEmpty)`
   span.euiButtonContent {
     padding: 0;
   }
+`;
+
+const ExpandedContent = styled.div`
+  max-height: 33vh;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;
 
 const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) => {
@@ -60,11 +67,15 @@ const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) 
   return (
     <>
       {isExpanded ? (
-        <p>{content}</p>
+        <ExpandedContent data-test-subj="expanded-line-clamp">
+          <p>{content}</p>
+        </ExpandedContent>
       ) : isOverflow == null || isOverflow === true ? (
-        <StyledLineClamp ref={descriptionRef}>{content}</StyledLineClamp>
+        <StyledLineClamp data-test-subj="styled-line-clamp" ref={descriptionRef}>
+          {content}
+        </StyledLineClamp>
       ) : (
-        <EuiText>{content}</EuiText>
+        <EuiText data-test-subj="default-line-clamp">{content}</EuiText>
       )}
       {isOverflow && (
         <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
