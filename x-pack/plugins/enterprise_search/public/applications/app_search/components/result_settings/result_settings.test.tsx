@@ -26,6 +26,7 @@ describe('ResultSettings', () => {
     },
     dataLoading: false,
     stagedUpdates: true,
+    resultFieldsAtDefaultSettings: false,
   };
 
   const actions = {
@@ -89,6 +90,16 @@ describe('ResultSettings', () => {
     const resetButton = shallow(buttons[1]);
     resetButton.simulate('click');
     expect(actions.confirmResetAllFields).toHaveBeenCalled();
+  });
+
+  it('renders the "restore defaults" button as disabled if the values are already at their defaults', () => {
+    setMockValues({
+      ...values,
+      resultFieldsAtDefaultSettings: true,
+    });
+    const buttons = findButtons(subject());
+    const resetButton = shallow(buttons[1]);
+    expect(resetButton.prop('disabled')).toBe(true);
   });
 
   it('renders a "clear" button that will remove all selected options', () => {

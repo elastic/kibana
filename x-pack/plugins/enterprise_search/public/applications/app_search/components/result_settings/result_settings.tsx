@@ -44,7 +44,9 @@ interface Props {
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { dataLoading, schema, stagedUpdates } = useValues(ResultSettingsLogic);
+  const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings } = useValues(
+    ResultSettingsLogic
+  );
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -84,6 +86,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
                   data-test-subj="ResetResultSettings"
                   color="danger"
                   onClick={confirmResetAllFields}
+                  disabled={resultFieldsAtDefaultSettings}
                 >
                   {RESTORE_DEFAULTS_BUTTON_LABEL}
                 </EuiButton>,
