@@ -133,7 +133,7 @@ describe('esaggs expression function - public', () => {
   test('calls searchSource.fetch', async () => {
     await handleRequest(mockParams);
     const searchSource = await mockParams.searchSourceService.create();
-    expect(searchSource.fetch).toHaveBeenCalledWith({
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
       abortSignal: mockParams.abortSignal,
       sessionId: mockParams.searchSessionId,
     });
