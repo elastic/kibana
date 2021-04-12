@@ -46,6 +46,8 @@ import {
   LOG_RATE_CHART_TITLE,
 } from './translations';
 import { TimeDropdown } from './time_dropdown';
+import { getCustomMetricLabel } from '../../../../../../../../common/formatters/get_custom_metric_label';
+import { createFormatterForMetric } from '../../../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -55,15 +57,21 @@ const TabComponent = (props: TabProps) => {
   const memoryChartRef = useRef<Chart>(null);
   const loadChartRef = useRef<Chart>(null);
   const logRateChartRef = useRef<Chart>(null);
+  const customMetricRefs = useRef<Record<string, Chart | null>>({});
   const [time, setTime] = useState(ONE_HOUR);
-  const chartRefs = useMemo(() => [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef], [
+  const chartRefs = useMemo(() => {
+    const refs = [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef, logRateChartRef];
+    return [...refs, customMetricRefs];
+  }, [
     cpuChartRef,
     networkChartRef,
     memoryChartRef,
     loadChartRef,
+    logRateChartRef,
+    customMetricRefs,
   ]);
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
-  const { nodeType, accountId, region } = useWaffleOptionsContext();
+  const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
   const { currentTime, options, node } = props;
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -100,20 +108,22 @@ const TabComponent = (props: TabProps) => {
     ignoreLookback: true,
   };
 
-  const { nodes, reload, loading } = useSnapshot(
+  const defaultMetrics: Array<{ type: SnapshotMetricType }> = [
+    { type: 'rx' },
+    { type: 'tx' },
+    buildCustomMetric('system.cpu.user.pct', 'user'),
+    buildCustomMetric('system.cpu.system.pct', 'system'),
+    buildCustomMetric('system.load.1', 'load1m'),
+    buildCustomMetric('system.load.5', 'load5m'),
+    buildCustomMetric('system.load.15', 'load15m'),
+    buildCustomMetric('system.memory.actual.used.bytes', 'usedMemory'),
+    buildCustomMetric('system.memory.actual.free', 'freeMemory'),
+    buildCustomMetric('system.cpu.cores', 'cores', 'max'),
+  ];
+
+  const { nodes, reload } = useSnapshot(
     filter,
-    [
-      { type: 'rx' },
-      { type: 'tx' },
-      buildCustomMetric('system.cpu.user.pct', 'user'),
-      buildCustomMetric('system.cpu.system.pct', 'system'),
-      buildCustomMetric('system.load.1', 'load1m'),
-      buildCustomMetric('system.load.5', 'load5m'),
-      buildCustomMetric('system.load.15', 'load15m'),
-      buildCustomMetric('system.memory.actual.used.bytes', 'usedMemory'),
-      buildCustomMetric('system.memory.actual.free', 'freeMemory'),
-      buildCustomMetric('system.cpu.cores', 'cores', 'max'),
-    ],
+    [...defaultMetrics, ...customMetrics],
     [],
     nodeType,
     sourceId,
@@ -124,7 +134,7 @@ const TabComponent = (props: TabProps) => {
     timeRange
   );
 
-  const { nodes: logRateNodes, reload: reloadLogRate, loading: logRateLoading } = useSnapshot(
+  const { nodes: logRateNodes, reload: reloadLogRate } = useSnapshot(
     filter,
     [{ type: 'logRate' }],
     [],
@@ -203,7 +213,16 @@ const TabComponent = (props: TabProps) => {
     (event: PointerEvent) => {
       chartRefs.forEach((ref) => {
         if (ref.current) {
-          ref.current.dispatchExternalPointerEvent(event);
+          if (ref.current instanceof Chart) {
+            ref.current.dispatchExternalPointerEvent(event);
+          } else {
+            const charts = Object.values(ref.current);
+            charts.forEach((c) => {
+              if (c) {
+                c.dispatchExternalPointerEvent(event);
+              }
+            });
+          }
         }
       });
     },
@@ -211,10 +230,6 @@ const TabComponent = (props: TabProps) => {
   );
 
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
-  };
 
   const getTimeseries = useCallback(
     (metricName: string) => {
@@ -396,6 +411,30 @@ const TabComponent = (props: TabProps) => {
             stack={true}
           />
         </EuiFlexItem>
+
+        {customMetrics.map((c) => {
+          const metricTS = getTimeseries(c.id);
+          const chartMetrics = buildChartMetricLabels([c.field], c.aggregation);
+          if (!metricTS) return null;
+          return (
+            <EuiFlexItem>
+              <ChartSection
+                title={getCustomMetricLabel(c)}
+                style={MetricsExplorerChartType.line}
+                chartRef={(r) => {
+                  customMetricRefs.current[c.id] = r;
+                }}
+                series={[{ metric: chartMetrics[0], series: metricTS }]}
+                tickFormatterForTime={formatter}
+                tickFormatter={createFormatterForMetric(c)}
+                onPointerUpdate={pointerUpdate}
+                domain={getDomain(mergeTimeseries(metricTS), chartMetrics)}
+                isDarkMode={isDarkMode}
+                stack={true}
+              />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGrid>
     </TabContent>
   );

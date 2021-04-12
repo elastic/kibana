@@ -23,7 +23,7 @@ export const ChartHeader = ({ title, metrics }: Props) => {
     <EuiFlexGroup gutterSize={'s'} responsive={false}>
       <EuiFlexItem grow={1}>
         <EuiText size={'s'}>
-          <h4>{title}</h4>
+          <h4 style={{ wordBreak: 'break-all' }}>{title}</h4>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
