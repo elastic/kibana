@@ -29,7 +29,7 @@ data-type="inline"
 ++++
 
 [float]
-==== Requirements
+==== Prerequisites
 
 
 * To save a session, you must have permissions for *Discover* and *Dashboard*,
