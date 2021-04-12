@@ -7,28 +7,25 @@
 
 import { QueryContext } from './search';
 import {
+  FetchMonitorListHistogramParams,
   Histogram,
   HistogramPoint,
-  MonitorHistogramResult,
 } from '../../../common/runtime_types/monitor';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { GetMonitorStatesParams } from './get_monitor_states';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
+import { createEsQuery, UptimeESClient } from '../lib';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
 
-export const getHistogramForMonitors: UMElasticsearchQueryFn<
-  GetMonitorStatesParams,
-  MonitorHistogramResult
-> = async ({
+export type MonitorHistogramResult = ReturnType<typeof getHistogramForMonitors>;
+
+export const getHistogramForMonitors = async ({
   uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
-  pagination,
-  pageSize,
   filters,
   statusFilter,
   query,
   monitorIds,
-}): Promise<{ [key: string]: Histogram }> => {
+}: FetchMonitorListHistogramParams & { uptimeEsClient: UptimeESClient }) => {
   statusFilter = statusFilter === null ? undefined : statusFilter;
 
   const parsedFilters = filters && filters !== '' ? JSON.parse(filters) : null;
@@ -37,9 +34,9 @@ export const getHistogramForMonitors: UMElasticsearchQueryFn<
     uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
-    pagination,
+    CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     parsedFilters,
-    pageSize,
+    10,
     statusFilter,
     query
   );
@@ -50,7 +47,7 @@ export const getHistogramForMonitors: UMElasticsearchQueryFn<
     12
   );
 
-  const params = {
+  const params = createEsQuery({
     size: 0,
     query: {
       bool: {
@@ -100,7 +97,8 @@ export const getHistogramForMonitors: UMElasticsearchQueryFn<
         },
       },
     },
-  };
+  });
+
   const { body: result } = await queryContext.search({ body: params });
 
   const histoBuckets: any[] = (result.aggregations as any)?.histogram.buckets ?? [];

@@ -9,8 +9,6 @@ import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../common/runtime_types';
 import { QueryContext, MonitorSummaryIterator } from './search';
-import { HistogramPoint, Histogram } from '../../../common/runtime_types';
-import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface CursorPagination {
   cursorKey?: any;

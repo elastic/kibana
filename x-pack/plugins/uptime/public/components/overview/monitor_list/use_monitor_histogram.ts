@@ -15,7 +15,7 @@ import { fetchMonitorListHistogram } from '../../../state/api';
 import { esKuerySelector } from '../../../state/selectors';
 
 export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
-  const { dateRangeStart, dateRangeEnd, statusFilter, query, pagination } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, statusFilter, query } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -30,7 +30,6 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
           dateRangeStart,
           dateRangeEnd,
           filters,
-          pagination,
           statusFilter,
           query,
         },

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { PromiseType } from 'utility-types';
 import { QueryContext } from './query_context';
-import { MonitorSummary, Ping } from '../../../../common/runtime_types';
-import { summaryByLocAggs } from './list_of_monitors';
+import { MonitorSummary, Ping, PingSource, X509Expiry } from '../../../../common/runtime_types';
+import { createEsQuery } from '../../lib';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
  * If provided check groups are not the latest complete group, they are discarded.
  * @param queryContext the data and resources needed to perform the query
  * @param potentialMatchMonitorIDs the monitor ID's of interest
- * @param potentialMatchCheckGroups the check groups to filter for the latest match per ID
  */
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
@@ -29,10 +29,13 @@ export const refinePotentialMatches = async (
   return await fullyMatchingIds(queryResult, queryContext.statusFilter);
 };
 
-export const fullyMatchingIds = (queryResult: any, statusFilter?: string): MonitorSummary[] => {
+export const fullyMatchingIds = (
+  queryResult: PromiseType<QueryResult>['body'],
+  statusFilter?: string
+): MonitorSummary[] => {
   const summaries: MonitorSummary[] = [];
 
-  for (const monBucket of queryResult.aggregations.monitor.buckets) {
+  for (const monBucket of queryResult.aggregations?.monitor.buckets ?? []) {
     // Did at least one location match?
     let matched = false;
 
@@ -52,17 +55,18 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
       //
       // We just check if the timestamp is greater. Note this may match an incomplete check group
       // that has not yet sent a summary doc
+      const latestSource = latest._source as PingSource;
       if (
         latestStillMatching &&
-        latestStillMatching._source['@timestamp'] >= latest._source['@timestamp']
+        (latestStillMatching._source as PingSource)['@timestamp'] >= latestSource['@timestamp']
       ) {
         matched = true;
       }
 
       summaryPings.push({
+        ...latestSource,
         docId: latest._id,
-        timestamp: latest._source['@timestamp'],
-        ...latest._source,
+        timestamp: latestSource['@timestamp'],
       });
     }
 
@@ -97,7 +101,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
         status: summaryPings.some((p) => (p.summary?.down ?? 0) > 0) ? 'down' : 'up',
       },
       summaryPings,
-      tls: latest.tls,
+      tls: (latest.tls as unknown) as X509Expiry,
       // easier to ensure to use '' for an empty geo name in terms of types
       observer: {
         geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
@@ -107,11 +111,10 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
   };
 };
 
-export const query = async (
-  queryContext: QueryContext,
-  potentialMatchMonitorIDs: string[]
-): Promise<any> => {
-  const params = {
+type QueryResult = ReturnType<typeof query>;
+
+export const query = async (queryContext: QueryContext, potentialMatchMonitorIDs: string[]) => {
+  const params = createEsQuery({
     body: {
       size: 0,
       query: {
@@ -164,7 +167,7 @@ export const query = async (
         },
       },
     },
-  };
+  });
 
   return await queryContext.search(params);
 };

@@ -326,3 +326,5 @@ export const GetPingsParamsType = t.intersection([
 ]);
 
 export type GetPingsParams = t.TypeOf<typeof GetPingsParamsType>;
+
+export type PingSource = Ping & { '@timestamp': string };

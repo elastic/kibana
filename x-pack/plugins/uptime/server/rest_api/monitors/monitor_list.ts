@@ -83,16 +83,11 @@ export const createMonitorListPaginationRoute: UMRestApiRouteFactory = (libs) =>
       dateRangeStart,
       dateRangeEnd,
       filters,
-      pagination,
       statusFilter,
       query,
       beforeMonitorId,
       afterMonitorId,
     } = request.query;
-
-    const decodedPagination = pagination
-      ? JSON.parse(decodeURIComponent(pagination))
-      : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
 
     return await libs.requests.getMonitorListPagination({
       query,
@@ -102,7 +97,6 @@ export const createMonitorListPaginationRoute: UMRestApiRouteFactory = (libs) =>
       dateRangeEnd,
       beforeMonitorId,
       afterMonitorId,
-      pagination: decodedPagination,
       statusFilter,
     });
   },

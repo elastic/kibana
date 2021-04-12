@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export type { MonitorListPaginationResult } from '../../server/lib/requests/get_monitor_list_pagination';
+export type {
+  MonitorListPaginationResult,
+  MonitorHistogramResult, // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../server/lib/requests/types';
 
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {

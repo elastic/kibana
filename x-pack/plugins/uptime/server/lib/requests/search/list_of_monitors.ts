@@ -10,6 +10,7 @@ import { QueryContext } from './query_context';
 import { MonitorSummary } from '../../../../common/runtime_types/monitor';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { summaryPingsToSummary } from './refine_potential_matches';
+import { createEsQuery } from '../../lib';
 
 export const getQueryFilter = (query?: string) => {
   return query
@@ -19,7 +20,7 @@ export const getQueryFilter = (query?: string) => {
           {
             multi_match: {
               query: escape(query),
-              type: 'phrase_prefix',
+              type: 'phrase_prefix' as const,
               fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
             },
           },
@@ -37,7 +38,7 @@ export const summaryByLocAggs = {
       aggs: {
         latest: {
           top_hits: {
-            sort: [{ '@timestamp': 'desc' }],
+            sort: [{ '@timestamp': 'desc' as const }],
             size: 1,
           },
         },
@@ -47,7 +48,9 @@ export const summaryByLocAggs = {
 };
 
 export const getListOfMonitors = async (queryContext: QueryContext): Promise<ChunkResult> => {
-  const params = {
+  const cursorKey = queryContext.pagination?.cursorKey;
+
+  const params = createEsQuery({
     body: {
       size: 0,
       query: {
@@ -79,6 +82,8 @@ export const getListOfMonitors = async (queryContext: QueryContext): Promise<Chu
       aggs: {
         monitors: {
           composite: {
+            ...(cursorKey ? { after: cursorKey } : {}),
+
             size: queryContext.size,
             sources: [
               {
@@ -97,17 +102,13 @@ export const getListOfMonitors = async (queryContext: QueryContext): Promise<Chu
         },
       },
     },
-  };
-
-  if (queryContext.pagination.cursorKey) {
-    params.body.aggs.monitors.composite.after = queryContext.pagination.cursorKey;
-  }
+  });
 
   const { body: data } = await queryContext.search(params);
 
   const summaries: MonitorSummary[] = [];
 
-  for (const monBucket of data.aggregations.monitors.buckets) {
+  for (const monBucket of data.aggregations?.monitors.buckets ?? []) {
     const summaryPings: Ping[] = [];
 
     for (const locBucket of monBucket.location.buckets) {
@@ -119,9 +120,9 @@ export const getListOfMonitors = async (queryContext: QueryContext): Promise<Chu
       }
 
       summaryPings.push({
+        ...(latest._source as Ping),
         docId: latest._id,
-        timestamp: latest._source['@timestamp'],
-        ...latest._source,
+        timestamp: (latest._source as Ping & { '@timestamp': string })['@timestamp'],
       });
     }
 

@@ -49,8 +49,6 @@ export const StateType = t.intersection([
   }),
 ]);
 
-export type MonitorSummaryState = t.TypeOf<typeof StateType>;
-
 export const HistogramPointType = t.type({
   timestamp: t.number,
   up: t.union([t.number, t.undefined]),
@@ -64,13 +62,6 @@ export const HistogramType = t.type({
 });
 
 export type Histogram = t.TypeOf<typeof HistogramType>;
-
-export const MonitorHistogramResultType = t.type({
-  histograms: t.record(t.string, HistogramType),
-  minInterval: t.number,
-});
-
-export type MonitorHistogramResult = t.TypeOf<typeof MonitorHistogramResultType>;
 
 export const MonitorSummaryType = t.type({
   monitor_id: t.string,
@@ -139,11 +130,11 @@ export const FetchMonitorListHistogramType = t.intersection([
     filters: t.string,
     statusFilter: t.string,
     query: t.string,
-    pagination: t.string,
   }),
   t.type({
     dateRangeStart: t.string,
     dateRangeEnd: t.string,
+    monitorIds: t.array(t.string),
   }),
 ]);
 
