@@ -168,8 +168,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewMetaEngineSourceEngines && isMetaEngine && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH))}
+          to={generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH)}
           data-test-subj="MetaEngineEnginesLink"
         >
           {ENGINES_TITLE}
