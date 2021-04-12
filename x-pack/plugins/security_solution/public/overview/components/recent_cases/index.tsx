@@ -40,7 +40,7 @@ const RecentCasesComponent = () => {
       onClick: goToCases,
     },
     caseDetailsNavigation: {
-      getHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
+      href: ({ detailName, subCaseId }: AllCasesNavProps) => {
         return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
       },
       onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {

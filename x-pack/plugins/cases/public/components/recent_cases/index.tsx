@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import React, { useMemo, useState } from 'react';
 
 import * as i18n from './translations';
-import { CaseDetailsNavigation, CasesNavigation, LinkAnchor } from '../links';
+import { CaseDetailsHrefSchema, CasesNavigation, LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
@@ -17,7 +17,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 
 export interface RecentCasesProps {
   allCasesNavigation: CasesNavigation;
-  caseDetailsNavigation: CaseDetailsNavigation;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }

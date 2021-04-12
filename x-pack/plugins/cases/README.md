@@ -48,9 +48,9 @@ Arguments:
 
 |Property|Description|
 |---|---|
-|caseDetailsNavigation|`{ getHref: (caseDetails: CaseDetailsHrefSchema) => string; onClick: (caseDetails: CaseDetailsHrefSchema) => void }` route configuration to generate the case details url for the case details page
-|configureCasesNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }` route configuration for configure cases page
-|createCaseNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }` route configuration for create cases page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
+|configureCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |disabledStatuses?|`CaseStatuses[];` array of disabled statuses
 |isModal?|`boolean;` is All Cases table a modal
 |onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
@@ -64,15 +64,15 @@ Arguments:
 
 |Property|Description|
 |---|---|
-|caseDetailsNavigation|`{ getHref: (caseDetails: CaseDetailsHrefSchema) => string; onClick: (caseDetails: CaseDetailsHrefSchema) => void }` route configuration to generate the case details url for the case details page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
 |caseId|`string;` ID of the case
-|configureCasesNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }` route configuration for configure cases page
-|createCaseNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }` route configuration for create cases page
+|configureCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |getCaseDetailHrefWithCommentId|`(commentId: string) => string;` callback to generate the case details url with a comment id reference from the case id and comment id
 |onComponentInitialized?|`() => void;` callback when component has initialized
 |renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
 |renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
-|ruleDetailsNavigation|: `{ getHref: (ruleId: string, null, undefined) => string; onClick: (ruleId: string, null, undefined) => void }`
+|ruleDetailsNavigation|: `CasesNavigation<string | null | undefined, 'configurable'>`
 |showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
 |subCaseId?|: `string;` subcase id
 |useFetchAlertData|: `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
@@ -108,9 +108,9 @@ Arguments:
 
 |Property|Description|
 |---|---|
-|allCasesNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }` route configuration for configure cases page
-|caseDetailsNavigation|`{ getHref: (caseDetails: CaseDetailsHrefSchema) => string; onClick: (caseDetails: CaseDetailsHrefSchema) => void }` route configuration to generate the case details url for the case details page
-|createCaseNavigation|`{ href: string; onClick: (arg: React.MouseEvent \| MouseEvent) => void }`
+|allCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
+|createCaseNavigation|`CasesNavigation`
 |maxCasesToShow|`number;` number of cases to show in widget
   
 UI component:

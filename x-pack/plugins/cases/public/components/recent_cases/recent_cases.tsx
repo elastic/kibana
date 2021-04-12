@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
 import { useGetCases } from '../../containers/use_get_cases';
-import { CaseDetailsLink, CaseDetailsNavigation, CasesNavigation } from '../links';
+import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
 import { isSubCase } from '../all_cases/helpers';
@@ -28,7 +28,7 @@ const MarkdownContainer = styled.div`
 
 export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
-  caseDetailsNavigation: CaseDetailsNavigation;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }

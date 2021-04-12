@@ -40,7 +40,7 @@ import {
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { Ecs } from '../../common/ecs_types';
-import { CasesGetNavigation, CasesNavigation } from '../links';
+import { CasesNavigation } from '../links';
 
 // TODO: All below imports depend on Timeline or SecuritySolution in some form or another
 // import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -55,7 +55,7 @@ export interface CaseViewProps {
   onComponentInitialized?: () => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   renderTimelineDetailsPanel?: () => JSX.Element;
-  ruleDetailsNavigation: CasesGetNavigation<string | null | undefined>;
+  ruleDetailsNavigation: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
@@ -382,7 +382,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   <>
                     <UserActionTree
                       getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                      getRuleDetailsHref={ruleDetailsNavigation.getHref}
+                      getRuleDetailsHref={ruleDetailsNavigation.href}
                       onRuleDetailsClick={ruleDetailsNavigation.onClick}
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}

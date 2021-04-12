@@ -25,7 +25,7 @@ import { CaseStatuses, CaseType } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsLink, CaseDetailsNavigation } from '../links';
+import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
 import * as i18n from './translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
@@ -53,7 +53,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 interface GetCasesColumn {
   actions: Array<DefaultItemIconButtonAction<Case>>;
-  caseDetailsNavigation: CaseDetailsNavigation;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   filterStatus: string;
   isModal: boolean;
 }

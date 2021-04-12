@@ -45,7 +45,7 @@ describe('AllCases', () => {
       onClick: jest.fn(),
     },
     caseDetailsNavigation: {
-      getHref: jest.fn().mockReturnValue('testHref'), // string
+      href: jest.fn().mockReturnValue('testHref'), // string
       onClick: jest.fn(),
     },
     createCaseNavigation: {
@@ -257,7 +257,7 @@ describe('AllCases', () => {
         filterStatus: CaseStatuses.open,
         isModal: false,
         caseDetailsNavigation: {
-          getHref: jest.fn(),
+          href: jest.fn(),
           onClick: jest.fn(),
         },
       }).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
@@ -353,7 +353,7 @@ describe('AllCases', () => {
         filterStatus: CaseStatuses.open,
         isModal: true,
         caseDetailsNavigation: {
-          getHref: jest.fn(),
+          href: jest.fn(),
           onClick: jest.fn(),
         },
       }).map((i, key) => i.name != null && checkIt(`${i.name}`));

@@ -17,7 +17,7 @@ interface Props {
   alertId: string;
   commentType: CommentType;
   getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
   ruleId?: string | null;
   ruleName?: string | null;
   alertsCount?: number;
@@ -37,7 +37,7 @@ const AlertCommentEventComponent: React.FC<Props> = ({
   const onLinkClick = useCallback(
     (ev: { preventDefault: () => void }) => {
       ev.preventDefault();
-      onRuleDetailsClick(ruleId);
+      if (onRuleDetailsClick) onRuleDetailsClick(ruleId);
     },
     [ruleId, onRuleDetailsClick]
   );

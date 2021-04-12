@@ -49,7 +49,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
-import { CaseDetailsNavigation, CasesNavigation, LinkButton } from '../links';
+import { CaseDetailsHrefSchema, CasesNavigation, LinkButton } from '../links';
 import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { getExpandedRowMap } from './expanded_row';
@@ -114,7 +114,7 @@ BasicTable.displayName = 'BasicTable';
 
 export interface AllCasesProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  caseDetailsNavigation: CaseDetailsNavigation;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   configureCasesNavigation: CasesNavigation;
   createCaseNavigation: CasesNavigation;
   disabledStatuses?: CaseStatuses[];

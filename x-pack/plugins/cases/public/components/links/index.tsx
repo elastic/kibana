@@ -16,14 +16,9 @@ import {
 import React, { useCallback } from 'react';
 import * as i18n from './translations';
 
-export interface CasesNavigation {
-  href: string;
-  onClick?: (arg: React.MouseEvent | MouseEvent) => void;
-}
-
-export interface CasesGetNavigation<T = React.MouseEvent> {
-  getHref: (arg: T) => string;
-  onClick: (arg: T) => void;
+export interface CasesNavigation<T = React.MouseEvent | MouseEvent, K = null> {
+  href: K extends 'configurable' ? (arg: T) => string : string;
+  onClick?: (arg: T) => void;
 }
 
 export const LinkButton: React.FC<
@@ -39,19 +34,15 @@ export interface CaseDetailsHrefSchema {
   search?: string;
   subCaseId?: string;
 }
-export interface CaseDetailsNavigation {
-  getHref: (caseDetails: CaseDetailsHrefSchema) => string;
-  onClick?: (caseDetails: CaseDetailsHrefSchema) => void;
-}
 
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
-  caseDetailsNavigation: CaseDetailsNavigation;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   subCaseId?: string;
   title?: string;
 }> = ({ caseDetailsNavigation, children, detailName, subCaseId, title }) => {
-  const { getHref, onClick } = caseDetailsNavigation;
+  const { href: getHref, onClick } = caseDetailsNavigation;
   const goToCaseDetails = useCallback(
     (ev) => {
       ev.preventDefault();

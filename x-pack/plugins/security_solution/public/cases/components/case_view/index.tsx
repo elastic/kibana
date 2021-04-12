@@ -205,7 +205,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
     renderTimelineDetailsPanel: TimelineDetailsPanel,
     ruleDetailsNavigation: {
-      getHref: getDetectionsRuleDetailsHref,
+      href: getDetectionsRuleDetailsHref,
       onClick: onDetectionsRuleDetailsClick,
     },
     showAlertDetails,

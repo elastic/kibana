@@ -215,7 +215,7 @@ export const getAlertAttachment = ({
   action: CaseUserActions;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
   onShowAlertDetails: (alertId: string, index: string) => void;
   alertId: string;
   index: string;
@@ -316,7 +316,7 @@ export const getGeneratedAlertsAttachment = ({
   alertIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref: (ruleId: string | null | undefined) => string;
-  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   ruleId: string;
   ruleName: string;
