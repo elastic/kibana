@@ -11,7 +11,7 @@ import { setMockValues, setMockActions } from '../../../__mocks__';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
@@ -38,6 +38,8 @@ describe('RelevanceTuning', () => {
   });
 
   const subject = () => shallow(<ResultSettings engineBreadcrumb={['test']} />);
+  const findButtons = (wrapper: ShallowWrapper) =>
+    wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
   it('renders', () => {
     const wrapper = subject();
@@ -60,7 +62,7 @@ describe('RelevanceTuning', () => {
   });
 
   it('renders a "save" button that will save the current changes', () => {
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);
     const saveButton = shallow(buttons[0]);
     saveButton.simulate('click');
@@ -68,7 +70,7 @@ describe('RelevanceTuning', () => {
   });
 
   it('renders a "restore defaults" button that will reset all values to their defaults', () => {
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);
     const resetButton = shallow(buttons[1]);
     resetButton.simulate('click');
@@ -76,7 +78,7 @@ describe('RelevanceTuning', () => {
   });
 
   it('renders a "clear" button that will remove all selected options', () => {
-    const buttons = subject().find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
+    const buttons = findButtons(subject());
     expect(buttons.length).toBe(3);
     const clearButton = shallow(buttons[2]);
     clearButton.simulate('click');
