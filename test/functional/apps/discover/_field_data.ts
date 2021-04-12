@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.discover.getDocHeader()).to.be('Time relatedContent');
         });
 
-        const field = await PageObjects.discover.getDocTableField(1, 1);
+        const field = await PageObjects.discover.getDocTableField(1);
         expect(field).to.include.string('"og:description":');
 
         const marks = await PageObjects.discover.getMarks();
