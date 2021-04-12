@@ -8,7 +8,6 @@
 import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
 import { SearchResponse } from 'elasticsearch';
