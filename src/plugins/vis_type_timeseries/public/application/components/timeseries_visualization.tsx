@@ -21,8 +21,12 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
+import { TimeseriesVisData, PanelData, isVisSeriesData } from '../../../common/types';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { TimeseriesVisParams } from '../../types';
-import { isVisSeriesData, TimeseriesVisData } from '../../../common/types';
+import { getDataStart } from '../../services';
+import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { X_ACCESSOR_INDEX } from '../visualizations/constants';
 import { LastValueModeIndicator } from './last_value_mode_indicator';
 import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
@@ -51,25 +55,29 @@ function TimeseriesVisualization({
   palettesService,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
-    (gte: string, lte: string) => {
-      handlers.event({
-        name: 'applyFilter',
+    async (gte: string, lte: string, series: PanelData[]) => {
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+      const table = tables?.[model.series[0].id];
+
+      const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
+      const event = {
         data: {
-          timeFieldName: '*',
-          filters: [
-            {
-              range: {
-                '*': {
-                  gte,
-                  lte,
-                },
-              },
-            },
-          ],
+          table,
+          column: X_ACCESSOR_INDEX,
+          range,
+          timeFieldName: indexPattern?.timeFieldName,
         },
-      });
+        name: 'brush',
+      };
+      handlers.event(event);
     },
-    [handlers]
+    [handlers, model]
   );
 
   const handleUiState = useCallback(

@@ -17,7 +17,7 @@ import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-import { createAPIKey, invalidateAPIKeys } from './security';
+import { invalidateAPIKeys } from './security';
 
 const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
@@ -38,6 +38,7 @@ export async function listEnrollmentApiKeys(
     size: perPage,
     sort: 'created_at:desc',
     track_total_hits: true,
+    ignore_unavailable: true,
     q: kuery,
   });
 
@@ -76,17 +77,12 @@ export async function getEnrollmentAPIKey(
 
 /**
  * Invalidate an api key and mark it as inactive
- * @param soClient
  * @param id
  */
-export async function deleteEnrollmentApiKey(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  id: string
-) {
+export async function deleteEnrollmentApiKey(esClient: ElasticsearchClient, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
-  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
+  await invalidateAPIKeys([enrollmentApiKey.api_key_id]);
 
   await esClient.update({
     index: ENROLLMENT_API_KEYS_INDEX,
@@ -101,7 +97,6 @@ export async function deleteEnrollmentApiKey(
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicyId: string
 ) {
@@ -119,7 +114,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     }
 
     for (const apiKey of items) {
-      await deleteEnrollmentApiKey(soClient, esClient, apiKey.id);
+      await deleteEnrollmentApiKey(esClient, apiKey.id);
     }
   }
 }
@@ -181,19 +176,37 @@ export async function generateEnrollmentAPIKey(
   }
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
-  const key = await createAPIKey(soClient, name, {
-    // Useless role to avoid to have the privilege of the user that created the key
-    'fleet-apikey-enroll': {
-      cluster: [],
-      applications: [
-        {
-          application: '.fleet',
-          privileges: ['no-privileges'],
-          resources: ['*'],
+
+  const { body: key } = await esClient.security
+    .createApiKey({
+      body: {
+        name,
+        // @ts-expect-error Metadata in api keys
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'enroll',
+          policy_id: data.agentPolicyId,
         },
-      ],
-    },
-  });
+        role_descriptors: {
+          // Useless role to avoid to have the privilege of the user that created the key
+          'fleet-apikey-enroll': {
+            cluster: [],
+            index: [],
+            applications: [
+              {
+                application: '.fleet',
+                privileges: ['no-privileges'],
+                resources: ['*'],
+              },
+            ],
+          },
+        },
+      },
+    })
+    .catch((err) => {
+      throw new Error(`Impossible to create an api key: ${err.message}`);
+    });
 
   if (!key) {
     throw new Error(
@@ -230,6 +243,7 @@ export async function generateEnrollmentAPIKey(
 export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
   const res = await esClient.search<FleetServerEnrollmentAPIKey>({
     index: ENROLLMENT_API_KEYS_INDEX,
+    ignore_unavailable: true,
     q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
   });
 

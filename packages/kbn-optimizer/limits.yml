@@ -46,12 +46,11 @@ pageLoadAssetSize:
   lens: 96624
   licenseManagement: 41817
   licensing: 29004
-  lists: 202261
+  lists: 228500
   logstash: 53548
   management: 46112
   maps: 80000
   mapsLegacy: 87859
-  mapsLegacyLicensing: 20214
   ml: 82187
   monitoring: 80000
   navigation: 37413
@@ -69,7 +68,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 189428
   securityOss: 30806
-  securitySolution: 283440
+  securitySolution: 235402
   share: 99205
   snapshotRestore: 79176
   spaces: 389643

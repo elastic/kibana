@@ -7,6 +7,11 @@
 
 import React from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+
 import { ResultHeaderItem } from './result_header_item';
 import { ResultMeta } from './types';
 
@@ -16,33 +21,56 @@ interface Props {
   showScore: boolean;
   isMetaEngine: boolean;
   resultMeta: ResultMeta;
+  actions?: React.ReactNode;
+  shouldLinkToDetailPage?: boolean;
 }
 
-export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta, isMetaEngine }) => {
-  return (
-    <header className="appSearchResultHeader">
-      {showScore && (
-        <div className="appSearchResultHeader__column">
-          <ResultHeaderItem
-            data-test-subj="ResultScore"
-            field="score"
-            value={resultMeta.score}
-            type="score"
-          />
-        </div>
-      )}
+export const ResultHeader: React.FC<Props> = ({
+  showScore,
+  resultMeta,
+  isMetaEngine,
+  actions,
+  shouldLinkToDetailPage = false,
+}) => {
+  const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
+    engineName: resultMeta.engine,
+    documentId: resultMeta.id,
+  });
 
-      <div className="appSearchResultHeader__column">
-        {isMetaEngine && (
+  return (
+    <header style={{ margin: '0 0 .75rem 0' }}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+        <EuiFlexItem grow>
           <ResultHeaderItem
-            data-test-subj="ResultEngine"
-            field="engine"
-            value={resultMeta.engine}
-            type="string"
+            href={shouldLinkToDetailPage ? documentLink : undefined}
+            data-test-subj="ResultId"
+            field="ID"
+            value={resultMeta.id}
+            type="id"
           />
+        </EuiFlexItem>
+        {showScore && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultScore"
+              field="Score"
+              value={resultMeta.score}
+              type="score"
+            />
+          </EuiFlexItem>
         )}
-        <ResultHeaderItem data-test-subj="ResultId" field="id" value={resultMeta.id} type="id" />
-      </div>
+        {isMetaEngine && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultEngine"
+              field="Engine"
+              value={resultMeta.engine}
+              type="string"
+            />
+          </EuiFlexItem>
+        )}
+        {actions}
+      </EuiFlexGroup>
     </header>
   );
 };
