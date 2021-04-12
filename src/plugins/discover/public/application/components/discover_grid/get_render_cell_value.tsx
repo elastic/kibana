@@ -136,7 +136,7 @@ export const getRenderCellValueFn = (
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocColumnEntries).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
