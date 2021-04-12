@@ -860,4 +860,29 @@ describe('When on the Trusted Apps Page', () => {
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
   });
+
+  describe('and the search is dispatched', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      mockListApis(coreStart.http);
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?filter=test');
+      });
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+    });
+
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
+    });
+  });
 });

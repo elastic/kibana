@@ -306,6 +306,28 @@ export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SYNC_DIAGNOSTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsTitle',
+  {
+    defaultMessage: 'Sync Diagnostics',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsDescription',
+  {
+    defaultMessage:
+      'Retrieve relevant diagnostics data for troubleshooting active synchronization processes.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
+  {
+    defaultMessage: 'Download diagnostics data',
+  }
+);
+
 export const SOURCE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceName.label',
   {

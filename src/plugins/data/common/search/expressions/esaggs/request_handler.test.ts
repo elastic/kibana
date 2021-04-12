@@ -33,6 +33,7 @@ describe('esaggs expression function - public', () => {
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
+        setTimeFields: jest.fn(),
       } as unknown) as jest.Mocked<IAggConfigs>,
       filters: undefined,
       indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
@@ -132,7 +133,7 @@ describe('esaggs expression function - public', () => {
   test('calls searchSource.fetch', async () => {
     await handleRequest(mockParams);
     const searchSource = await mockParams.searchSourceService.create();
-    expect(searchSource.fetch).toHaveBeenCalledWith({
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
       abortSignal: mockParams.abortSignal,
       sessionId: mockParams.searchSessionId,
     });
