@@ -36,12 +36,12 @@ export interface AlertsUtilityBarProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
-  onShowThreatMatchesOnlyChanged: (showThreatMatchesOnly: boolean) => void;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showBuildingBlockAlerts: boolean;
   showClearSelection: boolean;
-  showThreatMatchesOnly: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
   totalCount: number;
   updateAlertsStatus: UpdateAlertsStatus;
 }
@@ -67,12 +67,12 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   hasIndexMaintenance,
   hasIndexWrite,
   onShowBuildingBlockAlertsChanged,
-  onShowThreatMatchesOnlyChanged,
+  onShowOnlyThreatIndicatorAlertsChanged,
   selectAll,
   selectedEventIds,
   showBuildingBlockAlerts,
   showClearSelection,
-  showThreatMatchesOnly,
+  showOnlyThreatIndicatorAlerts,
   totalCount,
   updateAlertsStatus,
 }) => {
@@ -164,16 +164,16 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
       </BuildingBlockContainer>
       <EuiFlexItem>
         <EuiCheckbox
-          id="showThreatMatchesOnlyCheckbox"
-          aria-label="showThreatMatchesOnly"
+          id="showOnlyThreatIndicatorAlertsCheckbox"
+          aria-label="showOnlyThreatIndicatorAlerts"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             closePopover();
-            onShowThreatMatchesOnlyChanged(e.target.checked);
+            onShowOnlyThreatIndicatorAlertsChanged(e.target.checked);
           }}
-          checked={showThreatMatchesOnly}
+          checked={showOnlyThreatIndicatorAlerts}
           color="text"
-          data-test-subj="showThreatMatchesOnlyCheckbox"
-          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_THREAT_MATCHES_ONLY}
+          data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"
+          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS}
         />
       </EuiFlexItem>
     </UtilityBarFlexGroup>
@@ -258,5 +258,6 @@ export const AlertsUtilityBar = React.memo(
     prevProps.totalCount === nextProps.totalCount &&
     prevProps.showClearSelection === nextProps.showClearSelection &&
     prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts &&
-    prevProps.showThreatMatchesOnly === nextProps.showThreatMatchesOnly
+    prevProps.onShowOnlyThreatIndicatorAlertsChanged ===
+      nextProps.onShowOnlyThreatIndicatorAlertsChanged
 );

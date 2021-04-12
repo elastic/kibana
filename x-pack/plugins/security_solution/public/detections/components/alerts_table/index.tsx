@@ -59,9 +59,9 @@ interface OwnProps {
   loading: boolean;
   onRuleChange?: () => void;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
-  onShowThreatMatchesOnlyChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showBuildingBlockAlerts: boolean;
-  showThreatMatchesOnly: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
   timelineId: TimelineIdLiteral;
   to: string;
 }
@@ -83,12 +83,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   loadingEventIds,
   onRuleChange,
   onShowBuildingBlockAlertsChanged,
-  onShowThreatMatchesOnlyChanged,
+  onShowOnlyThreatIndicatorAlertsChanged,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
   showBuildingBlockAlerts,
-  showThreatMatchesOnly,
+  showOnlyThreatIndicatorAlerts,
   timelineId,
   to,
 }) => {
@@ -272,12 +272,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           hasIndexMaintenance={hasIndexMaintenance}
           hasIndexWrite={hasIndexWrite}
           onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-          onShowThreatMatchesOnlyChanged={onShowThreatMatchesOnlyChanged}
+          onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
           showClearSelection={showClearSelectionAction}
-          showThreatMatchesOnly={showThreatMatchesOnly}
+          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
         />
@@ -290,12 +290,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       hasIndexWrite,
       loadingEventIds.length,
       onShowBuildingBlockAlertsChanged,
-      onShowThreatMatchesOnlyChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
       selectAllOnAllPagesCallback,
       selectedEventIds,
       showBuildingBlockAlerts,
       showClearSelectionAction,
-      showThreatMatchesOnly,
+      showOnlyThreatIndicatorAlerts,
       updateAlertsStatusCallback,
     ]
   );

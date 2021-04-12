@@ -36,7 +36,7 @@ describe('alerts default_config', () => {
     });
 
     describe('buildThreatMatchFilter', () => {
-      test('given a showThreatMatchesOnly=true this will return an array with a single filter', () => {
+      test('given a showOnlyThreatIndicatorAlerts=true this will return an array with a single filter', () => {
         const filters: Filter[] = buildThreatMatchFilter(true);
         const expectedFilter: Filter = {
           meta: {
@@ -55,7 +55,7 @@ describe('alerts default_config', () => {
         expect(filters).toHaveLength(1);
         expect(filters[0]).toEqual(expectedFilter);
       });
-      test('given a showThreatMatchesOnly=false this will return an empty filter', () => {
+      test('given a showOnlyThreatIndicatorAlerts=false this will return an empty filter', () => {
         const filters: Filter[] = buildThreatMatchFilter(false);
         expect(filters).toHaveLength(0);
       });

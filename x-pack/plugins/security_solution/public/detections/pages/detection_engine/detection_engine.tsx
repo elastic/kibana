@@ -103,7 +103,7 @@ const DetectionEnginePageComponent = () => {
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showThreatMatchesOnly, setShowThreatMatchesOnly] = useState(false);
+  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
@@ -135,18 +135,18 @@ const DetectionEnginePageComponent = () => {
     () => [
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showThreatMatchesOnly),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [filters, showBuildingBlockAlerts, showThreatMatchesOnly]
+    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
     () => [
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showThreatMatchesOnly),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [showBuildingBlockAlerts, showThreatMatchesOnly]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -156,11 +156,11 @@ const DetectionEnginePageComponent = () => {
     [setShowBuildingBlockAlerts]
   );
 
-  const onShowThreatMatchesOnlyChangedCallback = useCallback(
-    (newShowThreatMatchesOnly: boolean) => {
-      setShowThreatMatchesOnly(newShowThreatMatchesOnly);
+  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
+    (newShowOnlyThreatIndicatorAlerts: boolean) => {
+      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
     },
-    [setShowThreatMatchesOnly]
+    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -268,8 +268,8 @@ const DetectionEnginePageComponent = () => {
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showThreatMatchesOnly={showThreatMatchesOnly}
-              onShowThreatMatchesOnlyChanged={onShowThreatMatchesOnlyChangedCallback}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
             />
           </WrapperPage>

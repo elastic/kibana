@@ -209,7 +209,7 @@ const RuleDetailsPageComponent = () => {
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showThreatMatchesOnly, setShowThreatMatchesOnly] = useState(false);
+  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
@@ -290,9 +290,9 @@ const RuleDetailsPageComponent = () => {
     () => [
       ...buildAlertsRuleIdFilter(ruleId),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showThreatMatchesOnly),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, showBuildingBlockAlerts, showThreatMatchesOnly]
+    [ruleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -449,11 +449,11 @@ const RuleDetailsPageComponent = () => {
     [setShowBuildingBlockAlerts]
   );
 
-  const onShowThreatMatchesOnlyChangedCallback = useCallback(
-    (newShowThreatMatchesOnly: boolean) => {
-      setShowThreatMatchesOnly(newShowThreatMatchesOnly);
+  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
+    (newShowOnlyThreatIndicatorAlerts: boolean) => {
+      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
     },
-    [setShowThreatMatchesOnly]
+    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -680,9 +680,9 @@ const RuleDetailsPageComponent = () => {
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
-                    showThreatMatchesOnly={showThreatMatchesOnly}
+                    showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    onShowThreatMatchesOnlyChanged={onShowThreatMatchesOnlyChangedCallback}
+                    onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
                     onRuleChange={refreshRule}
                     to={to}
                   />

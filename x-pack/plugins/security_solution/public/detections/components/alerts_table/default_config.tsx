@@ -80,8 +80,8 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
         },
       ];
 
-export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[] =>
-  showThreatMatchesOnly
+export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
+  showOnlyThreatIndicatorAlerts
     ? [
         {
           meta: {
