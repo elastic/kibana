@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 // import { IndexPatternTitle } from '../kibana';
 // import { RuntimeMappings } from '../fields';
 // import { JobId } from './job';
@@ -41,17 +41,7 @@ export type ChunkingConfig = estypes.ChunkingConfig;
 //   time_span?: string;
 // }
 
-export type Aggregation = Record<
-  string,
-  {
-    date_histogram: {
-      field: string;
-      fixed_interval: string;
-    };
-    aggregations?: { [key: string]: any };
-    aggs?: { [key: string]: any };
-  }
->;
+export type Aggregation = Record<string, estypes.AggregationContainer>;
 
 export type IndicesOptions = estypes.IndicesOptions;
 // export interface IndicesOptions {
