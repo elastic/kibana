@@ -7,5 +7,5 @@
 import type { PackageInfo, PackageListItem } from '../types';
 
 export const doesPackageHaveIntegrations = (pkgInfo: PackageInfo | PackageListItem) => {
-  return 'input_groups' in pkgInfo || (pkgInfo.policy_templates || []).length > 1;
+  return (pkgInfo.policy_templates || []).length > 1;
 };
