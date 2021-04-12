@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { eventHit } from '../../../../../../common/utils/mock_event_details';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
-import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
   it('happy path', async () => {
