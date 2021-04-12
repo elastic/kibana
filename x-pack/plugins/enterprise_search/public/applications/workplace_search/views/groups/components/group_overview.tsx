@@ -145,6 +145,12 @@ export const GroupOverview: React.FC = () => {
       values: { name },
     }
   );
+  const GROUP_SOURCES_TITLE = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesTitle',
+    {
+      defaultMessage: 'Group content sources',
+    }
+  );
   const GROUP_SOURCES_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesDescription',
     {
@@ -170,7 +176,7 @@ export const GroupOverview: React.FC = () => {
 
   const sourcesSection = (
     <ContentSection
-      title="Group content sources"
+      title={GROUP_SOURCES_TITLE}
       description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
       data-test-subj="GroupContentSourcesSection"
