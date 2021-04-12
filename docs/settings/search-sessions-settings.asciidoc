@@ -37,7 +37,7 @@ a| `xpack.data_enhanced.`
 | How many retries {kib} can perform while attempting to save a search session. The default is `3`.
 
 a| `xpack.data_enhanced.`
-`search.sessions.defaultExpiration`{ess-icon}
+`search.sessions.defaultExpiration` {ess-icon}
 | How long search session results are stored before they are deleted.
 Extending a search session resets the expiration by the same value. The default is `7d`.
 |===
