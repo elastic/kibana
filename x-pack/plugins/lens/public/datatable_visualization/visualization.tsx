@@ -60,6 +60,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular and single value',
       }),
+      sortPriority: 1,
     },
   ],
 
