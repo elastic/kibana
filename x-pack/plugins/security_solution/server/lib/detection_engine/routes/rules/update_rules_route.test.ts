@@ -28,12 +28,12 @@ jest.mock('../../rules/update_rules_notifications');
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
     clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
