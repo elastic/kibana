@@ -82,6 +82,24 @@ add-apt-repository \
 curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 
+### Setup docker config and userns remap https://docs.docker.com/engine/security/userns-remap/
+{
+  uid=$(id -u "$AGENT_USER")
+  gid=$(id -g "$AGENT_USER")
+  lastuid=$((uid + 65536))
+  lastgid=$((gid + 65536))
+
+  usermod --add-subuids "$uid"-"$lastuid" "$AGENT_USER"
+  usermod --add-subgids "$gid"-"$lastgid" "$AGENT_USER"
+
+  mkdir -p /etc/docker
+  cat > /etc/docker/daemon.json <<EOF
+{
+  "userns-remap": "buildkite-agent:buildkite-agent"
+}
+EOF
+}
+
 apt-get update --yes
 
 apt-get install --yes \
