@@ -19,6 +19,7 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
@@ -36,10 +37,10 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       sourceField: 'performance.metric',
     },
     yAxisColumn: {
-      operationType: 'count',
+      sourceField: 'Records',
       label: 'Pages loaded',
     },
-    hasMetricType: false,
+    hasOperationType: false,
     defaultFilters: [
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
@@ -64,6 +65,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
         defaultValue: TRANSACTION_DURATION,
         options: [
           { label: 'Page load time', field: TRANSACTION_DURATION },
+          { label: 'Backend time', field: TRANSACTION_TIME_TO_FIRST_BYTE },
           { label: 'First contentful paint', field: FCP_FIELD },
           { label: 'Total blocking time', field: TBT_FIELD },
           // FIXME, review if we need these descriptions
@@ -74,8 +76,8 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       },
     ],
     filters: [
-      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: {
       ...FieldLabels,

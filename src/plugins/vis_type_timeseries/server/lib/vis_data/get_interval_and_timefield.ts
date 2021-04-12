@@ -7,28 +7,31 @@
  */
 
 import { AUTO_INTERVAL } from '../../../common/constants';
+import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
+import { validateField } from '../../../common/fields_utils';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
-
-export function getIntervalAndTimefield(panel, series = {}, indexPattern) {
-  const getDefaultTimeField = () => indexPattern?.timeFieldName ?? DEFAULT_TIME_FIELD;
-
+export function getIntervalAndTimefield(
+  panel: PanelSchema,
+  series: SeriesItemsSchema,
+  index: FetchedIndexPattern
+) {
   const timeField =
-    (series.override_index_pattern && series.series_time_field) ||
-    panel.time_field ||
-    getDefaultTimeField();
+    (series.override_index_pattern ? series.series_time_field : panel.time_field) ||
+    index.indexPattern?.timeFieldName;
+
+  validateField(timeField!, index);
 
   let interval = panel.interval;
   let maxBars = panel.max_bars;
 
   if (series.override_index_pattern) {
-    interval = series.series_interval;
+    interval = series.series_interval || AUTO_INTERVAL;
     maxBars = series.series_max_bars;
   }
 
   return {
+    maxBars,
     timeField,
     interval: interval || AUTO_INTERVAL,
-    maxBars,
   };
 }
