@@ -67,13 +67,14 @@ export const Result: React.FC<Props> = ({
       })
     : undefined;
   if (shouldLinkToDetailPage && documentLink) {
-    actions.unshift({
+    const linkAction = {
       onClick: () => KibanaLogic.values.navigateToUrl(documentLink),
       title: i18n.translate('xpack.enterpriseSearch.appSearch.result.documentDetailLink', {
         defaultMessage: 'Visit document details',
       }),
       iconType: 'eye',
-    });
+    };
+    actions = [linkAction, ...actions];
   }
 
   return (
