@@ -8,7 +8,6 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
 import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
@@ -88,12 +87,12 @@ export async function migrationStateActionMachine({
   model: Model<State>;
 }) {
   const executionLog: ExecutionLog = [];
-  const starteTime = performance.now();
+  const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
-  let prevTimestamp = Date.now();
+  let prevTimestamp = startTime;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -133,7 +132,7 @@ export async function migrationStateActionMachine({
       }
     );
 
-    const elapsedMs = performance.now() - starteTime;
+    const elapsedMs = Date.now() - startTime;
     if (finalState.controlState === 'DONE') {
       logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
       if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {
