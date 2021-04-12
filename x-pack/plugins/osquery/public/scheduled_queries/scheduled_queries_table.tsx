@@ -17,6 +17,7 @@ import {
   PackagePolicy,
   agentPolicyRouteService,
 } from '../../../fleet/common';
+import { pagePathGetters } from '../../../fleet/public';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { useScheduledQueries } from './use_scheduled_queries';
 
@@ -61,7 +62,12 @@ const ScheduledQueriesTableComponent = () => {
       );
 
       return (
-        <EuiLink href={getUrlForApp('fleet', { path: `#/policies/${policyId}` })} target="_blank">
+        <EuiLink
+          href={getUrlForApp('fleet', {
+            path: `#` + pagePathGetters.policy_details({ policyId }),
+          })}
+          target="_blank"
+        >
           {policyDetails?.data?.item?.name ?? policyId}
         </EuiLink>
       );

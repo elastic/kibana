@@ -8,8 +8,10 @@
 import React from 'react';
 
 import { LiveQueryForm } from './form';
+import { FormData } from '../shared_imports';
 
 interface LiveQueryProps {
+  defaultValue?: Partial<FormData> | undefined;
   onSuccess?: () => void;
 }
 

@@ -6,10 +6,16 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiLink,
+} from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { EuiDataGridSorting } from '@elastic/eui';
+import { pagePathGetters } from '../../../fleet/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
@@ -30,7 +36,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
-    (fleetAgentId) => getUrlForApp('fleet', { path: `#/fleet/agents/${fleetAgentId}` }),
+    (fleetAgentId) =>
+      getUrlForApp('fleet', {
+        path: `#` + pagePathGetters.fleet_agent_details({ fleetAgentId }),
+      }),
     [getUrlForApp]
   );
 

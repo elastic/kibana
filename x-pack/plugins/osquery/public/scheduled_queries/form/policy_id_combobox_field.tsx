@@ -7,14 +7,13 @@
 
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
-import { mapKeys } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { GetAgentPoliciesResponseItem } from '../../../../fleet/common';
 import { ComboBoxField, FieldHook } from '../../shared_imports';
-import { useAgentPolicies } from '../../agent_policies';
 
 // Custom styling for drop down list items due to:
 //  1) the max-width and overflow properties is added to prevent long agent policy
@@ -30,32 +29,19 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-interface PolicyIdComboBoxFieldProps {
-  euiFieldProps?: Record<string, any>;
+type ComboBoxFieldProps = Parameters<typeof ComboBoxField>[0];
+
+type PolicyIdComboBoxFieldProps = Pick<ComboBoxFieldProps, 'euiFieldProps'> & {
   field: FieldHook<string[]>;
-}
+  agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
+};
 
 const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   euiFieldProps,
   field,
+  agentPoliciesById,
 }) => {
   const { value } = field;
-
-  console.error('field', field, euiFieldProps);
-
-  const { data: agentPolicies = [] } = useAgentPolicies();
-
-  const agentPoliciesById = mapKeys(agentPolicies, 'id');
-
-  const agentPolicyOptions = useMemo(
-    () =>
-      // @ts-expect-error update types
-      agentPolicies.map((agentPolicy) => ({
-        key: agentPolicy.id,
-        label: agentPolicy.id,
-      })),
-    [agentPolicies]
-  );
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
@@ -95,17 +81,25 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
     }));
   }, [agentPoliciesById, value]);
 
+  const helpText = useMemo(() => {
+    if (!value?.length || !value[0].length) return;
+
+    return (
+      agentPoliciesById[value[0]].agents + ' agents are enrolled with the selected agent policy.'
+    );
+  }, [agentPoliciesById, value]);
+
   return (
     <ComboBoxField
       field={field as FieldHook}
       fullWidth={true}
+      helpText={helpText}
       // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
       euiFieldProps={{
         onCreateOption: null,
         singleSelection: { asPlainText: true },
         noSuggestions: false,
         isClearable: false,
-        options: agentPolicyOptions,
         'data-test-subj': 'searchableSnapshotCombobox',
         selectedOptions,
         renderOption,

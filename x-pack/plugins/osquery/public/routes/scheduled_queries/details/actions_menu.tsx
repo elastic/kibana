@@ -8,7 +8,7 @@
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useDiscoverLink } from '../../../common/hooks';
 
 interface LiveQueryDetailsActionsMenuProps {
   actionId: string;
@@ -17,12 +17,8 @@ interface LiveQueryDetailsActionsMenuProps {
 const LiveQueryDetailsActionsMenuComponent: React.FC<LiveQueryDetailsActionsMenuProps> = ({
   actionId,
 }) => {
-  const services = useKibana().services;
+  const discoverLinkProps = useDiscoverLink({ filters: [{ key: 'action_id', value: actionId }] });
   const [isPopoverOpen, setPopover] = useState(false);
-
-  const discoverLinkHref = services?.application?.getUrlForApp('discover', {
-    path: `#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logs-*',key:action_id,negate:!f,params:(query:'${actionId}'),type:phrase),query:(match_phrase:(action_id:'${actionId}')))),index:'logs-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))`,
-  });
 
   const onButtonClick = useCallback(() => {
     setPopover((currentIsPopoverOpen) => !currentIsPopoverOpen);
@@ -34,17 +30,20 @@ const LiveQueryDetailsActionsMenuComponent: React.FC<LiveQueryDetailsActionsMenu
 
   const items = useMemo(
     () => [
-      <EuiContextMenuItem key="copy" icon="copy" href={discoverLinkHref}>
-        Check results in Discover
+      <EuiContextMenuItem key="copy" icon="copy" {...discoverLinkProps}>
+        {'View results in Discover'}
       </EuiContextMenuItem>,
     ],
-    [discoverLinkHref]
+    [discoverLinkProps]
   );
 
-  const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      Actions
-    </EuiButton>
+  const button = useMemo(
+    () => (
+      <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+        {'Actions'}
+      </EuiButton>
+    ),
+    [onButtonClick]
   );
 
   return (

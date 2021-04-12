@@ -105,10 +105,12 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
       {
         field: 'vars.id.value',
         name: 'ID',
+        width: '20%',
       },
       {
         field: 'vars.interval.value',
         name: 'Interval',
+        width: '100px',
       },
       {
         field: 'vars.query.value',
@@ -121,6 +123,7 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
       },
       {
         name: 'Actions',
+        width: '80px',
         actions: editMode
           ? [
               {

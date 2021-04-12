@@ -33,7 +33,7 @@ const NewLiveQueryPageComponent = () => {
       };
     }
 
-    return null;
+    return undefined;
   }, [location.search]);
 
   const LeftColumn = useMemo(

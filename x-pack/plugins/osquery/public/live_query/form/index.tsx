@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
 
-import { UseField, Form, useForm, useFormData } from '../../shared_imports';
+import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -20,7 +20,7 @@ import { ResultTabs } from '../../queries/edit/tabs';
 const FORM_ID = 'liveQueryForm';
 
 interface LiveQueryFormProps {
-  defaultValue?: unknown;
+  defaultValue?: Partial<FormData> | undefined;
   onSubmit?: (payload: Record<string, string>) => Promise<void>;
   onSuccess?: () => void;
 }
@@ -53,7 +53,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     id: FORM_ID,
     // schema: formSchema,
     onSubmit: (payload) => {
-      // console.error('payload', payload, isValid);
       return mutateAsync(payload);
     },
     options: {

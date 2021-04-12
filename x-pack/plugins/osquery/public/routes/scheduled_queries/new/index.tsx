@@ -12,9 +12,21 @@ import React, { useMemo } from 'react';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ScheduledQueryForm } from '../../../scheduled_queries/form';
+import { useOsqueryIntegration } from '../../../common/hooks';
 
 const NewScheduledQueryPageComponent = () => {
   const scheduledQueryListProps = useRouterNavigate('scheduled_queries');
+  const { data: osqueryIntegration } = useOsqueryIntegration();
+
+  const packageInfo = useMemo(() => {
+    if (!osqueryIntegration) return;
+
+    return {
+      name: osqueryIntegration.name,
+      title: osqueryIntegration.title,
+      version: osqueryIntegration.version,
+    };
+  }, [osqueryIntegration]);
 
   const LeftColumn = useMemo(
     () => (
@@ -54,7 +66,7 @@ const NewScheduledQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <ScheduledQueryForm />
+      {packageInfo && <ScheduledQueryForm packageInfo={packageInfo} />}
     </WithHeaderLayout>
   );
 };

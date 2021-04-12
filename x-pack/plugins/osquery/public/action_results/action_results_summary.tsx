@@ -17,9 +17,11 @@ import {
   EuiDescriptionList,
   EuiInMemoryTable,
   EuiCodeBlock,
+  EuiIconTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { pagePathGetters } from '../../../fleet/public';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
@@ -31,11 +33,23 @@ interface ActionResultsSummaryProps {
   isLive?: boolean;
 }
 
-const renderErrorMessage = (error: string) => (
-  <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-    {error}
-  </EuiCodeBlock>
-);
+const renderErrorMessage = (error: string) => {
+  return (
+    <>
+      <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
+        {error}
+      </EuiCodeBlock>
+      {error === 'action undefined' ? (
+        <EuiIconTip
+          aria-label="Info"
+          type="iInCircle"
+          color="info"
+          content="Agent may need to be restarted to apply Osquery config properly"
+        />
+      ) : null}
+    </>
+  );
+};
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
@@ -107,7 +121,9 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     (agentId) => (
       <EuiLink
         className="eui-textTruncate"
-        href={getUrlForApp('fleet', { path: `#/fleet/agents/${agentId}` })}
+        href={getUrlForApp('fleet', {
+          path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
+        })}
         target="_blank"
       >
         {agentId}

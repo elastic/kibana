@@ -348,7 +348,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.13.5",
+    "react-query": "^3.13.6",
     "react-resize-detector": "^4.2.0",
     "react-reverse-portal": "^1.0.4",
     "react-router-redux": "^4.0.8",

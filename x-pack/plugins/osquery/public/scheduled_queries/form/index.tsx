@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mapKeys } from 'lodash';
 import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
@@ -18,16 +19,21 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import { produce } from 'immer';
 
-import { PackagePolicy, packagePolicyRouteService } from '../../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
+import {
+  PackagePolicy,
+  PackagePolicyPackage,
+  packagePolicyRouteService,
+} from '../../../../fleet/common';
+import { Form, useForm, useFormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
+import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
+import { useAgentPolicies } from '../../agent_policies';
 
 const GhostFormField = () => <></>;
 
@@ -37,14 +43,34 @@ const CommonUseField = getUseField({ component: Field });
 
 interface ScheduledQueryFormProps {
   defaultValue?: PackagePolicy;
+  packageInfo?: PackagePolicyPackage;
   editMode?: boolean;
 }
 
 const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
   defaultValue,
+  packageInfo,
   editMode = false,
 }) => {
-  const { http } = useKibana().services;
+  const {
+    application: { navigateToApp },
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
+
+  const { data: agentPolicies = [] } = useAgentPolicies();
+  const agentPoliciesById = mapKeys(agentPolicies, 'id');
+  const agentPolicyOptions = useMemo(
+    () =>
+      // @ts-expect-error update types
+      agentPolicies.map((agentPolicy) => ({
+        key: agentPolicy.id,
+        label: agentPolicy.id,
+      })),
+    [agentPolicies]
+  );
 
   const cancelButtonProps = useRouterNavigate(
     `scheduled_queries/${editMode ? defaultValue?.id : ''}`
@@ -65,10 +91,22 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
           })
         : http.post(packagePolicyRouteService.getCreatePath(), {
             body: JSON.stringify(payload),
-          })
-    // {
-    //   onSuccess: () => {},
-    // }
+          }),
+    {
+      onSuccess: (data) => {
+        if (!editMode) {
+          navigateToApp('osquery', { path: `scheduled_queries/${data.item.id}` });
+          toasts.addSuccess(`Successfully scheduled '${data.item.name}'`);
+          return;
+        }
+
+        toasts.addSuccess(`Successfully updated '${data.item.name}'`);
+      },
+      onError: (error) => {
+        // @ts-expect-error update types
+        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+      },
+    }
   );
 
   const { form } = useForm({
@@ -96,7 +134,6 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
       },
     },
     onSubmit: (payload) => {
-      // console.error('payload', payload);
       const formData = produce(payload, (draft) => {
         // @ts-expect-error update types
         draft.inputs[0].streams.forEach((stream) => {
@@ -110,24 +147,18 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
       stripEmptyFields: false,
     },
     // @ts-expect-error update types
-    deserializer: (payload) => {
-      // console.error('deserializer', payload);
-      return {
-        ...payload,
-        policy_id: payload.policy_id.length ? [payload.policy_id] : [],
-        namespace: [payload.namespace],
-      };
-    },
-    serializer: (payload) => {
-      // console.error('serializer', payload);
-      return {
-        ...payload,
-        // @ts-expect-error update types
-        policy_id: payload.policy_id[0],
-        // @ts-expect-error update types
-        namespace: payload.namespace[0],
-      };
-    },
+    deserializer: (payload) => ({
+      ...payload,
+      policy_id: payload.policy_id.length ? [payload.policy_id] : [],
+      namespace: [payload.namespace],
+    }),
+    serializer: (payload) => ({
+      ...payload,
+      // @ts-expect-error update types
+      policy_id: payload.policy_id[0],
+      // @ts-expect-error update types
+      namespace: payload.namespace[0],
+    }),
     defaultValue: merge(
       {
         name: '',
@@ -136,11 +167,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
         policy_id: [],
         namespace: 'default',
         output_id: '',
-        package: {
-          name: OSQUERY_INTEGRATION_NAME,
-          title: 'Osquery Manager',
-          version: '0.1.0',
-        },
+        package: packageInfo,
         inputs: [
           {
             type: 'osquery',
@@ -155,7 +182,41 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
 
   const { submit } = form;
 
-  const policyIdEuiFieldProps = useMemo(() => ({ isDisabled: !!defaultValue }), [defaultValue]);
+  const policyIdEuiFieldProps = useMemo(
+    () => ({ isDisabled: !!defaultValue, options: agentPolicyOptions }),
+    [defaultValue, agentPolicyOptions]
+  );
+
+  const [{ policy_id: policyId }] = useFormData({ form, watch: ['policy_id'] });
+
+  const currentPolicy = useMemo(() => {
+    if (!policyId) {
+      return {
+        agentCount: 0,
+        agentPolicy: {},
+      };
+    }
+
+    const currentAgentPolicy = agentPoliciesById[policyId[0]];
+    return {
+      agentCount: currentAgentPolicy?.agents ?? 0,
+      agentPolicy: currentAgentPolicy,
+    };
+  }, [agentPoliciesById, policyId]);
+
+  const handleSaveClick = useCallback(() => {
+    if (currentPolicy.agentCount) {
+      setShowConfirmationModal(true);
+      return;
+    }
+
+    submit();
+  }, [currentPolicy.agentCount, submit]);
+
+  const handleConfirmConfirmationClick = useCallback(() => {
+    submit();
+    setShowConfirmationModal(false);
+  }, [submit]);
 
   return (
     <>
@@ -181,6 +242,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
             path="policy_id"
             euiFieldProps={policyIdEuiFieldProps}
             component={PolicyIdComboBoxField}
+            agentPoliciesById={agentPoliciesById}
           />
 
           <EuiSpacer />
@@ -218,7 +280,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
                   fill
                   size="m"
                   iconType="save"
-                  onClick={submit}
+                  onClick={handleSaveClick}
                 >
                   {'Save query'}
                 </EuiButton>
@@ -227,6 +289,13 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
+      {showConfirmationModal && (
+        <ConfirmDeployAgentPolicyModal
+          onCancel={handleHideConfirmationModal}
+          onConfirm={handleConfirmConfirmationClick}
+          {...currentPolicy}
+        />
+      )}
     </>
   );
 };

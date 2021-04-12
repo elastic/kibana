@@ -5,68 +5,19 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { useQuery } from 'react-query';
-
-import { GetPackagesResponse, epmRouteService } from '../../../fleet/common';
 
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
-import {
-  useKibana,
-  useRouterNavigate,
-  isModifiedEvent,
-  isLeftClickEvent,
-} from '../common/lib/kibana';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useRouterNavigate } from '../common/lib/kibana';
+import { ManageIntegrationLink } from './manage_integration_link';
 
-export const OsqueryAppComponent = () => {
-  const {
-    application: { getUrlForApp, navigateToApp },
-    http,
-  } = useKibana().services;
+const OsqueryAppComponent = () => {
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
-
-  const { data: osqueryIntegration } = useQuery(
-    'integrations',
-    () =>
-      http.get(epmRouteService.getListPath(), {
-        query: {
-          experimental: true,
-        },
-      }),
-    {
-      select: ({ response }: GetPackagesResponse) =>
-        find(['name', OSQUERY_INTEGRATION_NAME], response),
-    }
-  );
-
-  const integrationHref = useMemo(() => {
-    if (osqueryIntegration) {
-      return getUrlForApp('fleet', {
-        path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
-      });
-    }
-  }, [getUrlForApp, osqueryIntegration]);
-
-  const integrationClick = useCallback(
-    (event) => {
-      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
-        event.preventDefault();
-        if (osqueryIntegration) {
-          return navigateToApp('fleet', {
-            path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
-          });
-        }
-      }
-    },
-    [navigateToApp, osqueryIntegration]
-  );
 
   return (
     <Container>
@@ -75,12 +26,12 @@ export const OsqueryAppComponent = () => {
           <EuiFlexGroup gutterSize="l" alignItems="center">
             <EuiFlexItem>
               <EuiTabs display="condensed">
-                <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
+                {/* <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
                   <FormattedMessage
                     id="xpack.osquery.appNavigation.overviewLinkText"
                     defaultMessage="Overview"
                   />
-                </EuiTab>
+                </EuiTab> */}
                 <EuiTab isSelected={section === 'live_query'} {...useRouterNavigate('live_query')}>
                   <FormattedMessage
                     id="xpack.osquery.appNavigation.liveQueryLinkText"
@@ -112,23 +63,7 @@ export const OsqueryAppComponent = () => {
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                {integrationHref && (
-                  <EuiFlexItem>
-                    {
-                      // eslint-disable-next-line @elastic/eui/href-or-on-click
-                      <EuiButtonEmpty
-                        iconType="gear"
-                        href={integrationHref}
-                        onClick={integrationClick}
-                      >
-                        <FormattedMessage
-                          id="xpack.osquery.appNavigation.manageIntegrationButton"
-                          defaultMessage="Manage integration"
-                        />
-                      </EuiButtonEmpty>
-                    }
-                  </EuiFlexItem>
-                )}
+                <ManageIntegrationLink />
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

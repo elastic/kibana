@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { mapKeys, kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
+
+const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 
 const ExamplePackLink = React.memo(() => (
   <EuiLink href="https://github.com/osquery/osquery/tree/master/packs" target="_blank">
-    {'Check example packs'}
+    {'Example packs'}
   </EuiLink>
 ));
 
 ExamplePackLink.displayName = 'ExamplePackLink';
 
-/**
- * Exports Osquery-specific package policy instructions
- * for use in the Fleet app create / edit package policy
- */
-// @ts-expect-error update types
-export const OsqueryPackUploader = React.memo(({ onChange }) => {
+interface OsqueryPackUploaderProps {
+  onChange: (payload: Record<string, unknown>) => void;
+}
+
+const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
+  const packName = useRef('');
+  const filePickerRef = useRef<EuiFilePicker>(null);
+  const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types
   let fileReader;
 
@@ -29,18 +34,36 @@ export const OsqueryPackUploader = React.memo(({ onChange }) => {
     // @ts-expect-error update types
     const content = fileReader.result;
 
-    let queriesJSON;
+    let parsedContent;
 
     try {
-      queriesJSON = JSON.parse(content);
-      // eslint-disable-next-line no-empty
-    } catch (error) {}
+      parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
+        if (key === 'query') {
+          // remove any multiple spaces from the query
+          return value.replaceAll(/\s(?=\s)/gm, '');
+        }
+        return value;
+      });
 
-    if (!queriesJSON?.queries) {
+      setIsInvalid(null);
+    } catch (error) {
+      setIsInvalid(error);
+      // @ts-expect-error update types
+      filePickerRef.current?.removeFiles(new Event('fake'));
+    }
+
+    if (!parsedContent?.queries) {
       return;
     }
 
-    onChange(queriesJSON?.queries);
+    const queriesJSON = mapKeys(
+      parsedContent?.queries,
+      (value, key) => `pack_${packName.current}_${key}`
+    );
+
+    onChange(queriesJSON);
+    // @ts-expect-error update types
+    filePickerRef.current?.removeFiles(new Event('fake'));
   };
 
   // @ts-expect-error update types
@@ -53,6 +76,24 @@ export const OsqueryPackUploader = React.memo(({ onChange }) => {
 
   const handleInputChange = useCallback(
     (inputFiles) => {
+      if (!inputFiles.length) {
+        packName.current = '';
+        return;
+      }
+
+      if (inputFiles.length && !SUPPORTED_PACK_EXTENSIONS.includes(inputFiles[0].type)) {
+        packName.current = '';
+        // @ts-expect-error update types
+        filePickerRef.current?.removeFiles(new Event('fake'));
+        setIsInvalid(
+          `File type ${
+            inputFiles[0].type
+          } is not supported please upload ${SUPPORTED_PACK_EXTENSIONS.join(' or ')} config file`
+        );
+        return;
+      }
+
+      packName.current = kebabCase(inputFiles[0].name.split('.')[0]);
       handleFileChosen(inputFiles[0]);
     },
     [handleFileChosen]
@@ -61,17 +102,26 @@ export const OsqueryPackUploader = React.memo(({ onChange }) => {
   return (
     <>
       <EuiSpacer size="xl" />
-      <EuiFormRow fullWidth labelAppend={<ExamplePackLink />}>
+      <EuiFormRow
+        fullWidth
+        labelAppend={<ExamplePackLink />}
+        isInvalid={!!isInvalid}
+        error={<>{`${isInvalid}`}</>}
+      >
         <EuiFilePicker
+          ref={filePickerRef}
           id="osquery_pack_picker"
           initialPromptText="Select or drag and drop osquery pack config file"
           onChange={handleInputChange}
           display="large"
           aria-label="Use aria labels when no actual label is in use"
           fullWidth
+          isInvalid={!!isInvalid}
+          accept={SUPPORTED_PACK_EXTENSIONS.join(',')}
         />
       </EuiFormRow>
     </>
   );
-});
-OsqueryPackUploader.displayName = 'OsqueryPackUploader';
+};
+
+export const OsqueryPackUploader = React.memo(OsqueryPackUploaderComponent);

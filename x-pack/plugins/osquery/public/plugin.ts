@@ -14,6 +14,7 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   AppStatus,
+  AppNavLinkStatus,
   AppUpdater,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -42,7 +43,7 @@ export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreSta
           integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
       );
       updater$.next(() => ({
-        status: installed ? AppStatus.accessible : AppStatus.inaccessible,
+        navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
       }));
     });
 }

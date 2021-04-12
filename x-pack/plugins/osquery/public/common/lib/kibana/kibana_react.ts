@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   KibanaContextProvider,
@@ -24,10 +25,10 @@ export interface WithKibanaProps {
 
 const useTypedKibana = () => useKibana<StartServices>();
 
-const isModifiedEvent = (event: any) =>
+const isModifiedEvent = (event: React.MouseEvent) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent = (event: any) => event.button === 0;
+const isLeftClickEvent = (event: React.MouseEvent) => event.button === 0;
 
 const useRouterNavigate = (
   to: Parameters<typeof reactRouterNavigate>[1],

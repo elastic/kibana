@@ -155,10 +155,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
         />
       ) : null}
       <EuiSpacer />
-      {
-        // @ts-expect-error update types
-        <OsqueryPackUploader onChange={handlePackUpload} />
-      }
+      {<OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
         // @ts-expect-error update types
         <AddQueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
