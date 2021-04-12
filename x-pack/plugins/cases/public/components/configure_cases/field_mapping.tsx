@@ -39,7 +39,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         {' '}
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
           </EuiFlexItem>
