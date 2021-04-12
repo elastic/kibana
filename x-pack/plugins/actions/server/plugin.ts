@@ -68,6 +68,9 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
+import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
+import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
+import { AlertHistoryEsIndexConnectorId } from '../common';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -98,6 +101,7 @@ export interface PluginStartContract {
   preconfiguredActions: PreConfiguredAction[];
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
+    actionId: string,
     params: Params,
     variables: Record<string, unknown>
   ): Params;
@@ -178,12 +182,22 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      this.preconfiguredActions.push(getAlertHistoryEsIndex());
+    }
+
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
-      this.preconfiguredActions.push({
-        ...this.actionsConfig.preconfigured[preconfiguredId],
-        id: preconfiguredId,
-        isPreconfigured: true,
-      });
+      if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
+        this.preconfiguredActions.push({
+          ...this.actionsConfig.preconfigured[preconfiguredId],
+          id: preconfiguredId,
+          isPreconfigured: true,
+        });
+      } else {
+        this.logger.warn(
+          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+        );
+      }
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
@@ -355,6 +369,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      createAlertHistoryIndexTemplate({
+        client: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
@@ -468,12 +489,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
+  actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables) as Params;
+    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
   } else {
     return renderMustacheObject(params, variables);
   }
