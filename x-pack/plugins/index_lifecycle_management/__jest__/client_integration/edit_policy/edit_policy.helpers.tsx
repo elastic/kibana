@@ -370,6 +370,7 @@ export const setup = async (arg?: {
         toggleDefaultRollover,
         hasRolloverSettingRequiredCallout,
         hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
+        hasMaxSizeDeprecationWarning: () => exists('maxIndexSizeFieldDeprecationWarning-hot'),
         ...createForceMergeActions('hot'),
         ...createIndexPriorityActions('hot'),
         ...createShrinkActions('hot'),

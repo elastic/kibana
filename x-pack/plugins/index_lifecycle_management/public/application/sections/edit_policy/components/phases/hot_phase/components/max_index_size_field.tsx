@@ -19,10 +19,13 @@ import { FieldDeprecationWarning } from '../../../../components';
 import { maxSizeStoredUnits } from '../constants';
 
 const i18nTexts = {
-  deprecationMessage: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel', {
-    defaultMessage:
-      'Maximum index size is deprecated and will be removed in future versions of the Elastic stack. Please use maximum primary shard size instead.',
-  }),
+  deprecationMessage: i18n.translate(
+    'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeDeprecationMessage',
+    {
+      defaultMessage:
+        'Maximum index size is deprecated and will be removed in future versions of the Elastic stack. Please use maximum primary shard size instead.',
+    }
+  ),
   maxSizeUnit: {
     ariaLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel', {
       defaultMessage: 'Maximum index size units',
@@ -37,6 +40,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
     <FieldDeprecationWarning
       message={i18nTexts.deprecationMessage}
       isShowing={showDeprecationWarning}
+      data-test-subj="maxIndexSizeFieldDeprecationWarning-hot"
     >
       <EuiFlexGroup>
         <EuiFlexItem style={{ maxWidth: 188 }}>
