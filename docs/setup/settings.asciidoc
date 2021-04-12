@@ -429,6 +429,15 @@ to display map tiles in tilemap visualizations. By default,
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
+| `migrations.batchSize:`
+ | Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If the migration fails due to a `circuit_breaking_exception`, set a smaller `batchSize` value. *Default: `1000`*
+
+| `migrations.enableV2:`
+ | experimental[]. Enables the new Saved Objects migration algorithm. For information about the migration algorithm, refer to <<upgrade-migrations>>. When `migrations v2` is stable, the setting will be removed in an upcoming release without any further notice. Setting the value to `false` causes {kib} to use the legacy migration algorithm, which shipped in 7.11 and earlier versions. *Default: `true`*
+
+| `migrations.retryAttempts:`
+ | The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. *Default: `15`*
+
 | `newsfeed.enabled:`
  | Controls whether to enable the newsfeed
 system for the {kib} UI notification center. Set to `false` to disable the
