@@ -63,7 +63,7 @@ plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
 ----
 
 Now your `DO_SOMETHING` action will automatically execute when `MY_APP_PIE_CHART_CLICK`
-trigger is triggered; or, if more than one compatible action, is attached to
+trigger is triggered; or, if more than one compatible action is attached to
 that trigger, user will be presented with a context menu popup to select one
 action to execute.
 
