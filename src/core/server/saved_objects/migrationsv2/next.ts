@@ -56,7 +56,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
-      Actions.waitForIndexStatusYellow(client, state.sourceIndex.value),
+      Actions.waitForIndexStatusYellow(client, state.sourceIndex),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
