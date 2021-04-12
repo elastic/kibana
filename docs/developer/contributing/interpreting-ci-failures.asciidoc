@@ -43,9 +43,11 @@ image::images/test_results.png[]
 Looking at the failure, we first look at the Error and stack trace. In the example below, this test failed to find an element within the timeout;
  `Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])`
 
-We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibane/x-pack/ so the file is https://github.com/elastic/kibana/blob/master/x-pack/test/accessibility/apps/spaces.ts#L50)
-And then the function to click on the element was called from a page object method in `test/functional/page_objects/space_selector_page.ts` https://github.com/elastic/kibana/blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58
+We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibane/x-pack/ so the file is https://github.com/elastic/kibana/blob/master/x-pack/test/accessibility/apps/spaces.ts#L50).
+The function to click on the element was called from a page object method in `test/functional/page_objects/space_selector_page.ts` https://github.com/elastic/kibana/blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58
 
+[source,bash]
+----
 [00:03:36]             │ debg --- retry.try error: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
 [00:03:36]             │      Wait timed out after 10020ms
 [00:03:36]             │ info Taking screenshot "/dev/shm/workspace/parallel/24/kibana/x-pack/test/functional/screenshots/failure/Kibana spaces page meets a11y validations a11y test for click on create space page.png"
@@ -65,6 +67,7 @@ And then the function to click on the element was called from a page object meth
 [00:03:37]             │       at SpaceSelectorPage.clickCreateSpace (test/functional/page_objects/space_selector_page.ts:59:7)
 [00:03:37]             │       at Context.<anonymous> (test/accessibility/apps/spaces.ts:50:7)
 [00:03:37]             │       at Object.apply (/dev/shm/workspace/parallel/24/kibana/node_modules/@kbn/test/src/functional_test_runner/lib/mocha/wrap_function.js:73:16)
+----
 
 But we don't know _why_ the test didn't find the element.  It could be that its not on the right page, or that the element has changed.
 
@@ -78,11 +81,14 @@ image::images\inspect_element.png[]
 
 We know the test was not on the correct page to find the element to click.  We see in the debug log the repeated attempts to find the element.  If we scroll to the start of those repeated attempts we that the first thing the test did was this attempt to click on the `createSpace` element.  
 
+[source,bash]
+----
 [00:01:30]           └-> a11y test for manage spaces menu from top nav on Kibana home
 [00:01:30]           └-> a11y test for manage spaces page
 [00:01:30]           └-> a11y test for click on create space page
 [00:01:30]             └-> "before each" hook: global before each for "a11y test for click on create space page"
 [00:01:30]             │ debg TestSubjects.click(createSpace)
+----
 
 And we can confirm that looking at the test code.
 
