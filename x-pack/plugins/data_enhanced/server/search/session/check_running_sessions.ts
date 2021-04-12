@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY, from, Observable, of } from 'rxjs';
-import { catchError, concatMap, expand } from 'rxjs/operators';
+import { catchError, concatMap, delay, expand, tap } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
@@ -134,28 +134,19 @@ function getSavedSearchSessionsPage$(
   );
 }
 
-function getAllSavedSearchSessions$(deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) {
-  return getSavedSearchSessionsPage$(deps, config, 1).pipe(
-    expand((result) => {
-      if (!result || !result.saved_objects || result.saved_objects.length < config.pageSize)
-        return EMPTY;
-      else {
-        return getSavedSearchSessionsPage$(deps, config, result.page + 1);
-      }
-    })
-  );
-}
-
-export function checkRunningSessions(
+function checkRunningSessionsPage(
   deps: CheckRunningSessionsDeps,
-  config: SearchSessionsConfig
-): Observable<void> {
+  config: SearchSessionsConfig,
+  page: number
+) {
   const { logger, client, savedObjectsClient } = deps;
-  return getAllSavedSearchSessions$(deps, config).pipe(
+  return getSavedSearchSessionsPage$(deps, config, page).pipe(
     concatMap(async (runningSearchSessionsResponse) => {
       if (!runningSearchSessionsResponse.total) return;
 
-      logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
+      logger.debug(
+        `Found ${runningSearchSessionsResponse.total} running sessions, processing ${runningSearchSessionsResponse.saved_objects.length} sessions from page ${page}`
+      );
 
       const updatedSessions = new Array<
         SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
@@ -231,10 +222,33 @@ export function checkRunningSessions(
 
         logger.debug(`Updating search sessions: success: ${success.length}, fail: ${fail.length}`);
       }
-    }),
+
+      return runningSearchSessionsResponse;
+    })
+  );
+}
+
+export function checkRunningSessions(deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) {
+  const { logger } = deps;
+
+  const checkRunningSessionsByPage = (nextPage = 1): Observable<void> =>
+    checkRunningSessionsPage(deps, config, nextPage).pipe(
+      concatMap((result) => {
+        if (!result || !result.saved_objects || result.saved_objects.length < config.pageSize) {
+          return EMPTY;
+        } else {
+          // TODO: while processing previous page session list might have been changed and we might skip a session,
+          // because it would appear now on a different "page".
+          // This isn't critical, as we would pick it up on a next task iteration, but maybe we could improve this somehow
+          return checkRunningSessionsByPage(result.page + 1);
+        }
+      })
+    );
+
+  return checkRunningSessionsByPage().pipe(
     catchError((e) => {
       logger.error(`Error while processing search sessions: ${e?.message}`);
-      return of(void 0);
+      return EMPTY;
     })
   );
 }
