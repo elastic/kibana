@@ -6,7 +6,7 @@
 .gphFieldEditor__badge--disabled:focus,
 .gphFieldEditor__badge--disabled:not(:disabled):focus {
   opacity: .7;
-  text-decoration: line-through; 
+  text-decoration: line-through;
 }
 
 // Chrome fix for focus: duplicate or Safari will ignore completely the disabled rule
