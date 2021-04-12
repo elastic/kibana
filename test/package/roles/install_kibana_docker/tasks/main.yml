@@ -8,7 +8,7 @@
 
 - name: start kibana
   become: yes
-  community.general.docker_container:
+  docker_container:
     name: kibana
     image: docker.elastic.co/kibana/kibana:{{ kibana_version }}
     container_default_behavior: no_defaults

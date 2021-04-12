@@ -14,7 +14,7 @@ cd -
 node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.50.1 \
   -E discovery.type=single-node \
-  --license=trial
+  --license=trial &
 
 export TEST_BROWSER_HEADLESS=1
 export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.6:5601
