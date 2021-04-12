@@ -105,6 +105,7 @@ export const ActionTypeForm = ({
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
   const selectedActionGroup =
     actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+  const [actionGroup, setActionGroup] = useState<string>();
 
   useEffect(() => {
     setAvailableActionVariables(
@@ -119,6 +120,15 @@ export const ActionTypeForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
+
+  useEffect(() => {
+    if (defaultParams && actionGroup) {
+      for (const [key, paramValue] of Object.entries(defaultParams)) {
+        setActionParamsProperty(key, paramValue, index);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionGroup]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
@@ -223,6 +233,7 @@ export const ActionTypeForm = ({
                   valueOfSelected={selectedActionGroup.id}
                   onChange={(group) => {
                     setActionGroupIdByIndex(group, index);
+                    setActionGroup(group);
                   }}
                 />
               </EuiFormControlLayout>
