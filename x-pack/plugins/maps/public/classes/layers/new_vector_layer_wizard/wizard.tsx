@@ -28,6 +28,7 @@ import { ESSearchSource } from '../../sources/es_search_source';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 
 export const CREATE_DRAWN_FEATURES_INDEX_STEP_ID = 'CREATE_DRAWN_FEATURES_INDEX_STEP_ID';
+export const ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID = 'ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID';
 
 interface NewVectorLayerProps extends RenderWizardArguments {
   indexName: string;
@@ -64,11 +65,16 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
   }
 
   async componentDidUpdate() {
-    const { indexName, enableNextBtn, disableNextBtn } = this.props;
+    const { indexName, enableNextBtn, disableNextBtn, currentStepId } = this.props;
     if (indexName) {
       enableNextBtn();
     } else {
       disableNextBtn();
+    }
+    if (!this.state.indexingTriggered && currentStepId === ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID) {
+      this.setState({ indexingTriggered: true });
+      await this._addFeaturesToNewIndex();
+      this.props.clearDrawingData();
     }
   }
 
@@ -84,7 +90,6 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
       geoField: 'coordinates',
       filterByMapBounds: false,
     });
-    this.props.advanceToNextStep();
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors
