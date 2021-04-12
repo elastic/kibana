@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { last, first } from 'lodash';
 import { SeriesAgg } from './_series_agg';
-import _ from 'lodash';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
@@ -33,15 +32,14 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
           return (fn && fn(acc)) || acc;
         }, targetSeries);
 
-      const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
 
       results.push({
         id: `${series.id}`,
         label:
-          series.label ||
-          calculateLabel(_.last(series.metrics), series.metrics, fieldsForMetaIndex),
+          series.label || calculateLabel(last(series.metrics), series.metrics, fieldsForSeries),
         color: series.color,
-        data: _.first(data),
+        data: first(data),
         ...decoration,
       });
     }
