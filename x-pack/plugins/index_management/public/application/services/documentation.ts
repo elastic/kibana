@@ -57,7 +57,7 @@ class DocumentationService {
   private runtimeFields: string = '';
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
-    this.dataStreams = `${links.elasticsearch.dataStreams}`;
+    this.dataStreams = links.elasticsearch.dataStreams;
     this.esDocsBase = `${links.elasticsearch.docsBase}`;
     this.indexManagement = `${links.management.indexManagement}`;
     this.indexSettings = `${links.elasticsearch.indexSettings}`;
