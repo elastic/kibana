@@ -7769,6 +7769,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "discover:maxDocColumnEntries": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "defaultColumns": {
           "type": "array",
           "items": {
@@ -8108,6 +8114,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -8127,12 +8139,6 @@
           }
         },
         "observability:enableAlertingExperience": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

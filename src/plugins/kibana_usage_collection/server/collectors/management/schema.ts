@@ -189,6 +189,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:maxDocColumnEntries': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   defaultColumns: {
     type: 'array',
     items: {

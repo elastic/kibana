@@ -28,6 +28,7 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:maxDocColumnEntries': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
