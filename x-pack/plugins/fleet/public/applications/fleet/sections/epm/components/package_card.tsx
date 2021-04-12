@@ -9,13 +9,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 
-import type { PackageInfo, PackageListItem } from '../../../types';
+import type { PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
-type PackageCardProps = PackageListItem | PackageInfo;
+type PackageCardProps = PackageListItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text
@@ -31,6 +31,7 @@ export function PackageCard({
   release,
   status,
   icons,
+  integration,
   ...restProps
 }: PackageCardProps) {
   const { getHref } = useLink();
@@ -44,8 +45,19 @@ export function PackageCard({
     <Card
       title={title || ''}
       description={description}
-      icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
-      href={getHref('integration_details_overview', { pkgkey: `${name}-${urlVersion}` })}
+      icon={
+        <PackageIcon
+          icons={icons}
+          packageName={name}
+          integrationName={integration}
+          version={version}
+          size="xl"
+        />
+      }
+      href={getHref('integration_details_overview', {
+        pkgkey: `${name}-${urlVersion}`,
+        ...(integration ? { integration } : {}),
+      })}
       betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
       betaBadgeTooltipContent={
         release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined

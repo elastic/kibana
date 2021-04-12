@@ -19,7 +19,12 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
-import type { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecScreenshot,
+  PackageSpecCategory,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -55,7 +60,6 @@ export enum KibanaAssetType {
   indexPattern = 'index_pattern',
   map = 'map',
   lens = 'lens',
-  securityRule = 'security_rule',
   mlModule = 'ml_module',
 }
 
@@ -70,7 +74,6 @@ export enum KibanaSavedObjectType {
   map = 'map',
   lens = 'lens',
   mlModule = 'ml-module',
-  securityRule = 'security-rule',
 }
 
 export enum ElasticsearchAssetType {
@@ -118,18 +121,18 @@ interface RegistryOverridePropertyValue {
 }
 
 export type RegistryRelease = PackageSpecManifest['release'];
-export interface RegistryImage {
-  src: string;
+export interface RegistryImage extends PackageSpecIcon {
   path: string;
-  title?: string;
-  size?: string;
-  type?: string;
 }
 
 export enum RegistryPolicyTemplateKeys {
   name = 'name',
   title = 'title',
   description = 'description',
+  icons = 'icons',
+  screenshots = 'screenshots',
+  categories = 'categories',
+  data_streams = 'data_streams',
   inputs = 'inputs',
   multiple = 'multiple',
 }
@@ -138,6 +141,10 @@ export interface RegistryPolicyTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
   [RegistryPolicyTemplateKeys.title]: string;
   [RegistryPolicyTemplateKeys.description]: string;
+  [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
+  [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
@@ -148,6 +155,7 @@ export enum RegistryInputKeys {
   description = 'description',
   template_path = 'template_path',
   condition = 'condition',
+  input_group = 'input_group',
   vars = 'vars',
 }
 
@@ -157,7 +165,14 @@ export interface RegistryInput {
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.condition]?: string;
+  [RegistryInputKeys.input_group]?: string;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+}
+
+export interface RegistryInputGroup {
+  name: string;
+  title: string;
+  description: string;
 }
 
 export enum RegistryStreamKeys {
@@ -273,7 +288,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
-  [RegistryDataStreamKeys.ingest_pipeline]: string;
+  [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
 }
@@ -307,7 +322,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.required]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
-  [RegistryVarsEntryKeys.default]?: string | string[];
+  [RegistryVarsEntryKeys.default]?: string | string[] | boolean;
   [RegistryVarsEntryKeys.os]?: {
     [key: string]: {
       default: string | string[];
@@ -329,8 +344,11 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
+export type PackageListItem = Installable<RegistrySearchResult> & {
+  integration?: string;
+  id: string;
+};
 
-export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>

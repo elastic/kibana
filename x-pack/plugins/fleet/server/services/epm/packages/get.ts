@@ -47,7 +47,7 @@ export async function getPackages(
   const { savedObjectsClient, experimental, category } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
-      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
   // get the installed packages

@@ -74,7 +74,9 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const history = useHistory();
-  const location = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -184,9 +186,9 @@ export function Detail() {
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
+        pathname,
+        search,
+        hash,
       });
       const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
@@ -204,11 +206,12 @@ export function Detail() {
       history.push({
         pathname: getPath('add_integration_to_policy', {
           pkgkey,
+          ...(integration ? { integration } : {}),
         }),
         state: redirectBackRouteState,
       });
     },
-    [getPath, history, location.hash, location.pathname, location.search, pkgkey]
+    [getPath, history, hash, pathname, search, pkgkey, integration]
   );
 
   const headerRightContent = useMemo(
@@ -255,6 +258,7 @@ export function Detail() {
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
+                      ...(integration ? { integration } : {}),
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
@@ -290,6 +294,7 @@ export function Detail() {
       getHref,
       handleAddIntegrationPolicyClick,
       hasWriteCapabilites,
+      integration,
       packageInfo,
       packageInstallStatus,
       pkgkey,
@@ -316,6 +321,7 @@ export function Detail() {
         'data-test-subj': `tab-overview`,
         href: getHref('integration_details_overview', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       },
     ];
@@ -333,6 +339,7 @@ export function Detail() {
         'data-test-subj': `tab-policies`,
         href: getHref('integration_details_policies', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       });
     }
@@ -349,6 +356,7 @@ export function Detail() {
       'data-test-subj': `tab-settings`,
       href: getHref('integration_details_settings', {
         pkgkey: packageInfoKey,
+        ...(integration ? { integration } : {}),
       }),
     });
 
@@ -365,12 +373,13 @@ export function Detail() {
         'data-test-subj': `tab-custom`,
         href: getHref('integration_details_custom', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       });
     }
 
     return tabs;
-  }, [getHref, packageInfo, panel, showCustomTab, packageInstallStatus]);
+  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab]);
 
   return (
     <WithHeaderLayout

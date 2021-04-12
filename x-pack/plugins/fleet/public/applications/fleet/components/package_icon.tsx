@@ -14,7 +14,7 @@ import { usePackageIconType } from '../hooks';
 
 export const PackageIcon: React.FunctionComponent<
   UsePackageIconType & Omit<EuiIconProps, 'type'>
-> = ({ packageName, version, icons, tryApi, ...euiIconProps }) => {
-  const iconType = usePackageIconType({ packageName, version, icons, tryApi });
+> = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
   return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
 };

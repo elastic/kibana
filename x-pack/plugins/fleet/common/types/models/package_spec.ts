@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegistryPolicyTemplate } from './epm';
+import type { RegistryPolicyTemplate, RegistryVarsEntry, RegistryInputGroup } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -21,7 +21,9 @@ export interface PackageSpecManifest {
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
+  input_groups?: RegistryInputGroup[];
   policy_templates?: RegistryPolicyTemplate[];
+  vars?: RegistryVarsEntry[];
   owner: { github: string };
 }
 

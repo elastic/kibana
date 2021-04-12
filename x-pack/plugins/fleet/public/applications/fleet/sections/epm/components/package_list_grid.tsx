@@ -24,12 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
-import { useLocalSearch, searchIdField } from '../hooks';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { useLocalSearch } from '../hooks';
 
 import { PackageCard } from './package_card';
 
-interface ListProps {
+interface PackageListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
@@ -42,10 +41,10 @@ export function PackageListGrid({
   isLoading,
   controls,
   title,
-  list,
+  list = [],
   setSelectedCategory = () => {},
   showMissingIntegrationMessage = false,
-}: ListProps) {
+}: PackageListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -80,15 +79,11 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
+      ? list.filter((item) => localSearchRef.current!.search(searchTerm) as PackageList)
       : list;
     gridContent = (
       <GridColumn
-        list={filteredList}
+        packages={filteredList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
       />
     );
@@ -145,19 +140,21 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 }
 
 interface GridColumnProps {
-  list: PackageList;
+  packages: PackageList;
   showMissingIntegrationMessage?: boolean;
 }
 
-function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
+function GridColumn({ packages, showMissingIntegrationMessage = false }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
-      {list.length ? (
-        list.map((item) => (
-          <EuiFlexItem key={pkgKeyFromPackageInfo(item)}>
-            <PackageCard {...item} />
-          </EuiFlexItem>
-        ))
+      {packages.length ? (
+        packages.map((pkg) => {
+          return (
+            <EuiFlexItem key={pkg.id}>
+              <PackageCard {...pkg} />
+            </EuiFlexItem>
+          );
+        })
       ) : (
         <EuiFlexItem grow={3}>
           <EuiText>

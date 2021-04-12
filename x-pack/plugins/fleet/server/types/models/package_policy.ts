@@ -77,6 +77,7 @@ const PackagePolicyBaseSchema = {
       ),
     })
   ),
+  vars: schema.maybe(ConfigRecordSchema),
 };
 
 export const NewPackagePolicySchema = schema.object({
