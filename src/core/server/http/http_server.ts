@@ -115,11 +115,13 @@ export class HttpServer {
   }
 
   private registerRouterAfterListening(router: IRouter) {
-    this.registeredRouters.add(router);
     if (this.isListening()) {
       for (const route of router.getRoutes()) {
         this.configureRoute(route);
       }
+    } else {
+      // Not listening yet, add to set of registeredRouters so that it can be added after listening has started.
+      this.registeredRouters.add(router);
     }
   }
 
