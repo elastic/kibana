@@ -1,8 +1,0 @@
-{
-  "id": "mapsLegacyLicensing",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["licensing", "mapsEms"]
-}

@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
 
-  describe('users', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96001
+  describe.skip('users', function () {
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();
@@ -90,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
       expect(roles.apm_system.deprecated).to.be(false);
 
       expect(roles.apm_user.reserved).to.be(true);
-      expect(roles.apm_user.deprecated).to.be(false);
+      expect(roles.apm_user.deprecated).to.be(true);
 
       expect(roles.beats_admin.reserved).to.be(true);
       expect(roles.beats_admin.deprecated).to.be(false);

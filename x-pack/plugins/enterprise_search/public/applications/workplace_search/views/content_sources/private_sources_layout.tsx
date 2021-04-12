@@ -12,7 +12,10 @@ import { useValues } from 'kea';
 import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
 
 import { AppLogic } from '../../app_logic';
+import { AccountHeader } from '../../components/layout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
+
+import { SourceSubNav } from './components/source_sub_nav';
 
 import {
   PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING,
@@ -46,21 +49,25 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
     : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
 
   return (
-    <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
-      <EuiPageSideBar className="enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar">
-        <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
-      </EuiPageSideBar>
-      <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
-        {readOnlyMode && (
-          <EuiCallOut
-            className="enterpriseSearchLayout__readOnlyMode"
-            color="warning"
-            iconType="lock"
-            title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
-          />
-        )}
-        {children}
-      </EuiPageBody>
-    </EuiPage>
+    <>
+      <AccountHeader />
+      <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
+        <EuiPageSideBar className="enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar">
+          <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+          <SourceSubNav />
+        </EuiPageSideBar>
+        <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
+          {readOnlyMode && (
+            <EuiCallOut
+              className="enterpriseSearchLayout__readOnlyMode"
+              color="warning"
+              iconType="lock"
+              title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
+            />
+          )}
+          {children}
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 };

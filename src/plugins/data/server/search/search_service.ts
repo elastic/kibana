@@ -29,6 +29,7 @@ import type {
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -37,7 +38,7 @@ import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-import { DataPluginStart } from '../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
@@ -74,7 +75,6 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
-import { DataRequestHandlerContext } from '../types';
 import { getKibanaContext } from './expressions/kibana_context';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
@@ -114,7 +114,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public setup(
-    core: CoreSetup<{}, DataPluginStart>,
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
