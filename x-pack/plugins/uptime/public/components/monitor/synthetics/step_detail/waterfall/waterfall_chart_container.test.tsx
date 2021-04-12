@@ -189,7 +189,7 @@ describe('WaterfallChartContainer', () => {
       networkEvents: {
         test: {
           '1': {
-            networkEvents: [],
+            events: [],
             total: 0,
             isWaterfallSupported: true,
             loading: false,
