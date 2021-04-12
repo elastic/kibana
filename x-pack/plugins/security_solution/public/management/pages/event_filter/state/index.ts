@@ -9,7 +9,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
-export interface EventFiltersListPageState {
+export interface EventFilterListPageState {
   entries: ExceptionListItemSchema[];
   form: {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;

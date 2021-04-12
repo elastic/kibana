@@ -19,10 +19,10 @@ export interface EventFilterService {
   ): Promise<ExceptionListItemSchema>;
 }
 export class EventFilterHttpService implements EventFilterService {
-  private hasCreatedList: boolean;
+  private listHasBeenCreated: boolean;
 
   constructor(private http: HttpStart) {
-    this.hasCreatedList = false;
+    this.listHasBeenCreated = false;
   }
 
   private async createEndpointEventList() {
@@ -32,13 +32,13 @@ export class EventFilterHttpService implements EventFilterService {
       });
     } catch (err) {
       // Ignore 409 errors. List already created
-      if (err.response.status === 409) this.hasCreatedList = true;
+      if (err.response.status === 409) this.listHasBeenCreated = true;
       else throw err;
     }
   }
 
   private async httpWrapper() {
-    if (!this.hasCreatedList) await this.createEndpointEventList();
+    if (!this.listHasBeenCreated) await this.createEndpointEventList();
     return this.http;
   }
 
