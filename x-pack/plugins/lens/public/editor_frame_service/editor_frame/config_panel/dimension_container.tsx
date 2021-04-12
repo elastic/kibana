@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -49,8 +51,16 @@ export function DimensionContainer({
     }
   }, [isOpen]);
 
+  const closeOnEscape = (event: KeyboardEvent) => {
+    if (event.key === keys.ESCAPE) {
+      event.preventDefault();
+      closeFlyout();
+    }
+  };
+
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
+      <EuiWindowEvent event="keydown" handler={closeOnEscape} />
       <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
         <div
           role="dialog"
