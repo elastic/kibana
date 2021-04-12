@@ -12,8 +12,12 @@ describe('splitByFilter(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  let config;
+  let seriesIndex;
+
   beforeEach(() => {
     panel = {};
+    config = {};
     series = {
       id: 'test',
       split_mode: 'filter',
@@ -27,17 +31,18 @@ describe('splitByFilter(req, panel, series)', () => {
         },
       },
     };
+    seriesIndex = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    splitByFilter(req, panel, series)(next)({});
+    splitByFilter(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns a valid filter with a query_string', () => {
     const next = (doc) => doc;
-    const doc = splitByFilter(req, panel, series)(next)({});
+    const doc = splitByFilter(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -63,7 +68,7 @@ describe('splitByFilter(req, panel, series)', () => {
   test('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
     const next = jest.fn((doc) => doc);
-    const doc = splitByFilter(req, panel, series)(next)({});
+    const doc = splitByFilter(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});
   });

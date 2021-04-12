@@ -570,7 +570,7 @@ export const InnerVisualizationWrapper = ({
               <EuiFlexItem>
                 <EuiEmptyPrompt
                   actions={
-                    visibleErrorMessage ? (
+                    visibleErrorMessage && !localState.expandError ? (
                       <EuiButtonEmpty
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
