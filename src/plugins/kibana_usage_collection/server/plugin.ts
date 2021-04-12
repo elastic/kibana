@@ -28,6 +28,7 @@ import {
   registerManagementUsageCollector,
   registerOpsStatsCollector,
   registerUiMetricUsageCollector,
+  registerCloudProviderUsageCollector,
   registerCspCollector,
   registerCoreUsageCollector,
   registerLocalizationUsageCollector,
@@ -102,6 +103,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       registerType,
       getSavedObjectsClient
     );
+    registerCloudProviderUsageCollector(usageCollection);
     registerCspCollector(usageCollection, coreSetup.http);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);

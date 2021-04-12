@@ -29,6 +29,11 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
     registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
 
+// Warning: (ae-missing-release-tag) "EmbeddableStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+
 // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EnhancementRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
