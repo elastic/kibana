@@ -29,6 +29,8 @@ import { MANAGE_BUTTON_LABEL } from '../constants';
 import { EuiLinkTo } from '../react_router_helpers';
 import { RoleRules } from '../types';
 
+import './role_mappings_table.scss';
+
 import {
   ANY_AUTH_PROVIDER,
   ANY_AUTH_PROVIDER_OPTION_LABEL,
@@ -108,7 +110,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer />
       {filteredResults.length > 0 ? (
-        <EuiTable>
+        <EuiTable className="roleMappingsTable">
           <EuiTableHeader>
             <EuiTableHeaderCell>{EXTERNAL_ATTRIBUTE_LABEL}</EuiTableHeaderCell>
             <EuiTableHeaderCell>{ATTRIBUTE_VALUE_LABEL}</EuiTableHeaderCell>
