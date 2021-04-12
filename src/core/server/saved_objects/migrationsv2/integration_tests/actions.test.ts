@@ -245,7 +245,7 @@ describe('migration actions', () => {
       });
 
       await indexStatusPromise;
-      // Assert that the promise didn't resolve before the index became green
+      // Assert that the promise didn't resolve before the index became yellow
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(yellowStatusResponse.body.status).toBe('yellow');
