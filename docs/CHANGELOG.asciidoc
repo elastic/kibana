@@ -2486,6 +2486,34 @@ By default, the Upgrade Assistant flaw is mitigated in all {kib} instances acces
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
+[[deprecations-7.7.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.7.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.7.0.
+
+[discrete]
+[[deprecation-53010]]
+==== Deprecates authentication settings
+
+*Details* +
+
+Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication. 
+
+Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication. 
+
+For more information, refer to {kibana-pull}53010[#53010].
+
+*Impact* +
+
+* Instead of `xpack.security.authc.saml.realm`, use `xpack.security.authc.providers.saml.<provider-name>.realm`.
+
+* Instead of `xpack.security.authc.saml.maxRedirectURLSize`, use `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`.
+
+* Instead of `xpack.security.authc.oidc.realm`, use `xpack.security.authc.providers.oidc.<provider-name>.realm`.
+
+[float]
 [[known-issues-7.7.0]]
 === Known issues
 
