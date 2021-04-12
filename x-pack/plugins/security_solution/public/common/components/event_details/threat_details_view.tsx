@@ -38,7 +38,11 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   </EuiToolTip>
 );
 
-const getSummaryRowsArray = ({ data }: { data: TimelineEventsDetailsItem[] }): SummaryRow[][] => {
+const getSummaryRowsArray = ({
+  data,
+}: {
+  data: TimelineEventsDetailsItem[];
+}): ThreatDetailsRow[][] => {
   if (!data) return [[]];
   const threatInfo = data.find(
     ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
@@ -65,9 +69,8 @@ const ThreatDetailsViewComponent: React.FC<{
   return (
     <>
       {summaryRowsArray.map((summaryRows, index, arr) => {
-        const key = (summaryRows.find(
-          (threat) => threat.title === 'matched.id'
-        ) as ThreatDetailsRow)?.description.value[0];
+        const key = summaryRows.find((threat) => threat.title === 'matched.id')?.description
+          .value[0];
         return (
           <div key={key}>
             <SummaryView
