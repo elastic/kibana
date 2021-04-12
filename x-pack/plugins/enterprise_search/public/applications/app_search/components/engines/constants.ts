@@ -17,7 +17,7 @@ export const META_ENGINES_TITLE = i18n.translate(
 );
 
 export const SOURCE_ENGINES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.metaEngines.title',
+  'xpack.enterpriseSearch.appSearch.enginesOverview.metaEnginesTable.sourceEngines.title',
   { defaultMessage: 'Source Engines' }
 );
 
