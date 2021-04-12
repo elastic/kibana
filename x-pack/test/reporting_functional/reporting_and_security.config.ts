@@ -7,36 +7,31 @@
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { resolve } from 'path';
-import { ReportingAPIProvider } from './services';
+import { ReportingAPIProvider } from '../reporting_api_integration/services';
+import { ReportingFunctionalProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
-
-  // config for testing network policy
-  const testPolicyRules = [
-    { allow: true, protocol: 'http:' },
-    { allow: false, host: 'via.placeholder.com' },
-    { allow: true, protocol: 'https:' },
-    { allow: true, protocol: 'data:' },
-    { allow: false },
-  ];
 
   return {
     ...apiConfig.getAll(),
-    junit: { reportName: 'X-Pack Reporting API Integration Tests' },
+    ...functionalConfig.getAll(),
+    junit: { reportName: 'X-Pack Reporting Functional Tests' },
     testFiles: [resolve(__dirname, './reporting_and_security')],
-    services: {
-      ...apiConfig.get('services'),
-      reportingAPI: ReportingAPIProvider,
-    },
     kbnTestServer: {
-      ...apiConfig.get('kbnTestServer'),
+      ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...apiConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
       ],
+    },
+    services: {
+      ...apiConfig.get('services'),
+      ...functionalConfig.get('services'),
+      reportingAPI: ReportingAPIProvider,
+      reportingFunctional: ReportingFunctionalProvider,
     },
   };
 }

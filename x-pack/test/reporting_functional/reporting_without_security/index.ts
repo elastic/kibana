@@ -8,9 +8,9 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Reporting API Integration Tests with Security disabled', function () {
-    this.tags('ciGroup13');
-    loadTestFile(require.resolve('./job_apis'));
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
+  describe('Reporting Functional Tests with Security disabled', function () {
+    this.tags('ciGroup2');
+    loadTestFile(require.resolve('./management'));
   });
 }

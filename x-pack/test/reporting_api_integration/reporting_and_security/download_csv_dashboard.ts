@@ -44,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await reportingAPI.initEcommerce();
 
       const {
         status: resStatus,
@@ -146,13 +145,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resType).to.eql('text/csv');
       expectSnapshot(resText).toMatch();
 
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await reportingAPI.teardownEcommerce();
     });
 
     it('Exports CSV with all fields when using defaults', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await reportingAPI.initEcommerce();
 
       const {
         status: resStatus,
@@ -193,13 +190,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resType).to.eql('text/csv');
       expectSnapshot(resText).toMatch();
 
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await reportingAPI.teardownEcommerce();
     });
 
     it('Logs the error explanation if the search query returns an error', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await reportingAPI.initEcommerce();
 
       const { status: resStatus, text: resText } = (await generateAPI.getCSVFromSearchSource(
         getMockJobParams({
@@ -235,8 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resStatus).to.eql(500);
       expectSnapshot(resText).toMatch();
 
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await reportingAPI.teardownEcommerce();
     });
 
     describe('date formatting', () => {
