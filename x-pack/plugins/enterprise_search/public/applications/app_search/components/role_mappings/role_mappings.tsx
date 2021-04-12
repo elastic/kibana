@@ -130,7 +130,7 @@ export const RoleMappings: React.FC = () => {
         pageTitle={ROLE_MAPPINGS_TITLE}
         description={ROLE_MAPPINGS_DESCRIPTION}
       />
-      <EuiPageContent hasBorder>
+      <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
         <EuiPageContentBody>
           <FlashMessages />
           {roleMappings.length === 0 ? roleMappingEmptyState : roleMappingsTable}
