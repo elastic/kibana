@@ -53,7 +53,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
@@ -66,11 +66,13 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+  useEffect(() => {
+    const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+    const isOrganization = !pathname.match(personalSourceUrlRegex); // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
 
-  // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
-  const isOrganization = !pathname.match(personalSourceUrlRegex);
-  setContext(isOrganization);
+    setContext(isOrganization);
+    setChromeIsVisible(isOrganization);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hasInitialized) {

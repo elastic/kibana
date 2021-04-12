@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { getEmsTmsServices } from '../../../meta';
+import { getEmsTmsServices } from '../../../util';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';

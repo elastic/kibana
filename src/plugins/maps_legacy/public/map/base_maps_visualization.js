@@ -193,13 +193,12 @@ export function BaseMapsVisualizationProvider() {
         isDesaturated,
         isDarkMode
       );
-      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { ...options, showZoomMessage, ...meta },
+        options: { ...options, ...meta },
       });
     }
 

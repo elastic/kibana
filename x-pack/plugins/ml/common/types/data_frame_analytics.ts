@@ -6,6 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { RuntimeMappings } from './fields';
+
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
 import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
@@ -74,6 +76,7 @@ export interface DataFrameAnalyticsConfig {
   source: {
     index: IndexName | IndexName[];
     query?: any;
+    runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;
   analyzed_fields: {
