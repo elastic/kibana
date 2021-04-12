@@ -359,7 +359,6 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
   });
 
-
   it('tests processing object field with no other attributes', () => {
     const objectFieldLiteralYml = `
 - name: objectField
