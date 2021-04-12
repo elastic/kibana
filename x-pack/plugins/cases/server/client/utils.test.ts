@@ -18,10 +18,9 @@ import { newCase } from '../routes/api/__mocks__/request_responses';
 import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
-  getConnectorFromConfiguration,
-  sortToSnake,
   transformNewCase,
-} from './utils';
+} from '../common';
+import { getConnectorFromConfiguration, sortToSnake } from './utils';
 
 describe('utils', () => {
   const caseConnector: CaseConnector = {

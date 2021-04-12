@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(400);
 
-      expect(body.message).to.contain('subCaseId');
+      expect(body.message).to.contain('disabled');
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests

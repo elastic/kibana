@@ -18,13 +18,14 @@ import {
   UserActionFieldType,
   SubCaseAttributes,
 } from '../../../common/api';
-import { isTwoArraysDifference, transformESConnectorToCaseConnector } from '../../client/utils';
+import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
 import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
+import { transformESConnectorToCaseConnector } from '../../common';
 
 export const transformNewUserAction = ({
   actionField,

@@ -12,7 +12,6 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import { decodeCommentRequest, isCommentRequestTypeGenAlert } from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -33,7 +32,11 @@ import {
 } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CaseService, CaseUserActionService } from '../../services';
-import { CommentableCase, createAlertUpdateRequest } from '../../common';
+import {
+  CommentableCase,
+  createAlertUpdateRequest,
+  isCommentRequestTypeGenAlert,
+} from '../../common';
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
 import {
@@ -41,6 +44,8 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   ENABLE_CASE_CONNECTOR,
 } from '../../../common/constants';
+
+import { decodeCommentRequest } from '../utils';
 
 async function getSubCase({
   caseService,

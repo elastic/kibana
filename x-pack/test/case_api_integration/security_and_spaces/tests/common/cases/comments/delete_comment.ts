@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(400);
       // make sure the failure is because of the subCaseId
-      expect(body.message).to.contain('subCaseId');
+      expect(body.message).to.contain('disabled');
     });
 
     it('should return a 400 when attempting to delete a single comment when passing the `subCaseId` parameter', async () => {
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(400);
       // make sure the failure is because of the subCaseId
-      expect(body.message).to.contain('subCaseId');
+      expect(body.message).to.contain('disabled');
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests

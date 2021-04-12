@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(400);
 
-      expect(body.message).to.contain('subCaseId');
+      expect(body.message).to.contain('disabled');
     });
 
     it('should return a 400 when passing the includeSubCaseComments parameter', async () => {
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(400);
 
-      expect(body.message).to.contain('includeSubCaseComments');
+      expect(body.message).to.contain('disabled');
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests

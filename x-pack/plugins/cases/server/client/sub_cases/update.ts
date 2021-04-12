@@ -36,13 +36,13 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import {
-  flattenSubCaseSavedObject,
-  isCommentRequestTypeAlertOrGenAlert,
-} from '../../routes/api/utils';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
-import { createAlertUpdateRequest } from '../../common';
+import {
+  createAlertUpdateRequest,
+  isCommentRequestTypeAlertOrGenAlert,
+  flattenSubCaseSavedObject,
+} from '../../common';
 import { createCaseError } from '../../common/error';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 import { CasesClientArgs } from '../types';

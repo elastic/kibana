@@ -7,10 +7,9 @@
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
-import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
 import { CaseService } from '../../services';
-import { countAlertsForID } from '../../common';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 

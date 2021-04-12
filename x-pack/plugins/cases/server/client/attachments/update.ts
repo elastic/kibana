@@ -15,7 +15,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/consta
 import { AttachmentService, CaseService } from '../../services';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../../routes/api/utils';
+import { decodeCommentRequest } from '../utils';
 import { createCaseError } from '../../common/error';
 
 export interface UpdateArgs {

@@ -15,7 +15,6 @@ import {
   SavedObject,
 } from 'kibana/server';
 import { ActionResult, ActionsClient } from '../../../../actions/server';
-import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../routes/api/utils';
 
 import {
   ActionConnector,
@@ -39,7 +38,7 @@ import {
   CaseUserActionService,
   AttachmentService,
 } from '../../services';
-import { createCaseError } from '../../common/error';
+import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientInternal } from '..';
 

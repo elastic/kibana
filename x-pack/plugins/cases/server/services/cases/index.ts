@@ -35,12 +35,13 @@ import {
 } from '../../../common/api';
 import {
   defaultSortField,
+  flattenCaseSavedObject,
+  flattenSubCaseSavedObject,
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import { flattenCaseSavedObject, flattenSubCaseSavedObject } from '../../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,

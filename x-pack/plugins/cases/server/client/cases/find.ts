@@ -26,12 +26,11 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CaseService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
-import { transformCases } from '../../routes/api/utils';
 import { Authorization } from '../../authorization/authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { AuthorizationFilter, Operations } from '../../authorization';
 import { AuditLogger } from '../../../../security/server';
-import { createAuditMsg } from '../../common';
+import { createAuditMsg, transformCases } from '../../common';
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;

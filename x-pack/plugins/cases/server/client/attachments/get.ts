@@ -21,14 +21,15 @@ import {
   CommentsResponseRt,
   SavedObjectFindOptionsRt,
 } from '../../../common/api';
-import { checkEnabledCaseConnectorOrThrow, defaultSortField } from '../../common';
-import { createCaseError } from '../../common/error';
-import { defaultPage, defaultPerPage } from '../../routes/api';
 import {
+  checkEnabledCaseConnectorOrThrow,
+  defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
-} from '../../routes/api/utils';
+} from '../../common';
+import { createCaseError } from '../../common/error';
+import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 
 const FindQueryParamsRt = rt.partial({

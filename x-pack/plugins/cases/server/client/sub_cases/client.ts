@@ -18,8 +18,7 @@ import {
   SubCasesResponse,
 } from '../../../common/api';
 import { CasesClientArgs } from '..';
-import { flattenSubCaseSavedObject, transformSubCases } from '../../routes/api/utils';
-import { countAlertsForID } from '../../common';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
 import { createCaseError } from '../../common/error';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';

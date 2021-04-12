@@ -28,12 +28,12 @@ import {
   SubCaseAttributes,
   User,
 } from '../../../common/api';
-import { transformESConnectorToCaseConnector } from '../../client/utils';
 import {
+  transformESConnectorToCaseConnector,
   flattenCommentSavedObjects,
   flattenSubCaseSavedObject,
   transformNewComment,
-} from '../../routes/api/utils';
+} from '..';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CaseService } from '../../services';
 import { createCaseError } from '../error';

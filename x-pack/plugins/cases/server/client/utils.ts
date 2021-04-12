@@ -5,28 +5,85 @@
  * 2.0.
  */
 
+import { badRequest } from '@hapi/boom';
 import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import {
   CaseConnector,
-  ESCaseConnector,
   ESCasesConfigureAttributes,
-  ConnectorTypeFields,
   ConnectorTypes,
   CaseStatuses,
   CaseType,
-  ESConnectorFields,
-  CasesClientPostRequest,
-  ESCaseAttributes,
   CommentRequest,
+  throwErrors,
+  excess,
+  ContextTypeUserRt,
+  AlertCommentRequestRt,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
-import { SavedObjectFindOptionsKueryNode } from '../common';
-import { isCommentRequestTypeAlertOrGenAlert } from '../routes/api/utils';
+import {
+  getIDsAndIndicesAsArrays,
+  isCommentRequestTypeAlertOrGenAlert,
+  isCommentRequestTypeUser,
+  SavedObjectFindOptionsKueryNode,
+} from '../common';
+
+export const decodeCommentRequest = (comment: CommentRequest) => {
+  if (isCommentRequestTypeUser(comment)) {
+    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    const { ids, indices } = getIDsAndIndicesAsArrays(comment);
+
+    /**
+     * The alertId and index field must either be both of type string or they must both be string[] and be the same length.
+     * Having a one-to-one relationship between the id and index of an alert avoids accidentally updating or
+     * retrieving the wrong alert. Elasticsearch only guarantees that the _id (the field we use for alertId) to be
+     * unique within a single index. So if we attempt to update or get a specific alert across multiple indices we could
+     * update or receive the wrong one.
+     *
+     * Consider the situation where we have a alert1 with _id = '100' in index 'my-index-awesome' and also in index
+     *  'my-index-hi'.
+     * If we attempt to update the status of alert1 using an index pattern like `my-index-*` or even providing multiple
+     * indices, there's a chance we'll accidentally update too many alerts.
+     *
+     * This check doesn't enforce that the API request has the correct alert ID to index relationship it just guards
+     * against accidentally making a request like:
+     * {
+     *  alertId: [1,2,3],
+     *  index: awesome,
+     * }
+     *
+     * Instead this requires the requestor to provide:
+     * {
+     *  alertId: [1,2,3],
+     *  index: [awesome, awesome, awesome]
+     * }
+     *
+     * Ideally we'd change the format of the comment request to be an array of objects like:
+     * {
+     *  alerts: [{id: 1, index: awesome}, {id: 2, index: awesome}]
+     * }
+     *
+     * But we'd need to also implement a migration because the saved object document currently stores the id and index
+     * in separate fields.
+     */
+    if (ids.length !== indices.length) {
+      throw badRequest(
+        `Received an alert comment with ids and indices arrays of different lengths ids: ${JSON.stringify(
+          ids
+        )} indices: ${JSON.stringify(indices)}`
+      );
+    }
+  }
+};
 
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
@@ -37,34 +94,6 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   }
   return [];
 };
-
-export const transformNewCase = ({
-  connector,
-  createdDate,
-  email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
-  newCase,
-  username,
-}: {
-  connector: ESCaseConnector;
-  createdDate: string;
-  email?: string | null;
-  full_name?: string | null;
-  newCase: CasesClientPostRequest;
-  username?: string | null;
-}): ESCaseAttributes => ({
-  ...newCase,
-  closed_at: null,
-  closed_by: null,
-  connector,
-  created_at: createdDate,
-  created_by: { email, full_name, username },
-  external_service: null,
-  status: CaseStatuses.open,
-  updated_at: null,
-  updated_by: null,
-});
 
 export const addStatusFilter = ({
   status,
@@ -392,47 +421,6 @@ export const getConnectorFromConfiguration = (
     };
   }
   return caseConnector;
-};
-
-export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
-  id: connector?.id ?? 'none',
-  name: connector?.name ?? 'none',
-  type: connector?.type ?? '.none',
-  fields:
-    connector?.fields != null
-      ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-          (acc, [key, value]) => [
-            ...acc,
-            {
-              key,
-              value,
-            },
-          ],
-          []
-        )
-      : [],
-});
-
-export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector): CaseConnector => {
-  const connectorTypeField = {
-    type: connector?.type ?? '.none',
-    fields:
-      connector && connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
-        : null,
-  } as ConnectorTypeFields;
-
-  return {
-    id: connector?.id ?? 'none',
-    name: connector?.name ?? 'none',
-    ...connectorTypeField,
-  };
 };
 
 enum SortFieldCase {

@@ -19,10 +19,7 @@ import {
 } from 'kibana/server';
 
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import {
-  flattenCaseSavedObject,
-  isCommentRequestTypeAlertOrGenAlert,
-} from '../../routes/api/utils';
+import {} from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -42,7 +39,7 @@ import {
   User,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
-import { getCaseToUpdate, transformCaseConnectorToEsConnector } from '../utils';
+import { getCaseToUpdate } from '../utils';
 
 import { CaseService, CaseUserActionService } from '../../services';
 import {
@@ -50,7 +47,12 @@ import {
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { createAlertUpdateRequest } from '../../common';
+import {
+  createAlertUpdateRequest,
+  transformCaseConnectorToEsConnector,
+  flattenCaseSavedObject,
+  isCommentRequestTypeAlertOrGenAlert,
+} from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
