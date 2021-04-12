@@ -39,7 +39,7 @@ You configure the authentication settings in the `xpack.security.authc.providers
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers`
-| Identifies the authentication method.
+| Specifies the types of authentication providers.
 |===
 
 For example:
@@ -57,7 +57,7 @@ xpack.security.authc.providers: [saml, basic, oidc]
 |===
 | `xpack.security.authc.providers.`
 `saml.<provider-name>.realm`
-| The SAML realm in {es} that the provider should use.
+| When specified in `xpack.security.authc.providers`, the SAML realm in {es} that the `saml` provider should use.
 
 | `xpack.security.authc.saml.maxRedirectURLSize`
 | Specifies the maximum size of the URL that {kib} is allowed to store during the SAML handshake.
@@ -71,7 +71,7 @@ xpack.security.authc.providers: [saml, basic, oidc]
 |===
 | `xpack.security.authc.providers.`
 `oidc.<provider-name>.realm`
-| The OpenID Connect realm in {es} that the provider should use.
+| When specified in `xpack.security.authc.providers`, the OpenID Connect realm in {es} that the `oidc` provider should use.
 |===
 
 [float]
