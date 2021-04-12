@@ -7,3 +7,4 @@
 
 export { WorkplaceSearchNav } from './nav';
 export { WorkplaceSearchHeaderActions } from './kibana_header_actions';
+export { AccountHeader } from './account_header';

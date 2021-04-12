@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
