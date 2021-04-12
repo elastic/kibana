@@ -54588,7 +54588,7 @@ const BuildBazelCommand = {
   }) {
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Call bazel with the target to build all available packages
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runBazel"])(['build', '//packages:build'], runOffline);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runBazel"])(['build', '//packages:build', '--show_result=1'], runOffline);
   }
 
 };
