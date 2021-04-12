@@ -19,8 +19,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { FormattedMessage } from 'react-intl';
+
 import { useStartServices } from '../../../hooks';
 
 export const ContentWrapper = styled(EuiFlexGroup)`
@@ -129,7 +129,7 @@ function renderCloudInstructions(deploymentUrl: string) {
   );
 }
 
-export const FleetServerSetupPage = () => {
+export const FleetServerRequirementPage = () => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 

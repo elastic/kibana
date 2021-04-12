@@ -31,6 +31,9 @@ import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { appContextService } from './app_context';
 
+const FLEET_ENROLL_USERNAME = 'fleet_enroll';
+const FLEET_ENROLL_ROLE = 'fleet_enroll';
+
 export interface SetupStatus {
   isIntialized: true | undefined;
 }
@@ -188,4 +191,68 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
       });
     })
   );
+}
+
+async function putFleetRole(esClient: ElasticsearchClient) {
+  return await esClient.security.putRole({
+    name: FLEET_ENROLL_ROLE,
+    body: {
+      cluster: ['monitor', 'manage_api_key'],
+      indices: [
+        {
+          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+          privileges: ['auto_configure', 'create_doc'],
+        },
+      ],
+    },
+  });
+}
+
+// TODO Deprecated should be removed as part of https://github.com/elastic/kibana/issues/94303
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options?: { forceRecreate?: boolean }
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  const { body: res } = await putFleetRole(esClient);
+
+  // If the role is already created skip the rest unless you have forceRecreate set to true
+  if (options?.forceRecreate !== true && res.role.created === false) {
+    return;
+  }
+  const password = generateRandomPassword();
+  // Create fleet enroll user
+  await esClient.security.putUser({
+    username: FLEET_ENROLL_USERNAME,
+    body: {
+      password,
+      roles: [FLEET_ENROLL_ROLE],
+      metadata: {
+        updated_at: new Date().toISOString(),
+      },
+    },
+  });
+
+  outputService.invalidateCache();
+
+  // save fleet admin user
+  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+  if (!defaultOutputId) {
+    throw new Error(
+      i18n.translate('xpack.fleet.setup.defaultOutputError', {
+        defaultMessage: 'Default output does not exist',
+      })
+    );
+  }
+
+  await outputService.updateOutput(soClient, defaultOutputId, {
+    fleet_enroll_username: FLEET_ENROLL_USERNAME,
+    fleet_enroll_password: password,
+  });
+}
+
+function generateRandomPassword() {
+  return Buffer.from(uuid.v4()).toString('base64');
 }

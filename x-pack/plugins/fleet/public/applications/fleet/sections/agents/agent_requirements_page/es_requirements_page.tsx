@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
-  EuiForm,
   EuiText,
-  EuiButton,
-  EuiTitle,
   EuiSpacer,
   EuiIcon,
   EuiCallOut,
@@ -25,7 +22,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { useStartServices, sendPostFleetSetup } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 
@@ -51,24 +47,9 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
   );
 };
 
-export const SetupPage: React.FunctionComponent<{
-  refresh: () => Promise<void>;
+export const MissingESRequirementsPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
-}> = ({ refresh, missingRequirements }) => {
-  const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
-  const core = useStartServices();
-
-  const onSubmit = async () => {
-    setIsFormLoading(true);
-    try {
-      await sendPostFleetSetup({ forceRecreate: true });
-      await refresh();
-    } catch (error) {
-      core.notifications.toasts.addDanger(error.message);
-      setIsFormLoading(false);
-    }
-  };
-
+}> = ({ missingRequirements }) => {
   return (
     <WithoutHeaderLayout>
       <EuiPageBody restrictWidth={820}>

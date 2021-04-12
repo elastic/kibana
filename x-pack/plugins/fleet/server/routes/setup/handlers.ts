@@ -9,7 +9,7 @@ import type { RequestHandler } from 'src/core/server';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager } from '../../services/setup';
+import { setupFleet, setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -52,6 +52,23 @@ export const FleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, esClient);
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+// TODO should be removed as part https://github.com/elastic/kibana/issues/94303
+export const FleetAgentSetupHandler: RequestHandler = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
+  try {
+    const body: PostIngestSetupResponse = { isInitialized: true };
+    await setupIngestManager(soClient, esClient);
+    await setupFleet(soClient, esClient);
     return response.ok({
       body,
     });

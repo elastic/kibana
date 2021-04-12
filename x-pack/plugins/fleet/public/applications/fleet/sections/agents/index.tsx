@@ -15,12 +15,11 @@ import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../.
 import { WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
-import { SetupPage } from './setup_page';
+import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { EnrollmentTokenListPage } from './enrollment_token_list_page';
 import { ListLayout } from './components/list_layout';
-import { FleetServerSetupPage } from './fleet_server_setup_page';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -32,13 +31,10 @@ export const FleetApp: React.FunctionComponent = () => {
 
   const fleetStatus = useFleetStatus();
 
-  if (!agents.enabled) return null;
-  if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
-    return <Loading />;
-  }
-
   useEffect(() => {
     if (
+      !agents.enabled ||
+      fleetStatus.isLoading ||
       !fleetStatus.missingRequirements ||
       !fleetStatus.missingRequirements.includes('fleet_server')
     ) {
@@ -52,7 +48,12 @@ export const FleetApp: React.FunctionComponent = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [fleetStatus.missingRequirements]);
+  }, [fleetStatus, agents.enabled]);
+
+  if (!agents.enabled) return null;
+  if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
+    return <Loading />;
+  }
 
   if (fleetStatus.error) {
     return (
@@ -76,10 +77,7 @@ export const FleetApp: React.FunctionComponent = () => {
 
   if (!hasOnlyFleetServerMissignRequirement) {
     return (
-      <SetupPage
-        missingRequirements={fleetStatus.missingRequirements || []}
-        refresh={fleetStatus.refresh}
-      />
+      <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements || []} />
     );
   }
   if (!capabilities.read) {
@@ -99,7 +97,11 @@ export const FleetApp: React.FunctionComponent = () => {
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
           <ListLayout>
-            {hasOnlyFleetServerMissignRequirement ? <FleetServerSetupPage /> : <AgentListPage />}
+            {hasOnlyFleetServerMissignRequirement ? (
+              <FleetServerRequirementPage />
+            ) : (
+              <AgentListPage />
+            )}
           </ListLayout>
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>
