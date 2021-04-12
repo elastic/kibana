@@ -25,6 +25,8 @@ apt-get install --yes \
 curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 apt-get install -y nodejs
 
+npm install -g yarn
+
 # Install GitHub cli (gh)
 {
   apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
