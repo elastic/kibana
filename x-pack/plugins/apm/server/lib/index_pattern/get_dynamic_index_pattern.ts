@@ -9,7 +9,7 @@ import {
   IndexPatternsFetcher,
   FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export interface IndexPatternTitleAndFields {
@@ -20,12 +20,12 @@ export interface IndexPatternTitleAndFields {
 
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = ({
+  config,
   context,
-}: {
-  context: APMRequestHandlerContext;
-}) => {
+  logger,
+}: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
   return withApmSpan('get_dynamic_index_pattern', async () => {
-    const indexPatternTitle = context.config['apm_oss.indexPattern'];
+    const indexPatternTitle = config['apm_oss.indexPattern'];
 
     const indexPatternsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser
@@ -50,7 +50,7 @@ export const getDynamicIndexPattern = ({
     } catch (e) {
       const notExists = e.output?.statusCode === 404;
       if (notExists) {
-        context.logger.error(
+        logger.error(
           `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
         );
         return;
