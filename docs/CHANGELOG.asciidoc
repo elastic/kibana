@@ -3738,6 +3738,29 @@ Machine Learning::
 Maps::
 * [Fixes #34662] Hide feature when it has no corresponding term join {kib-pull}36617[#36617]
 
+
+[float]
+[[deprecations-7.3.0]]
+=== Deprecation
+
+The following functionality is deprecated in 7.3.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.3.0.
+
+[discrete]
+[[deprecation-xpack-security-authProviders]]
+==== Deprecates `xpack.security.authProviders` and `xpack.security.public`
+
+*Details:* Deprecates the `xpack.security.authProviders` and `xpack.security.public` settings used for {kib} SAML authentication. For more information, refer to {pull}37346[#37346].
+
+*Impact:* 
+
+When you use the SAML authentication provider, use the following settings:
+
+* Instead of `xpack.security.authProviders`, use `xpack.security.authc.providers`.
+
+* Instead of `xpack.security.public`, use `xpack.security.authc.saml.realm`.
+
 [float]
 [[enhancement-7.3.0]]
 === Enhancements
