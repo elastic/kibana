@@ -119,7 +119,7 @@ export class ApplicationService {
     };
 
     this.navigateToNewTab = (url) => {
-      // basePath not needed here because `history` is configured with basename
+      // window.open copies session information if base url is same
       return window.open(basename + url, '_blank');
     };
 

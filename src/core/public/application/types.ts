@@ -687,8 +687,7 @@ export interface NavigateToAppOptions {
   replace?: boolean;
 
   /**
-   * if true, will try to open the app in new tab, will keep state, if respective app is implementating
-   * state recover mechanism
+   * if true, will try to open the app in new tab, will copy session information via window.open
    */
   openInNewTab?: boolean;
 }
