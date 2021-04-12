@@ -64,7 +64,8 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
 
 export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
   showBuildingBlockAlerts
-    ? [
+    ? []
+    : [
         {
           meta: {
             alias: null,
@@ -77,8 +78,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
-      ]
-    : [];
+      ];
 
 export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[] =>
   showThreatMatchesOnly
