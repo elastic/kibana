@@ -12,12 +12,14 @@ import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { ThreatMatchRowView } from './threat_match_row';
 
-describe('threatMatchRowView', () => {
+describe('ThreatMatchRowView', () => {
   const mount = useMountAppended();
 
   it('renders an indicator match row', () => {
     const wrapper = shallow(
       <ThreatMatchRowView
+        contextId="contextId"
+        eventId="eventId"
         indicatorDataset="dataset"
         indicatorProvider="provider"
         indicatorReference="http://example.com"
@@ -33,6 +35,8 @@ describe('threatMatchRowView', () => {
   it('matches the registered snapshot', () => {
     const wrapper = shallow(
       <ThreatMatchRowView
+        contextId="contextId"
+        eventId="eventId"
         indicatorDataset="dataset"
         indicatorProvider="provider"
         indicatorReference="http://example.com"
@@ -49,6 +53,8 @@ describe('threatMatchRowView', () => {
     const wrapper = mount(
       <TestProviders>
         <ThreatMatchRowView
+          contextId="contextId"
+          eventId="eventId"
           indicatorDataset="dataset"
           indicatorProvider="provider"
           indicatorReference="http://example.com"

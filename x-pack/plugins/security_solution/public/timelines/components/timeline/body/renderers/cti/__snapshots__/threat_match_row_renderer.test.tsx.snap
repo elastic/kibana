@@ -5,8 +5,8 @@ exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`
   <RowRendererContainer
     data-test-subj="threat-match-row-renderer"
   >
-    <ThreatMatchRowContainer
-      fields={
+    <ThreatMatchRow
+      data={
         Object {
           "matched": Object {
             "atomic": Array [
@@ -21,7 +21,9 @@ exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`
           },
         }
       }
-      key="0"
+      eventId="1"
+      key="threat-match-row-1-0"
+      timelineId="test"
     />
   </RowRendererContainer>
 </span>

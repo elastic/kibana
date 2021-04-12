@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`threatMatchRowView matches the registered snapshot 1`] = `
+exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
 <Fragment>
   <EuiFlexGroup
     alignItems="flexStart"
+    data-test-subj="threat-match-group"
     direction="row"
     gutterSize="none"
     justifyContent="center"
@@ -12,9 +13,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-indicator-type"
-        eventId="mm"
+        eventId="eventId"
         field="threat.indicator.matched.type"
         value="domain"
       />
@@ -24,9 +25,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-source-field"
-        eventId="mm"
+        eventId="eventId"
         field="threat.indicator.matched.field"
         value="host.name"
       />
@@ -36,9 +37,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-source-value"
-        eventId="mm"
+        eventId="eventId"
         field="host.name"
         value="http://elastic.co"
       />
@@ -46,7 +47,7 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="flexStart"
-    data-test-subj="threat-match-row"
+    data-test-subj="threat-match-indicator-group"
     direction="row"
     gutterSize="none"
     justifyContent="center"
@@ -55,9 +56,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-indicator-dataset"
-        eventId="mm"
+        eventId="eventId"
         field="threat.indicator.event.dataset"
         value="dataset"
       />
@@ -67,9 +68,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-indicator-provider"
-        eventId="mm"
+        eventId="eventId"
         field="threat.indicator.provider"
         value="provider"
       />
@@ -79,9 +80,9 @@ exports[`threatMatchRowView matches the registered snapshot 1`] = `
       grow={false}
     >
       <DraggableBadge
-        contextId="hmm"
+        contextId="contextId"
         data-test-subj="threat-match-row-indicator-reference"
-        eventId="mm"
+        eventId="eventId"
         field="threat.indicator.event.reference"
         value="http://example.com"
       />
