@@ -74,6 +74,11 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be availble in the upgraded index.
+   */
+  readonly unusedTypesToExclude: Option.Option<string[]>;
 }
 
 export type InitState = BaseState & {

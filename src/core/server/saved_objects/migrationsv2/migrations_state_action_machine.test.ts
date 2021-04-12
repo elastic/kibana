@@ -248,6 +248,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -307,6 +314,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -453,6 +467,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -507,6 +528,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",

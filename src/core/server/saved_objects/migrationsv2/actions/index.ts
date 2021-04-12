@@ -13,6 +13,7 @@ import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { flow } from 'fp-ts/lib/function';
+import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsRawDoc } from '../../serialization';
@@ -436,7 +437,12 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>,
-  requireAlias: boolean
+  requireAlias: boolean,
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be availble in the upgraded index.
+   */
+  unusedTypesToExclude: Option.Option<string[]>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -451,6 +457,15 @@ export const reindex = (
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
+          // Exclude saved object types
+          query: Option.fold<string[], QueryContainer | undefined>(
+            () => undefined,
+            (types) => ({
+              bool: {
+                must_not: types.map((type) => ({ term: { type } })),
+              },
+            })
+          )(unusedTypesToExclude),
         },
         dest: {
           index: targetIndex,

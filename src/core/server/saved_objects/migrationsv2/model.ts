@@ -769,6 +769,11 @@ export const createInitialState = ({
     },
   };
 
+  const unusedTypesToExclude = Option.some([
+    'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
+    'tsvb-validation-telemetry', // https://github.com/elastic/kibana/issues/95617
+  ]);
+
   const initialState: InitState = {
     controlState: 'INIT',
     indexPrefix,
@@ -786,6 +791,7 @@ export const createInitialState = ({
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     logs: [],
+    unusedTypesToExclude,
   };
   return initialState;
 };
