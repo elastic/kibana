@@ -53,6 +53,8 @@ export const getSignalsTemplate = (index: string) => {
               ...ecsMapping.mappings.properties.threat.properties.indicator,
               properties: {
                 ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
+                confidence:
+                  ecsMapping.mappings.properties.threat.properties.indicator.properties.confidence,
                 event: ecsMapping.mappings.properties.event,
               },
             },
