@@ -36,7 +36,9 @@ export const handleEsError = ({
     return response.customError({
       statusCode,
       body: {
-        message: body.error?.reason ?? error.message ?? 'Unknown error',
+        message:
+          // We use || instead of ?? as the switch here because reason could be an empty string
+          body?.error?.reason || body?.error?.caused_by?.reason || error.message || 'Unknown error',
         attributes: {
           // The full original ES error object
           error: body.error,
