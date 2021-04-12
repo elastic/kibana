@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
@@ -80,7 +79,6 @@ export const EnginesOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome trail={[ENGINES_TITLE]} />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />

@@ -12,15 +12,12 @@ import { useValues, useActions } from 'kea';
 import { EuiPageContent, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { AppLogic } from '../../../app_logic';
 import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
-
-import { ENGINES_TITLE } from './../constants';
 
 import { EnginesOverviewHeader } from './header';
 
@@ -34,7 +31,6 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome trail={[ENGINES_TITLE]} />
       <EnginesOverviewHeader />
       <EuiPageContent hasBorder className="emptyState">
         {canManageEngines ? (
