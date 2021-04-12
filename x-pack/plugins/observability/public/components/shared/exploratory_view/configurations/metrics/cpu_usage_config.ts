@@ -7,7 +7,6 @@
 
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
-import { OperationType } from '../../../../../../../lens/public';
 
 interface Props {
   seriesId: string;
@@ -23,11 +22,11 @@ export function getCPUUsageLensConfig({ seriesId }: Props): DataSeries {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'average' as OperationType,
+      operationType: 'average',
       sourceField: 'system.cpu.user.pct',
       label: 'CPU Usage %',
     },
-    hasMetricType: true,
+    hasOperationType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],
     filters: [],
