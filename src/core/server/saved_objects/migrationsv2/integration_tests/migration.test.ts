@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
@@ -18,6 +20,14 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
 
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
@@ -46,7 +56,7 @@ describe('migration v2', () => {
           appenders: {
             file: {
               type: 'file',
-              fileName: join(__dirname, 'migration_test_kibana.log'),
+              fileName: logFilePath,
               layout: {
                 type: 'json',
               },
@@ -121,9 +131,68 @@ describe('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: false,
-        dataArchive: join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+      });
+    });
+
+    afterAll(async () => {
+      await stopServers();
+    });
+
+    it('creates the new index and the correct aliases', async () => {
+      const { body } = await esClient.indices.get(
+        {
+          index: migratedIndex,
+        },
+        { ignore: [404] }
+      );
+
+      const response = body[migratedIndex];
+
+      expect(response).toBeDefined();
+      expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
+    });
+
+    it('copies all the document of the previous index to the new one', async () => {
+      const migratedIndexResponse = await esClient.count({
+        index: migratedIndex,
+      });
+      const oldIndexResponse = await esClient.count({
+        index: '.kibana_1',
+      });
+
+      // Use a >= comparison since once Kibana has started it might create new
+      // documents like telemetry tasks
+      expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+    });
+
+    it('migrates the documents to the highest version', async () => {
+      const expectedVersions = getExpectedVersionPerType();
+      const res = await esClient.search({
+        index: migratedIndex,
+        body: {
+          sort: ['_doc'],
+        },
+        size: 10000,
+      });
+      const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
+      allDocuments.forEach((doc) => {
+        assertMigrationVersion(doc, expectedVersions);
+      });
+    });
+  });
+
+  describe('migrating from the same Kibana version', () => {
+    const migratedIndex = `.kibana_${kibanaVersion}_001`;
+
+    beforeAll(async () => {
+      await removeLogFile();
+      await startServers({
+        oss: true,
+        dataArchive: Path.join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
       });
     });
 
