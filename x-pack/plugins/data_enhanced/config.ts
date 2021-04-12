@@ -25,10 +25,10 @@ export const configSchema = schema.object({
       trackingInterval: schema.duration({ defaultValue: '10s' }),
 
       /**
-       * trackingTimeout controls for how long task manager waits for search session monitoring task to complete before considering it timed out,
+       * monitoringTaskTimeout controls for how long task manager waits for search session monitoring task to complete before considering it timed out,
        * If tasks timeouts it receives cancel signal and next task starts in "trackingInterval" time
        */
-      trackingTimeout: schema.duration({ defaultValue: '5m' }),
+      monitoringTaskTimeout: schema.duration({ defaultValue: '5m' }),
 
       /**
        * notTouchedTimeout controls how long do we store unpersisted search session results,

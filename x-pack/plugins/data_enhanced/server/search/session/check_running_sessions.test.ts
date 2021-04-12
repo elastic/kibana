@@ -42,7 +42,7 @@ describe('getSearchStatus', () => {
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
-    trackingTimeout: moment.duration(5, 'm'),
+    monitoringTaskTimeout: moment.duration(5, 'm'),
     management: {} as any,
   };
   const mockLogger: any = {

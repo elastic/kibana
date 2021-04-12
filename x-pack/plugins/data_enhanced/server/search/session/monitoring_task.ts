@@ -77,7 +77,7 @@ export function registerSearchSessionsTask(
     [SEARCH_SESSIONS_TASK_TYPE]: {
       title: 'Search Sessions Monitor',
       createTaskRunner: searchSessionRunner(core, deps),
-      timeout: `${deps.config.search.sessions.trackingTimeout.asSeconds()}s`,
+      timeout: `${deps.config.search.sessions.monitoringTaskTimeout.asSeconds()}s`,
     },
   });
 }
