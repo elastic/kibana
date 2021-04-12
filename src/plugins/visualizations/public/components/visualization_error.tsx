@@ -20,7 +20,7 @@ export class VisualizationError extends React.Component<VisualizationNoResultsPr
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
-        data-test-subj="embeddable-lens-failure"
+        data-test-subj="visualization-error"
         body={<p>{this.props.error}</p>}
       />
     );
