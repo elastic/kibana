@@ -57,10 +57,8 @@ const validateAggregations = (
   context: ValidationContext
 ) => {
   return Object.entries(aggregations).reduce((memo, [aggrName, aggrContainer]) => {
-    return {
-      ...memo,
-      [aggrName]: validateAggregation(aggrContainer, childContext(context, aggrName)),
-    };
+    memo[aggrName] = validateAggregation(aggrContainer, childContext(context, aggrName));
+    return memo;
   }, {} as Record<string, estypes.AggregationContainer>);
 };
 
