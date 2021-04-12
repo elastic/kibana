@@ -37,10 +37,11 @@ const Panel = styled(EuiPanel)`
 
 export function IconPanel({
   packageName,
+  integrationName,
   version,
   icons,
-}: Pick<UsePackageIconType, 'packageName' | 'version' | 'icons'>) {
-  const iconType = usePackageIconType({ packageName, version, icons });
+}: Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'>) {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons });
 
   return (
     <PanelWrapper>

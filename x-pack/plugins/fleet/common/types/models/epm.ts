@@ -136,6 +136,7 @@ export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
   inputs = 'inputs',
+  readme = 'readme',
   multiple = 'multiple',
 }
 
@@ -148,6 +149,7 @@ export interface RegistryPolicyTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
   [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
+  [RegistryPolicyTemplateKeys.readme]?: string;
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
 
@@ -161,20 +163,16 @@ export enum RegistryInputKeys {
   vars = 'vars',
 }
 
+export type RegistryInputGroup = 'logs' | 'metrics';
+
 export interface RegistryInput {
   [RegistryInputKeys.type]: string;
   [RegistryInputKeys.title]: string;
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.condition]?: string;
-  [RegistryInputKeys.input_group]?: string;
+  [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
-}
-
-export interface RegistryInputGroup {
-  name: string;
-  title: string;
-  description: string;
 }
 
 export enum RegistryStreamKeys {

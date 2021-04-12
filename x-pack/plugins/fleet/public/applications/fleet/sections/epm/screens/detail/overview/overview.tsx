@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { PackageInfo, ScreenshotItem } from '../../../../../types';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -16,6 +16,7 @@ import { Details } from './details';
 
 interface Props {
   packageInfo: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 const LeftColumn = styled(EuiFlexItem)`
@@ -25,18 +26,12 @@ const LeftColumn = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
+export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   // Collect all package-level and integration-level screenshots
-  const allScreenshots = useMemo(
-    () =>
-      (packageInfo.policy_templates || []).reduce(
-        (screenshots: ScreenshotItem[], policyTemplate) => {
-          return [...screenshots, ...(policyTemplate.screenshots || [])];
-        },
-        [...(packageInfo.screenshots || [])]
-      ),
-    [packageInfo.policy_templates, packageInfo.screenshots]
-  );
+  const screenshots = useMemo(() => integrationInfo?.screenshots || packageInfo.screenshots || [], [
+    integrationInfo,
+    packageInfo.screenshots,
+  ]);
 
   return (
     <EuiFlexGroup alignItems="flexStart">
@@ -44,7 +39,7 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       <EuiFlexItem grow={9} className="eui-textBreakWord">
         {packageInfo.readme ? (
           <Readme
-            readmePath={packageInfo.readme}
+            readmePath={integrationInfo?.readme || packageInfo.readme}
             packageName={packageInfo.name}
             version={packageInfo.version}
           />
@@ -52,10 +47,10 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
-          {allScreenshots.length ? (
+          {screenshots.length ? (
             <EuiFlexItem>
               <Screenshots
-                images={allScreenshots}
+                images={screenshots}
                 packageName={packageInfo.name}
                 version={packageInfo.version}
               />

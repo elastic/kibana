@@ -122,6 +122,16 @@ export function Detail() {
     }
   }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
 
+  const integrationInfo = useMemo(
+    () =>
+      integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === integration
+          )
+        : undefined,
+    [integration, packageInfo]
+  );
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -149,8 +159,9 @@ export function Detail() {
               ) : (
                 <IconPanel
                   packageName={packageInfo.name}
+                  integrationName={integrationInfo?.name}
                   version={packageInfo.version}
-                  icons={packageInfo.icons}
+                  icons={integrationInfo?.icons || packageInfo.icons}
                 />
               )}
             </EuiFlexItem>
@@ -159,7 +170,7 @@ export function Detail() {
                 <FlexItemWithMinWidth grow={false}>
                   <EuiText>
                     {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{packageInfo?.title || '\u00A0'}</h1>
+                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
                   </EuiText>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
@@ -176,7 +187,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [getHref, isLoading, packageInfo]
+    [getHref, integrationInfo, isLoading, packageInfo]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
@@ -267,7 +278,7 @@ export function Detail() {
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
                       defaultMessage="Add {packageName}"
                       values={{
-                        packageName: packageInfo.title,
+                        packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
                   </EuiButton>
@@ -295,6 +306,7 @@ export function Detail() {
       handleAddIntegrationPolicyClick,
       hasWriteCapabilites,
       integration,
+      integrationInfo,
       packageInfo,
       packageInstallStatus,
       pkgkey,
@@ -389,7 +401,7 @@ export function Detail() {
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
-      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+      {integrationInfo ? <Breadcrumbs packageTitle={integrationInfo.title} /> : null}
       {packageInfoError ? (
         <Error
           title={
@@ -405,7 +417,7 @@ export function Detail() {
       ) : (
         <Switch>
           <Route path={PAGE_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage packageInfo={packageInfo} />
+            <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
           </Route>
           <Route path={PAGE_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} />
