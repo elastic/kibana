@@ -60,7 +60,7 @@ function TimeseriesVisualization({
       const { indexPatterns } = getDataStart();
       const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
       let event;
-      // trigger applyFilter if no index pattern found, url drillodowns is supported only
+      // trigger applyFilter if no index pattern found, url drilldowns are supported only
       // for the index pattern mode
       if (indexPattern) {
         const tables = indexPattern
