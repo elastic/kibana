@@ -87,38 +87,7 @@ export class HttpService
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const notReadySetup = this.shouldListen(config)
-      ? await this.runNotReadyServer(config)
-      : undefined;
-
-    let notReadyServer: InternalNotReadyHttpServiceSetup | undefined;
-    if (notReadySetup) {
-      // We cannot use the real context container since the core services may not yet be ready
-      const fakeContext: RequestHandlerContextContainer = new Proxy(
-        deps.context.createContextContainer(),
-        {
-          get: (target, property, receiver) => {
-            if (property === 'createHandler') {
-              return Reflect.get(target, property, receiver);
-            }
-            throw new Error(`Unexpected access from fake context: ${String(property)}`);
-          },
-        }
-      );
-
-      notReadyServer = {
-        registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
-          const router = new Router(
-            path,
-            this.log,
-            fakeContext.createHandler.bind(null, this.coreContext.coreId)
-          );
-
-          registerCallback(router);
-          notReadySetup.registerRouterAfterListening(router);
-        },
-      };
-    }
+    const notReadyServer = await this.setupNotReadyService({ config, context: deps.context });
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
 
@@ -206,6 +175,46 @@ export class HttpService
     }
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+  }
+
+  private async setupNotReadyService({
+    config,
+    context,
+  }: {
+    config: HttpConfig;
+    context: ContextSetup;
+  }): Promise<InternalNotReadyHttpServiceSetup | undefined> {
+    if (!this.shouldListen(config)) {
+      return;
+    }
+
+    const notReadySetup = await this.runNotReadyServer(config);
+
+    // We cannot use the real context container since the core services may not yet be ready
+    const fakeContext: RequestHandlerContextContainer = new Proxy(
+      context.createContextContainer(),
+      {
+        get: (target, property, receiver) => {
+          if (property === 'createHandler') {
+            return Reflect.get(target, property, receiver);
+          }
+          throw new Error(`Unexpected access from fake context: ${String(property)}`);
+        },
+      }
+    );
+
+    return {
+      registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
+        const router = new Router(
+          path,
+          this.log,
+          fakeContext.createHandler.bind(null, this.coreContext.coreId)
+        );
+
+        registerCallback(router);
+        notReadySetup.registerRouterAfterListening(router);
+      },
+    };
   }
 
   private async runNotReadyServer(config: HttpConfig) {
