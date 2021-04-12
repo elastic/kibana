@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
+
+export interface HasImportPermission {
+  hasImportPermission: boolean;
+}
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -79,7 +84,9 @@ export interface ImportResponse {
   pipelineId?: string;
   docCount: number;
   failures: ImportFailure[];
-  error?: any;
+  error?: {
+    error: estypes.ErrorCause;
+  };
   ingestError?: boolean;
 }
 

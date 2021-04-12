@@ -51,6 +51,7 @@ export interface ColumnHeaderOptions {
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
+  prevActiveTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
   /** Timeline saved object owner */
@@ -142,6 +143,7 @@ export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
     | 'activeTab'
+    | 'prevActiveTab'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'
