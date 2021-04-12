@@ -8,24 +8,25 @@
 import { get } from 'lodash';
 import React from 'react';
 
-import { Ecs } from '../../../../../../../common/ecs';
-import { ParsedFields, TimelineNonEcsData } from '../../../../../../../common/search_strategy';
-import { RowRendererContainer } from '../row_renderer';
+import { Fields } from '../../../../../../../common/search_strategy';
+import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
+import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { ThreatMatchRow } from './threat_match_row';
 
-export const ThreatMatchRows = ({
-  data,
-  flattenedData,
-}: {
-  data: Ecs;
-  flattenedData?: TimelineNonEcsData[];
-}) => {
-  const indicators = get(data, 'threat.indicator') as ParsedFields[];
+export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) => {
+  const indicators = get(data, 'threat.indicator') as Fields[];
+  const eventId = get(data, ID_FIELD_NAME);
 
   return (
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
-      {indicators.map((fields, index) => (
-        <ThreatMatchRow key={index} fields={fields} />
+      {indicators.map((indicator, index) => (
+        <ThreatMatchRow
+          // TODO index should be replaced with matched.id when it is available
+          key={`threat-match-row-${eventId}-${index}`}
+          data={indicator}
+          eventId={eventId}
+          timelineId={timelineId}
+        />
       ))}
     </RowRendererContainer>
   );

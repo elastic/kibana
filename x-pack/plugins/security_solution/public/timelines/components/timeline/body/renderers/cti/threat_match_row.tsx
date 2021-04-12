@@ -9,10 +9,12 @@ import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { ParsedFields } from '../../../../../../../common/search_strategy';
+import { Fields } from '../../../../../../../common/search_strategy';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
 export interface ThreatMatchRowProps {
+  contextId: string;
+  eventId: string;
   indicatorDataset: string;
   indicatorProvider: string;
   indicatorReference: string;
@@ -21,20 +23,32 @@ export interface ThreatMatchRowProps {
   sourceValue: string;
 }
 
-const ThreatMatchRowContainer = ({ fields }: { fields: ParsedFields }) => {
+export const ThreatMatchRow = ({
+  data,
+  eventId,
+  timelineId,
+}: {
+  data: Fields;
+  eventId: string;
+  timelineId: string;
+}) => {
   const props = {
-    indicatorDataset: get(fields, 'event.dataset')[0] as string,
-    indicatorReference: get(fields, 'event.reference')[0] as string,
-    indicatorProvider: get(fields, 'provider')[0] as string,
-    indicatorType: get(fields, 'matched.type')[0] as string,
-    sourceField: get(fields, 'matched.field')[0] as string,
-    sourceValue: get(fields, 'matched.atomic')[0] as string,
+    contextId: `threat-match-row-${timelineId}-${eventId}`,
+    eventId,
+    indicatorDataset: get(data, 'event.dataset')[0] as string,
+    indicatorReference: get(data, 'event.reference')[0] as string,
+    indicatorProvider: get(data, 'provider')[0] as string,
+    indicatorType: get(data, 'matched.type')[0] as string,
+    sourceField: get(data, 'matched.field')[0] as string,
+    sourceValue: get(data, 'matched.atomic')[0] as string,
   };
 
   return <ThreatMatchRowView {...props} />;
 };
 
 export const ThreatMatchRowView = ({
+  contextId,
+  eventId,
   indicatorDataset,
   indicatorProvider,
   indicatorReference,
@@ -52,9 +66,9 @@ export const ThreatMatchRowView = ({
       >
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-indicator-type"
-            eventId={'mm'}
+            eventId={eventId}
             field={'threat.indicator.matched.type'}
             value={indicatorType}
           />
@@ -62,9 +76,9 @@ export const ThreatMatchRowView = ({
         {'indicator matched on'}
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-source-field"
-            eventId={'mm'}
+            eventId={eventId}
             field={'threat.indicator.matched.field'}
             value={sourceField}
           />
@@ -72,9 +86,9 @@ export const ThreatMatchRowView = ({
         {', whose value was'}
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-source-value"
-            eventId={'mm'}
+            eventId={eventId}
             field={sourceField}
             value={sourceValue}
           />
@@ -89,9 +103,9 @@ export const ThreatMatchRowView = ({
       >
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-indicator-dataset"
-            eventId={'mm'}
+            eventId={eventId}
             field={'threat.indicator.event.dataset'}
             value={indicatorDataset}
           />
@@ -99,9 +113,9 @@ export const ThreatMatchRowView = ({
         {'via'}
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-indicator-provider"
-            eventId={'mm'}
+            eventId={eventId}
             field={'threat.indicator.provider'}
             value={indicatorProvider}
           />
@@ -109,9 +123,9 @@ export const ThreatMatchRowView = ({
         {':'}
         <EuiFlexItem grow={false}>
           <DraggableBadge
-            contextId={'hmm'}
+            contextId={contextId}
             data-test-subj="threat-match-row-indicator-reference"
-            eventId={'mm'}
+            eventId={eventId}
             field={'threat.indicator.event.reference'}
             value={indicatorReference}
           />
@@ -120,5 +134,3 @@ export const ThreatMatchRowView = ({
     </>
   );
 };
-
-export { ThreatMatchRowContainer as ThreatMatchRow };
