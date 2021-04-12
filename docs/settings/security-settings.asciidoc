@@ -27,6 +27,28 @@ Set to `true` to enable audit logging for security events. By default, it is set
 to `false`. For more details see <<xpack-security-audit-logging>>.
 
 [float]
+[[authentication-security-settings]]
+==== Authentication security settings
+
+You configure the authentication settings in the `xpack.security.authc.providers` namespace. For more information, refer to <<kibana-authentication>>.
+
+`xpack.security.authc.providers`::
+Specifies the types of authentication providers.
++
+For example:
++
+[source,yml]
+--------------------------------------------------
+xpack.security.authc.providers: [saml, basic, oidc]
+--------------------------------------------------
+
+`xpack.security.authc.saml.realm`::
+When specified in `xpack.security.authc.providers`, the SAML realm in {es} that the `saml` provider should use.
+
+`xpack.security.authc.oidc.realm`::
+When specified in `xpack.security.authc.providers`, the OpenID Connect realm in {es} that the `oidc` provider should use.
+
+[float]
 [[security-ui-settings]]
 ==== User interface security settings
 
