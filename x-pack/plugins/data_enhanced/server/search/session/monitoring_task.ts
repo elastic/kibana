@@ -7,7 +7,7 @@
 
 import { Duration } from 'moment';
 import { takeUntil } from 'rxjs/operators';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
