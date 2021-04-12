@@ -11,13 +11,21 @@ export const observabilityRuleRegistrySettings = {
   name: 'observability',
   fieldMap: {
     ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
+    'kibana.observability.evaluation.value': {
+      type: 'scaled_float' as const,
+      scaling_factor: 1000,
+    },
+    'kibana.observability.evaluation.threshold': {
+      type: 'scaled_float' as const,
+      scaling_factor: 1000,
+    },
   },
 };
 
 export const observabilityAlertRt = t.intersection([
   t.type({
     '@timestamp': t.string,
-    'event.action': t.union([t.literal('close'), t.literal('active'), t.literal('open')]),
+    'event.action': t.string,
     'kibana.rac.alert.id': t.string,
     'kibana.rac.alert.uuid': t.string,
     'kibana.rac.alert.start': t.string,
@@ -30,5 +38,7 @@ export const observabilityAlertRt = t.intersection([
   t.partial({
     'kibana.rac.alert.severity.level': t.string,
     'kibana.rac.alert.end': t.string,
+    'kibana.observability.evaluation.value': t.number,
+    'kibana.observability.evaluation.threshold': t.number,
   }),
 ]);

@@ -129,10 +129,11 @@ export function registerTransactionErrorRateAlertType({
           },
         };
 
-        const response = await alertingEsClient(
-          services.scopedClusterClient,
-          searchParams
-        );
+        const response = await alertingEsClient({
+          scopedClusterClient: services.scopedClusterClient,
+          logger: services.logger,
+          params: searchParams,
+        });
 
         if (!response.aggregations) {
           return {};
@@ -182,6 +183,10 @@ export function registerTransactionErrorRateAlertType({
                 [SERVICE_NAME]: serviceName,
                 ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
                 [TRANSACTION_TYPE]: transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                'kibana.observability.evaluation.value': errorRate,
+                'kibana.observability.evaluation.threshold':
+                  alertParams.threshold,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

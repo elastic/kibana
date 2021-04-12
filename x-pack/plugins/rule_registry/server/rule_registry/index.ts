@@ -101,6 +101,11 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
 
     const templateExists = await this.esAdapter.doesIndexTemplateExist(indexAliasName);
 
+    const mappings = mappingFromFieldMap(this.options.fieldMap);
+
+    const esClient = (await this.options.coreSetup.getStartServices())[0].elasticsearch.client
+      .asInternalUser;
+
     if (!templateExists) {
       await this.esAdapter.createIndexTemplate(indexAliasName, {
         index_patterns: [`${indexAliasName}-*`],
@@ -112,7 +117,16 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
           'sort.field': '@timestamp',
           'sort.order': 'desc',
         },
-        mappings: mappingFromFieldMap(this.options.fieldMap),
+        mappings,
+      });
+    } else {
+      await esClient.indices.putTemplate({
+        name: indexAliasName,
+        body: {
+          index_patterns: [`${indexAliasName}-*`],
+          mappings,
+        },
+        create: false,
       });
     }
 
@@ -126,6 +140,42 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
           },
         },
       });
+    } else {
+      const { body: aliases } = (await esClient.indices.getAlias({
+        index: indexAliasName,
+      })) as { body: Record<string, { aliases: Record<string, { is_write_index: boolean }> }> };
+
+      const writeIndex = Object.entries(aliases).find(
+        ([indexName, alias]) => alias.aliases[indexAliasName]?.is_write_index === true
+      )![0];
+
+      const { body: fieldsInWriteIndex } = await esClient.fieldCaps({
+        index: writeIndex,
+        fields: '*',
+      });
+
+      const fieldsNotOrDifferentInIndex = Object.entries(this.options.fieldMap).filter(
+        ([fieldName, descriptor]) => {
+          return (
+            !fieldsInWriteIndex.fields[fieldName] ||
+            !fieldsInWriteIndex.fields[fieldName][descriptor.type]
+          );
+        }
+      );
+
+      if (fieldsNotOrDifferentInIndex.length > 0) {
+        this.options.logger.debug(
+          `Some fields were not found in write index mapping: ${Object.keys(
+            Object.fromEntries(fieldsNotOrDifferentInIndex)
+          ).join(',')}`
+        );
+        this.options.logger.info(`Updating index mapping due to new fields`);
+
+        await esClient.indices.putMapping({
+          index: indexAliasName,
+          body: mappings,
+        });
+      }
     }
   }
 

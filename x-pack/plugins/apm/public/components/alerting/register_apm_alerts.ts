@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
 import { ApmRuleRegistry } from '../../plugin';
 
@@ -20,8 +21,10 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     format: ({ alert }) => {
       return {
         reason: i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-          defaultMessage: `Error count for {serviceName} was above the threshold`,
+          defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
+            threshold: alert['kibana.observability.evaluation.threshold'],
+            measured: alert['kibana.observability.evaluation.value'],
             serviceName: alert['service.name']!,
           },
         }),
@@ -63,8 +66,14 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionDuration.reason',
         {
-          defaultMessage: `Latency for {serviceName} was above the threshold`,
+          defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
           values: {
+            threshold: asDuration(
+              alert['kibana.observability.evaluation.threshold']
+            ),
+            measured: asDuration(
+              alert['kibana.observability.evaluation.value']
+            ),
             serviceName: alert['service.name']!,
           },
         }
@@ -109,8 +118,16 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionErrorRate.reason',
         {
-          defaultMessage: `Transaction error rate for {serviceName} was above the threshold`,
+          defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
+            threshold: asPercent(
+              alert['kibana.observability.evaluation.threshold'],
+              100
+            ),
+            measured: asPercent(
+              alert['kibana.observability.evaluation.value'],
+              100
+            ),
             serviceName: alert['service.name']!,
           },
         }
@@ -154,10 +171,11 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
         {
-          defaultMessage: `{severityLevel} anomaly detected for {serviceName}`,
+          defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
           values: {
-            serviceName: alert['service.name']!,
-            severityLevel: alert['kibana.rac.alert.severity.level']!,
+            serviceName: alert['service.name'],
+            severityLevel: alert['kibana.rac.alert.severity.level'],
+            measured: alert['kibana.observability.evaluation.value'],
           },
         }
       ),

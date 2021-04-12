@@ -12,7 +12,11 @@ import {
   DefaultItemAction,
   EuiTableSelectionType,
   EuiLink,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiBadge,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
@@ -54,6 +58,31 @@ export function AlertsTable(props: AlertsTableProps) {
 
   const columns: Array<EuiBasicTableColumn<TopAlert>> = [
     {
+      field: 'active',
+      name: 'Status',
+      width: '112px',
+      render: (_, { active }) => {
+        const style = {
+          width: '96px',
+          textAlign: 'center' as const,
+        };
+
+        return active ? (
+          <EuiBadge iconType="alert" color="danger" style={style}>
+            {i18n.translate('xpack.observability.alertsTable.status.active', {
+              defaultMessage: 'Active',
+            })}
+          </EuiBadge>
+        ) : (
+          <EuiBadge iconType="check" color="hollow" style={style}>
+            {i18n.translate('xpack.observability.alertsTable.status.recovered', {
+              defaultMessage: 'Recovered',
+            })}
+          </EuiBadge>
+        );
+      },
+    },
+    {
       field: 'start',
       name: 'Triggered',
       render: (_, item) => {
@@ -63,13 +92,9 @@ export function AlertsTable(props: AlertsTableProps) {
     {
       field: 'duration',
       name: 'Duration',
-      render: (_, { duration }) => {
-        return asDuration(duration, { extended: true });
+      render: (_, { duration, active }) => {
+        return active ? null : asDuration(duration, { extended: true });
       },
-    },
-    {
-      field: 'severityLevel',
-      name: 'Severity',
     },
     {
       field: 'reason',
