@@ -9,7 +9,15 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiPanel,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +44,7 @@ interface Props {
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { dataLoading } = useValues(ResultSettingsLogic);
+  const { dataLoading, schema } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -49,6 +57,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
   }, []);
 
   if (dataLoading) return <Loading />;
+  const hasSchema = Object.keys(schema).length > 0;
 
   return (
     <>
@@ -59,36 +68,63 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.pageDescription',
           { defaultMessage: 'Enrich search results and select which fields will appear.' }
         )}
-        rightSideItems={[
-          <EuiButton
-            data-test-subj="SaveResultSettings"
-            color="primary"
-            fill
-            onClick={saveResultSettings}
-          >
-            {SAVE_BUTTON_LABEL}
-          </EuiButton>,
-          <EuiButton
-            data-test-subj="ResetResultSettings"
-            color="danger"
-            onClick={confirmResetAllFields}
-          >
-            {RESTORE_DEFAULTS_BUTTON_LABEL}
-          </EuiButton>,
-          <EuiButtonEmpty data-test-subj="ClearResultSettings" onClick={clearAllFields}>
-            {CLEAR_BUTTON_LABEL}
-          </EuiButtonEmpty>,
-        ]}
+        rightSideItems={
+          hasSchema
+            ? [
+                <EuiButton
+                  data-test-subj="SaveResultSettings"
+                  color="primary"
+                  fill
+                  onClick={saveResultSettings}
+                >
+                  {SAVE_BUTTON_LABEL}
+                </EuiButton>,
+                <EuiButton
+                  data-test-subj="ResetResultSettings"
+                  color="danger"
+                  onClick={confirmResetAllFields}
+                >
+                  {RESTORE_DEFAULTS_BUTTON_LABEL}
+                </EuiButton>,
+                <EuiButtonEmpty data-test-subj="ClearResultSettings" onClick={clearAllFields}>
+                  {CLEAR_BUTTON_LABEL}
+                </EuiButtonEmpty>,
+              ]
+            : []
+        }
       />
       <FlashMessages />
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={5}>
-          <ResultSettingsTable />
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <SampleResponse />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {hasSchema ? (
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem grow={5}>
+            <ResultSettingsTable />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <SampleResponse />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiPanel hasBorder>
+          <EuiEmptyPrompt
+            iconType="gear"
+            title={
+              <h2>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaTitle',
+                  { defaultMessage: 'Engine does not have a schema' }
+                )}
+              </h2>
+            }
+            body={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.resultSettings.noSchemaDescription',
+              {
+                defaultMessage:
+                  'You need one! A schema is created for you after you index some documents.',
+              }
+            )}
+          />
+        </EuiPanel>
+      )}
     </>
   );
 };

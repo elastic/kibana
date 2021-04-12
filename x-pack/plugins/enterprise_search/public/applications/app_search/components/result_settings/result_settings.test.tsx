@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader, EuiEmptyPrompt } from '@elastic/eui';
 
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
@@ -21,6 +21,9 @@ import { SampleResponse } from './sample_response';
 
 describe('ResultSettings', () => {
   const values = {
+    schema: {
+      foo: 'text',
+    },
     dataLoading: false,
   };
 
@@ -32,9 +35,9 @@ describe('ResultSettings', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
-    jest.clearAllMocks();
   });
 
   const subject = () => shallow(<ResultSettings engineBreadcrumb={['test']} />);
@@ -83,5 +86,30 @@ describe('ResultSettings', () => {
     const clearButton = shallow(buttons[2]);
     clearButton.simulate('click');
     expect(actions.clearAllFields).toHaveBeenCalled();
+  });
+
+  describe('when there is no schema yet', () => {
+    let wrapper: ShallowWrapper;
+    beforeAll(() => {
+      setMockValues({
+        ...values,
+        schema: {},
+      });
+      wrapper = subject();
+    });
+
+    it('will not render action buttons', () => {
+      const buttons = findButtons(wrapper);
+      expect(buttons.length).toBe(0);
+    });
+
+    it('will not render the main page content', () => {
+      expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
+      expect(wrapper.find(SampleResponse).exists()).toBe(false);
+    });
+
+    it('will render an "empty" message', () => {
+      expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+    });
   });
 });
