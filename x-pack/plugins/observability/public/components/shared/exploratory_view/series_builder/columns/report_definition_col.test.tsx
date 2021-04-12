@@ -9,9 +9,9 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { ReportDefinitionCol } from './report_definition_col';
-import { SERVICE_NAME } from '../../configurations/data/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Series Builder ReportDefinitionCol', function () {
   const dataViewSeries = getDefaultConfigs({
