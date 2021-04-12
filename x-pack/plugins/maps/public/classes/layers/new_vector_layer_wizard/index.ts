@@ -24,7 +24,6 @@ import { LayerDescriptor } from '../../../../common/descriptor_types';
 function mapStateToProps(state: MapStoreState) {
   return {
     indexName: state.map.mapState.vectorLayerIndexName,
-    featuresQueued: state.map.mapState.featuresToIndexQueue,
   };
 }
 

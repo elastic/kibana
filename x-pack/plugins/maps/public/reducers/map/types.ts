@@ -39,7 +39,6 @@ export type MapContext = {
   vectorLayerIndexName: string;
   drawState?: DrawState;
   drawFeatureState?: DRAW_TYPE;
-  featuresToIndexQueue: Feature[];
   editModeActive?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;

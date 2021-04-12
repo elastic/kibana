@@ -47,10 +47,8 @@ import {
   UPDATE_MAP_SETTING,
   UPDATE_DRAW_FEATURE_STATE,
   UPDATE_EDIT_MODE,
-  ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
   CLEAR_DRAWING_DATA,
-  REMOVE_FEATURES_FROM_INDEX_QUEUE,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -85,7 +83,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     drawState: undefined,
     drawFeatureState: undefined,
     editModeActive: false,
-    featuresToIndexQueue: [],
   },
   selectedLayerId: null,
   layerList: [],
@@ -115,26 +112,9 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
     case UPDATE_EDIT_MODE:
       return {
         ...state,
-        mapState: {
+        mapStatToIndex: {
           ...state.mapState,
           editModeActive: action.isActive,
-        },
-      };
-    case ADD_FEATURES_TO_INDEX_QUEUE:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          featuresToIndexQueue: [...state.mapState.featuresToIndexQueue, ...action.features],
-        },
-      };
-    case REMOVE_FEATURES_FROM_INDEX_QUEUE:
-      const newFeatureArr = state.mapState.featuresToIndexQueue.filter(({ id }: { id: string }) => !action.featureIds.includes(id))
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          featuresToIndexQueue: newFeatureArr,
         },
       };
     case SET_VECTOR_LAYER_INDEX_NAME:
@@ -153,7 +133,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           drawState: undefined,
           drawFeatureState: undefined,
           editModeActive: false,
-          featuresToIndexQueue: [],
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:

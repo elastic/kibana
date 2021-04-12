@@ -15,13 +15,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
 import {
   getExistingIndexNames,
   getExistingIndexPatternNames,
   checkIndexPatternValid,
   createNewIndexAndPattern,
-  addFeatureToIndex,
   // @ts-expect-error
 } from './utils/indexing_service';
 import { RenderWizardArguments } from '../layer_wizard_registry';
@@ -30,11 +28,9 @@ import { ESSearchSource } from '../../sources/es_search_source';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 
 export const CREATE_DRAWN_FEATURES_INDEX_STEP_ID = 'CREATE_DRAWN_FEATURES_INDEX_STEP_ID';
-export const ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID = 'ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID';
 
 interface NewVectorLayerProps extends RenderWizardArguments {
   indexName: string;
-  featuresQueued: Feature[];
   setEditModeActive: () => void;
   setEditModeInActive: () => void;
   setIndexName: (indexName: string) => void;
@@ -68,15 +64,11 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
   }
 
   async componentDidUpdate() {
-    const { indexName, featuresQueued, enableNextBtn, disableNextBtn, currentStepId } = this.props;
-    if (indexName && featuresQueued.length) {
+    const { indexName, enableNextBtn, disableNextBtn } = this.props;
+    if (indexName) {
       enableNextBtn();
     } else {
       disableNextBtn();
-    }
-    if (!this.state.indexingTriggered && currentStepId === ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID) {
-      await this._addFeaturesToNewIndex();
-      this.props.clearDrawingData();
     }
   }
 
@@ -87,16 +79,6 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
 
   _addFeaturesToNewIndex = async () => {
     const { indexPatternId } = await createNewIndexAndPattern(this.props.indexName);
-    this.props.advanceToNextStep();
-    await Promise.all(
-      this.props.featuresQueued.map(async (feature) => {
-        const geometry = {
-          coordinates: feature.geometry.coordinates,
-          type: feature.geometry.type.toLowerCase(),
-        };
-        await addFeatureToIndex(this.props.indexName, geometry);
-      })
-    );
     const sourceDescriptor = ESSearchSource.createDescriptor({
       indexPatternId,
       geoField: 'coordinates',
