@@ -1,7 +1,7 @@
 [[save-load-delete-query]]
 == Save a query
 A saved query is a collection of query text and filters that you can
-reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
+reuse in any app with a query bar, like <<discover, *Discover*>> and <<dashboard, *Dashboard*>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
 * View the results of the same query in multiple apps
