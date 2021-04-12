@@ -37,7 +37,7 @@ export const RelevanceTuningLayout: React.FC<Props> = ({ engineBreadcrumb, child
       description={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
         {
-          defaultMessage: 'Set field weights and boosts',
+          defaultMessage: 'Set field weights and boosts.',
         }
       )}
       rightSideItems={
