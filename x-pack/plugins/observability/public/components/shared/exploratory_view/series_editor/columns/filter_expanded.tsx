@@ -14,7 +14,7 @@ import {
   EuiFilterGroup,
 } from '@elastic/eui';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { useUrlStorage } from '../../hooks/use_url_storage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
