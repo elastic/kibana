@@ -302,6 +302,7 @@ export class DocLinksService {
           skippingDisconnectedClusters: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html#skip-unavailable-clusters`,
         },
         apis: {
+          bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
           createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
@@ -515,6 +516,7 @@ export interface DocLinksStart {
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
     readonly apis: Readonly<{
+      bulkIndexAlias: string;
       createIndex: string;
       createSnapshotLifecyclePolicy: string;
       createRoleMapping: string;

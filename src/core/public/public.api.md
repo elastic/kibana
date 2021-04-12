@@ -612,6 +612,7 @@ export interface DocLinksStart {
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
