@@ -222,22 +222,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         // The source index is the index the `.kibana` alias points to
         const source = aliases[stateP.currentAlias];
-        const target = stateP.versionIndex;
         return {
           ...stateP,
-          controlState: 'SET_SOURCE_WRITE_BLOCK',
-          sourceIndex: Option.some(source) as Option.Some<string>,
-          targetIndex: target,
-          targetIndexMappings: disableUnknownTypeMappingFields(
-            stateP.targetIndexMappings,
-            indices[source].mappings
-          ),
-          versionIndexReadyActions: Option.some<AliasAction[]>([
-            { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
-            { add: { index: target, alias: stateP.currentAlias } },
-            { add: { index: target, alias: stateP.versionAlias } },
-            { remove_index: { index: stateP.tempIndex } },
-          ]),
+          controlState: 'WAIT_FOR_YELLOW_SOURCE',
+          sourceIndex: source,
+          sourceIndexMappings: indices[source].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
@@ -431,6 +420,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const source = stateP.sourceIndex;
+      const target = stateP.versionIndex;
+      return {
+        ...stateP,
+        controlState: 'SET_SOURCE_WRITE_BLOCK',
+        sourceIndex: Option.some(source) as Option.Some<string>,
+        targetIndex: target,
+        targetIndexMappings: disableUnknownTypeMappingFields(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        versionIndexReadyActions: Option.some<AliasAction[]>([
+          { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
+          { add: { index: target, alias: stateP.currentAlias } },
+          { add: { index: target, alias: stateP.versionAlias } },
+          { remove_index: { index: stateP.tempIndex } },
+        ]),
+      };
+    } else {
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
