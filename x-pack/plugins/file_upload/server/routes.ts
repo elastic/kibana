@@ -93,7 +93,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /api/file_upload/analyze_file Analyze file data
+   * @api {post} /internal/file_upload/analyze_file Analyze file data
    * @apiName AnalyzeFile
    * @apiDescription Performs analysis of the file data.
    *
@@ -101,7 +101,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    */
   router.post(
     {
-      path: '/api/file_upload/analyze_file',
+      path: '/internal/file_upload/analyze_file',
       validate: {
         body: schema.any(),
         query: analyzeFileQuerySchema,
@@ -131,7 +131,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /api/file_upload/import Import file data
+   * @api {post} /internal/file_upload/import Import file data
    * @apiName ImportFile
    * @apiDescription Imports file data into elasticsearch index.
    *
@@ -140,7 +140,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    */
   router.post(
     {
-      path: '/api/file_upload/import',
+      path: '/internal/file_upload/import',
       validate: {
         query: importFileQuerySchema,
         body: importFileBodySchema,
@@ -185,12 +185,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /api/file_upload/index_exists ES Field caps wrapper checks if index exists
+   * @api {post} /internal/file_upload/index_exists ES Field caps wrapper checks if index exists
    * @apiName IndexExists
    */
   router.post(
     {
-      path: '/api/file_upload/index_exists',
+      path: '/internal/file_upload/index_exists',
       validate: {
         body: schema.object({ index: schema.string() }),
       },
@@ -223,7 +223,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /api/file_upload/time_field_range Get time field range
+   * @api {post} /internal/file_upload/time_field_range Get time field range
    * @apiName GetTimeFieldRange
    * @apiDescription Returns the time range for the given index and query using the specified time range.
    *
@@ -234,7 +234,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    */
   router.post(
     {
-      path: '/api/file_upload/time_field_range',
+      path: '/internal/file_upload/time_field_range',
       validate: {
         body: schema.object({
           /** Index or indexes for which to return the time range. */

@@ -67,7 +67,7 @@ export async function analyzeFile(
   const body = JSON.stringify(file);
   const fileUploadModules = await lazyLoadFileUploadModules();
   return await fileUploadModules.getHttp().fetch<any>({
-    path: `/api/file_upload/analyze_file`,
+    path: `/internal/file_upload/analyze_file`,
     method: 'POST',
     body,
     query: params,
@@ -81,7 +81,7 @@ export async function checkIndexExists(
   const body = JSON.stringify({ index });
   const fileUploadModules = await lazyLoadFileUploadModules();
   return await fileUploadModules.getHttp().fetch<any>({
-    path: `/api/file_upload/index_exists`,
+    path: `/internal/file_upload/index_exists`,
     method: 'POST',
     body,
     query: params,
@@ -101,7 +101,7 @@ export async function getTimeFieldRange({
 
   const fileUploadModules = await lazyLoadFileUploadModules();
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
-    path: `/api/file_upload/time_field_range`,
+    path: `/internal/file_upload/time_field_range`,
     method: 'POST',
     body,
   });
