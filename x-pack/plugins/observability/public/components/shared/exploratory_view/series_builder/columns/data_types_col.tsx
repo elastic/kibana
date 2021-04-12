@@ -20,15 +20,19 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 ];
 
 export function DataTypesCol() {
-  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
+  const { series, setSeries, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { loadIndexPattern } = useIndexPatternContext();
+  const { loadIndexPattern, indexPattern } = useIndexPatternContext();
 
   const onDataTypeChange = (dataType?: AppDataType) => {
     if (dataType) {
       loadIndexPattern(dataType);
     }
-    setSeries(NEW_SERIES_KEY, { dataType } as any);
+    if (!dataType) {
+      removeSeries(NEW_SERIES_KEY);
+    } else {
+      setSeries(NEW_SERIES_KEY, { dataType } as any);
+    }
   };
 
   const selectedDataType = series.dataType;
@@ -43,6 +47,8 @@ export function DataTypesCol() {
             iconType="arrowRight"
             color={selectedDataType === dataTypeId ? 'primary' : 'text'}
             fill={selectedDataType === dataTypeId}
+            isDisabled={!indexPattern}
+            isLoading={!indexPattern && selectedDataType === dataTypeId}
             onClick={() => {
               onDataTypeChange(dataTypeId === selectedDataType ? undefined : dataTypeId);
             }}
