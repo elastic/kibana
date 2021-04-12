@@ -20,7 +20,7 @@ import { INVALID_LICENSE } from '../../../../../../common/custom_link';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../../../context/license/use_license_context';
-import { LicensePrompt } from '../../../../shared/LicensePrompt';
+import { LicensePrompt } from '../../../../shared/license_prompt';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { CreateEditCustomLinkFlyout } from './CreateEditCustomLinkFlyout';
 import { CustomLinkTable } from './CustomLinkTable';
