@@ -119,6 +119,7 @@ export interface AllCases extends CasesStatus {
 export enum SortFieldCase {
   createdAt = 'createdAt',
   closedAt = 'closedAt',
+  updatedAt = 'updatedAt',
 }
 
 export interface ElasticUser {
