@@ -23,9 +23,13 @@
 
 - name: open port 5601/tcp
   become: yes
-  ansible.posix.firewalld:
-    port: 5601/tcp
-    state: enabled
+  command:
+    cmd: firewall-cmd --zone=public --permanent --add-port=5601/tcp
+
+- name: open port 5601/tcp
+  become: yes
+  command:
+    cmd: firewall-cmd --reload
 
 - name: start kibana
   become: yes
