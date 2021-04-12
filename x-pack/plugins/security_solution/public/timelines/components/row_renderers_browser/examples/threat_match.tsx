@@ -16,7 +16,6 @@ const ThreatMatchExampleComponent: React.FC = () => (
     {threatMatchRowRenderer.renderRow({
       browserFields: {},
       data: mockTimelineData[31].ecs,
-      flattenedData: mockTimelineData[31].data,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>

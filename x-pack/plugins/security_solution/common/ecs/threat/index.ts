@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EventEcs } from '../event';
+
 interface ThreatMatchEcs {
   atomic?: string[];
   field?: string[];
@@ -13,6 +15,8 @@ interface ThreatMatchEcs {
 
 export interface ThreatIndicatorEcs {
   matched?: ThreatMatchEcs;
+  event?: EventEcs & { reference?: string[] };
+  provider?: string[];
   type?: string[];
 }
 
