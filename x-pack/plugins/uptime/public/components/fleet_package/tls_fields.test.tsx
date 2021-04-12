@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { TLSFields, TLSRole } from './tls_fields';
 import { ConfigKeys, VerificationMode } from './types';
@@ -18,7 +18,6 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('<TLSFields />', () => {
-  const onChange = jest.fn();
   const WrappedComponent = ({
     tlsRole = TLSRole.CLIENT,
     isEnabled = true,
