@@ -55,6 +55,7 @@ export class RenderingService {
             chromeVisible$={chrome.getIsVisible$()}
             classes$={chrome.getApplicationClasses$()}
           >
+            <div id="app-fixed-viewport" />
             {appComponent}
           </AppWrapper>
         </>
