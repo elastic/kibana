@@ -33,24 +33,23 @@ export async function getAnnotationRequestParams(
     cachedIndexPatternFetcher,
   }: AnnotationServices
 ) {
-  const { indexPattern, indexPatternString } = await cachedIndexPatternFetcher(
-    annotation.index_pattern
-  );
+  const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
 
   const request = await buildAnnotationRequest(
     req,
     panel,
     annotation,
     esQueryConfig,
-    indexPattern,
+    annotationIndex,
     capabilities,
     uiSettings
   );
 
   return {
-    index: indexPatternString,
+    index: annotationIndex.indexPatternString,
     body: {
       ...request,
+      runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
   };

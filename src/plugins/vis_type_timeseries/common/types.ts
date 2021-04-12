@@ -46,6 +46,7 @@ interface TableData {
 export type SeriesData = {
   type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
   uiRestrictions: TimeseriesUIRestrictions;
+  error?: string;
 } & {
   [key: string]: PanelSeries;
 };
@@ -56,7 +57,7 @@ interface PanelSeries {
   };
   id: string;
   series: PanelData[];
-  error?: unknown;
+  error?: string;
 }
 
 export interface PanelData {
@@ -66,6 +67,7 @@ export interface PanelData {
   seriesId: string;
   splitByLabel: string;
   isSplitByTerms: boolean;
+  error?: string;
 }
 
 export const isVisTableData = (data: TimeseriesVisData): data is TableData =>

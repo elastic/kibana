@@ -71,7 +71,9 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('join example');
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
-        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+        expect(joinExampleRequestNames).to.equal(
+          'geo_shapes*,meta_for_geo_shapes*.runtime_shape_name'
+        );
       });
       await inspector.close();
 
@@ -92,7 +94,7 @@ export default function ({ getPageObjects, getService }) {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
       await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-      await filterBar.addFilter('shape_name', 'is', 'alpha');
+      await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
 
       const gridResponse = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
@@ -101,7 +103,7 @@ export default function ({ getPageObjects, getService }) {
 
       const joinResponse = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'meta_for_geo_shapes*.shape_name'
+        'meta_for_geo_shapes*.runtime_shape_name'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });

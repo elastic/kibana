@@ -53,3 +53,27 @@ export const type: SavedObjectsType = {
   namespaceType: 'single',
   mappings: ruleStatusSavedObjectMappings,
 };
+
+export const ruleAssetSavedObjectType = 'security-rule';
+
+export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
+  properties: {
+    name: {
+      type: 'keyword',
+    },
+    rule_id: {
+      type: 'keyword',
+    },
+    version: {
+      type: 'long',
+    },
+  },
+};
+
+export const ruleAssetType: SavedObjectsType = {
+  name: ruleAssetSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: ruleAssetSavedObjectMappings,
+};
