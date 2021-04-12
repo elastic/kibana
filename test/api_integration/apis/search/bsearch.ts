@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 when index type is provided in OSS', async () => {
+      it('should return 400 when unknown index type is provided', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.status).to.be(200);
         parseBfetchResponse(resp).forEach((responseJson, i) => {
           expect(responseJson.id).to.be(i);
-          verifyErrorResponse(responseJson.error, 400, 'Unsupported index pattern type baad');
+          verifyErrorResponse(responseJson.error, 400, 'Unknown indexType');
         });
       });
 
@@ -163,7 +163,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.status).to.be(200);
           parseBfetchResponse(resp).forEach((responseJson, i) => {
             expect(responseJson.id).to.be(i);
-            verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
+            expect(responseJson.error.statusCode).to.be(400);
+            expect(responseJson.error.message).to.be('status_exception');
           });
         });
       });

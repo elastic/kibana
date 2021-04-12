@@ -31,7 +31,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: IUiSettingsClient,
-  config: SearchSessionsConfigSchema,
+  searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -48,13 +48,13 @@ export async function getDefaultAsyncSubmitParams(
 > {
   return {
     batched_reduce_size: 64,
-    keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
+    keep_on_completion: searchSessionsConfig ? !!options.sessionId : false, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
-    ...(options.sessionId
+    ...(options.sessionId && searchSessionsConfig
       ? {
-          keep_alive: `${config.defaultExpiration.asMilliseconds()}ms`,
+          keep_alive: `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`,
         }
       : {}),
   };
