@@ -8,17 +8,18 @@
 
 import './hits_counter.scss';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { formatNumWithCommas } from '../../helpers';
+import { TotalHitsSubject } from '../histogram/use_total_hits';
 
 export interface HitsCounterProps {
   /**
    * the number of query hits
    */
-  hits: number;
+  hits$: TotalHitsSubject;
   /**
    * displays the reset button
    */
@@ -29,7 +30,20 @@ export interface HitsCounterProps {
   onResetQuery: () => void;
 }
 
-export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounterProps) {
+export function HitsCounter({ hits$, showResetButton, onResetQuery }: HitsCounterProps) {
+  const [total, setTotal] = useState(hits$.getValue().total || 0);
+  useEffect(() => {
+    const subscription = hits$.subscribe({
+      next: (res) => {
+        if (res && res.state === 'success' && res.total !== total && Number(res.total) >= 0) {
+          setTotal(Number(res.total));
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [hits$, total, setTotal]);
   return (
     <I18nProvider>
       <EuiFlexGroup
@@ -41,12 +55,12 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
       >
         <EuiFlexItem grow={false}>
           <EuiText>
-            <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
+            <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(total)}</strong>{' '}
             <FormattedMessage
               id="discover.hitsPluralTitle"
               defaultMessage="{hits, plural, one {hit} other {hits}}"
               values={{
-                hits,
+                hits: total,
               }}
             />
           </EuiText>

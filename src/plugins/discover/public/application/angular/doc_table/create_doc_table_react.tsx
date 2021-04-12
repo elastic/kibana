@@ -23,7 +23,7 @@ export interface DocTableLegacyProps {
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   rows: estypes.Hit[];
   indexPattern: IIndexPattern;
-  minimumVisibleRows: number;
+  minimumVisibleRows?: number;
   onAddColumn?: (column: string) => void;
   onBackToTop: () => void;
   onSort?: (sort: string[][]) => void;

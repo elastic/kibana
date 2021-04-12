@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,19 +16,20 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import { HitsCounter } from './hits_counter';
-import { TimechartHeader } from './timechart_header';
-import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives';
+import { DiscoverUninitialized } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
-import { esFilters, IndexPatternField, search } from '../../../../data/public';
+import {
+  esFilters,
+  IndexPatternField,
+  indexPatterns as indexPatternsUtils,
+} from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
@@ -40,34 +40,37 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
-import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { useChartData } from './histogram/use_chart_data';
+import { DiscoverChart } from './discover_chart';
+import { UseSavedSearch } from './use_fetch';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
+import { getResultState } from '../helpers/get_result_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
-const TimechartHeaderMemoized = React.memo(TimechartHeader);
-const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
+const DiscoverChartMemoized = React.memo(DiscoverChart);
 
 export function Discover({
-  fetch,
-  fetchCounter,
-  fetchError,
-  fieldCounts,
-  fetchStatus,
-  hits,
   indexPattern,
-  minimumVisibleRows,
   opts,
   resetQuery,
-  resultState,
-  rows,
   searchSource,
+  searchSessionManager,
   state,
-  unmappedFieldsConfig,
-}: DiscoverProps) {
+  stateContainer,
+  useSavedSearch,
+}: DiscoverProps & {
+  searchSessionManager: DiscoverSearchSessionManager;
+  shouldSearchOnPageLoad: () => boolean;
+  state: AppState;
+  useSavedSearch: UseSavedSearch;
+  stateContainer: GetStateReturn;
+}) {
+  const { savedSearch, indexPatternList, config, services } = opts;
+  const { trackUiMetric, capabilities, indexPatterns, data } = services;
+
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -75,36 +78,43 @@ export function Discover({
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
   };
-
-  const toggleHideChart = useCallback(() => {
-    const newState = { ...state, hideChart: !state.hideChart };
-    opts.stateContainer.setAppState(newState);
-  }, [state, opts]);
-  const hideChart = useMemo(() => state.hideChart, [state]);
-  const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
-  const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
+  const timeField = useMemo(() => {
+    return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
+  }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const isLegacy = useMemo(() => services.uiSettings.get('doc_table:legacy'), [services]);
+  const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
+    services,
+  ]);
 
-  const { chartData, timefilterUpdateHandler, bucketInterval } = useChartData({
-    data,
-    fetch$: opts.fetch$,
-    interval: state.interval!,
-    savedSearch,
-    hideChart: hideChart || !indexPattern.timeFieldName,
-  });
+  const unmappedFieldsConfig = useMemo(
+    () => ({
+      showUnmappedFields: useNewFieldsApi,
+    }),
+    [useNewFieldsApi]
+  );
 
-  const contentCentered = resultState === 'uninitialized';
-  const isLegacy = services.uiSettings.get('doc_table:legacy');
-  const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const {
+    chart$,
+    hits$,
+    refetch$,
+    fetchStatus,
+    fetchError,
+    fetchCounter,
+    rows,
+    inspectorAdapters,
+  } = useSavedSearch;
+  const resultState = useMemo(() => getResultState(fetchStatus, rows), [fetchStatus, rows]);
+
   const updateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {
-        opts.searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        opts.refetch$.next();
+        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+        refetch$.next();
       }
     },
-    [opts]
+    [refetch$, searchSessionManager]
   );
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
@@ -114,23 +124,26 @@ export function Discover({
         config,
         indexPattern,
         indexPatterns,
-        setAppState,
+        setAppState: stateContainer.setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, config, indexPattern, indexPatterns, stateContainer, state, useNewFieldsApi]
   );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-  }, [setExpandedDoc]);
+    services.inspector.open(inspectorAdapters, {
+      title: savedSearch.title,
+    });
+  }, [setExpandedDoc, inspectorAdapters, savedSearch, services.inspector]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
-      setAppState({ sort });
+      stateContainer.setAppState({ sort });
     },
-    [setAppState]
+    [stateContainer]
   );
 
   const onAddFilter = useCallback(
@@ -150,15 +163,6 @@ export function Discover({
       return opts.filterManager.addFilters(newFilters);
     },
     [opts, indexPattern, indexPatterns, trackUiMetric]
-  );
-
-  const onChangeInterval = useCallback(
-    (interval: string) => {
-      if (interval) {
-        setAppState({ interval });
-      }
-    },
-    [setAppState]
   );
   /**
    * Legacy function, remove once legacy grid is removed
@@ -183,9 +187,9 @@ export function Discover({
         width: colSettings.width,
       };
       const newGrid = { ...grid, columns: newColumns };
-      opts.setAppState({ grid: newGrid });
+      stateContainer.setAppState({ grid: newGrid });
     },
-    [opts, state]
+    [stateContainer, state]
   );
 
   const columns = useMemo(() => {
@@ -195,20 +199,7 @@ export function Discover({
     return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
   }, [state, useNewFieldsApi]);
 
-  useEffect(() => {
-    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-
-    setBreadcrumbsTitle(savedSearch, chrome);
-    addHelpMenuToAppChrome(chrome, docLinks);
-    // Propagate current app state to url, then start syncing and fetching
-    opts.stateContainer.replaceUrlAppState({}).then(() => {
-      opts.stateContainer.startSync();
-      if (opts.shouldSearchOnPageLoad()) {
-        opts.refetch$.next();
-      }
-    });
-  }, [savedSearch, chrome, docLinks, opts]);
+  const contentCentered = resultState === 'uninitialized';
 
   return (
     <I18nProvider>
@@ -231,7 +222,6 @@ export function Discover({
               <SidebarMemoized
                 config={config}
                 columns={columns}
-                fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
                 indexPatterns={indexPatterns}
@@ -240,7 +230,7 @@ export function Discover({
                 onRemoveField={onRemoveColumn}
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
                 services={services}
-                setAppState={setAppState}
+                setAppState={stateContainer.setAppState}
                 state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
@@ -276,13 +266,15 @@ export function Discover({
               >
                 {resultState === 'none' && (
                   <DiscoverNoResults
-                    timeFieldName={opts.timefield}
+                    timeFieldName={timeField}
                     queryLanguage={state.query?.language || ''}
                     data={opts.data}
                     error={fetchError}
                   />
                 )}
-                {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
+                {resultState === 'uninitialized' && (
+                  <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+                )}
                 {resultState === 'loading' && <LoadingSpinner />}
                 {resultState === 'ready' && (
                   <EuiFlexGroup
@@ -292,77 +284,21 @@ export function Discover({
                     gutterSize="none"
                     responsive={false}
                   >
-                    <EuiFlexItem grow={false} className="dscResultCount">
-                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                        <EuiFlexItem
-                          grow={false}
-                          className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
-                        >
-                          <HitsCounter
-                            hits={hits > 0 ? hits : 0}
-                            showResetButton={!!(savedSearch && savedSearch.id)}
-                            onResetQuery={resetQuery}
-                          />
-                        </EuiFlexItem>
-                        {!hideChart && (
-                          <EuiFlexItem className="dscResultCount__actions">
-                            <TimechartHeaderMemoized
-                              data={opts.data}
-                              dateFormat={opts.config.get('dateFormat')}
-                              options={search.aggs.intervalOptions}
-                              onChangeInterval={onChangeInterval}
-                              stateInterval={state.interval || ''}
-                              bucketInterval={bucketInterval}
-                            />
-                          </EuiFlexItem>
-                        )}
-                        {opts.timefield && (
-                          <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                            <EuiButtonEmpty
-                              size="xs"
-                              iconType={!hideChart ? 'eyeClosed' : 'eye'}
-                              onClick={() => {
-                                toggleHideChart();
-                              }}
-                              data-test-subj="discoverChartToggle"
-                            >
-                              {!hideChart
-                                ? i18n.translate('discover.hideChart', {
-                                    defaultMessage: 'Hide chart',
-                                  })
-                                : i18n.translate('discover.showChart', {
-                                    defaultMessage: 'Show chart',
-                                  })}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                        )}
-                      </EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <DiscoverChartMemoized
+                        chart$={chart$}
+                        config={config}
+                        data={data}
+                        hits$={hits$}
+                        indexPattern={indexPattern}
+                        isLegacy={isLegacy}
+                        state={state}
+                        resetQuery={resetQuery}
+                        savedSearch={savedSearch}
+                        stateContainer={opts.stateContainer}
+                        timefield={timeField}
+                      />
                     </EuiFlexItem>
-                    {!hideChart && chartData && (
-                      <EuiFlexItem grow={false}>
-                        <section
-                          aria-label={i18n.translate(
-                            'discover.histogramOfFoundDocumentsAriaLabel',
-                            {
-                              defaultMessage: 'Histogram of found documents',
-                            }
-                          )}
-                          className="dscTimechart"
-                        >
-                          <div
-                            className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-                            data-test-subj="discoverChart"
-                          >
-                            <DiscoverHistogramMemoized
-                              chartData={chartData}
-                              timefilterUpdateHandler={timefilterUpdateHandler}
-                            />
-                          </div>
-                        </section>
-                        <EuiSpacer size="s" />
-                      </EuiFlexItem>
-                    )}
-
                     <EuiHorizontalRule margin="none" />
 
                     <EuiFlexItem className="eui-yScroll">
@@ -382,7 +318,6 @@ export function Discover({
                           <DocTableLegacyMemoized
                             columns={columns}
                             indexPattern={indexPattern}
-                            minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
                             sort={state.sort || []}
                             searchDescription={opts.savedSearch.description}

@@ -8,7 +8,7 @@
 
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { IndexPattern, ISearchSource } from '../../../../data/common/';
+import { IndexPattern, ISearchSource, SearchSource } from '../../../../data/common/';
 import { SortOrder } from '../../saved_searches/types';
 import { DiscoverServices } from '../../build_services';
 
@@ -19,19 +19,15 @@ export function updateSearchSource({
   indexPattern,
   services,
   sort,
-  columns,
   useNewFieldsApi,
   showUnmappedFields,
-  persistentSearchSource,
   volatileSearchSource,
 }: {
   indexPattern: IndexPattern;
   services: DiscoverServices;
   sort: SortOrder[];
-  columns: string[];
   useNewFieldsApi: boolean;
   showUnmappedFields?: boolean;
-  persistentSearchSource: ISearchSource;
   volatileSearchSource?: ISearchSource;
 }) {
   const { uiSettings, data } = services;
@@ -40,6 +36,7 @@ export function updateSearchSource({
     indexPattern,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
+  const persistentSearchSource = volatileSearchSource!.getParent() as SearchSource;
 
   persistentSearchSource
     .setField('index', indexPattern)
@@ -48,6 +45,7 @@ export function updateSearchSource({
 
   if (volatileSearchSource) {
     volatileSearchSource
+      .setField('trackTotalHits', false)
       .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
       .setField('sort', usedSort)
       .setField('highlightAll', true)

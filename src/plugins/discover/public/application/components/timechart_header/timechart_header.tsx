@@ -21,6 +21,12 @@ import dateMath from '@elastic/datemath';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import './timechart_header.scss';
 
+export interface TimechartBucketInterval {
+  scaled?: boolean;
+  description?: string;
+  scale?: number;
+}
+
 export interface TimechartHeaderProps {
   /**
    * Format of date to be displayed
@@ -29,11 +35,7 @@ export interface TimechartHeaderProps {
   /**
    * Interval for the buckets of the recent request
    */
-  bucketInterval?: {
-    scaled?: boolean;
-    description?: string;
-    scale?: number;
-  };
+  bucketInterval?: TimechartBucketInterval;
   data: DataPublicPluginStart;
   /**
    * Interval Options

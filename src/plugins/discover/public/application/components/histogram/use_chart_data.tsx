@@ -5,28 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
-import moment from 'moment';
-import { Subject } from 'rxjs';
+import { useCallback, useMemo } from 'react';
+
+import { BehaviorSubject } from 'rxjs';
 import { applyAggsToSearchSource } from './apply_aggs_to_search_source';
 import { AggConfigs, SearchSource, tabifyAggResponse } from '../../../../../data/common';
 import { getDimensions } from './get_dimensions';
 import { discoverResponseHandler } from '../../angular/response_handler';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
 import { SavedSearch } from '../../../saved_searches';
+import { TimechartBucketInterval } from '../timechart_header/timechart_header';
+
+export type ChartSubject = BehaviorSubject<{
+  state: string;
+  data?: any;
+  bucketInterval?: TimechartBucketInterval;
+}>;
 
 async function fetch(
   searchSource: SearchSource,
   abortController: AbortController,
   chartAggConfigs: AggConfigs,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  searchSessionId: string
 ) {
   try {
-    const currentSearchSessionId = data.search.session.getSessionId();
-    const response = await searchSource.fetch({
-      abortSignal: abortController.signal,
-      sessionId: currentSearchSessionId,
-    });
+    const response = await searchSource
+      .fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+      })
+      .toPromise();
     const tabifiedData = tabifyAggResponse(chartAggConfigs, response);
     const dimensions = getDimensions(chartAggConfigs, data);
     if (!dimensions) {
@@ -43,90 +52,38 @@ export function useChartData({
   savedSearch,
   data,
   interval = 'auto',
-  hideChart,
-  fetch$,
 }: {
   savedSearch: SavedSearch;
   data: DataPublicPluginStart;
   interval: string;
-  hideChart: boolean;
-  fetch$: Subject<undefined>;
 }) {
-  const abortControllerRef = useRef<AbortController | undefined>();
-  const [chartData, setChartData] = useState<undefined | any>(undefined);
-  const [bucketInterval, setBucketInterval] = useState<any>(undefined);
-  const [usedInterval, setUsedInterval] = useState<string>(interval);
-  const [usedHideChart, sedUsedHideCart] = useState<boolean>(hideChart);
+  const subject: ChartSubject = useMemo(() => new BehaviorSubject({ state: 'initial' }), []);
 
-  const timefilterUpdateHandler = useCallback(
-    (ranges: { from: number; to: number }) => {
-      data.query.timefilter.timefilter.setTime({
-        from: moment(ranges.from).toISOString(),
-        to: moment(ranges.to).toISOString(),
-        mode: 'absolute',
-      });
+  const fetchData = useCallback(
+    (abortController: AbortController, searchSessionId: string) => {
+      const searchSource = savedSearch.searchSource.createChild();
+      const indexPattern = savedSearch.searchSource.getField('index');
+      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
+      searchSource.setField('size', 0);
+
+      const chartAggConfigs = applyAggsToSearchSource(searchSource, interval, data);
+      const bucketAggConfig = chartAggConfigs!.aggs[1];
+
+      const newInterval =
+        bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+          ? bucketAggConfig.buckets?.getInterval()
+          : undefined;
+
+      subject.next({ state: 'loading' });
+
+      fetch(searchSource, abortController, chartAggConfigs!, data, searchSessionId).then(
+        (result: any) => {
+          subject.next({ state: 'complete', data: result, bucketInterval: newInterval });
+        }
+      );
     },
-    [data]
+    [data, interval, savedSearch.searchSource, subject]
   );
 
-  const fetchData = useCallback(() => {
-    if (hideChart) {
-      setChartData(undefined);
-      return;
-    }
-    const searchSource = savedSearch.searchSource.createChild();
-    const indexPattern = savedSearch.searchSource.getField('index');
-    searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
-    searchSource.setField('size', 0);
-
-    const chartAggConfigs = applyAggsToSearchSource(searchSource, interval, data);
-    const bucketAggConfig = chartAggConfigs!.aggs[1];
-
-    const newInterval =
-      bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-        ? bucketAggConfig.buckets?.getInterval()
-        : undefined;
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    fetch(searchSource, abortControllerRef.current, chartAggConfigs!, data).then((result: any) => {
-      setBucketInterval(newInterval);
-      setChartData(result);
-    });
-  }, [data, hideChart, interval, savedSearch.searchSource]);
-
-  useEffect(() => {
-    const subscription = fetch$.subscribe(() => {
-      fetchData();
-    });
-    return () => {
-      subscription.unsubscribe();
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [fetch$, fetchData]);
-
-  useEffect(() => {
-    if (usedInterval !== interval) {
-      setUsedInterval(interval);
-      fetchData();
-    }
-  }, [usedInterval, interval, fetchData]);
-
-  useEffect(() => {
-    if (hideChart !== usedHideChart) {
-      sedUsedHideCart(hideChart);
-      fetchData();
-    }
-  }, [hideChart, usedHideChart, sedUsedHideCart, fetchData]);
-
-  return {
-    chartData,
-    bucketInterval,
-    timefilterUpdateHandler,
-  };
+  return { fetch$: subject, fetch: fetchData };
 }

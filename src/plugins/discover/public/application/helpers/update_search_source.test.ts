@@ -19,9 +19,9 @@ describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
+    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
     updateSearchSource({
-      persistentSearchSource: persistentSearchSourceMock,
       volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
@@ -36,7 +36,6 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
-      columns: [],
       useNewFieldsApi: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
@@ -47,9 +46,9 @@ describe('updateSearchSource', () => {
   test('updates a given search source with the usage of the new fields api', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
+    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
     updateSearchSource({
-      persistentSearchSource: persistentSearchSourceMock,
       volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
@@ -64,7 +63,6 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
-      columns: [],
       useNewFieldsApi: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
@@ -76,9 +74,9 @@ describe('updateSearchSource', () => {
   test('requests unmapped fields when the flag is provided, using the new fields api', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
+    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
     updateSearchSource({
-      persistentSearchSource: persistentSearchSourceMock,
       volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
@@ -93,7 +91,6 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
-      columns: [],
       useNewFieldsApi: true,
       showUnmappedFields: true,
     });
@@ -108,9 +105,9 @@ describe('updateSearchSource', () => {
   test('updates a given search source when showUnmappedFields option is set to true', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
+    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
     updateSearchSource({
-      persistentSearchSource: persistentSearchSourceMock,
       volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
@@ -125,7 +122,6 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
-      columns: [],
       useNewFieldsApi: true,
       showUnmappedFields: true,
     });

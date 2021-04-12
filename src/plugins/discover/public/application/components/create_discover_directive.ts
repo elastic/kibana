@@ -5,28 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Discover } from './discover';
+import { DiscoverWrapper } from './discover_wrapper';
 
 export function createDiscoverDirective(reactDirective: any) {
-  return reactDirective(Discover, [
-    ['fetch', { watchDepth: 'reference' }],
-    ['fetchCounter', { watchDepth: 'reference' }],
-    ['fetchError', { watchDepth: 'reference' }],
-    ['fieldCounts', { watchDepth: 'reference' }],
-    ['histogramData', { watchDepth: 'reference' }],
-    ['hits', { watchDepth: 'reference' }],
+  return reactDirective(DiscoverWrapper, [
+    ['angularRoute', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['opts', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
-    ['resultState', { watchDepth: 'reference' }],
-    ['rows', { watchDepth: 'reference' }],
     ['savedSearch', { watchDepth: 'reference' }],
     ['searchSource', { watchDepth: 'reference' }],
-    ['showSaveQuery', { watchDepth: 'reference' }],
-    ['state', { watchDepth: 'reference' }],
-    ['topNavMenu', { watchDepth: 'reference' }],
-    ['updateQuery', { watchDepth: 'reference' }],
-    ['updateSavedQueryId', { watchDepth: 'reference' }],
-    ['unmappedFieldsConfig', { watchDepth: 'value' }],
   ]);
 }

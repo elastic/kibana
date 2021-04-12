@@ -31,9 +31,7 @@ export const DiscoverTopNav = ({
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
-        getFieldCounts: opts.getFieldCounts,
         indexPattern,
-        inspectorAdapters: opts.inspectorAdapters,
         navigateTo: opts.navigateTo,
         savedSearch: opts.savedSearch,
         services: opts.services,

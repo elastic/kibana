@@ -34,6 +34,7 @@ import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
+import { calcFieldCounts } from '../../helpers/calc_field_counts';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -55,7 +56,6 @@ export function DiscoverSidebar({
   alwaysShowActionButtons = false,
   columns,
   config,
-  fieldCounts,
   fieldFilter,
   hits,
   indexPatternList,
@@ -74,10 +74,15 @@ export function DiscoverSidebar({
   unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+  const [fieldCounts, setFieldCounts] = useState<Record<string, number>>({});
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
+  useEffect(() => {
+    const newFieldCounts = calcFieldCounts(fieldCounts || {}, hits, selectedIndexPattern!);
+    setFieldCounts(newFieldCounts);
+  }, [fieldCounts, hits, selectedIndexPattern]);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
