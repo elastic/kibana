@@ -88,6 +88,14 @@ const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
   }
 );
 
+const RESET_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmResetMessage',
+  {
+    defaultMessage:
+      'This will revert your settings back to the default: all fields set to raw. The default will take over immediately and impact your search results.',
+  }
+);
+
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
@@ -298,7 +306,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       }
     },
     confirmResetAllFields: () => {
-      if (window.confirm(SAVE_CONFIRMATION_MESSAGE)) {
+      if (window.confirm(RESET_CONFIRMATION_MESSAGE)) {
         actions.resetAllFields();
       }
     },
