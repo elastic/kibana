@@ -96,7 +96,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
