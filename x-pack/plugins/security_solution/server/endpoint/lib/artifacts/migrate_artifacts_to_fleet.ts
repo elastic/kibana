@@ -27,7 +27,7 @@ export const migrateArtifactsToFleet = async (
   isFleetServerEnabled: boolean
 ): Promise<void> => {
   if (!isFleetServerEnabled) {
-    logger.info('Skipping Artifacts migration to fleet. [fleetServerEnabled] flag is off');
+    logger.debug('Skipping Artifacts migration. [fleetServerEnabled] flag is off');
     return;
   }
 
@@ -49,14 +49,16 @@ export const migrateArtifactsToFleet = async (
       if (totalArtifactsMigrated === -1) {
         totalArtifactsMigrated = total;
         if (total > 0) {
-          logger.info(`Migrating artifacts from SavedObject to Fleet`);
+          logger.info(`Migrating artifacts from SavedObject`);
         }
       }
 
       // If nothing else to process, then exit out
       if (total === 0) {
         hasMore = false;
-        logger.info(`Total Artifacts migrated to Fleet: ${totalArtifactsMigrated}`);
+        if (totalArtifactsMigrated > 0) {
+          logger.info(`Total Artifacts migrated: ${totalArtifactsMigrated}`);
+        }
         return;
       }
 
@@ -78,7 +80,7 @@ export const migrateArtifactsToFleet = async (
       }
     }
   } catch (e) {
-    const error = new ArtifactMigrationError('Artifact SO migration to fleet failed', e);
+    const error = new ArtifactMigrationError('Artifact SO migration failed', e);
     logger.error(error);
     throw error;
   }

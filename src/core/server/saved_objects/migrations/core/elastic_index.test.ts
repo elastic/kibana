@@ -414,11 +414,18 @@ describe('ElasticIndex', () => {
           size: 100,
           query: {
             bool: {
-              must_not: {
-                term: {
-                  type: 'fleet-agent-events',
+              must_not: [
+                {
+                  term: {
+                    type: 'fleet-agent-events',
+                  },
                 },
-              },
+                {
+                  term: {
+                    type: 'tsvb-validation-telemetry',
+                  },
+                },
+              ],
             },
           },
         },
