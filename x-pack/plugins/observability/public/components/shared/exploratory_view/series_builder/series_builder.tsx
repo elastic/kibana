@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -56,6 +56,8 @@ export function SeriesBuilder() {
     reportDefinitions = {},
     filters = [],
     operationType,
+    breakdown,
+    time,
   } = series;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
@@ -69,6 +71,10 @@ export function SeriesBuilder() {
       seriesId: NEW_SERIES_KEY,
     });
   };
+
+  useEffect(() => {
+    setIsFlyoutVisible(!!series.dataType);
+  }, [series.dataType]);
 
   const columns = [
     {
@@ -92,10 +98,19 @@ export function SeriesBuilder() {
         defaultMessage: 'Definition',
       }),
       width: '30%',
-      render: (val: string) =>
-        reportType && indexPattern ? (
-          <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
-        ) : null,
+      render: (val: string) => {
+        if (dataType) {
+          return !indexPattern ? (
+            INITIATING_VIEW
+          ) : reportType ? (
+            <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
+          ) : (
+            SELECT_REPORT_TYPE
+          );
+        }
+
+        return null;
+      },
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.filters', {
@@ -126,14 +141,15 @@ export function SeriesBuilder() {
         ReportViewTypes[reportType]
       }`;
 
-      const newSeriesN = {
+      const newSeriesN: SeriesUrl = {
+        time,
+        filters,
+        breakdown,
         reportType,
         seriesType,
-        filters,
-        reportDefinitions,
         operationType,
-        time: { from: 'now-30m', to: 'now' },
-      } as SeriesUrl;
+        reportDefinitions,
+      };
 
       setSeries(newSeriesId, newSeriesN).then(() => {
         removeSeries(NEW_SERIES_KEY);
@@ -208,3 +224,14 @@ export function SeriesBuilder() {
 const BottomFlyout = styled.div`
   height: 300px;
 `;
+
+const INITIATING_VIEW = i18n.translate('xpack.observability.expView.seriesBuilder.initView', {
+  defaultMessage: 'Initiating view ...',
+});
+
+const SELECT_REPORT_TYPE = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectReportType',
+  {
+    defaultMessage: 'Select a Report Type to define visualization.',
+  }
+);

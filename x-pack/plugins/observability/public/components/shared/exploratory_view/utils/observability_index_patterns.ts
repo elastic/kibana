@@ -15,12 +15,13 @@ import {
 import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
 import { FieldFormat, FieldFormatParams } from '../types';
+import { apmFieldFormats } from '../configurations/apm/field_formats';
 
 const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
-  rum: rumFieldFormats,
-  apm: null,
   logs: null,
   metrics: null,
+  rum: rumFieldFormats,
+  apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
 };
 

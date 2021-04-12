@@ -25,6 +25,7 @@ import {
   USER_AGENT_OS,
   USER_AGENT_VERSION,
   TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
 
 export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
@@ -42,6 +43,10 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     },
     hasOperationType: false,
     defaultFilters: [
+      {
+        field: TRANSACTION_URL,
+        negation: false,
+      },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,

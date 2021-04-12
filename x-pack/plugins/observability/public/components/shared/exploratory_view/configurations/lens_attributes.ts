@@ -149,7 +149,7 @@ export class LensAttributes {
       ...buildNumberColumn(sourceField),
       label: i18n.translate('xpack.observability.expView.columns.label', {
         defaultMessage: '{percentileValue} percentile of {sourceField}',
-        values: { sourceField, percentileValue },
+        values: { sourceField: this.reportViewConfig.labels[sourceField], percentileValue },
       }),
       operationType: 'percentile',
       params: { percentile: Number(percentileValue.split('th')[0]) },

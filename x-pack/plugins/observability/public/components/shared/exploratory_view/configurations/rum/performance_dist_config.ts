@@ -21,6 +21,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -42,6 +43,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     },
     hasOperationType: false,
     defaultFilters: [
+      TRANSACTION_URL,
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,

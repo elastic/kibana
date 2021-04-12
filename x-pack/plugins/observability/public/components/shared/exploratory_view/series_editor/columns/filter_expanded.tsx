@@ -23,11 +23,12 @@ interface Props {
   seriesId: string;
   label: string;
   field: string;
+  negation?: boolean;
   goBack: () => void;
   nestedField?: string;
 }
 
-export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: Props) {
+export function FilterExpanded({ seriesId, field, label, goBack, nestedField, negation }: Props) {
   const { indexPattern } = useIndexPatternContext();
 
   const [value, setValue] = useState('');
@@ -71,16 +72,18 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
       {displayValues.map((opt) => (
         <Fragment key={opt}>
           <EuiFilterGroup fullWidth={true} color="primary">
-            <FilterValueButton
-              field={field}
-              value={opt}
-              allSelectedValues={currFilter?.notValues}
-              negate={true}
-              nestedField={nestedField}
-              seriesId={seriesId}
-              isNestedOpen={isOpen}
-              setIsNestedOpen={setIsOpen}
-            />
+            {negation !== false && (
+              <FilterValueButton
+                field={field}
+                value={opt}
+                allSelectedValues={currFilter?.notValues}
+                negate={true}
+                nestedField={nestedField}
+                seriesId={seriesId}
+                isNestedOpen={isOpen}
+                setIsNestedOpen={setIsOpen}
+              />
+            )}
             <FilterValueButton
               field={field}
               value={opt}

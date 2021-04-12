@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
@@ -14,6 +15,7 @@ import FieldValueSuggestions from '../../../field_value_suggestions';
 import { DataSeries } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
+import { DatePickerCol } from './date_picker_col';
 
 export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   const { indexPattern } = useIndexPatternContext();
@@ -55,7 +57,10 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <FlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <DatePickerCol seriesId={NEW_SERIES_KEY} />
+      </EuiFlexItem>
       {indexPattern &&
         reportDefinitions.map(({ field, custom, options, defaultValue }) => (
           <EuiFlexItem key={field}>
@@ -111,6 +116,10 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
           />
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </FlexGroup>
   );
 }
+
+const FlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;
