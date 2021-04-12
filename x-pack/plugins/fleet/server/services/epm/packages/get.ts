@@ -18,6 +18,7 @@ import type {
   ArchivePackage,
   RegistryPackage,
   EpmPackageAdditions,
+  GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
@@ -35,7 +36,7 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories(options: Registry.CategoriesParams) {
+export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
