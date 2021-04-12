@@ -60,7 +60,7 @@ export function Example() {
 }
 
 export function EventLog() {
-  return <AlertsPage items={eventLogPocData as AlertItem[]} routeParams={{ query: {} }} />;
+  return <AlertsPage items={eventLogPocData as TopAlert[]} routeParams={{ query: {} }} />;
 }
 
 export function EmptyState() {
