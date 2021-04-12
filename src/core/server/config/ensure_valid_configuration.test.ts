@@ -16,12 +16,38 @@ describe('ensureValidConfiguration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     configService = configServiceMock.create();
-    configService.getUsedPaths.mockReturnValue(Promise.resolve(['core', 'elastic']));
+
+    configService.validate.mockResolvedValue();
+    configService.getUsedPaths.mockReturnValue(Promise.resolve([]));
   });
 
-  it('returns normally when there is no unused keys', async () => {
-    configService.getUnusedPaths.mockResolvedValue([]);
+  it('returns normally when there is no unused keys and when the config validates', async () => {
     await expect(ensureValidConfiguration(configService as any)).resolves.toBeUndefined();
+  });
+
+  it('throws when config validation fails', async () => {
+    configService.validate.mockImplementation(() => {
+      throw new Error('some message');
+    });
+
+    await expect(ensureValidConfiguration(configService as any)).rejects.toMatchInlineSnapshot(
+      `[Error: some message]`
+    );
+  });
+
+  it('throws a `CriticalError` with the correct processExitCode value when config validation fails', async () => {
+    expect.assertions(2);
+
+    configService.validate.mockImplementation(() => {
+      throw new Error('some message');
+    });
+
+    try {
+      await ensureValidConfiguration(configService as any);
+    } catch (e) {
+      expect(e).toBeInstanceOf(CriticalError);
+      expect(e.processExitCode).toEqual(78);
+    }
   });
 
   it('throws when there are some unused keys', async () => {
@@ -43,5 +69,19 @@ describe('ensureValidConfiguration', () => {
       expect(e).toBeInstanceOf(CriticalError);
       expect(e.processExitCode).toEqual(64);
     }
+  });
+
+  it('does not throw when all unused keys are included in the ignored paths', async () => {
+    configService.getUnusedPaths.mockResolvedValue(['dev.someDevKey', 'elastic.apm.enabled']);
+
+    await expect(ensureValidConfiguration(configService as any)).resolves.toBeUndefined();
+  });
+
+  it('throws when only some keys are included in the ignored paths', async () => {
+    configService.getUnusedPaths.mockResolvedValue(['dev.someDevKey', 'some.key']);
+
+    await expect(ensureValidConfiguration(configService as any)).rejects.toMatchInlineSnapshot(
+      `[Error: Unknown configuration key(s): "some.key". Check for spelling errors and ensure that expected plugins are installed.]`
+    );
   });
 });
