@@ -13,8 +13,8 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import moment from 'moment';
-import { EMPTY, from, Observable, of } from 'rxjs';
-import { catchError, concatMap, delay, expand, tap } from 'rxjs/operators';
+import { EMPTY, from, Observable } from 'rxjs';
+import { catchError, concatMap } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
