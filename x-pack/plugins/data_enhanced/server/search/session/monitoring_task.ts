@@ -6,7 +6,7 @@
  */
 
 import { Duration } from 'moment';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import {
   TaskManagerSetupContract,
@@ -55,7 +55,7 @@ function searchSessionRunner(
           },
           sessionConfig
         )
-          .pipe(takeUntil(aborted$))
+          .pipe(takeUntil(aborted$.pipe(filter((aborted) => aborted))))
           .toPromise();
 
         return {
