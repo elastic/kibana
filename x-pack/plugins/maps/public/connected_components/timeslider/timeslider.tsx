@@ -53,7 +53,7 @@ class KeyedTimeslider extends Component<Props, State> {
     const timeRangeBounds = getTimeFilter().calculateBounds(props.timeRange);
     if (timeRangeBounds.min === undefined || timeRangeBounds.max === undefined) {
       throw new Error(
-        'Unable to create Timeslider component instance, timeRangeBounds min or max are undefined'
+        'Unable to create Timeslider component, timeRangeBounds min or max are undefined'
       );
     }
     const min = timeRangeBounds.min.valueOf();

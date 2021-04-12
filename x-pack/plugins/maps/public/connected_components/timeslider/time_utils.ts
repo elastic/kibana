@@ -55,11 +55,13 @@ export function getInterval(min: number, max: number, steps = 6): number {
   const duration = max - min;
   let interval = calcAutoIntervalNear(steps, duration).asMilliseconds();
   // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
-  // Adjust the interval to get the requested number of ticks
+  // Adjust the interval to get closer to the requested number of ticks
   const actualSteps = duration / interval;
   if (actualSteps > steps * 1.5) {
     const factor = Math.round(actualSteps / steps);
     interval *= factor;
+  } else if (actualSteps < 5) {
+    interval *= 0.5;
   }
   return interval;
 }
