@@ -29,7 +29,6 @@
     "kibanaUtils",
     "home",
     "data",
-    "ml",
-    "maps"
+    "ml"
   ]
 }
