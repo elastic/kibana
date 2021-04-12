@@ -65,11 +65,19 @@ export const ADD_SOURCE_EMPTY_TITLE = i18n.translate(
     defaultMessage: 'No available sources',
   }
 );
+
 export const ADD_SOURCE_EMPTY_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.addSourceList.emptyBody',
   {
     defaultMessage:
       'Sources will be available for search when an administrator adds them to this organization.',
+  }
+);
+
+export const AVAILABLE_IN_PERSONAL_DASHBOARD_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.addSourceList.availableInPersonaldashboard.button',
+  {
+    defaultMessage: 'Available in personal dashboard',
   }
 );
 
@@ -198,6 +206,27 @@ export const CONFIGURED_ORG_SOURCES_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredOrgSources.body',
   {
     defaultMessage: 'These sources use one account to provide content for the search experience.',
+  }
+);
+
+export const CONFIGURED_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredConnectedOrgSourceCard.description',
+  {
+    defaultMessage: 'At least one source connected',
+  }
+);
+
+export const CONFIGURED_NOT_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredNotConnectedOrgSourceCard.description',
+  {
+    defaultMessage: 'No sources connected',
+  }
+);
+
+export const CONFIGURED_PRIVATE_SOURCE_CARD_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredPrivateSourceCard.description',
+  {
+    defaultMessage: 'Private source',
   }
 );
 

@@ -13,7 +13,13 @@ import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getSourcesPath } from '../../../../routes';
 
-import { CONFIGURED_SOURCES_CONNECT_BUTTON } from './constants';
+import {
+  CONFIGURED_SOURCES_CONNECT_BUTTON,
+  AVAILABLE_IN_PERSONAL_DASHBOARD_BUTTON,
+  CONFIGURED_PRIVATE_SOURCE_CARD_DESCRIPTION,
+  CONFIGURED_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION,
+  CONFIGURED_NOT_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION,
+} from './constants';
 
 interface ConfiguredSourceProps {
   accountContextOnly: boolean;
@@ -37,7 +43,9 @@ export const ConfiguredSource: React.FC<ConfiguredSourceProps> = ({
       {CONFIGURED_SOURCES_CONNECT_BUTTON}
     </EuiButtonTo>
   );
-  const ButtonDisabled = () => <EuiButton disabled>Available in personal dashboard</EuiButton>;
+  const ButtonDisabled = () => (
+    <EuiButton disabled>{AVAILABLE_IN_PERSONAL_DASHBOARD_BUTTON}</EuiButton>
+  );
 
   const privateSource = !isOrganization || (isOrganization && !accountContextOnly);
   return (
@@ -45,10 +53,10 @@ export const ConfiguredSource: React.FC<ConfiguredSourceProps> = ({
       <EuiCard
         description={
           !privateSource
-            ? 'Private Source'
+            ? CONFIGURED_PRIVATE_SOURCE_CARD_DESCRIPTION
             : connected
-            ? 'At least one source connected'
-            : 'No sources connected'
+            ? CONFIGURED_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION
+            : CONFIGURED_NOT_CONNECTED_ORG_SOURCE_CARD_DESCRIPTION
         }
         display={'plain'}
         icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}

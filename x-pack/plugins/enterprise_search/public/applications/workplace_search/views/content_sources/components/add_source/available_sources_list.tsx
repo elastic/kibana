@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CONFIGURE_BUTTON_LABEL } from '../../../../../shared/constants/actions';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
@@ -50,7 +51,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLinkTo to={getSourcesPath(addPath, true)}>Configure</EuiLinkTo>
+            <EuiLinkTo to={getSourcesPath(addPath, true)}>{CONFIGURE_BUTTON_LABEL}</EuiLinkTo>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

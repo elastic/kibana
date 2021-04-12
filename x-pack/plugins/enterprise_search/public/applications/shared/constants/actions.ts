@@ -44,3 +44,8 @@ export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.actions.closeButtonLabel',
   { defaultMessage: 'Close' }
 );
+
+export const CONFIGURE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.configureButtonLabel',
+  { defaultMessage: 'Configure' }
+);
