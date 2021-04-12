@@ -16,28 +16,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { parse, format } from 'url';
+import { useHistory } from 'react-router-dom';
+import { format, parse } from 'url';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
-import { getAbsoluteDateRange } from '../../utils/date';
 
 interface AlertsPageProps {
   routeParams: RouteParams<'/alerts'>;
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const {
-    core,
-    appMountParameters: { history },
-    observabilityRuleRegistry,
-  } = usePluginContext();
+  const { core, observabilityRuleRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
-
+  const history = useHistory();
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
   } = routeParams;

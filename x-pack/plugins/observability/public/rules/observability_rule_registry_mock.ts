@@ -8,8 +8,8 @@
 import { ObservabilityRuleRegistry } from '../plugin';
 
 const createRuleRegistryMock = () => ({
-  registerType: jest.fn(),
-  getTypeByRuleId: jest.fn(),
+  registerType: () => {},
+  getTypeByRuleId: () => {},
   create: () => createRuleRegistryMock(),
 });
 
