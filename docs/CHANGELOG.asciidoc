@@ -1116,7 +1116,64 @@ Uptime::
 
 For detailed information about the 7.10.0 release, review the following sections.
 
-<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
+<<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>> | <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>>
+
+[float]
+[[deprecation-v7.10.0]]
+=== Deprecations
+Monitoring::
+* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
+Platform::
+* The /api/status endpoint response format is now deprecated and will change in 8.0 {kibana-pull}76054[#76054]
+* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
+Security::
+* Deprecates the `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` setting for SAML authentication {kibana-pull}68117[#68117]
+Visualizations::
+* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib} {kibana-pull}74660[#74660]
++
+To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
++
+NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
++
+To migrate a *Timelion* worksheet to a dashboard:
+
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
+
+. For each *Timelion* app worksheet, complete the following steps.
+
+.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
+
+.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[Timelion app chart]
+
+.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
+
+.. In the toolbar, click *Save*.
+
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
++
+The Timelion visualization panel appears on the dashboard.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
+
+[float]
+[[breaking-v7.10.0]]
+=== Breaking changes
+Lens and visualizations::
+* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
+Operations::
+* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
+Platform::
+* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
+
+For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [float]
 [[enhancement-v7.10.0]]
@@ -1546,61 +1603,6 @@ Spaces::
 Uptime::
 * Ml anomaly alert edit {kibana-pull}76909[#76909]
 * Removes custom handling of license enabling {kibana-pull}82019[#82019]
-
-[float]
-[[deprecation-v7.10.0]]
-=== Deprecations
-Monitoring::
-* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
-Platform::
-* The /api/status endpoint response format is now deprecated and will change in 8.0. {kibana-pull}76054[#76054]
-* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
-Visualizations::
-* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. {kibana-pull}74660[#74660]
-+
-To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-+
-NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-+
-To migrate a *Timelion* worksheet to a dashboard:
-
-. Open the main menu, click *Dashboard*, then click *Create dashboard*.
-
-. For each *Timelion* app worksheet, complete the following steps.
-
-.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
-
-.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-.. In the toolbar, click *Save*.
-
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
-
-[float]
-[[breaking-v7.10.0]]
-=== Breaking changes
-Lens and visualizations::
-* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
-Operations::
-* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
-Platform::
-* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
-
-For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
@@ -2484,6 +2486,34 @@ could lead to an attacker executing code with the permissions of the {kib} proce
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
 +
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+
+[float]
+[[deprecations-7.7.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.7.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.7.0.
+
+[discrete]
+[[deprecation-53010]]
+==== Deprecates authentication settings
+
+*Details* +
+
+Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication. 
+
+Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication. 
+
+For more information, refer to {kibana-pull}53010[#53010].
+
+*Impact* +
+
+* Instead of `xpack.security.authc.saml.realm`, use `xpack.security.authc.providers.saml.<provider-name>.realm`.
+
+* Instead of `xpack.security.authc.saml.maxRedirectURLSize`, use `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`.
+
+* Instead of `xpack.security.authc.oidc.realm`, use `xpack.security.authc.providers.oidc.<provider-name>.realm`.
 
 [float]
 [[known-issues-7.7.0]]
@@ -4157,6 +4187,29 @@ Machine Learning::
 * Data Frame: Remove format from date_histogram configs. {kib-pull}39811[#39811]
 Maps::
 * [Fixes #34662] Hide feature when it has no corresponding term join {kib-pull}36617[#36617]
+
+
+[float]
+[[deprecations-7.3.0]]
+=== Deprecation
+
+The following functionality is deprecated in 7.3.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.3.0.
+
+[discrete]
+[[deprecation-xpack-security-authProviders]]
+==== Deprecates `xpack.security.authProviders` and `xpack.security.public`
+
+*Details:* Deprecates the `xpack.security.authProviders` and `xpack.security.public` settings used for {kib} SAML authentication. For more information, refer to {pull}37346[#37346].
+
+*Impact:* 
+
+When you use the SAML authentication provider, use the following settings:
+
+* Instead of `xpack.security.authProviders`, use `xpack.security.authc.providers`.
+
+* Instead of `xpack.security.public`, use `xpack.security.authc.saml.realm`.
 
 [float]
 [[enhancement-7.3.0]]
