@@ -12,7 +12,7 @@ steps:
   - command: .ci/buildkite/jobs/baseline.sh
     label: Default Build and Metrics
     agents:
-      queue: bootstrap
+      queue: baseline
 
   - wait: ~
     continue_on_failure: true
