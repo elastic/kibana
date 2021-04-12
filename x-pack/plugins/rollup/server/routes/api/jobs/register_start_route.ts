@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 export const registerStartRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.post(
     {
@@ -29,31 +29,30 @@ export const registerStartRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
         const { jobIds } = request.body;
 
         const data = await Promise.all(
-          jobIds.map((id: string) =>
-            context.rollup!.client.callAsCurrentUser('rollup.startJob', { id })
-          )
+          jobIds.map((id: string) => clusterClient.asCurrentUser.rollup.startJob({ id }))
         ).then(() => ({ success: true }));
         return response.ok({ body: data });
       } catch (err) {
         // There is an issue opened on ES to handle the following error correctly
-        // https://github.com/elastic/elasticsearch/issues/39845, which was addressed in 8.0
-        // but not backported to 7.x because it's breaking. So we need to modify the response
-        // here for 7.x.
-        if (err.message.includes('Cannot start task for Rollup Job')) {
-          err.status = 400;
-          err.statusCode = 400;
-          err.body.error.status = 400;
-          err.displayName = 'Bad request';
+        // https://github.com/elastic/elasticsearch/issues/42908
+        // Until then we'll modify the response here.
+        if (
+          err?.meta &&
+          err.body?.task_failures[0]?.reason?.reason?.includes(
+            'Job must be [STOPPED] before deletion'
+          )
+        ) {
+          err.meta.status = 400;
+          err.meta.statusCode = 400;
+          err.meta.displayName = 'Bad request';
+          err.message = err.body.task_failures[0].reason.reason;
         }
-
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );

@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
 import { SeriesEditor } from './series_editor/series_editor';
-import { useUrlStorage } from './hooks/use_url_strorage';
+import { useUrlStorage } from './hooks/use_url_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { useIndexPatternContext } from './hooks/use_default_index_pattern';
