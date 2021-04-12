@@ -68,6 +68,8 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
   }
 
   public setup(core: CoreSetup, plugins: RacPluginsSetup): RuleRegistryPluginSetupContract {
+    const globalConfig = this.initContext.config.legacy.get();
+    const logger = this.initContext.logger.get();
     this.security = plugins.security;
 
     // RULE REGISTRY
