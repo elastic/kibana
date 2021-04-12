@@ -292,6 +292,7 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <
