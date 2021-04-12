@@ -40,7 +40,7 @@ function newAnnotation() {
     id: uuid.v1(),
     color: '#F00',
     index_pattern: '',
-    time_field: '@timestamp',
+    time_field: '',
     icon: 'fa-tag',
     ignore_global_filters: 1,
     ignore_panel_filters: 1,
@@ -114,25 +114,20 @@ export class AnnotationsEditor extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('timeField')}
+                <FieldSelect
                   label={
                     <FormattedMessage
                       id="visTypeTimeseries.annotationsEditor.timeFieldLabel"
                       defaultMessage="Time field (required)"
                     />
                   }
+                  restrict={RESTRICT_FIELDS}
+                  value={model.time_field}
+                  onChange={this.handleChange(model, 'time_field')}
+                  indexPattern={model.index_pattern}
+                  fields={this.props.fields}
                   fullWidth
-                >
-                  <FieldSelect
-                    restrict={RESTRICT_FIELDS}
-                    value={model.time_field}
-                    onChange={this.handleChange(model, 'time_field')}
-                    indexPattern={model.index_pattern}
-                    fields={this.props.fields}
-                    fullWidth
-                  />
-                </EuiFormRow>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
 

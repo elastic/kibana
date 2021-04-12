@@ -27,6 +27,14 @@ describe('migrationsStateActionMachine', () => {
     targetMappings: { properties: {} },
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
+    migrationsConfig: {
+      batchSize: 1000,
+      pollInterval: 0,
+      scrollDuration: '0s',
+      skip: false,
+      enableV2: true,
+      retryAttempts: 5,
+    },
   });
 
   const next = jest.fn((s: State) => {
@@ -198,6 +206,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_DELETE",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_DELETE",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -221,6 +230,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -239,6 +249,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -253,6 +270,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_DELETE -> FATAL",
           Object {
+            "batchSize": 1000,
             "controlState": "FATAL",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -280,6 +298,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -297,6 +316,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -403,6 +429,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] INIT -> LEGACY_REINDEX",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_REINDEX",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -424,6 +451,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -442,6 +470,13 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
+            },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
           },
@@ -453,6 +488,7 @@ describe('migrationsStateActionMachine', () => {
         Array [
           "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE",
           Object {
+            "batchSize": 1000,
             "controlState": "LEGACY_DELETE",
             "currentAlias": ".my-so-index",
             "indexPrefix": ".my-so-index",
@@ -478,6 +514,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -495,6 +532,13 @@ describe('migrationsStateActionMachine', () => {
                   "type": "keyword",
                 },
               },
+            },
+            "unusedTypesToExclude": Object {
+              "_tag": "Some",
+              "value": Array [
+                "fleet-agent-events",
+                "tsvb-validation-telemetry",
+              ],
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",

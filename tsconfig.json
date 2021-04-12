@@ -19,78 +19,6 @@
     "x-pack/plugins/cases/**/*",
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
-
-    // tests
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/integration_tests/*",
-    "src/**/tests/*",
-    // mocks
-    "src/**/__mocks__/*",
-    "src/**/mock/*",
-    "src/**/mocks/*",
-    "src/**/*/mock.ts",
-    "src/**/*/mocks.ts",
-    "src/**/*/mocks.tsx",
-    "src/**/*.mock.ts",
-    "src/**/*.mock.tsx",
-    "src/**/*.mocks.ts",
-    "src/**/*.mocks.tsx",
-
-    // test helpers
-    "src/**/test_helpers/*",
-    "src/**/test_utils/*",
-    "src/**/*/test_utils.ts",
-    "src/**/*/test_helpers.ts",
-    "src/**/*/test_helper.tsx",
-
-    // stubs
-    "src/**/*/stubs.ts",
-    "src/**/*.stub.ts",
-    "src/**/*.stories.tsx",
-    "src/**/*/_mock_handler_arguments.ts",
-
-    // tests
-    "x-pack/plugins/**/*.test.ts",
-    "x-pack/plugins/**/*.test.tsx",
-    "x-pack/plugins/**/test/**/*",
-    "x-pack/plugins/**/tests/*",
-    "x-pack/plugins/**/integration_tests/*",
-    "x-pack/plugins/**/tests_client_integration/*",
-    "x-pack/plugins/**/__fixtures__/*",
-    "x-pack/plugins/**/__stories__/*",
-    "x-pack/plugins/**/__jest__/**/*",
-
-    // mocks
-    "x-pack/plugins/**/__mocks__/*",
-    "x-pack/plugins/**/mock/*",
-    "x-pack/plugins/**/mocks/*",
-    "x-pack/plugins/**/*/mock.ts",
-    "x-pack/plugins/**/*/mocks.ts",
-    "x-pack/plugins/**/*/mocks.tsx",
-    "x-pack/plugins/**/*.mock.ts",
-    "x-pack/plugins/**/*.mock.tsx",
-    "x-pack/plugins/**/*.mocks.ts",
-    "x-pack/plugins/**/*.mocks.tsx",
-
-    // test helpers
-    "x-pack/plugins/**/test_helpers/*",
-    "x-pack/plugins/**/test_utils/*",
-    "x-pack/plugins/**/*/test_utils.ts",
-    "x-pack/plugins/**/*/test_helper.tsx",
-    "x-pack/plugins/**/*/test_helpers.ts",
-    "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/test_data.tsx",
-    "x-pack/plugins/uptime/server/lib/requests/helper.ts",
-    "x-pack/plugins/uptime/public/lib/helper/rtl_helpers.tsx",
-    "x-pack/plugins/uptime/public/lib/helper/enzyme_helpers.tsx",
-    "x-pack/plugins/apm/server/utils/test_helpers.tsx",
-    "x-pack/plugins/apm/public/utils/testHelpers.tsx",
-
-    // stubs
-    "x-pack/plugins/**/*/stubs.ts",
-    "x-pack/plugins/**/*.stub.ts",
-    "x-pack/plugins/**/*.stories.tsx",
-    "x-pack/plugins/**/*/_mock_handler_arguments.ts"
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
@@ -180,7 +108,6 @@
     { "path": "./x-pack/plugins/license_management/tsconfig.json" },
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/logstash/tsconfig.json" },
-    { "path": "./x-pack/plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },
     { "path": "./x-pack/plugins/monitoring/tsconfig.json" },

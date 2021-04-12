@@ -61,7 +61,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex(client, state.tempIndex, state.tempIndexMappings),
     REINDEX_SOURCE_TO_TEMP: (state: ReindexSourceToTempState) =>
-      Actions.reindex(client, state.sourceIndex.value, state.tempIndex, Option.none, false),
+      Actions.reindex(
+        client,
+        state.sourceIndex.value,
+        state.tempIndex,
+        Option.none,
+        false,
+        state.unusedTypesToExclude
+      ),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock(client, state.tempIndex),
     REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK: (state: ReindexSourceToTempWaitForTaskState) =>
@@ -73,7 +80,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, state.targetIndex, state.outdatedDocumentsQuery),
+      Actions.searchForOutdatedDocuments(client, {
+        batchSize: state.batchSize,
+        targetIndex: state.targetIndex,
+        outdatedDocumentsQuery: state.outdatedDocumentsQuery,
+      }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
@@ -100,7 +111,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.legacyIndex,
         state.sourceIndex.value,
         state.preMigrationScript,
-        false
+        false,
+        state.unusedTypesToExclude
       ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
