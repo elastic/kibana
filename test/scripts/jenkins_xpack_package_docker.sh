@@ -20,4 +20,5 @@ export TEST_BROWSER_HEADLESS=1
 export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.7:5601
 export TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200
 
+cd x-pack
 node scripts/functional_test_runner.js --include-tag=smoke
