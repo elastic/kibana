@@ -19,13 +19,11 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
 } from '../../common';
-import { PRECONFIGURATION_METADATA_INDEX } from '../constants';
 
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
-import { packagePolicyService } from './package_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;

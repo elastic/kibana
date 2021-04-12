@@ -171,14 +171,8 @@ describe('policy preconfiguration', () => {
 
   it('should install packages and configure agent policies successfully', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createInternalClient();
-    esClient.search.mockResolvedValue({
-      body: {
-        hits: {
-          total: 0,
-        },
-      },
-    });
+    const esClient = createMockESClient();
+
     const { policies, packages } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
       esClient,
@@ -226,14 +220,8 @@ describe('policy preconfiguration', () => {
 
   it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
-    const esClient = elasticsearchServiceMock.createInternalClient();
-    esClient.search.mockResolvedValue({
-      body: {
-        hits: {
-          total: 0,
-        },
-      },
-    });
+    const esClient = createMockESClient();
+
     const { policies: policiesA } = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
       esClient,
