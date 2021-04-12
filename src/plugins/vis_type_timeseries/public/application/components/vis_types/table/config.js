@@ -186,20 +186,16 @@ export class TableSeriesConfig extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
-              id={htmlId('field')}
+            <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
               }
-            >
-              <FieldSelect
-                fields={this.props.fields}
-                indexPattern={this.props.panel.index_pattern}
-                value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
-                fullWidth
-              />
-            </EuiFormRow>
+              fields={this.props.fields}
+              indexPattern={this.props.panel.index_pattern}
+              value={model.aggregate_by}
+              onChange={handleSelectChange('aggregate_by')}
+              fullWidth
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFormRow
