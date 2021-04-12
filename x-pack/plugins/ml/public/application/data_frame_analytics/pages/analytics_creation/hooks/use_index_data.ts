@@ -13,7 +13,7 @@ import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { RuntimeMappings, RuntimeField } from '../../../../../../common/types/fields';
+import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
@@ -44,7 +44,7 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromESFieldType(field.type as RuntimeField['type']);
+    const schema = getDataGridSchemaFromESFieldType(field.type as estypes.RuntimeField['type']);
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
@@ -64,7 +64,7 @@ export const useIndexData = (
       const field = indexPattern.fields.getByName(id);
       const isRuntimeFieldColumn = field?.runtimeField !== undefined;
       const schema = isRuntimeFieldColumn
-        ? getDataGridSchemaFromESFieldType(field?.type as RuntimeField['type'])
+        ? getDataGridSchemaFromESFieldType(field?.type as estypes.RuntimeField['type'])
         : getDataGridSchemaFromKibanaFieldType(field);
       return {
         id,
