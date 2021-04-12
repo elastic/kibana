@@ -32,7 +32,7 @@ describe('DataTypesCol', function () {
   });
 
   it('should set series on change on already selected', function () {
-    const { setSeries } = mockUrlStorage({
+    const { removeSeries } = mockUrlStorage({
       data: {
         [NEW_SERIES_KEY]: {
           dataType: 'synthetics',
@@ -54,6 +54,6 @@ describe('DataTypesCol', function () {
     fireEvent.click(button);
 
     // undefined on click selected
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: undefined });
+    expect(removeSeries).toHaveBeenCalledWith('newSeriesKey');
   });
 });

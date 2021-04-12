@@ -47,12 +47,16 @@ const appToPatternMap: Record<DataType, string> = {
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
-  return (
+  const isSame =
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
-    param1?.showSuffix === param2?.showSuffix &&
-    param2?.outputPrecision === param1?.outputPrecision
-  );
+    param1?.showSuffix === param2?.showSuffix;
+
+  if (param2.outputPrecision !== undefined) {
+    return param2?.outputPrecision === param1?.outputPrecision && isSame;
+  }
+
+  return isSame;
 }
 
 export class ObservabilityIndexPatterns {
