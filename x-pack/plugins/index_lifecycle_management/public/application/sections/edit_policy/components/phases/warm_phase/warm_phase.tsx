@@ -40,7 +40,7 @@ export const WarmPhase: FunctionComponent = () => {
 
       {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-      <ReadonlyField phase="warm" />
+      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="warm" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField

@@ -321,7 +321,7 @@ describe('KibanaMigrator', () => {
         options.client.tasks.get.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise({
             completed: true,
-            error: { type: 'elatsicsearch_exception', reason: 'task failed with an error' },
+            error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
             failures: [],
             task: { description: 'task description' } as any,
           })
@@ -331,11 +331,11 @@ describe('KibanaMigrator', () => {
         migrator.prepareMigrations();
         await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
                 [Error: Unable to complete saved object migrations for the [.my-index] index. Error: Reindex failed with the following error:
-                {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+                {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
               `);
         expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
           [Error: Reindex failed with the following error:
-          {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]
+          {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
         `);
       });
     });
@@ -414,12 +414,13 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
       enabled: true,
       index: '.my-index',
     } as KibanaMigratorOptions['kibanaConfig'],
-    savedObjectsConfig: {
+    soMigrationsConfig: {
       batchSize: 20,
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       enableV2,
+      retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
   };
