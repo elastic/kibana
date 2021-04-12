@@ -26,7 +26,7 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
-import { epmRouteService } from '../../fleet/common';
+import { epmRouteService, GetPackagesResponse } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
@@ -35,10 +35,9 @@ import {
 
 export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
   http
-    .fetch(epmRouteService.getListPath(), { query: { experimental: true } })
+    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
     .then(({ response }) => {
       const installed = response.find(
-        // @ts-expect-error update types
         (integration) =>
           integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
       );
@@ -49,7 +48,9 @@ export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreSta
 }
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({
+    navLinkStatus: AppNavLinkStatus.hidden,
+  }));
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
 
