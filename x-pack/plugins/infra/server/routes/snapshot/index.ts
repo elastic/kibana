@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
@@ -20,7 +21,7 @@ import { getNodes } from './lib/get_nodes';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework } = libs;
+  const { framework, handleEsError } = libs;
 
   framework.registerRoute(
     {
@@ -49,17 +50,28 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
 
-      const snapshotResponse = await getNodes(
-        client,
-        snapshotRequest,
-        source,
-        logQueryFields,
-        compositeSize
-      );
-
-      return response.ok({
-        body: SnapshotNodeResponseRT.encode(snapshotResponse),
-      });
+      try {
+        const snapshotResponse = await getNodes(
+          client,
+          snapshotRequest,
+          source,
+          logQueryFields,
+          compositeSize
+        );
+        return response.ok({
+          body: SnapshotNodeResponseRT.encode(snapshotResponse),
+        });
+      } catch (err) {
+        // temporary until handleEsError handles the case where body.error.reason: ''
+        // OR elasticsearch fixes it https://github.com/elastic/kibana/issues/96640
+        if (err.name === 'ResponseError') {
+          const { body } = err as ResponseError;
+          if (!body.error?.reason) {
+            body.error.reason = body.error.caused_by?.reason;
+          }
+        }
+        return handleEsError({ error: err, response });
+      }
     }
   );
 };
