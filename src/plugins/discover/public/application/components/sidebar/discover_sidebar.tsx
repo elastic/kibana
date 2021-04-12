@@ -49,6 +49,17 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
+
+  /**
+   * Callback to close the flyout sidebar rendered in a flyout, close flyout
+   */
+  closeFlyout?: () => void;
+
+  /**
+   * Pass the reference to field editor component to the parent, so it can be properly unmounted
+   * @param ref reference to the field editor component
+   */
+  setFieldEditorRef?: (ref: () => void | undefined) => void;
 }
 
 export function DiscoverSidebar({
@@ -72,8 +83,14 @@ export function DiscoverSidebar({
   useNewFieldsApi = false,
   useFlyout = false,
   unmappedFieldsConfig,
+  onEditRuntimeField,
+  setFieldEditorRef,
+  closeFlyout,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+  const { indexPatternFieldEditor } = services;
+  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -220,6 +237,27 @@ export function DiscoverSidebar({
     return null;
   }
 
+  const editField = (fieldName: string) => {
+    if (!canEditIndexPatternField) {
+      return;
+    }
+    const ref = indexPatternFieldEditor.openEditor({
+      ctx: {
+        indexPattern: selectedIndexPattern,
+      },
+      fieldName,
+      onSave: async () => {
+        onEditRuntimeField();
+      },
+    });
+    if (setFieldEditorRef) {
+      setFieldEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  };
+
   if (useFlyout) {
     return (
       <section
@@ -331,6 +369,7 @@ export function DiscoverSidebar({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
+                                onEditField={canEditIndexPatternField ? editField : undefined}
                               />
                             </li>
                           );
@@ -388,6 +427,7 @@ export function DiscoverSidebar({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
+                                onEditField={canEditIndexPatternField ? editField : undefined}
                               />
                             </li>
                           );
@@ -414,6 +454,7 @@ export function DiscoverSidebar({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
+                            onEditField={canEditIndexPatternField ? editField : undefined}
                           />
                         </li>
                       );
