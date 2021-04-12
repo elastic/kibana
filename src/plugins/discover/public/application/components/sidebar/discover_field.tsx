@@ -266,6 +266,7 @@ export function DiscoverField({
   };
 
   const fieldInfoIcon = getFieldInfoIcon();
+
   const shouldRenderMultiFields = !!multiFields;
   const renderMultiFields = () => {
     if (!multiFields) {

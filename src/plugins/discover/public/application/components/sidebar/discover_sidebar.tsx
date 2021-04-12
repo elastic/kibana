@@ -55,7 +55,7 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   setFieldFilter: (next: FieldFilterState) => void;
 
   /**
-   * Callback to close the flyout sidebar rendered in a flyout, close flyout
+   * Callback to close the flyout if sidebar is rendered in a flyout
    */
   closeFlyout?: () => void;
 
