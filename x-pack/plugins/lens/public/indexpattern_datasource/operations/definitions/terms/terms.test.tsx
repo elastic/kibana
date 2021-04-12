@@ -105,46 +105,6 @@ describe('terms', () => {
         })
       );
     });
-
-    it('should include esaggs suffix from other columns in orderby argument', () => {
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: {
-            ...termsColumn.params,
-            otherBucket: true,
-            orderBy: { type: 'column', columnId: 'abcde' },
-          },
-        },
-        'col1',
-        {} as IndexPattern,
-        {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            abcde: {
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'percentile',
-              sourceField: 'abc',
-              label: '',
-              params: {
-                percentile: 12,
-              },
-            },
-          },
-        },
-        uiSettingsMock
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            orderBy: ['abcde.12'],
-          }),
-        })
-      );
-    });
   });
 
   describe('onFieldChange', () => {

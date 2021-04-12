@@ -144,7 +144,8 @@ export class QueryContext {
       this.pagination,
       this.filterClause,
       this.size,
-      this.statusFilter
+      this.statusFilter,
+      this.query
     );
   }
 

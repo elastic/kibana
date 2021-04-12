@@ -53,20 +53,29 @@ const geti18nTexts = (field?: Field) => {
     confirmButtonText: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.saveButtonLabel',
       {
-        defaultMessage: 'Save',
+        defaultMessage: 'Save changes',
       }
     ),
     warningChangingFields: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningChangingFields',
       {
         defaultMessage:
-          'Warning: Changing name or type may break searches or visualizations that rely on this field.',
+          'Changing name or type can break searches and visualizations that rely on this field.',
       }
     ),
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.saveRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: "Type 'CHANGE' to continue:",
+        defaultMessage: 'Enter CHANGE to continue',
+      }
+    ),
+    titleConfirmChanges: i18n.translate(
+      'indexPatternFieldEditor.saveRuntimeField.confirmModal.title',
+      {
+        defaultMessage: `Save changes to '{name}'`,
+        values: {
+          name: field?.name,
+        },
       }
     ),
   };
@@ -134,7 +143,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [confirmContent, setConfirmContent] = useState<string>();
+  const [confirmContent, setConfirmContent] = useState<string>('');
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
   const { fields } = indexPattern;
@@ -211,7 +220,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const modal = isModalVisible ? (
     <EuiConfirmModal
-      title={`Confirm changes to '${field?.name}'`}
+      title={i18nTexts.titleConfirmChanges}
       data-test-subj="runtimeFieldSaveConfirmModal"
       cancelButtonText={i18nTexts.cancelButtonText}
       confirmButtonText={i18nTexts.confirmButtonText}

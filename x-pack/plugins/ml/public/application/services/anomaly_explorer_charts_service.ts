@@ -7,6 +7,8 @@
 
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Observable, of } from 'rxjs';
+import { map as mapObservable } from 'rxjs/operators';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -29,7 +31,6 @@ import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
 import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
   ExplorerChartsData,
@@ -37,6 +38,8 @@ import {
 } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -90,11 +93,7 @@ export interface SeriesConfigWithMetadata extends SeriesConfig {
 }
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
-  return (
-    isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'bucketSpanSeconds') &&
-    {}.hasOwnProperty.call(arg, 'detectorLabel')
-  );
+  return isPopulatedObject(arg, ['bucketSpanSeconds', 'detectorLabel']);
 };
 
 interface ChartRange {
@@ -374,15 +373,53 @@ export class AnomalyExplorerChartsService {
       // Getting only necessary job config and datafeed config without the stats
       jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
     );
-    const combinedJobs = combinedResults
+    return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
       .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
-    return combinedJobs;
+  }
+
+  public loadDataForCharts$(
+    jobIds: string[],
+    earliestMs: number,
+    latestMs: number,
+    influencers: EntityField[] = [],
+    selectedCells: AppStateSelectedCells | undefined,
+    influencersFilterQuery: InfluencersFilterQuery
+  ): Observable<RecordForInfluencer[]> {
+    if (
+      selectedCells === undefined &&
+      influencers.length === 0 &&
+      influencersFilterQuery === undefined
+    ) {
+      of([]);
+    }
+
+    return this.mlResultsService
+      .getRecordsForInfluencer$(
+        jobIds,
+        influencers,
+        0,
+        earliestMs,
+        latestMs,
+        500,
+        influencersFilterQuery
+      )
+      .pipe(
+        mapObservable((resp): RecordForInfluencer[] => {
+          if (
+            (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
+            influencersFilterQuery !== undefined
+          ) {
+            return resp.records;
+          }
+
+          return [] as RecordForInfluencer[];
+        })
+      );
   }
 
   public async getAnomalyData(
-    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -490,9 +527,6 @@ export class AnomalyExplorerChartsService {
       data.errorMessages = errorMessages;
     }
 
-    if (explorerService) {
-      explorerService.setCharts({ ...data });
-    }
     if (seriesConfigs.length === 0) {
       return data;
     }
@@ -852,9 +886,6 @@ export class AnomalyExplorerChartsService {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
         }
-        if (explorerService) {
-          explorerService.setCharts({ ...data });
-        }
         return Promise.resolve(data);
       })
       .catch((error) => {
@@ -864,7 +895,7 @@ export class AnomalyExplorerChartsService {
   }
 
   public processRecordsForDisplay(
-    jobRecords: Record<string, CombinedJob>,
+    combinedJobRecords: Record<string, CombinedJob>,
     anomalyRecords: RecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
@@ -879,7 +910,7 @@ export class AnomalyExplorerChartsService {
       // Check if we can plot a chart for this record, depending on whether the source data
       // is chartable, and if model plot is enabled for the job.
 
-      const job = jobRecords[record.job_id];
+      const job = combinedJobRecords[record.job_id];
 
       // if we already know this job has datafeed aggregations we cannot support
       // no need to do more checks

@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -31,6 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.savedObjects.clean({ types: ['search'] });
       await kibanaServer.importExport.load('discover');
+      log.info(
+        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
+      );
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
