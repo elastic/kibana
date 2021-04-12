@@ -8,19 +8,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const NAME_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.eventFilters.form.name.placeholder',
+  'xpack.securitySolution.eventFilter.form.name.placeholder',
   {
     defaultMessage: 'Event exception name',
   }
 );
 
-export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilters.form.name.label', {
+export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.name.label', {
   defaultMessage: 'Name your event exception',
 });
 
-export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilters.form.name.error', {
+export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
   defaultMessage: "The name can't be empty",
 });
-export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilters.form.os.label', {
+export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
   defaultMessage: 'Seelct OS',
 });

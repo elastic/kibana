@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
+import { EventFilterListPageState } from '../state';
 
-export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
+export const initialEventFilterPageState = (): EventFilterListPageState => ({
   entries: [],
   form: {
     entry: undefined,

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
+import { EventFilterListPageState } from '../state';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
 
 export const getFormEntry = (
-  state: EventFiltersListPageState
+  state: EventFilterListPageState
 ): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
   return state.form.entry;
 };
 
-export const getFormHasError = (state: EventFiltersListPageState): boolean => {
+export const getFormHasError = (state: EventFilterListPageState): boolean => {
   return state.form.hasError;
 };
 
-export const getFormIsLoadingAction = (state: EventFiltersListPageState): boolean => {
+export const getFormIsLoadingAction = (state: EventFilterListPageState): boolean => {
   return state.form.isLoadingAction;
 };

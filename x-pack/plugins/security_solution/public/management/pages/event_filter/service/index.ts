@@ -11,33 +11,39 @@ import {
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
 import { Immutable } from '../../../../../common/endpoint/types';
-// import { EXCEPTION_LIST_ITEM_URL } from '../../../../../../../plugins/lists/common/constants';
+import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 
-export interface EventFiltersService {
+export interface EventFilterService {
   addEventFilter(
     exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema>;
 }
+export class EventFilterHttpService implements EventFilterService {
+  private hasCreatedList: boolean;
 
-// TODO: to be moved with right fields.
-const EVENT_FILTER_LIST = {
-  name: 'Endpoint Event Filter List',
-  namespace_type: 'agnostic',
-  description: 'Endpoint Event Filter List',
-  list_id: 'endpointEventFilterList',
-  type: 'endpoint_event_filter',
-};
-
-export class EventFiltersHttpService implements EventFiltersService {
   constructor(private http: HttpStart) {
-    http.post<ExceptionListItemSchema>('/api/exception_lists', {
-      body: JSON.stringify(EVENT_FILTER_LIST),
-    });
+    this.hasCreatedList = false;
+  }
+
+  private async createEndpointEventList() {
+    try {
+      await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+        body: JSON.stringify(EVENT_FILTER_LIST),
+      });
+    } catch (err) {
+      // Ignore 409 errors. List already created
+      if (err.response.status === 409) this.hasCreatedList = true;
+      else throw err;
+    }
+  }
+
+  private async httpWrapper() {
+    if (!this.hasCreatedList) await this.createEndpointEventList();
+    return this.http;
   }
 
   async addEventFilter(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
-    // TODO: change this url path string by a constant
-    return this.http.post<ExceptionListItemSchema>('/api/exception_lists/items', {
+    return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
   }

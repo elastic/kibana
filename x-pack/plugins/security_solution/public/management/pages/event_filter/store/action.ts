@@ -32,7 +32,7 @@ export type EventFilterCreateSuccess = Action<'eventFilterCreateSuccess'> & {
 };
 export type EventFilterCreateError = Action<'eventFilterCreateError'>;
 
-export type EventFiltersPageAction =
+export type EventFilterPageAction =
   | EventFilterCreateStart
   | EventFilterInitForm
   | EventFilterChangeForm

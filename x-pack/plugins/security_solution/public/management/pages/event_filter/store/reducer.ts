@@ -17,14 +17,14 @@ import {
   EventFilterCreateError,
 } from './action';
 
-import { EventFiltersListPageState } from '../state';
-import { initialEventFiltersPageState } from './builders';
+import { EventFilterListPageState } from '../state';
+import { initialEventFilterPageState } from './builders';
 
-type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
+type StateReducer = ImmutableReducer<EventFilterListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
-  state: Immutable<EventFiltersListPageState>,
+  state: Immutable<EventFilterListPageState>,
   action: Immutable<T>
-) => Immutable<EventFiltersListPageState>;
+) => Immutable<EventFilterListPageState>;
 
 const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) => {
   return { ...state, form: { ...state.form, entry: action.payload.entry } };
@@ -59,8 +59,8 @@ const eventFilterCreateError: CaseReducer<EventFilterCreateError> = (state, acti
   };
 };
 
-export const eventFiltersPageReducer: StateReducer = (
-  state = initialEventFiltersPageState(),
+export const eventFilterPageReducer: StateReducer = (
+  state = initialEventFilterPageState(),
   action
 ) => {
   switch (action.type) {

@@ -11,19 +11,20 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState } from '../state';
+import { EventFilterListPageState } from '../state';
 
 import { CreateExceptionListItemSchema } from '../../../../../public/shared_imports';
 import { Ecs } from '../../../../../common/ecs';
 
 import {
-  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE as EVENT_FILTERS_NS,
+  MANAGEMENT_STORE_EVENT_FILTER_NAMESPACE as EVENT_FILTER_NS,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE as GLOBAL_NS,
 } from '../../../common/constants';
+import { EVENT_FILTER_LIST_ID } from '../constants';
 
-export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPageState) => R): R {
+export function useEventFilterSelector<R>(selector: (state: EventFilterListPageState) => R): R {
   return useSelector((state: State) =>
-    selector(state[GLOBAL_NS][EVENT_FILTERS_NS] as EventFiltersListPageState)
+    selector(state[GLOBAL_NS][EVENT_FILTER_NS] as EventFilterListPageState)
   );
 }
 
@@ -50,7 +51,7 @@ export function useGetInitialExceptionFromEvent(data: Ecs): CreateExceptionListI
             ]
           : [],
       item_id: undefined,
-      list_id: 'eventFiltersList',
+      list_id: EVENT_FILTER_LIST_ID,
       meta: {
         temporaryUuid: uuid.v4(),
       },

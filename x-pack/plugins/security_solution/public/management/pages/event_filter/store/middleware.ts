@@ -12,36 +12,36 @@ import {
   ImmutableMiddlewareFactory,
 } from '../../../../common/store';
 
-import { EventFiltersHttpService, EventFiltersService } from '../service';
+import { EventFilterHttpService, EventFilterService } from '../service';
 
-import { EventFiltersListPageState } from '../state';
+import { EventFilterListPageState } from '../state';
 
 const eventFilterCreate = async (
-  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
-  eventFiltersService: EventFiltersService
+  store: ImmutableMiddlewareAPI<EventFilterListPageState, AppAction>,
+  eventFilterService: EventFilterService
 ) => {
   try {
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
-    const exception = await eventFiltersService.addEventFilter(formEntry);
+    const exception = await eventFilterService.addEventFilter(formEntry);
     store.dispatch({ type: 'eventFilterCreateSuccess', payload: { exception } });
   } catch (error) {
     store.dispatch({ type: 'eventFilterCreateError' });
   }
 };
 
-export const createEventFiltersPageMiddleware = (
-  eventFiltersService: EventFiltersService
-): ImmutableMiddleware<EventFiltersListPageState, AppAction> => {
+export const createEventFilterPageMiddleware = (
+  eventFilterService: EventFilterService
+): ImmutableMiddleware<EventFilterListPageState, AppAction> => {
   return (store) => (next) => async (action) => {
     next(action);
 
     if (action.type === 'eventFilterCreateStart') {
-      await eventFilterCreate(store, eventFiltersService);
+      await eventFilterCreate(store, eventFilterService);
     }
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
+export const eventFilterPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFilterListPageState> = (
   coreStart
-) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+) => createEventFilterPageMiddleware(new EventFilterHttpService(coreStart.http));

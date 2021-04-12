@@ -20,7 +20,7 @@ import {
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
 import { EventFilteringForm } from '../event_filtering_form';
-import { useGetInitialExceptionFromEvent, useEventFiltersSelector } from '../../hooks';
+import { useGetInitialExceptionFromEvent, useEventFilterSelector } from '../../hooks';
 import { getFormHasError, getFormIsLoadingAction } from '../../../store/selector';
 import { ACTIONS_TITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
@@ -54,8 +54,8 @@ const ModalBodySection = styled.section`
 export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
   ({ data, onCancel }) => {
     const dispatch = useDispatch<Dispatch<AppAction>>();
-    const formHasError = useEventFiltersSelector(getFormHasError);
-    const formIsLoadingAction = useEventFiltersSelector(getFormIsLoadingAction);
+    const formHasError = useEventFilterSelector(getFormHasError);
+    const formIsLoadingAction = useEventFilterSelector(getFormIsLoadingAction);
 
     const entry = useGetInitialExceptionFromEvent(data);
     useEffect(() => {

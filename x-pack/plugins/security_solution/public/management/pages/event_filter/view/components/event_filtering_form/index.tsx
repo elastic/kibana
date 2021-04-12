@@ -29,10 +29,11 @@ import {
   ExceptionBuilder,
 } from '../../../../../../../public/shared_imports';
 
-import { useEventFiltersSelector } from '../../hooks';
+import { useEventFilterSelector } from '../../hooks';
 import { getFormEntry } from '../../../store/selector';
 import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
+import { EVENT_FILTER_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -47,7 +48,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
   ({ allowSelectOs = false }) => {
     const { http, data } = useKibana().services;
     const dispatch = useDispatch<Dispatch<AppAction>>();
-    const exception = useEventFiltersSelector(getFormEntry);
+    const exception = useEventFilterSelector(getFormEntry);
 
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
 
@@ -93,8 +94,8 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
           httpService={http}
           autocompleteService={data.autocomplete}
           exceptionListItems={[exception as ExceptionListItemSchema]}
-          listType={'endpoint'}
-          listId={''}
+          listType={EVENT_FILTER_LIST_TYPE}
+          listId={EVENT_FILTER_LIST_ID}
           listNamespaceType={'agnostic'}
           ruleName={'Endpoint Event Filtering'}
           indexPatterns={indexPatterns}
