@@ -81,7 +81,7 @@ export class CsvGenerator {
     searchSource: ISearchSource,
     scrollSettings: CsvExportSettings['scroll']
   ) {
-    const searchBody = await searchSource.getSearchRequestBody();
+    const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
       params: {

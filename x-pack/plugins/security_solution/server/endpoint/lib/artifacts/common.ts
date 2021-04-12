@@ -22,6 +22,9 @@ export const ArtifactConstants = {
   SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
   SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
+
+  SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_EVENT_FILTERS_NAME: 'endpoint-eventfilterlist',
 };
 
 export const ManifestConstants = {
