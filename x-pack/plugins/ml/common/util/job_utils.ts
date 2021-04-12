@@ -140,10 +140,10 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
 
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
-      if (aggs !== undefined) {
+      if (isPopulatedObject(aggs)) {
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
-          // if fieldName is a aggregated field under nested terms using bucket_script
+          // if fieldName is an aggregated field under nested terms using bucket_script
           const aggregations =
             getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
@@ -198,16 +198,16 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
   // if job has at least one composite source that is not terms or date_histogram
   const aggs = getDatafeedAggregations(job.datafeed_config);
-  if (aggs !== undefined) {
+  if (isPopulatedObject(aggs)) {
     const aggBucketsName = getFirstKeyInObject(aggs);
     if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
-      // if fieldName is a aggregated field under nested terms using bucket_script
+      // if fieldName is an aggregated field under nested terms using bucket_script
 
       if (!hasValidComposite(aggs[aggBucketsName])) {
         return i18n.translate(
           'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
           {
-            defaultMessage: 'the datafeed contains unsupported composite sources',
+            defaultMessage: 'Disabled because the datafeed contains unsupported composite sources.',
           }
         );
       }
@@ -223,7 +223,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'not a viewable time series job',
+      defaultMessage: 'Disabled because not a viewable time series job.',
     });
   }
 }

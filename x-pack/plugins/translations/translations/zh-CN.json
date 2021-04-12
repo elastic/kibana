@@ -14406,7 +14406,6 @@
     "xpack.ml.jobsList.refreshButtonLabel": "刷新",
     "xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText": "在 Anomaly Explorer 中打开 {jobsCount, plural, one {{jobId}} other {# 个作业}}",
     "xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText": "在 Single Metric Viewer 中打开 {jobsCount, plural, one {{jobId}} other {# 个作业}}",
-    "xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText": "由于{reason}，已禁用。",
     "xpack.ml.jobsList.selectRowForJobMessage": "选择作业 ID {jobId} 的行",
     "xpack.ml.jobsList.showDetailsColumn.screenReaderDescription": "此列包含可单击控件，用于显示每个作业的更多详情",
     "xpack.ml.jobsList.spacesLabel": "工作区",

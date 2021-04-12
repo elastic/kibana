@@ -14209,7 +14209,6 @@
     "xpack.ml.jobsList.refreshButtonLabel": "更新",
     "xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText": "{jobsCount, plural, one {{jobId}} other {# 件のジョブ}} を異常エクスプローラーで開く",
     "xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText": "シングルメトリックビューアーで {jobsCount, plural, one {{jobId}} other {# 件のジョブ}} を開く",
-    "xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText": "{reason}のため無効です。",
     "xpack.ml.jobsList.selectRowForJobMessage": "ジョブID {jobId} の行を選択",
     "xpack.ml.jobsList.showDetailsColumn.screenReaderDescription": "このカラムには各ジョブの詳細を示すクリック可能なコントロールが含まれます",
     "xpack.ml.jobsList.spacesLabel": "スペース",
