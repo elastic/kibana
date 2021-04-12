@@ -24,6 +24,7 @@ import {
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
+  MAX_DOC_COLUMN_ENTRIES,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -37,6 +38,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [MAX_DOC_COLUMN_ENTRIES]: {
+    name: i18n.translate('discover.advancedSettings.maxDocColumnEntriesTitle', {
+      defaultMessage: 'Maximum document column entries',
+    }),
+    value: 200,
+    description: i18n.translate('discover.advancedSettings.maxDocColumnEntriesText', {
+      defaultMessage: 'Maximum number of entries rendered in the default document column',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
