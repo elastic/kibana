@@ -120,6 +120,9 @@ function getSavedSearchSessionsPage$(
       perPage: config.pageSize,
       type: SEARCH_SESSION_TYPE,
       namespaces: ['*'],
+      // process older sessions first
+      sortField: 'touched',
+      sortOrder: 'asc',
       filter: nodeBuilder.or([
         nodeBuilder.and([
           nodeBuilder.is(
