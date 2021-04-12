@@ -7,16 +7,11 @@
  */
 
 import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { ISearchSource, SearchSourceFields } from '../../../../data/common';
+import { ISearchSource } from '../../../../data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import type { SavedSearch, SortOrder } from '../../saved_searches/types';
 import { AppState } from '../angular/discover_state';
 import { getSortForSearchSource } from '../angular/doc_table';
-
-export interface ISharingData {
-  columns: string[];
-  searchSource: SearchSourceFields;
-}
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -25,7 +20,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
   config: IUiSettingsClient
-): Promise<ISharingData> {
+) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 

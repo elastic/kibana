@@ -8,11 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { CoreSetup } from 'src/core/public';
-import type {
-  ISearchEmbeddable,
-  ISharingData,
-  SavedSearch,
-} from '../../../../../src/plugins/discover/public';
+import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
@@ -64,10 +60,7 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(
-    savedSearch: SavedSearch,
-    embeddable: ISearchEmbeddable
-  ): Promise<ISharingData> {
+  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,
