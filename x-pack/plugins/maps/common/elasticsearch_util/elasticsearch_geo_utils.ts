@@ -384,11 +384,12 @@ export function createSpatialFilterWithGeometry({
 
   const isGeoPoint = geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
 
-  const relationLabel = isGeoPoint
-    ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
-        defaultMessage: 'in',
-      })
-    : getEsSpatialRelationLabel(relation);
+  // const relationLabel = isGeoPoint
+  //   ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
+  //       defaultMessage: 'in',
+  //     })
+  //   : getEsSpatialRelationLabel(relation);
+  const relationLabel = getEsSpatialRelationLabel(relation);
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
@@ -398,11 +399,14 @@ export function createSpatialFilterWithGeometry({
     disabled: false,
   };
 
-  const shapeQuery: GeoShapeQueryBody = {
-    // geo_shape query with geo_point field only supports intersects relation
-    relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
-  };
+  // const shapeQuery: GeoShapeQueryBody = {
+  //   // geo_shape query with geo_point field only supports intersects relation
+  //   relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
+  // };
 
+  const shapeQuery: GeoShapeQueryBody = {
+    relation,
+  };
   if (preIndexedShape) {
     shapeQuery.indexed_shape = preIndexedShape;
   } else {
