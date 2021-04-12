@@ -19,7 +19,7 @@ import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
 import { SampleResponse } from './sample_response';
 
-describe('RelevanceTuning', () => {
+describe('ResultSettings', () => {
   const values = {
     dataLoading: false,
   };
