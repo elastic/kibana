@@ -852,5 +852,6 @@ export async function addPackageToAgentPolicy(
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     bumpRevision: false,
+    skipEnsureInstalled: true,
   });
 }

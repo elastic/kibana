@@ -60,7 +60,12 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
+    options?: {
+      id?: string;
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      skipEnsureInstalled?: boolean;
+    }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
@@ -88,18 +93,25 @@ class PackagePolicyService {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const [, pkgInfo] = await Promise.all([
-        ensureInstalledPackage({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          esClient,
-        }),
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
-        }),
-      ]);
+      const pkgInfoPromise = getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packagePolicy.package.version,
+      });
+
+      let pkgInfo;
+      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
+      else {
+        const [, packageInfo] = await Promise.all([
+          ensureInstalledPackage({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            esClient,
+          }),
+          pkgInfoPromise,
+        ]);
+        pkgInfo = packageInfo;
+      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
