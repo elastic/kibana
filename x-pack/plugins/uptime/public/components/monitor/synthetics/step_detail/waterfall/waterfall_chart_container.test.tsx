@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallChartContainer } from './waterfall_chart_container';
 
@@ -139,10 +140,10 @@ describe('WaterfallChartContainer', () => {
   });
 
   it('does not display waterfall chart unavailable when isWaterfallSupported is true', () => {
-    const { queryByText } = render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
+    render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
       state: defaultState,
     });
-    expect(queryByText('Waterfall chart unavailable')).not.toBeInTheDocument();
+    expect(screen.queryByText('Waterfall chart unavailable')).not.toBeInTheDocument();
   });
 
   it('displays waterfall chart unavailable when isWaterfallSupported is false', () => {
@@ -158,9 +159,47 @@ describe('WaterfallChartContainer', () => {
         },
       },
     };
-    const { getByText } = render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
+    render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
       state,
     });
-    getByText('Waterfall chart unavailable');
+    expect(screen.getByText('Waterfall chart unavailable')).toBeInTheDocument();
+  });
+
+  it('displays loading bar when loading', () => {
+    const state = {
+      networkEvents: {
+        test: {
+          '1': {
+            ...networkEvents,
+            total: 100,
+            isWaterfallSupported: false,
+            loading: true,
+          },
+        },
+      },
+    };
+    render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
+      state,
+    });
+    expect(screen.getByLabelText('Waterfall chart loading')).toBeInTheDocument();
+  });
+
+  it('displays no data available message when no events are available', () => {
+    const state = {
+      networkEvents: {
+        test: {
+          '1': {
+            networkEvents: [],
+            total: 0,
+            isWaterfallSupported: true,
+            loading: false,
+          },
+        },
+      },
+    };
+    render(<WaterfallChartContainer checkGroup="test" stepIndex={1} />, {
+      state,
+    });
+    expect(screen.getByText('No waterfall data could be found for this step')).toBeInTheDocument();
   });
 });
