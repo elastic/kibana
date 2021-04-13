@@ -24,11 +24,25 @@ const StyledFlyout = styled(EuiFlyout)`
     z-index: ${theme.eui.euiZModal};
   `}
 `;
-
 // Adding bottom padding because timeline's
 // bottom bar gonna hide the submit button.
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  ${({ theme }) => `
+    && .euiFlyoutBody__overflow {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    && .euiFlyoutBody__overflowContent {
+      display: block;
+      padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
+      height: auto;
+    }
+  `}
+`;
+
 const FormWrapper = styled.div`
-  padding-bottom: 50px;
+  width: 100%;
 `;
 
 const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
@@ -44,7 +58,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
           <h2>{i18n.CREATE_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <StyledEuiFlyoutBody>
         <FormWrapper>
           {cases.getCreateCase({
             afterCaseCreated,
@@ -53,7 +67,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
             withSteps: false,
           })}
         </FormWrapper>
-      </EuiFlyoutBody>
+      </StyledEuiFlyoutBody>
     </StyledFlyout>
   );
 };

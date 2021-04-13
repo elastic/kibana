@@ -11,11 +11,7 @@ import { Map as MbMap } from 'mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';
-import {
-  DRAW_TYPE,
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../../../../common/constants';
+import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
@@ -84,9 +80,6 @@ export class DrawFilterControl extends Component<Props, {}> {
             : geometry,
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoFieldName,
-        geoFieldType: this.props.drawState.geoFieldType
-          ? this.props.drawState.geoFieldType
-          : ES_GEO_FIELD_TYPE.GEO_POINT,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
         relation: this.props.drawState.relation
           ? this.props.drawState.relation
