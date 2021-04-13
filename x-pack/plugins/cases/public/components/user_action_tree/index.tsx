@@ -60,7 +60,7 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   updateCase: (newCase: Case) => void;

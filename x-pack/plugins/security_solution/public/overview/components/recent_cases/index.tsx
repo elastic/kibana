@@ -35,16 +35,22 @@ const RecentCasesComponent = () => {
   );
 
   return casesUi.getRecentCases({
-    allCasesHref: formatUrl(getCaseUrl()),
-    createCaseHref: formatUrl(getCreateCaseUrl()),
-    getCaseDetailsHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
-      return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
+    allCasesNavigation: {
+      href: formatUrl(getCaseUrl()),
+      onClick: goToCases,
     },
-    goToAllCases: goToCases,
-    onCaseDetailsNavClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
-      });
+    caseDetailsNavigation: {
+      href: ({ detailName, subCaseId }: AllCasesNavProps) => {
+        return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
+      },
+      onClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
+        });
+      },
+    },
+    createCaseNavigation: {
+      href: formatUrl(getCreateCaseUrl()),
     },
     maxCasesToShow: MAX_CASES_TO_SHOW,
   });

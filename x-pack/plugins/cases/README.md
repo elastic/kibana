@@ -41,43 +41,38 @@ cases: CasesUiStart;
     onSuccess,
   })
 ```
+
 ##### Methods:
 ### `getAllCases`
 Arguments: 
 
 |Property|Description|
 |---|---|
-|configureCasesHref|`string;` route for configure cases page
-|createCaseHref|`string;` route for create cases page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
+|configureCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |disabledStatuses?|`CaseStatuses[];` array of disabled statuses
-|getCaseDetailsHref|`(caseDetails: CaseDetailsHrefSchema) => string;` callback to generate the case details url from the case id
 |isModal?|`boolean;` is All Cases table a modal
-|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for case details nav click
-|onConfigureCasesNavClick?|`(ev: React.MouseEvent) => void;` callback for configure case nav click
-|onCreateCaseNavClick?|`(ev: React.MouseEvent) => void;` callback for create case nav click
 |onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
 |userCanCrud|`boolean;` user permissions to crud
 
 UI component:
  ![All Cases Component][all-cases-img] 
- 
+
 ### `getCaseView`
-Arguments: 
+Arguments:
 
 |Property|Description|
 |---|---|
-|allCasesHref|`string;` route for all cases page
-|backToAllCasesOnClick|`(ev: MouseEvent) => void;` handler for back to all cases click
-|caseDetailsHref|`string;` route for configure cases page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
 |caseId|`string;` ID of the case
-|configureCasesHref|`string;` route for configure cases page
+|configureCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |getCaseDetailHrefWithCommentId|`(commentId: string) => string;` callback to generate the case details url with a comment id reference from the case id and comment id
-|getRuleDetailsHref|`(ruleId: string, null, undefined) => string;` callback to generate the rule details url from the rule id
 |onComponentInitialized?|`() => void;` callback when component has initialized
-|onConfigureCasesNavClick|`(ev: React.MouseEvent) => void;` callback for configure case nav click
-|onRuleDetailsClick|`(ruleId: string, null, undefined) => void;` callback for rule details nav click
 |renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
 |renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
+|ruleDetailsNavigation|: `CasesNavigation<string | null | undefined, 'configurable'>`
 |showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
 |subCaseId?|: `string;` subcase id
 |useFetchAlertData|: `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
@@ -96,10 +91,10 @@ Arguments:
 |onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
 
 UI component:
- ![Create Component][create-img] 
+ ![Create Component][create-img]
  
  ### `getConfigureCases`
- Arguments: 
+ Arguments:
  
  |Property|Description|
  |---|---|
@@ -109,16 +104,14 @@ UI component:
   ![Configure Component][configure-img] 
 
 ### `getRecentCases`
-Arguments: 
+Arguments:
 
 |Property|Description|
 |---|---|
-|allCasesHref|`string;` href of all cases page
-|createCaseHref|`string;` 
-|getCaseDetailsHref|`(caseDetails: CaseDetailsHrefSchema) => string;` 
-|goToAllCases|`(ev: React.MouseEvent) => void;` callback for all cases link click
-|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for case details nav click
-|perPage|`number;` number of cases to show in widget
+|allCasesNavigation|`CasesNavigation` route configuration for configure cases page
+|caseDetailsNavigation|`CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page
+|createCaseNavigation|`CasesNavigation`
+|maxCasesToShow|`number;` number of cases to show in widget
   
 UI component:
  ![Recent Cases Component][recent-cases-img] 

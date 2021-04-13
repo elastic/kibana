@@ -188,18 +188,26 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   }, [dispatch]);
 
   return casesUi.getCaseView({
-    allCasesHref: formattedAllCasesLink,
-    backToAllCasesOnClick,
-    caseDetailsHref: caseDetailsLink,
+    allCasesNavigation: {
+      href: formattedAllCasesLink,
+      onClick: backToAllCasesOnClick,
+    },
+    caseDetailsNavigation: {
+      href: caseDetailsLink,
+    },
     caseId,
-    configureCasesHref,
+    configureCasesNavigation: {
+      href: configureCasesHref,
+      onClick: onConfigureCasesNavClick,
+    },
     getCaseDetailHrefWithCommentId,
-    getRuleDetailsHref: getDetectionsRuleDetailsHref,
     onComponentInitialized,
-    onConfigureCasesNavClick,
-    onRuleDetailsClick: onDetectionsRuleDetailsClick,
     renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
     renderTimelineDetailsPanel: TimelineDetailsPanel,
+    ruleDetailsNavigation: {
+      href: getDetectionsRuleDetailsHref,
+      onClick: onDetectionsRuleDetailsClick,
+    },
     showAlertDetails,
     subCaseId,
     useFetchAlertData,
