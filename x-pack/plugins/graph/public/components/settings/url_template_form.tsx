@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -79,8 +79,6 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
   const [open, setOpen] = useState(!isUpdateForm(props));
 
   const [autoformatUrl, setAutoformatUrl] = useState(false);
-
-  const textRef = useRef<HTMLInputElement>(null);
 
   function setValue<K extends keyof UrlTemplate>(key: K, value: UrlTemplate[K]) {
     setCurrentTemplate({ ...currentTemplate, [key]: value });
@@ -213,39 +211,22 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           }
         >
           <EuiFieldText
-            inputRef={textRef}
             fullWidth
             placeholder="https://www.google.co.uk/#q={{gquery}}"
             value={currentTemplate.url}
             onChange={(e) => {
               setValue('url', e.target.value);
-              setAutoformatUrl(false);
+              if (
+                (e.nativeEvent as InputEvent).inputType !== 'insertFromPaste' ||
+                !isKibanaUrl(e.target.value)
+              ) {
+                setAutoformatUrl(false);
+              }
             }}
             onPaste={(e) => {
-              // Note: in general this custom paste prevents the user from undo using the
-              // browser undo/redo commands. Maybe we could hint the user to click the "Reset"
-              // button if he tries to press CTRL+Z after the paste?
-              e.preventDefault();
               const pastedUrl = e.clipboardData.getData('text/plain');
               if (isKibanaUrl(pastedUrl)) {
                 setAutoformatUrl(true);
-              }
-              textRef.current?.focus();
-              const currentSelectionText = window.getSelection?.()?.toString();
-              if (
-                currentSelectionText == null ||
-                (currentSelectionText !== '' && currentSelectionText === currentTemplate.url)
-              ) {
-                return setValue('url', pastedUrl);
-              }
-              // workout where is the start and the end of the selection in the input
-              const el = document.activeElement as HTMLInputElement;
-              if (typeof el.selectionStart === 'number' && typeof el.selectionEnd === 'number') {
-                const finalUrl =
-                  el.value.slice(0, el.selectionStart) +
-                  pastedUrl +
-                  el.value.slice(el.selectionEnd);
-                return setValue('url', finalUrl);
               }
             }}
             isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
