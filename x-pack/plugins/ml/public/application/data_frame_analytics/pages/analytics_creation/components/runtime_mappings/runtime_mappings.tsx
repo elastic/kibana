@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { XJsonMode } from '@kbn/ace';
-import { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
@@ -28,6 +27,7 @@ import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 import { isRuntimeMappings } from '../../../../../../../common';
+import { SwitchModal } from './switch_modal';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
@@ -51,6 +51,11 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     false
   );
   const [
+    isRuntimeMappingsEditorSwitchModalVisible,
+    setRuntimeMappingsEditorSwitchModalVisible,
+  ] = useState<boolean>(false);
+
+  const [
     isRuntimeMappingsEditorApplyButtonEnabled,
     setIsRuntimeMappingsEditorApplyButtonEnabled,
   ] = useState<boolean>(false);
@@ -58,10 +63,9 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     advancedEditorRuntimeMappingsLastApplied,
     setAdvancedEditorRuntimeMappingsLastApplied,
   ] = useState<string>();
-  const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState<string>();
 
   const { setFormState } = actions;
-  const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
+  const { jobType, previousRuntimeMapping, runtimeMappings, runtimeMappingsUpdated } = state.form;
 
   const {
     convertToJson,
@@ -100,12 +104,12 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       setFormState({ runtimeMappingsUpdated: false });
     }
     if (isRuntimeMappingsEditorEnabled === false) {
-      setAdvancedEditorRuntimeMappingsLastApplied(advancedEditorRuntimeMappings);
+      setAdvancedEditorRuntimeMappingsLastApplied(advancedRuntimeMappingsConfig);
     }
 
     setIsRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
 
-    setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(advancedEditorRuntimeMappings));
+    setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(runtimeMappings));
   };
 
   useEffect(function getInitialRuntimeMappings() {
@@ -177,9 +181,26 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                         }
                       )}
                       checked={isRuntimeMappingsEditorEnabled}
-                      onChange={() => toggleEditorHandler()}
+                      onChange={() => {
+                        if (isRuntimeMappingsEditorEnabled && runtimeMappingsUpdated) {
+                          setRuntimeMappingsEditorSwitchModalVisible(true);
+                          return;
+                        }
+
+                        toggleEditorHandler();
+                      }}
                       data-test-subj="mlDataFrameAnalyticsRuntimeMappingsEditorSwitch"
                     />
+                    {isRuntimeMappingsEditorSwitchModalVisible && (
+                      <SwitchModal
+                        onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
+                        onConfirm={() => {
+                          setRuntimeMappingsEditorSwitchModalVisible(false);
+                          applyChanges();
+                          toggleEditorHandler();
+                        }}
+                      />
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy

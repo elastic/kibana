@@ -14,25 +14,28 @@ interface Props {
   onConfirm: () => void;
 }
 
-const modalTitle = i18n.translate('xpack.transform.stepDefineForm.runtimeEditorSwitchModalTitle', {
-  defaultMessage: 'Edits will be lost',
-});
+const modalTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalTitle',
+  {
+    defaultMessage: 'Edits will be lost',
+  }
+);
 
 const cancelButtonText = i18n.translate(
-  'xpack.transform.stepDefineForm.runtimeEditorSwitchModalCancelButtonText',
+  'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalCancelButtonText',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 const applyChangesText = i18n.translate(
-  'xpack.transform.stepDefineForm.runtimeEditorSwitchModalConfirmButtonText',
+  'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalConfirmButtonText',
   {
     defaultMessage: 'Apply changes',
   }
 );
 const modalMessage = i18n.translate(
-  'xpack.transform.stepDefineForm.runtimeEditorSwitchModalBodyText',
+  'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalBodyText',
   {
     defaultMessage: `The changes in the editor haven't been applied yet. By cancelling you will lose your edits.`,
   }
