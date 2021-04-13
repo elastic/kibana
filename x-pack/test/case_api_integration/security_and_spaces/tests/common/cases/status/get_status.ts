@@ -8,9 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
-import { CASES_URL, CASE_STATUS_URL } from '../../../../../../../plugins/cases/common/constants';
+import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { postCaseReq } from '../../../../../common/lib/mock';
-import { deleteCases } from '../../../../../common/lib/utils';
+import {
+  deleteCases,
+  createCase,
+  updateCase,
+  getAllCasesStatuses,
+} from '../../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -23,54 +28,33 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return case statuses', async () => {
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+      await createCase(supertest, postCaseReq);
+      const inProgressCase = await createCase(supertest, postCaseReq);
+      const postedCase = await createCase(supertest, postCaseReq);
 
-      const { body: inProgressCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+      await updateCase(supertest, {
+        cases: [
+          {
+            id: postedCase.id,
+            version: postedCase.version,
+            status: CaseStatuses.closed,
+          },
+        ],
+      });
 
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      await updateCase(supertest, {
+        cases: [
+          {
+            id: inProgressCase.id,
+            version: inProgressCase.version,
+            status: CaseStatuses['in-progress'],
+          },
+        ],
+      });
 
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'closed',
-            },
-          ],
-        })
-        .expect(200);
+      const statuses = await getAllCasesStatuses(supertest);
 
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: inProgressCase.id,
-              version: inProgressCase.version,
-              status: 'in-progress',
-            },
-          ],
-        })
-        .expect(200);
-
-      const { body } = await supertest
-        .get(CASE_STATUS_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body).to.eql({
+      expect(statuses).to.eql({
         count_open_cases: 1,
         count_closed_cases: 1,
         count_in_progress_cases: 1,
