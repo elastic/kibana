@@ -64,10 +64,12 @@ describe('usePushToService', () => {
     caseId,
     caseServices,
     caseStatus: CaseStatuses.open,
-    configureCasesHref: 'href',
+    configureCasesNavigation: {
+      href: 'href',
+      onClick: jest.fn(),
+    },
     connectors: connectorsMock,
     isValidConnector: true,
-    onConfigureCasesNavClick: jest.fn(),
     updateCase,
     userCanCrud: true,
   };

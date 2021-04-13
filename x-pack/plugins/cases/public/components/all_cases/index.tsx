@@ -49,7 +49,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
-import { CaseDetailsHrefSchema, LinkButton } from '../links';
+import { CaseDetailsHrefSchema, CasesNavigation, LinkButton } from '../links';
 import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { getExpandedRowMap } from './expanded_row';
@@ -114,14 +114,11 @@ BasicTable.displayName = 'BasicTable';
 
 export interface AllCasesProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  configureCasesHref: string;
-  createCaseHref: string;
+  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
+  configureCasesNavigation: CasesNavigation;
+  createCaseNavigation: CasesNavigation;
   disabledStatuses?: CaseStatuses[];
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   isModal?: boolean;
-  onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
-  onConfigureCasesNavClick?: (ev: React.MouseEvent) => void;
-  onCreateCaseNavClick?: (ev: React.MouseEvent) => void;
   onRowClick?: (theCase?: Case | SubCase) => void;
   userCanCrud: boolean;
   updateCase?: (newCase: Case) => void;
@@ -130,14 +127,11 @@ export interface AllCasesProps {
 export const AllCases = React.memo<AllCasesProps>(
   ({
     alertData,
-    configureCasesHref,
-    createCaseHref,
+    caseDetailsNavigation,
+    configureCasesNavigation,
+    createCaseNavigation,
     disabledStatuses,
-    getCaseDetailsHref,
     isModal = false,
-    onCaseDetailsNavClick,
-    onConfigureCasesNavClick,
-    onCreateCaseNavClick,
     onRowClick,
     userCanCrud,
     updateCase,
@@ -303,6 +297,7 @@ export const AllCases = React.memo<AllCasesProps>(
       [dispatchUpdateCaseProperty, fetchCasesStatus]
     );
 
+    const { onClick: onCreateCaseNavClick } = createCaseNavigation;
     const goToCreateCase = useCallback(
       (ev) => {
         ev.preventDefault();
@@ -372,19 +367,11 @@ export const AllCases = React.memo<AllCasesProps>(
       () =>
         getCasesColumns({
           actions: userCanCrud ? actions : [],
+          caseDetailsNavigation,
           filterStatus: filterOptions.status,
           isModal,
-          getCaseDetailsHref,
-          onCaseDetailsNavClick,
         }),
-      [
-        actions,
-        filterOptions.status,
-        getCaseDetailsHref,
-        isModal,
-        onCaseDetailsNavClick,
-        userCanCrud,
-      ]
+      [actions, caseDetailsNavigation, filterOptions.status, isModal, userCanCrud]
     );
 
     const itemIdToExpandedRowMap = useMemo(
@@ -496,8 +483,7 @@ export const AllCases = React.memo<AllCasesProps>(
               </FlexItemDivider>
               <EuiFlexItem grow={false}>
                 <ConfigureCaseButton
-                  configureCasesHref={configureCasesHref}
-                  onConfigureCasesNavClick={onConfigureCasesNavClick}
+                  configureCasesNavigation={configureCasesNavigation}
                   label={i18n.CONFIGURE_CASES_BUTTON}
                   isDisabled={!isEmpty(actionsErrors) || !userCanCrud}
                   showToolTip={!isEmpty(actionsErrors)}
@@ -509,8 +495,8 @@ export const AllCases = React.memo<AllCasesProps>(
                 <LinkButton
                   isDisabled={!userCanCrud}
                   fill
-                  onClick={onCreateCaseNavClick}
-                  href={createCaseHref}
+                  onClick={createCaseNavigation.onClick}
+                  href={createCaseNavigation.href}
                   iconType="plusInCircle"
                   data-test-subj="createNewCaseBtn"
                 >
@@ -594,7 +580,7 @@ export const AllCases = React.memo<AllCasesProps>(
                         fill
                         size="s"
                         onClick={goToCreateCase}
-                        href={createCaseHref}
+                        href={createCaseNavigation.href}
                         iconType="plusInCircle"
                         data-test-subj="cases-table-add-case"
                       >

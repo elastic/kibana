@@ -7,32 +7,32 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { LinkButton } from '../links';
+import { CasesNavigation, LinkButton } from '../links';
+
+// TODO: Potentially move into links component?
 
 export interface ConfigureCaseButtonProps {
-  configureCasesHref: string;
+  configureCasesNavigation: CasesNavigation;
   isDisabled: boolean;
   label: string;
   msgTooltip: JSX.Element;
-  onConfigureCasesNavClick?: (ev: React.MouseEvent) => void;
   showToolTip: boolean;
   titleTooltip: string;
 }
 
 const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
-  configureCasesHref,
+  configureCasesNavigation: { href, onClick },
   isDisabled,
   label,
   msgTooltip,
-  onConfigureCasesNavClick,
   showToolTip,
   titleTooltip,
 }: ConfigureCaseButtonProps) => {
   const configureCaseButton = useMemo(
     () => (
       <LinkButton
-        onClick={onConfigureCasesNavClick}
-        href={configureCasesHref}
+        onClick={onClick}
+        href={href}
         iconType="controlsHorizontal"
         isDisabled={isDisabled}
         aria-label={label}
@@ -41,7 +41,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
         {label}
       </LinkButton>
     ),
-    [label, isDisabled, onConfigureCasesNavClick, configureCasesHref]
+    [label, isDisabled, onClick, href]
   );
 
   return showToolTip ? (
