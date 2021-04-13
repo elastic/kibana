@@ -44,18 +44,6 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   const [search, setSearch] = useState<string>('');
   const [currentGroupBy, setCurrentGroupBy] = useState<GroupByOption>(GroupByOption.message);
 
-  const changeFilter = (filter: LevelFilterOption) => {
-    setCurrentFilter(filter);
-  };
-
-  const changeSearch = (newSearch: string) => {
-    setSearch(newSearch);
-  };
-
-  const changeGroupBy = (groupBy: GroupByOption) => {
-    setCurrentGroupBy(groupBy);
-  };
-
   const availableGroupByOptions = () => {
     if (!deprecations) {
       return [];
@@ -122,11 +110,11 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
           isLoading={isLoading}
           loadData={refreshCheckupData}
           currentFilter={currentFilter}
-          onFilterChange={changeFilter}
-          onSearchChange={changeSearch}
+          onFilterChange={(filter: LevelFilterOption) => setCurrentFilter(filter)}
+          onSearchChange={(newSearch: string) => setSearch(newSearch)}
           availableGroupByOptions={availableGroupByOptions()}
           currentGroupBy={currentGroupBy}
-          onGroupByChange={changeGroupBy}
+          onGroupByChange={(groupBy: GroupByOption) => setCurrentGroupBy(groupBy)}
         />
 
         <EuiSpacer />

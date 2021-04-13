@@ -13,8 +13,35 @@ import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../app_context';
 import { ResponseError } from '../../lib/api';
 
+const i18nTexts = {
+  toggleErrorLabel: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
+    {
+      defaultMessage: 'Could not load logging state',
+    }
+  ),
+  toggleLabel: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
+    {
+      defaultMessage: 'Enable deprecation logging',
+    }
+  ),
+  enabledMessage: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledToastMessage',
+    {
+      defaultMessage: 'Deprecation logs will be displayed in the Elasticsearch console.',
+    }
+  ),
+  disabledMessage: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledToastMessage',
+    {
+      defaultMessage: 'Deprecation logs will not be displayed in the Elasticsearch console.',
+    }
+  ),
+};
+
 export const DeprecationLoggingToggle: React.FunctionComponent = () => {
-  const { api } = useAppContext();
+  const { api, notifications } = useAppContext();
 
   const [isEnabled, setIsEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,20 +71,10 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
 
   const renderLoggingState = () => {
     if (error) {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
-        {
-          defaultMessage: 'Could not load logging state',
-        }
-      );
+      return i18nTexts.toggleErrorLabel;
     }
 
-    return i18n.translate(
-      'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
-      {
-        defaultMessage: 'Enable deprecation logging',
-      }
-    );
+    return i18nTexts.toggleLabel;
   };
 
   const toggleLogging = async () => {
@@ -75,6 +92,9 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
       setError(updateError);
     } else if (data) {
       setIsEnabled(data.isEnabled);
+      notifications.toasts.addSuccess(
+        data.isEnabled ? i18nTexts.enabledMessage : i18nTexts.disabledMessage
+      );
     }
   };
 

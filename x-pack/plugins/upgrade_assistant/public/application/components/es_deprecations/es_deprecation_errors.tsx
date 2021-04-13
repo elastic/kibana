@@ -16,13 +16,11 @@ interface Props {
 }
 
 export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) => {
-  let callout: React.ReactNode;
-
   const { code: errorType, message } = getEsDeprecationError(error);
 
   switch (errorType) {
     case 'unauthorized_error':
-      callout = (
+      return (
         <EuiCallOut
           title={message}
           color="danger"
@@ -30,9 +28,8 @@ export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) =
           data-test-subj="permissionsError"
         />
       );
-      break;
     case 'partially_upgraded_error':
-      callout = (
+      return (
         <EuiCallOut
           title={message}
           color="warning"
@@ -40,18 +37,14 @@ export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) =
           data-test-subj="partiallyUpgradedWarning"
         />
       );
-      break;
     case 'upgraded_error':
-      callout = <EuiCallOut title={message} iconType="pin" data-test-subj="upgradedCallout" />;
-      break;
+      return <EuiCallOut title={message} iconType="pin" data-test-subj="upgradedCallout" />;
     case 'request_error':
     default:
-      callout = (
+      return (
         <EuiCallOut title={message} color="danger" iconType="alert" data-test-subj="requestError">
           {error.message}
         </EuiCallOut>
       );
   }
-
-  return <>{callout}</>;
 };
