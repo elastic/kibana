@@ -586,10 +586,9 @@ describe('RelevanceTuningLogic', () => {
         confirmSpy.mockImplementation(() => false);
 
         RelevanceTuningLogic.actions.resetSearchSettings();
+        await nextTick();
 
-        expect(http.post).not.toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings/reset'
-        );
+        expect(http.post).not.toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
