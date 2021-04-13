@@ -62,7 +62,6 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
@@ -206,7 +205,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
