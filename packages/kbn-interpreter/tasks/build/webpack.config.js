@@ -22,13 +22,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const { createServerCodeTransformer } = require('./server_code_transformer');
 
-const {
-  PLUGIN_SOURCE_DIR,
-  PLUGIN_BUILD_DIR,
-  BABEL_PRESET_PATH,
-} = require('./paths');
+const { PLUGIN_SOURCE_DIR, PLUGIN_BUILD_DIR, BABEL_PRESET_PATH } = require('./paths');
 
-module.exports = function ({ sourceMaps }, { watch }) {
+module.exports = function({ sourceMaps }, { watch }) {
   return {
     devtool: sourceMaps ? 'inline-cheap-module-source-map' : undefined,
 
@@ -104,8 +100,8 @@ module.exports = function ({ sourceMaps }, { watch }) {
         {
           from: resolve(PLUGIN_SOURCE_DIR, 'functions/common'),
           to: resolve(PLUGIN_BUILD_DIR, 'functions/common'),
-          ignore: '**/__tests__/**',
-          transform: createServerCodeTransformer(sourceMaps)
+          ignore: ['**/__tests__/**'],
+          transform: createServerCodeTransformer(sourceMaps),
         },
       ]),
 
@@ -130,6 +126,6 @@ module.exports = function ({ sourceMaps }, { watch }) {
           }
         });
       },
-    ]
+    ],
   };
 };
