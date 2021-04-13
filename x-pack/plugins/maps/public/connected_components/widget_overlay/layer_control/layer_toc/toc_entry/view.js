@@ -142,7 +142,6 @@ export class TOCEntry extends React.Component {
     const quickActions = [
       <EuiButtonIcon
         iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
-        color="subdued"
         title={getVisibilityToggleLabel(this.props.layer.isVisible())}
         aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
         onClick={this._toggleVisible}
@@ -153,7 +152,6 @@ export class TOCEntry extends React.Component {
       quickActions.push(
         <EuiButtonIcon
           iconType="expand"
-          color="subdued"
           title={FIT_TO_DATA_LABEL}
           aria-label={FIT_TO_DATA_LABEL}
           onClick={this._fitToBounds}
@@ -166,7 +164,6 @@ export class TOCEntry extends React.Component {
         <EuiButtonIcon
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
-          color="subdued"
           aria-label={EDIT_LAYER_LABEL}
           title={EDIT_LAYER_LABEL}
           onClick={this._openLayerPanelWithCheck}
@@ -175,7 +172,6 @@ export class TOCEntry extends React.Component {
       quickActions.push(
         <EuiButtonIcon
           iconType="grab"
-          color="subdued"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}

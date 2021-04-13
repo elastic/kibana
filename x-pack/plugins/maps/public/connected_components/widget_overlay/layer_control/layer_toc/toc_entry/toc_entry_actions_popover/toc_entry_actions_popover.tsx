@@ -37,20 +37,7 @@ interface State {
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  private _isMounted: boolean = false;
-
-  state = {
-    isPopoverOpen: false,
-    supportsFitToBounds: false,
-  };
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+  state: State = { isPopoverOpen: false };
 
   _togglePopover = () => {
     this.setState((prevState) => ({
