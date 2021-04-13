@@ -1,39 +1,72 @@
 [[save-load-delete-query]]
-== Save a query
-A saved query is a collection of query text and filters that you can
-reuse in any app with a query bar, like <<discover, *Discover*>> and <<dashboard, *Dashboard*>>. Save a query when you want to:
+=== Save a query
+A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to *Discover*,
-such as the currently selected columns in the document table, the sort order, and the index pattern.
-To save your current view of *Discover* for later retrieval and reuse,
-create a <<save-open-search, saved search>> instead.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
 
-NOTE::
+[role="xpack"]
+==== Read-only access
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
-If you have insufficient privileges to save queries, the *Save current query*
-button isn't visible in the saved query management popover.
-For more information, see <<xpack-security-authorization, Granting access to Kibana>>
+==== Save a query
+To save the current query text, filters, and time filter:
 
-. Click *#* in the query bar.
-. In the popover, click *Save current query*.
+. Click *#* in the search bar, next to the query text input.
+. Click *Save current query* in the popover.
 +
 [role="screenshot"]
 image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
 +
-. Enter a name, a description, and then select the filter options.
-By default, filters are automatically included, but the time filter is not.
+. Enter a name, a description, and then select the filter options that you want to include. By default, filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
 image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
 . Click *Save*.
-. To load a saved query into *Discover* or *Dashboard*, open the *Saved search* popover, and select the query.
-. To manage your saved queries, use these actions in the popover:
+
+==== Load a query
+To load a saved query into Discover or Dashboard:
+
+. Click *#* in the search bar, next to the query text input.
+. Select the query you want to load. You might need to scroll down to find the query you are looking for.
+
+==== Save changes to a query
+If you load a query and then make changes to the query text, the filters, or the time filter, you can save the changes as a new query or update the existing query.
+
+To save the changes as a new query:
+
+. Click *#* in the search bar, next to the query text input.
+. Click *Save as new* in the popover.
+. Enter a name and a description, and then select the filter options that you want to include.
+. Click *Save*.
 +
-* Save as new:  Save changes to the current query.
-* Clear.  Clear a query that is currently loaded in an app.
-* Delete.  You can’t recover a deleted query.
-. To import and export saved queries, go to <<managing-saved-objects, Saved Objects in Management>>.
+[role="screenshot"]
+image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the saved query management popover when a query is loaded and we have made changes to the query",width="80%"]
+
+To save the changes to the current query:
+
+. Click *#* in the search bar.
+. Click *Save changes* in the popover.
+. Enter a description, and then select the filter options that you want to include.
+. Click *Save*.
+
+==== Clear a query
+To clear a query that is currently loaded in an application:
+
+. Click *#* in the search bar.
+. Click *Clear* in the popover.
+
+==== Delete a query
+To completely delete a query:
+
+. Click *#* in the search bar, next to the query text input.
+. Hover over the query you want to delete.
+. Click the trash can icon.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
+
+You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.

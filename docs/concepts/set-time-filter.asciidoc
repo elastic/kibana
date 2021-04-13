@@ -1,5 +1,5 @@
 [[set-time-filter]]
-== Set the time filter
+=== Set the time range
 If your index contains time-based events, and a time-field is configured for the
 selected <<index-patterns, index pattern>>, set a time filter that displays only the data within the
 specified time range.
@@ -9,7 +9,7 @@ range in the histogram.
 
 [float]
 [[use-time-filter]]
-=== Use the time filter
+==== Use the time filter
 
 Use the time filter to change the time range. By default, the time filter is set
 to the last 15 minutes.
@@ -40,7 +40,7 @@ options.
 image::images/time-filter-bar.png[Time filter bar]
 
 [float]
-=== Select a time range from the histogram
+==== Select a time range from the histogram
 
 To select a specific time range in the histogram, choose one of the following:
 
