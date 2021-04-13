@@ -6,11 +6,11 @@
  */
 
 import { newJobCapsService } from './new_job_capabilities_service';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
-import mockCloudwatchResponse from './__mocks__/cloudwatch_job_caps_response.json';
+import mockCloudwatchResponse from '../__mocks__/cloudwatch_job_caps_response.json';
 
 jest.mock('./ml_api_service', () => ({
   ml: {

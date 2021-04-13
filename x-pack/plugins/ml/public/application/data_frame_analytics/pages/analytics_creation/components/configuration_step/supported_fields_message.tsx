@@ -16,7 +16,7 @@ import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
 import { CATEGORICAL_TYPES } from './form_options_validation';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { analyticsFieldsService } from '../../../../../services/analytics_fields_service';
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const containsClassificationFieldsCb = ({ name, type }: Field) =>
@@ -73,7 +73,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
     setSourceIndexContainsSupportedFields,
   ] = useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);
-  const { fields } = analyticsFieldsService;
+  const { fields } = newJobCapsServiceAnalytics;
 
   // Find out if index pattern contains supported fields for job type. Provides a hint in the form
   // that job may not run correctly if no supported fields are found.

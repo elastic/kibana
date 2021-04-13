@@ -16,7 +16,7 @@ import {
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { analyticsFieldsService } from '../../services/analytics_fields_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
@@ -54,18 +54,18 @@ export const ML__ID_COPY = 'ml__id_copy';
 export const ML__INCREMENTAL_ID = 'ml__incremental_id';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {
-  const { fields } = analyticsFieldsService;
+  const { fields } = newJobCapsServiceAnalytics;
 
   const fieldType = fields.find((field) => field.name === fieldName)?.type;
   let isBothTypes = false;
 
   // If it's a keyword type - check if it has a corresponding text type
   if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
-    const field = analyticsFieldsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
+    const field = newJobCapsServiceAnalytics.getFieldById(fieldName.replace(/\.keyword$/, ''));
     isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
   } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
     //   If text, check if has corresponding keyword type
-    const field = analyticsFieldsService.getFieldById(`${fieldName}.keyword`);
+    const field = newJobCapsServiceAnalytics.getFieldById(`${fieldName}.keyword`);
     isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
   }
 
@@ -209,7 +209,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   if (isClassificationAnalysis(jobConfig.analysis) || isRegressionAnalysis(jobConfig.analysis)) {
     const dependentVariable = getDependentVar(jobConfig.analysis);
-    type = analyticsFieldsService.getFieldById(dependentVariable)?.type;
+    type = newJobCapsServiceAnalytics.getFieldById(dependentVariable)?.type;
     const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
     const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
     const numTopClasses = getNumTopClasses(jobConfig.analysis);

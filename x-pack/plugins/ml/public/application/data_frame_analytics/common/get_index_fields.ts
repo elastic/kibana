@@ -7,7 +7,7 @@
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
-import { analyticsFieldsService } from '../../services/analytics_fields_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { getDefaultFieldsFromJobCaps, DataFrameAnalyticsConfig } from '../common';
 
@@ -19,7 +19,7 @@ export const getIndexFields = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   needsDestIndexFields: boolean
 ) => {
-  const { fields } = analyticsFieldsService;
+  const { fields } = newJobCapsServiceAnalytics;
   if (jobConfig !== undefined) {
     const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
       fields,

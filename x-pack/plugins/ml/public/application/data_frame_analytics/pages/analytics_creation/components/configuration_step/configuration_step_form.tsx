@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { analyticsFieldsService } from '../../../../../services/analytics_fields_service';
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
@@ -196,7 +196,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
-        const { fields } = analyticsFieldsService;
+        const { fields } = newJobCapsServiceAnalytics;
 
         let resetDependentVariable = true;
         for (const field of fields) {

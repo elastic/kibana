@@ -15,7 +15,7 @@ import { IndexPattern } from '../../../../../../../../../src/plugins/data/public
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { analyticsFieldsService } from '../../../../services/analytics_fields_service';
+import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -51,7 +51,7 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
 }
 
 function getInitialColumns(indexPattern: IndexPattern) {
-  const { fields } = analyticsFieldsService;
+  const { fields } = newJobCapsServiceAnalytics;
   const columns = fields.map((field: any) => {
     const schema = getDataGridSchemaFromKibanaFieldType(field);
     return {

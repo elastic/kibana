@@ -4,66 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   Field,
   Aggregation,
   AggId,
   FieldId,
-  NewJobCaps,
   EVENT_RATE_FIELD_ID,
-} from '../../../common/types/fields';
-import {
-  ES_FIELD_TYPES,
-  IIndexPattern,
-  IndexPatternsContract,
-} from '../../../../../../src/plugins/data/public';
-import { ml } from './ml_api_service';
-import { getIndexPatternAndSavedSearch } from '../util/index_utils';
-
-// called in the routing resolve block to initialize the
-// newJobCapsService with the currently selected index pattern
-export function loadNewJobCapabilities(
-  indexPatternId: string,
-  savedSearchId: string,
-  indexPatterns: IndexPatternsContract
-) {
-  return new Promise(async (resolve, reject) => {
-    if (indexPatternId !== undefined) {
-      // index pattern is being used
-      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
-      await newJobCapsService.initializeFromIndexPattern(indexPattern);
-      resolve(newJobCapsService.newJobCaps);
-    } else if (savedSearchId !== undefined) {
-      // saved search is being used
-      // load the index pattern from the saved search
-      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
-      if (indexPattern === null) {
-        // eslint-disable-next-line no-console
-        console.error('Cannot retrieve index pattern from saved search');
-        reject();
-        return;
-      }
-      await newJobCapsService.initializeFromIndexPattern(indexPattern);
-      resolve(newJobCapsService.newJobCaps);
-    } else {
-      reject();
-    }
-  });
-}
+} from '../../../../common/types/fields';
+import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { ml } from '../ml_api_service';
+import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
-class NewJobCapsService {
-  private _fields: Field[] = [];
-  private _catFields: Field[] = [];
-  private _dateFields: Field[] = [];
-  private _aggs: Aggregation[] = [];
-  private _includeEventRateField: boolean = true;
-  private _removeTextFields: boolean = true;
+class NewJobCapsService extends NewJobCapabilitiesServiceBase {
+  private _catFields: Field[];
+  private _dateFields: Field[];
+  private _includeEventRateField: boolean;
+  private _removeTextFields: boolean;
 
-  public get fields(): Field[] {
-    return this._fields;
+  constructor() {
+    super();
+    this._catFields = [];
+    this._dateFields = [];
+    this._includeEventRateField = true;
+    this._removeTextFields = true;
   }
 
   public get catFields(): Field[] {
@@ -72,17 +37,6 @@ class NewJobCapsService {
 
   public get dateFields(): Field[] {
     return this._dateFields;
-  }
-
-  public get aggs(): Aggregation[] {
-    return this._aggs;
-  }
-
-  public get newJobCaps(): NewJobCaps {
-    return {
-      fields: this._fields,
-      aggs: this._aggs,
-    };
   }
 
   public get categoryFields(): Field[] {
@@ -125,11 +79,6 @@ class NewJobCapsService {
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
     }
-  }
-
-  public getFieldById(id: string): Field | null {
-    const field = this._fields.find((f) => f.id === id);
-    return field === undefined ? null : field;
   }
 
   public getAggById(id: string): Aggregation | null {
@@ -229,27 +178,6 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     }
   });
   fields.splice(0, 0, eventRateField);
-}
-
-// create two lists, one removing text fields if there are keyword equivalents and vice versa
-function processTextAndKeywordFields(fields: Field[]) {
-  const keywordIds = fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD).map((f) => f.id);
-  const textIds = fields.filter((f) => f.type === ES_FIELD_TYPES.TEXT).map((f) => f.id);
-
-  const fieldsPreferringKeyword = fields.filter(
-    (f) =>
-      f.type !== ES_FIELD_TYPES.TEXT ||
-      (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
-  );
-
-  const fieldsPreferringText = fields.filter(
-    (f) =>
-      f.type !== ES_FIELD_TYPES.KEYWORD ||
-      (f.type === ES_FIELD_TYPES.KEYWORD &&
-        textIds.includes(f.id.replace(/\.keyword$/, '')) === false)
-  );
-
-  return { fieldsPreferringKeyword, fieldsPreferringText };
 }
 
 export function filterCategoryFields(fields: Field[]) {
