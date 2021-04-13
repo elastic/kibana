@@ -117,7 +117,7 @@ export async function fetchIndexShardSize(
   if (!clusterBuckets.length) {
     return stats;
   }
-  const thresholdGB = threshold * gbMultiplier;
+  const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
     const indexBuckets = clusterBucket.over_threshold.index.buckets;
     const clusterUuid = clusterBucket.key;
@@ -152,10 +152,10 @@ export async function fetchIndexShardSize(
        */
       const { name: nodeName, uuid: nodeId } = sourceNode;
       const avgShardSize = primaryShardSizeBytes / totalPrimaryShards;
-      const shardSize = +(avgShardSize / gbMultiplier).toFixed(2);
-      if (shardSize < thresholdGB) {
+      if (avgShardSize < thresholdBytes) {
         continue;
       }
+      const shardSize = +(avgShardSize / gbMultiplier).toFixed(2);
       stats.push({
         shardIndex,
         shardSize,
