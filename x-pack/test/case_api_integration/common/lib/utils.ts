@@ -563,7 +563,7 @@ export const createCase = async (
 /**
  * Sends a delete request for the specified case IDs.
  */
-export const deleteCase = async ({
+export const sendDeleteCasesRequest = async ({
   supertest,
   caseIDs,
   expectedHttpCode = 204,
@@ -657,7 +657,7 @@ export const getComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   commentId: string,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<CommentResponse> => {
   const { body: comment } = await supertest
     .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
