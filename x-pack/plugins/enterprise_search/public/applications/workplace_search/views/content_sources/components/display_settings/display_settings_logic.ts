@@ -16,7 +16,13 @@ import {
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
+import {
+  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
+  DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
+  getContentSourcePath,
+} from '../../../../routes';
 import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
@@ -33,6 +39,8 @@ export interface DisplaySettingsInitialData extends DisplaySettingsResponseProps
   sourceId: string;
   serverRoute: string;
 }
+
+export type TabId = 'search_results' | 'result_detail';
 
 interface DisplaySettingsActions {
   initializeDisplaySettings(): void;
@@ -51,6 +59,7 @@ interface DisplaySettingsActions {
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
   removeDetailField(index: number): number;
+  handleSelectedTabChanged(tabId: TabId): TabId;
   addDetailField(newField: DetailField): DetailField;
   updateDetailField(
     updatedField: DetailField,
@@ -109,6 +118,7 @@ export const DisplaySettingsLogic = kea<
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
     removeDetailField: (index: number) => index,
+    handleSelectedTabChanged: (tabId: TabId) => tabId,
     addDetailField: (newField: DetailField) => newField,
     updateDetailField: (updatedField: DetailField, index: number) => ({ updatedField, index }),
     toggleFieldEditorModal: () => true,
@@ -329,6 +339,17 @@ export const DisplaySettingsLogic = kea<
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();
+    },
+
+    handleSelectedTabChanged: async (tabId, breakpoint) => {
+      const { isOrganization } = AppLogic.values;
+      const { sourceId } = values;
+      const path =
+        tabId === 'result_detail'
+          ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
+          : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
+
+      KibanaLogic.values.navigateToUrl(path);
     },
   }),
 });
