@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('empty_kibana');
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
     beforeEach(async () => {
       try {
