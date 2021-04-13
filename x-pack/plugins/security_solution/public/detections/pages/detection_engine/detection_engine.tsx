@@ -50,7 +50,10 @@ import {
 } from '../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
+import {
+  buildShowBuildingBlockFilter,
+  buildThreatMatchFilter,
+} from '../../components/alerts_table/default_config';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
@@ -100,6 +103,7 @@ const DetectionEnginePageComponent = () => {
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
+  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
@@ -128,14 +132,21 @@ const DetectionEnginePageComponent = () => {
   );
 
   const alertsHistogramDefaultFilters = useMemo(
-    () => [...filters, ...buildShowBuildingBlockFilter(showBuildingBlockAlerts)],
-    [filters, showBuildingBlockAlerts]
+    () => [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ],
+    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
-    () => buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-    [showBuildingBlockAlerts]
+    () => [
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ],
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -143,6 +154,13 @@ const DetectionEnginePageComponent = () => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
     },
     [setShowBuildingBlockAlerts]
+  );
+
+  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
+    (newShowOnlyThreatIndicatorAlerts: boolean) => {
+      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
+    },
+    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -250,6 +268,8 @@ const DetectionEnginePageComponent = () => {
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
             />
           </WrapperPage>
