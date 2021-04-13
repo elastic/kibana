@@ -7,7 +7,6 @@
  */
 
 export { isEsError, handleEsError, parseEsError } from './errors';
-export { License } from './license';
 
 /** dummy plugin*/
 export function plugin() {

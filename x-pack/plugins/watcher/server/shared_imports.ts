@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { License, isEsError } from '../../../../src/plugins/es_ui_shared/server';
+export { isEsError } from '../../../../src/plugins/es_ui_shared/server';
+export { License } from '../../license_api_guard/server';
