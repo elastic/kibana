@@ -358,8 +358,8 @@ export class SearchSource {
       .pipe(
         first(undefined, null),
         tap(() => {
-          trackRequestBody();
           requestResponder?.stats(getRequestInspectorStats(this));
+          trackRequestBody();
         }),
         catchError(() => {
           trackRequestBody();
