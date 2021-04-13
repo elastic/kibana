@@ -17,7 +17,7 @@ import {
   postCollectionReq,
 } from '../../../../common/lib/mock';
 import {
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);

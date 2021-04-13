@@ -15,11 +15,11 @@ import {
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   createCase,
-  sendDeleteCasesRequest,
+  deleteCases,
   createComment,
   getComment,
 } from '../../../../common/lib/utils';
@@ -33,14 +33,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('delete_cases', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });
 
     it('should delete a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
-      const body = await sendDeleteCasesRequest({ supertest, caseIDs: [postedCase.id] });
+      const body = await deleteCases({ supertest, caseIDs: [postedCase.id] });
 
       expect(body).to.eql({});
     });
@@ -51,14 +51,14 @@ export default ({ getService }: FtrProviderContext): void => {
       // ensure that we can get the comment before deleting the case
       await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
 
-      await sendDeleteCasesRequest({ supertest, caseIDs: [postedCase.id] });
+      await deleteCases({ supertest, caseIDs: [postedCase.id] });
 
       // make sure the comment is now gone
       await getComment(supertest, postedCase.id, patchedCase.comments![0].id, 404);
     });
 
     it('unhappy path - 404s when case is not there', async () => {
-      await sendDeleteCasesRequest({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
+      await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         expect(caseInfo.subCases![0].id).to.not.eql(undefined);
 
-        const body = await sendDeleteCasesRequest({ supertest, caseIDs: [caseInfo.id] });
+        const body = await deleteCases({ supertest, caseIDs: [caseInfo.id] });
 
         expect(body).to.eql({});
         await supertest
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // make sure we can get the second comment
         await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(200);
 
-        await sendDeleteCasesRequest({ supertest, caseIDs: [caseInfo.id] });
+        await deleteCases({ supertest, caseIDs: [caseInfo.id] });
 
         await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(404);
       });

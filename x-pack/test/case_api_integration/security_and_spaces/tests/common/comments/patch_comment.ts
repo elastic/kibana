@@ -27,7 +27,7 @@ import {
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   createCase,
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('patch_comment', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });

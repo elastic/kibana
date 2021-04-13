@@ -11,7 +11,7 @@ import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/cases/c
 
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('push_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);

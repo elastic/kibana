@@ -12,7 +12,7 @@ import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { postCaseReq, postCaseResp, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  deleteCases,
+  deleteCasesByESQuery,
   createCase,
   getCase,
   createComment,
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
     it('should return a case with no comments', async () => {
