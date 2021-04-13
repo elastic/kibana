@@ -17,21 +17,8 @@ import { DRAW_TYPE } from '../../../../common/constants';
 import { DrawCircle } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
-const SIMPLE_SELECT = 'simple_select';
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
-const DRAW_POLYGON = 'draw_polygon';
-const DRAW_LINE = 'draw_line_string';
-const DRAW_POINT = 'draw_point';
-
-const mbModeEquivalencies = new Map([
-  ['simple_select', 'SIMPLE_SELECT'],
-  ['draw_rectangle', 'BOUNDS'],
-  ['draw_circle', 'DISTANCE'],
-  ['draw_polygon', 'POLYGON'],
-  ['draw_line_string', 'LINE'],
-  ['draw_point', 'POINT'],
-]);
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes[DRAW_RECTANGLE] = DrawRectangle;
@@ -39,14 +26,11 @@ mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
 export interface Props {
   drawType?: DRAW_TYPE;
-  onDraw: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
-  onFeaturesSelected?: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
+  onDraw: (event: { features: Feature[] }) => void;
   mbMap: MbMap;
-  drawActive: boolean;
-  updateDrawFeatureState: (drawFeatureState: DRAW_TYPE) => void;
 }
 
-export class DrawControl extends Component<Props> {
+export class DrawControl extends Component<Props, {}> {
   private _isMounted = false;
   private _mbDrawControlAdded = false;
   private _mbDrawControl = new MapboxDraw({
@@ -74,18 +58,12 @@ export class DrawControl extends Component<Props> {
       return;
     }
 
-    if (this.props.drawActive) {
+    if (this.props.drawType) {
       this._updateDrawControl();
     } else {
       this._removeDrawControl();
     }
   }, 0);
-
-  _onModeChange = ({ mode }: { mode: string }) => {
-    if (mbModeEquivalencies.has(mode)) {
-      this.props.updateDrawFeatureState(mbModeEquivalencies.get(mode) as DRAW_TYPE);
-    }
-  };
 
   _removeDrawControl() {
     if (!this._mbDrawControlAdded) {
@@ -93,11 +71,7 @@ export class DrawControl extends Component<Props> {
     }
 
     this.props.mbMap.getCanvas().style.cursor = '';
-    this.props.mbMap.off('draw.modechange', this._onModeChange);
     this.props.mbMap.off('draw.create', this.props.onDraw);
-    if (this.props.onFeaturesSelected) {
-      this.props.mbMap.off('draw.selectionchange', this.props.onFeaturesSelected);
-    }
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
   }
@@ -111,22 +85,7 @@ export class DrawControl extends Component<Props> {
       this.props.mbMap.addControl(this._mbDrawControl);
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
-      this.props.mbMap.on('draw.modechange', this._onModeChange);
-      this.props.mbMap.on('draw.create', this.props.onDraw(this._mbDrawControl));
-      if (this.props.onFeaturesSelected) {
-        this.props.mbMap.on(
-          'draw.selectionchange',
-          this.props.onFeaturesSelected(this._mbDrawControl)
-        );
-      }
-    }
-
-    if (this.props.drawType === DRAW_TYPE.TRASH) {
-      // There is no way to deselect shapes other than changing modes,
-      // this deselects shapes to avoid leaving shapes in an unwanted
-      // edit mode
-      this._mbDrawControl.changeMode('simple_select');
-      return;
+      this.props.mbMap.on('draw.create', this.props.onDraw);
     }
 
     const drawMode = this._mbDrawControl.getMode();
@@ -134,14 +93,6 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawType === DRAW_TYPE.DISTANCE) {
       this._mbDrawControl.changeMode(DRAW_CIRCLE);
-    } else if (drawMode !== DRAW_LINE && this.props.drawType === DRAW_TYPE.LINE) {
-      this._mbDrawControl.changeMode(DRAW_LINE);
-    } else if (drawMode !== DRAW_POLYGON && this.props.drawType === DRAW_TYPE.POLYGON) {
-      this._mbDrawControl.changeMode(DRAW_POLYGON);
-    } else if (drawMode !== DRAW_POINT && this.props.drawType === DRAW_TYPE.POINT) {
-      this._mbDrawControl.changeMode(DRAW_POINT);
-    } else if (drawMode !== SIMPLE_SELECT && this.props.drawType === DRAW_TYPE.SIMPLE_SELECT) {
-      this._mbDrawControl.changeMode(SIMPLE_SELECT);
     } else if (
       drawMode !== this._mbDrawControl.modes.DRAW_POLYGON &&
       this.props.drawType === DRAW_TYPE.POLYGON

@@ -24,7 +24,7 @@ import {
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
+import { DrawControl } from '../draw_control';
 import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
@@ -36,7 +36,7 @@ export interface Props {
 }
 
 export class DrawFilterControl extends Component<Props, {}> {
-  _onDraw = () => async (e: { features: Feature[] }) => {
+  _onDraw = async (e: { features: Feature[] }) => {
     if (
       !e.features.length ||
       !this.props.drawState ||
@@ -120,7 +120,6 @@ export class DrawFilterControl extends Component<Props, {}> {
         }
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
-        drawActive={!!(this.props.drawState && this.props.drawState.drawType)}
       />
     );
   }

@@ -10,23 +10,7 @@
 .mapToolbarOverlay__button {
   @include size($euiSizeXL);
   // sass-lint:disable-block no-important
-  color: $euiTextColor !important;
   background-color: $euiColorEmptyShade !important;
-  pointer-events: all;
-  position: relative;
-
-  &:enabled,
-  &:enabled:hover,
-  &:enabled:focus {
-    @include euiBottomShadowLarge;
-  }
-}
-
-.mapToolbarOverlay__button__selected {
-  @include size($euiSizeXL);
-  // sass-lint:disable-block no-important
-  color: $euiTextColor !important;
-  background-color: $euiColorLightShade !important;
   pointer-events: all;
   position: relative;
 
