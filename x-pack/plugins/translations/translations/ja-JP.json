@@ -7344,7 +7344,6 @@
     "xpack.data.searchSessionIndicator.canceledTitleText": "検索セッションが停止しました",
     "xpack.data.searchSessionIndicator.canceledTooltipText": "検索セッションが停止しました",
     "xpack.data.searchSessionIndicator.continueInBackgroundButtonText": "セッションの保存",
-    "xpack.data.searchSessionIndicator.disabledDueToAutoRefreshMessage": "自動更新が有効な場合は、検索セッションの保存を使用できません。",
     "xpack.data.searchSessionIndicator.disabledDueToDisabledGloballyMessage": "検索セッションを管理するアクセス権がありません",
     "xpack.data.searchSessionIndicator.disabledDueToTimeoutMessage": "検索セッション結果が期限切れです。",
     "xpack.data.searchSessionIndicator.loadingInTheBackgroundDescriptionText": "管理から完了した結果に戻ることができます。",
