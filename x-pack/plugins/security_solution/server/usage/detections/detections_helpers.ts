@@ -12,7 +12,14 @@ import {
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
-import { DetectionRulesUsage, MlJobsUsage, MlJobMetric, DetectionRuleMetric } from './index';
+import {
+  DetectionRulesUsage,
+  DetectionRulesTypeUsage,
+  MlJobsUsage,
+  MlJobMetric,
+  DetectionRuleMetric,
+  DetectionRuleAdoption,
+} from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
@@ -67,6 +74,45 @@ export const initialRulesUsage: DetectionRulesUsage = {
   elastic: {
     enabled: 0,
     disabled: 0,
+  },
+};
+
+export const initalDetectionRulesUsage: DetectionRulesTypeUsage = {
+  query: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+  },
+  threshold: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+  },
+  eql: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+  },
+  machine_learning: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+  },
+  threat_match: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+  },
+  elastic_total: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
   },
 };
 
@@ -341,13 +387,14 @@ export const getDetectionRuleMetrics = async (
   index: string,
   esClient: ElasticsearchClient,
   savedObjectClient: SavedObjectsClientContract
-): Promise<DetectionRuleMetric[]> => {
+): Promise<DetectionRuleAdoption> => {
+  const rulesUsage: DetectionRulesTypeUsage = initalDetectionRulesUsage;
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: [],
     ignoreUnavailable: true,
     index,
-    size: 10000,
+    size: 10_000,
   };
 
   try {
@@ -361,7 +408,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.id' },
+            terms: { field: 'signal.rule.id.keyword' },
           },
         },
         query: {
@@ -411,7 +458,7 @@ export const getDetectionRuleMetrics = async (
         isElasticRule(hit._source?.alert.tags || [])
       );
 
-      return elasticRules.map((hit) => {
+      const elasticRuleObjects = elasticRules.map((hit) => {
         const ruleId = hit._id.split(':')[1];
         return {
           rule_name: hit._source?.alert.name,
@@ -425,10 +472,18 @@ export const getDetectionRuleMetrics = async (
           cases_count_daily: casesCache.get(ruleId) || 0,
         } as DetectionRuleMetric;
       });
+
+      return {
+        detection_rule_metrics: elasticRuleObjects,
+        detection_rule_adoption: rulesUsage,
+      };
     }
   } catch (e) {
     // ignore failure, usage will be zeroed
   }
 
-  return [];
+  return {
+    detection_rule_metrics: [],
+    detection_rule_adoption: rulesUsage,
+  };
 };

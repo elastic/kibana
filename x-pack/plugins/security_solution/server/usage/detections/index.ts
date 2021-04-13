@@ -12,6 +12,7 @@ import {
   getDetectionRuleMetrics,
   getRulesUsage,
   initialRulesUsage,
+  initalDetectionRulesUsage,
   initialMlJobsUsage,
 } from './detections_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -19,6 +20,22 @@ import { MlPluginSetup } from '../../../../ml/server';
 interface FeatureUsage {
   enabled: number;
   disabled: number;
+}
+
+interface FeatureTypeUsage {
+  enabled: number;
+  disabled: number;
+  alerts: number;
+  cases: number;
+}
+
+export interface DetectionRulesTypeUsage {
+  query: FeatureTypeUsage;
+  threshold: FeatureTypeUsage;
+  eql: FeatureTypeUsage;
+  machine_learning: FeatureTypeUsage;
+  threat_match: FeatureTypeUsage;
+  elastic_total: FeatureTypeUsage;
 }
 
 export interface DetectionRulesUsage {
@@ -38,7 +55,7 @@ export interface DetectionsUsage {
 
 export interface DetectionMetrics {
   ml_jobs: MlJobMetric[];
-  detection_rules: DetectionRuleMetric[];
+  detection_rules: DetectionRuleAdoption;
 }
 
 export interface MlJobDataCount {
@@ -89,6 +106,11 @@ export interface DetectionRuleMetric {
   cases_count_daily: number;
 }
 
+export interface DetectionRuleAdoption {
+  detection_rule_metrics: DetectionRuleMetric[];
+  detection_rule_adoption: DetectionRulesTypeUsage;
+}
+
 export const defaultDetectionsUsage = {
   detection_rules: initialRulesUsage,
   ml_jobs: initialMlJobsUsage,
@@ -124,6 +146,9 @@ export const fetchDetectionsMetrics = async (
 
   return {
     ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : [],
-    detection_rules: detectionRuleMetrics.status === 'fulfilled' ? detectionRuleMetrics.value : [],
+    detection_rules:
+      detectionRuleMetrics.status === 'fulfilled'
+        ? detectionRuleMetrics.value
+        : { detection_rule_metrics: [], detection_rule_adoption: initalDetectionRulesUsage },
   };
 };
