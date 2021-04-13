@@ -24,6 +24,7 @@ import { PluginSetupContract as AlertingPluginSetupContract } from '../../../ale
 import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
 import { DefaultFieldMap } from './defaults/field_map';
 import { ScopedRuleRegistryClient } from './create_scoped_rule_registry_client/types';
+import { DefaultAlertLifecycleMap } from './defaults/lifecycle_map';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   kibanaIndex: string;
@@ -152,9 +153,11 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     });
   }
 
-  registerType<TRuleParams extends RuleParams, TActionVariable extends ActionVariable>(
-    type: RuleType<TFieldMap, TRuleParams, TActionVariable>
-  ) {
+  registerType<
+    TRuleParams extends RuleParams,
+    TActionVariable extends ActionVariable,
+    TAlertLifecycleMap extends DefaultAlertLifecycleMap
+  >(type: RuleType<TFieldMap, TRuleParams, TActionVariable, TAlertLifecycleMap>) {
     const logger = this.options.logger.get(type.id);
 
     const { indexAliasName, indexTarget } = this.getEsNames();

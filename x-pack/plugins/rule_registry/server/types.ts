@@ -18,6 +18,7 @@ import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
 import { RuleRegistry } from './rule_registry';
 import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 import { DefaultFieldMap } from './rule_registry/defaults/field_map';
+import { DefaultAlertLifecycleMap } from './rule_registry/defaults/lifecycle_map';
 
 export type RuleParams = Type<any>;
 
@@ -80,6 +81,7 @@ export type RuleType<
   TFieldMap extends DefaultFieldMap,
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable,
+  TAlertLifecycleMap extends DefaultAlertLifecycleMap,
   TAdditionalRuleExecutorServices extends Record<string, any> = {}
 > = RuleTypeBase & {
   validate: {
@@ -96,6 +98,7 @@ export type RuleType<
     TActionVariable,
     TAdditionalRuleExecutorServices
   >;
+  lifecycleEventsMap?: TAlertLifecycleMap;
 };
 
 export type FieldMapOf<

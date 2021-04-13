@@ -12,7 +12,6 @@ import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
 import { DefaultFieldMap } from '../defaults/field_map';
-import { defaultAlertLifecycleMap, DefaultAlertLifecycleMap } from '../defaults/lifecycle_map';
 import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
 import { PrepopulatedRuleEventFields } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
@@ -37,20 +36,18 @@ type ThresholdMetricService<TFieldMap extends DefaultFieldMap> = (alert: {
 
 type CreateThresholdRuleType<TFieldMap extends DefaultFieldMap> = <
   TRuleParams extends RuleParams,
-  TActionVariable extends ActionVariable,
-  TAlertLifecycleMap extends DefaultAlertLifecycleMap
+  TActionVariable extends ActionVariable
 >(
   type: RuleType<
     TFieldMap,
     TRuleParams,
     TActionVariable,
-    TAlertLifecycleMap,
     {
       alertWithThreshold: ThresholdAlertService<TFieldMap, TActionVariable>;
       metricWithThreshold: ThresholdMetricService<TFieldMap>;
     }
   >
-) => RuleType<TFieldMap, TRuleParams, TActionVariable, TAlertLifecycleMap>;
+) => RuleType<TFieldMap, TRuleParams, TActionVariable>;
 
 const trackedAlertStateRt = t.type({
   alertId: t.string,
@@ -63,13 +60,13 @@ const wrappedStateRt = t.type({
   trackedAlerts: t.record(t.string, trackedAlertStateRt),
 });
 
-export function createThresholdRuleTypeFactory<
+export function createComposableRuleTypeFactory<
   TRuleRegistry extends RuleRegistry<DefaultFieldMap>
 >(): TRuleRegistry extends RuleRegistry<infer TFieldMap>
   ? CreateThresholdRuleType<TFieldMap>
   : never;
 
-export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<DefaultFieldMap> {
+export function createComposableRuleTypeFactory(): CreateThresholdRuleType<DefaultFieldMap> {
   return (type) => {
     return {
       ...type,
@@ -121,8 +118,6 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
             },
           },
         });
-
-        const alertLifecycleMap = type.lifecycleEventsMap ?? defaultAlertLifecycleMap;
 
         const currentAlertIds = Object.keys(currentAlerts);
         const trackedAlertIds = Object.keys(state.trackedAlerts);
@@ -216,21 +211,21 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
             event['kibana.rac.alert.uuid'] = alertUuid;
 
             if (isNew) {
-              event['event.action'] = alertLifecycleMap.action.new;
+              event['event.action'] = 'new';
             }
 
             if (isRecovered) {
               event['kibana.rac.alert.end'] = timestamp;
-              event['event.action'] = alertLifecycleMap.action.recovered;
-              event['kibana.rac.alert.status'] = alertLifecycleMap.status.recovered;
+              event['event.action'] = '';
+              event['kibana.rac.alert.status'] = 'recovered';
             }
 
             if (isActiveButNotNew) {
-              event['event.action'] = alertLifecycleMap.action.active;
+              event['event.action'] = 'active';
             }
 
             if (isActive) {
-              event['kibana.rac.alert.status'] = alertLifecycleMap.status.active;
+              event['kibana.rac.alert.status'] = 'active';
             }
 
             event['kibana.rac.alert.duration.us'] =

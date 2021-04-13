@@ -33,6 +33,17 @@ export function register(registerParams: RegisterAlertTypesParams) {
       validate: {
         params: ParamsSchema,
       },
+      lifecycleEventsMap: {
+        status: {
+          recovered: 'recovered',
+          active: 'active',
+        },
+        action: {
+          new: 'new',
+          recovered: 'recovered',
+          active: 'active',
+        },
+      },
       actionVariables: {
         context: [
           { name: 'message', description: IndexThreshold.actionVariableContextMessageLabel },
