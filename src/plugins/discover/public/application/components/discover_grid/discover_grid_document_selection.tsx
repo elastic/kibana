@@ -113,7 +113,7 @@ export function DiscoverGridDocumentToolbarBtn({
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
         textToCopy={
-          !rows ? '' : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
+          rows ? JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row)))) : ''
         }
       >
         {(copy) => (
