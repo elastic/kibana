@@ -10,7 +10,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 
 import { IntlProvider } from 'react-intl';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { ScatterplotMatrix } from './scatterplot_matrix';
 
@@ -23,7 +23,7 @@ jest.mock('../../contexts/kibana', () => ({
   }),
 }));
 
-const mockEuiTheme = euiThemeLight;
+const mockEuiTheme = euiThemeVars;
 jest.mock('../color_range_legend', () => ({
   useCurrentEuiTheme: () => ({
     euiTheme: mockEuiTheme,

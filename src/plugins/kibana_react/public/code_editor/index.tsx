@@ -13,8 +13,7 @@ import {
   EuiLoadingContent,
   EuiFormControlLayout,
 } from '@elastic/eui';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
@@ -48,7 +47,7 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
   const { width, height, options } = props;
   const darkMode = useUiSetting<boolean>('theme:darkMode');
-  const theme = darkMode ? darkTheme : lightTheme;
+  const theme = darkMode ? euiDarkVars : euiLightVars;
   const style = {
     width,
     height,

@@ -9,7 +9,7 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
@@ -86,7 +86,7 @@ type VegaValue = Record<string, string | number>;
 export const getScatterplotMatrixVegaLiteSpec = (
   values: VegaValue[],
   columns: string[],
-  euiTheme: typeof euiThemeLight,
+  euiTheme: typeof euiThemeVars,
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
