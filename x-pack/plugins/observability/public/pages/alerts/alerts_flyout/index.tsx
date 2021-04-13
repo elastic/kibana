@@ -6,23 +6,34 @@
  */
 
 import {
+  EuiButton,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutProps,
-  EuiInMemoryTable,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import React from 'react';
-import { asDuration } from '../../../common/utils/formatters';
-import { TopAlert } from './alerts_table';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { asDuration } from '../../../../common/utils/formatters';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { TopAlert } from '../alerts_table';
 
 type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
 
-export function AlertsFlyout(props: AlertsFlyoutProps) {
-  const { onClose, alert } = props;
+export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
+  const dateFormat = useUiSetting<string>('dateFormat');
+  const { core } = usePluginContext();
+  const { prepend } = core.http.basePath;
 
   const overviewListItems = [
     {
@@ -39,11 +50,17 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
     // },
     {
       title: 'Triggered',
-      description: alert.start, // TODO: format date
+      description: (
+        <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
+      ),
     },
     {
       title: 'Duration',
-      description: asDuration(alert.duration, { extended: true }) || '-', // TODO: format duration
+      description: (
+        <span title={alert.duration.toString()}>
+          {asDuration(alert.duration, { extended: true }) || '-'}
+        </span>
+      ),
     },
     // {
     //   title: 'Expected value',
@@ -68,53 +85,35 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
       content: (
         <>
           <EuiSpacer />
-          <EuiInMemoryTable
-            columns={[
-              { field: 'title', name: '' },
-              { field: 'description', name: '' },
-            ]}
-            items={overviewListItems}
-          />
-          {/* <EuiSpacer />
-          <EuiTitle size="xs">
-            <h4>Severity log</h4>
-          </EuiTitle>
-          <EuiInMemoryTable
-            columns={[
-              { field: '@timestamp', name: 'Timestamp', dataType: 'date' },
-              {
-                field: 'severity',
-                name: 'Severity',
-                render: (_, item) => (
-                  <>
-                    <EuiBadge>{item.severity}</EuiBadge> {item.message}
-                  </>
-                ),
-              },
-            ]}
-            items={severityLog ?? []}
-          /> */}
+          <EuiDescriptionList type="responsiveColumn" listItems={overviewListItems} />
         </>
       ),
-    },
-    {
-      id: 'metadata',
-      name: i18n.translate('xpack.observability.alerts.flyoutMetadataTabTitle', {
-        defaultMessage: 'Metadata',
-      }),
-      disabled: true,
-      content: <></>,
     },
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader>
-        <EuiTitle size="xs">
+        <EuiTitle size="m">
           <h2>{alert.ruleName}</h2>
         </EuiTitle>
-        <EuiTabbedContent size="s" tabs={tabs} />
+        <EuiSpacer size="s" />
+        <EuiText size="s">{alert.reason}</EuiText>
       </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiTabbedContent size="s" tabs={tabs} />
+      </EuiFlyoutBody>
+      {alert.link && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton href={prepend(alert.link)} fill>
+                View in app
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 }

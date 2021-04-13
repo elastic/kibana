@@ -6,15 +6,12 @@
  */
 
 import {
+  DefaultItemAction,
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
-  DefaultItemAction,
-  EuiTableSelectionType,
   EuiLink,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -115,8 +112,6 @@ export function AlertsTable(props: AlertsTableProps) {
       {flyoutAlert && <AlertsFlyout alert={flyoutAlert} onClose={handleFlyoutClose} />}
       <EuiBasicTable<TopAlert>
         {...props}
-        isSelectable={true}
-        selection={{} as EuiTableSelectionType<TopAlert>}
         columns={columns}
         tableLayout="auto"
         pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}

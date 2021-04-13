@@ -47,16 +47,6 @@ export const apmAlertResponseExample = [
   },
 ];
 
-export const flyoutItemExample = {
-  link: '/app/apm/services/opbeans-java?rangeFrom=now-15m&rangeTo=now',
-  reason: 'Error count for opbeans-java was above the threshold',
-  active: true,
-  start: 1618235449493,
-  duration: 180057000,
-  ruleCategory: 'Error count threshold',
-  ruleName: 'Error count threshold | opbeans-java (smith test)',
-};
-
 export const dynamicIndexPattern = {
   fields: [
     {
