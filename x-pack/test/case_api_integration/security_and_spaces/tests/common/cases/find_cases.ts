@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import supertestAsPromised from 'supertest-as-promised';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -30,12 +29,7 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import {
-  CaseResponse,
-  CasesFindResponse,
-  CaseStatuses,
-  CaseType,
-} from '../../../../../../plugins/cases/common/api';
+import { CaseResponse, CaseStatuses, CaseType } from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -100,9 +94,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('filters by status', async () => {
-        const openCase = await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
-        await updateCase(supertest, {
+        const patchedCase = await updateCase(supertest, {
           cases: [
             {
               id: toCloseCase.id,
@@ -117,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
-          cases: [openCase],
+          cases: [patchedCase[0]],
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,

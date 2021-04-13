@@ -10,7 +10,12 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCaseResp, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  defaultUser,
+  postCaseReq,
+  postCaseResp,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   createCase,
@@ -35,21 +40,29 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await getCase(supertest, postedCase.id, true);
 
       const data = removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql(postCaseResp(postedCase.id));
+      expect(data).to.eql(postCaseResp());
       expect(data.comments?.length).to.eql(0);
     });
 
     it('should return a case with comments', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await createComment(supertest, postedCase.id, postCommentUserReq);
-      const theCase = await getCase(supertest, postedCase.id);
+      const theCase = await getCase(supertest, postedCase.id, true);
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
         theCase.comments![0] as AttributesTypeUser
       );
 
       expect(theCase.comments?.length).to.eql(1);
-      expect(theCase.comments![0]).to.eql(comment);
+      expect(comment).to.eql({
+        type: postCommentUserReq.type,
+        comment: postCommentUserReq.comment,
+        associationType: 'case',
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
     it('should return a 400 when passing the includeSubCaseComments', async () => {
