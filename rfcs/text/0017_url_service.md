@@ -516,7 +516,7 @@ The `/app/goto/_redirect/<locatorId>?params=...&paramsVersion=...` client-side
 endpoint will receive the locator ID and locator params, it will use those to
 find the locator and execute `locator.navigate(params)` method.
 
-The optional `paramsVersion` parameter will be used to specify the version of the
+The `paramsVersion` parameter will be used to specify the version of the
 `params` parameter. If the version is behind the latest version, then the migration
 facilities of the locator will be used to on-the-fly migrate the `params` to the
 latest version.
