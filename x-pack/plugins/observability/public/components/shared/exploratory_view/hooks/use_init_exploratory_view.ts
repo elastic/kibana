@@ -27,15 +27,17 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const firstSeries = allSeries[firstSeriesId];
 
+  let dataType: DataType = firstSeries?.dataType ?? 'rum';
+
+  if (firstSeries?.rt) {
+    dataType = ReportToDataTypeMap[firstSeries?.rt];
+  }
+
   const { data: indexPattern, error } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
-    let reportType: DataType = 'apm';
-    if (firstSeries?.rt) {
-      reportType = ReportToDataTypeMap[firstSeries?.rt];
-    }
 
-    return obsvIndexP.getIndexPattern(reportType);
-  }, [firstSeries?.rt, data]);
+    return obsvIndexP.getIndexPattern(dataType);
+  }, [dataType, data]);
 
   if (error) {
     throw error;
