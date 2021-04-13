@@ -24,116 +24,189 @@ Sharing options include:
 
 * beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
-[float]
-[[embedding]]
-== Embed code
-
-Display your dashboard or visualization on an internal company website or personal webpage, then share the link so others can view your work.
-
-. Open the main menu, then click *Dashboard* or *Visualize Library*. 
-
-. Open the dashboard or visualization you want to display.
-
-. In the toolbar, click *Share*, then click *Embed code > Copy iFrame code*. 
-+
-You can embed this snippet in your web page, and then add analysis, images, and links to give more context to the object you're sharing.
-+
-image::images/embed-kibana.png[Generate an HTML snippet to embed {kib}, align=center]
-+
-NOTE: Embedding other {kib} objects is generally possible, but you must manually craft the HTML code
+You can also <<automating-report-generation,automatically generate reports>> with {watcher} or a script.
 
 [float]
-[[share-direct-links]]
-== Share direct links
+[[configuring-reporting]]
+== Configure the security settings for sharing
 
-Share a direct link to a saved search, dashboard, or visualization. To access the {kib} snapshot or object, user authentication is required.
+The sharing options are dependent on the reporting settings. To use {report-features} with {security-features} enabled, 
+you need to <<using-kibana-with-security,configure security in {kib}>>.
 
-. Open the main menu, then click *Discover*, *Dashboard*, or *Visualize Library*. 
-
-. Open the saved search, dashboard, or visualization you want to share.
-
-. In the toolbar, click *Share*, click *Permalinks > Copy link*, then share the copied link.
+If you are automatically generating reports with {ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
+to trust the {kib} server certificate.
 
 [float]
-[[manually-generate-reports]]
-== Generate and download reports
+[[reporting-roles-management-ui]]
+=== Assign the reporting role
 
-Generate and download reports of saved searches, dashboards, visualizations, and *Canvas* workpads
+To generate reports, you must have the `reporting_user` role and the necessary privileges to access the object you want to share, and the {es} indices in the object.
 
-. Open the main menu, then click *Discover*, *Dashboard*, *Visualize Library*, or *Canvas*.
+. Open the main menu, then click *Stack Management > Roles*.
 
-. Open the saved search, dashboard, visualization, or *Canvas* workpad you want to share.
+.. Click *Create role*, then give the role a name. For example, `custom_reporting_user`.
 
-. In the toolbar, click *Share*, then select the report type.
-
-* When you generate dashboard PDF reports, select *Optimize for printing* to create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page.
-
-* When you generate *Canvas* workpad PDF reports, select *Full page layout* to create a PDF without margins surrounding the workpad.
-
-. Generate the report.
+.. On the *Create role* page, add a line for each index that contains the report data, then give each index `read` and `view_index_metadata` privileges.
 +
-When the report completes, a notification appears.
-
-. Click **Download report**.
-
-. To view the status of your report, or download previously generated reports, open the main menu, then click *Stack Management > Reporting*.
-
-[float]
-[[reporting-layout-sizing]]
-=== Change the layout and size
-
-The layout and size of the PDF or PNG images depend on the {kib} app.
-When you generate *Canvas* reports, the workpad dimensions determine the size of the report. 
-When you generate *Discover*, *Dashboard*, and *Visualize Library* reports, the table, panel, and visualization dimensions determine the size of the report.
-To change the layout and size of the report, change the size of your browser, which resizes the shareable container. {kib} captures the shareable container when you click
-*Generate* or *Copy POST URL*.
-
-[role="screenshot"]
-image::user/reporting/images/shareable-container.png["Shareable Container"]
-
-[float]
-[[export-single-workpad]]
-== Generate JSON files
-
-To view a *Canvas* workpad in another {kib} installation, create a JSON file.
-
-. Open the main menu, then click *Canvas*.
-
-. Open the Canvas* workpad you want to share.
-
-. In the toolbar, click *Share > Download as JSON*, then save the file. 
-
-. Open another {kib} installation, open the main menu, then click *Canvas*.
-
-. Click *Import workpad JSON file*, then select the saved file.
-+
-Want to create a JSON file with multiple workpads? On the *Canvas workpads* page, select the workpads you want to share, then click *Export*.
-
-[float]
-[[add-workpad-website]]
-== Share on a website
-
-beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on any website. 
-To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
-
-. In the toolbar, click *Share > Share on a website*.
-
-. Follow the *Share on a website* instructions.
-
-. To autoplay the pages or hide the toolbar, use the inline parameters.
-+
-To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. *Canvas* does not display elements that manipulate the data on the workpad.
+For more information, refer to {ref}/security-privileges.html[Security privileges].
 +
 [role="screenshot"]
-image::canvas/images/canvas-embed_workpad.gif[Image showing how to share the workpad on a website]
-+
-NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
+image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
 
-. To change the settings, click the settings icon, then choose the settings you want to use.
+.. To add space privileges, click *Add {kib} privilege*, enable *All* privileges for the applicable apps, then click *Add {kib} privilege*.
+
+.. Click *Create role*.
+
+. Open the main menu, then click *Stack Management > Users*.
+
+.. Click the user, then select `reporting_user` and `custom_reporting_user` from the *Roles* dropdown.
+
+.. Click *Update user*.
+
+[float]
+[[assign-the-reporting-role-for-a-custom-index]]
+==== Assign the reporting role for a custom index
+
+When you generate reports with a custom index, you must create a custom role with appropriate access to the index
+if you use a different pattern for <<xpack-reporting-index,`xpack.reporting.index`>>.
+
+. Open the main menu, then click *Stack Management > Roles*.
+
+.. Click *Create role*, then give the role a name. For example, `custom_reporting_user`.
+
+.. From the *Indices* dropdown, select the custom index.
+
+.. From the *Privileges* dropdown, select *all*.
+
+. Open the main menu, then click *Stack Management > Users*.
+
+.. Click the user, then select `kibana_system` and `custom-reporting-user` from the *Roles* dropdown.
+
+.. Click *Update user*.
+
+. Open kibana.yml, then configure {kib} to use the new account:
+
+[source,js]
+--------------------------------------------------------------------------------
+elasticsearch.username: 'custom_kibana_system'
+--------------------------------------------------------------------------------
+
+[float]
+[[reporting-roles-user-api]]
+==== Assign the reporting role with the user API
+
+Create a user with the `reporting_user` and `kibana_admin` roles using the {ref}/security-api-put-user.html[user API].
+
+[source, sh]
+---------------------------------------------------------------
+POST /_security/user/reporter
+{
+  "password" : "x-pack-test-password",
+  "roles" : ["kibana_admin", "reporting_user"],
+  "full_name" : "Reporting User"
+}
+---------------------------------------------------------------
+
+[float]
+==== Assign the reporting role for an external identity provider
+
+If you are using an external identity provider, such as LDAP or Active Directory, you can assign the reporting role to individual users
+or groups of users. By default, role mappings are configured in {ref}/mapping-roles.html[`config/role_mapping.yml`].
+
+For example, assign the Bill Murray user the `kibana_admin` and `reporting_user` roles:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana_admin:
+  - "cn=Bill Murray,dc=example,dc=com"
+reporting_user:
+  - "cn=Bill Murray,dc=example,dc=com"
+--------------------------------------------------------------------------------
+
+[float]
+[[embedding-security]]
+=== Configure the embed code settings
+
+To minimize security risks, embedding content through iframes requires careful consideration. By default, modern web browsers enforce the
+https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy[same-origin policy] to restrict the behavior of framed pages. When
+{stack-security-features} are enabled on your cluster, you must relax the constraint for <<embedding-cookies, cookies>> so that {kib} can function
+in an iframe. For more information, refer to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[iframe] and
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite[SameSite cookies].
+
+[float]
+==== Authentication
+When you embed {kib} objects in a website that supports Single Sign-On with SAML, OpenID Connect, Kerberos, or PKI, it's highly recommended 
+that you configure {kib} as a part of the Single Sign-On setup. To provide the most secure and seamless experience, make sure that you operate in 
+a single and properly configured security domain. For more information, refer to <<kibana-authentication, Authentication in {kib}>>.
+
+To allow users access to embedded {kib} objects without logging in when Single Sign-On isn't an option, use <<anonymous-authentication, anonymous access>>. 
+Anonymous access is natively integrated into the workflow for embedding dashboards and visualizations.
+
+When you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding anything other than dashboards and visualizations, 
+add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
+
+For example:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+To automatically enable anonymous access, modify the link to {kib} in the `src` iframe attribute:
+
+```html
+<iframe src="https://localhost:5601/app/monitoring?auth_provider_hint=anonymous1#/elasticsearch/nodes?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+NOTE: The `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
+
+[float]
+[[embedding-cookies]]
+==== Configure cookies
+
+Regardless of the authentication type that you're using for the embedded {kib} object, you must make sure that the browsers can transmit session cookies to a {kib} server. 
+To support modern browsers, set <<xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>> to `None`. 
+
+[source,yaml]
+-----------------------
+xpack.security.sameSiteCookies: "None"
+-----------------------
+
+[float]
+[role="xpack"]
+[[securing-reporting]]
+=== Secure the reporting endpoints
+
+In a production environment, you should restrict access to the reporting endpoints for authorized users. 
+
+. Enable the {stack-security-features} on your {es} cluster. For information on how to enable the {stack-security-features}, refer to {ref}/security-getting-started.html[Getting started with security].
+
+. Configure TLS/SSL encryption for the {kib} server. For information on TLS/SSL encryption, refer to <<configuring-tls>>.
+
+. Specify the {kib} server CA certificate chain in `elasticsearch.yml`.
++
+If you are using your own CA to sign the {kib} server certificate, specify the CA certificate chain in {es} to properly establish trust in TLS
+connections between {watcher} and {kib}. 
++
+If your CA certificate chain is contained in a PKCS #12 trust store, specify the following:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"
+--------------------------------------------------------------------------------
++
+If your CA certificate chain is in PEM format, specify the following:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
++
+For more information, refer to {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
 
 --
 
+include::share-objects.asciidoc[]
 include::automating-report-generation.asciidoc[]
-include::configuring-reporting.asciidoc[]
-include::chromium-sandbox.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]

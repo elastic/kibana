@@ -22,29 +22,66 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
   | Set to `false` to disable the {report-features}.
 
 |[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey` {ess-icon}
-  | Set to an alphanumeric, at least 32 characters long text string. By default, {kib} will generate a random key when it
-  starts, which will cause pending reports to fail after restart. Configure this
-  setting to preserve the same key across multiple restarts and multiple instances of {kib}.
-
+  | By default, a new encryption key generates for the {report-features} each
+  time you start {kib}When a static encryption key is not persisted in
+  the {kib} configuration, any pending reports fail when you restart {kib}. 
+  
+  When you configure the encryption key, {kib} preserves the same key across multiple restarts and multiple {kib} instances.
+  When you load balance across multiple {kib} instances, each instance must have
+  the same encryption key. If the encryption keys are different and a report queues through one {kib} instance,
+  then another instance picks up the reporting job, {kib} is unable to decrypt the metadata and the report fails to generate. 
+  
+  The encryption key must be at least 32 characters long, a text string, and can include any alphanumeric character. 
 |===
+
+For example: 
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+[cols="2*<"]
+|===
+|[[xpack-reporting-index]] `xpack.reporting.index`
+  | When you have multiple {kib} instances with a different `kibana.index` for each instance, configure a custom `xpack.reporting.index`
+  for each `kibana.index`. When security is enabled, begin the `xpack.reporting.index` value with `.reporting-` to enable the necessary privileges over the index for the `kibana_system` role.
+  The default {kib} system user has `all` privileges for the `.reporting-*` pattern of indices.
+|===
+
+For example:
+
+{kib} instance A:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-a"
+xpack.reporting.index: ".reporting-custom-index-a"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+{kib} instance B:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-b"
+xpack.reporting.index: ".reporting-custom-index-b"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
 
 [float]
 [[reporting-kibana-server-settings]]
 ==== {kib} server settings
 
-Reporting opens the {kib} web interface in a server process to generate
-screenshots of {kib} visualizations. In most cases, the default settings
-will work and you don't need to configure Reporting to communicate with {kib}.
-However, if your client connections must go through a reverse-proxy
-to access {kib}, Reporting configuration must have the proxy port, protocol,
-and hostname set in the `xpack.reporting.kibanaServer.*` settings.
+To open a {kib} page for capturing screenshots, a headless browser runs on the {kib} server. 
+If your client connections go through a reverse-proxy, such as NGINX and Apache,
+to access {kib} due to rewrite rules or special headers added by the proxy, you must configure
+`xpack.reporting.kibanaServer.*` so the headless browser process connects to the proxy.
 
 [NOTE]
 ====
 If a reverse-proxy carries encrypted traffic from end-user
 clients back to a {kib} server, the proxy port, protocol, and hostname
 in Reporting settings must be valid for the encryption that the Reporting
-browser will receive. Encrypted communications will fail if there are
+browser receives. Encrypted communications fail if there are
 mismatches in the host information between the request and the certificate on the server.
 
 Configuring the `xpack.reporting.kibanaServer` settings to point to a
@@ -178,7 +215,36 @@ available, but there will likely be errors in the visualizations in the report.
 [[reporting-chromium-settings]]
 ==== Chromium settings
 
+The reporting options are automatically enabled and run a custom build of the Chromium web browser, which
+runs on the server in headless mode to load {kib} and capture the rendered {kib} objects.
+
+Chromium is an open-source project unrelated to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
+works with minimal setup. However, the {kib} server OS can require additional dependencies for Chromium. For more information about the system dependencies
+for different operating systems, refer to <<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>>.
+
+When {report-features} uses the Chromium browser to generate PDF reports, use the sandbox for an additional layer of security. To make sure that
+code execution is unable to make persistent changes to the computer or access
+confidential information, the Chromium sandbox uses operating system-provided mechanisms. For each operating system, the specific sandboxing techniques differ.
+
 When <<xpack-reporting-browser, `xpack.reporting.capture.browser.type`>> is set to `chromium` (default) you can also specify the following settings.
+
+[float]
+===== Linux sandbox
+
+The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
+distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability. The {report-features}
+automatically disable the sandbox when it is running on Debian and CentOS because additional steps are required to enable
+unprivileged usernamespaces. When the sandbox is disabled, the following message appears in your {kib} startup logs:
+`Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
+Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`
+
+{kib} automatically enables the Chromium sandbox at startup when a supported operating system is detected. If you use kernel 3.8 or later, 
+set `xpack.reporting.capture.browser.chromium.disableSandbox: false` to enable usernamespaces.
+
+[float]
+===== Docker
+When running {kib} in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
+AppArmor profiles that prevent {kib} from using the Chromium sandbox. You must disable the sandbox to allow the container to implement similar security mechanisms.
 
 [cols="2*<"]
 |===
@@ -186,7 +252,7 @@ a| `xpack.reporting.capture.browser`
 `.chromium.disableSandbox`
   | It is recommended that you research the feasibility of enabling unprivileged user namespaces.
   See Chromium Sandbox for additional information. Defaults to false for all operating systems except Debian,
-  Red Hat Linux, and CentOS which use true.
+  Red Hat Linux, and CentOS, which use `true`.
 
 a| `xpack.reporting.capture.browser`
 `.chromium.proxy.enabled`
@@ -261,25 +327,105 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
 [cols="2*<"]
 |===
 | `xpack.reporting.index`
-  | *deprecated* This setting is deprecated and will be removed in 8.0. Multitenancy by changing
-  `kibana.index` will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]
-  for more details. Reporting uses a weekly index in {es} to store the reporting job and
+  | *deprecated* This setting is deprecated and will be removed in 8.0. in 8.0 and later, multitenancy by changing
+  `kibana.index` will be unsupported. For more information, refer to https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]. 
+  Reporting uses a weekly index in {es} to store the reporting job and
   the report content. The index is automatically created if it does not already
   exist. Configure this to a unique value, beginning with `.reporting-`, for every
   {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
 
-| `xpack.reporting.capture.networkPolicy`
-  | Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown
-  visualization can show an image from a remote server. You can configure what type of requests to allow or filter by setting a
-  <<reporting-network-policy, network policy>> for Reporting.
-
 | `xpack.reporting.roles.allow`
   | Specifies the roles in addition to superusers that can use reporting.
   Defaults to `[ "reporting_user" ]`. +
-
 |===
 
 [NOTE]
 ============
 Each user has access to only their own reports.
 ============
+
+[role="xpack"]
+[[reporting-network-policy]]
+=== Network policy setting
+
+When you generate PDF reports, {kib} uses the Chromium browser to load the {kib} page on the server, which
+potentially involves sending requests to external hosts. For example, when a request is sent to an external image server to show a
+field formatted as an image, or to show an image in a Markdown visualization.
+
+When the Chromium browser is asked to send a request that violates the network policy, {kib} stops processing the page
+before the request goes out, and the report fails. Additional information about the failure appears in
+the {kib} server logs.
+
+[NOTE]
+============
+{kib} is not designed to be publicly accessible over the internet. The network policy and Elastic Stack security features do not change this condition.
+============
+
+[cols="2*<"]
+|===
+| `xpack.reporting.capture.networkPolicy`
+  | To capture a screenshot from a {kib} page, requests are sent for all of the linked web assets. For example, a Markdown
+  visualization can show an image from a remote server. A network policy is specified as an array of objects that describe 
+  what to allow or deny based on a host or protocol. When a host or protocol are unspecified, the rule matches any host or protocol.
+
+  The rule objects are sequentially evaluated from the beginning to the end of the array, and continue until there is a matching rule.
+  If no rules allow a request, the request is denied.
+|===
+
+For example:
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to placeholder.com
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com" } ] 
+-------------------------------------------------------
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to https://placeholder.com 
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ] 
+-------------------------------------------------------
+
+A final `allow` rule with no host or protocol allows all requests that are not explicitly denied.
+
+[source,yaml]
+-------------------------------------------------------
+# Denies requests from http://placeholder.com, but anything else is allowed.
+xpack.reporting.capture.networkPolicy:
+  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+-------------------------------------------------------
+
+A network policy can include multiple rules.
+
+[source,yaml]
+-------------------------------------------------------
+# Allow any request to http://placeholder.com but for any other host, https is required
+xpack.reporting.capture.networkPolicy
+  rules: [
+    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, protocol: "https:" },
+  ]
+-------------------------------------------------------
+
+[NOTE]
+============
+The `file:` protocol is always denied, even if when no network policy is configured.
+============
+
+To disable a network policy:
+
+[source,yaml]
+-------------------------------------------------------
+xpack.reporting.capture.networkPolicy.enabled: false
+-------------------------------------------------------
+
+
+
+
+
+
+
+
+

@@ -4,7 +4,18 @@
 
 To automatically generate PDF and CSV reports, generate a POST URL, then submit the HTTP `POST` request using {watcher} or a script.
 
-include::report-intervals.asciidoc[]
+[IMPORTANT]
+===================
+The interval between report requests must be longer than the time it
+takes to generate the reports--otherwise, the report queue can back up. To 
+avoid this, increase the time between report requests. 
+
+By default, report generation fails if the report is unable to generate
+within two minutes. When you generate reports that contain many complex
+visualizations, or your machine is slow or under constant heavy load, it
+can take longer than two minutes to generate a report. To increase
+the time between report requests, configure <<xpack-reporting-q-timeout,`xpack.reporting.queue.timeout`.
+===================
 
 [float]
 === Create a POST URL
