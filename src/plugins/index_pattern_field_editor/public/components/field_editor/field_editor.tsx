@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
   EuiCode,
-  EuiFormErrorText,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
@@ -243,7 +243,16 @@ const FieldEditorComponent = ({
       </EuiFlexGroup>
 
       {(nameHasChanged || typeHasChanged) && (
-        <EuiFormErrorText data-test-subj="changeWarning">{changeWarning}</EuiFormErrorText>
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut
+            color="warning"
+            title={changeWarning}
+            iconType="alert"
+            size="s"
+            data-test-subj="changeWarning"
+          />
+        </>
       )}
       <EuiSpacer size="xl" />
 
