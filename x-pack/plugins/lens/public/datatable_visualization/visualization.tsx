@@ -68,6 +68,7 @@ export const getDatatableVisualization = ({
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular and single value',
       }),
+      sortPriority: 1,
     },
   ],
 
@@ -190,7 +191,7 @@ export const getDatatableVisualization = ({
         {
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
-            defaultMessage: 'Split rows',
+            defaultMessage: 'Rows',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
             defaultMessage:
@@ -217,7 +218,7 @@ export const getDatatableVisualization = ({
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Split columns',
+            defaultMessage: 'Columns',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
