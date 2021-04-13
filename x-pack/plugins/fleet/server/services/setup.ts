@@ -36,7 +36,8 @@ const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
 export interface SetupStatus {
-  isIntialized: true | undefined;
+  isInitialized: boolean;
+  preconfigurationError: { name: string; message: string } | undefined;
 }
 
 export async function setupIngestManager(
@@ -86,14 +87,19 @@ async function createSetupSideEffects(
 
   const policies = policiesOrUndefined ?? [];
   const packages = packagesOrUndefined ?? [];
+  let preconfigurationError;
 
-  await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput
-  );
+  try {
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      policies,
+      packages,
+      defaultOutput
+    );
+  } catch (e) {
+    preconfigurationError = { name: e.name, message: e.message };
+  }
 
   // Ensure the predefined default policies AFTER loading preconfigured policies. This allows the kibana config
   // to override the default agent policies.
@@ -170,7 +176,7 @@ async function createSetupSideEffects(
 
   await ensureAgentActionPolicyChangeExists(soClient);
 
-  return { isIntialized: true };
+  return { isInitialized: true, preconfigurationError };
 }
 
 async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {

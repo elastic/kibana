@@ -7,4 +7,5 @@
 
 export interface PostIngestSetupResponse {
   isInitialized: boolean;
+  preconfigurationError: { name: string; message: string } | undefined;
 }
