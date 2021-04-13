@@ -11,11 +11,11 @@ import { AnomaliesTable } from '../../../ml/anomaly_detection/anomalies_table/an
 import { TabContent, TabProps } from '../shared';
 
 const TabComponent = (props: TabProps) => {
-  const { node } = props;
+  const { node, onClose } = props;
 
   return (
     <TabContent>
-      <AnomaliesTable closeFlyout={() => {}} hostName={node.name} />
+      <AnomaliesTable closeFlyout={onClose} hostName={node.name} />
     </TabContent>
   );
 };

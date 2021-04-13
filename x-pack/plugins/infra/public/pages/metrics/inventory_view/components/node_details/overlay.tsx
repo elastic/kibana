@@ -59,11 +59,17 @@ export const NodeContextPopover = ({
       return {
         ...m,
         content: (
-          <TabContent node={node} nodeType={nodeType} currentTime={currentTime} options={options} />
+          <TabContent
+            onClose={onClose}
+            node={node}
+            nodeType={nodeType}
+            currentTime={currentTime}
+            options={options}
+          />
         ),
       };
     });
-  }, [tabConfigs, node, nodeType, currentTime, options]);
+  }, [tabConfigs, node, nodeType, currentTime, onClose, options]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
