@@ -11,7 +11,12 @@ import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
-import { getVisibilityToggleLabel, EDIT_LAYER_LABEL, FIT_TO_DATA_LABEL } from '../action_labels';
+import {
+  getVisibilityToggleIcon,
+  getVisibilityToggleLabel,
+  EDIT_LAYER_LABEL,
+  FIT_TO_DATA_LABEL,
+} from '../action_labels';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -94,7 +99,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
       {
         name: getVisibilityToggleLabel(this.props.layer.isVisible()),
-        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'} size="m" />,
+        icon: <EuiIcon type={getVisibilityToggleIcon(this.props.layer.isVisible())} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
         onClick: () => {

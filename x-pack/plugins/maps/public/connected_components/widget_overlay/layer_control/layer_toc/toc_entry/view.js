@@ -11,7 +11,12 @@ import classNames from 'classnames';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
-import { getVisibilityToggleLabel, EDIT_LAYER_LABEL, FIT_TO_DATA_LABEL } from './action_labels';
+import {
+  getVisibilityToggleIcon,
+  getVisibilityToggleLabel,
+  EDIT_LAYER_LABEL,
+  FIT_TO_DATA_LABEL,
+} from './action_labels';
 
 function escapeLayerName(name) {
   return name ? name.split(' ').join('_') : '';
@@ -133,42 +138,41 @@ export class TOCEntry extends React.Component {
     );
   }
 
-  _renderLayerIcons() {
-    const fitToBoundsIcon = this.state.supportsFitToBounds ? (
+  _renderQuickActions() {
+    const quickActions = [
       <EuiButtonIcon
-        iconType="expand"
+        iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
         color="subdued"
-        title={FIT_TO_DATA_LABEL}
-        aria-label={FIT_TO_DATA_LABEL}
-        onClick={this._fitToBounds}
-      />
-    ) : null;
+        title={getVisibilityToggleLabel(this.props.layer.isVisible())}
+        aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
+        onClick={this._toggleVisible}
+      />,
+    ];
 
-    const editIcon = this.props.isReadOnly ? null : (
-      <EuiButtonIcon
-        isDisabled={this.props.isEditButtonDisabled}
-        iconType="pencil"
-        color="subdued"
-        aria-label={EDIT_LAYER_LABEL}
-        title={EDIT_LAYER_LABEL}
-        onClick={this._openLayerPanelWithCheck}
-      />
-    );
-
-    return (
-      <div className="mapTocEntry__layerIcons">
+    if (this.state.supportsFitToBounds) {
+      quickActions.push(
         <EuiButtonIcon
-          iconType={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'}
+          iconType="expand"
           color="subdued"
-          title={getVisibilityToggleLabel(this.props.layer.isVisible())}
-          aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
-          onClick={this._toggleVisible}
+          title={FIT_TO_DATA_LABEL}
+          aria-label={FIT_TO_DATA_LABEL}
+          onClick={this._fitToBounds}
         />
+      );
+    }
 
-        {fitToBoundsIcon}
-
-        {editIcon}
-
+    if (!this.props.isReadOnly) {
+      quickActions.push(
+        <EuiButtonIcon
+          isDisabled={this.props.isEditButtonDisabled}
+          iconType="pencil"
+          color="subdued"
+          aria-label={EDIT_LAYER_LABEL}
+          title={EDIT_LAYER_LABEL}
+          onClick={this._openLayerPanelWithCheck}
+        />
+      );
+      quickActions.push(
         <EuiButtonIcon
           iconType="grab"
           color="subdued"
@@ -181,8 +185,10 @@ export class TOCEntry extends React.Component {
           className="mapTocEntry__grab"
           {...this.props.dragHandleProps}
         />
-      </div>
-    );
+      );
+    }
+
+    return <div className="mapTocEntry__layerIcons">{quickActions}</div>;
   }
 
   _renderDetailsToggle() {
@@ -244,7 +250,7 @@ export class TOCEntry extends React.Component {
           supportsFitToBounds={this.state.supportsFitToBounds}
         />
 
-        {this._renderLayerIcons()}
+        {this._renderQuickActions()}
       </div>
     );
   }

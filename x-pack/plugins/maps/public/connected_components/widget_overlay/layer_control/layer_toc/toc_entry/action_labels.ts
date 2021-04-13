@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export function getVisibilityToggleIcon(isVisible: boolean) {
+  return isVisible ? 'eyeClosed' : 'eye';
+}
+
 export function getVisibilityToggleLabel(isVisible: boolean) {
   return isVisible
     ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
