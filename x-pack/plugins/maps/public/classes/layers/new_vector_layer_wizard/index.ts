@@ -32,7 +32,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     setEditModeActive: () => dispatch(updateEditMode(true)),
     setEditModeInActive: () => {
-      dispatch(updateEditMode(false))
+      dispatch(updateEditMode(false));
       dispatch(clearDrawingData());
     },
     setIndexName: (indexName: string) => dispatch(setVectorLayerIndexName(indexName)),

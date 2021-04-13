@@ -45,7 +45,6 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-  UPDATE_DRAW_FEATURE_STATE,
   UPDATE_EDIT_MODE,
   SET_VECTOR_LAYER_INDEX_NAME,
   CLEAR_DRAWING_DATA,
@@ -81,7 +80,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     refreshTimerLastTriggeredAt: undefined,
     vectorLayerIndexName: '',
     drawState: undefined,
-    drawFeatureState: undefined,
     editModeActive: false,
   },
   selectedLayerId: null,
@@ -99,14 +97,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawState: action.drawState,
-        },
-      };
-    case UPDATE_DRAW_FEATURE_STATE:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          drawFeatureState: action.drawFeatureState,
         },
       };
     case UPDATE_EDIT_MODE:
@@ -131,7 +121,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawState: undefined,
-          drawFeatureState: undefined,
           editModeActive: false,
         },
       };

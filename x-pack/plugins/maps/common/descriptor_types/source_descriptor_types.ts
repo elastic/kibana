@@ -188,13 +188,4 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type NewVectorLayerSourceDescriptor = {
-  __fields?: InlineFieldDescriptor[];
-  __featureCollection: FeatureCollection;
-  areResultsTrimmed: boolean;
-  tooltipContent: string | null;
-  name: string;
-  type: string;
-};
-
 export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

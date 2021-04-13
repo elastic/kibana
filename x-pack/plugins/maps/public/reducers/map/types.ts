@@ -17,7 +17,7 @@ import {
   MapRefreshConfig,
   TooltipState,
 } from '../../../common/descriptor_types';
-import { DRAW_TYPE, INITIAL_LOCATION } from '../../../common/constants';
+import { INITIAL_LOCATION } from '../../../common/constants';
 import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 export type MapContext = {
@@ -37,7 +37,6 @@ export type MapContext = {
   refreshTimerLastTriggeredAt?: string;
   vectorLayerIndexName: string;
   drawState?: DrawState;
-  drawFeatureState?: DRAW_TYPE;
   editModeActive: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
