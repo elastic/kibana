@@ -30,7 +30,6 @@ import { FormattedDate, FormattedMessage } from 'react-intl';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { PrefilledAnomalyAlertFlyout } from '../../../../../../../alerting/metric_anomaly/components/alert_flyout';
 import { useLinkProps } from '../../../../../../../hooks/use_link_props';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
@@ -68,11 +67,8 @@ const AnomalyActionMenu = ({
   partitionFieldValue?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-  const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
-  const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
   const { onViewChange } = useWaffleViewState();
 
   const showInInventory = useCallback(() => {
@@ -130,12 +126,6 @@ const AnomalyActionMenu = ({
         defaultMessage="Open in Anomaly Explorer"
       />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
-        defaultMessage="Create Alert"
-      />
-    </EuiContextMenuItem>,
   ];
 
   return (
@@ -152,12 +142,11 @@ const AnomalyActionMenu = ({
             })}
           />
         }
-        isOpen={isOpen && !isAlertOpen}
+        isOpen={isOpen}
         closePopover={close}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
     </>
   );
 };
@@ -184,9 +173,10 @@ export const NoAnomaliesFound = withTheme(({ theme }) => (
 ));
 interface Props {
   closeFlyout(): void;
+  hostName?: string;
 }
 export const AnomaliesTable = (props: Props) => {
-  const { closeFlyout } = props;
+  const { closeFlyout, hostName } = props;
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
@@ -329,7 +319,7 @@ export const AnomaliesTable = (props: Props) => {
     });
   };
 
-  const columns: Array<
+  let columns: Array<
     | EuiTableFieldDataColumnType<MetricsHostsAnomaly>
     | EuiTableActionsColumnType<MetricsHostsAnomaly>
   > = [
@@ -406,11 +396,20 @@ export const AnomaliesTable = (props: Props) => {
     },
   ];
 
+  columns = hostName
+    ? columns.filter((c) => {
+        if ('field' in c) {
+          return c.field !== 'influencers';
+        }
+        return true;
+      })
+    : columns;
+
   useEffect(() => {
     if (getAnomalies) {
-      getAnomalies(undefined, search);
+      getAnomalies(undefined, search, hostName);
     }
-  }, [getAnomalies, search]);
+  }, [getAnomalies, search, hostName]);
 
   return (
     <div>
@@ -425,31 +424,33 @@ export const AnomaliesTable = (props: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={3}>
-          <EuiFieldSearch
-            fullWidth
-            placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
-              defaultMessage: 'Search',
-            })}
-            value={search}
-            onChange={onSearchChange}
-            isClearable={true}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiComboBox
-            placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
-              defaultMessage: 'Select group',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={jobOptions}
-            selectedOptions={selectedJobType}
-            onChange={changeJobType}
-            isClearable={false}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!hostName && (
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={3}>
+            <EuiFieldSearch
+              fullWidth
+              placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
+                defaultMessage: 'Search',
+              })}
+              value={search}
+              onChange={onSearchChange}
+              isClearable={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiComboBox
+              placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
+                defaultMessage: 'Select group',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={jobOptions}
+              selectedOptions={selectedJobType}
+              onChange={changeJobType}
+              isClearable={false}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <EuiSpacer size={'m'} />
 
