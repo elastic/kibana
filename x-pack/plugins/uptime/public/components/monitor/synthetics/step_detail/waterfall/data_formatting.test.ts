@@ -30,7 +30,6 @@ export const networkItems: NetworkItems = [
     status: 200,
     mimeType: 'text/css',
     requestSentTime: 18098833.175,
-    requestStartTime: 18098835.439,
     loadEndTime: 18098957.145,
     timings: {
       connect: 81.10800000213203,
@@ -53,8 +52,8 @@ export const networkItems: NetworkItems = [
     },
     certificates: {
       issuer: 'Sample Issuer',
-      validFrom: 1578441600000,
-      validTo: 1617883200000,
+      validFrom: '2021-02-22T18:35:26.000Z',
+      validTo: '2021-04-05T22:28:43.000Z',
       subjectName: '*.elastic.co',
     },
     ip: '104.18.8.22',
@@ -66,7 +65,6 @@ export const networkItems: NetworkItems = [
     status: 200,
     mimeType: 'application/javascript',
     requestSentTime: 18098833.537,
-    requestStartTime: 18098837.233999997,
     loadEndTime: 18098977.648000002,
     timings: {
       blocked: 84.54599999822676,
@@ -152,7 +150,6 @@ export const networkItemsWithUncommonMimeType: NetworkItems = [
     status: 200,
     mimeType: 'application/x-javascript',
     requestSentTime: 18098833.537,
-    requestStartTime: 18098837.233999997,
     loadEndTime: 18098977.648000002,
     timings: {
       blocked: 84.54599999822676,

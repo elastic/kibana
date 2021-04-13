@@ -177,7 +177,7 @@ export function getState({
     },
     uiSettings
   );
-  // todo filter source depending on fields fetchinbg flag (if no columns remain and source fetching is enabled, use default columns)
+  // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 

@@ -17,8 +17,10 @@ interface EsErrorHandlerParams {
   handleCustomError?: () => IKibanaResponse<any>;
 }
 
-/*
+/**
  * For errors returned by the new elasticsearch js client.
+ *
+ * @throws If "error" is not an error from the elasticsearch client this handler will throw "error".
  */
 export const handleEsError = ({
   error,

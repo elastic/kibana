@@ -52,9 +52,6 @@ node_repositories(
 # NOTE: FORCE_COLOR env var forces colors on non tty mode
 yarn_install(
   name = "npm",
-  environment = {
-    "FORCE_COLOR": "True",
-  },
   package_json = "//:package.json",
   yarn_lock = "//:yarn.lock",
   data = [
