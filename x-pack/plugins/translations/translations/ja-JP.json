@@ -17365,7 +17365,6 @@
     "xpack.security.account.passwordsDoNotMatch": "パスワードが一致していません。",
     "xpack.security.account.usernameGroupDescription": "この情報は変更できません。",
     "xpack.security.account.usernameGroupTitle": "ユーザー名とメールアドレス",
-    "xpack.security.apiKeys.breadcrumb": "API キー",
     "xpack.security.authentication.login.validateLogin.requiredPasswordErrorMessage": "パスワードが必要です",
     "xpack.security.authentication.login.validateLogin.requiredUsernameErrorMessage": "ユーザー名が必要です",
     "xpack.security.checkup.dismissButtonText": "閉じる",
