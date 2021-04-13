@@ -35,7 +35,6 @@ describe('ResultSettingsLogic', () => {
     serverResultFields: {},
     reducedServerResultFields: {},
     resultFieldsAtDefaultSettings: true,
-    resultFieldsEmpty: true,
     stagedUpdates: false,
     nonTextResultFields: {},
     textResultFields: {},
@@ -319,30 +318,6 @@ describe('ResultSettingsLogic', () => {
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(false);
-      });
-    });
-
-    describe('resultFieldsEmpty', () => {
-      it('should return true if all fields are empty', () => {
-        mount({
-          resultFields: {
-            foo: {},
-            bar: {},
-          },
-        });
-
-        expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(true);
-      });
-
-      it('should return false otherwise', () => {
-        mount({
-          resultFields: {
-            foo: {},
-            bar: { raw: true, snippet: true, snippetFallback: false },
-          },
-        });
-
-        expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(false);
       });
     });
 
