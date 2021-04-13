@@ -1,8 +1,8 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "elastic-datemath"
-PKG_REQUIRE_NAME = "@elastic/datemath"
+PKG_BASE_NAME = "kbn-apm-utils"
+PKG_REQUIRE_NAME = "@kbn/apm-utils"
 
 SOURCE_FILES = glob([
   "src/index.ts",
@@ -17,11 +17,10 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
 ]
 
 SRC_DEPS = [
-  "@npm//moment",
+  "@npm//elastic-apm-node",
 ]
 
 TYPES_DEPS = [
