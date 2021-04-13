@@ -31,6 +31,7 @@ export interface FleetConfigType {
     };
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
+    agentPolicyTightPermissions: boolean;
   };
 }
 

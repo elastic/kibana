@@ -28,6 +28,7 @@ export const createConfigurationMock = (): FleetConfigType => {
       },
       agentPolicyRolloutRateLimitIntervalMs: 100,
       agentPolicyRolloutRateLimitRequestPerInterval: 1000,
+      agentPolicyTightPermissions: false,
     },
   };
 };

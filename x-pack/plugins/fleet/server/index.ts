@@ -76,6 +76,7 @@ export const config: PluginConfigDescriptor = {
       agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
+      agentPolicyTightPermissions: schema.boolean({ defaultValue: false }),
     }),
   }),
 };
