@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { ClockPlayIcon } from './clock_play_icon';
 
 export interface Props {
@@ -34,14 +34,16 @@ export function TimesliderToggleButton(props: Props) {
       });
 
   return (
-    <EuiButtonIcon
-      className="mapToolbarOverlay__button"
-      onClick={onClick}
-      data-test-subj="timesliderToggleButton"
-      iconType={ClockPlayIcon}
-      color="text"
-      aria-label={label}
-      title={label}
-    />
+    <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
+      <EuiButtonIcon
+        size="s"
+        onClick={onClick}
+        data-test-subj="timesliderToggleButton"
+        iconType={ClockPlayIcon}
+        color="text"
+        aria-label={label}
+        title={label}
+      />
+    </EuiPanel>
   );
 }
