@@ -40,6 +40,7 @@ ts_config(
 
 ts_project(
   name = "tsc",
+  args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
   declaration = True,

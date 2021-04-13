@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiTitle,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -69,6 +71,8 @@ export interface DiscoverFieldProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
+
+  onEditField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -82,6 +86,7 @@ export function DiscoverField({
   selected,
   trackUiMetric,
   multiFields,
+  onEditField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -250,7 +255,6 @@ export function DiscoverField({
   };
 
   const fieldInfoIcon = getFieldInfoIcon();
-
   const shouldRenderMultiFields = !!multiFields;
   const renderMultiFields = () => {
     if (!multiFields) {
@@ -282,6 +286,35 @@ export function DiscoverField({
     );
   };
 
+  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
+  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
+  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
+  const displayNameGrow = canEditField ? 9 : 10;
+  const popoverTitle = (
+    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
+        {canEditField && (
+          <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelEditItem">
+            <EuiButtonIcon
+              onClick={() => {
+                if (onEditField) {
+                  togglePopover();
+                  onEditField(field.name);
+                }
+              }}
+              iconType="pencil"
+              data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
+              aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+                defaultMessage: 'Edit index pattern field',
+              })}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
+  );
+
   return (
     <EuiPopover
       display="block"
@@ -305,9 +338,7 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-        {field.displayName}
-      </EuiPopoverTitle>
+      {popoverTitle}
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

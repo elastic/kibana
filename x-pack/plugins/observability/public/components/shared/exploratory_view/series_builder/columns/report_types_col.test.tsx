@@ -10,6 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 import { ReportTypesCol, SELECTED_DATA_TYPE_FOR_REPORT } from './report_types_col';
 import { ReportTypes } from '../series_builder';
+import { DEFAULT_TIME } from '../../configurations/constants';
 
 describe('ReportTypesCol', function () {
   it('should render properly', function () {
@@ -60,6 +61,9 @@ describe('ReportTypesCol', function () {
     fireEvent.click(button);
 
     // undefined on click selected
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: 'synthetics' });
+    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+      dataType: 'synthetics',
+      time: DEFAULT_TIME,
+    });
   });
 });
