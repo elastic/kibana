@@ -99,7 +99,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
 
-  // used to give the use the option to customize the fields used for the matrix axes
+  // used to give the user the option to customize the fields used for the matrix axes
   const [fields, setFields] = useState<string[]>([]);
 
   useEffect(() => {
@@ -156,7 +156,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   useEffect(() => {
     if (fields.length === 0) {
-      setSplom(undefined);
+      setSplom({ columns: [], items: [], messages: [] });
       setIsLoading(false);
       return;
     }
@@ -267,7 +267,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       {splom === undefined || vegaSpec === undefined ? (
         <VegaChartLoading />
       ) : (
-        <div data-test-subj="mlScatterplotMatrix">
+        <div data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -316,6 +316,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSelect
+                  data-test-subj="mlScatterplotMatrixSampleSizeSelect"
                   compressed
                   options={sampleSizeOptions}
                   value={fetchSize}
@@ -340,6 +341,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSwitch
+                  data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}

@@ -762,7 +762,7 @@ describe('AllCases', () => {
       wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
       wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
-        sortField: 'updatedAt',
+        sortField: 'createdAt',
       });
     });
   });

@@ -31,7 +31,7 @@ export const request = async <T = unknown>({
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
   const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
-
+  const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
   return await axios(url, {
     ...rest,
     method,
@@ -40,6 +40,8 @@ export const request = async <T = unknown>({
     httpAgent,
     httpsAgent,
     proxy: false,
+    maxContentLength,
+    timeout,
   });
 };
 
