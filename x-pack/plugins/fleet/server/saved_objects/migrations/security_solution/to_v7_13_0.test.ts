@@ -128,16 +128,6 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
 
   const migrationContext = migrationMocks.createContext();
 
-  beforeEach(() => {
-    // set `fleetServerEnabled` flag to true
-    appContextService.fleetServerEnabled = true;
-  });
-
-  afterEach(() => {
-    // set `fleetServerEnabled` flag back to false
-    appContextService.fleetServerEnabled = false;
-  });
-
   it('should adjust the relative url for all artifact manifests', () => {
     expect(
       migrateEndpointPackagePolicyToV7130(createOldPackagePolicySO(), migrationContext)
@@ -149,17 +139,6 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
     packagePolicySo.attributes.package!.name = 'not endpoint';
 
     const unchangedPackagePolicySo = cloneDeep(packagePolicySo);
-
-    expect(migrateEndpointPackagePolicyToV7130(packagePolicySo, migrationContext)).toEqual(
-      unchangedPackagePolicySo
-    );
-  });
-
-  it('should NOT migrate artifact relative_url if fleetServerEnabled is false', () => {
-    const packagePolicySo = createOldPackagePolicySO();
-    const unchangedPackagePolicySo = cloneDeep(packagePolicySo);
-
-    appContextService.fleetServerEnabled = false;
 
     expect(migrateEndpointPackagePolicyToV7130(packagePolicySo, migrationContext)).toEqual(
       unchangedPackagePolicySo

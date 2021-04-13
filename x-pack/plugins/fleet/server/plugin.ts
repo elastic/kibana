@@ -218,8 +218,6 @@ export class FleetPlugin
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    appContextService.fleetServerEnabled = config.agents.fleetServerEnabled;
-
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
