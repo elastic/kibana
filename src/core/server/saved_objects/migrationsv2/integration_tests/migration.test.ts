@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
@@ -18,6 +20,14 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
 
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
@@ -46,7 +56,7 @@ describe('migration v2', () => {
           appenders: {
             file: {
               type: 'file',
-              fileName: join(__dirname, 'migration_test_kibana.log'),
+              fileName: logFilePath,
               layout: {
                 type: 'json',
               },
@@ -121,9 +131,10 @@ describe('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: false,
-        dataArchive: join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
       });
     });
 
@@ -162,7 +173,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
