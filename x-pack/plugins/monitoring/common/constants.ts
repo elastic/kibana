@@ -477,7 +477,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Shard size',
     }),
     description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
-      defaultMessage: 'Alert if an index (primary) shard average is oversize.',
+      defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
   },
 };
