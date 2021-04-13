@@ -661,7 +661,7 @@ export const deleteComment = async (
 export const getAllComments = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<AllCommentsResponse> => {
   const { body: comments } = await supertest
     .get(`${CASES_URL}/${caseId}/comments`)
@@ -676,7 +676,7 @@ export const getComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   commentId: string,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<CommentResponse> => {
   const { body: comment } = await supertest
     .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
@@ -691,7 +691,7 @@ export const updateComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   req: CommentPatchRequest,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<CaseResponse> => {
   const { body: res } = await supertest
     .patch(`${CASES_URL}/${caseId}/comments`)
