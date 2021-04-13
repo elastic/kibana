@@ -52,6 +52,14 @@ Sensitive properties, such as passwords, can also be stored in the <<creating-ke
 ==============================================
 
 [float]
+[[build-in-preconfigured-connectors]]
+==== Built-in preconfigured connectors
+
+{kib} provides one built-in preconfigured connector:
+
+* <<preconfigured-connector-alert-history, Alert history preconfigured {es} index connector>>
+
+[float]
 [[managing-pre-configured-connectors]]
 ==== View preconfigured connectors
 

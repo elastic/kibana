@@ -10,7 +10,9 @@ import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
-import { FieldConfig, ValidationFunc } from '../../../../../../shared_imports';
+import { FieldConfig, ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
+
+const { emptyField } = fieldValidators;
 
 export const arrayOfStrings = rt.array(rt.string);
 
@@ -115,6 +117,20 @@ export const isJSONStringValidator: ValidationFunc = ({ value }) => {
         { defaultMessage: 'Invalid JSON string.' }
       ),
     };
+  }
+};
+
+/**
+ * Similar to the emptyField validator but we accept whitespace characters.
+ */
+export const isEmptyString = (message: string): ValidationFunc => (field) => {
+  const { value } = field;
+  if (typeof value === 'string') {
+    const hasLength = Boolean(value.length);
+    const hasNonWhiteSpaceChars = hasLength && Boolean(value.trim().length);
+    if (hasNonWhiteSpaceChars) {
+      return emptyField(message)(field);
+    }
   }
 };
 

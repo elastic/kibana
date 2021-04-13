@@ -108,7 +108,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
 
-  // used to give the use the option to customize the fields used for the matrix axes
+  // used to give the user the option to customize the fields used for the matrix axes
   const [fields, setFields] = useState<string[]>([]);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   useEffect(() => {
     if (fields.length === 0) {
-      setSplom(undefined);
+      setSplom({ columns: [], items: [], messages: [] });
       setIsLoading(false);
       return;
     }

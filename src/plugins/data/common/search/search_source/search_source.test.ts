@@ -125,7 +125,7 @@ describe('SearchSource', () => {
           }),
         } as unknown) as IndexPattern);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['hello']);
         expect(request.script_fields).toEqual({ world: {} });
         expect(request.fields).toEqual(['@timestamp']);
@@ -144,7 +144,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['@timestamp']);
         searchSource.setField('fieldsFromSource', ['foo']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).not.toHaveProperty('docvalue_fields');
       });
 
@@ -160,7 +160,7 @@ describe('SearchSource', () => {
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', ['world']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('docvalue_fields');
         expect(request.docvalue_fields).toEqual(['world']);
       });
@@ -179,7 +179,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['c']);
         searchSource.setField('fieldsFromSource', ['a', 'b', 'd']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('docvalue_fields');
         expect(request._source.includes).toEqual(['c', 'a', 'b', 'd']);
         expect(request.docvalue_fields).toEqual([{ field: 'b', format: 'date_time' }]);
@@ -202,7 +202,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('fields');
         expect(request.fields).toEqual([{ field: 'hello', format: 'strict_date_time' }]);
       });
@@ -218,7 +218,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('fields');
         expect(request.fields).toEqual([{ field: 'hello', format: 'date_time' }]);
       });
@@ -239,7 +239,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('fields');
         expect(request.fields).toEqual([
           { field: 'hello', format: 'date_time', a: 'a', b: 'test', c: 'c' },
@@ -258,7 +258,7 @@ describe('SearchSource', () => {
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('script_fields', { world: {} });
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('script_fields');
         expect(request.script_fields).toEqual({
           hello: {},
@@ -277,7 +277,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['a', 'c']);
       });
@@ -293,7 +293,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['a']);
       });
@@ -309,23 +309,23 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fieldsFromSource', ['hello', 'a']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['a']);
       });
 
       test('defaults to * for stored fields when no fields are provided', async () => {
-        const requestA = await searchSource.getSearchRequestBody();
+        const requestA = searchSource.getSearchRequestBody();
         expect(requestA.stored_fields).toEqual(['*']);
 
         searchSource.setField('fields', ['*']);
-        const requestB = await searchSource.getSearchRequestBody();
+        const requestB = searchSource.getSearchRequestBody();
         expect(requestB.stored_fields).toEqual(['*']);
       });
 
       test('defaults to * for stored fields when no fields are provided with fieldsFromSource', async () => {
         searchSource.setField('fieldsFromSource', ['*']);
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
     });
@@ -343,7 +343,7 @@ describe('SearchSource', () => {
         // @ts-expect-error Typings for excludes filters need to be fixed.
         searchSource.setField('source', { excludes: ['exclude-*'] });
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['@timestamp']);
       });
 
@@ -357,7 +357,7 @@ describe('SearchSource', () => {
           }),
         } as unknown) as IndexPattern);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['@timestamp']);
       });
 
@@ -372,7 +372,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
       });
 
@@ -387,7 +387,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello', 'foo']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['hello']);
       });
 
@@ -402,7 +402,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['*']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
@@ -417,7 +417,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
@@ -432,7 +432,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['timestamp', '*']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {}, world: {} });
       });
     });
@@ -455,7 +455,7 @@ describe('SearchSource', () => {
           'bar-b',
         ]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
           includes: ['@timestamp', 'bar-b'],
         });
@@ -473,7 +473,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
@@ -498,7 +498,7 @@ describe('SearchSource', () => {
           'runtime_field',
         ]);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
           includes: ['@timestamp', 'bar'],
         });
@@ -520,7 +520,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
         searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
           includes: ['@timestamp', 'bar', 'date', 'baz'],
         });
@@ -546,7 +546,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['*']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([
           '*',
           { field: '@timestamp', format: 'strict_date_optional_time_nanos' },
@@ -574,7 +574,7 @@ describe('SearchSource', () => {
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['*']);
 
-        const request = await searchSource.getSearchRequestBody();
+        const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },
@@ -592,14 +592,14 @@ describe('SearchSource', () => {
             expect(searchSource.getField('source')).toBe(undefined);
             searchSource.setField('index', indexPattern);
             expect(searchSource.getField('index')).toBe(indexPattern);
-            const request = await searchSource.getSearchRequestBody();
+            const request = searchSource.getSearchRequestBody();
             expect(request._source).toBe(mockSource);
           });
 
           test('removes created searchSource filter on removal', async () => {
             searchSource.setField('index', indexPattern);
             searchSource.setField('index', undefined);
-            const request = await searchSource.getSearchRequestBody();
+            const request = searchSource.getSearchRequestBody();
             expect(request._source).toBe(undefined);
           });
         });
@@ -609,7 +609,7 @@ describe('SearchSource', () => {
             searchSource.setField('index', indexPattern);
             searchSource.setField('index', indexPattern2);
             expect(searchSource.getField('index')).toBe(indexPattern2);
-            const request = await searchSource.getSearchRequestBody();
+            const request = searchSource.getSearchRequestBody();
             expect(request._source).toBe(mockSource2);
           });
 
@@ -617,7 +617,7 @@ describe('SearchSource', () => {
             searchSource.setField('index', indexPattern);
             searchSource.setField('index', indexPattern2);
             searchSource.setField('index', undefined);
-            const request = await searchSource.getSearchRequestBody();
+            const request = searchSource.getSearchRequestBody();
             expect(request._source).toBe(undefined);
           });
         });
@@ -808,7 +808,7 @@ describe('SearchSource', () => {
           docvalueFields: [],
         }),
       } as unknown) as IndexPattern);
-      const request = await searchSource.getSearchRequestBody();
+      const request = searchSource.getSearchRequestBody();
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
       expect(request._source).toEqual(['geometry']);
