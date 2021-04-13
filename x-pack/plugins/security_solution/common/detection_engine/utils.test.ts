@@ -193,15 +193,7 @@ describe('normalizeMachineLearningJobIds', () => {
     ]);
   });
 
-  it('converts undefined to an empty array', () => {
-    expect(normalizeMachineLearningJobIds(undefined)).toEqual([]);
-  });
-
-  it('converts null to an empty array', () => {
-    expect(normalizeMachineLearningJobIds(null)).toEqual([]);
-  });
-
-  it('converts an empty string to an empty array', () => {
-    expect(normalizeMachineLearningJobIds('')).toEqual([]);
+  it('preserves undefined', () => {
+    expect(normalizeMachineLearningJobIds(undefined)).toEqual(undefined);
   });
 });
