@@ -61,7 +61,6 @@ export async function unenrollAgents(
 ): Promise<{ items: BulkActionResult[] }> {
   // start with all agents specified
   const givenAgents = await getAgents(esClient, options);
-  const outgoingErrors: Record<Agent['id'], Error> = {};
 
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
@@ -76,6 +75,7 @@ export async function unenrollAgents(
       unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
     )
   );
+  const outgoingErrors: Record<Agent['id'], Error> = {};
   const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
     if (result.status === 'fulfilled') {
       agents.push(result.value);
