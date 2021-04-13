@@ -7,8 +7,8 @@
  */
 
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { fromRoot } from '@kbn/utils';
 
-import { fromRoot } from '../../core/server/utils';
 import { parseMilliseconds, parse } from './settings';
 
 const SECOND = 1000;
