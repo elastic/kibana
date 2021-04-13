@@ -67,7 +67,7 @@
     "sass-loader": "^7.1.0",
     "sinon": "^5.0.7",
     "style-loader": "^0.23.1",
-    "webpack": "^4.23.1",
+    "webpack": "4.26.1",
     "webpack-dev-server": "^3.11.2",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.5"
