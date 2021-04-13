@@ -12,7 +12,7 @@ import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
 import { PolicyFromES } from '../../../../../common/types';
-import { FormInternal } from '../types';
+import { FormInternal, MinAgePhase } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -150,8 +150,6 @@ export const createPolicyNameValidations = ({
     },
   ];
 };
-
-type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
 
 /**
  * This validator guarantees that the user does not specify a min_age
