@@ -37,7 +37,6 @@ import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
-import { OVERVIEW_TITLE } from '../engine_overview';
 import { EngineOverview } from '../engine_overview';
 import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
@@ -122,7 +121,7 @@ export const EngineRouter: React.FC = () => {
         </Route>
       )}
       <Route>
-        <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
+        <SetPageChrome trail={[...engineBreadcrumb]} />
         <EngineOverview />
       </Route>
     </Switch>
