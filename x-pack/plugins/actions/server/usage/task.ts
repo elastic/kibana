@@ -101,6 +101,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 count_by_type: totalAggegations.countByType,
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
+                count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
               },
               runAt: getNextMidnight(),
             };
@@ -118,5 +119,8 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  // return moment().add(1, 'd').startOf('d').toDate();
+  const runAt = new Date();
+  runAt.setMilliseconds(new Date().getMilliseconds() + 15000);
+  return runAt;
 }

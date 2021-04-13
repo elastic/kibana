@@ -39,6 +39,7 @@ export function createActionsUsageCollector(
     schema: {
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
+      count_active_alert_history_connectors: { type: 'long' },
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
     },
@@ -55,6 +56,7 @@ export function createActionsUsageCollector(
         return {
           count_total: 0,
           count_active_total: 0,
+          count_active_alert_history_connectors: 0,
           count_active_by_type: {},
           count_by_type: {},
         };
