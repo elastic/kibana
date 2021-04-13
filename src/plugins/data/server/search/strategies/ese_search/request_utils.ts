@@ -31,7 +31,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: IUiSettingsClient,
-  searchSessionsConfig: SearchSessionsConfigSchema,
+  searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -54,7 +54,11 @@ export async function getDefaultAsyncSubmitParams(
     ...(await getDefaultSearchParams(uiSettingsClient)),
     ...(options.sessionId
       ? {
-          keep_alive: `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`,
+          // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
+          // This can be cleaned up when we completely stop separating basic and oss
+          keep_alive: searchSessionsConfig
+            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
+            : '1m',
         }
       : {}),
   };

@@ -45,7 +45,7 @@ export class SearchSessionService implements ISearchSessionService {
         throw new Error('delete not implemented in OSS search session service');
       },
       getConfig: () => {
-        throw new Error('getConfig not implemented in OSS search session service');
+        return null;
       },
     });
   }

@@ -32,7 +32,7 @@ export interface IScopedSearchSessionsClient<T = unknown> {
   cancel: (sessionId: string) => Promise<{}>;
   delete: (sessionId: string) => Promise<{}>;
   extend: (sessionId: string, expires: Date) => Promise<SavedObjectsUpdateResponse<T>>;
-  getConfig: () => SearchSessionsConfigSchema;
+  getConfig: () => SearchSessionsConfigSchema | null;
 }
 
 export interface ISearchSessionService<T = unknown> {
