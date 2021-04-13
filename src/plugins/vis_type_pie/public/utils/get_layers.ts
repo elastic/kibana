@@ -44,7 +44,7 @@ export const computeColor = (
       {
         maxDepth: 1,
         totalSeries: allSeries.length || 1,
-        behindText: false,
+        behindText: visParams.labels.show,
         syncColors,
       }
     );
