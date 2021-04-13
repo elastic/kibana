@@ -20,8 +20,9 @@ import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import { DEFAULT_LINES_TO_SAMPLE, readFile, createUrlOverrides, processResults } from '../utils';
-import { getMaxBytes } from '../../../get_max_bytes';
-import { hasImportPermission, analyzeFile } from '../../../api';
+import { getMaxBytes } from '../../../../../file_upload/public';
+import { getApi } from '../../../api';
+import { getFileUpload } from '../../../kibana_services';
 
 import { MODE } from './constants';
 
@@ -63,7 +64,7 @@ export class FileDataVisualizerView extends Component {
     // check the user has the correct permission to import data.
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
-    const hasPermissionToImport = await hasImportPermission({
+    const hasPermissionToImport = await getFileUpload().hasImportPermission({
       checkCreateIndexPattern: false,
       checkHasManagePipeline: true,
     });
@@ -128,6 +129,7 @@ export class FileDataVisualizerView extends Component {
 
   async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
+      const { analyzeFile } = getApi(this.props.http);
       const resp = await analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;

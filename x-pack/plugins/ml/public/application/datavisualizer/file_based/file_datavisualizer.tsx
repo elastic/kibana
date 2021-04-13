@@ -12,14 +12,14 @@ import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
-import { FileDataVisualizer } from '../../../../../file_upload/public';
+import { FileDataVisualizer } from '../../../../../file_data_visualizer/public';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, data, embeddable, share, /* maps,*/ security, savedObjects },
+    services: { docLinks, data, embeddable, share, maps, security, savedObjects, http },
   } = useMlKibana();
-  const coreStart = { savedObjects } as CoreStart;
+  const coreStart = { savedObjects, http } as CoreStart;
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
@@ -29,7 +29,7 @@ export const FileDataVisualizerPage: FC = () => {
         data={data}
         embeddable={embeddable}
         share={share}
-        // maps={maps}
+        maps={maps}
         security={security}
       />
       <HelpMenu docLink={helpLink} />

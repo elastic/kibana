@@ -21,7 +21,7 @@ import {
 
 import { ExperimentalBadge } from '../experimental_badge';
 
-import { getMaxBytesFormatted } from '../../../get_max_bytes';
+import { getMaxBytesFormatted } from '../../../../../file_upload/public';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(

@@ -11,7 +11,7 @@ import { CoreStart } from 'kibana/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-// import type { MapsStartApi } from '../../../maps/public';
+import type { MapsStartApi } from '../../../maps/public';
 import { SecurityPluginSetup } from '../../../security/public';
 
 // @ts-ignore
@@ -20,7 +20,7 @@ import { FileDataVisualizerView } from './components/file_datavisualizer_view/in
 export interface FileDataVisualizerProps {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
-  // maps?: MapsStartApi;
+  maps?: MapsStartApi;
   security?: SecurityPluginSetup;
   coreStart: CoreStart;
   share: SharePluginStart;
@@ -29,18 +29,19 @@ export interface FileDataVisualizerProps {
 export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
   data,
   embeddable,
-  // maps,
+  maps,
   security,
   share,
   coreStart,
 }) => {
-  const services = { data, embeddable, share, /* maps,*/ security, ...coreStart };
+  const services = { data, embeddable, share, maps, security, ...coreStart };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
       <FileDataVisualizerView
         indexPatterns={data.indexPatterns}
         savedObjectsClient={coreStart.savedObjects.client}
+        http={coreStart.http}
       />
     </KibanaContextProvider>
   );

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/*
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
@@ -154,4 +153,3 @@ export function MlEmbeddedMapComponent({
     />
   );
 }
-*/

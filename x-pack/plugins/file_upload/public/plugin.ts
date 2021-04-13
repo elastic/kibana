@@ -12,6 +12,8 @@ import {
   importerFactory,
   hasImportPermission,
   analyzeFile,
+  checkIndexExists,
+  getTimeFieldRange,
 } from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -45,6 +47,8 @@ export class FileUploadPlugin
       getMaxBytesFormatted,
       hasImportPermission,
       analyzeFile,
+      checkIndexExists,
+      getTimeFieldRange,
     };
   }
 }

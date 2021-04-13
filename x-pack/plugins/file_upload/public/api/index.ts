@@ -17,6 +17,12 @@ export interface FileUploadStartApi {
   getMaxBytesFormatted(): string;
   hasImportPermission(params: HasImportPermissionParams): Promise<boolean>;
   analyzeFile(file: string, params: Record<string, string>): Promise<any>;
+  checkIndexExists(index: string, params: Record<string, string>): Promise<boolean>;
+  getTimeFieldRange(
+    index: string,
+    query: any,
+    timeFieldName?: string
+  ): Promise<GetTimeFieldRangeResponse>;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -88,15 +94,7 @@ export async function checkIndexExists(
   });
 }
 
-export async function getTimeFieldRange({
-  index,
-  timeFieldName,
-  query,
-}: {
-  index: string;
-  timeFieldName?: string;
-  query: any;
-}) {
+export async function getTimeFieldRange(index: string, query: any, timeFieldName?: string) {
   const body = JSON.stringify({ index, timeFieldName, query });
 
   const fileUploadModules = await lazyLoadFileUploadModules();

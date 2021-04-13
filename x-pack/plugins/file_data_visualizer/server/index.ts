@@ -5,15 +5,8 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { FileUploadPlugin } from './plugin';
 
-export function plugin() {
-  return new FileUploadPlugin();
-}
-
-export * from './importer/types';
-
-export { FileUploadPluginStart } from './plugin';
-export { FileUploadComponentProps } from './lazy_load_bundle';
-
-export { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new FileUploadPlugin(initializerContext);

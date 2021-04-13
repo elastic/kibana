@@ -11,14 +11,14 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import { useKibana, KibanaReactContextValue } from '../../../../../src/plugins/kibana_react/public';
 import { SecurityPluginSetup } from '../../../security/public';
 import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-// import type { MapsStartApi } from '../../../maps/public';
+import type { MapsStartApi } from '../../../maps/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
   security?: SecurityPluginSetup;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
-  // maps?: MapsStartApi;
+  maps?: MapsStartApi;
 }
 export type StartServices = CoreStart & StartPlugins;
 export const useFileUploadKibana = () => useKibana<StartServices>();

@@ -15,7 +15,7 @@ import {
 } from '../../../../../../../src/plugins/discover/public';
 import { FindFileStructureResponse } from '../../../../common';
 import { useFileUploadKibana } from '../../kibana_context';
-import { getTimeFieldRange } from '../../../api';
+import { getFileUpload } from '../../../kibana_services';
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
@@ -235,11 +235,7 @@ export const ResultsLinks: FC<Props> = ({
 
 async function getFullTimeRange(index: string, timeFieldName: string) {
   const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };
-  const resp = await getTimeFieldRange({
-    index,
-    timeFieldName,
-    query,
-  });
+  const resp = await getFileUpload().getTimeFieldRange(index, query, timeFieldName);
 
   return {
     from: moment(resp.start.epoch).toISOString(),

@@ -1,5 +1,5 @@
 {
-  "id": "fileUpload",
+  "id": "fileDataVisualizer",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,
@@ -9,13 +9,17 @@
     "usageCollection",
     "embeddable",
     "share",
-    "discover"
+    "discover",
+    "fileUpload"
   ],
   "optionalPlugins": [
-    "security"
+    "security",
+    "maps"
   ],
   "requiredBundles": [
-    "kibanaReact"
+    "esUiShared",
+    "kibanaReact",
+    "fileUpload"
   ],
   "extraPublicDirs": [
     "common"
