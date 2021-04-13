@@ -6,15 +6,15 @@ source src/dev/ci_setup/setup_env.sh
 
 gsutil -q -m cp "gs://ci-artifacts.kibana.dev/package-testing/$GIT_COMMIT/kibana-*.deb" ./target
 
-cd test/package
-vagrant up deb --no-provision
-vagrant provision deb
-cd -
-
 node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.50.1 \
   -E discovery.type=single-node \
   --license=trial &
+
+cd test/package
+vagrant up deb --no-provision
+vagrant provision deb
+cd -
 
 export TEST_BROWSER_HEADLESS=1
 export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601
