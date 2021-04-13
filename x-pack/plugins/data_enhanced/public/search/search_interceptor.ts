@@ -70,6 +70,8 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
   private createRequestHash$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
     const { sessionId, isRestore } = options;
+    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
     const { preference, ...params } = request.params || {};
     const hashOptions = {
       ...params,
@@ -130,6 +132,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           savedToBackgroundSub.unsubscribe();
         }
       }),
+      // This observable is cached in the responseCache. 
+      // Using shareReplay makes sure that future subscribers will get the final response
+
       shareReplay(1)
     );
   }
@@ -151,7 +156,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     // Create a new abort signal if one was not passed. This fake signal will never be aborted,
     // So the underlaying search will not be aborted, even if the other consumers abort.
-    searchAbortController.addAbortSignal(options.abortSignal || new AbortController().signal);
+    searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
     const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
 
     if (requestHash && !this.responseCache.has(requestHash)) {
@@ -174,11 +179,11 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     };
     const { sessionId, abortSignal } = searchOptions;
 
-    return this.createRequestHash$(request, options).pipe(
+    return this.createRequestHash$(request, searchOptions).pipe(
       switchMap((requestHash) => {
         const { searchAbortController, response$ } = this.getSearchResponse$(
           request,
-          options,
+          searchOptions,
           requestHash
         );
 
@@ -199,7 +204,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
-              this.handleSearchError(e, options, searchAbortController.isTimeout())
+              this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
             );
           }),
           finalize(() => {

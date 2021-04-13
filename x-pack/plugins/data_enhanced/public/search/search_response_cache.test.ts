@@ -11,7 +11,7 @@ import { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchResponseCache } from './search_response_cache';
 
-describe('', () => {
+describe('SearchResponseCache', () => {
   let cache: SearchResponseCache;
   let searchAbortController: SearchAbortController;
   const r: Array<IKibanaSearchResponse<any>> = [
@@ -59,7 +59,7 @@ describe('', () => {
     );
   }
 
-  function wrapWithAbotController(response$: Observable<IKibanaSearchResponse<any>>) {
+  function wrapWithAbortController(response$: Observable<IKibanaSearchResponse<any>>) {
     return {
       response$,
       searchAbortController,
@@ -74,8 +74,8 @@ describe('', () => {
   describe('Cache eviction', () => {
     test('clear evicts all', () => {
       const finalResult = r[r.length - 1];
-      cache.set('123', wrapWithAbotController(of(finalResult)));
-      cache.set('234', wrapWithAbotController(of(finalResult)));
+      cache.set('123', wrapWithAbortController(of(finalResult)));
+      cache.set('234', wrapWithAbortController(of(finalResult)));
 
       cache.clear();
 
@@ -101,8 +101,8 @@ describe('', () => {
           },
         },
       ]);
-      cache.set('123', wrapWithAbotController(err$));
-      cache.set('234', wrapWithAbotController(res$));
+      cache.set('123', wrapWithAbortController(err$));
+      cache.set('234', wrapWithAbortController(res$));
 
       const errHandler = jest.fn();
       await err$.toPromise().catch(errHandler);
@@ -130,7 +130,7 @@ describe('', () => {
           },
         },
       ]);
-      cache.set('123', wrapWithAbotController(err$));
+      cache.set('123', wrapWithAbortController(err$));
 
       const errHandler = jest.fn();
       await err$.toPromise().catch(errHandler);
@@ -141,10 +141,10 @@ describe('', () => {
 
     test('evicts oldest item if has too many cached items', async () => {
       const finalResult = r[r.length - 1];
-      cache.set('123', wrapWithAbotController(of(finalResult)));
-      cache.set('234', wrapWithAbotController(of(finalResult)));
-      cache.set('345', wrapWithAbotController(of(finalResult)));
-      cache.set('456', wrapWithAbotController(of(finalResult)));
+      cache.set('123', wrapWithAbortController(of(finalResult)));
+      cache.set('234', wrapWithAbortController(of(finalResult)));
+      cache.set('345', wrapWithAbortController(of(finalResult)));
+      cache.set('456', wrapWithAbortController(of(finalResult)));
 
       expect(cache.get('123')).toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();
@@ -170,9 +170,9 @@ describe('', () => {
         },
       ]);
 
-      cache.set('123', wrapWithAbotController(largeResult$));
-      cache.set('234', wrapWithAbotController(largeResult$));
-      cache.set('345', wrapWithAbotController(largeResult$));
+      cache.set('123', wrapWithAbortController(largeResult$));
+      cache.set('234', wrapWithAbortController(largeResult$));
+      cache.set('345', wrapWithAbortController(largeResult$));
 
       await largeResult$.toPromise();
 
@@ -199,21 +199,21 @@ describe('', () => {
         },
       ]);
 
-      cache.set('234', wrapWithAbotController(largeResult$));
+      cache.set('234', wrapWithAbortController(largeResult$));
       await largeResult$.toPromise();
       expect(cache.get('234')).toBeUndefined();
     });
 
     test('get updates the insertion time of an item', async () => {
       const finalResult = r[r.length - 1];
-      cache.set('123', wrapWithAbotController(of(finalResult)));
-      cache.set('234', wrapWithAbotController(of(finalResult)));
-      cache.set('345', wrapWithAbotController(of(finalResult)));
+      cache.set('123', wrapWithAbortController(of(finalResult)));
+      cache.set('234', wrapWithAbortController(of(finalResult)));
+      cache.set('345', wrapWithAbortController(of(finalResult)));
 
       cache.get('123');
       cache.get('234');
 
-      cache.set('456', wrapWithAbotController(of(finalResult)));
+      cache.set('456', wrapWithAbortController(of(finalResult)));
 
       expect(cache.get('123')).not.toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();
@@ -225,14 +225,14 @@ describe('', () => {
   describe('Observable behavior', () => {
     test('caches a response and re-emits it', async () => {
       const s$ = getSearchObservable$();
-      cache.set('123', wrapWithAbotController(s$));
+      cache.set('123', wrapWithAbortController(s$));
       const finalRes = await cache.get('123')!.response$.toPromise();
       expect(finalRes).toStrictEqual(r[r.length - 1]);
     });
 
     test('cached$ should emit same as original search$', async () => {
       const s$ = getSearchObservable$();
-      cache.set('123', wrapWithAbotController(s$));
+      cache.set('123', wrapWithAbortController(s$));
 
       const next = jest.fn();
       const cached$ = cache.get('123');
@@ -252,7 +252,7 @@ describe('', () => {
 
     test('cached$ should emit only current value and keep emitting if subscribed while search$ is running', async () => {
       const s$ = getSearchObservable$();
-      cache.set('123', wrapWithAbotController(s$));
+      cache.set('123', wrapWithAbortController(s$));
 
       const next = jest.fn();
       let cached$: Observable<IKibanaSearchResponse<any>> | undefined;
@@ -278,7 +278,7 @@ describe('', () => {
 
     test('cached$ should emit only last value if subscribed after search$ was complete 1', async () => {
       const finalResult = r[r.length - 1];
-      const s$ = wrapWithAbotController(of(finalResult));
+      const s$ = wrapWithAbortController(of(finalResult));
       cache.set('123', s$);
 
       // wait for original search to complete
@@ -298,7 +298,7 @@ describe('', () => {
 
     test('cached$ should emit only last value if subscribed after search$ was complete', async () => {
       const s$ = getSearchObservable$();
-      cache.set('123', wrapWithAbotController(s$));
+      cache.set('123', wrapWithAbortController(s$));
 
       // wait for original search to complete
       await s$!.toPromise();

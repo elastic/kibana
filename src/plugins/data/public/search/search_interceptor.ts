@@ -114,7 +114,7 @@ export class SearchInterceptor {
   }
 
   protected getSerializableOptions(options?: ISearchOptions) {
-    const { abortSignal, sessionId, ...requestOptions } = options || {};
+    const { sessionId, ...requestOptions } = options || {};
 
     const serializableOptions: ISearchOptionsSerializable = {};
     const combined = {

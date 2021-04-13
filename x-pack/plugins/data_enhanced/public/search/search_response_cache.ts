@@ -21,8 +21,6 @@ interface ResponseCacheItemInternal {
   subs: Subscription;
 }
 
-export const CACHE_MAX_SIZE_MB = 10;
-
 export class SearchResponseCache {
   private responseCache: Map<string, ResponseCacheItemInternal>;
   private cacheSize = 0;
@@ -66,7 +64,7 @@ export class SearchResponseCache {
       this.responseCache.size > this.maxItems ||
       this.byteToMb(this.cacheSize) > this.maxCacheSizeMB
     ) {
-      const [key] = this.responseCache.entries().next().value as [string, ResponseCacheItem];
+      const [key] = [...this.responseCache.keys()];
       this.deleteItem(key);
     }
   }
@@ -102,7 +100,7 @@ export class SearchResponseCache {
       response$.subscribe({
         next: (r) => {
           // TODO: avoid stringiying. Get the size some other way!
-          const newSize = JSON.stringify(r).length;
+          const newSize = (new Blob([JSON.stringify(r)])).size;
           if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
             this.setItem(key, {
               ...cacheItem,
