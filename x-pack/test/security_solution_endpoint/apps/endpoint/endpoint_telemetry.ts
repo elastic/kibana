@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const telemetryTestResources = getService('telemetryTestResources');
 
-  describe('security solution endpoint telemetry', () => {
+  describe.skip('security solution endpoint telemetry', () => {
     after(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         await telemetryTestResources.deleteArchive('checkin_now');
       });
 
-      it('reports the correct number of endpoints seen total and in past 24 hours', async () => {
+      it.skip('reports the correct number of endpoints seen total and in past 24 hours', async () => {
         const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
         expect(endpointTelemetry.total_installed).to.eql(3);
         expect(endpointTelemetry.active_within_last_24_hours).to.eql(3);

@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('fleet_agents_events', () => {
+  describe.skip('fleet_agents_events', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
     });

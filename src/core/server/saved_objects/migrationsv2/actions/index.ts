@@ -436,7 +436,12 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>,
-  requireAlias: boolean
+  requireAlias: boolean,
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be available in the upgraded index.
+   */
+  unusedTypesQuery: Option.Option<any>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -451,6 +456,11 @@ export const reindex = (
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
+          // Exclude saved object types
+          query: Option.fold<any, any | undefined>(
+            () => undefined,
+            (query) => query
+          )(unusedTypesQuery),
         },
         dest: {
           index: targetIndex,
