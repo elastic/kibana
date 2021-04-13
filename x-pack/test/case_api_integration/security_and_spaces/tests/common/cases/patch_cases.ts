@@ -374,7 +374,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('409s when conflict', async () => {
+      it('409s when version does not match', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase(
           supertest,

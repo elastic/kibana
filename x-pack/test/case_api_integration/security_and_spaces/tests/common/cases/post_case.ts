@@ -16,7 +16,7 @@ import {
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   createCaseAsUser,
-  deleteCases,
+  deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
     describe('happy path', () => {
@@ -67,6 +67,35 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'Jira',
                 type: ConnectorTypes.jira,
                 fields: { issueType: 'Task', priority: 'High', parent: null },
+              },
+            })
+          )
+        );
+      });
+
+      it('should post a case: none connector', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
               },
             })
           )

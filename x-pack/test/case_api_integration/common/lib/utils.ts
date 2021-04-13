@@ -448,7 +448,7 @@ export const removeServerGeneratedPropertiesFromComments = (
 
 export const deleteAllCaseItems = async (es: KibanaClient) => {
   await Promise.all([
-    deleteCases(es),
+    deleteCasesByESQuery(es),
     deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
@@ -468,7 +468,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
   });
 };
 
-export const deleteCases = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
@@ -600,6 +600,27 @@ export const createCase = async (
   return theCase;
 };
 
+/**
+ * Sends a delete request for the specified case IDs.
+ */
+export const deleteCases = async ({
+  supertest,
+  caseIDs,
+  expectedHttpCode = 204,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseIDs: string[];
+  expectedHttpCode?: number;
+}) => {
+  const { body } = await supertest
+    .delete(`${CASES_URL}?ids=${JSON.stringify(caseIDs)}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
 export const createComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
@@ -648,7 +669,7 @@ export const deleteComment = async (
   caseId: string,
   commentId: string,
   expectedHttpCode: number = 204
-): Promise<void> => {
+): Promise<{} | Error> => {
   const { body: comment } = await supertest
     .delete(`${CASES_URL}/${caseId}/comments/${commentId}`)
     .set('kbn-xsrf', 'true')
@@ -661,7 +682,7 @@ export const deleteComment = async (
 export const getAllComments = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<AllCommentsResponse> => {
   const { body: comments } = await supertest
     .get(`${CASES_URL}/${caseId}/comments`)
@@ -676,7 +697,7 @@ export const getComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   commentId: string,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<CommentResponse> => {
   const { body: comment } = await supertest
     .get(`${CASES_URL}/${caseId}/comments/${commentId}`)
@@ -691,7 +712,7 @@ export const updateComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   req: CommentPatchRequest,
-  expectedHttpCode: number = 204
+  expectedHttpCode: number = 200
 ): Promise<CaseResponse> => {
   const { body: res } = await supertest
     .patch(`${CASES_URL}/${caseId}/comments`)
@@ -729,7 +750,9 @@ export const createConfiguration = async (
   return configuration;
 };
 
-type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & { connector_type_id: string };
+export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
+  connector_type_id: string;
+};
 
 export const createConnector = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
@@ -810,6 +833,21 @@ export const findCases = async (
     .query({ sortOrder: 'asc', ...query })
     .set('kbn-xsrf', 'true')
     .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const pushCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  connectorId: string,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .post(`${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .set('kbn-xsrf', 'true')
+    .send({})
     .expect(expectedHttpCode);
 
   return res;
