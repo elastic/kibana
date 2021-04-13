@@ -111,7 +111,7 @@ describe('DiscoverGrid', () => {
       expect(getSelectedDocNr(component)).toBe(0);
     });
 
-    test('showing only selected documents and undo this', async () => {
+    test('showing only selected documents and undo selection', async () => {
       await toggleDocSelection(component, esHits[0]);
       await toggleDocSelection(component, esHits[1]);
       expect(getSelectedDocNr(component)).toBe(2);
@@ -121,6 +121,17 @@ describe('DiscoverGrid', () => {
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       component.update();
       findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
+      expect(getDisplayedDocNr(component)).toBe(5);
+    });
+
+    test('showing only selected documents and remove filter deselecting each doc manually', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+      expect(getDisplayedDocNr(component)).toBe(1);
+      await toggleDocSelection(component, esHits[0]);
+      expect(getDisplayedDocNr(component)).toBe(5);
+      await toggleDocSelection(component, esHits[0]);
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 

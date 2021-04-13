@@ -290,7 +290,12 @@ export const DiscoverGrid = ({
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
         selectedDocs,
-        setSelectedDocs,
+        setSelectedDocs: (newSelectedDocs) => {
+          setSelectedDocs(newSelectedDocs);
+          if (isFilterActive && newSelectedDocs.length === 0) {
+            setIsFilterActive(false);
+          }
+        },
       }}
     >
       <span
