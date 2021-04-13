@@ -509,7 +509,7 @@ export const getDetectionRuleMetrics = async (
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
 
-    const detectionAlertsResp: AlertsAggregationResponse | undefined;
+    let detectionAlertsResp: AlertsAggregationResponse | undefined;
     // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
     ({ body: detectionAlertsResp } = await esClient.search({
       index: '.siem-signals-pjhampton-default', // TODO:PH pass in siem-sigs index

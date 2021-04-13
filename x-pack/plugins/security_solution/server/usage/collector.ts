@@ -65,6 +65,67 @@ export const registerCollector: RegisterCollector = ({
         },
       },
       detectionMetrics: {
+        detection_rules: {
+          detection_rule_usage: {
+            query: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            threshold: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            eql: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            machine_learning: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            threat_match: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            elastic_total: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            },
+            custom_total: {
+              enabled: { type: 'long' },
+              disabled: { type: 'long' },
+              alerts: { type: 'long' },
+              cases: { type: 'long' }
+            }
+          },
+          detection_rule_detail: {
+            type: 'array',
+            itmes: {
+              rule_name: { type: 'keyword' },
+              rule_id: { type: 'keyword' },
+              rule_type: { type: 'keyword' },
+              rule_version: { type: 'long' },
+              enabled: { type: 'keyword' },
+              elastic_rule: { type: 'keyword' },
+              created_on: { type: 'keyword' },
+              updated_on: { type: 'keyword' },
+              alert_count_daily: { type: 'long' },
+              cases_count_daily: { type: 'long' }
+            }
+          }
+        },
         ml_jobs: {
           type: 'array',
           items: {
