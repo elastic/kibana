@@ -69,6 +69,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
+      it('adds a markdown visualization via the quick button', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await PageObjects.dashboard.clickMarkdownQuickButton();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from markdown quick button',
+          { redirectToOrigin: true }
+        );
+
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('adds an input control visualization via the quick button', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await PageObjects.dashboard.clickInputControlsQuickButton();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from input control quick button',
+          { redirectToOrigin: true }
+        );
+
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
       it('saves the listing page instead of the visualization to the app link', async () => {
         await PageObjects.header.clickVisualize(true);
         const currentUrl = await browser.getCurrentUrl();

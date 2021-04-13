@@ -1,9 +1,5 @@
-.panelToolbar {
-  padding: 0 $euiSizeS $euiSizeS;
-  flex-grow: 0;
-}
 
-.panelToolbarButton {
+.solutionToolbarButton {
   line-height: $euiButtonHeight; // Keeps alignment of text and chart icon
   background-color: $euiColorEmptyShade;
 
