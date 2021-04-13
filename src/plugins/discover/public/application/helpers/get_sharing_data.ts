@@ -7,11 +7,11 @@
  */
 
 import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { getSortForSearchSource } from '../angular/doc_table';
 import { ISearchSource } from '../../../../data/common';
-import { AppState } from '../angular/discover_state';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import type { SavedSearch, SortOrder } from '../../saved_searches/types';
+import { AppState } from '../angular/discover_state';
+import { getSortForSearchSource } from '../angular/doc_table';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -23,10 +23,6 @@ export async function getSharingData(
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
-  const fields = {
-    fields: searchSource.getField('fields'),
-    fieldsFromSource: searchSource.getField('fieldsFromSource'),
-  };
 
   searchSource.setField(
     'sort',
@@ -37,7 +33,7 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  // fields get re-set to match the saved search columns
+  // Columns that the user has selected in the saved search
   let columns = state.columns || [];
 
   if (columns && columns.length > 0) {
@@ -50,14 +46,11 @@ export async function getSharingData(
     if (timeFieldName && !columns.includes(timeFieldName)) {
       columns = [timeFieldName, ...columns];
     }
-
-    // if columns were selected in the saved search, use them for the searchSource's fields
-    const fieldsKey = fields.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    searchSource.setField(fieldsKey, columns);
   }
 
   return {
     searchSource: searchSource.getSerializedFields(true),
+    columns,
   };
 }
 
