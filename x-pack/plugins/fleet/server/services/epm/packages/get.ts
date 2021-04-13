@@ -19,7 +19,6 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
 } from '../../../../common/types';
-import type { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
 import { appContextService } from '../../';
