@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     after(async () => {
       await reportingAPI.teardownEcommerce();
+      await reportingAPI.deleteAllReports();
     });
 
     describe('Dashboard: CSV download file', () => {
