@@ -5,58 +5,37 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useCallback, FunctionComponent } from 'react';
-import { Plugin, PluggableList } from 'unified';
-// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehype2react from 'rehype-react';
-import {
-  EuiLinkAnchorProps,
-  EuiMarkdownEditor,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-  getDefaultEuiMarkdownUiPlugins,
-} from '@elastic/eui';
+import React, { memo, useEffect, useState, useCallback } from 'react';
+import { PluggableList } from 'unified';
+import { EuiMarkdownEditor } from '@elastic/eui';
+import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { usePlugins } from './use_plugins';
 
 interface MarkdownEditorProps {
-  onChange: (content: string) => void;
-  value: string;
   ariaLabel: string;
-  editorId?: string;
   dataTestSubj?: string;
+  editorId?: string;
   height?: number;
+  onChange: (content: string) => void;
+  parsingPlugins?: PluggableList;
+  processingPlugins?: PluggableList;
+  uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
+  value: string;
 }
 
-// create plugin stuff here
-export const { uiPlugins, parsingPlugins, processingPlugins } = {
-  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
-  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins() as [
-    [Plugin, Remark2RehypeOptions],
-    [
-      typeof rehype2react,
-      Parameters<typeof rehype2react>[0] & {
-        components: { a: FunctionComponent<EuiLinkAnchorProps> };
-      }
-    ],
-    ...PluggableList
-  ],
-};
-
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
+  ariaLabel,
+  dataTestSubj,
+  editorId,
+  height,
   onChange,
   value,
-  ariaLabel,
-  editorId,
-  dataTestSubj,
-  height,
 }) => {
   const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
   const onParse = useCallback((err, { messages }) => {
     setMarkdownErrorMessages(err ? [err] : messages);
   }, []);
+  const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
 
   useEffect(
     () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
