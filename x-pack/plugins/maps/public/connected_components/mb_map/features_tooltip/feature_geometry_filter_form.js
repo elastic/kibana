@@ -52,13 +52,7 @@ export class FeatureGeometryFilterForm extends Component {
     return preIndexedShape;
   };
 
-  _createFilter = async ({
-    geometryLabel,
-    indexPatternId,
-    geoFieldName,
-    geoFieldType,
-    relation,
-  }) => {
+  _createFilter = async ({ geometryLabel, indexPatternId, geoFieldName, relation }) => {
     this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();
     if (!this._isMounted) {
@@ -72,7 +66,6 @@ export class FeatureGeometryFilterForm extends Component {
       geometryLabel,
       indexPatternId,
       geoFieldName,
-      geoFieldType,
       relation,
     });
 
