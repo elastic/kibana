@@ -29,6 +29,10 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/serv
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
+import {
+  ensureCleanupFailedExecutionsTaskScheduled,
+  registerCleanupFailedExecutionsTaskDefinition,
+} from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
@@ -244,6 +248,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     // Routes
     defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
+    // Cleanup failed execution task definition
+    registerCleanupFailedExecutionsTaskDefinition(
+      this.logger,
+      core.getStartServices(),
+      plugins.taskManager,
+      actionTypeRegistry,
+      this.actionsConfig.cleanupFailedExecutionsTask
+    );
+
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -375,6 +388,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
       });
     }
+
+    // Cleanup failed execution task
+    ensureCleanupFailedExecutionsTaskScheduled(
+      plugins.taskManager,
+      this.logger,
+      this.actionsConfig.cleanupFailedExecutionsTask
+    );
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {

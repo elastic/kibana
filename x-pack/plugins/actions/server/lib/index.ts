@@ -12,6 +12,7 @@ export { ActionExecutor, ActionExecutorContract } from './action_executor';
 export { ILicenseState, LicenseState } from './license_state';
 export { verifyApiAccess } from './verify_api_access';
 export { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
+export { parallelize } from './parallelize';
 export {
   ActionTypeDisabledError,
   ActionTypeDisabledReason,

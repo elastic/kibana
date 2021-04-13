@@ -50,6 +50,10 @@ export const configSchema = schema.object({
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
+  cleanupFailedExecutionsTask: schema.object({
+    interval: schema.duration({ defaultValue: '15s' }),
+    pageSize: schema.number({ defaultValue: 100 }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
