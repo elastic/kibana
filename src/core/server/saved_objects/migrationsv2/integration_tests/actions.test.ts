@@ -30,6 +30,7 @@ import {
   UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
+  waitForIndexStatusYellow,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -207,6 +208,51 @@ describe('migration actions', () => {
     });
   });
 
+  describe('waitForIndexStatusYellow', () => {
+    afterAll(async () => {
+      await client.indices.delete({ index: 'red_then_yellow_index' });
+    });
+    it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
+      // Create a red index
+      await client.indices.create(
+        {
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
+            },
+          },
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      );
+
+      // Start tracking the index status
+      const indexStatusPromise = waitForIndexStatusYellow(client, 'red_then_yellow_index')();
+
+      const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(redStatusResponse.body.status).toBe('red');
+
+      client.indices.putSettings({
+        index: 'red_then_yellow_index',
+        body: {
+          // Enable all shard allocation so that the index status turns yellow
+          index: { routing: { allocation: { enable: 'all' } } },
+        },
+      });
+
+      await indexStatusPromise;
+      // Assert that the promise didn't resolve before the index became yellow
+
+      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(yellowStatusResponse.body.status).toBe('yellow');
+    });
+  });
+
   describe('cloneIndex', () => {
     afterAll(async () => {
       try {
@@ -370,14 +416,20 @@ describe('migration actions', () => {
         ]
       `);
     });
-    it('resolves right and excludes all unusedTypesToExclude documents', async () => {
+    it('resolves right and excludes all documents not matching the unusedTypesQuery', async () => {
       const res = (await reindex(
         client,
         'existing_index_with_docs',
         'reindex_target_excluded_docs',
         Option.none,
         false,
-        Option.some(['f_agent_event', 'another_unused_type'])
+        Option.of({
+          bool: {
+            must_not: ['f_agent_event', 'another_unused_type'].map((type) => ({
+              term: { type },
+            })),
+          },
+        })
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`

@@ -465,7 +465,9 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
-    options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
+    options: { user?: AuthenticatedUser; bumpRevision: boolean; force?: boolean } = {
+      bumpRevision: true,
+    }
   ): Promise<AgentPolicy> {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
@@ -473,7 +475,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (oldAgentPolicy.is_managed) {
+    if (oldAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
     }
 
@@ -496,7 +498,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<AgentPolicy> {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
@@ -504,7 +506,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (oldAgentPolicy.is_managed) {
+    if (oldAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
     }
 
