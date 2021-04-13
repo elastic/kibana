@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
@@ -80,11 +79,10 @@ export const EnginesOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
-      <EuiPageContent panelPaddingSize="s" className="enginesOverview">
+      <EuiPageContent hasBorder panelPaddingSize="s" className="enginesOverview">
         <FlashMessages />
         <EuiPageContentHeader responsive={false}>
           <EuiPageContentHeaderSection>
@@ -97,8 +95,9 @@ export const EnginesOverview: React.FC = () => {
           <EuiPageContentHeaderSection>
             {canManageEngines && (
               <EuiButtonTo
-                color="primary"
-                fill
+                color="secondary"
+                size="s"
+                iconType="plusInCircle"
                 data-test-subj="appSearchEnginesEngineCreationButton"
                 to={ENGINE_CREATION_PATH}
               >
@@ -108,6 +107,7 @@ export const EnginesOverview: React.FC = () => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
+          <EuiSpacer />
           <EnginesTable
             items={engines}
             loading={enginesLoading}
@@ -134,8 +134,9 @@ export const EnginesOverview: React.FC = () => {
               <EuiPageContentHeaderSection>
                 {canManageEngines && (
                   <EuiButtonTo
-                    color="primary"
-                    fill
+                    color="secondary"
+                    size="s"
+                    iconType="plusInCircle"
                     data-test-subj="appSearchEnginesMetaEngineCreationButton"
                     to={META_ENGINE_CREATION_PATH}
                   >
