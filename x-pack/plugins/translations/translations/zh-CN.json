@@ -12582,7 +12582,6 @@
     "xpack.maps.es_geo_utils.convert.invalidGeometryCollectionErrorMessage": "不应将 GeometryCollection 传递给 convertESShapeToGeojsonGeometry",
     "xpack.maps.es_geo_utils.convert.unsupportedGeometryTypeErrorMessage": "无法将 {geometryType} 几何图形转换成 geojson，不支持",
     "xpack.maps.es_geo_utils.distanceFilterAlias": "{pointLabel} {distanceKm}km 内的 {geoFieldName}",
-    "xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel": "于",
     "xpack.maps.es_geo_utils.unsupportedFieldTypeErrorMessage": "字段类型不受支持，应为 {expectedTypes}，而提供的是 {fieldType}",
     "xpack.maps.es_geo_utils.unsupportedGeometryTypeErrorMessage": "几何类型不受支持，应为 {expectedTypes}，而提供的是 {geometryType}",
     "xpack.maps.es_geo_utils.wkt.invalidWKTErrorMessage": "无法将 {wkt} 转换成 geojson。需要有效的 WKT。",
