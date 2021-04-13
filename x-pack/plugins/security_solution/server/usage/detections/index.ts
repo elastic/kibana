@@ -36,6 +36,7 @@ export interface DetectionRulesTypeUsage {
   machine_learning: FeatureTypeUsage;
   threat_match: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
+  custom_total: FeatureTypeUsage;
 }
 
 export interface DetectionRulesUsage {
@@ -100,6 +101,7 @@ export interface DetectionRuleMetric {
   rule_id: string;
   rule_type: string;
   enabled: boolean;
+  elastic_rule: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
@@ -107,8 +109,8 @@ export interface DetectionRuleMetric {
 }
 
 export interface DetectionRuleAdoption {
-  detection_rule_metrics: DetectionRuleMetric[];
-  detection_rule_adoption: DetectionRulesTypeUsage;
+  detection_rule_detail: DetectionRuleMetric[];
+  detection_rule_usage: DetectionRulesTypeUsage;
 }
 
 export const defaultDetectionsUsage = {
@@ -149,6 +151,6 @@ export const fetchDetectionsMetrics = async (
     detection_rules:
       detectionRuleMetrics.status === 'fulfilled'
         ? detectionRuleMetrics.value
-        : { detection_rule_metrics: [], detection_rule_adoption: initalDetectionRulesUsage },
+        : { detection_rule_detail: [], detection_rule_usage: initalDetectionRulesUsage },
   };
 };
