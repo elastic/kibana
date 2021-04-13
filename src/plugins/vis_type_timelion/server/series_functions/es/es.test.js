@@ -176,6 +176,13 @@ describe('es', () => {
         expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
+
+      test('has a special `count` metric with redundant field which use a script', () => {
+        config.metric = ['count:beer'];
+        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
+        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
+      });
     });
   });
 
