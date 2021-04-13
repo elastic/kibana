@@ -5,7 +5,8 @@ set -euo pipefail
 # Credentials
 
 cd .buildkite/agents/packer
-export PKR_VAR_buildkite_token="TODO"
-# export GOOGLE_APPLICATION_CREDENTIALS="TODO"
+
+PKR_VAR_buildkite_token=$(vault read -field=token secret/kibana-issues/dev/buildkite-agent-token)
+export PKR_VAR_buildkite_token
 
 packer build .
