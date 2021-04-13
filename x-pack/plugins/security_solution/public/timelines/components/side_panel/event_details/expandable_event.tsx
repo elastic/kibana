@@ -26,7 +26,8 @@ import { BrowserFields } from '../../../../common/containers/source';
 import {
   EventDetails,
   EventsViewType,
-  View,
+  EventView,
+  ThreatView,
 } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
@@ -87,7 +88,8 @@ ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
-    const [view, setView] = useState<View>(EventsViewType.summaryView);
+    const [eventView, setEventView] = useState<EventView>(EventsViewType.summaryView);
+    const [threatView, setThreatView] = useState<ThreatView>(EventsViewType.threatSummaryView);
 
     const message = useMemo(() => {
       if (detailsData) {
@@ -131,10 +133,12 @@ export const ExpandableEvent = React.memo<Props>(
             data={detailsData!}
             id={event.eventId!}
             isAlert={isAlert}
-            onViewSelected={setView}
-            timelineTabType={timelineTabType}
+            onThreatViewSelected={setThreatView}
+            onEventViewSelected={setEventView}
+            threatView={threatView}
             timelineId={timelineId}
-            view={view}
+            timelineTabType={timelineTabType}
+            eventView={eventView}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

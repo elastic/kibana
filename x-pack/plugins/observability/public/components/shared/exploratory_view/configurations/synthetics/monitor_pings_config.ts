@@ -25,7 +25,7 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
       operationType: 'count',
       label: 'Monitor pings',
     },
-    hasMetricType: false,
+    hasOperationType: false,
     defaultFilters: ['observer.geo.name'],
     breakdowns: ['monitor.status', 'observer.geo.name', 'monitor.type'],
     filters: [],

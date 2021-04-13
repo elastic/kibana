@@ -37,6 +37,10 @@ import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 import { LicenseService } from '../../common/license/license';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../../common/experimental_features';
 
 export interface MetadataService {
   queryStrategy(
@@ -107,6 +111,9 @@ export class EndpointAppContextService {
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
+  private config: ConfigType | undefined;
+
+  private experimentalFeatures: ExperimentalFeatures | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -115,6 +122,9 @@ export class EndpointAppContextService {
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
+    this.config = dependencies.config;
+
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
@@ -139,6 +149,10 @@ export class EndpointAppContextService {
   }
 
   public stop() {}
+
+  public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
+    return this.experimentalFeatures;
+  }
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
