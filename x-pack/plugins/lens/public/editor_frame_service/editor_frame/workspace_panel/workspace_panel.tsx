@@ -432,7 +432,7 @@ export const InnerVisualizationWrapper = ({
           .map(({ longMessage }) => (
             <p
               key={longMessage}
-              className="eui-textBreakAll"
+              className="eui-textBreakWord"
               data-test-subj="configuration-failure-error"
             >
               {longMessage}
@@ -465,7 +465,7 @@ export const InnerVisualizationWrapper = ({
             actions={showExtraErrorsAction}
             body={
               <>
-                <p className="eui-textBreakAll" data-test-subj="configuration-failure-error">
+                <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
                   {localState.configurationValidationError[0].longMessage}
                 </p>
 
@@ -507,7 +507,7 @@ export const InnerVisualizationWrapper = ({
             }
             body={
               <>
-                <p className="eui-textBreakAll" data-test-subj="missing-refs-failure">
+                <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
                   <FormattedMessage
                     id="xpack.lens.editorFrame.indexPatternNotFound"
                     defaultMessage="Index pattern not found"
@@ -595,7 +595,7 @@ export const InnerVisualizationWrapper = ({
                       </p>
 
                       {localState.expandError ? (
-                        <p className="eui-textBreakAll">{visibleErrorMessage}</p>
+                        <p className="eui-textBreakWord">{visibleErrorMessage}</p>
                       ) : null}
                     </>
                   }
