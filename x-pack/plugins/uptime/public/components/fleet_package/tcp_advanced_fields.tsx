@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { TCPAdvancedFieldsContext } from './contexts';
+import { useTCPAdvancedFieldsContext } from './contexts';
 
 import { ConfigKeys } from './types';
 
@@ -24,7 +24,7 @@ import { OptionalLabel } from './optional_label';
 import { ComboBox } from './combo_box';
 
 export const TCPAdvancedFields = () => {
-  const { fields, setFields } = useContext(TCPAdvancedFieldsContext);
+  const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { TLSFieldsContext } from './contexts';
+import { useTLSFieldsContext } from './contexts';
 
 import { VerificationMode, ConfigKeys, TLSVersion } from './types';
 
@@ -37,7 +37,7 @@ export const TLSFields: React.FunctionComponent<{
   isEnabled: boolean;
   tlsRole: TLSRole;
 }> = memo(({ isEnabled, tlsRole }) => {
-  const { fields, setFields } = useContext(TLSFieldsContext);
+  const { fields, setFields } = useTLSFieldsContext();
   const [
     verificationVersionInputRef,
     setVerificationVersionInputRef,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { ISimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
 
 interface ISimpleFieldsContext {
@@ -56,3 +56,5 @@ export const SimpleFieldsContextProvider = ({
 
   return <SimpleFieldsContext.Provider value={value} children={children} />;
 };
+
+export const useSimpleFieldsContext = () => useContext(SimpleFieldsContext);

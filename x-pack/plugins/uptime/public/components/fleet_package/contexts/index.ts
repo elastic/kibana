@@ -9,19 +9,23 @@ export {
   SimpleFieldsContext,
   SimpleFieldsContextProvider,
   initialValues as defaultSimpleFields,
+  useSimpleFieldsContext,
 } from './simple_fields_context';
 export {
   TCPAdvancedFieldsContext,
   TCPAdvancedFieldsContextProvider,
   initialValues as defaultTCPAdvancedFields,
+  useTCPAdvancedFieldsContext,
 } from './advanced_fields_tcp_context';
 export {
   HTTPAdvancedFieldsContext,
   HTTPAdvancedFieldsContextProvider,
   initialValues as defaultHTTPAdvancedFields,
+  useHTTPAdvancedFieldsContext,
 } from './advanced_fields_http_context';
 export {
   TLSFieldsContext,
   TLSFieldsContextProvider,
   initialValues as defaultTLSFields,
+  useTLSFieldsContext,
 } from './tls_fields_context';

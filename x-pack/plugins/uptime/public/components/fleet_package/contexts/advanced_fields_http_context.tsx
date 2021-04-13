@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import {
   IHTTPAdvancedFields,
   ConfigKeys,
@@ -65,3 +65,5 @@ export const HTTPAdvancedFieldsContextProvider = ({
 
   return <HTTPAdvancedFieldsContext.Provider value={value} children={children} />;
 };
+
+export const useHTTPAdvancedFieldsContext = () => useContext(HTTPAdvancedFieldsContext);

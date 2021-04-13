@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -20,7 +20,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { ConfigKeys, DataStream, ISimpleFields, Validation } from './types';
-import { SimpleFieldsContext } from './contexts';
+import { useSimpleFieldsContext } from './contexts';
 import { TLSFields, TLSRole } from './tls_fields';
 import { ComboBox } from './combo_box';
 import { OptionalLabel } from './optional_label';
@@ -37,7 +37,7 @@ interface Props {
 export const CustomFields = memo<Props>(
   ({ typeEditable = false, isTLSEnabled: defaultIsTLSEnabled = false, validate }) => {
     const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
-    const { fields, setFields, defaultValues } = useContext(SimpleFieldsContext);
+    const { fields, setFields, defaultValues } = useSimpleFieldsContext();
     const { type } = fields;
 
     const isHTTP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP;
@@ -46,12 +46,14 @@ export const CustomFields = memo<Props>(
 
     // reset monitor type specific fields any time a monitor type is switched
     useEffect(() => {
-      setFields((prevFields: ISimpleFields) => ({
-        ...prevFields,
-        [ConfigKeys.HOSTS]: defaultValues[ConfigKeys.HOSTS],
-        [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
-      }));
-    }, [defaultValues, type, setFields]);
+      if (typeEditable) {
+        setFields((prevFields: ISimpleFields) => ({
+          ...prevFields,
+          [ConfigKeys.HOSTS]: defaultValues[ConfigKeys.HOSTS],
+          [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
+        }));
+      }
+    }, [defaultValues, type, typeEditable, setFields]);
 
     const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));

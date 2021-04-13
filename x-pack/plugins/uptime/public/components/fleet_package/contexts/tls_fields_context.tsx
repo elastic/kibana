@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { ITLSFields, ConfigKeys, TLSVersion, VerificationMode } from '../types';
 
 interface ITLSFieldsContext {
@@ -68,3 +68,5 @@ export const TLSFieldsContextProvider = ({
 
   return <TLSFieldsContext.Provider value={value} children={children} />;
 };
+
+export const useTLSFieldsContext = () => useContext(TLSFieldsContext);

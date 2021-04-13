@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, memo } from 'react';
+import React, { useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { HTTPAdvancedFieldsContext } from './contexts';
+import { useHTTPAdvancedFieldsContext } from './contexts';
 
 import { ConfigKeys, HTTPMethod, Validation } from './types';
 
@@ -35,7 +35,7 @@ interface Props {
 }
 
 export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
-  const { fields, setFields } = useContext(HTTPAdvancedFieldsContext);
+  const { fields, setFields } = useHTTPAdvancedFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));

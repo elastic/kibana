@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { ITCPAdvancedFields, ConfigKeys } from '../types';
 
 interface ITCPAdvancedFieldsContext {
@@ -48,3 +48,5 @@ export const TCPAdvancedFieldsContextProvider = ({
 
   return <TCPAdvancedFieldsContext.Provider value={value} children={children} />;
 };
+
+export const useTCPAdvancedFieldsContext = () => useContext(TCPAdvancedFieldsContext);
