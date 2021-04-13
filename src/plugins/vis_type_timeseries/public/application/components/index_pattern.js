@@ -29,6 +29,7 @@ import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -77,6 +78,7 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
@@ -110,7 +112,6 @@ export const IndexPattern = ({
   ];
 
   const defaults = {
-    default_index_pattern: '',
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
@@ -120,7 +121,6 @@ export const IndexPattern = ({
 
   const model = { ...defaults, ..._model };
 
-  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
@@ -192,22 +192,18 @@ export const IndexPattern = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('timeField')}
+          <FieldSelect
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
             })}
-          >
-            <FieldSelect
-              restrict={RESTRICT_FIELDS}
-              value={model[timeFieldName]}
-              disabled={disabled}
-              onChange={handleSelectChange(timeFieldName)}
-              indexPattern={model[indexPatternName]}
-              fields={fields}
-              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
-            />
-          </EuiFormRow>
+            restrict={RESTRICT_FIELDS}
+            value={model[timeFieldName]}
+            disabled={disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
+            fields={fields}
+            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow

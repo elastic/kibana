@@ -6,24 +6,18 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorLightShade: '#ece',
-  },
-});
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
@@ -41,7 +35,7 @@ describe('BuilderExceptionListItemComponent', () => {
         entries: [getEntryMatchMock(), getEntryMatchMock()],
       };
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -61,7 +55,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(
@@ -73,7 +67,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -93,7 +87,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeTruthy();
@@ -103,7 +97,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -123,7 +117,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(
@@ -135,7 +129,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={false}
@@ -155,7 +149,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(

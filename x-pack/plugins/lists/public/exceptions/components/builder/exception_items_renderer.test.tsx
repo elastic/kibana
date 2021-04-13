@@ -6,28 +6,22 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   fields,
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorLightShade: '#ece',
-  },
-});
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
@@ -44,7 +38,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if no "exceptionListItems" are passed in', () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -65,7 +59,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
@@ -84,7 +78,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "exceptionListItems" that are passed in', async () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -112,7 +106,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
       1
@@ -130,7 +124,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "or", "and" and "add nested button" enabled', () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -152,7 +146,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(
@@ -168,7 +162,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an entry when "and" clicked', async () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -189,7 +183,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
@@ -226,7 +220,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an exception item when "or" clicked', async () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -247,7 +241,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionEntriesContainer"]')).toHaveLength(
@@ -288,7 +282,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if user deletes last remaining entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -316,7 +310,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
@@ -344,7 +338,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -365,7 +359,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(
@@ -381,7 +375,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it does not display "and" badge if none of the exception items include more than one entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -402,7 +396,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           osTypes={['windows']}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     wrapper.find('[data-test-subj="exceptionsOrButton"] button').simulate('click');
@@ -421,7 +415,7 @@ describe('ExceptionBuilderComponent', () => {
   describe('nested entry', () => {
     test('it adds a nested entry when "add nested entry" clicked', async () => {
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <ExceptionBuilderComponent
             allowLargeValueLists={true}
             autocompleteService={autocompleteStartMock}
@@ -442,7 +436,7 @@ describe('ExceptionBuilderComponent', () => {
             onChange={jest.fn()}
             osTypes={['windows']}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper.find('[data-test-subj="exceptionsNestedButton"] button').simulate('click');
