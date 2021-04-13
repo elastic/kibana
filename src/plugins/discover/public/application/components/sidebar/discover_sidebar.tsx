@@ -231,11 +231,10 @@ export function DiscoverSidebar({
 
   const deleteField = useMemo(
     () =>
-      canEditIndexPatternField
+      canEditIndexPatternField && selectedIndexPattern
         ? async (fieldName: string) => {
             const ref = indexPatternFieldEditor.openDeleteModal({
               ctx: {
-                // @ts-ignore
                 indexPattern: selectedIndexPattern,
               },
               fieldName,
@@ -393,7 +392,7 @@ export function DiscoverSidebar({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center">
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
                 config={config}

@@ -302,13 +302,12 @@ export function DiscoverField({
   const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
   const canEditField = onEditField && (!isUnknownField || isRuntimeField);
   const canDeleteField = onDeleteField && isRuntimeField;
-  const displayNameGrow = canEditField ? (canDeleteField ? 8 : 9) : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
+      <EuiFlexGroup responsive={false} gutterSize="xs">
+        <EuiFlexItem grow={true}>{field.displayName}</EuiFlexItem>
         {canEditField && (
-          <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelEditItem">
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
             <EuiButtonIcon
               onClick={() => {
                 if (onEditField) {
@@ -325,7 +324,7 @@ export function DiscoverField({
           </EuiFlexItem>
         )}
         {canDeleteField && (
-          <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelDeleteItem">
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
             <EuiToolTip
               content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
                 defaultMessage: 'Delete index pattern field',

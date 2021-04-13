@@ -42,7 +42,7 @@ export function buildSearchBody(
     fields: useNewFieldsApi ? [{ field: '*', include_unmapped: 'true' }] : undefined,
     script_fields: computedFields.scriptFields,
     docvalue_fields: computedFields.docvalueFields,
-    runtime_mappings: useNewFieldsApi && runtimeFields ? runtimeFields : {},
+    runtime_mappings: useNewFieldsApi && runtimeFields ? runtimeFields : {}, // needed for index pattern runtime fields in a single doc view
   };
 }
 
