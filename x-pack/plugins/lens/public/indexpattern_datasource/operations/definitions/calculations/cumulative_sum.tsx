@@ -63,13 +63,19 @@ export const cumulativeSumOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    const ref = columns[column.references[0]];
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const ref = layer.columns[referenceIds[0]];
+
     return {
       label: ofName(ref && 'label' in ref ? ref.label : undefined),
       dataType: 'number',
