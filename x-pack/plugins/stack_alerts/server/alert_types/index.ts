@@ -6,11 +6,18 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertingSetup, StackAlertsStartDeps } from '../types';
+import { AlertingSetup, StackAlertsRuleRegistry, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
-interface RegisterAlertTypesParams {
+
+export interface RegisterAlertTypesParams {
+  logger: Logger;
+  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
+  registry: StackAlertsRuleRegistry;
+}
+
+export interface RegisterLegacyAlertTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
@@ -18,6 +25,9 @@ interface RegisterAlertTypesParams {
 
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
   registerIndexThreshold(params);
-  registerGeoContainment(params);
   registerEsQuery(params);
+}
+
+export function registerLegacyBuiltInAlertTypes(params: RegisterLegacyAlertTypesParams) {
+  registerGeoContainment(params);
 }

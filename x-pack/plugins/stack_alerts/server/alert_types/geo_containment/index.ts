@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { AlertingSetup } from '../../types';
+import { RegisterLegacyAlertTypesParams } from '..';
 import {
   GeoContainmentParams,
   GeoContainmentState,
@@ -17,12 +16,7 @@ import {
   RecoveryActionGroupId,
 } from './alert_type';
 
-interface RegisterParams {
-  logger: Logger;
-  alerting: AlertingSetup;
-}
-
-export function register(params: RegisterParams) {
+export function register(params: RegisterLegacyAlertTypesParams) {
   const { logger, alerting } = params;
   alerting.registerType<
     GeoContainmentParams,

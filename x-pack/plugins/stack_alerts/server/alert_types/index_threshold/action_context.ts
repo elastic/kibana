@@ -7,11 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { AlertInstanceContext } from '../../../../alerting/server';
 
 // alert type context provided to actions
-
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
 
 export interface ActionContext extends BaseActionContext {
   // a short pre-constructed message which may be used in an action field
@@ -33,14 +31,14 @@ export interface BaseActionContext extends AlertInstanceContext {
 }
 
 export function addMessages(
-  alertInfo: AlertInfo,
+  alertName: string,
   baseContext: BaseActionContext,
   params: Params
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle', {
     defaultMessage: 'alert {name} group {group} met threshold',
     values: {
-      name: alertInfo.name,
+      name: alertName,
       group: baseContext.group,
     },
   });
@@ -55,7 +53,7 @@ export function addMessages(
 - Conditions Met: {conditions} over {window}
 - Timestamp: {date}`,
       values: {
-        name: alertInfo.name,
+        name: alertName,
         group: baseContext.group,
         value: baseContext.value,
         conditions: baseContext.conditions,

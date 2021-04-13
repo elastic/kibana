@@ -8,8 +8,9 @@
 import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
 
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
-import { registerBuiltInAlertTypes } from './alert_types';
+import { registerBuiltInAlertTypes, registerLegacyBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
+import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/server';
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
@@ -19,16 +20,38 @@ export class AlertingBuiltinsPlugin
     this.logger = ctx.logger.get();
   }
 
-  public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
+  public setup(
+    core: CoreSetup<StackAlertsStartDeps>,
+    { alerting, features, ruleRegistry }: StackAlertsDeps
+  ) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
+
+    const stackAlertsRuleRegistry = ruleRegistry.create({
+      name: 'stack-alerts',
+      fieldMap: {
+        ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
+      },
+    });
 
     registerBuiltInAlertTypes({
       logger: this.logger,
       data: core
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
+      registry: stackAlertsRuleRegistry,
+    });
+
+    registerLegacyBuiltInAlertTypes({
+      logger: this.logger,
+      data: core
+        .getStartServices()
+        .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
     });
+
+    return {
+      ruleRegistry: stackAlertsRuleRegistry,
+    };
   }
 
   public start() {}

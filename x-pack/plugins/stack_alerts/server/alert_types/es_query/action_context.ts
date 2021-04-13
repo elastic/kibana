@@ -7,12 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { AlertInstanceContext } from '../../../../alerting/server';
 import { EsQueryAlertParams } from './alert_type_params';
 
 // alert type context provided to actions
-
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
 
 export interface ActionContext extends EsQueryAlertActionContext {
   // a short pre-constructed message which may be used in an action field
@@ -33,14 +31,14 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
 }
 
 export function addMessages(
-  alertInfo: AlertInfo,
+  alertName: string,
   baseContext: EsQueryAlertActionContext,
   params: EsQueryAlertParams
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
     defaultMessage: `alert '{name}' matched query`,
     values: {
-      name: alertInfo.name,
+      name: alertName,
     },
   });
 
@@ -52,7 +50,7 @@ export function addMessages(
 - Conditions Met: {conditions} over {window}
 - Timestamp: {date}`,
     values: {
-      name: alertInfo.name,
+      name: alertName,
       value: baseContext.value,
       conditions: baseContext.conditions,
       window,

@@ -6,6 +6,7 @@
  */
 import { Type, TypeOf } from '@kbn/config-schema';
 import { Logger } from 'kibana/server';
+import { LicenseType } from '../../licensing/common/types';
 import {
   ActionVariable,
   AlertInstanceContext,
@@ -72,7 +73,7 @@ interface RuleTypeBase {
   actionGroups: Array<ActionGroup<string>>;
   defaultActionGroupId: string;
   producer: string;
-  minimumLicenseRequired: 'basic' | 'gold' | 'trial';
+  minimumLicenseRequired: LicenseType;
 }
 
 export type RuleType<
@@ -86,6 +87,8 @@ export type RuleType<
   };
   actionVariables: {
     context: TActionVariable[];
+    params?: TActionVariable[];
+    state?: TActionVariable[];
   };
   executor: RuleExecutorFunction<
     TFieldMap,
