@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState, memo } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -125,11 +124,7 @@ export const TLSFields: React.FunctionComponent<{
             defaultMessage="Verification mode"
           />
         }
-        helpText={
-          <ReactMarkdown
-            source={verificationModeHelpText[fields[ConfigKeys.TLS_VERIFICATION_MODE].value]}
-          />
-        }
+        helpText={verificationModeHelpText[fields[ConfigKeys.TLS_VERIFICATION_MODE].value]}
       >
         <EuiSelect
           options={verificationModeOptions}
@@ -390,7 +385,7 @@ const verificationModeHelpText = {
     'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.none.description',
     {
       defaultMessage:
-        'Performs *no verification* of the server’s certificate. It is primarily intended as a temporary diagnostic mechanism when attempting to resolve TLS errors; its use in production environments is strongly discouraged.',
+        'Performs no verification of the server’s certificate. It is primarily intended as a temporary diagnostic mechanism when attempting to resolve TLS errors; its use in production environments is strongly discouraged.',
     }
   ),
   [VerificationMode.STRICT]: i18n.translate(

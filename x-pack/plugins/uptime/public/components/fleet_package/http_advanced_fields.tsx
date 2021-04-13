@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
+  EuiCode,
   EuiFieldText,
   EuiFieldPassword,
   EuiFormRow,
@@ -268,15 +268,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
         <EuiSpacer size="s" />
         <EuiFormRow
           helpText={
-            <ReactMarkdown
-              source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText',
-                {
-                  defaultMessage:
-                    'Controls the indexing of the HTTP response headers `http.response.body.headers` field.',
-                }
-              )}
-            />
+            <>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText"
+                defaultMessage="Controls the indexing of the HTTP response headers to "
+              />
+              <EuiCode>http.response.body.headers</EuiCode>
+            </>
           }
         >
           <EuiCheckbox
@@ -298,15 +296,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
         </EuiFormRow>
         <EuiFormRow
           helpText={
-            <ReactMarkdown
-              source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseBody.helpText',
-                {
-                  defaultMessage:
-                    'Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.',
-                }
-              )}
-            />
+            <>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseBody.helpText"
+                defaultMessage="Controls the indexing of the HTTP response body contents to "
+              />
+              <EuiCode>http.response.body.contents</EuiCode>
+            </>
           }
         >
           <ResponseBodyIndexField
@@ -352,17 +348,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               defaultMessage="Status code must contain digits only."
             />
           }
-          helpText={
-            <ReactMarkdown
-              source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
-                {
-                  defaultMessage:
-                    'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered `up`.',
-                }
-              )}
-            />
-          }
+          helpText={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
+            {
+              defaultMessage:
+                'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
+            }
+          )}
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_STATUS_CHECK]}
@@ -427,17 +419,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          helpText={
-            <ReactMarkdown
-              source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
-                {
-                  defaultMessage:
-                    'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
-                }
-              )}
-            />
-          }
+          helpText={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
+            {
+              defaultMessage:
+                'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
+            }
+          )}
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
@@ -459,17 +447,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          helpText={
-            <ReactMarkdown
-              source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
-                {
-                  defaultMessage:
-                    'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
-                }
-              )}
-            />
-          }
+          helpText={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
+            {
+              defaultMessage:
+                'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
+            }
+          )}
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
