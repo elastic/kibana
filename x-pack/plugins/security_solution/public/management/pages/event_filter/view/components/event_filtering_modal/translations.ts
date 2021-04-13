@@ -15,13 +15,6 @@ export const MODAL_SUBTITLE = i18n.translate('xpack.securitySolution.eventFilter
   defaultMessage: 'Endpoint Security',
 });
 
-export const MODAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.eventFilter.modal.description',
-  {
-    defaultMessage: "Events are filtered when the rule's conditions are met:",
-  }
-);
-
 export const ACTIONS_CONFIRM = i18n.translate(
   'xpack.securitySolution.eventFilter.modal.actions.confirm',
   {

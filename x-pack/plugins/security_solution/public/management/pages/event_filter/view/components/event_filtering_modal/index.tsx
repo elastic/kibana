@@ -28,13 +28,7 @@ import {
   isCreationSuccessful,
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
-import {
-  MODAL_TITLE,
-  MODAL_SUBTITLE,
-  MODAL_DESCRIPTION,
-  ACTIONS_CONFIRM,
-  ACTIONS_CANCEL,
-} from './translations';
+import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
 export interface EventFilteringModalProps {
   data: Ecs;
@@ -121,7 +115,6 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     const modalBodyMemo = useMemo(
       () => (
         <ModalBodySection className="builder-section">
-          <EuiText size="s">{MODAL_DESCRIPTION}</EuiText>
           <EventFilteringForm />
         </ModalBodySection>
       ),

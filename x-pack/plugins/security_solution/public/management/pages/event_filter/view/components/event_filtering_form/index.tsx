@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiText,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
@@ -31,7 +32,13 @@ import {
 
 import { useEventFilterSelector } from '../../hooks';
 import { getFormEntry } from '../../../store/selector';
-import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL } from './translations';
+import {
+  FORM_DESCRIPTION,
+  NAME_LABEL,
+  NAME_ERROR,
+  NAME_PLACEHOLDER,
+  OS_LABEL,
+} from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { EVENT_FILTER_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 
@@ -172,6 +179,8 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
 
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
+        <EuiText size="s">{FORM_DESCRIPTION}</EuiText>
+        <EuiSpacer size="s" />
         {nameInputMemo}
         <EuiSpacer />
         {allowSelectOs ? (
