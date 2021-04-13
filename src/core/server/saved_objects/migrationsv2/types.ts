@@ -7,7 +7,6 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
-import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
@@ -79,7 +78,7 @@ export interface BaseState extends ControlState {
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  readonly unusedTypesQuery: Option.Option<estypes.QueryContainer>;
+  readonly unusedTypesQuery: Option.Option<any>;
 }
 
 export type InitState = BaseState & {

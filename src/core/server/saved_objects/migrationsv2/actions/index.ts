@@ -441,7 +441,7 @@ export const reindex = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: Option.Option<estypes.QueryContainer>
+  unusedTypesQuery: Option.Option<any>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -457,7 +457,7 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
+          query: Option.fold<any, any | undefined>(
             () => undefined,
             (query) => query
           )(unusedTypesQuery),
