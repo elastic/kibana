@@ -37,22 +37,24 @@ const myGenerator = plugins.share.getUrlGenerator(/* ... */);
 const deepLink: string = myGenerator.createUrl({ /* ... */ });
 ```
 
+
+## Goals of the project
+
 The proposal is to unify both of these services (Short URL Service and URL
 Generator Service) into a single new *URL Service*. The new unified service
 will still provide all the functionality the above mentioned services provide
 and in addition will implement the following improvements:
 
-1. It will provide all public APIs through plugin contracts and HTTP endpoints.
-1. It will expose a consistent client interface, the same interface on the
-   server-side as on the browser-side, so it is easier to write isomorphic
-   plugins, which rely on URL services.
-1. Improve the HTTP endpoints for use by external users, Cloud, and Support.
-1. Expose a "redirect" endpoint, which given URL generator ID and parameters,
-   redirects the user to a deep link inside Kibana.
-1. Add ability to generate human-readable short URLs.
-1. Add ability to delete short URLs.
-1. Add ability to generate short URLs using URL generators.
-1. Will not use MD5 hashing algorithm.
+1. Standardize a way for apps to deep link and navigate into other Kibana apps,
+   with ability to use *location state* to specify the state of the app which is
+   not part of the URL.
+2. Combine Short URL Service with URL Generator Service to allow short URLs to
+   be constructed from URL generators, which will also allow us to automatically
+   migrate the short URLs if the parameters of the underlying URL generator
+   change and be able to store location state in every short URL.
+
+See more detailed explanation and other small improvements in the "Motivation"
+section below.
 
 
 # Terminology
@@ -224,13 +226,6 @@ current state of the URL services needs an upgrade.
 We have identified the following limitations in the current implementation of
 the Short URL Service:
 
-1. It exposes only HTTP endpoint API.
-   1. __Will do:__ We will also expose a URL Service client through plugin
-      contract on the server and browser.
-1. It only has 3 HTTP endpoints, yet all three have different paths:
-   (1) `/short_url`, (2) `/shorten_url`; and (3) `/goto`.
-   1. __Will do:__ We will normalize the HTTP endpoints. We will use HTTP
-      method "verbs" like POST, instead of verbs in the url like "shorten_url".
 1. There is no migration system. If an application exposes this functionality,
    every possible URL that might be generated should be supported forever. A
    migration could be written inside the app itself, on page load, but this is a
@@ -238,6 +233,20 @@ the Short URL Service:
    1. __Will do:__ Short URLs will be created using locators. We will use
       migrations provided by the locators to migrate the stored parameters
       in the short URL saved object.
+1. Short URLs store only the URL of the destination page. However, the
+   destination page might have other state which affects the display of the page
+   but is not present in the URL. Once the short URL is used to navigate to that
+   page, any state that is kept only in memory is lost.
+   1. __Will do:__ The new implementation of the short URLs will also persist
+      the location state of the URL. That state would be provided to a
+      Kibana app once a user navigates to that app using a short URL.
+1. It exposes only HTTP endpoint API.
+   1. __Will do:__ We will also expose a URL Service client through plugin
+      contract on the server and browser.
+1. It only has 3 HTTP endpoints, yet all three have different paths:
+   (1) `/short_url`, (2) `/shorten_url`; and (3) `/goto`.
+   1. __Will do:__ We will normalize the HTTP endpoints. We will use HTTP
+      method "verbs" like POST, instead of verbs in the url like "shorten_url".
 1. There is not much documentation for developers.
    1. __Will do:__ The new service will have a much nicer API and docs.
 1. There is no way to delete short URLs once they are created.
@@ -246,13 +255,6 @@ the Short URL Service:
 1. Short URL service uses MD5 algorithm to hash long URLs. Security team
    requested to stop using that algorithm.
    1. __Will do:__ The new URL Service will not use MD5 algorithm.
-1. Short URLs store only the URL of the destination page. However, the
-   destination page might have other state which affects the display of the page
-   but is not present in the URL. Once the short URL is used to navigate to that
-   page, any state that is kept only in memory is lost.
-   1. __Will do:__ The new implementation of the short URLs will also persist
-      the location state of the URL. That state would be provided to a
-      Kibana app once a user navigates to that app using a short URL.
 1. Short URLs are not automatically deleted when the target (say dashboard) is
    deleted. (#10450)
    1. __Could do:__ The URL Service will not provide such feature. Though the
@@ -291,6 +293,11 @@ the Short URL Service:
 We have identified the following limitations in the current implementation of
 the URL Generator Service:
 
+1. URL generator generate only the URL of the destination. However there is
+   also the ability to use location state with `core.application.navigateToApp`
+   navigation method.
+   1. __Will do:__ The new locators will also generate the location state, which
+      will be used in `.navigateToApp` method.
 1. URL generators are available only on the client-side. There is no way to use
    them together with short URLs.
    1. __Will do:__ We will implement locators also on the server-side
