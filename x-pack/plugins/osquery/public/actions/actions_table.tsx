@@ -84,7 +84,7 @@ const ActionsTableComponent = () => {
         render: renderTimestampColumn,
       },
       {
-        name: 'Actions',
+        name: 'View details',
         actions: [
           {
             render: renderActionsColumn,

@@ -24,7 +24,7 @@ const ScheduledQueriesPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.scheduledQueryList.pageTitle"
-                defaultMessage="Scheduled queries"
+                defaultMessage="Scheduled query groups"
               />
             </h1>
           </EuiText>
@@ -49,7 +49,7 @@ const ScheduledQueriesPageComponent = () => {
       <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
         <FormattedMessage
           id="xpack.osquery.scheduledQueryList.newScheduledQueryButtonLabel"
-          defaultMessage="New scheduled query"
+          defaultMessage="New scheduled query group"
         />
       </EuiButton>
     ),

@@ -65,7 +65,7 @@ const LiveQueryDetailsPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.pageTitle"
-                defaultMessage="Live query results"
+                defaultMessage="Live query details"
               />
             </h1>
           </EuiText>

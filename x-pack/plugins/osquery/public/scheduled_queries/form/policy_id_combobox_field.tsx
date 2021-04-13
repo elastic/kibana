@@ -82,7 +82,8 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   }, [agentPoliciesById, value]);
 
   const helpText = useMemo(() => {
-    if (!value?.length || !value[0].length) return;
+    if (!value?.length || !value[0].length || !agentPoliciesById || !agentPoliciesById[value[0]])
+      return;
 
     return (
       agentPoliciesById[value[0]].agents + ' agents are enrolled with the selected agent policy.'

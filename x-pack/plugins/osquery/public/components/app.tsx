@@ -35,7 +35,7 @@ const OsqueryAppComponent = () => {
                 <EuiTab isSelected={section === 'live_query'} {...useRouterNavigate('live_query')}>
                   <FormattedMessage
                     id="xpack.osquery.appNavigation.liveQueryLinkText"
-                    defaultMessage="Live Query"
+                    defaultMessage="Live queries"
                   />
                 </EuiTab>
                 <EuiTab
@@ -44,7 +44,7 @@ const OsqueryAppComponent = () => {
                 >
                   <FormattedMessage
                     id="xpack.osquery.appNavigation.scheduledQueriesLinkText"
-                    defaultMessage="Scheduled Queries"
+                    defaultMessage="Scheduled query groups"
                   />
                 </EuiTab>
               </EuiTabs>

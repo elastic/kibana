@@ -6,3 +6,4 @@
  */
 
 export * from './use_agent_policies';
+export * from './use_agent_policy';

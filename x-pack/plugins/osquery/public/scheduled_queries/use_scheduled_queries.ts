@@ -36,9 +36,8 @@ export const useScheduledQueries = () => {
         draft.items = draft.items.filter(
           (item) =>
             !(
-              !item.inputs[0].streams.length ||
-              (item.inputs[0].streams.length === 1 &&
-                !item.inputs[0].streams[0].compiled_stream.query)
+              item.inputs[0].streams.length === 1 &&
+              !item.inputs[0].streams[0].compiled_stream.query
             )
         );
       }),

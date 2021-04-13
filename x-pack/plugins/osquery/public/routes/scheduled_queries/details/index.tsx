@@ -41,7 +41,7 @@ const ScheduledQueryDetailsPageComponent = () => {
           >
             <FormattedMessage
               id="xpack.osquery.scheduledQueryDetails.viewAllScheduledQueriesListTitle"
-              defaultMessage="View all scheduled queries"
+              defaultMessage="View all scheduled query groups"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -50,7 +50,11 @@ const ScheduledQueryDetailsPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.scheduledQueryDetails.pageTitle"
-                defaultMessage="Scheduled query details"
+                defaultMessage="{queryName} details"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  queryName: data?.name,
+                }}
               />
             </h1>
           </EuiText>
@@ -67,7 +71,7 @@ const ScheduledQueryDetailsPageComponent = () => {
         </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
-    [scheduledQueriesListProps]
+    [data?.name, scheduledQueriesListProps]
   );
 
   const RightColumn = useMemo(
@@ -75,7 +79,7 @@ const ScheduledQueryDetailsPageComponent = () => {
       <EuiButton fill {...editQueryLinkProps} iconType="pencil">
         <FormattedMessage
           id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
-          defaultMessage="Edit query"
+          defaultMessage="Edit"
         />
       </EuiButton>
     ),

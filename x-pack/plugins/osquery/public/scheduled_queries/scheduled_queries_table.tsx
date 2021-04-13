@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { find, uniq, map } from 'lodash/fp';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -20,6 +18,7 @@ import {
 import { pagePathGetters } from '../../../fleet/public';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { useScheduledQueries } from './use_scheduled_queries';
+import { ActiveStateSwitch } from './active_state_switch';
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`scheduled_queries/${id}`)}>{name}</EuiLink>
@@ -75,6 +74,13 @@ const ScheduledQueriesTableComponent = () => {
     [agentPolicies, getUrlForApp]
   );
 
+  const renderQueries = useCallback(
+    (streams: PackagePolicy['inputs'][0]['streams']) => <>{streams.length}</>,
+    []
+  );
+
+  const renderActive = useCallback((_, item) => <ActiveStateSwitch item={item} />, []);
+
   const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
     () => [
       {
@@ -91,17 +97,18 @@ const ScheduledQueriesTableComponent = () => {
       },
       {
         field: 'inputs[0].streams',
-        name: '# queries',
-        render: (streams: PackagePolicy['inputs'][0]['streams']) => <>{streams.length}</>,
+        name: 'Number of queries',
+        render: renderQueries,
       },
       {
         field: 'enabled',
         name: 'Active',
         sortable: true,
-        render: (enabled, item) => <>{item.enabled ? 'True' : 'False'}</>,
+        align: 'right',
+        render: renderActive,
       },
     ],
-    [renderAgentPolicy]
+    [renderActive, renderAgentPolicy, renderQueries]
   );
 
   const sorting = useMemo(

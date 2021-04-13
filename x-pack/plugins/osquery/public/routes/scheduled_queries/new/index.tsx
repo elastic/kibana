@@ -35,7 +35,7 @@ const NewScheduledQueryPageComponent = () => {
           <EuiButtonEmpty iconType="arrowLeft" {...scheduledQueryListProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.newScheduledQuery.viewScheduledQueriesListTitle"
-              defaultMessage="View all live queries"
+              defaultMessage="View all scheduled query groups"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -44,7 +44,7 @@ const NewScheduledQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.newScheduledQuery.pageTitle"
-                defaultMessage="New scheduled query"
+                defaultMessage="New scheduled query group"
               />
             </h1>
           </EuiText>

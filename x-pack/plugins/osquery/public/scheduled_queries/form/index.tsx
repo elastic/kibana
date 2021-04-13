@@ -222,7 +222,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
     <>
       <Form form={form}>
         <EuiDescribedFormGroup
-          title={<h3>Scheduled query settings</h3>}
+          title={<h3>{'Scheduled query group settings'}</h3>}
           fullWidth
           description={
             <>

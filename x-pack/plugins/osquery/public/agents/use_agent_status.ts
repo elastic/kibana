@@ -18,7 +18,7 @@ interface UseAgentStatus {
 export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
   const { http } = useKibana().services;
 
-  return useQuery<GetAgentStatusResponse>(
+  return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
     ['agentStatus', policyId],
     () =>
       http.get(
@@ -33,6 +33,7 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
       ),
     {
       enabled: !skip,
+      select: (response) => response.results,
     }
   );
 };

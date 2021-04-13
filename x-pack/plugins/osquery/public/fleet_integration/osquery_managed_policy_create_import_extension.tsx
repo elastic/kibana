@@ -194,15 +194,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
-                title="You need to save the integration to deploy Osquery to the picked policy agents"
+                title="Save the integration to access the options below"
                 iconType="save"
-              >
-                <p>
-                  {`Please be aware that installation process of the Osquery deamon on the Agents
-                  can take a while, so if you don't see Live queries please check your Agent logs to
-                  make sure that Osquerybeat has been installed and running successfully`}
-                </p>
-              </EuiCallOut>
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
@@ -214,7 +208,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
             <EuiFlexItem>
               <EuiCallOut title="No agents in the policy" color="warning" iconType="help">
                 <p>
-                  {`We have detected that you have not assigned yet any agent to the `}
+                  {`Fleet has detected that you have not assigned yet any agent to the `}
                   {
                     <EuiLink href={agentsLinkHref}>
                       {agentPolicy?.name ?? policy?.policy_id}
@@ -234,11 +228,11 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xl" type="console" />}
-            title="Run Live query"
+            title="Run live queries"
             isDisabled={!editMode}
             href={liveQueryHref}
+            description={''}
             onClick={liveQueryClick}
-            description="This option will deploy Osquery to the agents, so you can issue live queries"
             footer={
               <EuiButtonEmpty
                 iconType="iInCircle"
@@ -256,7 +250,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
             icon={<EuiIcon size="xl" type="clock" />}
             title="Schedule queries"
             isDisabled={!editMode}
-            description="Run queries on defined interval"
+            description={''}
             href={scheduleQueriesHref}
             onClick={scheduleQueriesClick}
             footer={

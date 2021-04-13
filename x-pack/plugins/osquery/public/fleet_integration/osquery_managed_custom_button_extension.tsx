@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
 
 import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
-import { useKibana } from '../common/lib/kibana';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -17,30 +17,46 @@ import { useKibana } from '../common/lib/kibana';
  */
 export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExtensionComponentProps>(
   () => {
-    const { navigateToApp, getUrlForApp } = useKibana().services.application;
-
-    const handleClick = useCallback(() => navigateToApp('osquery'), [navigateToApp]);
-    const osqueryAppUrl = useMemo(() => getUrlForApp('osquery'), [getUrlForApp]);
+    const liveQueriesProps = useRouterNavigate('live_queries');
+    const scheduledQueriesProps = useRouterNavigate('scheduled_queries');
 
     return (
-      <EuiFlexGroup direction="column" alignItems="flexStart">
+      <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
-          <EuiText>{'You can manage your queries from the Osquery app'}</EuiText>
+          <EuiCard
+            icon={<EuiIcon size="xl" type="console" />}
+            title="Run live queries"
+            {...liveQueriesProps}
+            description={''}
+            footer={
+              <EuiButtonEmpty
+                iconType="iInCircle"
+                size="xs"
+                href="http://google.com"
+                aria-label="See more details about Live queries"
+              >
+                {'More details'}
+              </EuiButtonEmpty>
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          {
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton
-              fill
-              href={osqueryAppUrl}
-              onClick={handleClick}
-              iconType="popout"
-              iconSide="right"
-              target="_blank"
-            >
-              {'Go to Osquery app'}
-            </EuiButton>
-          }
+          <EuiCard
+            icon={<EuiIcon size="xl" type="clock" />}
+            title="Schedule queries"
+            description={''}
+            {...scheduledQueriesProps}
+            footer={
+              <EuiButtonEmpty
+                iconType="iInCircle"
+                size="xs"
+                href="http://google.com"
+                aria-label="See more details about Scheduled query groups"
+              >
+                {'More details'}
+              </EuiButtonEmpty>
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
