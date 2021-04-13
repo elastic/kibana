@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import type { AbstractSearchStrategy, DefaultSearchCapabilities } from '../index';
 import type { IndexPatternsService } from '../../../../../data/common';
 import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
+import type { IndexPatternValue } from '../../../../common/types';
 
 export interface FieldsFetcherServices {
   indexPatternsService: IndexPatternsService;
@@ -29,11 +32,13 @@ export const createFieldsFetcher = (
 ) => {
   const fieldsCacheMap = new Map();
 
-  return async (index: string) => {
-    if (fieldsCacheMap.has(index)) {
-      return fieldsCacheMap.get(index);
+  return async (indexPatternValue: IndexPatternValue) => {
+    const key = getIndexPatternKey(indexPatternValue);
+
+    if (fieldsCacheMap.has(key)) {
+      return fieldsCacheMap.get(key);
     }
-    const fetchedIndex = await cachedIndexPatternFetcher(index);
+    const fetchedIndex = await cachedIndexPatternFetcher(indexPatternValue);
 
     const fields = await searchStrategy.getFieldsForWildcard(
       fetchedIndex,
@@ -41,7 +46,7 @@ export const createFieldsFetcher = (
       capabilities
     );
 
-    fieldsCacheMap.set(index, fields);
+    fieldsCacheMap.set(key, fields);
 
     return fields;
   };

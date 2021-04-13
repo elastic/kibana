@@ -45,6 +45,13 @@ export const searchSessionsConfigSchema = schema.object({
    * trackingInterval controls how often we track search session objects progress
    */
   trackingInterval: schema.duration({ defaultValue: '10s' }),
+
+  /**
+   * monitoringTaskTimeout controls for how long task manager waits for search session monitoring task to complete before considering it timed out,
+   * If tasks timeouts it receives cancel signal and next task starts in "trackingInterval" time
+   */
+  monitoringTaskTimeout: schema.duration({ defaultValue: '5m' }),
+
   /**
    * notTouchedTimeout controls how long do we store unpersisted search session results,
    * after the last search in the session has completed
@@ -59,6 +66,7 @@ export const searchSessionsConfigSchema = schema.object({
    * maxUpdateRetries controls how many retries we perform while attempting to save a search session
    */
   maxUpdateRetries: schema.number({ defaultValue: 3 }),
+
   /**
    * defaultExpiration controls how long search sessions are valid for, until they are expired.
    */
