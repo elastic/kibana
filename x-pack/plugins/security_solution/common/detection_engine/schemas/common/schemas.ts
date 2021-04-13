@@ -22,6 +22,7 @@ import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greate
 import { PositiveInteger } from '../types/positive_integer';
 import { NonEmptyString } from '../types/non_empty_string';
 import { parseScheduleDates } from '../../parse_schedule_dates';
+import { NonEmptyArray } from '../types';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -230,13 +231,10 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
-export const machine_learning_job_id = t.string;
-export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
-
-export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
-export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
-
-export const machine_learning_job_id_normalized = t.array(t.string);
+export const machine_learning_job_id_normalized = NonEmptyArray(
+  t.string,
+  'MachineLearningJobIdNormalized'
+);
 export type MachineLearningJobIdNormalized = t.TypeOf<typeof machine_learning_job_id_normalized>;
 
 export const machineLearningJobIdNormalizedOrUndefined = t.union([
@@ -246,6 +244,12 @@ export const machineLearningJobIdNormalizedOrUndefined = t.union([
 export type MachineLearningJobIdNormalizedOrUndefined = t.TypeOf<
   typeof machineLearningJobIdNormalizedOrUndefined
 >;
+
+export const machine_learning_job_id = t.union([t.string, machine_learning_job_id_normalized]);
+export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
+
+export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
+export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
 
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
