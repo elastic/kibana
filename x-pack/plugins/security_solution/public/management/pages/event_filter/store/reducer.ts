@@ -13,7 +13,7 @@ import {
   EventFilterInitForm,
   EventFilterChangeForm,
   EventFilterCreateStart,
-  EventFilterCreateSuccess,
+  EventFilterFormStateChanged,
   EventFilterCreateError,
 } from './action';
 
@@ -27,7 +27,16 @@ type CaseReducer<T extends AppAction> = (
 ) => Immutable<EventFilterListPageState>;
 
 const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) => {
-  return { ...state, form: { ...state.form, entry: action.payload.entry } };
+  return {
+    ...state,
+    form: {
+      ...state.form,
+      entry: action.payload.entry,
+      submissionResourceState: {
+        type: 'UninitialisedResourceState',
+      },
+    },
+  };
 };
 
 const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action) => {
@@ -40,22 +49,24 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
 const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
   return {
     ...state,
-    form: { ...state.form, isLoadingAction: true },
+    form: {
+      ...state.form,
+      isLoadingAction: true,
+      submissionResourceState: {
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      },
+    },
   };
 };
 
-const eventFilterCreateSuccess: CaseReducer<EventFilterCreateSuccess> = (state, action) => {
+const eventFilterFormStateChanged: CaseReducer<EventFilterFormStateChanged> = (state, action) => {
   return {
     ...state,
-    entries: [action.payload.exception, ...state.entries],
-    form: { ...state.form, isLoadingAction: false, entry: undefined, hasError: false },
-  };
-};
-
-const eventFilterCreateError: CaseReducer<EventFilterCreateError> = (state, action) => {
-  return {
-    ...state,
-    form: { ...state.form, isLoadingAction: false },
+    form: {
+      ...state.form,
+      submissionResourceState: action.payload,
+    },
   };
 };
 
@@ -70,10 +81,8 @@ export const eventFilterPageReducer: StateReducer = (
       return eventFilterChangeForm(state, action);
     case 'eventFilterCreateStart':
       return eventFilterCreateStart(state, action);
-    case 'eventFilterCreateSuccess':
-      return eventFilterCreateSuccess(state, action);
-    case 'eventFilterCreateError':
-      return eventFilterCreateError(state, action);
+    case 'eventFilterFormStateChanged':
+      return eventFilterFormStateChanged(state, action);
   }
 
   return state;

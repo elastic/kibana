@@ -10,6 +10,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
+import { AsyncResourceState } from '../../../state/async_resource_state';
 
 export type EventFilterInitForm = Action<'eventFilterInitForm'> & {
   payload: {
@@ -32,10 +33,15 @@ export type EventFilterCreateSuccess = Action<'eventFilterCreateSuccess'> & {
 };
 export type EventFilterCreateError = Action<'eventFilterCreateError'>;
 
+export type EventFilterFormStateChanged = Action<'eventFilterFormStateChanged'> & {
+  payload: AsyncResourceState<ExceptionListItemSchema>;
+};
+
 export type EventFilterPageAction =
   | EventFilterCreateStart
   | EventFilterInitForm
   | EventFilterChangeForm
   | EventFilterCreateStart
   | EventFilterCreateSuccess
-  | EventFilterCreateError;
+  | EventFilterCreateError
+  | EventFilterFormStateChanged;

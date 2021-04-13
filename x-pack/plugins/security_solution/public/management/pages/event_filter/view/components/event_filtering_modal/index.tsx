@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useMemo, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled, { css } from 'styled-components';
@@ -20,8 +20,13 @@ import {
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
 import { EventFilteringForm } from '../event_filtering_form';
-import { useGetInitialExceptionFromEvent, useEventFilterSelector } from '../../hooks';
-import { getFormHasError, getFormIsLoadingAction } from '../../../store/selector';
+import { useEventFilterSelector } from '../../hooks';
+import {
+  getFormHasError,
+  isCreationInProgress,
+  isCreationSuccessful,
+} from '../../../store/selector';
+import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { ACTIONS_TITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
 export interface EventFilteringModalProps {
@@ -55,28 +60,49 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
   ({ data, onCancel }) => {
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const formHasError = useEventFilterSelector(getFormHasError);
-    const formIsLoadingAction = useEventFilterSelector(getFormIsLoadingAction);
+    const creationInProgress = useEventFilterSelector(isCreationInProgress);
+    const creationSuccessful = useEventFilterSelector(isCreationSuccessful);
 
-    const entry = useGetInitialExceptionFromEvent(data);
     useEffect(() => {
-      dispatch({ type: 'eventFilterInitForm', payload: { entry } });
-    }, [dispatch, entry]);
+      if (creationSuccessful) {
+        onCancel();
+        dispatch({
+          type: 'eventFilterFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
+          },
+        });
+      }
+    }, [creationSuccessful, onCancel, dispatch]);
+
+    useEffect(() => {
+      dispatch({
+        type: 'eventFilterInitForm',
+        payload: { entry: getInitialExceptionFromEvent(data) },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleOnCancel = useCallback(() => {
+      if (creationInProgress) return;
+      onCancel();
+    }, [creationInProgress, onCancel]);
 
     const confirmButtonMemo = useMemo(
       () => (
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError || formIsLoadingAction}
+          disabled={formHasError || creationInProgress}
           onClick={() => {
             dispatch({ type: 'eventFilterCreateStart' });
           }}
-          isLoading={formIsLoadingAction}
+          isLoading={creationInProgress}
         >
           {ACTIONS_CONFIRM}
         </EuiButton>
       ),
-      [dispatch, formHasError, formIsLoadingAction]
+      [dispatch, formHasError, creationInProgress]
     );
 
     const modalBodyMemo = useMemo(
@@ -97,7 +123,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
         {modalBodyMemo}
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
             {ACTIONS_CANCEL}
           </EuiButtonEmpty>
           {confirmButtonMemo}

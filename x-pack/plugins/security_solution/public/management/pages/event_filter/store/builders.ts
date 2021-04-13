@@ -12,7 +12,6 @@ export const initialEventFilterPageState = (): EventFilterListPageState => ({
   form: {
     entry: undefined,
     hasError: false,
-    isLoadingAction: false,
-    isLoadingEntry: false,
+    submissionResourceState: { type: 'UninitialisedResourceState' },
   },
 });

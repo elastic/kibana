@@ -15,6 +15,7 @@ import {
 import { EventFilterHttpService, EventFilterService } from '../service';
 
 import { EventFilterListPageState } from '../state';
+import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 
 const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFilterListPageState, AppAction>,
@@ -24,9 +25,22 @@ const eventFilterCreate = async (
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
     const exception = await eventFilterService.addEventFilter(formEntry);
-    store.dispatch({ type: 'eventFilterCreateSuccess', payload: { exception } });
+    store.dispatch({
+      type: 'eventFilterFormStateChanged',
+      payload: {
+        type: 'LoadedResourceState',
+        data: exception,
+      },
+    });
   } catch (error) {
-    store.dispatch({ type: 'eventFilterCreateError' });
+    store.dispatch({
+      type: 'eventFilterFormStateChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+        lastLoadedState: getLastLoadedResourceState(store.getState().form.submissionResourceState),
+      },
+    });
   }
 };
 

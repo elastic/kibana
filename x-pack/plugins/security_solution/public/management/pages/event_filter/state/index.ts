@@ -9,12 +9,12 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
+import { AsyncResourceState } from '../../../state/async_resource_state';
 export interface EventFilterListPageState {
   entries: ExceptionListItemSchema[];
   form: {
     entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
     hasError: boolean;
-    isLoadingAction: boolean;
-    isLoadingEntry: boolean;
+    submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
   };
 }

@@ -10,6 +10,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/shared_imports';
+import { isLoadingResourceState, isLoadedResourceState } from '../../../state/async_resource_state';
 
 export const getFormEntry = (
   state: EventFilterListPageState
@@ -21,6 +22,24 @@ export const getFormHasError = (state: EventFilterListPageState): boolean => {
   return state.form.hasError;
 };
 
-export const getFormIsLoadingAction = (state: EventFilterListPageState): boolean => {
-  return state.form.isLoadingAction;
+export const getFormSubmissionIsLoadingStatus = (state: EventFilterListPageState): boolean => {
+  return state.form.submissionResourceState.type === 'LoadingResourceState';
+};
+
+export const getFormSubmissionIsUninitialisedStatus = (
+  state: EventFilterListPageState
+): boolean => {
+  return state.form.submissionResourceState.type === 'UninitialisedResourceState';
+};
+
+export const getFormSubmissionIsLoadedStatus = (state: EventFilterListPageState): boolean => {
+  return state.form.submissionResourceState.type === 'LoadedResourceState';
+};
+
+export const isCreationInProgress = (state: EventFilterListPageState): boolean => {
+  return isLoadingResourceState(state.form.submissionResourceState);
+};
+
+export const isCreationSuccessful = (state: EventFilterListPageState): boolean => {
+  return isLoadedResourceState(state.form.submissionResourceState);
 };
