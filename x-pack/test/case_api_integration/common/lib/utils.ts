@@ -799,3 +799,18 @@ export const getCase = async (
 
   return theCase;
 };
+
+export const findCases = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  query: Record<string, unknown> = {},
+  expectedHttpCode: number = 200
+): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${CASES_URL}/_find`)
+    .query({ sortOrder: 'asc', ...query })
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
