@@ -59,6 +59,7 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
+  buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
 import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
@@ -208,6 +209,7 @@ const RuleDetailsPageComponent = () => {
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
+  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
@@ -286,10 +288,11 @@ const RuleDetailsPageComponent = () => {
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
+      ...buildAlertsRuleIdFilter(ruleId),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, showBuildingBlockAlerts]
+    [ruleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -444,6 +447,13 @@ const RuleDetailsPageComponent = () => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
     },
     [setShowBuildingBlockAlerts]
+  );
+
+  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
+    (newShowOnlyThreatIndicatorAlerts: boolean) => {
+      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
+    },
+    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -670,7 +680,9 @@ const RuleDetailsPageComponent = () => {
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
+                    showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                    onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
                     onRuleChange={refreshRule}
                     to={to}
                   />
