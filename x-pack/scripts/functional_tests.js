@@ -34,6 +34,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/case_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/trial/config.ts'),
+  require.resolve('../test/apm_api_integration/rules/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/basic/config.ts'),
   require.resolve('../test/lists_api_integration/security_and_spaces/config.ts'),
@@ -73,8 +74,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting_api_integration/reporting_and_security.config.ts'),
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96515
-  // require.resolve('../test/fleet_api_integration/config.ts'),
+  require.resolve('../test/fleet_api_integration/config.ts'),
   require.resolve('../test/search_sessions_integration/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
