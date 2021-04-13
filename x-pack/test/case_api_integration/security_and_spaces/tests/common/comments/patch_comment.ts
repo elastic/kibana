@@ -21,6 +21,7 @@ import {
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
+  postCommentGenAlertReq,
 } from '../../../../common/lib/mock';
 import {
   createCaseAction,
@@ -352,24 +353,18 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('alert format', () => {
       type AlertComment = CommentType.alert | CommentType.generatedAlert;
 
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed create a test case for generated alerts here
       for (const [alertId, index, type] of [
         ['1', ['index1', 'index2'], CommentType.alert],
         [['1', '2'], 'index', CommentType.alert],
-        ['1', ['index1', 'index2'], CommentType.generatedAlert],
-        [['1', '2'], 'index', CommentType.generatedAlert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-          const patchedCase = await createComment(
-            supertest,
-            postedCase.id,
-            { ...postCommentAlertReq, alertId, index, type: type as AlertComment },
-            400
-          );
+          const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
 
           await updateComment(
             supertest,
-            postedCase.id,
+            patchedCase.id,
             {
               id: patchedCase.comments![0].id,
               version: patchedCase.comments![0].version,
@@ -389,12 +384,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-          const patchedCase = await createComment(
-            supertest,
-            postedCase.id,
-            { ...postCommentAlertReq, alertId, index, type: type as AlertComment },
-            400
-          );
+          const patchedCase = await createComment(supertest, postedCase.id, {
+            ...postCommentAlertReq,
+            alertId,
+            index,
+            type: type as AlertComment,
+          });
 
           await updateComment(supertest, postedCase.id, {
             id: patchedCase.comments![0].id,

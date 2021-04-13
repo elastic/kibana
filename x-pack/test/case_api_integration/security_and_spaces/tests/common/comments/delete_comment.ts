@@ -49,10 +49,15 @@ export default ({ getService }: FtrProviderContext): void => {
       it('404s when comment belongs to different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
-        const message = await deleteComment(supertest, 'fake-id', patchedCase.comments![0].id, 404);
+        const error = (await deleteComment(
+          supertest,
+          'fake-id',
+          patchedCase.comments![0].id,
+          404
+        )) as Error;
 
-        expect(message).to.eql(
-          `This comment ${patchedCase.comments![0].id} does not exist in fake-id).`
+        expect(error.message).to.be(
+          `This comment ${patchedCase.comments![0].id} does not exist in fake-id.`
         );
       });
 

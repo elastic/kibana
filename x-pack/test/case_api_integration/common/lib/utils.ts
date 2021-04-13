@@ -648,7 +648,7 @@ export const deleteComment = async (
   caseId: string,
   commentId: string,
   expectedHttpCode: number = 204
-): Promise<void> => {
+): Promise<{} | Error> => {
   const { body: comment } = await supertest
     .delete(`${CASES_URL}/${caseId}/comments/${commentId}`)
     .set('kbn-xsrf', 'true')
