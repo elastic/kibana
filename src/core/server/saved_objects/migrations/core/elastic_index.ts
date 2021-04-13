@@ -29,6 +29,46 @@ export interface FullIndexInfo {
   mappings: IndexMapping;
 }
 
+// When migrating from the outdated index we use a read query which excludes
+// saved objects which are no longer used. These saved objects will still be
+// kept in the outdated index for backup purposes, but won't be availble in
+// the upgraded index.
+export const excludeUnusedTypesQuery: estypes.QueryContainer = {
+  bool: {
+    must_not: [
+      // https://github.com/elastic/kibana/issues/91869
+      {
+        term: {
+          type: 'fleet-agent-events',
+        },
+      },
+      // https://github.com/elastic/kibana/issues/95617
+      {
+        term: {
+          type: 'tsvb-validation-telemetry',
+        },
+      },
+      // https://github.com/elastic/kibana/issues/96131
+      {
+        bool: {
+          must: [
+            {
+              match: {
+                type: 'search-session',
+              },
+            },
+            {
+              match: {
+                'search-session.persisted': false,
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
 /**
  * A slight enhancement to indices.get, that adds indexName, and validates that the
  * index mappings are somewhat what we expect.
@@ -68,23 +108,6 @@ export function reader(
 ) {
   const scroll = scrollDuration;
   let scrollId: string | undefined;
-
-  // When migrating from the outdated index we use a read query which excludes
-  // saved object types which are no longer used. These saved objects will
-  // still be kept in the outdated index for backup purposes, but won't be
-  // availble in the upgraded index.
-  const EXCLUDE_UNUSED_TYPES = [
-    'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
-    'tsvb-validation-telemetry', // https://github.com/elastic/kibana/issues/95617
-  ];
-
-  const excludeUnusedTypesQuery = {
-    bool: {
-      must_not: EXCLUDE_UNUSED_TYPES.map((type) => ({
-        term: { type },
-      })),
-    },
-  };
 
   const nextBatch = () =>
     scrollId !== undefined

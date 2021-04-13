@@ -14,7 +14,6 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
-import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
@@ -185,10 +184,10 @@ export const removeWriteBlock = (
  * yellow at any point in the future. So ultimately data-redundancy is up to
  * users to maintain.
  */
-const waitForIndexStatusYellow = (
+export const waitForIndexStatusYellow = (
   client: ElasticsearchClient,
   index: string,
-  timeout: string
+  timeout = DEFAULT_TIMEOUT
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
     .health({ index, wait_for_status: 'yellow', timeout })
@@ -440,9 +439,9 @@ export const reindex = (
   requireAlias: boolean,
   /* When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
-   * index for backup purposes, but won't be availble in the upgraded index.
+   * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesToExclude: Option.Option<string[]>
+  unusedTypesQuery: Option.Option<estypes.QueryContainer>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -457,14 +456,10 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<string[], QueryContainer | undefined>(
+          query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
             () => undefined,
-            (types) => ({
-              bool: {
-                must_not: types.map((type) => ({ term: { type } })),
-              },
-            })
-          )(unusedTypesToExclude),
+            (query) => query
+          )(unusedTypesQuery),
         },
         dest: {
           index: targetIndex,
