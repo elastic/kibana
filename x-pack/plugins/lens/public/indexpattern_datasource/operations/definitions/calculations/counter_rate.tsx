@@ -75,11 +75,16 @@ export const counterRateOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(metric && 'label' in metric ? metric.label : undefined, timeScale),
+      label: ofName(
+        metric && 'sourceField' in metric
+          ? indexPattern.getFieldByName(metric.sourceField)?.displayName
+          : undefined,
+        timeScale
+      ),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,

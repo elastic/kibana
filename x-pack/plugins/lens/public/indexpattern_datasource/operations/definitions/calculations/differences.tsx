@@ -74,7 +74,7 @@ export const derivativeOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref && 'label' in ref ? ref.label : undefined, previousColumn?.timeScale),
+      label: ofName(ref?.label, previousColumn?.timeScale),
       dataType: 'number',
       operationType: OPERATION_NAME,
       isBucketed: false,
