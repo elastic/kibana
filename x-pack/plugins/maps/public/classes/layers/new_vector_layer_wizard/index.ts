@@ -20,10 +20,11 @@ import {
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { getVectorLayerIndexName } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    indexName: state.map.mapState.vectorLayerIndexName,
+    indexName: getVectorLayerIndexName(state),
   };
 }
 

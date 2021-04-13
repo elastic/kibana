@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Feature } from 'geojson';
 import {
   DrawState,
   Goto,
@@ -39,7 +38,7 @@ export type MapContext = {
   vectorLayerIndexName: string;
   drawState?: DrawState;
   drawFeatureState?: DRAW_TYPE;
-  editModeActive?: boolean;
+  editModeActive: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };

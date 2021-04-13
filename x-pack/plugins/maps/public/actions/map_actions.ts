@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import { Feature } from 'geojson';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';

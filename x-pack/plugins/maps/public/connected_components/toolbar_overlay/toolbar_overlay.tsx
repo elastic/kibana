@@ -19,8 +19,6 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  addDrawLayerInProgress: boolean;
-  editModeActive: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {

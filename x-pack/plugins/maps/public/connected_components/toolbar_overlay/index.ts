@@ -5,19 +5,4 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { ToolbarOverlay } from './toolbar_overlay';
-import { MapStoreState } from '../../reducers/store';
-import { getFlyoutDisplay } from '../../selectors/ui_selectors';
-import { FLYOUT_STATE } from '../../reducers/ui';
-
-function mapStateToProps(state: MapStoreState) {
-  return {
-    editModeActive: state.map.mapState.editModeActive,
-    addDrawLayerInProgress:
-      getFlyoutDisplay(state) !== FLYOUT_STATE.NONE && state.map.mapState.editModeActive,
-  };
-}
-
-const connected = connect(mapStateToProps, null)(ToolbarOverlay);
-export { connected as ToolbarOverlay };
+export { ToolbarOverlay } from './toolbar_overlay';

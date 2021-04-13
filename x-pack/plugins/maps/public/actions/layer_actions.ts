@@ -49,11 +49,6 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-// @ts-ignore
-import {
-  createNewIndexAndPattern,
-  addFeatureToIndex,
-} from '../classes/layers/new_vector_layer_wizard/utils/indexing_service';
 
 export function trackCurrentLayerState(layerId: string) {
   return {

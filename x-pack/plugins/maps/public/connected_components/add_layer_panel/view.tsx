@@ -33,6 +33,7 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
+  isDrawingLayer: boolean;
 }
 
 interface State {

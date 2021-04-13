@@ -30,7 +30,7 @@ import { LayerDescriptor } from '../../../../common/descriptor_types';
 export const CREATE_DRAWN_FEATURES_INDEX_STEP_ID = 'CREATE_DRAWN_FEATURES_INDEX_STEP_ID';
 export const ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID = 'ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID';
 
-interface NewVectorLayerProps extends RenderWizardArguments {
+export interface NewVectorLayerProps extends RenderWizardArguments {
   indexName: string;
   setEditModeActive: () => void;
   setEditModeInActive: () => void;
@@ -48,7 +48,7 @@ interface State {
 }
 
 export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> {
-  state = {
+  state: State = {
     indexName: '',
     indexError: '',
     indexNames: [],
