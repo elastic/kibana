@@ -132,7 +132,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           savedToBackgroundSub.unsubscribe();
         }
       }),
-      // This observable is cached in the responseCache. 
+      // This observable is cached in the responseCache.
       // Using shareReplay makes sure that future subscribers will get the final response
 
       shareReplay(1)

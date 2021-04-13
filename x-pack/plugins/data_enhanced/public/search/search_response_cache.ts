@@ -100,7 +100,7 @@ export class SearchResponseCache {
       response$.subscribe({
         next: (r) => {
           // TODO: avoid stringiying. Get the size some other way!
-          const newSize = (new Blob([JSON.stringify(r)])).size;
+          const newSize = new Blob([JSON.stringify(r)]).size;
           if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
             this.setItem(key, {
               ...cacheItem,
