@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -16,17 +17,32 @@ import { createObservabilityRuleRegistryMock } from '../../rules/observability_r
 import { createCallObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { AlertsFlyout } from './alerts_flyout';
+import { TopAlert } from './alerts_table';
 import { apmAlertResponseExample, dynamicIndexPattern, flyoutItemExample } from './example_data';
 
-interface Args {
+interface PageArgs {
   items: ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>;
+}
+
+interface FlyoutArgs {
+  alert: TopAlert;
 }
 
 export default {
   title: 'app/Alerts',
   component: AlertsPage,
   decorators: [
-    (Story: ComponentType) => {
+    (Story: ComponentType, { args: { items = [] } }: StoryContext) => {
+      createCallObservabilityApi(({
+        get: async (endpoint: string) => {
+          if (endpoint === '/api/observability/rules/alerts/top') {
+            return items;
+          } else if (endpoint === '/api/observability/rules/alerts/dynamic_index_pattern') {
+            return dynamicIndexPattern;
+          }
+        },
+      } as unknown) as HttpSetup);
+
       return (
         <MemoryRouter>
           <IntlProvider locale="en">
@@ -66,29 +82,21 @@ export default {
   ],
 };
 
-export function Example({ items }: Args) {
-  createCallObservabilityApi(({
-    get: async (endpoint: string) => {
-      if (endpoint === '/api/observability/rules/alerts/top') {
-        return items;
-      } else if (endpoint === '/api/observability/rules/alerts/dynamic_index_pattern') {
-        return dynamicIndexPattern;
-      }
-    },
-  } as unknown) as HttpSetup);
-
+export function Example(_args: PageArgs) {
   return (
     <AlertsPage routeParams={{ query: { rangeFrom: 'now-15m', rangeTo: 'now', kuery: '' } }} />
   );
 }
 Example.args = {
   items: apmAlertResponseExample,
-} as Args;
+} as PageArgs;
 
-export function EmptyState() {
+export function EmptyState(_args: PageArgs) {
   return <AlertsPage routeParams={{ query: {} }} />;
 }
+EmptyState.args = { items: [] } as PageArgs;
 
-export function Flyout() {
-  return <AlertsFlyout alert={flyoutItemExample} onClose={() => {}} />;
+export function Flyout({ alert }: FlyoutArgs) {
+  return <AlertsFlyout alert={alert} onClose={() => {}} />;
 }
+Flyout.args = { alert: flyoutItemExample } as FlyoutArgs;
