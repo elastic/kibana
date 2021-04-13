@@ -15,6 +15,7 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { NewJobCapsResponse } from '../../../../common/types/fields';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -177,7 +178,7 @@ export const dataFrameAnalytics = {
   },
   analyticsFields(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
-    return http<any>({
+    return http<NewJobCapsResponse>({
       path: `${basePath()}/data_frame/analytics/fields/${indexPatternTitle}`,
       method: 'GET',
       query,

@@ -20,7 +20,7 @@ interface FieldsAndAggs {
 }
 
 // called in the routing resolve block to initialize the
-// newJobCapsService with the currently selected index pattern
+// analyticsFieldsService with the currently selected index pattern
 export function loadAnalyticsFields(
   indexPatternId: string,
   savedSearchId: string,

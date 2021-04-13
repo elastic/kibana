@@ -50,7 +50,7 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   });
 }
 
-function getInitialColumns(indexPattern: any) {
+function getInitialColumns(indexPattern: IndexPattern) {
   const { fields } = analyticsFieldsService;
   const columns = fields.map((field: any) => {
     const schema = getDataGridSchemaFromKibanaFieldType(field);

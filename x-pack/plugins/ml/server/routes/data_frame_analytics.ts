@@ -725,13 +725,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         );
         const { fields, aggs } = await fieldService.getData(true);
         convertForStringify(aggs, fields);
-        const fieldsWithoutDocCount = fields.filter(({ id }) => id !== _DOC_COUNT && id !== _TIER);
 
         return response.ok({
           body: {
             [indexPattern]: {
               aggs,
-              fields: fieldsWithoutDocCount,
+              fields,
             },
           },
         });

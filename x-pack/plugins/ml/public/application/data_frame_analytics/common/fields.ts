@@ -188,7 +188,7 @@ export const getDefaultFieldsFromJobCaps = (
     if (!jobConfig.analysis.outlier_detection.compute_feature_influence) {
       // remove all feature influence fields
       fields = fields.filter(
-        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
+        (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
       );
     } else {
       // remove flattened feature influence fields
