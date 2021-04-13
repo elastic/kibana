@@ -123,12 +123,30 @@ describe('es', () => {
       const emptyScriptedFields = [];
 
       test('adds a metric agg for each metric', () => {
-        config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
+        config.metric = [
+          'sum:beer',
+          'avg:bytes',
+          'percentiles:bytes',
+          'cardinality::sample',
+          'sum::beer',
+          'percentiles::bytes:1',
+          'percentiles:::bytes:1.2,1.3,2.7',
+        ];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).toEqual({ avg: { field: 'bytes' } });
         expect(agg.time_buckets.aggs['percentiles(bytes)']).toEqual({
           percentiles: { field: 'bytes' },
+        });
+        expect(agg.time_buckets.aggs['cardinality(:sample)']).toEqual({
+          cardinality: { field: ':sample' },
+        });
+        expect(agg.time_buckets.aggs['sum(:beer)']).toEqual({ sum: { field: ':beer' } });
+        expect(agg.time_buckets.aggs['percentiles(:bytes)']).toEqual({
+          percentiles: { field: ':bytes', percents: [1] },
+        });
+        expect(agg.time_buckets.aggs['percentiles(::bytes)']).toEqual({
+          percentiles: { field: '::bytes', percents: [1.2, 1.3, 2.7] },
         });
       });
 

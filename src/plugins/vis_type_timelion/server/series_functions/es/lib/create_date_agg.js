@@ -10,7 +10,6 @@ import _ from 'lodash';
 import { buildAggBody } from './agg_body';
 import { search } from '../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
-const OPERANDS_NUMBER = 2;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
@@ -31,7 +30,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
 
   dateAgg.time_buckets.aggs = {};
   _.each(config.metric, function (metric) {
-    metric = metric.split(/:(.+)/).slice(0, OPERANDS_NUMBER);
+    metric = metric.split(/:(.+)/);
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
       // It simplifies the aggregation tree walking code considerably
@@ -42,11 +41,12 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
         },
       };
     } else if (metric[0] && metric[1]) {
-      const metricName = metric[0] + '(' + metric[1] + ')';
+      const [field, percentArgs] = metric[1].split(/:(\d.*)/);
+      const metricName = metric[0] + '(' + field + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
-      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
-      if (metric[0] === 'percentiles' && metric[2]) {
-        let percentList = metric[2].split(',');
+      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(field, scriptedFields);
+      if (metric[0] === 'percentiles' && percentArgs) {
+        let percentList = percentArgs.split(',');
         percentList = percentList.map((x) => parseFloat(x));
         dateAgg.time_buckets.aggs[metricName][metric[0]].percents = percentList;
       }
