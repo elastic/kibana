@@ -73,7 +73,7 @@ export function FieldEditor({
 
   // In case of cleared field and the user closes the popover, restore the initial field
   useEffect(() => {
-    if (!open && currentField.name === '') {
+    if (!open) {
       setCurrentField(initialField);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
