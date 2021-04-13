@@ -112,13 +112,6 @@ export const splitResultFields = (resultFields: FieldResultSettingObject, schema
   return { textResultFields, nonTextResultFields };
 };
 
-export const areFieldsEmpty = (fields: FieldResultSettingObject) => {
-  const anyNonEmptyField = Object.values(fields).find((resultSettings) => {
-    return !isEmpty(resultSettings);
-  });
-  return !anyNonEmptyField;
-};
-
 export const areFieldsAtDefaultSettings = (fields: FieldResultSettingObject) => {
   const anyNonDefaultSettingsValue = Object.values(fields).find((resultSettings) => {
     return !isEqual(resultSettings, DEFAULT_FIELD_SETTINGS);
