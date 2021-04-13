@@ -11,7 +11,7 @@ import { RouteDependencies } from '../../../types';
 export const registerGetRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -19,14 +19,12 @@ export const registerGetRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
-        const data = await context.rollup!.client.callAsCurrentUser('rollup.jobs');
+        const { body: data } = await clusterClient.asCurrentUser.rollup.getJobs({ id: '_all' });
         return response.ok({ body: data });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );

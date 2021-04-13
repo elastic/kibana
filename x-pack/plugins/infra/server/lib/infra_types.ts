@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InfraSourceConfiguration } from '../../common/source_configuration/source_configuration';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -27,15 +26,4 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
   getLogQueryFields: GetLogQueryFields;
-}
-
-export interface InfraConfiguration {
-  enabled: boolean;
-  query: {
-    partitionSize: number;
-    partitionFactor: number;
-  };
-  sources: {
-    default: InfraSourceConfiguration;
-  };
 }

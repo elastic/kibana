@@ -30,6 +30,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/case_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/trial/config.ts'),
+  require.resolve('../test/apm_api_integration/rules/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/basic/config.ts'),
   require.resolve('../test/lists_api_integration/security_and_spaces/config.ts'),
