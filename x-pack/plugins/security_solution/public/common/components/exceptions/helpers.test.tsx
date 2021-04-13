@@ -113,7 +113,7 @@ describe('Exception helpers', () => {
   describe('#filterIndexPatterns', () => {
     test('it returns index patterns without filtering if list type is "detection"', () => {
       const mockIndexPatterns = getMockIndexPattern();
-      const output = filterIndexPatterns(mockIndexPatterns, 'detection');
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
 
       expect(output).toEqual(mockIndexPatterns);
     });
@@ -123,7 +123,7 @@ describe('Exception helpers', () => {
         ...getMockIndexPattern(),
         fields: [...fields, ...mockEndpointFields],
       };
-      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint');
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
       expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
     });

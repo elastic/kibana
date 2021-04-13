@@ -39,7 +39,7 @@ import {
 import { OperatorOption } from '../autocomplete/types';
 // import exceptionableFields from '../exceptionable_fields.json';
 // import exceptionableLinuxFields from '../exceptionable_linux_fields.json';
-// import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray } from '../../../../shared_imports';
 
 import {
   BuilderEntry,
@@ -300,9 +300,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  osTypes?: OsTypeArray,
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o: OsTypeArray) => IIndexPattern
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown

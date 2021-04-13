@@ -51,7 +51,8 @@ export interface EntryItemProps {
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: IIndexPattern,
-    type: ExceptionListType
+    type: ExceptionListType,
+    osTypes: OsTypeArray
   ) => IIndexPattern;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
@@ -129,8 +130,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         indexPattern,
         entry,
         listType,
-        listTypeSpecificIndexPatternFilter,
-        osTypes
+        osTypes,
+        listTypeSpecificIndexPatternFilter
       );
       const comboBox = (
         <FieldComponent

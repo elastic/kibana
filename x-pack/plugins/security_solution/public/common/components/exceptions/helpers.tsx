@@ -50,15 +50,20 @@ import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
 import exceptionableFields from './exceptionable_fields.json';
+import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
-  type: ExceptionListType
+  type: ExceptionListType,
+  osTypes: OsTypeArray
 ): IIndexPattern => {
+  const osFilterForEndpoint: (name: string) => boolean = osTypes.includes('linux')
+    ? (name: string) => exceptionableLinuxFields.includes(name)
+    : (name: string) => exceptionableFields.includes(name);
   return type === 'endpoint'
     ? {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
+        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
       }
     : patterns;
 };
@@ -503,7 +508,7 @@ export const getPrepopulatedEndpointException = ({
   const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
-  const filePathDefault = host?.os?.family === 'linux' ? 'file.path.text' : 'file.path.caseless';
+  const filePathDefault = host?.os?.family === 'linux' ? 'file.path' : 'file.path.caseless';
 
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
