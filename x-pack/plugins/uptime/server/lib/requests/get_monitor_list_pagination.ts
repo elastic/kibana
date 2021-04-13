@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getFilterClause } from '../helper';
 import { FetchMonitorListPaginationParams } from '../../../common/runtime_types';
 import { createEsQuery, UptimeESClient } from '../lib';
+import { QueryContext } from './search';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
 
 export type MonitorListPaginationResult = ReturnType<typeof getMonitorListPagination>;
 
@@ -18,8 +19,8 @@ export const getMonitorListPagination = async ({
   uptimeEsClient,
   beforeMonitorId,
   afterMonitorId,
-  dateRangeStart: from,
-  dateRangeEnd: to,
+  dateRangeStart,
+  dateRangeEnd,
 }: FetchMonitorListPaginationParams & { uptimeEsClient: UptimeESClient }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
@@ -27,15 +28,31 @@ export const getMonitorListPagination = async ({
   if (boolFilters) {
     additionalFilters.push(boolFilters);
   }
-  const filter = getFilterClause(from, to, additionalFilters);
+  const parsedFilters = filters && filters !== '' ? JSON.parse(filters) : null;
+
+  const queryContext = new QueryContext(
+    uptimeEsClient,
+    dateRangeStart,
+    dateRangeEnd,
+    CONTEXT_DEFAULTS.CURSOR_PAGINATION,
+    parsedFilters,
+    10,
+    statusFilter,
+    query
+  );
+
+  const queryFilters = await queryContext.dateAndCustomFilters();
+
+  if (statusFilter) {
+    queryFilters.push({ match: { 'monitor.status': statusFilter } });
+  }
 
   const params = createEsQuery({
     body: {
       query: {
         bool: {
           filter: [
-            ...filter,
-            ...(statusFilter ? [{ match: { 'monitor.status': statusFilter } }] : []),
+            ...queryFilters,
             {
               exists: {
                 field: 'summary',

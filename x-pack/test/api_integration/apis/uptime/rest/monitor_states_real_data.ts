@@ -48,11 +48,6 @@ const checkMonitorStatesResponse = ({
     ).to.eql(statuses);
     (summaries ?? []).forEach((s) => {
       expect(s.state.url.full).to.be.ok();
-      expect(Array.isArray(s.histogram?.points)).to.be(true);
-      (s.histogram?.points ?? []).forEach((point) => {
-        expect(point.timestamp).to.be.greaterThan(absFrom);
-        expect(point.timestamp).to.be.lessThan(absTo);
-      });
     });
     expect(prevPagePagination).to.be(prevPagination);
     expect(nextPagePagination).to.eql(nextPagination);
@@ -83,8 +78,10 @@ export default function ({ getService }: FtrProviderContext) {
         absFrom,
         absTo,
         size: 1,
-        prevPagination: null,
-        nextPagination: null,
+        prevPagination:
+          '{"cursorKey":{"monitor_id":"0002-up"},"sortOrder":"ASC","cursorDirection":"BEFORE"}',
+        nextPagination:
+          '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0002-up"}}',
       });
     });
 
@@ -119,7 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
           statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
           nextPagination:
             '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}',
-          prevPagination: null,
+          prevPagination:
+            '{"cursorKey":{"monitor_id":"0000-intermittent"},"sortOrder":"ASC","cursorDirection":"BEFORE"}',
         },
         {
           statesIds: [
@@ -287,7 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
             '0099-up',
           ],
           statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
-          nextPagination: null,
+          nextPagination:
+            '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0099-up"}}',
           prevPagination:
             '{"cursorKey":{"monitor_id":"0090-intermittent"},"sortOrder":"ASC","cursorDirection":"BEFORE"}',
         },
@@ -310,7 +309,8 @@ export default function ({ getService }: FtrProviderContext) {
           statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
           nextPagination:
             '{"cursorKey":{"monitor_id":"0009-up"},"sortOrder":"ASC","cursorDirection":"AFTER"}',
-          prevPagination: null,
+          prevPagination:
+            '{"cursorKey":{"monitor_id":"0000-intermittent"},"sortOrder":"ASC","cursorDirection":"BEFORE"}',
         },
         {
           statesIds: [
@@ -520,7 +520,8 @@ export default function ({ getService }: FtrProviderContext) {
         absFrom,
         absTo,
         size: LENGTH,
-        prevPagination: null,
+        prevPagination:
+          '{"cursorKey":{"monitor_id":"0000-intermittent"},"sortOrder":"ASC","cursorDirection":"BEFORE"}',
         nextPagination:
           '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}',
       });
