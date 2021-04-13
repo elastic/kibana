@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeRangeParams } from '../common';
+import type { SearchSourceFields } from 'src/plugins/data/common';
 
 export interface FakeRequest {
   headers: Record<string, string>;
@@ -14,7 +14,8 @@ export interface FakeRequest {
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
-  searchSource: any;
+  searchSource: SearchSourceFields;
+  columns?: string[];
 }
 
 export interface SavedObjectServiceError {
