@@ -128,6 +128,13 @@ export type FatalState = BaseState & {
   readonly reason: string;
 };
 
+export interface WaitForYellowSourceState extends BaseState {
+  /** Wait for the source index to be yellow before requesting it. */
+  readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: string;
+  readonly sourceIndexMappings: IndexMapping;
+}
+
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
@@ -290,6 +297,7 @@ export type State =
   | FatalState
   | InitState
   | DoneState
+  | WaitForYellowSourceState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
