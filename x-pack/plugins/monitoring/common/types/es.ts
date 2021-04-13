@@ -608,6 +608,56 @@ export interface ElasticsearchMetricbeatSource {
       };
     };
   };
+  beat?: {
+    stats?: {
+      timestamp?: string;
+      beat?: {
+        uuid?: string;
+        name?: string;
+        type?: string;
+        version?: string;
+        host?: string;
+      };
+      handles?: {
+        limit?: {
+          hard?: number;
+          soft?: number;
+        };
+      };
+      info?: {
+        uptime?: {
+          ms?: number;
+        };
+      };
+      memstats?: {
+        memory?: {
+          alloc?: number;
+        };
+      };
+      libbeat?: {
+        config?: {
+          reloads?: number;
+        };
+        output?: {
+          type?: string;
+          read?: {
+            errors?: number;
+          };
+          write?: {
+            bytes?: string;
+            errors?: number;
+          };
+        };
+        pipeline?: {
+          events?: {
+            total?: number;
+            published?: number;
+            dropped?: number;
+          };
+        };
+      };
+    };
+  };
 }
 
 export type ElasticsearchSource = ElasticsearchLegacySource & ElasticsearchMetricbeatSource;

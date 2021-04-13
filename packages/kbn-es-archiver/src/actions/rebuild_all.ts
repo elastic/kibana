@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { Transform } from 'stream';
-import { set } from '@elastic/safer-lodash-set';
+import { setWith, set } from '@elastic/safer-lodash-set';
 import { resolve, dirname, relative } from 'path';
 import {
   stat,
@@ -79,8 +79,10 @@ function convertLegacyTypeToMetricsetName(type: string) {
       return 'ccr';
     case 'kibana_stats':
     case 'logstash_stats':
+    case 'beats_stats':
       return 'stats';
     case 'logstash_state':
+    case 'beats_state':
       return 'state';
   }
   return type;
@@ -319,6 +321,32 @@ function applyCustomLogstashRules(item: any, legacyDoc: any, mbDoc: any) {
   ];
 }
 
+function applyCustomBeatsRules(item: any, legacyDoc: any, mbDoc: any) {
+  set(mbDoc, '@timestamp', legacyDoc.beats_stats?.timestamp);
+  // set(mbDoc, 'logstash.node.stats.timestamp', legacyDoc.logstash_stats?.timestamp);
+  // set(mbDoc, 'logstash.node.stats.logstash', legacyDoc.logstash_stats?.logstash);
+  // set(mbDoc, 'logstash.node.stats.pipelines', legacyDoc.logstash_stats?.pipelines);
+  // set(
+  //   mbDoc,
+  //   'logstash.node.stats.jvm.mem.heap_used_percent',
+  //   legacyDoc.logstash_stats?.jvm.mem.heap_used_percent
+  // );
+  // set(mbDoc, 'logstash.node.stats.reloads', legacyDoc.logstash_stats?.reloads);
+  // set(mbDoc, 'logstash.node.stats.events', legacyDoc.logstash_stats?.events);
+  return [
+    {
+      ...item,
+      value: {
+        ...item.value,
+        index: `metricbeat-8.0.0`,
+        source: {
+          ...mbDoc,
+        },
+      },
+    },
+  ];
+}
+
 export async function rebuildAllAction({
   dataDir,
   log,
@@ -370,6 +398,7 @@ export async function rebuildAllAction({
             (item.type === '_doc' || item.type === 'doc') &&
             (item.value.index.indexOf('-es') > -1 ||
               item.value.index.indexOf('-kibana') > -1 ||
+              item.value.index.indexOf('-beats') > -1 ||
               item.value.index.indexOf('-logstash') > -1)
           ) {
             const legacyDoc = item.value.source;
@@ -387,7 +416,7 @@ export async function rebuildAllAction({
                 }
               }
               if (value !== null) {
-                set(mbDoc, alias.path, value);
+                setWith(mbDoc, alias.path, value, Object);
               }
             }
             const skipMbConversion =
@@ -403,6 +432,8 @@ export async function rebuildAllAction({
                 mbDocs.push(...applyCustomKibanaRules(item, legacyDoc, mbDoc));
               } else if (item.value.index.indexOf('-logstash') > -1) {
                 mbDocs.push(...applyCustomLogstashRules(item, legacyDoc, mbDoc));
+              } else if (item.value.index.indexOf('-beats') > -1) {
+                mbDocs.push(...applyCustomBeatsRules(item, legacyDoc, mbDoc));
               } else {
                 mbDocs.push({
                   ...item,

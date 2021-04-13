@@ -1329,6 +1329,94 @@
                     }
                   }
                 },
+                "cgroup": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "cfs": {
+                          "properties": {
+                            "period": {
+                              "properties": {
+                                "us": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "quota": {
+                              "properties": {
+                                "us": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "stats": {
+                          "properties": {
+                            "periods": {
+                              "type": "long"
+                            },
+                            "throttled": {
+                              "properties": {
+                                "ns": {
+                                  "type": "long"
+                                },
+                                "periods": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cpuacct": {
+                      "properties": {
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "total": {
+                          "properties": {
+                            "ns": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "memory": {
+                      "properties": {
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "mem": {
+                          "properties": {
+                            "limit": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "usage": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
                 "cpu": {
                   "properties": {
                     "system": {
@@ -1378,6 +1466,23 @@
                     }
                   }
                 },
+                "handles": {
+                  "properties": {
+                    "limit": {
+                      "properties": {
+                        "hard": {
+                          "type": "long"
+                        },
+                        "soft": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "open": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "info": {
                   "properties": {
                     "ephemeral_id": {
@@ -1397,23 +1502,16 @@
                   "properties": {
                     "config": {
                       "properties": {
-                        "module": {
-                          "properties": {
-                            "running": {
-                              "type": "short"
-                            },
-                            "starts": {
-                              "type": "short"
-                            },
-                            "stops": {
-                              "type": "short"
-                            }
-                          }
-                        },
                         "reloads": {
                           "type": "short"
                         },
-                        "scans": {
+                        "running": {
+                          "type": "short"
+                        },
+                        "starts": {
+                          "type": "short"
+                        },
+                        "stops": {
                           "type": "short"
                         }
                       }
@@ -1476,7 +1574,7 @@
                     },
                     "pipeline": {
                       "properties": {
-                        "client": {
+                        "clients": {
                           "type": "long"
                         },
                         "events": {
@@ -1907,19 +2005,19 @@
                           }
                         },
                         "frames": {
-                          "path": "beat.stats.apm_server.processor.transaction.frames",
+                          "path": "beat.stats.apm_server.processor.error.frames",
                           "type": "alias"
                         },
                         "spans": {
-                          "path": "beat.stats.apm_server.processor.transaction.spans",
+                          "path": "beat.stats.apm_server.processor.error.spans",
                           "type": "alias"
                         },
                         "stacktraces": {
-                          "path": "beat.stats.apm_server.processor.transaction.stacktraces",
+                          "path": "beat.stats.apm_server.processor.error.stacktraces",
                           "type": "alias"
                         },
                         "transformations": {
-                          "path": "beat.stats.apm_server.processor.transaction.transformations",
+                          "path": "beat.stats.apm_server.processor.error.transformations",
                           "type": "alias"
                         },
                         "validation": {
@@ -2065,7 +2163,8 @@
                         "wait": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "path": "beat.stats.apm_server.server.concurrent.wait.ms",
+                              "type": "alias"
                             }
                           }
                         }
@@ -2180,6 +2279,410 @@
                 "version": {
                   "path": "beat.stats.beat.version",
                   "type": "alias"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "beat": {
+                  "properties": {
+                    "cgroup": {
+                      "properties": {
+                        "cpu": {
+                          "properties": {
+                            "cfs": {
+                              "properties": {
+                                "period": {
+                                  "properties": {
+                                    "us": {
+                                      "path": "beat.stats.cgroup.cpu.cfs.period.us",
+                                      "type": "alias"
+                                    }
+                                  }
+                                },
+                                "quota": {
+                                  "properties": {
+                                    "us": {
+                                      "path": "beat.stats.cgroup.cpu.cfs.quota.us",
+                                      "type": "alias"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "id": {
+                              "path": "beat.stats.cgroup.cpu.id",
+                              "type": "alias"
+                            },
+                            "stats": {
+                              "properties": {
+                                "periods": {
+                                  "path": "beat.stats.cgroup.cpu.stats.periods",
+                                  "type": "alias"
+                                },
+                                "throttled": {
+                                  "properties": {
+                                    "ns": {
+                                      "path": "beat.stats.cgroup.cpu.stats.throttled.ns",
+                                      "type": "alias"
+                                    },
+                                    "periods": {
+                                      "path": "beat.stats.cgroup.cpu.stats.throttled.periods",
+                                      "type": "alias"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "cpuacct": {
+                          "properties": {
+                            "id": {
+                              "path": "beat.stats.cgroup.cpuacct.id",
+                              "type": "alias"
+                            },
+                            "total": {
+                              "properties": {
+                                "ns": {
+                                  "path": "beat.stats.cgroup.cpuacct.total.ns",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "mem": {
+                          "properties": {
+                            "limit": {
+                              "properties": {
+                                "bytes": {
+                                  "path": "beat.stats.cgroup.memory.mem.limit.bytes",
+                                  "type": "alias"
+                                }
+                              }
+                            },
+                            "usage": {
+                              "properties": {
+                                "bytes": {
+                                  "path": "beat.stats.cgroup.memory.mem.usage.bytes",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory": {
+                          "properties": {
+                            "id": {
+                              "path": "beat.stats.cgroup.memory.id",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cpu": {
+                      "properties": {
+                        "system": {
+                          "properties": {
+                            "ticks": {
+                              "path": "beat.stats.cpu.system.ticks",
+                              "type": "alias"
+                            },
+                            "time": {
+                              "properties": {
+                                "ms": {
+                                  "path": "beat.stats.cpu.system.time.ms",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "properties": {
+                            "ticks": {
+                              "path": "beat.stats.cpu.total.ticks",
+                              "type": "alias"
+                            },
+                            "time": {
+                              "properties": {
+                                "ms": {
+                                  "path": "beat.stats.cpu.total.time.ms",
+                                  "type": "alias"
+                                }
+                              }
+                            },
+                            "value": {
+                              "path": "beat.stats.cpu.total.value",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "user": {
+                          "properties": {
+                            "ticks": {
+                              "path": "beat.stats.cpu.user.ticks",
+                              "type": "alias"
+                            },
+                            "time": {
+                              "properties": {
+                                "ms": {
+                                  "path": "beat.stats.cpu.user.time.ms",
+                                  "type": "alias"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "handles": {
+                      "properties": {
+                        "limit": {
+                          "properties": {
+                            "hard": {
+                              "path": "beat.stats.handles.limit.hard",
+                              "type": "alias"
+                            },
+                            "soft": {
+                              "path": "beat.stats.handles.limit.soft",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "open": {
+                          "path": "beat.stats.handles.open",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "info": {
+                      "properties": {
+                        "ephemeral_id": {
+                          "path": "beat.stats.info.ephemeral_id",
+                          "type": "alias"
+                        },
+                        "uptime": {
+                          "properties": {
+                            "ms": {
+                              "path": "beat.stats.info.uptime.ms",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "memstats": {
+                      "properties": {
+                        "gc_next": {
+                          "path": "beat.stats.memstats.gc_next",
+                          "type": "alias"
+                        },
+                        "memory_alloc": {
+                          "path": "beat.stats.memstats.memory.alloc",
+                          "type": "alias"
+                        },
+                        "memory_total": {
+                          "path": "beat.stats.memstats.memory.total",
+                          "type": "alias"
+                        },
+                        "rss": {
+                          "path": "beat.stats.memstats.rss",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "libbeat": {
+                  "properties": {
+                    "config": {
+                      "properties": {
+                        "module": {
+                          "properties": {
+                            "running": {
+                              "path": "beat.stats.libbeat.config.running",
+                              "type": "alias"
+                            },
+                            "starts": {
+                              "path": "beat.stats.libbeat.config.starts",
+                              "type": "alias"
+                            },
+                            "stops": {
+                              "path": "beat.stats.libbeat.config.stops",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "reloads": {
+                          "path": "beat.stats.libbeat.config.reloads",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "output": {
+                      "properties": {
+                        "events": {
+                          "properties": {
+                            "acked": {
+                              "path": "beat.stats.libbeat.output.events.acked",
+                              "type": "alias"
+                            },
+                            "active": {
+                              "path": "beat.stats.libbeat.output.events.active",
+                              "type": "alias"
+                            },
+                            "batches": {
+                              "path": "beat.stats.libbeat.output.events.batches",
+                              "type": "alias"
+                            },
+                            "dropped": {
+                              "path": "beat.stats.libbeat.output.events.dropped",
+                              "type": "alias"
+                            },
+                            "duplicated": {
+                              "path": "beat.stats.libbeat.output.events.duplicates",
+                              "type": "alias"
+                            },
+                            "failed": {
+                              "path": "beat.stats.libbeat.output.events.failed",
+                              "type": "alias"
+                            },
+                            "toomany": {
+                              "path": "beat.stats.libbeat.output.events.toomany",
+                              "type": "alias"
+                            },
+                            "total": {
+                              "path": "beat.stats.libbeat.output.events.total",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "read": {
+                          "properties": {
+                            "bytes": {
+                              "path": "beat.stats.libbeat.output.read.bytes",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.libbeat.output.read.errors",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "type": {
+                          "path": "beat.stats.libbeat.output.type",
+                          "type": "alias"
+                        },
+                        "write": {
+                          "properties": {
+                            "bytes": {
+                              "path": "beat.stats.libbeat.output.write.bytes",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.libbeat.output.write.errors",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pipeline": {
+                      "properties": {
+                        "clients": {
+                          "path": "beat.stats.libbeat.pipeline.clients",
+                          "type": "alias"
+                        },
+                        "events": {
+                          "properties": {
+                            "active": {
+                              "path": "beat.stats.libbeat.pipeline.events.active",
+                              "type": "alias"
+                            },
+                            "dropped": {
+                              "path": "beat.stats.libbeat.pipeline.events.dropped",
+                              "type": "alias"
+                            },
+                            "failed": {
+                              "path": "beat.stats.libbeat.pipeline.events.failed",
+                              "type": "alias"
+                            },
+                            "filtered": {
+                              "path": "beat.stats.libbeat.pipeline.events.filtered",
+                              "type": "alias"
+                            },
+                            "published": {
+                              "path": "beat.stats.libbeat.pipeline.events.published",
+                              "type": "alias"
+                            },
+                            "retry": {
+                              "path": "beat.stats.libbeat.pipeline.events.retry",
+                              "type": "alias"
+                            },
+                            "total": {
+                              "path": "beat.stats.libbeat.pipeline.events.total",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "queue": {
+                          "properties": {
+                            "acked": {
+                              "path": "beat.stats.libbeat.pipeline.queue.acked",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "system": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "cores": {
+                          "path": "beat.stats.system.cpu.cores",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "load": {
+                      "properties": {
+                        "1": {
+                          "path": "beat.stats.system.load.1",
+                          "type": "alias"
+                        },
+                        "15": {
+                          "path": "beat.stats.system.load.15",
+                          "type": "alias"
+                        },
+                        "5": {
+                          "path": "beat.stats.system.load.5",
+                          "type": "alias"
+                        },
+                        "norm": {
+                          "properties": {
+                            "1": {
+                              "path": "beat.stats.system.load.norm.1",
+                              "type": "alias"
+                            },
+                            "15": {
+                              "path": "beat.stats.system.load.norm.15",
+                              "type": "alias"
+                            },
+                            "5": {
+                              "path": "beat.stats.system.load.norm.5",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -8319,30 +8822,6 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
-            },
-            "network": {
-              "properties": {
-                "in": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "out": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
             },
             "os": {
               "properties": {
@@ -21694,6 +22173,9 @@
             "beat.stats.beat.uuid",
             "beat.stats.beat.version",
             "beat.stats.info.ephemeral_id",
+            "beat.stats.cgroup.cpu.id",
+            "beat.stats.cgroup.cpuacct.id",
+            "beat.stats.cgroup.memory.id",
             "beat.stats.libbeat.output.type",
             "ceph.cluster_health.overall_status",
             "ceph.cluster_health.timechecks.round.status",
