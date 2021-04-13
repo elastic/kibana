@@ -139,6 +139,7 @@ export class DocLinksService {
           indexTemplates: `${ELASTICSEARCH_DOCS}indices-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
+          mappingBoost: `${ELASTICSEARCH_DOCS}mapping-boost.html`,
           mappingCoerce: `${ELASTICSEARCH_DOCS}coerce.html`,
           mappingCopyTo: `${ELASTICSEARCH_DOCS}copy-to.html`,
           mappingDocValues: `${ELASTICSEARCH_DOCS}doc-values.html`,
