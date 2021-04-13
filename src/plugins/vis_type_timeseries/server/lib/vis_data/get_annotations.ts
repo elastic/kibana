@@ -19,14 +19,7 @@ import { getLastSeriesTimestamp } from './helpers/timestamp';
 import { VisTypeTimeseriesVisDataRequest } from '../../types';
 
 function validAnnotation(annotation: AnnotationItemsSchema) {
-  return (
-    annotation.index_pattern &&
-    annotation.time_field &&
-    annotation.fields &&
-    annotation.icon &&
-    annotation.template &&
-    !annotation.hidden
-  );
+  return annotation.fields && annotation.icon && annotation.template && !annotation.hidden;
 }
 
 interface GetAnnotationsParams {
