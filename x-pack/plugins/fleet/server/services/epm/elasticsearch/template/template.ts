@@ -204,6 +204,12 @@ function generateMultiFields(fields: Fields): MultiFields {
         case 'keyword':
           multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
           break;
+        case 'long':
+          multiFields[f.name] = { type: f.type };
+          break;
+        case 'double':
+          multiFields[f.name] = { type: f.type };
+          break;
       }
     });
   }
