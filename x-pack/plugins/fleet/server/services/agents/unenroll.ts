@@ -89,21 +89,7 @@ export async function unenrollAgents(
   const now = new Date().toISOString();
   if (options.force) {
     // Get all API keys that need to be invalidated
-    const apiKeys = agentsToUpdate.reduce<string[]>((keys, agent) => {
-      if (agent.access_api_key_id) {
-        keys.push(agent.access_api_key_id);
-      }
-      if (agent.default_api_key_id) {
-        keys.push(agent.default_api_key_id);
-      }
-
-      return keys;
-    }, []);
-
-    // Invalidate all API keys
-    if (apiKeys.length) {
-      await APIKeyService.invalidateAPIKeys(apiKeys);
-    }
+    await invalidateAPIKeysForAgents(agentsToUpdate);
   } else {
     // Create unenroll action for each agent
     await bulkCreateAgentActions(
@@ -143,6 +129,23 @@ export async function unenrollAgents(
   return out;
 }
 
+export async function invalidateAPIKeysForAgents(agents: Agent[]) {
+  const apiKeys = agents.reduce<string[]>((keys, agent) => {
+    if (agent.access_api_key_id) {
+      keys.push(agent.access_api_key_id);
+    }
+    if (agent.default_api_key_id) {
+      keys.push(agent.default_api_key_id);
+    }
+
+    return keys;
+  }, []);
+
+  if (apiKeys.length) {
+    await APIKeyService.invalidateAPIKeys(apiKeys);
+  }
+}
+
 export async function forceUnenrollAgent(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -150,16 +153,9 @@ export async function forceUnenrollAgent(
 ) {
   const agent = await getAgentById(esClient, agentId);
 
-  await Promise.all([
-    agent.access_api_key_id
-      ? APIKeyService.invalidateAPIKeys([agent.access_api_key_id])
-      : undefined,
-    agent.default_api_key_id
-      ? APIKeyService.invalidateAPIKeys([agent.default_api_key_id])
-      : undefined,
-  ]);
 
   await updateAgent(esClient, agentId, {
+  await invalidateAPIKeysForAgents([agent]);
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
