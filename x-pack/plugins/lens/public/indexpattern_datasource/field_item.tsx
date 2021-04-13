@@ -193,6 +193,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
+  const onDragStart = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
+
   const value = useMemo(
     () => ({
       field,
@@ -244,6 +248,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            onDragStart={onDragStart}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
