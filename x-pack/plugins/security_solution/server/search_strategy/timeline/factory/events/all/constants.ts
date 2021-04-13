@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+export const TIMELINE_CTI_FIELDS = [
+  'threat.indicator.event.dataset',
+  'threat.indicator.event.reference',
+  'threat.indicator.matched.atomic',
+  'threat.indicator.matched.field',
+  'threat.indicator.matched.type',
+  'threat.indicator.provider',
+];
+
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
   'signal.status',
@@ -230,4 +239,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.established',
   'zeek.ssl.resumed',
   'zeek.ssl.version',
+  ...TIMELINE_CTI_FIELDS,
 ];
