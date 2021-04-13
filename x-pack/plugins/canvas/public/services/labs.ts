@@ -7,23 +7,23 @@
 
 import {
   projectIDs,
-  Project,
-  ProjectID,
+  PresentationLabsService,
 } from '../../../../../src/plugins/presentation_util/public';
 
 import { CanvasServiceFactory } from '.';
-
-export interface CanvasLabsService {
-  getProject: (id: ProjectID) => Project;
-  getProjects: () => Record<ProjectID, Project>;
+import { UI_SETTINGS } from '../../common';
+export interface CanvasLabsService extends PresentationLabsService {
+  projectIDs: typeof projectIDs;
+  isLabsEnabled: () => boolean;
 }
 
 export const labsServiceFactory: CanvasServiceFactory<CanvasLabsService> = async (
   _coreSetup,
-  _coreStart,
+  coreStart,
   _setupPlugins,
   startPlugins
 ) => ({
   projectIDs,
+  isLabsEnabled: () => coreStart.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI),
   ...startPlugins.presentationUtil.labsService,
 });

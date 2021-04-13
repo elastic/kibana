@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
@@ -112,24 +113,26 @@ export const LabsFlyout = (props: Props) => {
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="beaker" size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ProjectList {...{ projects, solutions, onStatusChange }} />
-      </EuiFlyoutBody>
-      {footer}
-    </EuiFlyout>
+    <EuiOverlayMask onClick={() => onClose()} headerZindexLocation="below">
+      <EuiFlyout onClose={onClose}>
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="beaker" size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
+              </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <ProjectList {...{ projects, solutions, onStatusChange }} />
+        </EuiFlyoutBody>
+        {footer}
+      </EuiFlyout>
+    </EuiOverlayMask>
   );
 };
 

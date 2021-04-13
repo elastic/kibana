@@ -14,6 +14,7 @@ import {
   ProjectID,
   Project,
   getProjectIDs,
+  SolutionName,
 } from '../../../common';
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
@@ -35,9 +36,15 @@ export const labsServiceFactory: LabsServiceFactory = ({ coreStart }) => {
   const localStorage = window.localStorage;
   const sessionStorage = window.sessionStorage;
 
-  const getProjects = () =>
+  const getProjects = (solutions: SolutionName[] = []) =>
     projectIDs.reduce((acc, id) => {
-      acc[id] = getProject(id);
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
       return acc;
     }, {} as { [id in ProjectID]: Project });
 

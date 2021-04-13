@@ -8,6 +8,12 @@
 
 import { PresentationUtilPlugin } from './plugin';
 
+export {
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+} from './services';
+
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
