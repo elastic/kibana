@@ -195,12 +195,13 @@ function getTrainingPercentMessage(trainingDocs: number) {
 async function getValidationCheckMessages(
   asCurrentUser: IScopedClusterClient['asCurrentUser'],
   analyzedFields: string[],
-  index: string | string[],
   analysisConfig: AnalysisConfig,
-  query: estypes.QueryContainer = defaultQuery
+  source: DataFrameAnalyticsConfig['source']
 ) {
   const analysisType = getAnalysisType(analysisConfig);
   const depVar = getDependentVar(analysisConfig);
+  const index = source.index;
+  const query = source.query || defaultQuery;
   const messages = [];
   const emptyFields: string[] = [];
   const percentEmptyLimit = FRACTION_EMPTY_LIMIT * 100;
@@ -236,6 +237,7 @@ async function getValidationCheckMessages(
       size: 0,
       track_total_hits: true,
       body: {
+        ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
         query,
         aggs,
       },
@@ -247,21 +249,22 @@ async function getValidationCheckMessages(
     if (body.aggregations) {
       // @ts-expect-error
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
-        const empty = docCount / totalDocs;
+        if (docCount !== undefined) {
+          const empty = docCount / totalDocs;
+          if (docCount > 0 && empty > FRACTION_EMPTY_LIMIT) {
+            emptyFields.push(aggName);
 
-        if (docCount > 0 && empty > FRACTION_EMPTY_LIMIT) {
-          emptyFields.push(aggName);
-
-          if (aggName === depVar) {
-            depVarValid = false;
-            dependentVarWarningMessage.text = i18n.translate(
-              'xpack.ml.models.dfaValidation.messages.depVarEmptyWarning',
-              {
-                defaultMessage:
-                  'The dependent variable has at least {percentEmpty}% empty values. It may be unsuitable for analysis.',
-                values: { percentEmpty: percentEmptyLimit },
-              }
-            );
+            if (aggName === depVar) {
+              depVarValid = false;
+              dependentVarWarningMessage.text = i18n.translate(
+                'xpack.ml.models.dfaValidation.messages.depVarEmptyWarning',
+                {
+                  defaultMessage:
+                    'The dependent variable has at least {percentEmpty}% empty values. It may be unsuitable for analysis.',
+                  values: { percentEmpty: percentEmptyLimit },
+                }
+              );
+            }
           }
         }
 
@@ -374,9 +377,8 @@ export async function validateAnalyticsJob(
   const messages = await getValidationCheckMessages(
     client.asCurrentUser,
     job.analyzed_fields.includes,
-    job.source.index,
     job.analysis,
-    job.source.query
+    job.source
   );
   return messages;
 }
