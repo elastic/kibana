@@ -28,6 +28,46 @@ exports[`should render 1`] = `
 
 exports[`should render no index pattern warning when there are no matching index patterns 1`] = `
 <Fragment>
+  <EuiCallOut
+    color="warning"
+    title="Couldn't find any index patterns"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="You'll need to "
+        id="xpack.maps.noIndexPattern.doThisPrefixDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        href="abc//app/management/kibana/indexPatterns"
+      >
+        <FormattedMessage
+          defaultMessage="create an index pattern."
+          id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+    <p>
+      <FormattedMessage
+        defaultMessage="Don't have any data? "
+        id="xpack.maps.noIndexPattern.hintDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        href="abc//app/home#/tutorial_directory/sampleData"
+      >
+        <FormattedMessage
+          defaultMessage="Get started with some sample data sets."
+          id="xpack.maps.noIndexPattern.getStartedLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -42,7 +82,7 @@ exports[`should render no index pattern warning when there are no matching index
     <MockIndexPatternSelect
       indexPatternId="indexPatternId"
       isClearable={false}
-      isDisabled={false}
+      isDisabled={true}
       isInvalid={true}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
