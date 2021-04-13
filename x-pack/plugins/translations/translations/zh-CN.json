@@ -19328,7 +19328,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatherVictimNetworkInformationDescription": "Gather Victim Network Information (T1590)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatherVictimOrgInformationDescription": "Gather Victim Org Information (T1591)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.graphicalUserInterfaceDescription": "Graphical User Interface (T1061)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.groupPolicyModificationDescription": "Group Policy Modification (T1484)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hardwareAdditionsDescription": "Hardware Additions (T1200)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hideArtifactsDescription": "Hide Artifacts (T1564)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hijackExecutionFlowDescription": "Hijack Execution Flow (T1574)",
