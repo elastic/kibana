@@ -97,14 +97,14 @@ export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMa
       }
     : {};
 
-  const client: ScopedRuleRegistryClient<TFieldMap> = {
+  const client: ScopedRuleRegistryClient<BaseRuleFieldMap> = {
     search: async (searchRequest) => {
       const ruleUuids = await getRuleUuids({
         savedObjectsClient,
         namespace,
       });
 
-      const fields: string[] = [
+      const fields = [
         'rule.id',
         ...(searchRequest.body?.fields ? castArray(searchRequest.body.fields) : []),
       ];
@@ -206,5 +206,8 @@ export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMa
       return clusterClientAdapter.indexDocuments(operations);
     },
   };
+
+  // @ts-expect-error: We can't use ScopedRuleRegistryClient<BaseRuleFieldMap>
+  // when creating the client, due to #41693 which will be fixed in 4.2
   return client;
 }
