@@ -1,12 +1,12 @@
-.euiFlexItem:not(:first-child):not(:last-child) .appSearchResultHeaderItem {
-  padding-right: .75rem;
-  box-shadow: inset -1px 0 0 0 $euiBorderColor;
-}
-
 .appSearchResultHeaderItem {
   @include euiCodeFont;
 
   &__score {
     color: $euiColorSuccessText;
+  }
+
+  .euiFlexItem:not(:first-child):not(:last-child) & {
+    padding-right: $euiSizeS;
+    box-shadow: inset (-$euiBorderWidthThin) 0 0 0 $euiBorderColor;
   }
 }
