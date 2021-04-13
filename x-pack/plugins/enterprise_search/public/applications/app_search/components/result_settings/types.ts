@@ -7,11 +7,6 @@
 
 import { FieldValue } from '../result/types';
 
-export enum OpenModal {
-  None,
-  ConfirmResetModal,
-  ConfirmSaveModal,
-}
 export interface ServerFieldResultSetting {
   raw?:
     | {
