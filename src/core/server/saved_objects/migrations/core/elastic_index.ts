@@ -70,16 +70,19 @@ export function reader(
   let scrollId: string | undefined;
 
   // When migrating from the outdated index we use a read query which excludes
-  // saved objects which are no longer used. These saved objects will still be
-  // kept in the outdated index for backup purposes, but won't be availble in
-  // the upgraded index.
-  const excludeUnusedTypes = {
+  // saved object types which are no longer used. These saved objects will
+  // still be kept in the outdated index for backup purposes, but won't be
+  // availble in the upgraded index.
+  const EXCLUDE_UNUSED_TYPES = [
+    'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
+    'tsvb-validation-telemetry', // https://github.com/elastic/kibana/issues/95617
+  ];
+
+  const excludeUnusedTypesQuery = {
     bool: {
-      must_not: {
-        term: {
-          type: 'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
-        },
-      },
+      must_not: EXCLUDE_UNUSED_TYPES.map((type) => ({
+        term: { type },
+      })),
     },
   };
 
@@ -92,7 +95,7 @@ export function reader(
       : client.search<SearchResponse<SavedObjectsRawDocSource>>({
           body: {
             size: batchSize,
-            query: excludeUnusedTypes,
+            query: excludeUnusedTypesQuery,
           },
           index,
           scroll,

@@ -7,6 +7,7 @@
  */
 
 import React, { lazy } from 'react';
+import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
@@ -42,7 +43,6 @@ export const getTimeseriesVisRenderer: (deps: {
       unmountComponentAtNode(domNode);
     });
     const { palettes } = getChartsSetup();
-
     const showNoResult = !checkIfDataExists(config.visData, config.visParams);
     const palettesService = await palettes.getPalettes();
 
@@ -52,6 +52,7 @@ export const getTimeseriesVisRenderer: (deps: {
           data-test-subj="timeseriesVis"
           handlers={handlers}
           showNoResult={showNoResult}
+          error={get(config.visData, [config.visParams.id, 'error'])}
         >
           <TimeseriesVisualization
             // it is mandatory to bind uiSettings because of "this" usage inside "get" method

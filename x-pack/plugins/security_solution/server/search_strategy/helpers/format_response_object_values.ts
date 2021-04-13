@@ -7,7 +7,7 @@
 
 import { mapValues, isObject, isArray } from 'lodash/fp';
 
-import { toArray } from './to_array';
+import { toArray } from '../../../common/utils/to_array';
 
 export const mapObjectValuesToStringArray = (object: object): object =>
   mapValues((o) => {

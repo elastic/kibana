@@ -15,6 +15,7 @@ import {
   CollectorOptions,
   createUsageCollectionSetupMock,
 } from '../../usage_collection/server/mocks';
+import { cloudDetailsMock } from './mocks';
 
 import { plugin } from './';
 
@@ -31,6 +32,10 @@ describe('kibana_usage_collection', () => {
   usageCollection.makeStatsCollector.mockImplementation((opts) => {
     usageCollectors.push(opts);
     return createUsageCollectionSetupMock().makeStatsCollector(opts);
+  });
+
+  beforeEach(() => {
+    cloudDetailsMock.mockClear();
   });
 
   test('Runs the setup method without issues', async () => {
@@ -77,6 +82,10 @@ describe('kibana_usage_collection', () => {
           "type": "application_usage",
         },
         Object {
+          "isReady": false,
+          "type": "cloud_provider",
+        },
+        Object {
           "isReady": true,
           "type": "csp",
         },
@@ -100,6 +109,12 @@ describe('kibana_usage_collection', () => {
     coreStart.uiSettings.asScopedToClient.mockImplementation(() =>
       uiSettingsServiceMock.createClient()
     );
+    cloudDetailsMock.mockReturnValueOnce({
+      name: 'my-cloud',
+      vm_type: 'big',
+      region: 'my-home',
+      zone: 'my-home-office',
+    });
 
     expect(pluginInstance.start(coreStart)).toBe(undefined);
     usageCollectors.forEach(({ isReady }) => {
