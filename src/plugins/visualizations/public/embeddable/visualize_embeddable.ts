@@ -63,7 +63,6 @@ export interface VisualizeInput extends EmbeddableInput {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  newVisType?: string;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
