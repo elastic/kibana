@@ -62,9 +62,10 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
 }) => (
   <>
     {header}
+    <EuiSpacer />
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={2}>
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
           <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />

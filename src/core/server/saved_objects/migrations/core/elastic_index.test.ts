@@ -425,6 +425,22 @@ describe('ElasticIndex', () => {
                     type: 'tsvb-validation-telemetry',
                   },
                 },
+                {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          type: 'search-session',
+                        },
+                      },
+                      {
+                        match: {
+                          'search-session.persisted': false,
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
