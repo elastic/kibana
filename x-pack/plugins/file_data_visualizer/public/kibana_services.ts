@@ -15,9 +15,5 @@ export function setStartServices(core: CoreStart, plugins: FileDataVisualizerSta
   pluginsStart = plugins;
 }
 
-export const getDocLinks = () => coreStart.docLinks;
-export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
-export const getHttp = () => coreStart.http;
-export const getSavedObjectsClient = () => coreStart.savedObjects.client;
-export const getUiSettings = () => coreStart.uiSettings;
-export const getFileUpload = () => pluginsStart.fileUpload;
+export const getCoreStart = () => coreStart;
+export const getPluginsStart = () => pluginsStart;

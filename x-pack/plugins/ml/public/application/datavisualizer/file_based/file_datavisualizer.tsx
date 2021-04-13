@@ -6,7 +6,6 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import type { CoreStart } from 'kibana/public';
 
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
@@ -17,21 +16,13 @@ import { FileDataVisualizer } from '../../../../../file_data_visualizer/public';
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, data, embeddable, share, maps, security, savedObjects, http },
+    services: { docLinks },
   } = useMlKibana();
-  const coreStart = { savedObjects, http } as CoreStart;
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <FileDataVisualizer
-        coreStart={coreStart}
-        data={data}
-        embeddable={embeddable}
-        share={share}
-        maps={maps}
-        security={security}
-      />
+      <FileDataVisualizer />
       <HelpMenu docLink={helpLink} />
     </Fragment>
   );

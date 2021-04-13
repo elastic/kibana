@@ -23,7 +23,7 @@ import {
   isErrorEmbeddable,
   ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { useFileUploadKibana } from '../../kibana_context';
+import { useFileDataVisualizerKibana } from '../../kibana_context';
 
 export function MlEmbeddedMapComponent({
   layerList,
@@ -41,7 +41,7 @@ export function MlEmbeddedMapComponent({
 
   const {
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
-  } = useFileUploadKibana();
+  } = useFileDataVisualizerKibana();
 
   const factory:
     | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>

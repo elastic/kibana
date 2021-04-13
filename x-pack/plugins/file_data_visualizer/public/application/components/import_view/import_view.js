@@ -32,8 +32,6 @@ import {
   getDefaultCombinedFields,
 } from '../combined_fields';
 import { ExperimentalBadge } from '../experimental_badge';
-// import { hasImportPermission, importerFactory, checkIndexExists } from '../../../api';
-import { getFileUpload } from '../../../kibana_services';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -100,7 +98,7 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { data, results, indexPatterns, showBottomBar } = this.props;
+    const { data, results, indexPatterns, showBottomBar, fileUpload } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -124,7 +122,7 @@ export class ImportView extends Component {
         async () => {
           // check to see if the user has permission to create and ingest data into the specified index
           if (
-            (await getFileUpload().hasImportPermission({
+            (await fileUpload.hasImportPermission({
               checkCreateIndexPattern: createIndexPattern,
               checkHasManagePipeline: true,
               indexName: index,
@@ -221,7 +219,7 @@ export class ImportView extends Component {
                 }
 
                 if (success) {
-                  const importer = await getFileUpload().importerFactory(format, {
+                  const importer = await fileUpload.importerFactory(format, {
                     excludeLinesPattern: results.exclude_lines_pattern,
                     multilineStartPattern: results.multiline_start_pattern,
                   });
@@ -353,7 +351,7 @@ export class ImportView extends Component {
       return;
     }
 
-    const { exists } = await getFileUpload().checkIndexExists(index);
+    const { exists } = await this.props.fileUpload.checkIndexExists(index);
     const indexNameError = exists ? (
       <FormattedMessage
         id="xpack.fileUpload.importView.indexNameAlreadyExistsErrorMessage"

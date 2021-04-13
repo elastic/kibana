@@ -11,9 +11,4 @@ export function plugin() {
   return new FileDataVisualizerPlugin();
 }
 
-// export * from './importer/types';
-
-// export { FileUploadPluginStart } from './plugin';
-// export { FileUploadComponentProps } from './lazy_load_bundle';
-
 export { FileDataVisualizer } from './application';

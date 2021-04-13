@@ -14,8 +14,8 @@ import {
   DiscoverUrlGeneratorState,
 } from '../../../../../../../src/plugins/discover/public';
 import { FindFileStructureResponse } from '../../../../common';
-import { useFileUploadKibana } from '../../kibana_context';
-import { getFileUpload } from '../../../kibana_services';
+import { useFileDataVisualizerKibana } from '../../kibana_context';
+import type { FileUploadPluginStart } from '../../../../../file_upload/public';
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
@@ -45,6 +45,10 @@ export const ResultsLinks: FC<Props> = ({
   createIndexPattern,
   showFilebeatFlyout,
 }) => {
+  const {
+    services: { fileUpload },
+  } = useFileDataVisualizerKibana();
+
   const [duration, setDuration] = useState({
     from: 'now-30m',
     to: 'now',
@@ -62,7 +66,7 @@ export const ResultsLinks: FC<Props> = ({
         urlGenerators: { getUrlGenerator },
       },
     },
-  } = useFileUploadKibana();
+  } = useFileDataVisualizerKibana();
 
   useEffect(() => {
     let unmounted = false;
@@ -149,7 +153,7 @@ export const ResultsLinks: FC<Props> = ({
 
   async function updateTimeValues(recheck = true) {
     if (timeFieldName !== undefined) {
-      const { from, to } = await getFullTimeRange(index, timeFieldName);
+      const { from, to } = await getFullTimeRange(index, timeFieldName, fileUpload);
       setDuration({
         from: from === null ? duration.from : from,
         to: to === null ? duration.to : to,
@@ -233,9 +237,13 @@ export const ResultsLinks: FC<Props> = ({
   );
 };
 
-async function getFullTimeRange(index: string, timeFieldName: string) {
+async function getFullTimeRange(
+  index: string,
+  timeFieldName: string,
+  { getTimeFieldRange }: FileUploadPluginStart
+) {
   const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };
-  const resp = await getFileUpload().getTimeFieldRange(index, query, timeFieldName);
+  const resp = await getTimeFieldRange(index, query, timeFieldName);
 
   return {
     from: moment(resp.start.epoch).toISOString(),

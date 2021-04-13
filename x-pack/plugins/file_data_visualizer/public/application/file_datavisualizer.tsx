@@ -6,35 +6,16 @@
  */
 import './_index.scss';
 import React, { FC } from 'react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import type { MapsStartApi } from '../../../maps/public';
-import { SecurityPluginSetup } from '../../../security/public';
+import { getCoreStart, getPluginsStart } from '../kibana_services';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
-export interface FileDataVisualizerProps {
-  data: DataPublicPluginStart;
-  embeddable?: EmbeddableStart;
-  maps?: MapsStartApi;
-  security?: SecurityPluginSetup;
-  coreStart: CoreStart;
-  share: SharePluginStart;
-}
-
-export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
-  data,
-  embeddable,
-  maps,
-  security,
-  share,
-  coreStart,
-}) => {
-  const services = { data, embeddable, share, maps, security, ...coreStart };
+export const FileDataVisualizer: FC = () => {
+  const coreStart = getCoreStart();
+  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
+  const services = { data, maps, embeddable, share, security, ...coreStart };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
@@ -42,6 +23,7 @@ export const FileDataVisualizer: FC<FileDataVisualizerProps> = ({
         indexPatterns={data.indexPatterns}
         savedObjectsClient={coreStart.savedObjects.client}
         http={coreStart.http}
+        fileUpload={fileUpload}
       />
     </KibanaContextProvider>
   );

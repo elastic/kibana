@@ -22,7 +22,7 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 import { createFilebeatConfig } from './filebeat_config';
-import { useFileUploadKibana } from '../../kibana_context'; // copy context?
+import { useFileDataVisualizerKibana } from '../../kibana_context'; // copy context?
 import { FindFileStructureResponse } from '../../../../common';
 
 export enum EDITOR_MODE {
@@ -48,7 +48,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   const [username, setUsername] = useState<string | null>(null);
   const {
     services: { security },
-  } = useFileUploadKibana();
+  } = useFileDataVisualizerKibana();
 
   useEffect(() => {
     if (security !== undefined) {
