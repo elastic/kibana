@@ -857,7 +857,6 @@ describe('SearchSource', () => {
   });
 
   describe('fetch$', () => {
-
     describe('responses', () => {
       test('should return partial results', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
