@@ -45,10 +45,17 @@ const isEsError = (e: Error | ESError): e is ESError => {
   return false;
 };
 
-function getNestedErrorClause(e: ElasticsearchErrorClause): { type: string; reason: string } {
+function getNestedErrorClause(
+  e: ElasticsearchErrorClause
+): { type: string; reason: string; nestedError?: { type: string; reason: string } } {
   if (isScriptedFieldError(e)) {
     const nestedError = e.failed_shards![0].reason;
-    return { type: nestedError.type, reason: `${nestedError.reason}: ${nestedError.script}` };
+    const nestedCause = nestedError.caused_by ? getNestedErrorClause(nestedError.caused_by) : null;
+    return {
+      type: nestedError.type,
+      reason: `the script \`${nestedError.script}\``,
+      nestedError: nestedCause ? nestedCause : undefined,
+    };
   }
   const { type, reason, caused_by: causedBy } = e;
   if (causedBy) {
@@ -77,6 +84,16 @@ export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | n
     }
     const rootError = getNestedErrorClause(errorSource);
     if (rootError.reason && rootError.type) {
+      if (rootError.nestedError) {
+        return i18n.translate('xpack.lens.editorFrame.scriptedFieldFailureMessage', {
+          defaultMessage: 'Request error: {type}, {reason} within {message}',
+          values: {
+            message: rootError.reason,
+            type: rootError.nestedError.type,
+            reason: rootError.nestedError.reason,
+          },
+        });
+      }
       return i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
         defaultMessage: 'Request error: {type}, {reason}',
         values: {
