@@ -109,6 +109,7 @@ describe('Detections Usage and Metrics', () => {
   describe('fetchDetectionsMetrics()', () => {
     beforeEach(() => {
       mlMock = mlServicesMock.create();
+      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
     });
 
     it('returns an empty array if there is no data', async () => {
@@ -116,7 +117,7 @@ describe('Detections Usage and Metrics', () => {
         jobs: null,
         jobStats: null,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
-      const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
+      const result = await fetchDetectionsMetrics('', esClientMock, mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -138,7 +139,7 @@ describe('Detections Usage and Metrics', () => {
         datafeedStats: mockDatafeedStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
-      const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
+      const result = await fetchDetectionsMetrics('', esClientMock, mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
         expect.objectContaining({

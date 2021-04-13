@@ -79,6 +79,9 @@ export const initialRulesUsage: DetectionRulesUsage = {
   },
 };
 
+/**
+ * Default detection rule usage count, split by type + elastic/custom
+ */
 export const initalDetectionRulesUsage: DetectionRulesTypeUsage = {
   query: {
     enabled: 0,
