@@ -365,7 +365,9 @@ provide two main functionalities:
 
 1. It will provide a facility to create locators.
 1. It will also be a registry of locators, every newly created locator is
-   automatically added to the registry.
+   automatically added to the registry. The registry should never be used when
+   locator ID is known at the compile time, but is reserved only for use cases
+   when we only know ID of a locator at runtime.
 
 ```ts
 interface ILocatorClient {
