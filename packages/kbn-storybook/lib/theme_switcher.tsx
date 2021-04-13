@@ -8,23 +8,41 @@
 
 import React from 'react';
 import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
+import { useGlobals } from '@storybook/api';
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher(props: any) {
+  const [globals, updateGlobals] = useGlobals();
+  const selectedTheme = globals.euiTheme;
+
+  if (!selectedTheme) {
+    updateGlobals({ euiTheme: 'v8.light' });
+  }
+
   const links = [
-    { id: 'v8.light', title: 'Amsterdam: Light', active: true },
-    { id: 'v8.dark', title: 'Amsterdam: Dark' },
+    {
+      id: 'v8.light',
+      title: 'Amsterdam: Light',
+    },
+    {
+      id: 'v8.dark',
+      title: 'Amsterdam: Dark',
+    },
     { id: 'v7.light', title: 'Light' },
     { id: 'v7.dark', title: 'Dark' },
-  ];
+  ].map((link) => ({
+    ...link,
+    onClick: (_event: any, item: any) => {
+      updateGlobals({ euiTheme: item.id });
+    },
+    active: selectedTheme === link.id,
+  }));
 
   return (
     <WithTooltip
       placement="top"
       trigger="click"
       closeOnClick
-      tooltip={({ onHide }) => {
-        return <TooltipLinkList links={links} />;
-      }}
+      tooltip={() => <TooltipLinkList links={links} />}
     >
       <IconButton key="eui-theme" title="Change the EUI theme">
         <Icons icon="hearthollow" />
