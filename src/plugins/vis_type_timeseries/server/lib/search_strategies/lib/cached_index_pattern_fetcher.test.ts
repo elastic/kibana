@@ -42,28 +42,7 @@ describe('CachedIndexPatternFetcher', () => {
   });
 
   describe('text-based index', () => {
-    test('should return the Kibana index if it exists', async () => {
-      mockedIndices = [
-        {
-          id: 'indexId',
-          title: 'indexTitle',
-        },
-      ] as IndexPattern[];
-
-      const value = await cachedIndexPatternFetcher('indexTitle');
-
-      expect(value).toMatchInlineSnapshot(`
-        Object {
-          "indexPattern": Object {
-            "id": "indexId",
-            "title": "indexTitle",
-          },
-          "indexPatternString": "indexTitle",
-        }
-      `);
-    });
-
-    test('should return only indexPatternString if Kibana index does not exist', async () => {
+    test('should return only indexPatternString', async () => {
       const value = await cachedIndexPatternFetcher('indexTitle');
 
       expect(value).toMatchInlineSnapshot(`
