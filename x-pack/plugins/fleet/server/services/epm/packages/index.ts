@@ -24,6 +24,8 @@ export {
   SearchParams,
 } from './get';
 
+export { getPackagePermissions } from './permissions';
+
 export {
   BulkInstallResponse,
   IBulkInstallPackageError,

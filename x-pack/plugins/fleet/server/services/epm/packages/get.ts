@@ -18,7 +18,6 @@ import type {
   ArchivePackage,
   RegistryPackage,
   EpmPackageAdditions,
-  PackagePermissions,
 } from '../../../../common/types';
 import type { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
@@ -169,45 +168,6 @@ export const getPackageUsageStats = async ({
     agent_policy_count: agentPolicyCount.size,
   };
 };
-
-export async function getPackagePermissions(
-  soClient: SavedObjectsClientContract,
-  pkgName: string,
-  pkgVersion: string,
-  namespace = '*'
-): Promise<PackagePermissions | undefined> {
-  const pkg = await getPackageInfo({ savedObjectsClient: soClient, pkgName, pkgVersion });
-  if (!pkg.data_streams) {
-    return undefined;
-  }
-
-  const clusterPermissions = new Set<string>();
-  const indices: PackagePermissions['indices'] = pkg.data_streams!.map((ds) => {
-    if (ds.permissions?.cluster) {
-      ds.permissions.cluster.forEach((p) => clusterPermissions.add(p));
-    } else {
-      clusterPermissions.add('monitor');
-    }
-
-    let index = `${ds.type}-${ds.dataset}-${namespace}`;
-    if (ds.dataset_is_prefix) {
-      index = `${index}-*`;
-    }
-    if (ds.hidden) {
-      index = `.${index}`;
-    }
-
-    return {
-      names: [index],
-      privileges: ds.permissions?.indices ?? ['auto_configure', 'create_doc'],
-    };
-  });
-
-  return {
-    cluster: Array.from(clusterPermissions),
-    indices,
-  };
-}
 
 interface PackageResponse {
   paths: string[];

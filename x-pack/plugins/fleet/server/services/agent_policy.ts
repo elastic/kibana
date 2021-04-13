@@ -53,7 +53,7 @@ import {
 } from '../errors';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
-import { getPackageInfo } from './epm/packages';
+import { getPackageInfo, getPackagePermissions } from './epm/packages';
 import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -62,7 +62,6 @@ import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { isAgentsSetup } from './agents/setup';
 import { appContextService } from './app_context';
-import { getPackagePermissions } from './epm/packages/get';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
