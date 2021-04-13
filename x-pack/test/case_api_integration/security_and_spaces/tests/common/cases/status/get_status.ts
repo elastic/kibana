@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../../../common/ftr_provider_contex
 import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { postCaseReq } from '../../../../../common/lib/mock';
 import {
-  deleteCases,
+  deleteCasesByESQuery,
   createCase,
   updateCase,
   getAllCasesStatuses,
@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_status', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
     it('should return case statuses', async () => {
