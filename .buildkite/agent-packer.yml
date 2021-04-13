@@ -8,6 +8,8 @@ steps:
 
   - command: .ci/buildkite/jobs/agent-packer.sh
     label: Build Agent Image
+    agents:
+      queue: packer
 
   - wait: ~
     continue_on_failure: true
