@@ -16,6 +16,7 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
@@ -27,7 +28,13 @@ import {
   isCreationSuccessful,
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
-import { ACTIONS_TITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
+import {
+  MODAL_TITLE,
+  MODAL_SUBTITLE,
+  MODAL_DESCRIPTION,
+  ACTIONS_CONFIRM,
+  ACTIONS_CANCEL,
+} from './translations';
 
 export interface EventFilteringModalProps {
   data: Ecs;
@@ -44,6 +51,12 @@ const Modal = styled(EuiModal)`
 const ModalHeader = styled(EuiModalHeader)`
   flex-direction: column;
   align-items: flex-start;
+`;
+
+const ModalHeaderSubtitle = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiColorMediumShade};
+  `}
 `;
 
 const ModalBodySection = styled.section`
@@ -108,6 +121,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     const modalBodyMemo = useMemo(
       () => (
         <ModalBodySection className="builder-section">
+          <EuiText size="s">{MODAL_DESCRIPTION}</EuiText>
           <EventFilteringForm />
         </ModalBodySection>
       ),
@@ -117,7 +131,8 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     return (
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{ACTIONS_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+          <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
         </ModalHeader>
 
         {modalBodyMemo}
