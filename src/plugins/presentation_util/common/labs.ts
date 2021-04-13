@@ -9,8 +9,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const UNIFIED_TOOLBAR = 'labs:presentation:unifiedToolbar';
+export const USE_DATA_SERVICE = 'labs:canvas:useDataService';
 
-export const projectIDs = [UNIFIED_TOOLBAR] as const;
+export const projectIDs = [UNIFIED_TOOLBAR, USE_DATA_SERVICE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -30,6 +31,21 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
       defaultMessage: 'Enable the new unified toolbar design for Presentation solutions',
     }),
     solutions: ['dashboard', 'canvas'],
+  },
+  [USE_DATA_SERVICE]: {
+    id: USE_DATA_SERVICE,
+    isActive: true,
+    environments: ['kibana', 'browser', 'session'],
+    name: i18n.translate('presentationUtil.experiments.enableUseDataServiceExperimentName', {
+      defaultMessage: 'Use data service',
+    }),
+    description: i18n.translate(
+      'presentationUtil.experiments.enableUseDataServiceExperimentDescription',
+      {
+        defaultMessage: 'An experiment of using the new data.search service for Canvas datasources',
+      }
+    ),
+    solutions: ['canvas'],
   },
 };
 

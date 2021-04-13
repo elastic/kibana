@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchService } from '../search';
-
 const noop = (..._args: any[]): any => {};
 
-export const searchService: SearchService = {
+export const searchService: any = {
   search: noop,
 };

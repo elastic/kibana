@@ -19,16 +19,16 @@ interface Arguments {
   query: string;
 }
 
-export function escountLegacy(): ExpressionFunctionDefinition<
-  'escountLegacy',
+export function escount(): ExpressionFunctionDefinition<
+  'escount',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().escountLegacy;
+  const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {
-    name: 'escountLegacy',
+    name: 'escount',
     type: 'number',
     context: {
       types: ['filter'],

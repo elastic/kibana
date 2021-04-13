@@ -18,16 +18,16 @@ interface Arguments {
   timezone: string;
 }
 
-export function essqlLegacy(): ExpressionFunctionDefinition<
-  'essqlLegacy',
+export function essql(): ExpressionFunctionDefinition<
+  'essql',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().essqlLegacy;
+  const { help, args: argHelp } = getFunctionHelp().essql;
 
   return {
-    name: 'essqlLegacy',
+    name: 'essql',
     type: 'datatable',
     context: {
       types: ['filter'],

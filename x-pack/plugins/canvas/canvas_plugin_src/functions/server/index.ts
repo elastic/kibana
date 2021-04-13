@@ -6,9 +6,9 @@
  */
 
 import { demodata } from './demodata';
-import { escountLegacy } from './escountLegacy';
-import { esdocsLegacy } from './esdocsLegacy';
+import { escount } from './escount';
+import { esdocs } from './esdocs';
 import { pointseries } from './pointseries';
-import { essqlLegacy } from './essqlLegacy';
+import { essql } from './essql';
 
-export const functions = [demodata, esdocsLegacy, escountLegacy, essqlLegacy, pointseries];
+export const functions = [demodata, esdocs, escount, essql, pointseries];
