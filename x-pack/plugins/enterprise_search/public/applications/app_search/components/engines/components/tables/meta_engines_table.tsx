@@ -9,17 +9,16 @@ import React, { ReactNode, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { AppLogic } from '../../../../app_logic';
 import { EngineDetails } from '../../../engine/types';
 
-import { navigateToEngine } from './engine_link_helpers';
 import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
 import {
+  ACTIONS_COLUMN,
   BLANK_COLUMN,
   CREATED_AT_COLUMN,
   DOCUMENT_COUNT_COLUMN,
@@ -43,7 +42,6 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
   noItemsMessage,
   pagination,
   onChange,
-  onDeleteEngine,
 }) => {
   const { expandedSourceEngines } = useValues(MetaEnginesTableLogic);
   const { hideRow, fetchOrDisplayRow } = useActions(MetaEnginesTableLogic);
@@ -96,68 +94,8 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
     FIELD_COUNT_COLUMN,
   ];
 
-  const META_ENGINE_ACTIONS_COLUMN: EuiTableActionsColumnType<EngineDetails> = {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions', {
-      defaultMessage: 'Actions',
-    }),
-    actions: [
-      {
-        name: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage',
-          {
-            defaultMessage: 'Manage',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.enginesOverview.metaEnginesTable.action.manage.buttonDescription',
-          {
-            defaultMessage: 'Manage this meta engine',
-          }
-        ),
-        type: 'icon',
-        icon: 'eye',
-        onClick: (engineDetails) => navigateToEngine(engineDetails.name),
-      },
-      {
-        name: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonLabel',
-          {
-            defaultMessage: 'Delete',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.enginesOverview.metaEnginesTable.action.delete.buttonDescription',
-          {
-            defaultMessage: 'Delete this meta engine',
-          }
-        ),
-        type: 'icon',
-        icon: 'trash',
-        color: 'danger',
-        onClick: (engine) => {
-          if (
-            window.confirm(
-              i18n.translate(
-                'xpack.enterpriseSearch.appSearch.enginesOverview.metaEnginesTable.action.delete.confirmationPopupMessage',
-                {
-                  defaultMessage:
-                    'Are you sure you want to permanently delete "{engineName}" and all of its settings?',
-                  values: {
-                    engineName: engine.name,
-                  },
-                }
-              )
-            )
-          ) {
-            onDeleteEngine(engine);
-          }
-        },
-      },
-    ],
-  };
-
   if (canManageMetaEngines) {
-    columns.push(META_ENGINE_ACTIONS_COLUMN);
+    columns.push(ACTIONS_COLUMN);
   }
 
   return (

@@ -22,5 +22,4 @@ export interface EnginesTableProps {
     hidePerPageOptions: boolean;
   };
   onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
-  onDeleteEngine(engine: EngineDetails): void;
 }

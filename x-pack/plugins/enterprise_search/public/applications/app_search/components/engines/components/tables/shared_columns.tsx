@@ -7,12 +7,20 @@
 
 import React from 'react';
 
-import { EuiTableFieldDataColumnType, EuiTableComputedColumnType } from '@elastic/eui';
+import {
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';
 import { EngineDetails } from '../../../engine/types';
+import { EnginesLogic } from '../../../engines';
+
+import { navigateToEngine } from './engine_link_helpers';
 
 export const BLANK_COLUMN: EuiTableComputedColumnType<EngineDetails> = {
   render: () => <></>,
@@ -66,4 +74,54 @@ export const FIELD_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   dataType: 'number',
   render: (number: number) => <FormattedNumber value={number} />,
   truncateText: true,
+};
+
+export const ACTIONS_COLUMN: EuiTableActionsColumnType<EngineDetails> = {
+  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions', {
+    defaultMessage: 'Actions',
+  }),
+  actions: [
+    {
+      name: MANAGE_BUTTON_LABEL,
+      description: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
+        {
+          defaultMessage: 'Manage this engine',
+        }
+      ),
+      type: 'icon',
+      icon: 'eye',
+      onClick: (engineDetails) => navigateToEngine(engineDetails.name),
+    },
+    {
+      name: DELETE_BUTTON_LABEL,
+      description: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
+        {
+          defaultMessage: 'Delete this engine',
+        }
+      ),
+      type: 'icon',
+      icon: 'trash',
+      color: 'danger',
+      onClick: (engine) => {
+        if (
+          window.confirm(
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
+              {
+                defaultMessage:
+                  'Are you sure you want to permanently delete "{engineName}" and all of its content?',
+                values: {
+                  engineName: engine.name,
+                },
+              }
+            )
+          )
+        ) {
+          EnginesLogic.actions.deleteEngine(engine);
+        }
+      },
+    },
+  ],
 };
