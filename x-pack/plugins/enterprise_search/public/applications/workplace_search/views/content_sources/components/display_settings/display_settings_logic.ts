@@ -59,6 +59,7 @@ interface DisplaySettingsActions {
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
   removeDetailField(index: number): number;
+  setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addDetailField(newField: DetailField): DetailField;
   updateDetailField(
@@ -82,6 +83,7 @@ interface DisplaySettingsValues {
   serverRoute: string;
   editFieldIndex: number | null;
   dataLoading: boolean;
+  navigatingBetweenTabs: boolean;
   addFieldModalVisible: boolean;
   titleFieldHover: boolean;
   urlFieldHover: boolean;
@@ -118,6 +120,7 @@ export const DisplaySettingsLogic = kea<
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
     removeDetailField: (index: number) => index,
+    setNavigatingBetweenTabs: (navigatingBetweenTabs: boolean) => navigatingBetweenTabs,
     handleSelectedTabChanged: (tabId: TabId) => tabId,
     addDetailField: (newField: DetailField) => newField,
     updateDetailField: (updatedField: DetailField, index: number) => ({ updatedField, index }),
@@ -232,6 +235,12 @@ export const DisplaySettingsLogic = kea<
       true,
       {
         onInitializeDisplaySettings: () => false,
+      },
+    ],
+    navigatingBetweenTabs: [
+      false,
+      {
+        setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
       },
     ],
     addFieldModalVisible: [
@@ -349,7 +358,16 @@ export const DisplaySettingsLogic = kea<
           ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
           : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
 
+      // This method is needed because the shared `UnsavedChangesPrompt` component is triggered
+      // when navigating between tabs. We set a boolean flag that tells the prompt there are no
+      // unsaved changes when navigating between the tabs and reset it one the transition is complete
+      // in order to restore the intended functionality when navigating away with unsaved changes.
+      actions.setNavigatingBetweenTabs(true);
+
+      await breakpoint();
+
       KibanaLogic.values.navigateToUrl(path);
+      actions.setNavigatingBetweenTabs(false);
     },
   }),
 });

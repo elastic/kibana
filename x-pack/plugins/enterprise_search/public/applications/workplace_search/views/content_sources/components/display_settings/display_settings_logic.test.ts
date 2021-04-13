@@ -40,6 +40,7 @@ describe('DisplaySettingsLogic', () => {
     serverRoute: '',
     editFieldIndex: null,
     dataLoading: true,
+    navigatingBetweenTabs: false,
     addFieldModalVisible: false,
     titleFieldHover: false,
     urlFieldHover: false,

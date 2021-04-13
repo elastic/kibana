@@ -53,9 +53,11 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     addFieldModalVisible,
     unsavedChanges,
     exampleDocuments,
+    navigatingBetweenTabs,
   } = useValues(DisplaySettingsLogic);
 
   const hasDocuments = exampleDocuments.length > 0;
+  const hasUnsavedChanges = hasDocuments && unsavedChanges;
 
   useEffect(() => {
     initializeDisplaySettings();
@@ -89,7 +91,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
   return (
     <>
       <UnsavedChangesPrompt
-        hasUnsavedChanges={hasDocuments && unsavedChanges}
+        hasUnsavedChanges={!navigatingBetweenTabs && hasUnsavedChanges}
         messageText={UNSAVED_MESSAGE}
       />
       <form onSubmit={handleFormSubmit}>
