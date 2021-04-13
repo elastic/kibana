@@ -1,10 +1,10 @@
 .appSearchResult {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
   grid-template-areas:
-    'drag content actions'
-    'drag toggle actions';
+    'drag content'
+    'drag toggle';
   overflow: hidden; // Prevents child background-colors from clipping outside of panel border-radius
   border: $euiBorderThin; // TODO: Remove after EUI version is bumped beyond 31.8.0
 
@@ -32,29 +32,6 @@
 
     .euiIcon {
       margin-left: $euiSizeXS;
-    }
-  }
-
-  &__actionButtons {
-    grid-area: actions;
-    display: flex;
-    flex-wrap: no-wrap;
-  }
-
-  &__actionButton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: $euiSize * 2;
-    border-left: $euiBorderThin;
-
-    &:first-child {
-      border-left: none;
-    }
-
-    &:hover,
-    &:focus {
-      background-color: $euiPageBackgroundColor;
     }
   }
 

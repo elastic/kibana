@@ -467,6 +467,13 @@ function discoverController($route, $scope) {
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
+  $scope.refreshAppState = async () => {
+    $scope.hits = [];
+    $scope.rows = [];
+    $scope.fieldCounts = {};
+    await refetch$.next();
+  };
+
   $scope.resetQuery = function () {
     history.push(
       $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
