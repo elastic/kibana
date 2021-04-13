@@ -1,0 +1,8 @@
+- name: "localhost:5601/api/status"
+  uri:
+    url: "http://localhost:5601/api/status"
+    status_code: [200, 401]
+  register: result
+  until: result.status != 503
+  retries: 3
+  delay: 30
