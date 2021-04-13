@@ -70,7 +70,7 @@ export function MetricSelect(props) {
   const percentileOptions = siblings
     .filter((row) => /^percentile/.test(row.type))
     .reduce((acc, row) => {
-      const label = calculateLabel(row, calculatedMetrics, fields);
+      const label = calculateLabel(row, calculatedMetrics, fields, false);
 
       switch (row.type) {
         case METRIC_TYPES.PERCENTILE_RANK:
@@ -100,7 +100,7 @@ export function MetricSelect(props) {
     }, []);
 
   const options = siblings.filter(filterRows(includeSiblings)).map((row) => {
-    const label = calculateLabel(row, calculatedMetrics, fields);
+    const label = calculateLabel(row, calculatedMetrics, fields, false);
     return { value: row.id, label };
   });
   const allOptions = [...options, ...additionalOptions, ...percentileOptions];
