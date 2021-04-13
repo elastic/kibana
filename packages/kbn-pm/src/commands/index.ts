@@ -27,16 +27,20 @@ export interface ICommand {
 }
 
 import { BootstrapCommand } from './bootstrap';
+import { BuildBazelCommand } from './build_bazel';
 import { CleanCommand } from './clean';
 import { ResetCommand } from './reset';
 import { RunCommand } from './run';
 import { WatchCommand } from './watch';
+import { WatchBazelCommand } from './watch_bazel';
 import { Kibana } from '../utils/kibana';
 
 export const commands: { [key: string]: ICommand } = {
   bootstrap: BootstrapCommand,
+  'build-bazel': BuildBazelCommand,
   clean: CleanCommand,
   reset: ResetCommand,
   run: RunCommand,
   watch: WatchCommand,
+  'watch-bazel': WatchBazelCommand,
 };
