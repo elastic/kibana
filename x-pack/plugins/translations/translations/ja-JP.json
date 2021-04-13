@@ -19058,7 +19058,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatherVictimNetworkInformationDescription": "被害者ネットワーク情報の収集 (T1590) ",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatherVictimOrgInformationDescription": "被害者組織情報の収集 (T1591) ",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.graphicalUserInterfaceDescription": "グラフィカルユーザーインターフェイス (T1061) ",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.groupPolicyModificationDescription": "グループポリシー修正 (T1484) ",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hardwareAdditionsDescription": "ハードウェア追加 (T1200) ",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hideArtifactsDescription": "アーチファクトの非表示 (T1564) ",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.hijackExecutionFlowDescription": "ハイジャック実行フロー (T1574) ",
