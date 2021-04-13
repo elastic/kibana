@@ -45,19 +45,19 @@ export const referenceRulePersistenceAlertType = createSecurityPersistenceRuleTy
   },
   minimumLicenseRequired: 'basic',
   producer: 'security-solution',
-  query({ params: { query } }) {
+  async executor({ services: { alertWithPersistence, findAlerts }, params }) {
     const indexPattern: IIndexPattern = {
       fields: [],
       title: '*',
     };
 
-    const esQuery = buildEsQuery(indexPattern, { query, language: 'kuery' }, []);
-    return {
+    const esQuery = buildEsQuery(indexPattern, { query: params.query, language: 'kuery' }, []);
+    const query = {
       index: ['*'],
       body: {
         query: {
           bool: {
-            must: esQuery.bool.must,
+            must: esQuery.bool.must, // FIXME
           },
         },
         fields: ['*'],
@@ -66,9 +66,14 @@ export const referenceRulePersistenceAlertType = createSecurityPersistenceRuleTy
         },
       },
     };
-  },
-  // TODO: do we need a user-defined executor?
-  async executor({ services, params }) {
-    return {};
+
+    const alerts = await findAlerts(query);
+    alertWithPersistence(alerts).forEach((alert) => {
+      alert.scheduleActions('action-group-tbd', {});
+    });
+
+    return {
+      lastChecked: new Date(),
+    };
   },
 });
