@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PanelToolbar } from './panel_toolbar';
+export { SolutionToolbar } from './solution_toolbar';
+export * from './items';
