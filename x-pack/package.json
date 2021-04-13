@@ -27,6 +27,7 @@
     "yarn": "^1.21.1"
   },
   "devDependencies": {
+    "@elastic/synthetics": "^0.0.1-alpha.13",
     "@kbn/babel-preset": "link:../packages/kbn-babel-preset",
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
     "@kbn/es": "link:../packages/kbn-es",
