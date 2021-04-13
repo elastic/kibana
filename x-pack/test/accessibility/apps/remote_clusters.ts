@@ -13,6 +13,8 @@ const createButton = 'remoteClusterEmptyPromptCreateButton';
 const pageTitle = 'remoteClusterPageTitle';
 const nameLink = 'remoteClustersTableListClusterLink';
 const editButton = 'remoteClusterTableRowEditButton';
+const deleteButton = 'remoteClusterTableRowRemoveButton';
+const deleteModalTitle = 'confirmModalTitleText';
 const detailsTitle = 'remoteClusterDetailsFlyoutTitle';
 const requestButton = 'remoteClustersRequestButton';
 const requestTitle = 'remoteClusterRequestFlyoutTitle';
@@ -154,6 +156,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.waitFor('remote cluster details to be rendered', async () => {
             return (await testSubjects.getVisibleText(detailsTitle)) === clusterName;
+          });
+
+          await a11y.testAppSnapshot();
+        });
+
+        it(`renders delete cluster modal (${mode} mode)`, async () => {
+          await retry.waitFor('remote clusters list to be rendered', async () => {
+            return testSubjects.isDisplayed(nameLink);
+          });
+
+          await testSubjects.click(deleteButton);
+
+          await retry.waitFor('delete cluster modal to be rendered', async () => {
+            return (
+              (await testSubjects.getVisibleText(deleteModalTitle)) ===
+              `Remove remote cluster '${clusterName}'?`
+            );
           });
 
           await a11y.testAppSnapshot();
