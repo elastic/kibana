@@ -12,6 +12,7 @@ steps:
       - docker#v3.8.0:
           image: 'hashicorp/packer:latest'
           workdir: /app
+          entrypoint: false
 
   - wait: ~
     continue_on_failure: true
