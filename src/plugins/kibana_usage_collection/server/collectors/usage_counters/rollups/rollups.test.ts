@@ -21,9 +21,12 @@ import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
   ({
     id,
-    type: 'ui-counter',
+    type: 'usage-counter',
     attributes: {
       count: 3,
+      counterName: 'testName',
+      counterType: 'count',
+      domainId: 'testDomain',
     },
     references: [],
     updated_at: updatedAt.format(),
