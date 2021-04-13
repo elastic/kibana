@@ -73,9 +73,11 @@ But we don't know _why_ the test didn't find the element.  It could be that its 
 Just above the `✖ fail:` line, there is a line `info Taking screenshot ...` which tells us the name of the screenshot to look for in the *Google Cloud Storage (GCS) Upload Report:*
 
 Clicking the `[Download]` link for that png shows this image;
-image::images\Kibana spaces page meets a11y validations a11y test for click on create space page.png[]
+
+image::'images\Kibana spaces page meets a11y validations a11y test for click on create space page.png'[]
 
 If we use a running Kibana instance and inspect elements, we find that the `createSpace` data-test-subj attribute is on this button in the Stack Management / Spaces page;
+
 image::images\inspect_element.png[]
 
 We know the test was not on the correct page to find the element to click.  We see in the debug log the repeated attempts to find the element.  If we scroll to the start of those repeated attempts we that the first thing the test did was this attempt to click on the `createSpace` element.  
