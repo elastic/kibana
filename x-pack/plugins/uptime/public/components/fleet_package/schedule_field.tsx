@@ -31,7 +31,7 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
           id="syntheticsFleetScheduleField--number"
           data-test-subj="scheduleFieldInput"
           step={'any'}
-          min={0}
+          min={1}
           value={number}
           onChange={(event) => {
             const updatedNumber = event.target.value;
