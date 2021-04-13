@@ -271,6 +271,9 @@ describe('map_actions', () => {
       require('../selectors/map_selectors').getTimeFilters = () => {
         return timeFilters;
       };
+      require('../selectors/map_selectors').getTimeslice = () => {
+        return undefined;
+      };
       require('../selectors/map_selectors').getFilters = () => {
         return filters;
       };
