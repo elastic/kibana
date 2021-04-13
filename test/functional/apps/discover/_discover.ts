@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -31,6 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.savedObjects.clean({ types: ['search'] });
       await kibanaServer.importExport.load('discover');
+      log.info(
+        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
+      );
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -178,7 +182,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query #2, which has an empty time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/89550
+    describe.skip('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
