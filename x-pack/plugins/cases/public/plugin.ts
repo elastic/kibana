@@ -9,11 +9,13 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { getCaseConnectorUi } from './components/connectors';
-import { getAllCasesLazy } from './methods/get_all_cases';
-import { getCaseViewLazy } from './methods/get_case_view';
-import { getConfigureCasesLazy } from './methods/get_configure_cases';
-import { getCreateCaseLazy } from './methods/get_create_case';
-import { getRecentCasesLazy } from './methods/get_recent_cases';
+import {
+  getAllCasesLazy,
+  getCaseViewLazy,
+  getConfigureCasesLazy,
+  getCreateCaseLazy,
+  getRecentCasesLazy,
+} from './methods';
 import { ENABLE_CASE_CONNECTOR } from '../common';
 
 /**

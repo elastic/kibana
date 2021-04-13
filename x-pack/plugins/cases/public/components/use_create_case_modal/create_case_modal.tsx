@@ -6,15 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
-import { FormContext } from '../create/form_context';
-import { CreateCaseForm } from '../create/form';
-import { SubmitCaseButton } from '../create/submit_button';
 import { Case } from '../../containers/types';
 import * as i18n from '../../common/translations';
 import { CaseType } from '../../../common';
+import { getCreateCaseLazy as getCreateCase } from '../../methods';
 
 export interface CreateCaseModalProps {
   caseType?: CaseType;
@@ -24,13 +21,6 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
-const Container = styled.div`
-  ${({ theme }) => `
-    margin-top: ${theme.eui.euiSize};
-    text-align: right;
-  `}
-`;
-
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   caseType = CaseType.individual,
   hideConnectorServiceNowSir,
@@ -39,24 +29,18 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   onSuccess,
 }) => {
   return isModalOpen ? (
-    <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
+    <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FormContext
-          caseType={caseType}
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-          onSuccess={onSuccess}
-        >
-          <CreateCaseForm
-            hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-            withSteps={false}
-          />
-          <Container>
-            <SubmitCaseButton />
-          </Container>
-        </FormContext>
+        {getCreateCase({
+          caseType,
+          hideConnectorServiceNowSir,
+          onCancel: onCloseCaseModal,
+          onSuccess,
+          withSteps: false,
+        })}
       </EuiModalBody>
     </EuiModal>
   ) : null;
