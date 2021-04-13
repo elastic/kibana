@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import { KibanaRequest, Logger } from '../../../../../../src/core/server';
+import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
@@ -19,52 +19,28 @@ import {
   CaseResponse,
   CasesResponse,
 } from '../../../common/api';
-import {
-  connectorMappingsServiceMock,
-  createCaseServiceMock,
-  createConfigureServiceMock,
-  createUserActionServiceMock,
-  createAlertServiceMock,
-} from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
-import { createExternalCasesClientMock } from '../../client/mocks';
-import { CasesClientFactory } from '../../client/factory';
-import { featuresPluginMock } from '../../../../features/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
 
-const mockCasesClient = createExternalCasesClientMock();
-
-jest.mock('../../client', () => ({
-  createExternalCasesClient: () => mockCasesClient,
-}));
+import {
+  CasesClientMock,
+  createCasesClientFactory,
+  createCasesClientMock,
+} from '../../client/mocks';
 
 const services = actionsMock.createServices();
 let caseActionType: CaseActionType;
 
 describe('case connector', () => {
+  let mockCasesClient: CasesClientMock;
+
   beforeEach(() => {
-    jest.resetAllMocks();
     const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-    const caseService = createCaseServiceMock();
-    const caseConfigureService = createConfigureServiceMock();
-    const connectorMappingsService = connectorMappingsServiceMock();
-    const userActionService = createUserActionServiceMock();
-    const alertsService = createAlertServiceMock();
-    const factory = new CasesClientFactory(logger);
 
-    factory.initialize({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      userActionService,
-      featuresPluginStart: featuresPluginMock.createStart(),
-      getSpace: async (req: KibanaRequest) => undefined,
-      securityPluginSetup: securityMock.createSetup(),
-      securityPluginStart: securityMock.createStart(),
-    });
+    mockCasesClient = createCasesClientMock();
 
+    const factory = createCasesClientFactory();
+    factory.create.mockReturnValue(Promise.resolve(mockCasesClient));
     caseActionType = getActionType({
       logger,
       factory,
@@ -983,7 +959,7 @@ describe('case connector', () => {
           owner: 'securitySolution',
         };
 
-        mockCasesClient.create.mockReturnValue(Promise.resolve(createReturn));
+        mockCasesClient.cases.create.mockReturnValue(Promise.resolve(createReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -1019,7 +995,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: createReturn });
-        expect(mockCasesClient.create).toHaveBeenCalledWith({
+        expect(mockCasesClient.cases.create).toHaveBeenCalledWith({
           ...params.subActionParams,
           connector: {
             id: 'jira',
@@ -1081,7 +1057,7 @@ describe('case connector', () => {
           },
         ];
 
-        mockCasesClient.update.mockReturnValue(Promise.resolve(updateReturn));
+        mockCasesClient.cases.update.mockReturnValue(Promise.resolve(updateReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -1109,7 +1085,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
-        expect(mockCasesClient.update).toHaveBeenCalledWith({
+        expect(mockCasesClient.cases.update).toHaveBeenCalledWith({
           // Null values have been striped out.
           cases: [
             {
@@ -1171,7 +1147,7 @@ describe('case connector', () => {
           owner: 'securitySolution',
         };
 
-        mockCasesClient.addComment.mockReturnValue(Promise.resolve(commentReturn));
+        mockCasesClient.attachments.add.mockReturnValue(Promise.resolve(commentReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -1196,7 +1172,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
-        expect(mockCasesClient.addComment).toHaveBeenCalledWith({
+        expect(mockCasesClient.attachments.add).toHaveBeenCalledWith({
           caseId: 'case-id',
           comment: {
             comment: 'a comment',
