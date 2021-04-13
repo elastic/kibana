@@ -98,7 +98,7 @@ export const SourceRouter: React.FC = () => {
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
           <SendTelemetry action="viewed" metric="source_overview" />
-          <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.OVERVIEW]} />
+          <SetPageChrome trail={[NAV.SOURCES, name || '...']} />
           <Overview />
         </Route>
         <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
