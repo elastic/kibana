@@ -110,6 +110,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
       if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.dashboard.waitForRenderComplete();
     }
 
     async removePanelByTitle(title: string) {
@@ -136,6 +137,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.clickContextMenuMoreItem();
       }
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.dashboard.waitForRenderComplete();
     }
 
     async clonePanelByTitle(title?: string) {
