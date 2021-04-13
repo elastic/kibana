@@ -217,7 +217,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             onChange={(e) => {
               setValue('url', e.target.value);
               if (
-                (e.nativeEvent as InputEvent).inputType !== 'insertFromPaste' ||
+                (e.nativeEvent as InputEvent)?.inputType !== 'insertFromPaste' ||
                 !isKibanaUrl(e.target.value)
               ) {
                 setAutoformatUrl(false);
