@@ -54,7 +54,7 @@ export const Curations: React.FC = () => {
           </EuiButtonTo>,
         ]}
       />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <FlashMessages />
         <CurationsTable />
       </EuiPageContent>

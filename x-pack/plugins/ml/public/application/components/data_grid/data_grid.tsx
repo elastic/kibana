@@ -80,6 +80,7 @@ export const DataGrid: FC<Props> = memo(
       baseline,
       chartsVisible,
       chartsButtonVisible,
+      ccsWarning,
       columnsWithCharts,
       dataTestSubj,
       errorMessage,
@@ -288,6 +289,24 @@ export const DataGrid: FC<Props> = memo(
         {errorCallout !== undefined && (
           <div data-test-subj={`${dataTestSubj} error`}>
             {errorCallout}
+            <EuiSpacer size="m" />
+          </div>
+        )}
+        {ccsWarning && (
+          <div data-test-subj={`${dataTestSubj} ccsWarning`}>
+            <EuiCallOut
+              title={i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutTitle', {
+                defaultMessage: 'Cross-cluster search returned no fields data.',
+              })}
+              color="warning"
+            >
+              <p>
+                {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
+                  defaultMessage:
+                    'There was an issue retrieving data for the index pattern. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                })}
+              </p>
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </div>
         )}

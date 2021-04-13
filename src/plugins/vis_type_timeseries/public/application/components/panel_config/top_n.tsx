@@ -144,7 +144,7 @@ export class TopNPanelConfig extends Component<
                     onChange={(filter: PanelConfigProps['model']['filter']) => {
                       this.props.onChange({ filter });
                     }}
-                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
+                    indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
