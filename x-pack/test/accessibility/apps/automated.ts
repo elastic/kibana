@@ -72,17 +72,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (app === 'login') continue; // causes a perpetual login loop, ignore
         await common.navigateToActualUrl(app, hash);
         await header.waitUntilLoadingHasFinished();
-        const errorCount = await a11y.testAppSnapshot({
-          returnErrorCount: true,
-          reportType: 'all',
-        });
-        if ((errorCount ?? 0) > (currentErrors[app] ?? 0)) {
-          log.debug(
-            `App: ${app}; Errors: ${errorCount ?? 0}; Max allowed: ${currentErrors[app] ?? 0}`
-          );
-          expect(false).to.be.ok();
+        const errorCount =
+          (await a11y.testAppSnapshot({
+            returnErrorCount: true,
+            reportType: 'all',
+          })) ?? 0;
+        if (errorCount > (currentErrors[app] ?? 0)) {
+          // If you've found your way here and aren't sure why, you've introduced a new a11y failure
+          // Run axe on your page to get more accurate reporting of where and what the problem is
+          // You can run axe either through a browser addon or by writing a dedicated a11y test
+          new Error(`App: ${app}; Errors: ${errorCount}; Max allowed: ${currentErrors[app] ?? 0}`);
         } else {
-          currentErrors[app] = errorCount ?? 0;
+          currentErrors[app] = errorCount;
         }
       }
     });
