@@ -42,12 +42,8 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import {
-  referenceRuleAlertType,
-} from './lib/detection_engine/reference_rules/reference_rule';
-import {
-  referenceRulePersistenceAlertType,
-} from './lib/detection_engine/reference_rules/reference_rule_persistence';
+import { referenceRuleAlertType } from './lib/detection_engine/reference_rules/reference_rule';
+import { referenceRulePersistenceAlertType } from './lib/detection_engine/reference_rules/reference_rule_persistence';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -65,7 +61,6 @@ import {
   SIGNALS_ID,
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
-  REFERENCE_RULE_HIERARCHICAL_ALERT_TYPE_ID,
   REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
@@ -228,7 +223,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const referenceRuleTypes = [
       REFERENCE_RULE_ALERT_TYPE_ID,
-      REFERENCE_RULE_HIERARCHICAL_ALERT_TYPE_ID,
       REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
     ];
     const ruleTypes = [SIGNALS_ID, NOTIFICATIONS_ID, ...referenceRuleTypes];
