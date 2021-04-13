@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 
 import { Schema } from '../../../shared/types';
 
