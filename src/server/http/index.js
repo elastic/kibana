@@ -98,7 +98,7 @@ export default async function (kbnServer, server, config) {
     path: '/{p*}',
     handler: function (req, h) {
       const path = req.path;
-      if (path === '/' || path.charAt(path.length - 1) !== '/') {
+      if (path === '/' || path.charAt(path.length - 1) !== '/' || path.charAt(0) === '/') {
         throw Boom.notFound();
       }
 
