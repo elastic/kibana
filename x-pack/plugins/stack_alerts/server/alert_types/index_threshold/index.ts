@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { RegisterAlertTypesParams } from '..';
-import { createLifecycleRuleType } from '../../types';
+import { createThresholdRuleType } from '../../types';
 import * as IndexThreshold from './alert_type';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ParamsSchema } from './alert_type_params';
@@ -23,7 +23,7 @@ export const DEFAULT_GROUPS = 100;
 export function register(registerParams: RegisterAlertTypesParams) {
   const { data, registry } = registerParams;
   registry.registerType(
-    createLifecycleRuleType({
+    createThresholdRuleType({
       id: IndexThreshold.ID,
       name: IndexThreshold.RuleTypeName,
       actionGroups: [
@@ -56,7 +56,7 @@ export function register(registerParams: RegisterAlertTypesParams) {
         const {
           rule,
           params,
-          services: { alertInstanceFactory, logger, scopedClusterClient },
+          services: { alertWithThreshold, metricWithThreshold, logger, scopedClusterClient },
         } = options;
 
         const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -95,7 +95,7 @@ export function register(registerParams: RegisterAlertTypesParams) {
           query: queryParams,
         });
         logger.debug(
-          `alert ${IndexThreshold.ID}:${rule.id} "${rule.name}" query result: ${JSON.stringify(
+          `alert ${IndexThreshold.ID}:${rule.uuid} "${rule.name}" query result: ${JSON.stringify(
             result
           )}`
         );
@@ -106,6 +106,17 @@ export function register(registerParams: RegisterAlertTypesParams) {
           const instanceId = groupResult.group;
           const value = groupResult.metrics[0][1];
           const met = compareFn(value, params.threshold);
+
+          // According to the issue description for https://github.com/elastic/kibana/issues/93728
+          // This would be considered "extra documents [which] are typically immutable and provide
+          // extra details for the Alert"
+          // This will show up in the alerts-as-data index as event.kind: "metric"
+          metricWithThreshold({
+            id: instanceId,
+            fields: {
+              'kibana.rac.alert.value': value,
+            },
+          });
 
           if (!met) continue;
 
@@ -123,8 +134,12 @@ export function register(registerParams: RegisterAlertTypesParams) {
             conditions: humanFn,
           };
           const actionContext = addMessages(rule.name, baseContext, params);
-          const alertInstance = alertInstanceFactory(instanceId);
-          alertInstance.scheduleActions(IndexThreshold.RuleTypeActionGroupId, actionContext);
+          alertWithThreshold({
+            id: instanceId,
+            fields: {
+              'kibana.rac.alert.value': value,
+            },
+          }).scheduleActions(IndexThreshold.RuleTypeActionGroupId, actionContext);
           logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
         }
 

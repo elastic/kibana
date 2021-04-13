@@ -10,6 +10,7 @@ import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import {
   RuleRegistryPluginSetupContract,
   createLifecycleRuleTypeFactory,
+  createThresholdRuleTypeFactory,
 } from '../../rule_registry/server';
 
 export {
@@ -32,4 +33,5 @@ export interface StackAlertsStartDeps {
 }
 
 export type StackAlertsRuleRegistry = ReturnType<StackAlertsPlugin['setup']>['ruleRegistry'];
+export const createThresholdRuleType = createThresholdRuleTypeFactory<StackAlertsRuleRegistry>();
 export const createLifecycleRuleType = createLifecycleRuleTypeFactory<StackAlertsRuleRegistry>();

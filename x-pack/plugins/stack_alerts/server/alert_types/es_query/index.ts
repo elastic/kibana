@@ -121,7 +121,7 @@ export function register(registerParams: RegisterAlertTypesParams) {
         });
 
         logger.debug(
-          `alert ${EsQuery.ID}:${rule.id} "${rule.name}" query - ${JSON.stringify(query)}`
+          `alert ${EsQuery.ID}:${rule.uuid} "${rule.name}" query - ${JSON.stringify(query)}`
         );
 
         const { body: searchResult } = await esClient.search(query);
@@ -129,7 +129,7 @@ export function register(registerParams: RegisterAlertTypesParams) {
         if (searchResult.hits.hits.length > 0) {
           const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
           logger.debug(
-            `alert ${EsQuery.ID}:${rule.id} "${rule.name}" query has ${numMatches} matches`
+            `alert ${EsQuery.ID}:${rule.uuid} "${rule.name}" query has ${numMatches} matches`
           );
 
           // apply the alert condition

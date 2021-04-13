@@ -10,7 +10,6 @@ import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/se
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInAlertTypes, registerLegacyBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
-import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/server';
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
@@ -29,7 +28,7 @@ export class AlertingBuiltinsPlugin
     const stackAlertsRuleRegistry = ruleRegistry.create({
       name: 'stack-alerts',
       fieldMap: {
-        ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
+        'kibana.rac.alert.value': { type: 'float' },
       },
     });
 
