@@ -47,12 +47,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('are added when a cell filter is clicked', async function () {
-      await find.clickByCssSelector(`[role="gridcell"]:nth-child(3)`);
+      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
       // needs a short delay between becoming visible & being clickable
       await PageObjects.common.sleep(250);
       await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await find.clickByCssSelector(`[role="gridcell"]:nth-child(3)`);
+      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
       await PageObjects.common.sleep(250);
       await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
       const filterCount = await filterBar.getFilterCount();

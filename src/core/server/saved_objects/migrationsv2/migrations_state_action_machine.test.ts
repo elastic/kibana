@@ -254,12 +254,40 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
-            "unusedTypesToExclude": Object {
+            "unusedTypesQuery": Object {
               "_tag": "Some",
-              "value": Array [
-                "fleet-agent-events",
-                "tsvb-validation-telemetry",
-              ],
+              "value": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -322,12 +350,40 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
-            "unusedTypesToExclude": Object {
+            "unusedTypesQuery": Object {
               "_tag": "Some",
-              "value": Array [
-                "fleet-agent-events",
-                "tsvb-validation-telemetry",
-              ],
+              "value": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -475,12 +531,40 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
-            "unusedTypesToExclude": Object {
+            "unusedTypesQuery": Object {
               "_tag": "Some",
-              "value": Array [
-                "fleet-agent-events",
-                "tsvb-validation-telemetry",
-              ],
+              "value": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
@@ -538,12 +622,40 @@ describe('migrationsStateActionMachine', () => {
                 },
               },
             },
-            "unusedTypesToExclude": Object {
+            "unusedTypesQuery": Object {
               "_tag": "Some",
-              "value": Array [
-                "fleet-agent-events",
-                "tsvb-validation-telemetry",
-              ],
+              "value": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
             },
             "versionAlias": ".my-so-index_7.11.0",
             "versionIndex": ".my-so-index_7.11.0_001",
