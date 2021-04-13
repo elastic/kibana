@@ -7,6 +7,7 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
@@ -76,9 +77,9 @@ export interface BaseState extends ControlState {
   readonly tempIndex: string;
   /* When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
-   * index for backup purposes, but won't be availble in the upgraded index.
+   * index for backup purposes, but won't be available in the upgraded index.
    */
-  readonly unusedTypesToExclude: Option.Option<string[]>;
+  readonly unusedTypesQuery: Option.Option<estypes.QueryContainer>;
 }
 
 export type InitState = BaseState & {
