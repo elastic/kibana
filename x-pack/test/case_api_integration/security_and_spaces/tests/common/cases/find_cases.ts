@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import supertestAsPromised from 'supertest-as-promised';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -25,12 +24,12 @@ import {
   createCaseAsUser,
   ensureSavedObjectIsAuthorized,
   findCasesAsUser,
+  findCases,
+  createCase,
+  updateCase,
+  createComment,
 } from '../../../../common/lib/utils';
-import {
-  CasesFindResponse,
-  CaseStatuses,
-  CaseType,
-} from '../../../../../../plugins/cases/common/api';
+import { CaseResponse, CaseStatuses, CaseType } from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -62,41 +61,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return empty response', async () => {
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql(findCasesResp);
+        const cases = await findCases(supertest);
+        expect(cases).to.eql(findCasesResp);
       });
 
       it('should return cases', async () => {
-        const { body: a } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        const a = await createCase(supertest, postCaseReq);
+        const b = await createCase(supertest, postCaseReq);
+        const c = await createCase(supertest, postCaseReq);
 
-        const { body: b } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        const cases = await findCases(supertest);
 
-        const { body: c } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql({
+        expect(cases).to.eql({
           ...findCasesResp,
           total: 3,
           cases: [a, b, c],
@@ -105,20 +81,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('filters by tags', async () => {
-        await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, tags: ['unique'] })
-          .expect(200);
+        await createCase(supertest, postCaseReq);
+        const postedCase = await createCase(supertest, { ...postCaseReq, tags: ['unique'] });
+        const cases = await findCases(supertest, { tags: ['unique'] });
 
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc&tags=unique`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql({
+        expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
           cases: [postedCase],
@@ -127,40 +94,24 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('filters by status', async () => {
-        const { body: openCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq);
+        await createCase(supertest, postCaseReq);
+        const toCloseCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase(supertest, {
+          cases: [
+            {
+              id: toCloseCase.id,
+              version: toCloseCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+        });
 
-        const { body: toCloseCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq);
+        const cases = await findCases(supertest, { status: CaseStatuses.closed });
 
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: toCloseCase.id,
-                version: toCloseCase.version,
-                status: 'closed',
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc&status=open`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql({
+        expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
-          cases: [openCase],
+          cases: [patchedCase[0]],
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
@@ -168,18 +119,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('filters by reporters', async () => {
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq);
+        const postedCase = await createCase(supertest, postCaseReq);
+        const cases = await findCases(supertest, { reporters: 'elastic' });
 
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc&reporters=elastic`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql({
+        expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
           cases: [postedCase],
@@ -188,32 +131,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('correctly counts comments', async () => {
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        const postedCase = await createCase(supertest, postCaseReq);
 
         // post 2 comments
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
+        await createComment(supertest, postedCase.id, postCommentUserReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
-        const { body: patchedCase } = await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body).to.eql({
+        const cases = await findCases(supertest);
+        expect(cases).to.eql({
           ...findCasesResp,
           total: 1,
           cases: [
@@ -228,64 +153,38 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('correctly counts open/closed/in-progress', async () => {
-        await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+        await createCase(supertest, postCaseReq);
+        const inProgressCase = await createCase(supertest, postCaseReq);
+        const postedCase = await createCase(supertest, postCaseReq);
 
-        const { body: inProgreeCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq);
+        await updateCase(supertest, {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+        });
 
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        await updateCase(supertest, {
+          cases: [
+            {
+              id: inProgressCase.id,
+              version: inProgressCase.version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        });
 
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: 'closed',
-              },
-            ],
-          })
-          .expect(200);
-
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: inProgreeCase.id,
-                version: inProgreeCase.version,
-                status: 'in-progress',
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${CASES_URL}/_find?sortOrder=asc`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.count_open_cases).to.eql(1);
-        expect(body.count_closed_cases).to.eql(1);
-        expect(body.count_in_progress_cases).to.eql(1);
+        const cases = await findCases(supertest);
+        expect(cases.count_open_cases).to.eql(1);
+        expect(cases.count_closed_cases).to.eql(1);
+        expect(cases.count_in_progress_cases).to.eql(1);
       });
 
       it('unhappy path - 400s when bad query supplied', async () => {
-        await supertest
-          .get(`${CASES_URL}/_find?perPage=true`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
+        await findCases(supertest, { perPage: true }, 400);
       });
 
       // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
@@ -334,75 +233,66 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
         it('correctly counts stats without using a filter', async () => {
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc`)
-            .expect(200);
+          const cases = await findCases(supertest);
 
-          expect(body.total).to.eql(3);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(1);
+          expect(cases.total).to.eql(3);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(1);
         });
 
         it('correctly counts stats with a filter for open cases', async () => {
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&status=open`)
-            .expect(200);
+          const cases = await findCases(supertest, { status: CaseStatuses.open });
 
-          expect(body.cases.length).to.eql(1);
+          expect(cases.cases.length).to.eql(1);
 
           // since we're filtering on status and the collection only has an in-progress case, it should only return the
           // individual case that has the open status and no collections
           // ENABLE_CASE_CONNECTOR: this value is not correct because it includes a collection
           // that does not have an open case. This is a known issue and will need to be resolved
           // when this issue is addressed: https://github.com/elastic/kibana/issues/94115
-          expect(body.total).to.eql(2);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(1);
+          expect(cases.total).to.eql(2);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(1);
         });
 
         it('correctly counts stats with a filter for individual cases', async () => {
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&type=${CaseType.individual}`)
-            .expect(200);
+          const cases = await findCases(supertest, { type: CaseType.individual });
 
-          expect(body.total).to.eql(2);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(2);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
 
         it('correctly counts stats with a filter for collection cases with multiple sub cases', async () => {
           // this will force the first sub case attached to the collection to be closed
           // so we'll have one closed sub case and one open sub case
           await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}`)
-            .expect(200);
+          const cases = await findCases(supertest, { type: CaseType.collection });
 
-          expect(body.total).to.eql(1);
-          expect(body.cases[0].subCases?.length).to.eql(2);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(1);
+          expect(cases.cases[0].subCases?.length).to.eql(2);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
 
         it('correctly counts stats with a filter for collection and open cases with multiple sub cases', async () => {
           // this will force the first sub case attached to the collection to be closed
           // so we'll have one closed sub case and one open sub case
           await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(
-              `${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}&status=${CaseStatuses.open}`
-            )
-            .expect(200);
+          const cases = await findCases(supertest, {
+            type: CaseType.collection,
+            status: CaseStatuses.open,
+          });
 
-          expect(body.total).to.eql(1);
-          expect(body.cases[0].subCases?.length).to.eql(1);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(1);
+          expect(cases.cases[0].subCases?.length).to.eql(1);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
 
         it('correctly counts stats including a collection without sub cases when not filtering on status', async () => {
@@ -415,15 +305,13 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc`)
-            .expect(200);
+          const cases = await findCases(supertest, { type: CaseType.collection });
 
           // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(body.total).to.eql(3);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(3);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
 
         it('correctly counts stats including a collection without sub cases when filtering on tags', async () => {
@@ -436,31 +324,27 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&tags=defacement`)
-            .expect(200);
+          const cases = await findCases(supertest, { tags: ['defacement'] });
 
           // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(body.total).to.eql(3);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(3);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
 
         it('does not return collections without sub cases matching the requested status', async () => {
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&status=closed`)
-            .expect(200);
+          const cases = await findCases(supertest, { status: CaseStatuses.closed });
 
-          expect(body.cases.length).to.eql(1);
+          expect(cases.cases.length).to.eql(1);
           // it should not include the collection that has a sub case as in-progress
           // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
           // fix for when sub cases are not enabled. When the feature is completed the _find API
           // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(body.total).to.eql(2);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(1);
+          expect(cases.total).to.eql(2);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(1);
         });
 
         it('does not return empty collections when filtering on status', async () => {
@@ -473,19 +357,17 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(204);
 
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find?sortOrder=asc&status=closed`)
-            .expect(200);
+          const cases = await findCases(supertest, { status: CaseStatuses.closed });
 
-          expect(body.cases.length).to.eql(1);
+          expect(cases.cases.length).to.eql(1);
 
           // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
           // fix for when sub cases are not enabled. When the feature is completed the _find API
           // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(body.total).to.eql(2);
-          expect(body.count_closed_cases).to.eql(1);
-          expect(body.count_open_cases).to.eql(1);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(2);
+          expect(cases.count_closed_cases).to.eql(1);
+          expect(cases.count_open_cases).to.eql(1);
+          expect(cases.count_in_progress_cases).to.eql(0);
         });
       });
     });
@@ -500,22 +382,17 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      const createCasesWithTitleAsNumber = async (total: number) => {
-        const responsePromises: supertestAsPromised.Test[] = [];
+      const createCasesWithTitleAsNumber = async (total: number): Promise<CaseResponse[]> => {
+        const responsePromises = [];
         for (let i = 0; i < total; i++) {
           // this doesn't guarantee that the cases will be created in order that the for-loop executes,
           // for example case with title '2', could be created before the case with title '1' since we're doing a promise all here
           // A promise all is just much faster than doing it one by one which would have guaranteed that the cases are
           // created in the order that the for-loop executes
-          responsePromises.push(
-            supertest
-              .post(CASES_URL)
-              .set('kbn-xsrf', 'true')
-              .send({ ...postCaseReq, title: `${i}` })
-          );
+          responsePromises.push(createCase(supertest, { ...postCaseReq, title: `${i}` }));
         }
         const responses = await Promise.all(responsePromises);
-        return responses.map((response) => response.body);
+        return responses;
       };
 
       /**
@@ -541,88 +418,68 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       it('returns the correct total when perPage is less than the total', async () => {
-        const { body }: { body: CasesFindResponse } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .query({
-            sortOrder: 'asc',
-            page: 1,
-            perPage: 5,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const cases = await findCases(supertest, {
+          page: 1,
+          perPage: 5,
+        });
 
-        expect(body.cases.length).to.eql(5);
-        expect(body.total).to.eql(10);
-        expect(body.page).to.eql(1);
-        expect(body.per_page).to.eql(5);
-        expect(body.count_open_cases).to.eql(10);
-        expect(body.count_closed_cases).to.eql(0);
-        expect(body.count_in_progress_cases).to.eql(0);
+        expect(cases.cases.length).to.eql(5);
+        expect(cases.total).to.eql(10);
+        expect(cases.page).to.eql(1);
+        expect(cases.per_page).to.eql(5);
+        expect(cases.count_open_cases).to.eql(10);
+        expect(cases.count_closed_cases).to.eql(0);
+        expect(cases.count_in_progress_cases).to.eql(0);
       });
 
       it('returns the correct total when perPage is greater than the total', async () => {
-        const { body }: { body: CasesFindResponse } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .query({
-            sortOrder: 'asc',
-            page: 1,
-            perPage: 11,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const cases = await findCases(supertest, {
+          page: 1,
+          perPage: 11,
+        });
 
-        expect(body.total).to.eql(10);
-        expect(body.page).to.eql(1);
-        expect(body.per_page).to.eql(11);
-        expect(body.cases.length).to.eql(10);
-        expect(body.count_open_cases).to.eql(10);
-        expect(body.count_closed_cases).to.eql(0);
-        expect(body.count_in_progress_cases).to.eql(0);
+        expect(cases.total).to.eql(10);
+        expect(cases.page).to.eql(1);
+        expect(cases.per_page).to.eql(11);
+        expect(cases.cases.length).to.eql(10);
+        expect(cases.count_open_cases).to.eql(10);
+        expect(cases.count_closed_cases).to.eql(0);
+        expect(cases.count_in_progress_cases).to.eql(0);
       });
 
       it('returns the correct total when perPage is equal to the total', async () => {
-        const { body }: { body: CasesFindResponse } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .query({
-            sortOrder: 'asc',
-            page: 1,
-            perPage: 10,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const cases = await findCases(supertest, {
+          page: 1,
+          perPage: 10,
+        });
 
-        expect(body.total).to.eql(10);
-        expect(body.page).to.eql(1);
-        expect(body.per_page).to.eql(10);
-        expect(body.cases.length).to.eql(10);
-        expect(body.count_open_cases).to.eql(10);
-        expect(body.count_closed_cases).to.eql(0);
-        expect(body.count_in_progress_cases).to.eql(0);
+        expect(cases.total).to.eql(10);
+        expect(cases.page).to.eql(1);
+        expect(cases.per_page).to.eql(10);
+        expect(cases.cases.length).to.eql(10);
+        expect(cases.count_open_cases).to.eql(10);
+        expect(cases.count_closed_cases).to.eql(0);
+        expect(cases.count_in_progress_cases).to.eql(0);
       });
 
       it('returns the second page of results', async () => {
         const perPage = 5;
-        const { body }: { body: CasesFindResponse } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .query({
-            sortOrder: 'asc',
-            page: 2,
-            perPage,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const cases = await findCases(supertest, {
+          page: 2,
+          perPage,
+        });
 
-        expect(body.total).to.eql(10);
-        expect(body.page).to.eql(2);
-        expect(body.per_page).to.eql(5);
-        expect(body.cases.length).to.eql(5);
-        expect(body.count_open_cases).to.eql(10);
-        expect(body.count_closed_cases).to.eql(0);
-        expect(body.count_in_progress_cases).to.eql(0);
+        expect(cases.total).to.eql(10);
+        expect(cases.page).to.eql(2);
+        expect(cases.per_page).to.eql(5);
+        expect(cases.cases.length).to.eql(5);
+        expect(cases.count_open_cases).to.eql(10);
+        expect(cases.count_closed_cases).to.eql(0);
+        expect(cases.count_in_progress_cases).to.eql(0);
 
         const allCases = await getAllCasesSortedByCreatedAtAsc();
 
-        body.cases.map((caseInfo, index) => {
+        cases.cases.map((caseInfo, index) => {
           // we started on the second page of 10 cases with a perPage of 5, so the first case should 0 + 5 (index + perPage)
           expect(caseInfo.title).to.eql(allCases[index + perPage]?.cases.title);
         });
@@ -635,27 +492,22 @@ export default ({ getService }: FtrProviderContext): void => {
         // it's less than or equal here because the page starts at 1, so page 5 is a valid page number
         // and should have case titles 9, and 10
         for (let currentPage = 1; currentPage <= total / perPage; currentPage++) {
-          const { body }: { body: CasesFindResponse } = await supertest
-            .get(`${CASES_URL}/_find`)
-            .query({
-              sortOrder: 'asc',
-              page: currentPage,
-              perPage,
-            })
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const cases = await findCases(supertest, {
+            page: currentPage,
+            perPage,
+          });
 
-          expect(body.total).to.eql(total);
-          expect(body.page).to.eql(currentPage);
-          expect(body.per_page).to.eql(perPage);
-          expect(body.cases.length).to.eql(perPage);
-          expect(body.count_open_cases).to.eql(total);
-          expect(body.count_closed_cases).to.eql(0);
-          expect(body.count_in_progress_cases).to.eql(0);
+          expect(cases.total).to.eql(total);
+          expect(cases.page).to.eql(currentPage);
+          expect(cases.per_page).to.eql(perPage);
+          expect(cases.cases.length).to.eql(perPage);
+          expect(cases.count_open_cases).to.eql(total);
+          expect(cases.count_closed_cases).to.eql(0);
+          expect(cases.count_in_progress_cases).to.eql(0);
 
           const allCases = await getAllCasesSortedByCreatedAtAsc();
 
-          body.cases.map((caseInfo, index) => {
+          cases.cases.map((caseInfo, index) => {
             // for page 1, the cases tiles should be 0,1,2 for page 2: 3,4,5 etc (assuming the titles were sorted
             // correctly)
             expect(caseInfo.title).to.eql(
@@ -666,24 +518,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('retrieves the last three cases', async () => {
-        const { body }: { body: CasesFindResponse } = await supertest
-          .get(`${CASES_URL}/_find`)
-          .query({
-            sortOrder: 'asc',
-            // this should skip the first 7 cases and only return the last 3
-            page: 2,
-            perPage: 7,
-          })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const cases = await findCases(supertest, {
+          // this should skip the first 7 cases and only return the last 3
+          page: 2,
+          perPage: 7,
+        });
 
-        expect(body.total).to.eql(10);
-        expect(body.page).to.eql(2);
-        expect(body.per_page).to.eql(7);
-        expect(body.cases.length).to.eql(3);
-        expect(body.count_open_cases).to.eql(10);
-        expect(body.count_closed_cases).to.eql(0);
-        expect(body.count_in_progress_cases).to.eql(0);
+        expect(cases.total).to.eql(10);
+        expect(cases.page).to.eql(2);
+        expect(cases.per_page).to.eql(7);
+        expect(cases.cases.length).to.eql(3);
+        expect(cases.count_open_cases).to.eql(10);
+        expect(cases.count_closed_cases).to.eql(0);
+        expect(cases.count_in_progress_cases).to.eql(0);
       });
     });
 
