@@ -144,6 +144,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         isInvalid={Boolean(touchedFields[name] && validation[name])}
       >
         <EuiFieldText
+          disabled={agentPolicy.is_managed === true}
           fullWidth
           value={agentPolicy[name]}
           onChange={(e) => updateAgentPolicy({ [name]: e.target.value })}
@@ -283,7 +284,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiDescribedFormGroup>
-      {isEditing && 'id' in agentPolicy ? (
+      {isEditing && 'id' in agentPolicy && agentPolicy.is_managed !== true ? (
         <EuiDescribedFormGroup
           title={
             <h4>

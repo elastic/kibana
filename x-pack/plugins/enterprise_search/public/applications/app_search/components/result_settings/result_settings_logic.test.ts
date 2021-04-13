@@ -15,7 +15,7 @@ import { nextTick } from '@kbn/test/jest';
 
 import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
 
-import { OpenModal, ServerFieldResultSettingObject } from './types';
+import { ServerFieldResultSettingObject } from './types';
 
 import { ResultSettingsLogic } from '.';
 
@@ -25,7 +25,6 @@ describe('ResultSettingsLogic', () => {
   const DEFAULT_VALUES = {
     dataLoading: true,
     saving: false,
-    openModal: OpenModal.None,
     resultFields: {},
     lastSavedResultFields: {},
     schema: {},
@@ -40,6 +39,7 @@ describe('ResultSettingsLogic', () => {
     stagedUpdates: false,
     nonTextResultFields: {},
     textResultFields: {},
+    queryPerformanceScore: 0,
   };
 
   // Values without selectors
@@ -82,7 +82,6 @@ describe('ResultSettingsLogic', () => {
         mount({
           dataLoading: true,
           saving: true,
-          openModal: OpenModal.ConfirmSaveModal,
         });
 
         ResultSettingsLogic.actions.initializeResultFields(
@@ -138,8 +137,6 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
-          // The modal should be reset back to closed if it had been opened previously
-          openModal: OpenModal.None,
           // Stores the provided schema details
           schema,
           schemaConflicts,
@@ -152,47 +149,6 @@ describe('ResultSettingsLogic', () => {
         ResultSettingsLogic.actions.initializeResultFields(serverResultFields, schema);
 
         expect(ResultSettingsLogic.values.schemaConflicts).toEqual({});
-      });
-    });
-
-    describe('openConfirmSaveModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmSaveModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmSaveModal,
-      });
-    });
-
-    describe('openConfirmResetModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmResetModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmResetModal,
-      });
-    });
-
-    describe('closeModals', () => {
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.closeModals();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
-        });
       });
     });
 
@@ -234,19 +190,6 @@ describe('ResultSettingsLogic', () => {
             quuz: { raw: true, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: false },
           },
-        });
-      });
-
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.resetAllFields();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
         });
       });
     });
@@ -296,7 +239,7 @@ describe('ResultSettingsLogic', () => {
     });
 
     describe('saving', () => {
-      it('sets saving to true and close any open modals', () => {
+      it('sets saving to true', () => {
         mount({
           saving: false,
         });
@@ -306,7 +249,6 @@ describe('ResultSettingsLogic', () => {
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           saving: true,
-          openModal: OpenModal.None,
         });
       });
     });
@@ -487,11 +429,87 @@ describe('ResultSettingsLogic', () => {
         });
       });
     });
+
+    describe('queryPerformanceScore', () => {
+      describe('returns a score for the current query performance based on the result settings', () => {
+        it('considers a text value with raw set (but no size) as worth 1.5', () => {
+          mount({
+            resultFields: { foo: { raw: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
+        });
+
+        it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
+          mount({
+            resultFields: { foo: { raw: true, rawSize: 251 } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
+        });
+
+        it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
+          mount({
+            resultFields: { foo: { raw: true, rawSize: 250 } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
+        });
+
+        it('considers a text value with a snippet set as worth 2', () => {
+          mount({
+            resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
+        });
+
+        it('will sum raw and snippet values if both are set', () => {
+          mount({
+            resultFields: { foo: { snippet: true, raw: true } },
+            schema: { foo: 'text' as SchemaTypes },
+          });
+          // 1.5 (raw) + 2 (snippet) = 3.5
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
+        });
+
+        it('considers a non-text value with raw set as 0.2', () => {
+          mount({
+            resultFields: { foo: { raw: true } },
+            schema: { foo: 'number' as SchemaTypes },
+          });
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
+        });
+
+        it('can sum variations of all the prior', () => {
+          mount({
+            resultFields: {
+              foo: { raw: true },
+              bar: { raw: true, snippet: true },
+              baz: { raw: true },
+            },
+            schema: {
+              foo: 'text' as SchemaTypes,
+              bar: 'text' as SchemaTypes,
+              baz: 'number' as SchemaTypes,
+            },
+          });
+          // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
+          expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(5.2);
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors } = mockFlashMessageHelpers;
+    let confirmSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      confirmSpy = jest.spyOn(window, 'confirm');
+    });
+    afterAll(() => confirmSpy.mockRestore());
 
     const serverFieldResultSettings = {
       foo: {
@@ -793,20 +811,55 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('confirmResetAllFields', () => {
+      it('will reset all fields as long as the user confirms the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).toHaveBeenCalled();
+      });
+
+      it('will do nothing if the user cancels the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).not.toHaveBeenCalled();
+      });
+    });
+
     describe('saveResultSettings', () => {
+      beforeEach(() => {
+        confirmSpy.mockImplementation(() => true);
+      });
+
       it('should make an API call to update result settings and update state accordingly', async () => {
+        const resultFields = {
+          foo: { raw: true, rawSize: 100 },
+        };
+
+        const serverResultFields = {
+          foo: { raw: { size: 100 } },
+        };
+
         mount({
           schema,
+          resultFields,
         });
         http.put.mockReturnValueOnce(
           Promise.resolve({
-            result_fields: serverFieldResultSettings,
+            result_fields: serverResultFields,
           })
         );
         jest.spyOn(ResultSettingsLogic.actions, 'saving');
         jest.spyOn(ResultSettingsLogic.actions, 'initializeResultFields');
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
 
         expect(ResultSettingsLogic.actions.saving).toHaveBeenCalled();
 
@@ -816,12 +869,12 @@ describe('ResultSettingsLogic', () => {
           '/api/app_search/engines/test-engine/result_settings',
           {
             body: JSON.stringify({
-              result_fields: serverFieldResultSettings,
+              result_fields: serverResultFields,
             }),
           }
         );
         expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
-          serverFieldResultSettings,
+          serverResultFields,
           schema
         );
       });
@@ -830,10 +883,20 @@ describe('ResultSettingsLogic', () => {
         mount();
         http.put.mockReturnValueOnce(Promise.reject('error'));
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+
+      it('does nothing if the user does not confirm', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+
+        ResultSettingsLogic.actions.saveResultSettings();
+        await nextTick();
+
+        expect(http.put).not.toHaveBeenCalled();
       });
     });
   });
