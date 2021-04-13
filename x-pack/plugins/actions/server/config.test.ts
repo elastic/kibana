@@ -27,9 +27,14 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
+        "responseTimeout": "PT1M",
       }
     `);
   });
@@ -57,6 +62,9 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
         "preconfigured": Object {
           "mySlack1": Object {
             "actionTypeId": ".slack",
@@ -67,8 +75,10 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
+        "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
+        "responseTimeout": "PT1M",
       }
     `);
   });

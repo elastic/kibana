@@ -37,6 +37,7 @@ export const configSchema = schema.object({
       defaultValue: [AllowedHosts.Any],
     }
   ),
+  preconfiguredAlertHistoryEsIndex: schema.boolean({ defaultValue: false }),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
     defaultValue: {},
     validate: validatePreconfigured,
@@ -47,6 +48,8 @@ export const configSchema = schema.object({
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
+  responseTimeout: schema.duration({ defaultValue: '60s' }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

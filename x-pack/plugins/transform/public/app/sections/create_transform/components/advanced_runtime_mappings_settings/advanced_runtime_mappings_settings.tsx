@@ -91,7 +91,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
           defaultMessage: 'Runtime fields',
         })}
       >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {runtimeMappings !== undefined && Object.keys(runtimeMappings).length > 0 ? (
               <FormattedMessage

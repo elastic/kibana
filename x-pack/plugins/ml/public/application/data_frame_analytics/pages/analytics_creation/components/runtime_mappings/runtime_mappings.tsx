@@ -135,7 +135,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
           defaultMessage: 'Runtime fields',
         })}
       >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {isPopulatedObject(runtimeMappings) ? (
               <EuiText size="s" grow={false}>
