@@ -72,17 +72,17 @@ describe('isSavedObjectOlderThan', () => {
 describe('rollUiCounterIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
-  let stopRollingUiCounterIndicies$: Rx.Subject<void>;
+  let stopUsingUiCounterIndicies$: Rx.Subject<void>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     savedObjectClient = savedObjectsRepositoryMock.create();
-    stopRollingUiCounterIndicies$ = new Rx.Subject();
+    stopUsingUiCounterIndicies$ = new Rx.Subject();
   });
 
   it('returns undefined if no savedObjectsClient initialised yet', async () => {
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, undefined)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, undefined)
     ).resolves.toBe(undefined);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
@@ -97,7 +97,7 @@ describe('rollUiCounterIndices', () => {
       }
     });
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
     ).resolves.toEqual([]);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
@@ -113,9 +113,9 @@ describe('rollUiCounterIndices', () => {
       }
     });
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
     ).resolves.toEqual([]);
-    expect(stopRollingUiCounterIndicies$.isStopped).toBe(true);
+    expect(stopUsingUiCounterIndicies$.isStopped).toBe(true);
   });
 
   it(`deletes documents older than ${UI_COUNTERS_KEEP_DOCS_FOR_DAYS} days`, async () => {
@@ -134,7 +134,7 @@ describe('rollUiCounterIndices', () => {
       }
     });
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
     ).resolves.toHaveLength(2);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
@@ -156,7 +156,7 @@ describe('rollUiCounterIndices', () => {
       throw new Error(`Expected error!`);
     });
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
     ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
@@ -178,7 +178,7 @@ describe('rollUiCounterIndices', () => {
       throw new Error(`Expected error!`);
     });
     await expect(
-      rollUiCounterIndices(logger, stopRollingUiCounterIndicies$, savedObjectClient)
+      rollUiCounterIndices(logger, stopUsingUiCounterIndicies$, savedObjectClient)
     ).resolves.toEqual(undefined);
     expect(savedObjectClient.find).toBeCalled();
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);

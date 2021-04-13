@@ -10,17 +10,7 @@ import type { UICounterSavedObject } from '../ui_counter_saved_object_type';
 export const rawUiCounters: UICounterSavedObject[] = [
   {
     type: 'ui-counter',
-    id: 'Kibana_home:24112020:click:ingest_data_card_home_tutorial_directory',
-    attributes: {
-      count: 3,
-    },
-    references: [],
-    updated_at: '2020-11-24T11:27:57.067Z',
-    version: 'WzI5LDFd',
-  },
-  {
-    type: 'ui-counter',
-    id: 'Kibana_home:24112020:click:home_tutorial_directory',
+    id: 'Kibana_home:23102020:click:different_type',
     attributes: {
       count: 1,
     },
@@ -30,7 +20,17 @@ export const rawUiCounters: UICounterSavedObject[] = [
   },
   {
     type: 'ui-counter',
-    id: 'Kibana_home:24112020:loaded:home_tutorial_directory',
+    id: 'Kibana_home:25102020:loaded:intersecting_event',
+    attributes: {
+      count: 1,
+    },
+    references: [],
+    updated_at: '2020-10-25T11:27:57.067Z',
+    version: 'WzI5NDRd',
+  },
+  {
+    type: 'ui-counter',
+    id: 'Kibana_home:23102020:loaded:intersecting_event',
     attributes: {
       count: 3,
     },

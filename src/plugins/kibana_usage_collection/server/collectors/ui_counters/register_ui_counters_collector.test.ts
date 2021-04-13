@@ -9,8 +9,9 @@
 import {
   transformRawUiCounterObject,
   transformRawUsageCounterObject,
-  fetchUiCounters,
+  createFetchUiCounters,
 } from './register_ui_counters_collector';
+import { BehaviorSubject } from 'rxjs';
 import { rawUiCounters } from './__fixtures__/ui_counter_saved_objects';
 import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
@@ -33,7 +34,7 @@ describe('transformRawUsageCounterObject', () => {
         Object {
           "appName": "Kibana_home",
           "counterType": "loaded",
-          "eventName": "home_tutorial_directory",
+          "eventName": "intersecting_event",
           "fromTimestamp": "2020-10-23T00:00:00Z",
           "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
           "total": 60,
@@ -70,15 +71,7 @@ describe('transformRawUiCounterObject', () => {
         Object {
           "appName": "Kibana_home",
           "counterType": "click",
-          "eventName": "ingest_data_card_home_tutorial_directory",
-          "fromTimestamp": "2020-11-24T00:00:00Z",
-          "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
-          "total": 3,
-        },
-        Object {
-          "appName": "Kibana_home",
-          "counterType": "click",
-          "eventName": "home_tutorial_directory",
+          "eventName": "different_type",
           "fromTimestamp": "2020-11-24T00:00:00Z",
           "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
           "total": 1,
@@ -86,7 +79,15 @@ describe('transformRawUiCounterObject', () => {
         Object {
           "appName": "Kibana_home",
           "counterType": "loaded",
-          "eventName": "home_tutorial_directory",
+          "eventName": "intersecting_event",
+          "fromTimestamp": "2020-10-25T00:00:00Z",
+          "lastUpdatedAt": "2020-10-25T11:27:57.067Z",
+          "total": 1,
+        },
+        Object {
+          "appName": "Kibana_home",
+          "counterType": "loaded",
+          "eventName": "intersecting_event",
           "fromTimestamp": "2020-10-23T00:00:00Z",
           "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
           "total": 3,
@@ -104,11 +105,36 @@ describe('transformRawUiCounterObject', () => {
   });
 });
 
-describe('fetchUiCounters', () => {
+describe('createFetchUiCounters', () => {
+  let stopUsingUiCounterIndicies$: BehaviorSubject<boolean>;
   const soClientMock = savedObjectsClientMock.create();
   beforeEach(() => {
     jest.clearAllMocks();
+    stopUsingUiCounterIndicies$ = new BehaviorSubject<boolean>(false);
   });
+
+  it('does not query ui_counters saved objects if stopUsingUiCounterIndicies$ is complete', async () => {
+    // @ts-expect-error incomplete mock implementation
+    soClientMock.find.mockImplementation(async ({ type }) => {
+      switch (type) {
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
+          return { saved_objects: rawUsageCounters };
+        default:
+          throw new Error(`unexpected type ${type}`);
+      }
+    });
+
+    stopUsingUiCounterIndicies$.complete();
+    // @ts-expect-error incomplete mock implementation
+    const { dailyEvents } = await createFetchUiCounters(stopUsingUiCounterIndicies$)({
+      soClient: soClientMock,
+    });
+
+    const transforemdUsageCounters = rawUsageCounters.map(transformRawUsageCounterObject);
+    expect(soClientMock.find).toBeCalledTimes(1);
+    expect(dailyEvents).toEqual(transforemdUsageCounters.filter(Boolean));
+  });
+
   it('merges saved objects from both ui_counters and usage_counters saved objects', async () => {
     // @ts-expect-error incomplete mock implementation
     soClientMock.find.mockImplementation(async ({ type }) => {
@@ -123,11 +149,13 @@ describe('fetchUiCounters', () => {
     });
 
     // @ts-expect-error incomplete mock implementation
-    const { dailyEvents } = await fetchUiCounters({ soClient: soClientMock });
-    expect(dailyEvents).toHaveLength(8);
+    const { dailyEvents } = await createFetchUiCounters(stopUsingUiCounterIndicies$)({
+      soClient: soClientMock,
+    });
+    expect(dailyEvents).toHaveLength(7);
     const intersectingEntry = dailyEvents.find(
       ({ eventName, fromTimestamp }) =>
-        eventName === 'home_tutorial_directory' && fromTimestamp === '2020-10-23T00:00:00Z'
+        eventName === 'intersecting_event' && fromTimestamp === '2020-10-23T00:00:00Z'
     );
 
     const onlyFromUICountersEntry = dailyEvents.find(
@@ -175,10 +203,10 @@ describe('fetchUiCounters', () => {
       Object {
         "appName": "Kibana_home",
         "counterType": "loaded",
-        "eventName": "home_tutorial_directory",
+        "eventName": "intersecting_event",
         "fromTimestamp": "2020-10-23T00:00:00Z",
         "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
-        "total": 60,
+        "total": 63,
       }
     `);
   });

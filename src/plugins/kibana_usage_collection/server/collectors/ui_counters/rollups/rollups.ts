@@ -39,7 +39,7 @@ export function isSavedObjectOlderThan({
 
 export async function rollUiCounterIndices(
   logger: Logger,
-  stopRollingUiCounterIndicies$: Subject<void>,
+  stopUsingUiCounterIndicies$: Subject<void>,
   savedObjectsClient?: ISavedObjectsRepository
 ) {
   if (!savedObjectsClient) {
@@ -67,7 +67,7 @@ export async function rollUiCounterIndices(
        * migrate any docs to the Usage Counters Saved object.
        */
 
-      stopRollingUiCounterIndicies$.complete();
+      stopUsingUiCounterIndicies$.complete();
     }
 
     const docsToDelete = rawUiCounterDocs.filter((doc) =>
