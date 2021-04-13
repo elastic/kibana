@@ -11,10 +11,11 @@ import type {
   ServerRoute,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, KibanaRequest, Logger } from 'kibana/server';
 import { ObservabilityRuleRegistry } from '../plugin';
 
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
+import { ObservabilityRequestHandlerContext } from '../types';
 
 export { ObservabilityServerRouteRepository };
 
@@ -25,7 +26,7 @@ export interface ObservabilityRouteHandlerResources {
   };
   ruleRegistry: ObservabilityRuleRegistry;
   request: KibanaRequest;
-  context: RequestHandlerContext;
+  context: ObservabilityRequestHandlerContext;
   logger: Logger;
 }
 

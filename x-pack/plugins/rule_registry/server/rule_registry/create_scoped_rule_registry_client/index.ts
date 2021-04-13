@@ -7,7 +7,7 @@
 import { Either, isLeft, isRight } from 'fp-ts/lib/Either';
 import { Errors } from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Logger, SavedObjectsClientContract } from 'kibana/server';
+import { Logger } from 'kibana/server';
 import { IScopedClusterClient as ScopedClusterClient } from 'src/core/server';
 import { castArray, compact } from 'lodash';
 import { ESSearchRequest } from 'typings/elasticsearch';
@@ -18,33 +18,6 @@ import { ScopedRuleRegistryClient, EventsOf } from './types';
 import { BaseRuleFieldMap } from '../../../common';
 import { RuleRegistry } from '..';
 
-const getRuleUuids = async ({
-  savedObjectsClient,
-  namespace,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  namespace?: string;
-}) => {
-  const options = {
-    type: 'alert',
-    ...(namespace ? { namespace } : {}),
-  };
-
-  const pitFinder = savedObjectsClient.createPointInTimeFinder({
-    ...options,
-  });
-
-  const ruleUuids: string[] = [];
-
-  for await (const response of pitFinder.find()) {
-    ruleUuids.push(...response.saved_objects.map((object) => object.id));
-  }
-
-  await pitFinder.close();
-
-  return ruleUuids;
-};
-
 const createPathReporterError = (either: Either<Errors, unknown>) => {
   const error = new Error(`Failed to validate alert event`);
   error.stack += '\n' + PathReporter.report(either).join('\n');
@@ -52,9 +25,8 @@ const createPathReporterError = (either: Either<Errors, unknown>) => {
 };
 
 export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMap>({
+  ruleUuids,
   scopedClusterClient,
-  savedObjectsClient,
-  namespace,
   clusterClientAdapter,
   indexAliasName,
   indexTarget,
@@ -62,9 +34,8 @@ export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMa
   registry,
   ruleData,
 }: {
+  ruleUuids: string[];
   scopedClusterClient: ScopedClusterClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  namespace?: string;
   clusterClientAdapter: ClusterClientAdapter<{
     body: TypeOfFieldMap<TFieldMap>;
     index: string;
@@ -99,11 +70,6 @@ export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMa
 
   const client: ScopedRuleRegistryClient<BaseRuleFieldMap> = {
     search: async (searchRequest) => {
-      const ruleUuids = await getRuleUuids({
-        savedObjectsClient,
-        namespace,
-      });
-
       const fields = [
         'rule.id',
         ...(searchRequest.body?.fields ? castArray(searchRequest.body.fields) : []),
