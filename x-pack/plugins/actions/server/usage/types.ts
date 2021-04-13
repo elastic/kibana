@@ -6,6 +6,7 @@
  */
 
 export interface ActionsUsage {
+  alert_history_connector_enabled: boolean;
   count_total: number;
   count_active_total: number;
   count_active_alert_history_connectors: number;
