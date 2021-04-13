@@ -31,7 +31,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: IUiSettingsClient,
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
+  searchSessionsConfig: SearchSessionsConfigSchema,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -54,9 +54,7 @@ export async function getDefaultAsyncSubmitParams(
     ...(await getDefaultSearchParams(uiSettingsClient)),
     ...(options.sessionId
       ? {
-          keep_alive: searchSessionsConfig
-            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
-            : '1m',
+          keep_alive: `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`,
         }
       : {}),
   };
