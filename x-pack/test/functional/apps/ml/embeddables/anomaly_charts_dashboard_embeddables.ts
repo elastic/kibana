@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
           await dashboardAddPanel.clickOpenAddPanel();
+          await dashboardAddPanel.ensureAddPanelIsShowing();
           await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
           await ml.dashboardJobSelectionTable.assertJobSelectionTableExists();
         });

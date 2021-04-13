@@ -67,6 +67,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
+    const processorDescriptor = getProcessorDescriptor(processor.type);
+
     const { testPipelineData } = useTestPipelineContext();
     const {
       config: { selectedDocumentIndex },
@@ -85,10 +87,14 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
-    const inlineTextInputContainerClasses = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'pipelineProcessorsEditor__item--displayNone': isInMoveMode && !processor.options.description,
-    });
+    const inlineTextInputContainerClasses = classNames(
+      'pipelineProcessorsEditor__item__descriptionContainer',
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'pipelineProcessorsEditor__item__descriptionContainer--displayNone':
+          isInMoveMode && !processor.options.description,
+      }
+    );
 
     const onDescriptionChange = useCallback(
       (nextDescription) => {
@@ -167,8 +173,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           data-test-subj={selectorToDataTestSubject(selector)}
           data-processor-id={processor.id}
         >
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem className="pipelineProcessorsEditor__item__controlsFlexItem">
+            <EuiFlexGroup
+              className="pipelineProcessorsEditor__item__controlsContainer"
+              gutterSize="m"
+              alignItems="center"
+              responsive={false}
+            >
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
               <EuiFlexItem grow={false} className="pipelineProcessorsEditor__item__statusContainer">
                 {isExecutingPipeline ? (
@@ -193,7 +204,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     }}
                     data-test-subj="manageItemButton"
                   >
-                    <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
+                    <b>{processorDescriptor?.label ?? processor.type}</b>
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
@@ -203,7 +214,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   onChange={onDescriptionChange}
                   ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
                   text={description}
-                  placeholder={i18nTexts.descriptionPlaceholder}
+                  placeholder={
+                    processorDescriptor?.getDefaultDescription(processor.options) ??
+                    i18nTexts.descriptionPlaceholder
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
