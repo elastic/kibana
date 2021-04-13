@@ -54,7 +54,7 @@ describe('healthRoute', () => {
 
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_health"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/_health"`);
   });
 
   it('queries the usage api', async () => {
@@ -107,22 +107,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: false,
-        isSufficientlySecure: true,
+        has_permanent_encryption_key: false,
+        is_sufficiently_secure: true,
       },
     });
   });
@@ -148,22 +148,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
-        isSufficientlySecure: true,
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: true,
       },
     });
   });
@@ -189,22 +189,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
-        isSufficientlySecure: true,
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: true,
       },
     });
   });
@@ -230,22 +230,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
-        isSufficientlySecure: false,
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: false,
       },
     });
   });
@@ -273,22 +273,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
-        isSufficientlySecure: false,
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: false,
       },
     });
   });
@@ -316,22 +316,22 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
+        alerting_framework_heath: {
+          decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          executionHealth: {
+          execution_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
-          readHealth: {
+          read_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
-        isSufficientlySecure: true,
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: true,
       },
     });
   });

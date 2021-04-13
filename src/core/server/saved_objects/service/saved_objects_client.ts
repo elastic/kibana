@@ -162,7 +162,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: unknown[];
+  sort?: string[];
 }
 
 /**

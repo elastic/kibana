@@ -15,7 +15,10 @@ export interface DataAllocationMetaFields {
 
 export interface MinAgeField {
   minAgeUnit?: string;
+  minAgeToMilliSeconds: number;
 }
+
+export type MinAgePhase = 'warm' | 'cold' | 'frozen' | 'delete';
 
 export interface ForcemergeFields {
   bestCompression: boolean;
@@ -50,6 +53,7 @@ interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, For
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
+  readonlyEnabled: boolean;
 }
 
 interface FrozenPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {

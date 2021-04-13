@@ -39,7 +39,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
     urlParams: { kuery, start, end },
   } = useUrlParams();
 
-  const { data: items = [] } = useFetcher(
+  const { data } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return undefined;
@@ -61,6 +61,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
     [kuery, serviceName, start, end]
   );
 
+  const items = data?.serviceNodes ?? [];
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
       name: (

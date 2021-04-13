@@ -15,6 +15,7 @@ import * as CSS from 'csstype';
 import { DetailedPeerCertificate } from 'tls';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -281,7 +282,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
-    getUpdated$(): Readonly<Rx.Observable<void>>;
+    getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)

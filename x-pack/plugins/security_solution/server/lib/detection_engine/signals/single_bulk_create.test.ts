@@ -142,6 +142,7 @@ describe('singleBulkCreate', () => {
   test('create successful bulk create', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
+      // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -179,6 +180,7 @@ describe('singleBulkCreate', () => {
   test('create successful bulk create with docs with no versioning', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
+      // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -216,6 +218,7 @@ describe('singleBulkCreate', () => {
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise(false)
     );
     const { success, createdItemsCount } = await singleBulkCreate({

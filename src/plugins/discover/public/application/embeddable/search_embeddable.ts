@@ -29,13 +29,7 @@ import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  getServices,
-  IndexPattern,
-  ISearchSource,
-} from '../../kibana_services';
+import { getServices, IndexPattern, ISearchSource } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import {
@@ -330,14 +324,11 @@ export class SearchEmbeddable
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
 
-    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
+    const requestResponder = this.inspectorAdapters.requests!.start(title, {
       description,
       searchSessionId,
     });
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
-      inspectorRequest.json(body);
-    });
+
     this.searchScope.$apply(() => {
       this.searchScope!.isLoading = true;
     });
@@ -345,19 +336,19 @@ export class SearchEmbeddable
 
     try {
       // Make the request
-      const resp = await searchSource.fetch({
-        abortSignal: this.abortController.signal,
-        sessionId: searchSessionId,
-      });
+      const resp = await searchSource
+        .fetch$({
+          abortSignal: this.abortController.signal,
+          sessionId: searchSessionId,
+          requestResponder,
+        })
+        .toPromise();
       this.updateOutput({ loading: false, error: undefined });
-
-      // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
-        this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.totalHitCount = resp.hits.total as number;
         this.searchScope!.isLoading = false;
       });
     } catch (error) {

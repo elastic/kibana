@@ -13,7 +13,7 @@ import { JobSetupScreen } from './job_setup_screen';
 import { useInfraMLCapabilities } from '../../../../../../containers/ml/infra_ml_capabilities';
 import { MetricHostsModuleProvider } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { MetricK8sModuleProvider } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { useSourceViaHttp } from '../../../../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
 import { useActiveKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 
 export const AnomalyDetectionFlyout = () => {
@@ -23,7 +23,6 @@ export const AnomalyDetectionFlyout = () => {
   const [screenParams, setScreenParams] = useState<any | null>(null);
   const { source } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
   });
 
   const { space } = useActiveKibanaSpace();

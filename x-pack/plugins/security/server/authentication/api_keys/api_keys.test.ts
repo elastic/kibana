@@ -64,7 +64,14 @@ describe('API Keys', () => {
     it('returns true when the operation completes without error', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValue(
-        securityMock.createApiResponse({ body: {} })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_api_keys: [],
+            previously_invalidated_api_keys: [],
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
       const result = await apiKeys.areAPIKeysEnabled();
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
@@ -105,7 +112,14 @@ describe('API Keys', () => {
     it('calls `invalidateApiKey` with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({ body: {} })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_api_keys: [],
+            previously_invalidated_api_keys: [],
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
 
       const result = await apiKeys.areAPIKeysEnabled();
@@ -133,6 +147,7 @@ describe('API Keys', () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResolvedValueOnce(
+        // @ts-expect-error @elastic/elsticsearch CreateApiKeyResponse.expiration: number
         securityMock.createApiResponse({
           body: {
             id: '123',
@@ -302,6 +317,7 @@ describe('API Keys', () => {
             invalidated_api_keys: ['api-key-id-1'],
             previously_invalidated_api_keys: [],
             error_count: 0,
+            error_details: [],
           },
         })
       );
@@ -312,6 +328,7 @@ describe('API Keys', () => {
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],
         error_count: 0,
+        error_details: [],
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
@@ -328,6 +345,7 @@ describe('API Keys', () => {
             invalidated_api_keys: ['api-key-id-1'],
             previously_invalidated_api_keys: [],
             error_count: 0,
+            error_details: [],
           },
         })
       );
@@ -339,6 +357,7 @@ describe('API Keys', () => {
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],
         error_count: 0,
+        error_details: [],
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
@@ -364,6 +383,7 @@ describe('API Keys', () => {
             invalidated_api_keys: ['api-key-id-1'],
             previously_invalidated_api_keys: [],
             error_count: 0,
+            error_details: [],
           },
         })
       );
@@ -372,6 +392,7 @@ describe('API Keys', () => {
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],
         error_count: 0,
+        error_details: [],
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
@@ -388,6 +409,7 @@ describe('API Keys', () => {
             invalidated_api_keys: ['api-key-id-1'],
             previously_invalidated_api_keys: [],
             error_count: 0,
+            error_details: [],
           },
         })
       );
@@ -399,6 +421,7 @@ describe('API Keys', () => {
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],
         error_count: 0,
+        error_details: [],
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {

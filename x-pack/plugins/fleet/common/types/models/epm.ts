@@ -50,6 +50,8 @@ export enum KibanaAssetType {
   indexPattern = 'index_pattern',
   map = 'map',
   lens = 'lens',
+  securityRule = 'security_rule',
+  mlModule = 'ml_module',
 }
 
 /*
@@ -62,6 +64,8 @@ export enum KibanaSavedObjectType {
   indexPattern = 'index-pattern',
   map = 'map',
   lens = 'lens',
+  mlModule = 'ml-module',
+  securityRule = 'security-rule',
 }
 
 export enum ElasticsearchAssetType {

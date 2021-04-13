@@ -9,7 +9,7 @@ import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
-import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
+import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -30,13 +30,13 @@ import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
+import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    query: schema.object({
-      partitionSize: schema.number({ defaultValue: 75 }),
-      partitionFactor: schema.number({ defaultValue: 1.2 }),
+    inventory: schema.object({
+      compositeSize: schema.number({ defaultValue: 2000 }),
     }),
     sources: schema.maybe(
       schema.object({
@@ -123,6 +123,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       sources,
       sourceStatus,
       ...domainLibs,
+      getLogQueryFields: createGetLogQueryFields(sources),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

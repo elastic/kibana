@@ -23,6 +23,7 @@ import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
@@ -2782,18 +2783,20 @@ describe('SavedObjectsRepository', () => {
         await findSuccess({ type, fields: ['title'] });
         expect(client.search).toHaveBeenCalledWith(
           expect.objectContaining({
-            _source: [
-              `${type}.title`,
-              'namespace',
-              'namespaces',
-              'type',
-              'references',
-              'migrationVersion',
-              'coreMigrationVersion',
-              'updated_at',
-              'originId',
-              'title',
-            ],
+            body: expect.objectContaining({
+              _source: [
+                `${type}.title`,
+                'namespace',
+                'namespaces',
+                'type',
+                'references',
+                'migrationVersion',
+                'coreMigrationVersion',
+                'updated_at',
+                'originId',
+                'title',
+              ],
+            }),
           }),
           expect.anything()
         );
@@ -3652,6 +3655,33 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
+      it(`uses the 'upsertAttributes' option when specified`, async () => {
+        const upsertAttributes = {
+          foo: 'bar',
+          hello: 'dolly',
+        };
+        await incrementCounterSuccess(type, id, counterFields, { namespace, upsertAttributes });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              upsert: expect.objectContaining({
+                [type]: {
+                  foo: 'bar',
+                  hello: 'dolly',
+                  ...counterFields.reduce((aggs, field) => {
+                    return {
+                      ...aggs,
+                      [field]: 1,
+                    };
+                  }, {}),
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         await incrementCounterSuccess(type, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
@@ -3837,6 +3867,7 @@ describe('SavedObjectsRepository', () => {
           id: '6.0.0-alpha1',
           ...mockTimestampFields,
           version: mockVersion,
+          references: [],
           attributes: {
             buildNum: 8468,
             apiCallsCount: 100,

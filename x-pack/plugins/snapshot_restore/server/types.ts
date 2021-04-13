@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type {
-  LegacyScopedClusterClient,
-  ILegacyScopedClusterClient,
-  IRouter,
-  RequestHandlerContext,
-} from 'src/core/server';
+import type { IRouter, RequestHandlerContext, IScopedClusterClient } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { License } from './services';
 import { wrapEsError } from './lib';
-import { isEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -27,7 +22,7 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: SnapshotRestoreRouter;
+  router: IRouter;
   license: License;
   config: {
     isSlmEnabled: boolean;
@@ -35,8 +30,8 @@ export interface RouteDependencies {
     isCloudEnabled: boolean;
   };
   lib: {
-    isEsError: typeof isEsError;
     wrapEsError: typeof wrapEsError;
+    handleEsError: typeof handleEsError;
   };
 }
 
@@ -56,13 +51,13 @@ export interface ResolveIndexResponseFromES {
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
 
-export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
+export type CallAsCurrentUser = IScopedClusterClient['asCurrentUser'];
 
 /**
  * @internal
  */
 export interface SnapshotRestoreContext {
-  client: ILegacyScopedClusterClient;
+  client: IScopedClusterClient;
 }
 
 /**
@@ -71,8 +66,3 @@ export interface SnapshotRestoreContext {
 export interface SnapshotRestoreRequestHandlerContext extends RequestHandlerContext {
   snapshotRestore: SnapshotRestoreContext;
 }
-
-/**
- * @internal
- */
-export type SnapshotRestoreRouter = IRouter<SnapshotRestoreRequestHandlerContext>;

@@ -12,7 +12,7 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
+import { SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
@@ -56,12 +56,12 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
+    if (doc._source?.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
-        doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
-        doc._source.signal.rule.id === ruleId
+        doc._source?.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
+        doc._source?.signal.rule.id === ruleId
       );
     }
   });
@@ -158,7 +158,7 @@ export const singleBulkCreate = async ({
     }),
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -244,7 +244,7 @@ export const bulkInsertSignals = async (
     doc._source,
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     refresh,
     body: bulkBody,
   });

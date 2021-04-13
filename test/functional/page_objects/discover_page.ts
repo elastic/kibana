@@ -210,6 +210,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return skipButton.click();
     }
 
+    /**
+     * When scrolling down the legacy table there's a link to scroll up
+     * So this is done by this function
+     */
+    public async backToTop() {
+      const skipButton = await testSubjects.find('discoverBackToTop');
+      return skipButton.click();
+    }
+
     public async getDocTableFooter() {
       return await testSubjects.find('discoverDocTableFooter');
     }
@@ -244,6 +253,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return $('.dscSidebarField__name')
         .toArray()
         .map((field) => $(field).text());
+    }
+
+    public async editField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.click(`field-${field}`);
+        await testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
     }
 
     public async hasNoResults() {

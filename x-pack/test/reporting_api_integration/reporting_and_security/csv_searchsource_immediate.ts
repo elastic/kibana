@@ -10,9 +10,9 @@ import supertest from 'supertest';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const getMockJobParams = (obj: Partial<JobParamsDownloadCSV>): JobParamsDownloadCSV => ({
+const getMockJobParams = (obj: any): JobParamsDownloadCSV => ({
   title: `Mock CSV Title`,
-  ...(obj as any),
+  ...obj,
 });
 
 // eslint-disable-next-line import/no-default-export
@@ -386,9 +386,9 @@ export default function ({ getService }: FtrProviderContext) {
               version: true,
               index: '907bc200-a294-11e9-a900-ef10e0ac769e',
               sort: [{ date: 'desc' }],
-              fields: ['date', 'message', '_id', '_index'],
               filter: [],
             },
+            columns: ['date', 'message', '_id', '_index'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;

@@ -31,12 +31,12 @@ import {
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
   // ENGINE_SEARCH_UI_PATH,
-  // ENGINE_API_LOGS_PATH,
+  ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
+import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
-import { OVERVIEW_TITLE } from '../engine_overview';
 import { EngineOverview } from '../engine_overview';
 import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
@@ -58,7 +58,7 @@ export const EngineRouter: React.FC = () => {
       canManageEngineCurations,
       canManageEngineResultSettings,
       // canManageEngineSearchUi,
-      // canViewEngineApiLogs,
+      canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
 
@@ -115,8 +115,13 @@ export const EngineRouter: React.FC = () => {
           <ResultSettings engineBreadcrumb={engineBreadcrumb} />
         </Route>
       )}
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs engineBreadcrumb={engineBreadcrumb} />
+        </Route>
+      )}
       <Route>
-        <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
+        <SetPageChrome trail={[...engineBreadcrumb]} />
         <EngineOverview />
       </Route>
     </Switch>
