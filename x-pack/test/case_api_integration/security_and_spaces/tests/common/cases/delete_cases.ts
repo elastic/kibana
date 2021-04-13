@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -18,6 +18,10 @@ import {
   deleteCases,
   deleteCasesUserActions,
   deleteComments,
+  createCase,
+  deleteCase,
+  createComment,
+  getComment,
 } from '../../../../common/lib/utils';
 import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import { CaseResponse } from '../../../../../../plugins/cases/common/api';
@@ -35,59 +39,26 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should delete a case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body } = await supertest
-        .delete(`${CASES_URL}?ids=["${postedCase.id}"]`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(204);
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+      const body = await deleteCase({ supertest, caseIDs: [postedCase.id] });
 
       expect(body).to.eql({});
     });
 
     it(`should delete a case's comments when that case gets deleted`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      // ensure that we can get the comment before deleting the case
+      await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
+      await deleteCase({ supertest, caseIDs: [postedCase.id] });
 
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      await supertest
-        .delete(`${CASES_URL}?ids=["${postedCase.id}"]`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(204);
-
-      await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
+      // make sure the comment is now gone
+      await getComment(supertest, postedCase.id, patchedCase.comments![0].id, 404);
     });
 
     it('unhappy path - 404s when case is not there', async () => {
-      await supertest
-        .delete(`${CASES_URL}?ids=["fake-id"]`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
+      await deleteCase({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests

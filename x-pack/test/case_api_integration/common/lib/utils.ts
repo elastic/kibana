@@ -560,6 +560,27 @@ export const createCase = async (
   return theCase;
 };
 
+/**
+ * Sends a delete request for the specified case IDs.
+ */
+export const deleteCase = async ({
+  supertest,
+  caseIDs,
+  expectedHttpCode = 204,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseIDs: string[];
+  expectedHttpCode?: number;
+}) => {
+  const { body } = await supertest
+    .delete(`${CASES_URL}?ids=${JSON.stringify(caseIDs)}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
 export const createComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
