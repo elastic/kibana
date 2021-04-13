@@ -448,7 +448,7 @@ export const removeServerGeneratedPropertiesFromComments = (
 
 export const deleteAllCaseItems = async (es: KibanaClient) => {
   await Promise.all([
-    deleteCases(es),
+    deleteCasesByESQuery(es),
     deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
@@ -468,7 +468,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
   });
 };
 
-export const deleteCases = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
@@ -598,6 +598,27 @@ export const createCase = async (
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+/**
+ * Sends a delete request for the specified case IDs.
+ */
+export const deleteCases = async ({
+  supertest,
+  caseIDs,
+  expectedHttpCode = 204,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseIDs: string[];
+  expectedHttpCode?: number;
+}) => {
+  const { body } = await supertest
+    .delete(`${CASES_URL}?ids=${JSON.stringify(caseIDs)}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return body;
 };
 
 export const createComment = async (

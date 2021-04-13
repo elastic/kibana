@@ -16,7 +16,7 @@ import {
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
 } from '../../../../common/lib/utils';
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_comments', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });

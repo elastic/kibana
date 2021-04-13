@@ -16,7 +16,7 @@ import {
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   createCaseAsUser,
-  deleteCases,
+  deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
     describe('happy path', () => {
