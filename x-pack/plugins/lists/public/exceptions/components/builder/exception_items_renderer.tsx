@@ -67,7 +67,7 @@ const initialState: State = {
   errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
-  selectedOS: 'windows',
+  selectedOS: null,
 };
 
 export interface OnChangeProps {
@@ -428,7 +428,7 @@ export const ExceptionBuilderComponent = ({
 
   const singleSelectionOptions = useMemo(() => {
     return { asPlainText: true };
-  },[])
+  }, []);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
@@ -485,6 +485,7 @@ export const ExceptionBuilderComponent = ({
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
+                isDisabled={selectedOS === null}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -500,9 +501,9 @@ export const ExceptionBuilderComponent = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
-              isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
-              isAndDisabled={disableAnd}
-              isNestedDisabled={disableNested}
+              isOrDisabled={selectedOS === null || (isOrDisabled ? isOrDisabled : disableOr)}
+              isAndDisabled={selectedOS === null || disableAnd}
+              isNestedDisabled={selectedOS === null || disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}

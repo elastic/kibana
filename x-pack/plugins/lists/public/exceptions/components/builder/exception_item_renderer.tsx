@@ -55,6 +55,7 @@ interface BuilderExceptionListItemProps {
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
+  isDisabled?: boolean;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -74,6 +75,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onChangeExceptionItem,
     setErrorsExist,
     onlyShowListOperators = false,
+    isDisabled = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -112,21 +114,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
       [exceptionItem.entries, indexPattern]
     );
 
-    // useEffect(() => {
-    //   const filePathFieldToCheck = osTypes[0] === 'linux' ? 'file.path.caseless' : 'file.path.text';
-    //   const filePathFieldToUpdate =
-    //     osTypes[0] === 'linux' ? 'file.path.text' : 'file.path.caseless';
-
-    //   const indexDeleteArray: number[] = [];
-    //   const entryIndicesToDelete = entries.reduce((deleteArray, entry) => {
-    //     if (entry?.field?.name === filePathFieldToCheck) {
-    //       deleteArray.push(entry.entryIndex);
-    //     }
-    //     return deleteArray;
-    //   }, indexDeleteArray);
-
-    // }, [osTypes]);
-
     return (
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
@@ -157,6 +144,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
                           osTypes={osTypes}
+                          isDisabled={isDisabled}
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
