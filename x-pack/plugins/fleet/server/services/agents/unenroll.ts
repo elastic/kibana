@@ -113,20 +113,21 @@ export async function unenrollAgents(
     agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
   );
 
-  const out = {
-    items: givenAgents.map((agent, index) => {
-      const hasError = agent.id in outgoingErrors;
-      const result: BulkActionResult = {
-        id: agent.id,
-        success: !hasError,
-      };
-      if (hasError) {
-        result.error = outgoingErrors[agent.id];
-      }
-      return result;
-    }),
+  const getResultForAgent = (agent: Agent) => {
+    const hasError = agent.id in outgoingErrors;
+    const result: BulkActionResult = {
+      id: agent.id,
+      success: !hasError,
+    };
+    if (hasError) {
+      result.error = outgoingErrors[agent.id];
+    }
+    return result;
   };
-  return out;
+
+  return {
+    items: givenAgents.map(getResultForAgent),
+  };
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {
