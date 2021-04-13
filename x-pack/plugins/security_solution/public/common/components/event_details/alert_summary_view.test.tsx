@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { SummaryViewComponent } from './summary_view';
+import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -30,7 +30,7 @@ const props = {
   timelineId: 'detections-page',
 };
 
-describe('SummaryViewComponent', () => {
+describe('AlertSummaryView', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('SummaryViewComponent', () => {
   test('render correct items', () => {
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
@@ -53,7 +53,7 @@ describe('SummaryViewComponent', () => {
   test('render investigation guide', async () => {
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -69,7 +69,7 @@ describe('SummaryViewComponent', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} />
+        <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {

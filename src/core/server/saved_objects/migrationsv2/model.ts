@@ -16,6 +16,7 @@ import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
+import { excludeUnusedTypesQuery } from '../migrations/core';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 /**
@@ -74,6 +75,7 @@ function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): b
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
 }
+
 /**
  * Extracts the version number from a >= 7.11 index
  * @param indexName A >= v7.11 index name
@@ -768,11 +770,6 @@ export const createInitialState = ({
     },
   };
 
-  const unusedTypesToExclude = Option.some([
-    'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
-    'tsvb-validation-telemetry', // https://github.com/elastic/kibana/issues/95617
-  ]);
-
   const initialState: InitState = {
     controlState: 'INIT',
     indexPrefix,
@@ -791,7 +788,7 @@ export const createInitialState = ({
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
     logs: [],
-    unusedTypesToExclude,
+    unusedTypesQuery: Option.of(excludeUnusedTypesQuery),
   };
   return initialState;
 };
