@@ -74,6 +74,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await toasts.dismissToast();
       });
 
+      it('shows top-level object keys', async function () {
+        await queryBar.setQuery('election');
+        await queryBar.submitQuery();
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        await PageObjects.common.navigateToUrl(
+          'discover',
+          hash.replace('columns:!(_source)', 'columns:!(relatedContent)'),
+          { useActualUrl: true }
+        );
+        await retry.try(async function tryingForTime() {
+          expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
+        });
+
+        const field = await PageObjects.discover.getDocTableField(1, 2);
+        expect(field).to.include.string('"og:description":');
+
+        const marks = await PageObjects.discover.getMarks();
+        expect(marks.length).to.be(0);
+      });
+
       describe('legacy table tests', async function () {
         before(async function () {
           await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
@@ -104,27 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(rowData.startsWith(expectedTimeStamp)).to.be.ok();
           });
         });
-      });
-
-      it('shows top-level object keys', async function () {
-        await queryBar.setQuery('election');
-        await queryBar.submitQuery();
-        const currentUrl = await browser.getCurrentUrl();
-        const [, hash] = currentUrl.split('#/');
-        await PageObjects.common.navigateToUrl(
-          'discover',
-          hash.replace('columns:!(_source)', 'columns:!(relatedContent)'),
-          { useActualUrl: true }
-        );
-        await retry.try(async function tryingForTime() {
-          expect(await PageObjects.discover.getDocHeader()).to.be('Time relatedContent');
-        });
-
-        const field = await PageObjects.discover.getDocTableField(1);
-        expect(field).to.include.string('"og:description":');
-
-        const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(0);
       });
     });
   });

@@ -202,10 +202,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
+    public async getDocTableField(index: number, cellIdx: number = 1) {
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
-      return result[1];
+      return result[cellIdx];
     }
 
     public async skipToEndOfDocTable() {

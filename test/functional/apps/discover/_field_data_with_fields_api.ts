@@ -90,15 +90,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           { useActualUrl: true }
         );
         await retry.try(async function tryingForTime() {
-          expect(await PageObjects.discover.getDocHeader()).to.be('Time relatedContent');
+          expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
         });
 
-        const field = await PageObjects.discover.getDocTableField(1);
-        expect(field).to.include.string('relatedContent.url:');
+        const field = await PageObjects.discover.getDocTableField(1, 2);
+        expect(field).to.include.string('relatedContent.url');
 
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(172);
-        expect(marks.indexOf('election')).to.be(0);
+        expect(marks.length).to.be(24);
+        expect(marks.indexOf('election')).to.be(4);
       });
 
       describe('legacy table tests', async function () {
