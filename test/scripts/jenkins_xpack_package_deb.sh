@@ -15,7 +15,7 @@ node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.50.1 \
   -E discovery.type=single-node \
   --license=trial &
-while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 10; done
+while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 60; done
 
 export TEST_BROWSER_HEADLESS=1
 export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601
