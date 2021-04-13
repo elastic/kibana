@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { getFlattenedObject } from '@kbn/std';
-
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -30,4 +28,11 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+  countValidationErrors,
 } from '../../../../common';

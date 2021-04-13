@@ -17,3 +17,12 @@ export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
+export {
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+  countValidationErrors,
+} from './validate_package_policy';

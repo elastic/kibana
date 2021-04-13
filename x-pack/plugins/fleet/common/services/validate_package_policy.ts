@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 import { keyBy } from 'lodash';
 
-import { getFlattenedObject, isValidNamespace } from '../../../../services';
 import type {
   NewPackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
   PackagePolicyConfigRecordEntry,
   PackageInfo,
-  RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
-} from '../../../../types';
+} from '../types';
+
+import { isValidNamespace, doesPackageHaveIntegrations } from './';
 
 type Errors = string[] | null;
 
@@ -48,6 +49,7 @@ export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): PackagePolicyValidationResults => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
@@ -81,54 +83,79 @@ export const validatePackagePolicy = (
   if (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
-    !packageInfo.policy_templates[0] ||
-    !packageInfo.policy_templates[0].inputs ||
-    packageInfo.policy_templates[0].inputs.length === 0
+    !packageInfo.policy_templates.find(
+      (policyTemplate) => policyTemplate.inputs && policyTemplate.inputs.length > 0
+    )
   ) {
     validationResults.inputs = null;
     return validationResults;
   }
 
-  const registryInputsByType: Record<
-    string,
-    RegistryInput
-  > = packageInfo.policy_templates[0].inputs.reduce((inputs, registryInput) => {
-    inputs[registryInput.type] = registryInput;
-    return inputs;
-  }, {} as Record<string, RegistryInput>);
+  // Build cache for fast var definition lookup
+  const inputVarDefsByType: Record<string, Record<string, RegistryVarsEntry>> = {};
+  const dataStreamsByPath = keyBy(packageInfo.data_streams || [], 'path');
+  const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
+    Record<string, RegistryStream>
+  >((streams, dataStream) => {
+    dataStream.streams?.forEach((stream) => {
+      streams[`${dataStream.dataset}-${stream.input}`] = stream;
+    });
+    return streams;
+  }, {});
+  const streamVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, Record<string, RegistryVarsEntry>>
+  >((varDefs, [path, stream]) => {
+    varDefs[path] = keyBy(stream.vars || [], 'name');
+    return varDefs;
+  }, {});
 
-  const registryStreamsByDataset: Record<string, RegistryStream[]> = (
-    packageInfo.data_streams || []
-  ).reduce((dataStreams, registryDataStream) => {
-    dataStreams[registryDataStream.dataset] = registryDataStream.streams || [];
-    return dataStreams;
-  }, {} as Record<string, RegistryStream[]>);
+  // Collect all input var definitions
+  packageInfo.policy_templates.forEach((packagePolicyTemplate) => {
+    (packagePolicyTemplate.inputs || []).forEach(({ type, vars }) => {
+      if (!(vars || []).length) {
+        return;
+      }
+      const varDefs = keyBy(vars, 'name');
 
-  // Validate each package policy input with either its own config fields or streams
+      // If a package has integrations, copy all input-level vars to its streams
+      // Otherwise leave it at the input level
+      if (hasIntegrations) {
+        packagePolicyTemplate.data_streams?.forEach((dataStream) => {
+          const dataStreamDataset = dataStreamsByPath[dataStream]?.dataset;
+          const datasetAndInputKey = `${dataStreamDataset}-${type}`;
+          if (streamsByDatasetAndInput[datasetAndInputKey]) {
+            if (!streamVarDefsByDatasetAndInput[datasetAndInputKey]) {
+              streamVarDefsByDatasetAndInput[datasetAndInputKey] = varDefs;
+            } else {
+              streamVarDefsByDatasetAndInput[datasetAndInputKey] = {
+                ...varDefs,
+                ...streamVarDefsByDatasetAndInput[datasetAndInputKey],
+              };
+            }
+          }
+        });
+      } else {
+        inputVarDefsByType[type] = varDefs;
+      }
+    });
+  });
+
+  // Validate each package policy input with either its own var fields or streams
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
-
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       streams: {},
     };
 
-    const inputVarsByName = (registryInputsByType[input.type].vars || []).reduce(
-      (vars, registryVar) => {
-        vars[registryVar.name] = registryVar;
-        return vars;
-      },
-      {} as Record<string, RegistryVarsEntry>
-    );
-
     // Validate input-level config fields
-    const inputConfigs = Object.entries(input.vars || {});
-    if (inputConfigs.length) {
-      inputValidationResults.vars = inputConfigs.reduce((results, [name, configEntry]) => {
+    const inputVars = Object.entries(input.vars || {});
+    if (inputVars.length) {
+      inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
-          ? validatePackagePolicyConfig(configEntry, inputVarsByName[name])
+          ? validatePackagePolicyConfig(configEntry, inputVarDefsByType[input.type][name])
           : null;
         return results;
       }, {} as ValidationEntry);
@@ -140,24 +167,16 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
+        const streamVarDefs =
+          streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
 
         // Validate stream-level config fields
         if (stream.vars) {
-          const streamVarsByName = (
-            (
-              registryStreamsByDataset[stream.data_stream.dataset].find(
-                (registryStream) => registryStream.input === input.type
-              ) || {}
-            ).vars || []
-          ).reduce((vars, registryVar) => {
-            vars[registryVar.name] = registryVar;
-            return vars;
-          }, {} as Record<string, RegistryVarsEntry>);
           streamValidationResults.vars = Object.entries(stream.vars).reduce(
             (results, [name, configEntry]) => {
               results[name] =
-                input.enabled && stream.enabled
-                  ? validatePackagePolicyConfig(configEntry, streamVarsByName[name])
+                streamVarDefs[name] && input.enabled && stream.enabled
+                  ? validatePackagePolicyConfig(configEntry, streamVarDefs[name])
                   : null;
               return results;
             },

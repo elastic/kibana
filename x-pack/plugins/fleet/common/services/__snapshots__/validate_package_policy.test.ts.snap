@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Fleet - validatePackagePolicy() works for packages with multiple policy templates (aka integrations) returns errors for invalid package policy 1`] = `
+Object {
+  "description": null,
+  "inputs": Object {
+    "aws/metrics": Object {
+      "streams": Object {
+        "aws.billing": Object {
+          "vars": Object {
+            "cost_explorer_config.group_by_dimension_keys": null,
+            "cost_explorer_config.group_by_tag_keys": null,
+            "latency": null,
+            "period": null,
+          },
+        },
+        "aws.cloudwatch_metrics": Object {
+          "vars": Object {
+            "latency": null,
+            "metrics": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.dynamodb": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.ebs": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.ec2_metrics": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.elb_metrics": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.lambda": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.natgateway": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.rds": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.s3_daily_storage": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.s3_request": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.sns": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+        "aws.sqs": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.transitgateway": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.usage": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+          },
+        },
+        "aws.vpn": Object {
+          "vars": Object {
+            "latency": null,
+            "period": null,
+            "regions": null,
+            "tags_filter": null,
+          },
+        },
+      },
+    },
+    "httpjson": Object {
+      "streams": Object {
+        "aws.cloudtrail": Object {
+          "vars": Object {
+            "interval": null,
+            "password": null,
+            "search": null,
+            "ssl": null,
+            "tags": null,
+            "url": null,
+            "username": null,
+          },
+        },
+      },
+    },
+    "s3": Object {
+      "streams": Object {
+        "aws.cloudtrail": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+        "aws.cloudwatch_logs": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+        "aws.ec2_logs": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+        "aws.elb_logs": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+        "aws.s3access": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+        "aws.vpcflow": Object {
+          "vars": Object {
+            "api_timeout": null,
+            "fips_enabled": null,
+            "queue_url": Array [
+              "Queue URL is required",
+            ],
+            "visibility_timeout": null,
+          },
+        },
+      },
+    },
+  },
+  "name": null,
+  "namespace": null,
+  "vars": Object {
+    "access_key_id": null,
+    "credential_profile_name": null,
+    "endpoint": null,
+    "role_arn": null,
+    "secret_access_key": null,
+    "session_token": null,
+    "shared_credential_file": null,
+  },
+}
+`;

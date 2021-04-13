@@ -98,14 +98,25 @@ describe('Fleet - packageToPackagePolicy', () => {
         {
           type: 'foo',
           enabled: true,
-          streams: [{ enabled: true, data_stream: { dataset: 'foo', type: 'logs' } }],
+          streams: [
+            {
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
+            },
+          ],
         },
         {
           type: 'bar',
           enabled: true,
           streams: [
-            { enabled: true, data_stream: { dataset: 'bar', type: 'logs' } },
-            { enabled: true, data_stream: { dataset: 'bar2', type: 'logs' } },
+            {
+              enabled: true,
+              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
+            },
+            {
+              enabled: true,
+              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
+            },
           ],
         },
       ]);
@@ -151,7 +162,7 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs' },
+              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
               vars: { 'var-name': { value: 'foo-var-value' } },
             },
           ],
@@ -162,12 +173,12 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'bar', type: 'logs' },
+              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
               vars: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
               enabled: true,
-              data_stream: { dataset: 'bar2', type: 'logs' },
+              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
               vars: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
             },
           ],
@@ -265,7 +276,7 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs' },
+              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
               vars: {
                 'var-name': { value: 'foo-var-value' },
               },
@@ -282,14 +293,14 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'bar', type: 'logs' },
+              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
               vars: {
                 'var-name': { value: 'bar-var-value' },
               },
             },
             {
               enabled: true,
-              data_stream: { dataset: 'bar2', type: 'logs' },
+              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
               vars: {
                 'var-name': { value: 'bar2-var-value' },
               },
@@ -302,14 +313,14 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: false,
-              data_stream: { dataset: 'disabled', type: 'logs' },
+              data_stream: { dataset: 'disabled', type: 'logs', policy_template: 'test_template' },
               vars: {
                 'var-name': { value: [] },
               },
             },
             {
               enabled: false,
-              data_stream: { dataset: 'disabled2', type: 'logs' },
+              data_stream: { dataset: 'disabled2', type: 'logs', policy_template: 'test_template' },
             },
           ],
         },

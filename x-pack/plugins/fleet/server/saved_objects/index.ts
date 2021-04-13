@@ -243,10 +243,10 @@ const getSavedObjectTypes = (
               type: 'nested',
               properties: {
                 id: { type: 'keyword' },
-                _meta: { type: 'flattened' },
                 enabled: { type: 'boolean' },
                 data_stream: {
                   properties: {
+                    policy_template: { type: 'keyword' },
                     dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
                   },

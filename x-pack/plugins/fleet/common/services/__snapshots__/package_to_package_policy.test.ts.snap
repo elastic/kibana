@@ -9,11 +9,9 @@ Object {
       "enabled": true,
       "streams": Array [
         Object {
-          "_meta": Object {
-            "policy_template": "billing",
-          },
           "data_stream": Object {
             "dataset": "aws.billing",
+            "policy_template": "billing",
             "type": "metrics",
           },
           "enabled": true,
@@ -43,11 +41,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "cloudwatch",
-          },
           "data_stream": Object {
             "dataset": "aws.cloudwatch_metrics",
+            "policy_template": "cloudwatch",
             "type": "metrics",
           },
           "enabled": true,
@@ -85,11 +81,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "dynamodb",
-          },
           "data_stream": Object {
             "dataset": "aws.dynamodb",
+            "policy_template": "dynamodb",
             "type": "metrics",
           },
           "enabled": true,
@@ -115,11 +109,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "ebs",
-          },
           "data_stream": Object {
             "dataset": "aws.ebs",
+            "policy_template": "ebs",
             "type": "metrics",
           },
           "enabled": true,
@@ -145,11 +137,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "ec2",
-          },
           "data_stream": Object {
             "dataset": "aws.ec2_metrics",
+            "policy_template": "ec2",
             "type": "metrics",
           },
           "enabled": true,
@@ -175,11 +165,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "elb",
-          },
           "data_stream": Object {
             "dataset": "aws.elb_metrics",
+            "policy_template": "elb",
             "type": "metrics",
           },
           "enabled": true,
@@ -205,11 +193,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "lambda",
-          },
           "data_stream": Object {
             "dataset": "aws.lambda",
+            "policy_template": "lambda",
             "type": "metrics",
           },
           "enabled": true,
@@ -235,11 +221,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "natgateway",
-          },
           "data_stream": Object {
             "dataset": "aws.natgateway",
+            "policy_template": "natgateway",
             "type": "metrics",
           },
           "enabled": true,
@@ -259,11 +243,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "rds",
-          },
           "data_stream": Object {
             "dataset": "aws.rds",
+            "policy_template": "rds",
             "type": "metrics",
           },
           "enabled": true,
@@ -289,11 +271,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "s3",
-          },
           "data_stream": Object {
             "dataset": "aws.s3_daily_storage",
+            "policy_template": "s3",
             "type": "metrics",
           },
           "enabled": true,
@@ -313,11 +293,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "s3",
-          },
           "data_stream": Object {
             "dataset": "aws.s3_request",
+            "policy_template": "s3",
             "type": "metrics",
           },
           "enabled": true,
@@ -337,11 +315,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "sns",
-          },
           "data_stream": Object {
             "dataset": "aws.sns",
+            "policy_template": "sns",
             "type": "metrics",
           },
           "enabled": true,
@@ -367,11 +343,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "sqs",
-          },
           "data_stream": Object {
             "dataset": "aws.sqs",
+            "policy_template": "sqs",
             "type": "metrics",
           },
           "enabled": true,
@@ -391,11 +365,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "transitgateway",
-          },
           "data_stream": Object {
             "dataset": "aws.transitgateway",
+            "policy_template": "transitgateway",
             "type": "metrics",
           },
           "enabled": true,
@@ -415,11 +387,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "usage",
-          },
           "data_stream": Object {
             "dataset": "aws.usage",
+            "policy_template": "usage",
             "type": "metrics",
           },
           "enabled": true,
@@ -439,11 +409,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "vpn",
-          },
           "data_stream": Object {
             "dataset": "aws.vpn",
+            "policy_template": "vpn",
             "type": "metrics",
           },
           "enabled": true,
@@ -475,11 +443,9 @@ Object {
       "enabled": true,
       "streams": Array [
         Object {
-          "_meta": Object {
-            "policy_template": "cloudtrail",
-          },
           "data_stream": Object {
             "dataset": "aws.cloudtrail",
+            "policy_template": "cloudtrail",
             "type": "logs",
           },
           "enabled": true,
@@ -503,11 +469,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "cloudwatch",
-          },
           "data_stream": Object {
             "dataset": "aws.cloudwatch_logs",
+            "policy_template": "cloudwatch",
             "type": "logs",
           },
           "enabled": true,
@@ -531,11 +495,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "ec2",
-          },
           "data_stream": Object {
             "dataset": "aws.ec2_logs",
+            "policy_template": "ec2",
             "type": "logs",
           },
           "enabled": true,
@@ -559,11 +521,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "elb",
-          },
           "data_stream": Object {
             "dataset": "aws.elb_logs",
+            "policy_template": "elb",
             "type": "logs",
           },
           "enabled": true,
@@ -587,11 +547,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "s3",
-          },
           "data_stream": Object {
             "dataset": "aws.s3access",
+            "policy_template": "s3",
             "type": "logs",
           },
           "enabled": true,
@@ -615,11 +573,9 @@ Object {
           },
         },
         Object {
-          "_meta": Object {
-            "policy_template": "vpcflow",
-          },
           "data_stream": Object {
             "dataset": "aws.vpcflow",
+            "policy_template": "vpcflow",
             "type": "logs",
           },
           "enabled": true,
@@ -649,11 +605,9 @@ Object {
       "enabled": false,
       "streams": Array [
         Object {
-          "_meta": Object {
-            "policy_template": "cloudtrail",
-          },
           "data_stream": Object {
             "dataset": "aws.cloudtrail",
+            "policy_template": "cloudtrail",
             "type": "logs",
           },
           "enabled": false,

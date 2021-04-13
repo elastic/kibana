@@ -102,15 +102,13 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): NewPacka
       ).map((packageStream) => {
         const stream: NewPackagePolicyInputStream = {
           enabled: packageStream.enabled === false ? false : true,
-          data_stream: packageStream.data_stream,
+          data_stream: {
+            ...packageStream.data_stream,
+            policy_template: packageInput.policy_template,
+          },
         };
         if (packageStream.vars && packageStream.vars.length) {
           stream.vars = packageStream.vars.reduce(varsReducer, {});
-        }
-        if (hasIntegrations) {
-          stream._meta = {
-            policy_template: packageInput.policy_template,
-          };
         }
         return stream;
       });
