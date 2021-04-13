@@ -41,9 +41,9 @@ export const handleEsError = ({
           body?.error?.reason || body?.error?.caused_by?.reason || error.message || 'Unknown error',
         attributes: {
           // The full original ES error object
-          error: body.error,
+          error: body?.error,
           // We assume that this is an ES error object with a nested caused by chain if we can see the "caused_by" field at the top-level
-          causes: body.error?.caused_by ? getEsCause(body.error) : undefined,
+          causes: body?.error?.caused_by ? getEsCause(body.error) : undefined,
         },
       },
     });
