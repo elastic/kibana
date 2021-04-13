@@ -135,8 +135,9 @@ export const EnginesOverview: React.FC = () => {
               <EuiPageContentHeaderSection>
                 {canManageEngines && (
                   <EuiButtonTo
-                    color="primary"
-                    fill
+                    color="secondary"
+                    size="s"
+                    iconType="plusInCircle"
                     data-test-subj="appSearchEnginesMetaEngineCreationButton"
                     to={META_ENGINE_CREATION_PATH}
                   >
