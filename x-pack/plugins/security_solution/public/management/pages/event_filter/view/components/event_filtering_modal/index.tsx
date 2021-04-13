@@ -16,7 +16,6 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiText,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
