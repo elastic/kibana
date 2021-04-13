@@ -400,6 +400,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       isLoadingUserActions={isLoadingUserActions}
                       onShowAlertDetails={onShowAlertDetails}
                       onUpdateField={onUpdateField}
+                      renderInvestigateInTimelineActionComponent={
+                        timelineUi?.renderInvestigateInTimelineActionComponent
+                      }
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
