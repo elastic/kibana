@@ -37,7 +37,7 @@ export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) 
             <EuiText>
               <h5>
                 <FormattedMessage
-                  id="xpack.fileUpload.searchPanel.numberFieldsLabel"
+                  id="xpack.fileDataVisualizer.searchPanel.numberFieldsLabel"
                   defaultMessage="Number fields"
                 />
               </h5>
@@ -55,7 +55,7 @@ export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) 
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerMetricFieldsCount">
               <FormattedMessage
-                id="xpack.fileUpload.searchPanel.ofFieldsTotal"
+                id="xpack.fileDataVisualizer.searchPanel.ofFieldsTotal"
                 defaultMessage="of {totalCount} total"
                 values={{ totalCount: metricsStats.totalMetricFieldsCount }}
               />

@@ -34,7 +34,7 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.fileUpload.explanationFlyout.title"
+              id="xpack.fileDataVisualizer.explanationFlyout.title"
               defaultMessage="Analysis explanation"
             />
           </h2>
@@ -48,7 +48,7 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.fileUpload.explanationFlyout.closeButton"
+                id="xpack.fileDataVisualizer.explanationFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -63,7 +63,7 @@ const Content: FC<{ explanation: string[] }> = ({ explanation }) => (
   <>
     <EuiText size={'s'}>
       <FormattedMessage
-        id="xpack.fileUpload.explanationFlyout.content"
+        id="xpack.fileDataVisualizer.explanationFlyout.content"
         defaultMessage="The logical steps that have produced the analysis results."
       />
 

@@ -49,7 +49,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'true',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCardExpandedRow.booleanContent.trueCountLabel"
+          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.booleanContent.trueCountLabel"
           defaultMessage="true"
         />
       ),
@@ -59,7 +59,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'false',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCardExpandedRow.booleanContent.falseCountLabel"
+          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.booleanContent.falseCountLabel"
           defaultMessage="false"
         />
       ),
@@ -80,7 +80,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   const summaryTableTitle = i18n.translate(
-    'xpack.fileUpload.fieldDataCardExpandedRow.booleanContent.summaryTableTitle',
+    'xpack.fileDataVisualizer.fieldDataCardExpandedRow.booleanContent.summaryTableTitle',
     {
       defaultMessage: 'Summary',
     }
@@ -104,7 +104,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
       <EuiFlexItem>
         <ExpandedRowFieldHeader>
           <FormattedMessage
-            id="xpack.fileUpload.fieldDataCard.cardBoolean.valuesLabel"
+            id="xpack.fileDataVisualizer.fieldDataCard.cardBoolean.valuesLabel"
             defaultMessage="Values"
           />
         </ExpandedRowFieldHeader>

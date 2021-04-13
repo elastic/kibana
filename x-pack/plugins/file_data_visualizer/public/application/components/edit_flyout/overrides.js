@@ -52,7 +52,7 @@ class OverridesUI extends Component {
   }
 
   linesToSampleErrors = i18n.translate(
-    'xpack.fileUpload.editFlyout.overrides.linesToSampleErrorMessage',
+    'xpack.fileDataVisualizer.editFlyout.overrides.linesToSampleErrorMessage',
     {
       defaultMessage: 'Value must be greater than {min} and less than or equal to {max}',
       values: {
@@ -63,7 +63,7 @@ class OverridesUI extends Component {
   );
 
   customTimestampFormatErrors = i18n.translate(
-    'xpack.fileUpload.editFlyout.overrides.customTimestampFormatErrorMessage',
+    'xpack.fileDataVisualizer.editFlyout.overrides.customTimestampFormatErrorMessage',
     {
       defaultMessage: `Timestamp format must be a combination of these Java date/time formats:
       yy, yyyy, M, MM, MMM, MMMM, d, dd, EEE, EEEE, H, HH, h, mm, ss, S through SSSSSSSSS, a, XX, XXX, zzz`,
@@ -274,7 +274,7 @@ class OverridesUI extends Component {
     const timestampFormatHelp = (
       <EuiText size="xs">
         <EuiLink href={docsUrl} target="_blank">
-          {i18n.translate('xpack.fileUpload.editFlyout.overrides.timestampFormatHelpText', {
+          {i18n.translate('xpack.fileDataVisualizer.editFlyout.overrides.timestampFormatHelpText', {
             defaultMessage: 'See more on accepted formats',
           })}
         </EuiLink>
@@ -288,7 +288,7 @@ class OverridesUI extends Component {
           isInvalid={linesToSampleValid === false}
           label={
             <FormattedMessage
-              id="xpack.fileUpload.editFlyout.overrides.linesToSampleFormRowLabel"
+              id="xpack.fileDataVisualizer.editFlyout.overrides.linesToSampleFormRowLabel"
               defaultMessage="Number of lines to sample"
             />
           }
@@ -303,7 +303,7 @@ class OverridesUI extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.fileUpload.editFlyout.overrides.dataFormatFormRowLabel"
+              id="xpack.fileDataVisualizer.editFlyout.overrides.dataFormatFormRowLabel"
               defaultMessage="Data format"
             />
           }
@@ -321,7 +321,7 @@ class OverridesUI extends Component {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.fileUpload.editFlyout.overrides.delimiterFormRowLabel"
+                  id="xpack.fileDataVisualizer.editFlyout.overrides.delimiterFormRowLabel"
                   defaultMessage="Delimiter"
                 />
               }
@@ -338,7 +338,7 @@ class OverridesUI extends Component {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.fileUpload.editFlyout.overrides.customDelimiterFormRowLabel"
+                    id="xpack.fileDataVisualizer.editFlyout.overrides.customDelimiterFormRowLabel"
                     defaultMessage="Custom delimiter"
                   />
                 }
@@ -350,7 +350,7 @@ class OverridesUI extends Component {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.fileUpload.editFlyout.overrides.quoteCharacterFormRowLabel"
+                  id="xpack.fileDataVisualizer.editFlyout.overrides.quoteCharacterFormRowLabel"
                   defaultMessage="Quote character"
                 />
               }
@@ -369,7 +369,7 @@ class OverridesUI extends Component {
                 id={'hasHeaderRow'}
                 label={
                   <FormattedMessage
-                    id="xpack.fileUpload.editFlyout.overrides.hasHeaderRowLabel"
+                    id="xpack.fileDataVisualizer.editFlyout.overrides.hasHeaderRowLabel"
                     defaultMessage="Has header row"
                   />
                 }
@@ -383,7 +383,7 @@ class OverridesUI extends Component {
                 id={'shouldTrimFields'}
                 label={
                   <FormattedMessage
-                    id="xpack.fileUpload.editFlyout.overrides.trimFieldsLabel"
+                    id="xpack.fileDataVisualizer.editFlyout.overrides.trimFieldsLabel"
                     defaultMessage="Should trim fields"
                   />
                 }
@@ -398,7 +398,7 @@ class OverridesUI extends Component {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.fileUpload.editFlyout.overrides.grokPatternFormRowLabel"
+                  id="xpack.fileDataVisualizer.editFlyout.overrides.grokPatternFormRowLabel"
                   defaultMessage="Grok pattern"
                 />
               }
@@ -415,7 +415,7 @@ class OverridesUI extends Component {
           helpText={timestampFormatHelp}
           label={
             <FormattedMessage
-              id="xpack.fileUpload.editFlyout.overrides.timestampFormatFormRowLabel"
+              id="xpack.fileDataVisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
               defaultMessage="Timestamp format"
             />
           }
@@ -434,7 +434,7 @@ class OverridesUI extends Component {
             isInvalid={timestampFormatValid === false}
             label={
               <FormattedMessage
-                id="xpack.fileUpload.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                id="xpack.fileDataVisualizer.editFlyout.overrides.customTimestampFormatFormRowLabel"
                 defaultMessage="Custom timestamp format"
               />
             }
@@ -450,7 +450,7 @@ class OverridesUI extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.fileUpload.editFlyout.overrides.timeFieldFormRowLabel"
+              id="xpack.fileDataVisualizer.editFlyout.overrides.timeFieldFormRowLabel"
               defaultMessage="Time field"
             />
           }
@@ -480,7 +480,7 @@ class OverridesUI extends Component {
             <EuiTitle size="s">
               <h3>
                 <FormattedMessage
-                  id="xpack.fileUpload.editFlyout.overrides.editFieldNamesTitle"
+                  id="xpack.fileDataVisualizer.editFlyout.overrides.editFieldNamesTitle"
                   defaultMessage="Edit field names"
                 />
               </h3>

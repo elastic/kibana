@@ -27,7 +27,7 @@ const metaTableColumns = [
 ];
 
 const metaTableTitle = i18n.translate(
-  'xpack.fileUpload.fieldDataCardExpandedRow.documentStatsTable.metaTableTitle',
+  'xpack.fileDataVisualizer.fieldDataCardExpandedRow.documentStatsTable.metaTableTitle',
   {
     defaultMessage: 'Documents stats',
   }
@@ -47,7 +47,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'count',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCardExpandedRow.documentStatsTable.countLabel"
+          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.documentStatsTable.countLabel"
           defaultMessage="count"
         />
       ),
@@ -57,7 +57,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'percentage',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCardExpandedRow.documentStatsTable.percentageLabel"
+          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.documentStatsTable.percentageLabel"
           defaultMessage="percentage"
         />
       ),
@@ -67,7 +67,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'distinctValues',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCardExpandedRow.documentStatsTable.distinctValueLabel"
+          id="xpack.fileDataVisualizer.fieldDataCardExpandedRow.documentStatsTable.distinctValueLabel"
           defaultMessage="distinct values"
         />
       ),

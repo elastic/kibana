@@ -81,13 +81,13 @@ export const getLegendText = (
   maxChartColumns = MAX_CHART_COLUMNS
 ): LegendText => {
   if (chartData.type === 'unsupported') {
-    return i18n.translate('xpack.fileUpload.dataGridChart.histogramNotAvailable', {
+    return i18n.translate('xpack.fileDataVisualizer.dataGridChart.histogramNotAvailable', {
       defaultMessage: 'Chart not supported.',
     });
   }
 
   if (chartData.data.length === 0) {
-    return i18n.translate('xpack.fileUpload.dataGridChart.notEnoughData', {
+    return i18n.translate('xpack.fileDataVisualizer.dataGridChart.notEnoughData', {
       defaultMessage: `0 documents contain field.`,
     });
   }
@@ -106,14 +106,14 @@ export const getLegendText = (
   }
 
   if (isOrdinalChartData(chartData) && chartData.cardinality <= maxChartColumns) {
-    return i18n.translate('xpack.fileUpload.dataGridChart.singleCategoryLegend', {
+    return i18n.translate('xpack.fileDataVisualizer.dataGridChart.singleCategoryLegend', {
       defaultMessage: `{cardinality, plural, one {# category} other {# categories}}`,
       values: { cardinality: chartData.cardinality },
     });
   }
 
   if (isOrdinalChartData(chartData) && chartData.cardinality > maxChartColumns) {
-    return i18n.translate('xpack.fileUpload.dataGridChart.topCategoriesLegend', {
+    return i18n.translate('xpack.fileDataVisualizer.dataGridChart.topCategoriesLegend', {
       defaultMessage: `top {maxChartColumns} of {cardinality} categories`,
       values: { cardinality: chartData.cardinality, maxChartColumns },
     });

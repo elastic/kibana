@@ -114,7 +114,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
       return JSON.parse(this.props.mappingsString);
     } catch (error) {
       throw new Error(
-        i18n.translate('xpack.fileUpload.combinedFieldsForm.mappingsParseError', {
+        i18n.translate('xpack.fileDataVisualizer.combinedFieldsForm.mappingsParseError', {
           defaultMessage: 'Error parsing mappings: {error}',
           values: { error: error.message },
         })
@@ -127,7 +127,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
       return JSON.parse(this.props.pipelineString);
     } catch (error) {
       throw new Error(
-        i18n.translate('xpack.fileUpload.combinedFieldsForm.pipelineParseError', {
+        i18n.translate('xpack.fileDataVisualizer.combinedFieldsForm.pipelineParseError', {
           defaultMessage: 'Error parsing pipeline: {error}',
           values: { error: error.message },
         })
@@ -153,7 +153,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   render() {
-    const geoPointLabel = i18n.translate('xpack.fileUpload.geoPointCombinedFieldLabel', {
+    const geoPointLabel = i18n.translate('xpack.fileDataVisualizer.geoPointCombinedFieldLabel', {
       defaultMessage: 'Add geo point field',
     });
     const panels = [
@@ -180,7 +180,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     ];
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.fileUpload.combinedFieldsLabel', {
+        label={i18n.translate('xpack.fileDataVisualizer.combinedFieldsLabel', {
           defaultMessage: 'Combined fields',
         })}
       >
@@ -196,12 +196,15 @@ export class CombinedFieldsForm extends Component<Props, State> {
                     iconType="trash"
                     color="danger"
                     onClick={this.removeCombinedField.bind(null, idx)}
-                    title={i18n.translate('xpack.fileUpload.removeCombinedFieldsLabel', {
+                    title={i18n.translate('xpack.fileDataVisualizer.removeCombinedFieldsLabel', {
                       defaultMessage: 'Remove combined field',
                     })}
-                    aria-label={i18n.translate('xpack.fileUpload.removeCombinedFieldsLabel', {
-                      defaultMessage: 'Remove combined field',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.fileDataVisualizer.removeCombinedFieldsLabel',
+                      {
+                        defaultMessage: 'Remove combined field',
+                      }
+                    )}
                   />
                 </EuiFlexItem>
               )}
@@ -217,7 +220,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                 isDisabled={this.props.isDisabled}
               >
                 <FormattedMessage
-                  id="xpack.fileUpload.addCombinedFieldsLabel"
+                  id="xpack.fileDataVisualizer.addCombinedFieldsLabel"
                   defaultMessage="Add combined field"
                 />
               </EuiButtonEmpty>

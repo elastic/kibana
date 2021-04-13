@@ -36,7 +36,7 @@ export const SimpleSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fileUpload.simpleImportSettings.indexNameFormRowLabel"
+            id="xpack.fileDataVisualizer.simpleImportSettings.indexNameFormRowLabel"
             defaultMessage="Index name"
           />
         }
@@ -45,7 +45,7 @@ export const SimpleSettings: FC<Props> = ({
       >
         <EuiFieldText
           placeholder={i18n.translate(
-            'xpack.fileUpload.simpleImportSettings.indexNamePlaceholder',
+            'xpack.fileDataVisualizer.simpleImportSettings.indexNamePlaceholder',
             {
               defaultMessage: 'index name',
             }
@@ -54,9 +54,12 @@ export const SimpleSettings: FC<Props> = ({
           disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
-          aria-label={i18n.translate('xpack.fileUpload.simpleImportSettings.indexNameAriaLabel', {
-            defaultMessage: 'Index name, required field',
-          })}
+          aria-label={i18n.translate(
+            'xpack.fileDataVisualizer.simpleImportSettings.indexNameAriaLabel',
+            {
+              defaultMessage: 'Index name, required field',
+            }
+          )}
           data-test-subj="mlFileDataVisIndexNameInput"
         />
       </EuiFormRow>
@@ -67,7 +70,7 @@ export const SimpleSettings: FC<Props> = ({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.fileUpload.simpleImportSettings.createIndexPatternLabel"
+            id="xpack.fileDataVisualizer.simpleImportSettings.createIndexPatternLabel"
             defaultMessage="Create index pattern"
           />
         }

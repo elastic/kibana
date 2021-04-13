@@ -25,7 +25,7 @@ import { getMaxBytesFormatted } from '../../../../../file_upload/public';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
-    'xpack.fileUpload.welcomeContent.experimentalFeatureTooltip',
+    'xpack.fileDataVisualizer.welcomeContent.experimentalFeatureTooltip',
     {
       defaultMessage: "Experimental feature. We'd love to hear your feedback.",
     }
@@ -42,7 +42,7 @@ export const WelcomeContent: FC = () => {
         <EuiTitle size="m">
           <h1>
             <FormattedMessage
-              id="xpack.fileUpload.welcomeContent.visualizeDataFromLogFileTitle"
+              id="xpack.fileDataVisualizer.welcomeContent.visualizeDataFromLogFileTitle"
               defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
               values={{
                 experimentalBadge: <ExperimentalBadge tooltipContent={toolTipContent} />,
@@ -54,7 +54,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileUpload.welcomeContent.visualizeDataFromLogFileDescription"
+              id="xpack.fileDataVisualizer.welcomeContent.visualizeDataFromLogFileDescription"
               defaultMessage="The File Data Visualizer helps you understand the fields and metrics in a log file.
               Upload your file, analyze its data, and then choose whether to import the data into an Elasticsearch index."
             />
@@ -64,7 +64,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileUpload.welcomeContent.supportedFileFormatDescription"
+              id="xpack.fileDataVisualizer.welcomeContent.supportedFileFormatDescription"
               defaultMessage="The File Data Visualizer supports these file formats:"
             />
           </p>
@@ -78,7 +78,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileUpload.welcomeContent.delimitedTextFilesDescription"
+                  id="xpack.fileDataVisualizer.welcomeContent.delimitedTextFilesDescription"
                   defaultMessage="Delimited text files, such as CSV and TSV"
                 />
               </p>
@@ -94,7 +94,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileUpload.welcomeContent.newlineDelimitedJsonDescription"
+                  id="xpack.fileDataVisualizer.welcomeContent.newlineDelimitedJsonDescription"
                   defaultMessage="Newline-delimited JSON"
                 />
               </p>
@@ -110,7 +110,7 @@ export const WelcomeContent: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.fileUpload.welcomeContent.logFilesWithCommonFormatDescription"
+                  id="xpack.fileDataVisualizer.welcomeContent.logFilesWithCommonFormatDescription"
                   defaultMessage="Log files with a common format for the timestamp"
                 />
               </p>
@@ -121,7 +121,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileUpload.welcomeContent.uploadedFilesAllowedSizeDescription"
+              id="xpack.fileDataVisualizer.welcomeContent.uploadedFilesAllowedSizeDescription"
               defaultMessage="You can upload files up to {maxFileSize}."
               values={{ maxFileSize }}
             />
@@ -131,7 +131,7 @@ export const WelcomeContent: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.fileUpload.welcomeContent.experimentalFeatureDescription"
+              id="xpack.fileDataVisualizer.welcomeContent.experimentalFeatureDescription"
               defaultMessage="This feature is experimental. Got feedback? Please create an issue in&nbsp;{githubLink}."
               values={{
                 githubLink: (

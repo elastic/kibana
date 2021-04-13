@@ -59,7 +59,7 @@ export const ImportSettings: FC<Props> = ({
   const tabs = [
     {
       id: 'simple-settings',
-      name: i18n.translate('xpack.fileUpload.importSettings.simpleTabName', {
+      name: i18n.translate('xpack.fileDataVisualizer.importSettings.simpleTabName', {
         defaultMessage: 'Simple',
       }),
       content: (
@@ -80,7 +80,7 @@ export const ImportSettings: FC<Props> = ({
     },
     {
       id: 'advanced-settings',
-      name: i18n.translate('xpack.fileUpload.importSettings.advancedTabName', {
+      name: i18n.translate('xpack.fileDataVisualizer.importSettings.advancedTabName', {
         defaultMessage: 'Advanced',
       }),
       content: (

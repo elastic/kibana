@@ -52,7 +52,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
     <EuiFlexItem data-test-subj={'mlTopValues'}>
       <ExpandedRowFieldHeader>
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCard.topValuesLabel"
+          id="xpack.fileDataVisualizer.fieldDataCard.topValuesLabel"
           defaultMessage="Top values"
         />
       </ExpandedRowFieldHeader>
@@ -100,7 +100,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
             <EuiSpacer size="xs" />
             <EuiText size="xs" textAlign={'left'}>
               <FormattedMessage
-                id="xpack.fileUpload.fieldDataCard.topValues.calculatedFromSampleDescription"
+                id="xpack.fileDataVisualizer.fieldDataCard.topValues.calculatedFromSampleDescription"
                 defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
                 values={{
                   topValuesSamplerShardSize,

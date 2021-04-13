@@ -75,7 +75,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.fileUpload.fileBeatConfigFlyout.closeButton"
+                id="xpack.fileDataVisualizer.fileBeatConfigFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -85,7 +85,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
               {(copy) => (
                 <EuiButton onClick={copy}>
                   <FormattedMessage
-                    id="xpack.fileUpload.fileBeatConfigFlyout.copyButton"
+                    id="xpack.fileDataVisualizer.fileBeatConfigFlyout.copyButton"
                     defaultMessage="Copy to clipboard"
                   />
                 </EuiButton>
@@ -108,7 +108,7 @@ const Contents: FC<{
       <EuiTitle size="s">
         <h5>
           <FormattedMessage
-            id="xpack.fileUpload.resultsLinks.fileBeatConfigTitle"
+            id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfigTitle"
             defaultMessage="Filebeat configuration"
           />
         </h5>
@@ -116,14 +116,14 @@ const Contents: FC<{
       <EuiSpacer size="s" />
       <p>
         <FormattedMessage
-          id="xpack.fileUpload.resultsLinks.fileBeatConfigTopText1"
+          id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfigTopText1"
           defaultMessage="Additional data can be uploaded to the {index} index using Filebeat."
           values={{ index: <EuiCode>{index}</EuiCode> }}
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.fileUpload.resultsLinks.fileBeatConfigTopText2"
+          id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfigTopText2"
           defaultMessage="Modify {filebeatYml} to set the connection information:"
           values={{ filebeatYml: <EuiCode>filebeat.yml</EuiCode> }}
         />
@@ -137,7 +137,7 @@ const Contents: FC<{
       <p>
         {username === null ? (
           <FormattedMessage
-            id="xpack.fileUpload.resultsLinks.fileBeatConfigBottomTextNoUsername"
+            id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfigBottomTextNoUsername"
             defaultMessage="Where {esUrl} is the URL of Elasticsearch."
             values={{
               esUrl: <EuiCode>{'<es_url>'}</EuiCode>,
@@ -145,7 +145,7 @@ const Contents: FC<{
           />
         ) : (
           <FormattedMessage
-            id="xpack.fileUpload.resultsLinks.fileBeatConfigBottomText"
+            id="xpack.fileDataVisualizer.resultsLinks.fileBeatConfigBottomText"
             defaultMessage="Where {password} is the password of the {user} user, {esUrl} is the URL of Elasticsearch."
             values={{
               user: <EuiCode>{username}</EuiCode>,

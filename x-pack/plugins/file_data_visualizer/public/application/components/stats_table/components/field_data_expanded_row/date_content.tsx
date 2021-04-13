@@ -30,7 +30,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   const { earliest, latest } = stats;
 
   const summaryTableTitle = i18n.translate(
-    'xpack.fileUpload.fieldDataCard.cardDate.summaryTableTitle',
+    'xpack.fileDataVisualizer.fieldDataCard.cardDate.summaryTableTitle',
     {
       defaultMessage: 'Summary',
     }
@@ -40,7 +40,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'earliest',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCard.cardDate.earliestLabel"
+          id="xpack.fileDataVisualizer.fieldDataCard.cardDate.earliestLabel"
           defaultMessage="earliest"
         />
       ),
@@ -50,7 +50,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.fileUpload.fieldDataCard.cardDate.latestLabel"
+          id="xpack.fileDataVisualizer.fieldDataCard.cardDate.latestLabel"
           defaultMessage="latest"
         />
       ),

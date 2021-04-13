@@ -47,31 +47,31 @@ export function kbnTypeToMLJobType(field: IFieldType) {
 }
 
 export const mlJobTypeAriaLabels = {
-  BOOLEAN: i18n.translate('xpack.fileUpload.fieldTypeIcon.booleanTypeAriaLabel', {
+  BOOLEAN: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {
     defaultMessage: 'boolean type',
   }),
-  DATE: i18n.translate('xpack.fileUpload.fieldTypeIcon.dateTypeAriaLabel', {
+  DATE: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.dateTypeAriaLabel', {
     defaultMessage: 'date type',
   }),
-  GEO_POINT: i18n.translate('xpack.fileUpload.fieldTypeIcon.geoPointTypeAriaLabel', {
+  GEO_POINT: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.geoPointTypeAriaLabel', {
     defaultMessage: '{geoPointParam} type',
     values: {
       geoPointParam: 'geo point',
     },
   }),
-  IP: i18n.translate('xpack.fileUpload.fieldTypeIcon.ipTypeAriaLabel', {
+  IP: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.ipTypeAriaLabel', {
     defaultMessage: 'ip type',
   }),
-  KEYWORD: i18n.translate('xpack.fileUpload.fieldTypeIcon.keywordTypeAriaLabel', {
+  KEYWORD: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.keywordTypeAriaLabel', {
     defaultMessage: 'keyword type',
   }),
-  NUMBER: i18n.translate('xpack.fileUpload.fieldTypeIcon.numberTypeAriaLabel', {
+  NUMBER: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.numberTypeAriaLabel', {
     defaultMessage: 'number type',
   }),
-  TEXT: i18n.translate('xpack.fileUpload.fieldTypeIcon.textTypeAriaLabel', {
+  TEXT: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.textTypeAriaLabel', {
     defaultMessage: 'text type',
   }),
-  UNKNOWN: i18n.translate('xpack.fileUpload.fieldTypeIcon.unknownTypeAriaLabel', {
+  UNKNOWN: i18n.translate('xpack.fileDataVisualizer.fieldTypeIcon.unknownTypeAriaLabel', {
     defaultMessage: 'unknown type',
   }),
 };
