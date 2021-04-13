@@ -78,6 +78,22 @@
         "machineType": "n2-standard-8",
         "diskType": "pd-ssd",
         "diskSizeGb": 256
+      },
+      {
+        "queue": "packer",
+        "name": "kibana-packer",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-184716.iam.gserviceaccount.com",
+        "overprovision": 0,
+        "minimumAgents": 0,
+        "maximumAgents": 10,
+        "gracefulStopAfterSecs": 21600,
+        "hardStopAfterSecs": 32400,
+        "idleTimeoutSecs": 900,
+        "exitAfterOneJob": false,
+        "imageFamily": "kibana-bk-dev-agents",
+        "machineType": "e2-small",
+        "diskType": "pd-ssd",
+        "diskSizeGb": 75
       }
     ]
   }
