@@ -784,3 +784,18 @@ export const getAllCasesStatuses = async (
 
   return statuses;
 };
+
+export const getCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  includeComments: boolean = false,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .get(`${CASES_URL}/${caseId}?includeComments=${includeComments}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
