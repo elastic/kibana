@@ -100,6 +100,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
           return;
         }
 
+        navigateToApp('osquery', { path: `scheduled_queries/${data.item.id}` });
         toasts.addSuccess(`Successfully updated '${data.item.name}'`);
       },
       onError: (error) => {

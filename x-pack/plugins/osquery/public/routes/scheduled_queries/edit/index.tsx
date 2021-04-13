@@ -34,7 +34,9 @@ const EditScheduledQueryPageComponent = () => {
           <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.editScheduledQuery.viewScheduledQueriesListTitle"
-              defaultMessage="View query details"
+              defaultMessage="View {queryName} details"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ queryName: data?.name }}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -43,7 +45,11 @@ const EditScheduledQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editScheduledQuery.pageTitle"
-                defaultMessage="Edit scheduled query"
+                defaultMessage="Edit {queryName}"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  queryName: data?.name,
+                }}
               />
             </h1>
           </EuiText>
@@ -60,7 +66,7 @@ const EditScheduledQueryPageComponent = () => {
         </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
-    [queryDetailsLinkProps]
+    [data?.name, queryDetailsLinkProps]
   );
 
   return (

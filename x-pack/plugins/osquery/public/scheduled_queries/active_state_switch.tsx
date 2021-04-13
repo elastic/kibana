@@ -91,7 +91,8 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     });
 
     mutate(updatedPolicy);
-  }, [item, mutate]);
+    hideConfirmationModal();
+  }, [hideConfirmationModal, item, mutate]);
 
   const handleToggleActiveClick = useCallback(() => {
     if (agentStatus?.total) {

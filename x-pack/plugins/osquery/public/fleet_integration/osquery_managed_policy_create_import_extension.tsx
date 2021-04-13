@@ -6,17 +6,8 @@
  */
 
 import { filter } from 'lodash/fp';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiCard,
-  EuiIcon,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { produce } from 'immer';
 
@@ -33,7 +24,8 @@ import {
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
 import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
+import { NavigationButtons } from './navigation_buttons';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -49,7 +41,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | null>(null);
   const [editMode] = useState(!!policy);
   const {
-    application: { getUrlForApp, navigateToApp },
+    application: { getUrlForApp },
     http,
   } = useKibana().services;
   const { replace } = useHistory();
@@ -64,14 +56,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         '?openEnrollmentFlyout=true',
     });
   }, [getUrlForApp, policy?.policy_id]);
-
-  const liveQueryHref = useMemo(
-    () =>
-      getUrlForApp('osquery', {
-        path: `/live_query/new?agentPolicyId=${policy?.policy_id}`,
-      }),
-    [getUrlForApp, policy?.policy_id]
-  );
 
   useEffect(() => {
     if (editMode && policyAgentsCount === null) {
@@ -107,34 +91,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       fetchAgentPolicyDetails();
     }
   }, [editMode, http, policy?.policy_id, policyAgentsCount]);
-
-  const liveQueryClick = useCallback(
-    (event) => {
-      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
-        event.preventDefault();
-        navigateToApp('osquery', {
-          path: `/live_query/new?agentPolicyId=${policy?.policy_id}`,
-        });
-      }
-    },
-    [navigateToApp, policy?.policy_id]
-  );
-
-  const scheduleQueriesHref = getUrlForApp('osquery', {
-    path: `/scheduled_queries/${policy?.id}/edit`,
-  });
-
-  const scheduleQueriesClick = useCallback(
-    (event) => {
-      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
-        event.preventDefault();
-        navigateToApp('osquery', {
-          path: `/scheduled_queries/${policy?.id}/edit`,
-        });
-      }
-    },
-    [navigateToApp, policy?.id]
-  );
 
   useEffect(() => {
     /*
@@ -173,10 +129,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       });
     }
   }, [editMode, replace]);
-
-  const detailsClicked = useCallback((e) => {
-    e.stopPropagation();
-  }, []);
 
   const scheduledQueriesTableData = useMemo(() => {
     const policyWithoutEmptyQueries = produce(newPolicy, (draft) => {
@@ -224,48 +176,12 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           <EuiSpacer />
         </>
       ) : null}
-      <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xl" type="console" />}
-            title="Run live queries"
-            isDisabled={!editMode}
-            href={liveQueryHref}
-            description={''}
-            onClick={liveQueryClick}
-            footer={
-              <EuiButtonEmpty
-                iconType="iInCircle"
-                size="xs"
-                onClick={detailsClicked}
-                aria-label="See more details about Osquery live queries"
-              >
-                {'More details'}
-              </EuiButtonEmpty>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xl" type="clock" />}
-            title="Schedule queries"
-            isDisabled={!editMode}
-            description={''}
-            href={scheduleQueriesHref}
-            onClick={scheduleQueriesClick}
-            footer={
-              <EuiButtonEmpty
-                iconType="iInCircle"
-                size="xs"
-                onClick={detailsClicked}
-                aria-label="See more details about Scheduled queries"
-              >
-                {'More details'}
-              </EuiButtonEmpty>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+
+      <NavigationButtons
+        isDisabled={!editMode}
+        integrationPolicyId={policy?.id}
+        agentPolicyId={policy?.policy_id}
+      />
       <EuiSpacer />
 
       {editMode && scheduledQueriesTableData.inputs[0].streams.length ? (
