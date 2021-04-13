@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   HttpServiceSetup,
@@ -31,11 +30,13 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { API_ROUTES_SUPPORTING_REDIRECTS, canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { renderUnauthorizedPage } from './unauthorized_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
   config: ConfigType;
   license: SecurityLicense;
+  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -70,21 +71,18 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, license }: AuthenticationServiceSetupParams) {
+  setup({ config, http, license, buildNumber }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
     // page if possible, so that they can try other methods to log in. If not possible, we should
-    // redirect to a dedicated `Unauthorized` page from which users can explicitly trigger a new
+    // render a dedicated `Unauthorized` page from which users can explicitly trigger a new
     // login attempt. There are two cases when we can redirect to the login page:
     // 1. Login selector is enabled
     // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
-    const unauthorizedURL = http.basePath.prepend(
+    const isLoginPageAvailable =
       config.authc.selector.enabled ||
-        shouldProviderUseLoginForm(config.authc.sortedProviders[0].type)
-        ? '/login'
-        : '/security/unauthorized'
-    );
+      shouldProviderUseLoginForm(config.authc.sortedProviders[0].type);
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
@@ -172,23 +170,25 @@ export class AuthenticationService {
       // to access initially, but we only want to do that for non-API routes. API routes that support
       // redirects are solely used to support various authentication flows that wouldn't make any
       // sense after successful authentication through login page.
-      const urlToRedirectToAfterLogin = !API_ROUTES_SUPPORTING_REDIRECTS.includes(
-        request.route.path
-      )
-        ? `${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-            this.authenticator.getRequestOriginalURL(request)
-          )}`
-        : '';
+      const originalURL = !API_ROUTES_SUPPORTING_REDIRECTS.includes(request.route.path)
+        ? this.authenticator.getRequestOriginalURL(request)
+        : `${http.basePath.get(request)}/`;
+      if (isLoginPageAvailable) {
+        return toolkit.render({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': http.csp.header,
+            Refresh: `0;url=${http.basePath.prepend(
+              `/login?msg=UNAUTHORIZED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                originalURL
+              )}`
+            )}`,
+          },
+        });
+      }
 
       return toolkit.render({
-        body: `
-          <html lang=${i18n.getLocale()}>
-            <head>
-              <title>Unauthorized</title>
-              <link rel="icon" href="data:," />
-              <meta http-equiv="refresh" content="0;url=${unauthorizedURL}?${urlToRedirectToAfterLogin}&msg=UNAUTHORIZED" />
-            </head>
-          </html>`,
+        body: renderUnauthorizedPage({ buildNumber, basePath: http.basePath, originalURL }),
         headers: { 'Content-Security-Policy': http.csp.header },
       });
     });

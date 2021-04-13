@@ -16,7 +16,6 @@ import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { overwrittenSessionApp } from './overwritten_session';
-import { unauthorizedApp } from './unauthorized';
 
 interface SetupParams {
   application: ApplicationSetup;
@@ -57,7 +56,6 @@ export class AuthenticationService {
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });
     overwrittenSessionApp.create({ application, authc: { getCurrentUser }, getStartServices });
-    unauthorizedApp.create({ application, getStartServices, http });
 
     return { getCurrentUser, areAPIKeysEnabled };
   }

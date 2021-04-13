@@ -13,7 +13,6 @@ import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
 import { defineLogoutRoutes } from './logout';
 import { defineOverwrittenSessionRoutes } from './overwritten_session';
-import { defineUnauthorizedRoutes } from './unauthorized';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
   if (
@@ -29,5 +28,4 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
   defineLogoutRoutes(params);
   defineOverwrittenSessionRoutes(params);
   defineCaptureURLRoutes(params);
-  defineUnauthorizedRoutes(params);
 }
