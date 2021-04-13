@@ -168,7 +168,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const textArr = [];
       let idx = 0;
       for (const cell of result) {
-        if (idx > 0) {
+        if (idx > 1) {
           textArr.push(await cell.getVisibleText());
         }
         idx++;
