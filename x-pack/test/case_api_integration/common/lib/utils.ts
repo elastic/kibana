@@ -16,6 +16,7 @@ import {
   CASES_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
+  CASE_STATUS_URL,
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../plugins/cases/common/constants';
 import {
@@ -38,6 +39,7 @@ import {
   AllCommentsResponse,
   CommentPatchRequest,
   CasesConfigurePatch,
+  CasesStatusResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -768,4 +770,17 @@ export const updateConfiguration = async (
     .expect(expectedHttpCode);
 
   return configuration;
+};
+
+export const getAllCasesStatuses = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  expectedHttpCode: number = 200
+): Promise<CasesStatusResponse> => {
+  const { body: statuses } = await supertest
+    .get(CASE_STATUS_URL)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return statuses;
 };
