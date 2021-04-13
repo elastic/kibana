@@ -432,7 +432,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 isOrDisabled={false}
                 isAndDisabled={false}
                 isNestedDisabled={false}
-                hasOSSelection={!hasAlertData}
+                hasOSSelection={exceptionListType === 'endpoint' && !hasAlertData}
                 onOSSelectionChange={handleOSSelectionChange}
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
