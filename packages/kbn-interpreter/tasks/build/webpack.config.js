@@ -104,7 +104,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
         {
           from: resolve(PLUGIN_SOURCE_DIR, 'functions/common'),
           to: resolve(PLUGIN_BUILD_DIR, 'functions/common'),
-          ignore: '**/__tests__/**',
+          ignore: ['**/__tests__/**'],
           transform: createServerCodeTransformer(sourceMaps)
         },
       ]),
