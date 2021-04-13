@@ -8,17 +8,11 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
-import { GetConfigFn } from '../../types';
-import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
-
-jest.mock('./legacy', () => ({
-  fetchSoon: jest.fn().mockResolvedValue({}),
-}));
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -863,23 +857,6 @@ describe('SearchSource', () => {
   });
 
   describe('fetch$', () => {
-    describe('#legacy fetch()', () => {
-      beforeEach(() => {
-        searchSourceDependencies = {
-          ...searchSourceDependencies,
-          getConfig: jest.fn(() => {
-            return true; // batchSearches = true
-          }) as GetConfigFn,
-        };
-      });
-
-      test('should call msearch', async () => {
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = {};
-        await searchSource.fetch$(options).toPromise();
-        expect(fetchSoon).toBeCalledTimes(1);
-      });
-    });
 
     describe('responses', () => {
       test('should return partial results', async () => {

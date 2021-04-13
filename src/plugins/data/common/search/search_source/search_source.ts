@@ -96,7 +96,6 @@ import {
   IKibanaSearchResponse,
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -274,8 +273,6 @@ export class SearchSource {
    * @param options
    */
   fetch$(options: ISearchOptions = {}) {
-    const { getConfig } = this.dependencies;
-
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -284,9 +281,7 @@ export class SearchSource {
           options.indexPattern = searchRequest.index;
         }
 
-        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
-          ? from(this.legacyFetch(searchRequest, options))
-          : this.fetchSearch$(searchRequest, options);
+        return this.fetchSearch$(searchRequest, options);
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
@@ -477,27 +472,6 @@ export class SearchSource {
         });
       }),
       map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
-    );
-  }
-
-  /**
-   * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
-   */
-  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { getConfig, legacy, onResponse } = this.dependencies;
-
-    return await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        getConfig,
-        onResponse,
-        legacy,
-      }
     );
   }
 

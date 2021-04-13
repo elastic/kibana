@@ -53,6 +53,7 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { NowProviderInternalContract } from '../now_provider';
 import { getKibanaContext } from './expressions/kibana_context';
+import { ES_SEARCH_STRATEGY, UI_SETTINGS } from '..';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -157,10 +158,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, notifications, uiSettings }: CoreStart,
+    { http, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search = ((request, options) => {
+    const search = ((request, options = {}) => {
+      // Use the sync search strategy if legacy search is enabled.
+      // This still uses bfetch for batching.
+      const useSyncSearch = uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES);
+      if (!options?.strategy && useSyncSearch) {
+        options.strategy = ES_SEARCH_STRATEGY;
+      }
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
