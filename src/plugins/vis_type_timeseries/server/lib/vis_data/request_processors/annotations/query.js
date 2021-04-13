@@ -22,7 +22,7 @@ export function query(
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const timeField = (annotation.time_field || annotationIndex.indexPattern?.timeField) ?? '';
+    const timeField = (annotation.time_field || annotationIndex.indexPattern?.timeFieldName) ?? '';
 
     validateField(timeField, annotationIndex);
 
