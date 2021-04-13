@@ -88,6 +88,7 @@ readonly links: {
             readonly top_hits: string;
         };
         readonly runtimeFields: {
+            readonly overview: string;
             readonly mapping: string;
         };
         readonly scriptedFields: {
@@ -114,9 +115,10 @@ readonly links: {
         };
         readonly query: {
             readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuerySyntax: string;
+            readonly percolate: string;
+            readonly queryDsl: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -127,6 +129,7 @@ readonly links: {
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -143,6 +146,7 @@ readonly links: {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
             updateTransform: string;
