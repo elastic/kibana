@@ -71,44 +71,44 @@ export const registerCollector: RegisterCollector = ({
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             threshold: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             eql: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             machine_learning: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             threat_match: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             elastic_total: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
+              cases: { type: 'long' },
             },
             custom_total: {
               enabled: { type: 'long' },
               disabled: { type: 'long' },
               alerts: { type: 'long' },
-              cases: { type: 'long' }
-            }
+              cases: { type: 'long' },
+            },
           },
           detection_rule_detail: {
             type: 'array',
@@ -122,9 +122,9 @@ export const registerCollector: RegisterCollector = ({
               created_on: { type: 'keyword' },
               updated_on: { type: 'keyword' },
               alert_count_daily: { type: 'long' },
-              cases_count_daily: { type: 'long' }
-            }
-          }
+              cases_count_daily: { type: 'long' },
+            },
+          },
         },
         ml_jobs: {
           type: 'array',

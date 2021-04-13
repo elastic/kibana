@@ -61,6 +61,8 @@ interface DetectionRuleParms {
   type: string;
 }
 
+/* eslint-disable complexity */
+
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
 /**
@@ -509,7 +511,7 @@ export const getDetectionRuleMetrics = async (
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
 
-    let detectionAlertsResp: AlertsAggregationResponse | undefined;
+    const detectionAlertsResp: AlertsAggregationResponse | undefined;
     // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
     ({ body: detectionAlertsResp } = await esClient.search({
       index: '.siem-signals-pjhampton-default', // TODO:PH pass in siem-sigs index
