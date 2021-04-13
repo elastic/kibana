@@ -8,18 +8,20 @@
 
 import { query } from './query';
 
-describe('query(req, panel, series)', () => {
+describe('query', () => {
   let panel;
   let series;
   let req;
+  let seriesIndex;
 
   const config = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
   };
+
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
@@ -32,17 +34,18 @@ describe('query(req, panel, series)', () => {
       interval: '10s',
     };
     series = { id: 'test' };
+    seriesIndex = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    query(req, panel, series, config)(next)({});
+    query(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns doc with query for timerange', () => {
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -69,7 +72,7 @@ describe('query(req, panel, series)', () => {
   test('returns doc with query for timerange (offset by 1h)', () => {
     series.offset_time = '1h';
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -94,7 +97,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with global query', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -108,7 +111,7 @@ describe('query(req, panel, series)', () => {
       },
     ];
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -147,7 +150,7 @@ describe('query(req, panel, series)', () => {
   test('returns doc with series filter', () => {
     series.filter = { query: 'host:web-server', language: 'lucene' };
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -186,7 +189,7 @@ describe('query(req, panel, series)', () => {
     });
   });
   test('returns doc with panel filter and global', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -201,7 +204,7 @@ describe('query(req, panel, series)', () => {
     ];
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -253,7 +256,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with panel filter (ignoring globals)', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -269,7 +272,7 @@ describe('query(req, panel, series)', () => {
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     panel.ignore_global_filter = true;
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -309,7 +312,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with panel filter (ignoring globals from series)', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -325,7 +328,7 @@ describe('query(req, panel, series)', () => {
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     series.ignore_global_filter = true;
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = query(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {

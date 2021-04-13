@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../../../hooks';
 import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AgentPolicy } from '../../../types';
+import type { AgentPolicy } from '../../../types';
 
 interface Props {
   agentPolicy: AgentPolicy;

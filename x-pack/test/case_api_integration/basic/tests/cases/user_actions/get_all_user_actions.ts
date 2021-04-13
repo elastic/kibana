@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { CommentType } from '../../../../../../plugins/case/common/api';
+import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   userActionPostResp,
   defaultUser,

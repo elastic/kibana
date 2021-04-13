@@ -159,14 +159,22 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
+    xpack.actions.preconfiguredAlertHistoryEsIndex
     xpack.actions.preconfigured
     xpack.actions.proxyHeaders
     xpack.actions.proxyRejectUnauthorizedCertificates
     xpack.actions.proxyUrl
+    xpack.actions.proxyBypassHosts
+    xpack.actions.proxyOnlyHosts
     xpack.actions.rejectUnauthorized
+    xpack.actions.maxResponseContentLength
+    xpack.actions.responseTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.healthCheck.interval
+    xpack.alerting.invalidateApiKeysTask.interval
+    xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled

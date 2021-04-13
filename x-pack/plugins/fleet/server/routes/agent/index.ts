@@ -37,7 +37,7 @@ import {
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
-import { FleetConfigType } from '../..';
+import type { FleetConfigType } from '../..';
 
 import {
   getAgentsHandler,
@@ -125,7 +125,7 @@ export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postNewAgentActionHandlerBuilder({
-      getAgent: AgentService.getAgent,
+      getAgent: AgentService.getAgentById,
       createAgentAction: AgentService.createAgentAction,
     })
   );

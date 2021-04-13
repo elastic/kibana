@@ -11,7 +11,6 @@ import {
   getImportRulesRequestOverwriteTrue,
   getEmptyFindResult,
   getResult,
-  getEmptyIndex,
   getFindResultWithSingleHit,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
@@ -25,6 +24,8 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -33,7 +34,7 @@ describe('import_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -41,11 +42,15 @@ describe('import_rules_route', () => {
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+    );
     importRulesRoute(server.router, config, ml);
   });
 
@@ -124,7 +129,10 @@ describe('import_rules_route', () => {
 
     test('returns an error if the index does not exist', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+      );
       const response = await server.inject(request, context);
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
@@ -135,9 +143,12 @@ describe('import_rules_route', () => {
     });
 
     test('returns an error when cluster throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise({
+          body: new Error('Test error'),
+        })
+      );
 
       const response = await server.inject(request, context);
       expect(response.status).toEqual(500);

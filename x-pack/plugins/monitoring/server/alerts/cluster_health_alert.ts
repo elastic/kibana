@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -17,7 +18,7 @@ import {
   AlertClusterHealth,
   AlertInstanceState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   ALERT_CLUSTER_HEALTH,
   LEGACY_ALERT_DETAILS,
@@ -25,7 +26,7 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -64,7 +65,7 @@ export class ClusterHealthAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -72,7 +73,7 @@ export class ClusterHealthAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const healths = await fetchClusterHealth(callCluster, clusters, esIndexPattern);
+    const healths = await fetchClusterHealth(esClient, clusters, esIndexPattern);
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =

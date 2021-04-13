@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -24,6 +23,10 @@ export default function (providerContext: FtrProviderContext) {
     let managedAgentPolicyId: string;
     let packagePolicyId: string;
     let packagePolicyId2: string;
+    before(async () => {
+      await getService('esArchiver').load('empty_kibana');
+      await getService('esArchiver').load('fleet/empty_fleet_server');
+    });
 
     before(async function () {
       if (!server.enabled) {
@@ -106,30 +109,12 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
     });
 
-    it('should fail on managed agent policies', async function () {
-      const { body } = await supertest
-        .put(`/api/fleet/package_policies/${packagePolicyId}`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-1',
-          description: '',
-          namespace: 'updated_namespace',
-          policy_id: managedAgentPolicyId,
-          enabled: true,
-          output_id: '',
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
-          },
-        })
-        .expect(400);
-
-      expect(body.message).to.contain('Cannot update integrations of managed policy');
+    after(async () => {
+      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('empty_kibana');
     });
 
-    it('should work with valid values', async function () {
+    it('should work with valid values on "regular" policies', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
@@ -138,6 +123,26 @@ export default function (providerContext: FtrProviderContext) {
           description: '',
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+    });
+
+    it('should work with valid values on hosted policies', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: managedAgentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],

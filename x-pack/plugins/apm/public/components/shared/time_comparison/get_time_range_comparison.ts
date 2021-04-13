@@ -43,11 +43,11 @@ export function getTimeRangeComparison({
   start,
   end,
 }: {
-  comparisonType: TimeRangeComparisonType;
+  comparisonType?: TimeRangeComparisonType;
   start?: string;
   end?: string;
 }) {
-  if (!start || !end) {
+  if (!comparisonType || !start || !end) {
     return {};
   }
 

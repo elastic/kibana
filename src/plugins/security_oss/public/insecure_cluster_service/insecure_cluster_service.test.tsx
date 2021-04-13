@@ -7,7 +7,6 @@
  */
 
 import { nextTick } from '@kbn/test/jest';
-
 import { coreMock } from 'src/core/public/mocks';
 
 import { mockAppStateService } from '../app_state/app_state_service.mock';

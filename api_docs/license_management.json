@@ -22,15 +22,13 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/license_management/public/plugin.ts",
-            "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/license_management/public/plugin.ts#L29"
+            "lineNumber": 29
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 28,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/license_management/public/plugin.ts#L28"
+        "lineNumber": 28
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -43,8 +41,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/license_management/public/plugin.ts#L31"
+        "lineNumber": 31
       },
       "signature": [
         "void"

@@ -15,7 +15,7 @@ import {
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];

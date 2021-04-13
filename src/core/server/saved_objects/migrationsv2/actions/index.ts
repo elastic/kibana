@@ -9,33 +9,26 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
+import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsRawDoc } from '../../serialization';
+import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 export type { RetryableEsClientError };
 
-export const isRetryableEsClientResponse = (
-  res: Either.Either<any, unknown>
-): res is Either.Left<RetryableEsClientError> => {
-  return Either.isLeft(res) && res.left.type === 'retryable_es_client_error';
-};
-
 /**
- * Batch size for updateByQuery, reindex & search operations. Smaller batches
- * reduce the memory pressure on Elasticsearch and Kibana so are less likely
- * to cause failures.
- * TODO (profile/tune): How much smaller can we make this number before it
- * starts impacting how long migrations take to perform?
+ * Batch size for updateByQuery and reindex operations.
+ * Uses the default value of 1000 for Elasticsearch reindex operation.
  */
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 1_000;
 const DEFAULT_TIMEOUT = '60s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
@@ -43,6 +36,27 @@ const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
 const INDEX_NUMBER_OF_SHARDS = 1;
 /** Wait for all shards to be active before starting an operation */
 const WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE = 'all';
+
+// Map of left response 'type' string -> response interface
+export interface ActionErrorTypeMap {
+  wait_for_task_completion_timeout: WaitForTaskCompletionTimeout;
+  retryable_es_client_error: RetryableEsClientError;
+  index_not_found_exception: IndexNotFound;
+  target_index_had_write_block: TargetIndexHadWriteBlock;
+  incompatible_mapping_exception: IncompatibleMappingException;
+  alias_not_found_exception: AliasNotFound;
+  remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
+}
+
+/**
+ * Type guard for narrowing the type of a left
+ */
+export function isLeftTypeof<T extends keyof ActionErrorTypeMap>(
+  res: any,
+  typeString: T
+): res is ActionErrorTypeMap[T] {
+  return res.type === typeString;
+}
 
 export type FetchIndexResponse = Record<
   string,
@@ -56,21 +70,27 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
-  return client.indices
-    .get(
-      {
-        index: indicesToFetch,
-        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-      },
-      { ignore: [404], maxRetries: 0 }
-    )
-    .then(({ body }) => {
-      return Either.right(body);
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
+  () => {
+    return client.indices
+      .get(
+        {
+          index: indicesToFetch,
+          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+        },
+        { ignore: [404], maxRetries: 0 }
+      )
+      .then(({ body }) => {
+        return Either.right(body);
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
+export interface IndexNotFound {
+  type: 'index_not_found_exception';
+  index: string;
+}
 /**
  * Sets a write block in place for the given index. If the response includes
  * `acknowledged: true` all in-progress writes have drained and no further
@@ -84,7 +104,7 @@ export const setWriteBlock = (
   client: ElasticsearchClient,
   index: string
 ): TaskEither.TaskEither<
-  { type: 'index_not_found_exception' } | RetryableEsClientError,
+  IndexNotFound | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
   return client.indices
@@ -98,7 +118,7 @@ export const setWriteBlock = (
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }
     )
-    .then((res) => {
+    .then((res: any) => {
       return res.body.acknowledged === true
         ? Either.right('set_write_block_succeeded' as const)
         : Either.left({
@@ -109,7 +129,7 @@ export const setWriteBlock = (
     .catch((e: ElasticsearchClientError) => {
       if (e instanceof EsErrors.ResponseError) {
         if (e.message === 'index_not_found_exception') {
-          return Either.left({ type: 'index_not_found_exception' as const });
+          return Either.left({ type: 'index_not_found_exception' as const, index });
         }
       }
       throw e;
@@ -134,7 +154,11 @@ export const removeWriteBlock = (
         // Don't change any existing settings
         preserve_existing: true,
         body: {
-          'index.blocks.write': false,
+          index: {
+            blocks: {
+              write: false,
+            },
+          },
         },
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -161,12 +185,13 @@ export const removeWriteBlock = (
  * yellow at any point in the future. So ultimately data-redundancy is up to
  * users to maintain.
  */
-const waitForIndexStatusYellow = (
+export const waitForIndexStatusYellow = (
   client: ElasticsearchClient,
-  index: string
+  index: string,
+  timeout = DEFAULT_TIMEOUT
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
-    .health({ index, wait_for_status: 'yellow', timeout: '30s' })
+    .health({ index, wait_for_status: 'yellow', timeout })
     .then(() => {
       return Either.right({});
     })
@@ -182,19 +207,18 @@ export type CloneIndexResponse = AcknowledgeResponse;
  * This method adds some additional logic to the ES clone index API:
  *  - it is idempotent, if it gets called multiple times subsequent calls will
  *    wait for the first clone operation to complete (up to 60s)
- *  - the first call will wait up to 90s for the cluster state and all shards
+ *  - the first call will wait up to 120s for the cluster state and all shards
  *    to be updated.
  */
 export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
-  target: string
-): TaskEither.TaskEither<
-  RetryableEsClientError | { type: 'index_not_found_exception'; index: string },
-  CloneIndexResponse
-> => {
+  target: string,
+  /** only used for testing */
+  timeout = DEFAULT_TIMEOUT
+): TaskEither.TaskEither<RetryableEsClientError | IndexNotFound, CloneIndexResponse> => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | { type: 'index_not_found_exception'; index: string },
+    RetryableEsClientError | IndexNotFound,
     AcknowledgeResponse
   > = () => {
     return client.indices
@@ -220,7 +244,7 @@ export const cloneIndex = (
               },
             },
           },
-          timeout: DEFAULT_TIMEOUT,
+          timeout,
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
@@ -270,7 +294,7 @@ export const cloneIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForIndexStatusYellow(client, target),
+          waitForIndexStatusYellow(client, target, timeout),
           TaskEither.map((value) => {
             /** When the index status is 'green' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };
@@ -285,8 +309,40 @@ interface WaitForTaskResponse {
   error: Option.Option<{ type: string; reason: string; index: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
-  description: string;
+  description?: string;
 }
+
+/**
+ * After waiting for the specificed timeout, the task has not yet completed.
+ *
+ * When querying the tasks API we use `wait_for_completion=true` to block the
+ * request until the task completes. If after the `timeout`, the task still has
+ * not completed we return this error. This does not mean that the task itelf
+ * has reached a timeout, Elasticsearch will continue to run the task.
+ */
+export interface WaitForTaskCompletionTimeout {
+  /** After waiting for the specificed timeout, the task has not yet completed. */
+  readonly type: 'wait_for_task_completion_timeout';
+  readonly message: string;
+  readonly error?: Error;
+}
+
+const catchWaitForTaskCompletionTimeout = (
+  e: ResponseError
+): Either.Either<WaitForTaskCompletionTimeout, never> => {
+  if (
+    e.body?.error?.type === 'timeout_exception' ||
+    e.body?.error?.type === 'receive_timeout_transport_exception'
+  ) {
+    return Either.left({
+      type: 'wait_for_task_completion_timeout' as const,
+      message: `[${e.body.error.type}] ${e.body.error.reason}`,
+      error: e,
+    });
+  } else {
+    throw e;
+  }
+};
 
 /**
  * Blocks for up to 60s or until a task completes.
@@ -297,14 +353,12 @@ const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
   timeout: string
-): TaskEither.TaskEither<RetryableEsClientError, WaitForTaskResponse> => () => {
+): TaskEither.TaskEither<
+  RetryableEsClientError | WaitForTaskCompletionTimeout,
+  WaitForTaskResponse
+> => () => {
   return client.tasks
-    .get<{
-      completed: boolean;
-      response: { failures: any[] };
-      task: { description: string };
-      error: { type: string; reason: string; index: string };
-    }>({
+    .get({
       task_id: taskId,
       wait_for_completion: true,
       timeout,
@@ -314,11 +368,13 @@ const waitForTask = (
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
+        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
       });
     })
+    .catch(catchWaitForTaskCompletionTimeout)
     .catch(catchRetryableEsClientErrors);
 };
 
@@ -359,7 +415,7 @@ export const pickupUpdatedMappings = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId });
+      return Either.right({ taskId: String(taskId!) });
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -381,13 +437,17 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>,
-  requireAlias: boolean
+  requireAlias: boolean,
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be availble in the upgraded index.
+   */
+  unusedTypesToExclude: Option.Option<string[]>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
-      // @ts-expect-error This API isn't documented
       require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents
@@ -396,6 +456,15 @@ export const reindex = (
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
+          // Exclude saved object types
+          query: Option.fold<string[], QueryContainer | undefined>(
+            () => undefined,
+            (types) => ({
+              bool: {
+                must_not: types.map((type) => ({ term: { type } })),
+              },
+            })
+          )(unusedTypesToExclude),
         },
         dest: {
           index: targetIndex,
@@ -416,13 +485,21 @@ export const reindex = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId });
+      return Either.right({ taskId: String(taskId) });
     })
     .catch(catchRetryableEsClientErrors);
 };
 
 interface WaitForReindexTaskFailure {
-  cause: { type: string; reason: string };
+  readonly cause: { type: string; reason: string };
+}
+
+export interface TargetIndexHadWriteBlock {
+  type: 'target_index_had_write_block';
+}
+
+export interface IncompatibleMappingException {
+  type: 'incompatible_mapping_exception';
 }
 
 export const waitForReindexTask = flow(
@@ -431,10 +508,11 @@ export const waitForReindexTask = flow(
     (
       res
     ): TaskEither.TaskEither<
-      | { type: 'index_not_found_exception'; index: string }
-      | { type: 'target_index_had_write_block' }
-      | { type: 'incompatible_mapping_exception' }
-      | RetryableEsClientError,
+      | IndexNotFound
+      | TargetIndexHadWriteBlock
+      | IncompatibleMappingException
+      | RetryableEsClientError
+      | WaitForTaskCompletionTimeout,
       'reindex_succeeded'
     > => {
       const failureIsAWriteBlock = ({ cause: { type, reason } }: WaitForReindexTaskFailure) =>
@@ -505,7 +583,12 @@ export const verifyReindex = (
 export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
   TaskEither.chain(
-    (res): TaskEither.TaskEither<RetryableEsClientError, 'pickup_updated_mappings_succeeded'> => {
+    (
+      res
+    ): TaskEither.TaskEither<
+      RetryableEsClientError | WaitForTaskCompletionTimeout,
+      'pickup_updated_mappings_succeeded'
+    > => {
       // We don't catch or type failures/errors because they should never
       // occur in our migration algorithm and we don't have any business logic
       // for dealing with it. If something happens we'll just crash and try
@@ -527,6 +610,14 @@ export const waitForPickupUpdatedMappingsTask = flow(
   )
 );
 
+export interface AliasNotFound {
+  type: 'alias_not_found_exception';
+}
+
+export interface RemoveIndexNotAConcreteIndex {
+  type: 'remove_index_not_a_concrete_index';
+}
+
 export type AliasAction =
   | { remove_index: { index: string } }
   | { remove: { index: string; alias: string; must_exist: boolean } }
@@ -539,10 +630,7 @@ export const updateAliases = (
   client: ElasticsearchClient,
   aliasActions: AliasAction[]
 ): TaskEither.TaskEither<
-  | { type: 'index_not_found_exception'; index: string }
-  | { type: 'alias_not_found_exception' }
-  | { type: 'remove_index_not_a_concrete_index' }
-  | RetryableEsClientError,
+  IndexNotFound | AliasNotFound | RemoveIndexNotAConcreteIndex | RetryableEsClientError,
   'update_aliases_succeeded'
 > => () => {
   return client.indices
@@ -624,7 +712,7 @@ export const createIndex = (
     const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
       acc[alias] = {};
       return acc;
-    }, {} as Record<string, {}>);
+    }, {} as Record<string, estypes.Alias>);
 
     return client.indices
       .create(
@@ -696,11 +784,11 @@ export const createIndex = (
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right('create_index_succeeded');
       } else {
-        // Otherwise, wait until the target index has a 'green' status.
+        // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow(client, indexName),
+          waitForIndexStatusYellow(client, indexName, DEFAULT_TIMEOUT),
           TaskEither.map(() => {
-            /** When the index status is 'green' we know that all shards were started */
+            /** When the index status is 'yellow' we know that all shards were started */
             return 'create_index_succeeded';
           })
         );
@@ -727,7 +815,7 @@ export const updateAndPickupMappings = (
     'update_mappings_succeeded'
   > = () => {
     return client.indices
-      .putMapping<Record<string, any>, IndexMapping>({
+      .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
         body: mappings,
@@ -763,6 +851,12 @@ export interface SearchResponse {
   outdatedDocuments: SavedObjectsRawDoc[];
 }
 
+interface SearchForOutdatedDocumentsOptions {
+  batchSize: number;
+  targetIndex: string;
+  outdatedDocumentsQuery?: estypes.QueryContainer;
+}
+
 /**
  * Search for outdated saved object documents with the provided query. Will
  * return one batch of documents. Searching should be repeated until no more
@@ -770,26 +864,19 @@ export interface SearchResponse {
  */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
-  index: string,
-  query: Record<string, unknown>
+  options: SearchForOutdatedDocumentsOptions
 ): TaskEither.TaskEither<RetryableEsClientError, SearchResponse> => () => {
   return client
-    .search<{
-      // when `filter_path` is specified, ES doesn't return empty arrays, so if
-      // there are no search results res.body.hits will be undefined.
-      hits?: {
-        hits?: SavedObjectsRawDoc[];
-      };
-    }>({
-      index,
-      // Optimize search performance by sorting by the "natural" index order
-      sort: ['_doc'],
+    .search<SavedObjectsRawDocSource>({
+      index: options.targetIndex,
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
-      size: BATCH_SIZE,
+      size: options.batchSize,
       body: {
-        query,
+        query: options.outdatedDocumentsQuery,
+        // Optimize search performance by sorting by the "natural" index order
+        sort: ['_doc'],
       },
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
@@ -811,7 +898,9 @@ export const searchForOutdatedDocuments = (
         'hits.hits._primary_term',
       ],
     })
-    .then((res) => Either.right({ outdatedDocuments: res.body.hits?.hits ?? [] }))
+    .then((res) =>
+      Either.right({ outdatedDocuments: (res.body.hits?.hits as SavedObjectsRawDoc[]) ?? [] })
+    )
     .catch(catchRetryableEsClientErrors);
 };
 
@@ -825,20 +914,7 @@ export const bulkOverwriteTransformedDocuments = (
   transformedDocs: SavedObjectsRawDoc[]
 ): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
-    .bulk<{
-      took: number;
-      errors: boolean;
-      items: [
-        {
-          index: {
-            _id: string;
-            status: number;
-            // the filter_path ensures that only items with errors are returned
-            error: { type: string; reason: string };
-          };
-        }
-      ];
-    }>({
+    .bulk({
       // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
       // can't bulkIndex to an alias with require_alias=true. This means if
       // users tamper during this operation (delete indices or restore a
@@ -880,7 +956,7 @@ export const bulkOverwriteTransformedDocuments = (
       // Filter out version_conflict_engine_exception since these just mean
       // that another instance already updated these documents
       const errors = (res.body.items ?? []).filter(
-        (item) => item.index.error.type !== 'version_conflict_engine_exception'
+        (item) => item.index?.error?.type !== 'version_conflict_engine_exception'
       );
       if (errors.length === 0) {
         return Either.right('bulk_index_succeeded' as const);

@@ -8,17 +8,28 @@
 import { produce } from 'immer';
 
 import { SerializedPolicy } from '../../../../../common/types';
-
 import { splitSizeAndUnits } from '../../../lib/policies';
-
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
-
+import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
+import { CLOUD_DEFAULT_REPO } from '../constants';
 
-export const deserializer = (policy: SerializedPolicy): FormInternal => {
+export const createDeserializer = (isCloudEnabled: boolean) => (
+  policy: SerializedPolicy
+): FormInternal => {
   const {
-    phases: { hot, warm, cold, delete: deletePhase },
+    phases: { hot, warm, cold, frozen, delete: deletePhase },
   } = policy;
+
+  let defaultRepository = getDefaultRepository([
+    hot?.actions.searchable_snapshot,
+    cold?.actions.searchable_snapshot,
+    frozen?.actions.searchable_snapshot,
+  ]);
+
+  if (!defaultRepository && isCloudEnabled) {
+    defaultRepository = CLOUD_DEFAULT_REPO;
+  }
 
   const _meta: FormInternal['_meta'] = {
     hot: {
@@ -40,9 +51,18 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
+      readonlyEnabled: Boolean(cold?.actions?.readonly),
+    },
+    frozen: {
+      enabled: Boolean(frozen),
+      dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
+      freezeEnabled: Boolean(frozen?.actions?.freeze),
     },
     delete: {
       enabled: Boolean(deletePhase),
+    },
+    searchableSnapshot: {
+      repository: defaultRepository,
     },
   };
 
@@ -91,6 +111,14 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
           const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
           draft.phases.cold.min_age = minAge.size;
           draft._meta.cold.minAgeUnit = minAge.units;
+        }
+      }
+
+      if (draft.phases.frozen) {
+        if (draft.phases.frozen.min_age) {
+          const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
+          draft.phases.frozen.min_age = minAge.size;
+          draft._meta.frozen.minAgeUnit = minAge.units;
         }
       }
 

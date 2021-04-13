@@ -14,16 +14,15 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';
 import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import {
+  EMPTY_ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPINGS_DESCRIPTION,
+} from '../../../shared/role_mapping/constants';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
 
-import {
-  EMPTY_ROLE_MAPPINGS_TITLE,
-  EMPTY_ROLE_MAPPINGS_BODY,
-  ROLE_MAPPINGS_TABLE_HEADER,
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from './constants';
+import { EMPTY_ROLE_MAPPINGS_BODY, ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 

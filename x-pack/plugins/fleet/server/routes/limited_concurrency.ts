@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 import type {
   CoreSetup,
   LifecycleResponseFactory,

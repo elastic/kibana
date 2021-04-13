@@ -19,6 +19,8 @@ import {
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
+import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
+import { defaultMonacoEditorWidth } from './constants';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
@@ -26,7 +28,7 @@ export const getRenderCellValueFn = (
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
+  const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
     ? (rowsFlattened[rowIndex] as Record<string, unknown>)
     : undefined;
@@ -75,6 +77,9 @@ export const getRenderCellValueFn = (
     const sourcePairs: Array<[string, string]> = [];
     Object.entries(innerColumns).forEach(([key, values]) => {
       const subField = indexPattern.getFieldByName(key);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
         : { convert: (v: string, ...rest: unknown[]) => String(v) };
@@ -88,7 +93,7 @@ export const getRenderCellValueFn = (
         )
         .join(', ');
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, formatted]);
+      pairs.push([displayKey ? displayKey : key, formatted]);
     });
 
     return (
@@ -106,10 +111,18 @@ export const getRenderCellValueFn = (
     );
   }
 
+  if (typeof rowFlattened[columnId] === 'object' && isDetails) {
+    return (
+      <JsonCodeEditor
+        json={rowFlattened[columnId] as Record<string, any>}
+        width={defaultMonacoEditorWidth}
+      />
+    );
+  }
+
   if (field && field.type === '_source') {
     if (isDetails) {
-      // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(row, null, 2)}</span>;
+      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 
@@ -120,7 +133,10 @@ export const getRenderCellValueFn = (
 
     Object.entries(formatted).forEach(([key, val]) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, val as string]);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
+      pairs.push([displayKey ? displayKey : key, val as string]);
     });
 
     return (

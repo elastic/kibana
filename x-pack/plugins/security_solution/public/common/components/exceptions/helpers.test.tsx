@@ -29,6 +29,8 @@ import {
   defaultEndpointExceptionItems,
   getFileCodeSignature,
   getProcessCodeSignature,
+  retrieveAlertOsTypes,
+  filterIndexPatterns,
 } from './helpers';
 import { AlertData, EmptyEntry } from './types';
 import {
@@ -48,6 +50,7 @@ import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import {
   ENTRIES,
   ENTRIES_WITH_IDS,
@@ -59,11 +62,44 @@ import {
   EntriesArray,
   OsTypeArray,
 } from '../../../../../lists/common/schemas';
-import { IIndexPattern } from 'src/plugins/data/common';
+import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
+
+const getMockIndexPattern = (): IIndexPattern => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
+const mockEndpointFields = [
+  {
+    name: 'file.path.caseless',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
+export const getEndpointField = (name: string) =>
+  mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -72,6 +108,25 @@ describe('Exception helpers', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
+  });
+
+  describe('#filterIndexPatterns', () => {
+    test('it returns index patterns without filtering if list type is "detection"', () => {
+      const mockIndexPatterns = getMockIndexPattern();
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection');
+
+      expect(output).toEqual(mockIndexPatterns);
+    });
+
+    test('it returns filtered index patterns if list type is "endpoint"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint');
+
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
+    });
   });
 
   describe('#getOperatorType', () => {
@@ -533,6 +588,25 @@ describe('Exception helpers', () => {
     });
   });
 
+  describe('#retrieveAlertOsTypes', () => {
+    test('it should retrieve os type if alert data is provided', () => {
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        host: { os: { family: 'windows' } },
+      };
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows'];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should return default os types if alert data is not provided', () => {
+      const result = retrieveAlertOsTypes();
+      const expected = ['windows', 'macos'];
+      expect(result).toEqual(expected);
+    });
+  });
+
   describe('#entryHasListType', () => {
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
@@ -723,15 +797,16 @@ describe('Exception helpers', () => {
       expect(prepopulatedItem.entries).toEqual([
         {
           entries: [
-            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
-            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: '' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
-        { field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
-        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'event.code', operator: 'included', type: 'match', value: '' },
       ]);
     });
 
@@ -748,24 +823,39 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'someSubjectName',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some-file-path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some-hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some-event-code',
+        },
       ]);
     });
   });
@@ -943,47 +1033,77 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
       ]);
       expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject_2',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
       ]);
     });
 
@@ -1014,59 +1134,91 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'process.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'process.executable',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
         {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
           field: 'Ransomware.feature',
           operator: 'included',
           type: 'match',
           value: 'some ransomware feature',
         },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
       ]);
       expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject_2',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
           ],
           field: 'process.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'process.executable',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
         {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
           field: 'Ransomware.feature',
           operator: 'included',
           type: 'match',
           value: 'some ransomware feature',
         },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
       ]);
     });
   });

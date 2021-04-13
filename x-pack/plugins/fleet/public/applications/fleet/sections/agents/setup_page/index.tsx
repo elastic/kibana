@@ -27,7 +27,7 @@ import {
 
 import { useStartServices, sendPostFleetSetup } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
-import { GetFleetStatusResponse } from '../../../types';
+import type { GetFleetStatusResponse } from '../../../types';
 
 export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
   isMissing,

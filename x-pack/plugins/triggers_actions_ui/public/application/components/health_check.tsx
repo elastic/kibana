@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
-import { alertingFrameworkHealth } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
+import { alertingFrameworkHealth } from '../lib/alert_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -118,7 +118,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
             {
-              defaultMessage: 'To create an alert, set a value for ',
+              defaultMessage: 'To create a rule, set a value for ',
             }
           )}
           <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
@@ -185,7 +185,7 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle"
-          defaultMessage="You must enable Alerts and Actions"
+          defaultMessage="You must enable Alerting and Actions"
         />
       </h2>
     }
@@ -193,11 +193,11 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
       <div className={`${className}__body`}>
         <p role="banner">
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsError', {
-            defaultMessage: 'To create an alert, set alerts and actions plugins enabled. ',
+            defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
           })}
           <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
-              defaultMessage: 'Learn how to enable Alerts and Actions.',
+              defaultMessage: 'Learn how.',
             })}
           </EuiLink>
         </p>
@@ -231,7 +231,7 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
               {
-                defaultMessage: 'Learn how',
+                defaultMessage: 'Learn how.',
               }
             )}
           </EuiLink>

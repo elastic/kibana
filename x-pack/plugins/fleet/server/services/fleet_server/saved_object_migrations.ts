@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 import {
   ENROLLMENT_API_KEYS_INDEX,
@@ -25,6 +25,7 @@ import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollme
 import { appContextService } from '../app_context';
 import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
+import { invalidateAPIKeys } from '../api_keys';
 
 export async function runFleetServerMigration() {
   // If Agents are not setup skip as there is nothing to migrate
@@ -56,6 +57,7 @@ function getInternalUserSOClient() {
 async function migrateAgents() {
   const esClient = appContextService.getInternalUserESClient();
   const soClient = getInternalUserSOClient();
+  const logger = appContextService.getLogger();
   let hasMore = true;
   while (hasMore) {
     const res = await soClient.find({
@@ -75,11 +77,19 @@ async function migrateAgents() {
           .getEncryptedSavedObjects()
           .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, so.id);
 
+        await invalidateAPIKeys(
+          [attributes.access_api_key_id, attributes.default_api_key_id].filter(
+            (keyId): keyId is string => keyId !== undefined
+          )
+        ).catch((error) => {
+          logger.error(`Invalidating API keys for agent ${so.id} failed: ${error.message}`);
+        });
+
         const body: FleetServerAgent = {
           type: attributes.type,
-          active: attributes.active,
+          active: false,
           enrolled_at: attributes.enrolled_at,
-          unenrolled_at: attributes.unenrolled_at,
+          unenrolled_at: new Date().toISOString(),
           unenrollment_started_at: attributes.unenrollment_started_at,
           upgraded_at: attributes.upgraded_at,
           upgrade_started_at: attributes.upgrade_started_at,
@@ -167,8 +177,10 @@ async function migrateAgentPolicies() {
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
         track_total_hits: true,
+        ignore_unavailable: true,
       });
 
+      // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
         return agentPolicyService.createFleetPolicyChangeFleetServer(
           soClient,

@@ -31,12 +31,7 @@ jest.mock('../../lib/reindexing', () => {
   };
 });
 
-import {
-  IndexGroup,
-  ReindexSavedObject,
-  ReindexStatus,
-  ReindexWarning,
-} from '../../../common/types';
+import { IndexGroup, ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
@@ -90,7 +85,12 @@ describe('reindex API', () => {
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
       });
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce([
-        ReindexWarning.customTypeName,
+        {
+          warningType: 'customTypeName',
+          meta: {
+            typeName: 'my_mapping_type',
+          },
+        },
       ]);
 
       const resp = await routeDependencies.router.getHandler({
@@ -110,7 +110,14 @@ describe('reindex API', () => {
       expect(resp.status).toEqual(200);
       const data = resp.payload;
       expect(data.reindexOp).toEqual({ indexName: 'wowIndex', status: ReindexStatus.inProgress });
-      expect(data.warnings).toEqual([0]);
+      expect(data.warnings).toEqual([
+        {
+          warningType: 'customTypeName',
+          meta: {
+            typeName: 'my_mapping_type',
+          },
+        },
+      ]);
     });
 
     it("returns null for both if reindex operation doesn't exist and index doesn't exist", async () => {

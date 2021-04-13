@@ -8,8 +8,8 @@
 
 import type { Plugin } from 'src/core/public';
 
-import type { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 import type { SpacesApi } from './api';
+import type { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 
 export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPluginStart, {}, {}> {
   private api?: SpacesApi;

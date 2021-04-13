@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -27,7 +27,7 @@ type MetricColumn<T> = FormattedIndexPatternColumn &
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
   max: 'aggMax',
-  avg: 'aggAvg',
+  average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
 };
@@ -76,7 +76,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     isTransferable: (column, newIndexPattern) => {
       const newField = newIndexPattern.getFieldByName(column.sourceField);
-
       return Boolean(
         newField &&
           supportedTypes.includes(newField.type) &&
@@ -99,10 +98,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        params:
-          previousColumn && previousColumn.dataType === 'number'
-            ? previousColumn.params
-            : undefined,
+        filter: previousColumn?.filter,
+        params: getFormatFromPreviousColumn(previousColumn),
       } as T),
     onFieldChange: (oldColumn, field) => {
       return {
@@ -121,11 +118,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    filterable: true,
   } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
-export type AvgIndexPatternColumn = MetricColumn<'avg'>;
+export type AvgIndexPatternColumn = MetricColumn<'average'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -155,7 +153,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
-  type: 'avg',
+  type: 'average',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',

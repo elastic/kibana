@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../../case/common/api';
+import { CaseStatuses } from '../../../../cases/common/api';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,

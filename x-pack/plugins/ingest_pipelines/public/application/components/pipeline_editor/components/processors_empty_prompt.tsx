@@ -39,11 +39,7 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
             defaultMessage="Use processors to transform data before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink
-                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
-                  target="_blank"
-                  external
-                >
+                <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank" external>
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {

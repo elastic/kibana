@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { spacesApiMock } from '../api.mock';
-
 import type { SpacesOssPluginSetup, SpacesOssPluginStart } from '../';
+import { spacesApiMock } from '../api.mock';
 
 const createSetupContract = (): jest.Mocked<SpacesOssPluginSetup> => ({
   registerSpacesApi: jest.fn(),

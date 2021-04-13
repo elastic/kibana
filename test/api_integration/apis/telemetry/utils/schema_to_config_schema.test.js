@@ -151,5 +151,23 @@ describe(`assertTelemetryPayload`, () => {
         { im_only_passing_through_data: [{ docs: { field: 1 } }] }
       )
     ).not.toThrow();
+
+    // Even when properties exist
+    expect(() =>
+      assertTelemetryPayload(
+        {
+          root: {
+            properties: {
+              im_only_passing_through_data: {
+                type: 'pass_through',
+                properties: {},
+              },
+            },
+          },
+          plugins: { properties: {} },
+        },
+        { im_only_passing_through_data: [{ docs: { field: 1 } }] }
+      )
+    ).not.toThrow();
   });
 });

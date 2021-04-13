@@ -25,9 +25,9 @@ import {
 import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
+import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
@@ -602,14 +602,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         for (const id of analyticsIds) {
           try {
             const { body } = allSpaces
-              ? await client.asInternalUser.ml.getDataFrameAnalytics<{
-                  data_frame_analytics: DataFrameAnalyticsConfig[];
-                }>({
+              ? await client.asInternalUser.ml.getDataFrameAnalytics({
                   id,
                 })
-              : await mlClient.getDataFrameAnalytics<{
-                  data_frame_analytics: DataFrameAnalyticsConfig[];
-                }>({
+              : await mlClient.getDataFrameAnalytics({
                   id,
                 });
             results[id] = body.data_frame_analytics.length > 0;
@@ -666,6 +662,38 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
           });
         }
 
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/validate Validate the data frame analytics job config
+   * @apiName ValidateDataFrameAnalytics
+   * @apiDescription Validates the data frame analytics job config.
+   *
+   * @apiSchema (body) dataAnalyticsJobConfigSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/validate',
+      validate: {
+        body: dataAnalyticsJobConfigSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      const jobConfig = request.body;
+      try {
+        const results = await validateAnalyticsJob(client, jobConfig);
         return response.ok({
           body: results,
         });

@@ -20,9 +20,9 @@ import {
   CommentType,
   AssociationType,
   CaseType,
-} from '../../../../case/common/api';
+} from '../../../../cases/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import { ConnectorTypes } from '../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../cases/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';

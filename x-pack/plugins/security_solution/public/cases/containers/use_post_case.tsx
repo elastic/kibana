@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CasePostRequest } from '../../../../case/common/api';
+import { CasePostRequest } from '../../../../cases/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { postCase } from './api';
 import * as i18n from './translations';

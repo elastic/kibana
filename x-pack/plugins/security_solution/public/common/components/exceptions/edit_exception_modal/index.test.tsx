@@ -21,14 +21,15 @@ import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
-import * as builder from '../builder';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { ExceptionBuilder } from '../../../../shared_imports';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiBreakpoints: {
       l: '1200px',
@@ -37,7 +38,7 @@ const mockTheme = {
       m: '10px',
     },
   },
-};
+});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
@@ -45,19 +46,28 @@ jest.mock('../use_add_exception');
 jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../builder');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../../shared_imports', () => {
+  const originalModule = jest.requireActual('../../../../shared_imports');
+
+  return {
+    ...originalModule,
+    ExceptionBuilder: {
+      ExceptionBuilderComponent: () => ({} as JSX.Element),
+    },
+  };
+});
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof builder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.ExceptionBuilderComponent>
   >;
 
   beforeEach(() => {
     ExceptionBuilderComponent = jest
-      .spyOn(builder, 'ExceptionBuilderComponent')
+      .spyOn(ExceptionBuilder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
 
     (useSignalIndex as jest.Mock).mockReturnValue({

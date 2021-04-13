@@ -176,9 +176,6 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -220,6 +217,7 @@ export {
 } from '../common';
 
 export {
+  IScopedSearchClient,
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
@@ -262,8 +260,6 @@ export const search = {
     toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };

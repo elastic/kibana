@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AlertMonitorStatus } from './alert_monitor_status';
 export {
   ToggleAlertFlyoutButton,
   ToggleAlertFlyoutButtonProps,

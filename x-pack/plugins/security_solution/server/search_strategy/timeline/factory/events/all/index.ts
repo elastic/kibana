@@ -53,6 +53,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       ...response,
       inspect,
       edges,
+      // @ts-expect-error code doesn't handle TotalHits
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,

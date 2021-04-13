@@ -9,6 +9,7 @@ import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { CoreStart, NotificationsStart } from 'src/core/public';
 
@@ -40,7 +41,13 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
       <EuiPageBody restrictWidth>
         <EuiPanel>
           <EuiText data-test-subj={'userDisplayName'}>
-            <h1>{getUserDisplayName(currentUser)}</h1>
+            <h1>
+              <FormattedMessage
+                id="xpack.security.account.pageTitle"
+                defaultMessage="Settings for {strongUsername}"
+                values={{ strongUsername: <strong>{getUserDisplayName(currentUser)}</strong> }}
+              />
+            </h1>
           </EuiText>
 
           <EuiSpacer size="xl" />

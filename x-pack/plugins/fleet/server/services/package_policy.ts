@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -37,9 +37,8 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  CallESAsCurrentUser,
 } from '../types';
-import { ExternalCallback } from '..';
+import type { ExternalCallback } from '..';
 
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -60,16 +59,15 @@ class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
-    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
+    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean; force?: boolean }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
     }
-    if (parentAgentPolicy.is_managed) {
+    if (parentAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(
         `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
       );
@@ -79,7 +77,9 @@ class PackagePolicyService {
         (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
       )
     ) {
-      throw new Error('There is already a package with the same name on this agent policy');
+      throw new IngestManagerError(
+        'There is already a package with the same name on this agent policy'
+      );
     }
 
     // Add ids to stream
@@ -94,7 +94,7 @@ class PackagePolicyService {
         ensureInstalledPackage({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
-          callCluster,
+          esClient,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,
@@ -108,7 +108,7 @@ class PackagePolicyService {
       if (isPackageLimited(pkgInfo)) {
         const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
-          throw new Error(
+          throw new IngestManagerError(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
@@ -142,6 +142,7 @@ class PackagePolicyService {
       {
         user: options?.user,
         bumpRevision: options?.bumpRevision ?? true,
+        force: options?.force,
       }
     );
 
@@ -318,18 +319,14 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (parentAgentPolicy.is_managed) {
-        throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
-      }
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) =>
-            siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) =>
+          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -373,7 +370,7 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
+    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
   ): Promise<DeletePackagePoliciesResponse> {
     const result: DeletePackagePoliciesResponse = [];
 
@@ -391,6 +388,7 @@ class PackagePolicyService {
             [packagePolicy.id],
             {
               user: options?.user,
+              force: options?.force,
             }
           );
         }

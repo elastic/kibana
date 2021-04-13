@@ -28,11 +28,11 @@ import type { ProcessedImportResponse } from 'src/plugins/saved_objects_manageme
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
+import { useSpaces } from '../../spaces_context';
 import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
-import { useSpaces } from '../../spaces_context';
 
 export interface CopyToSpaceFlyoutProps {
   onClose: () => void;

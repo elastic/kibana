@@ -20,17 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../..';
-import { Boost } from '../../types';
+import { ValueBoost } from '../../types';
 
 interface Props {
-  boost: Boost;
+  boost: ValueBoost;
   index: number;
   name: string;
 }
 
 export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
   const { updateBoostValue, removeBoostValue, addBoostValue } = useActions(RelevanceTuningLogic);
-  const values = boost.value || [''];
+  const values = boost.value;
 
   return (
     <>

@@ -11,6 +11,8 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } fr
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { getDocLinks } from '../services';
+
 function VegaHelpMenu() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
@@ -30,7 +32,7 @@ function VegaHelpMenu() {
   const items = [
     <EuiContextMenuItem
       key="vegaHelp"
-      href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
+      href={getDocLinks().links.visualize.vega}
       target="_blank"
       onClick={closePopover}
     >

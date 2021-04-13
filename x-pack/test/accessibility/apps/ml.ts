@@ -114,10 +114,11 @@ export default function ({ getService }: FtrProviderContext) {
             description: 'Test calendar',
           });
           await ml.api.createCalendarEvents(calendarId, [
+            // @ts-expect-error not full interface
             {
               description: eventDescription,
-              start_time: 1513641600000,
-              end_time: 1513728000000,
+              start_time: '1513641600000',
+              end_time: '1513728000000',
             },
           ]);
 
@@ -273,6 +274,12 @@ export default function ({ getService }: FtrProviderContext) {
         it('data frame analytics create job additional options step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaJobId);
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job validation step for outlier job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await a11y.testAppSnapshot();
         });
 

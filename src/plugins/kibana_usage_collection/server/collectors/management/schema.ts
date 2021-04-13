@@ -43,6 +43,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'banners:textContent': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   // non-sensitive
   'visualize:enableLabs': {
     type: 'boolean',
@@ -193,10 +197,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     },
   },
   'context:defaultSize': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'discover:aggs:terms:size': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -409,6 +409,30 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'apm:enableServiceOverview': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInspectEsQueries': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:placement': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:textColor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:backgroundColor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableAlertingExperience': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:presentation:unifiedToolbar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

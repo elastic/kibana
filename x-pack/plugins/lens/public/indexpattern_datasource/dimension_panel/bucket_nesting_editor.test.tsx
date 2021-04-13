@@ -134,7 +134,7 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ operationType: 'avg', isBucketed: false }),
+            a: mockCol({ operationType: 'average', isBucketed: false }),
             b: mockCol({ operationType: 'max', isBucketed: false }),
             c: mockCol({ operationType: 'min', isBucketed: false }),
           },

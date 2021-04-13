@@ -7,7 +7,8 @@
 
 import os from 'os';
 
-import { createFlagError, run, ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/dev-utils';
+import { createFlagError, run } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
 
 import type {

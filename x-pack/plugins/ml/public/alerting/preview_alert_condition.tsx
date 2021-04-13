@@ -152,7 +152,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     (alertParams.jobSelection?.jobIds?.length! > 0 ||
       alertParams.jobSelection?.groupIds?.length! > 0) &&
     !!alertParams.resultType &&
-    !!alertParams.severity &&
+    alertParams.severity !== undefined &&
     validationErrors === null;
 
   const isInvalid = lookBehindInterval !== undefined && !!validationErrors;

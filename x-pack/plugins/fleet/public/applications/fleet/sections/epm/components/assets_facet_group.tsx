@@ -19,12 +19,12 @@ import {
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
+import type {
   AssetsGroupedByServiceByType,
   AssetTypeToParts,
   KibanaAssetType,
-  entries,
 } from '../../../types';
+import { entries } from '../../../types';
 import {
   AssetIcons,
   AssetTitleMap,

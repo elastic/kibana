@@ -139,6 +139,13 @@ export function SavedQueryManagementComponentProvider({
       await testSubjects.click('savedQueryFormSaveButton');
     }
 
+    async savedQueryExist(title: string) {
+      await this.openSavedQueryManagementComponent();
+      const exists = testSubjects.exists(`~load-saved-query-${title}-button`);
+      await this.closeSavedQueryManagementComponent();
+      return exists;
+    }
+
     async savedQueryExistOrFail(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);

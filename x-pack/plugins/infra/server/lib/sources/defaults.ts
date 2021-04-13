@@ -10,7 +10,7 @@ import {
   LOGS_INDEX_PATTERN,
   TIMESTAMP_FIELD,
 } from '../../../common/constants';
-import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',

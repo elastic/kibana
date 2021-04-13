@@ -13,6 +13,7 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
+import { first } from 'rxjs/operators';
 import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
 import { addHelpMenuToAppChrome, DashboardPanelStorage } from './lib';
@@ -47,6 +48,7 @@ export const dashboardUrlParams = {
 export interface DashboardMountProps {
   appUnMounted: () => void;
   restorePreviousUrl: () => void;
+
   scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
   initializerContext: PluginInitializerContext;
@@ -80,6 +82,10 @@ export async function mountApp({
     savedObjectsTaggingOss,
   } = pluginsStart;
 
+  const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
+  const activeSpaceId = spacesApi && (await spacesApi.activeSpace$.pipe(first()).toPromise())?.id;
+  let globalEmbedSettings: DashboardEmbedSettings | undefined;
+
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
@@ -99,7 +105,10 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
-    dashboardPanelStorage: new DashboardPanelStorage(core.notifications.toasts),
+    dashboardPanelStorage: new DashboardPanelStorage(
+      core.notifications.toasts,
+      activeSpaceId || 'default'
+    ),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
@@ -141,9 +150,6 @@ export async function mountApp({
   const getDashboardEmbedSettings = (
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
-    if (!routeParams.embed) {
-      return undefined;
-    }
     return {
       forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
       forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
@@ -154,11 +160,13 @@ export async function mountApp({
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
     const routeParams = parse(routeProps.history.location.search);
-    const embedSettings = getDashboardEmbedSettings(routeParams);
+    if (routeParams.embed && !globalEmbedSettings) {
+      globalEmbedSettings = getDashboardEmbedSettings(routeParams);
+    }
     return (
       <DashboardApp
         history={routeProps.history}
-        embedSettings={embedSettings}
+        embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={(props: RedirectToProps) => redirect(routeProps, props)}
       />

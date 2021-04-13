@@ -44,7 +44,7 @@ export function createTimeSeriesQueryRoute(
 
     const result = await timeSeriesQuery({
       logger,
-      callCluster: ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
+      esClient: ctx.core.elasticsearch.client.asCurrentUser,
       query: req.body,
     });
 

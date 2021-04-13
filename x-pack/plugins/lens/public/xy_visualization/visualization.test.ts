@@ -587,6 +587,23 @@ describe('xy_visualization', () => {
   });
 
   describe('#getErrorMessages', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        label: 'MyOperation',
+      } as Operation);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+    });
+
     it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
         xyVisualization.getErrorMessages({
@@ -772,6 +789,32 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Missing Vertical axis.',
           longMessage: 'Layer 1 requires a field for the Vertical axis.',
+        },
+      ]);
+    });
+
+    it('should return an error when accessor type is of the wrong type', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'], // just use a single accessor to avoid too much noise
+              },
+            ],
+          },
+          frame.datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Vertical axis.',
+          longMessage:
+            'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
         },
       ]);
     });

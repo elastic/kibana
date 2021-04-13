@@ -10,8 +10,6 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiFieldSearch,
   EuiSpacer,
@@ -44,39 +42,39 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.title',
-                  {
-                    defaultMessage: 'Manage fields',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        {schemaFields.length > FIELD_FILTER_CUTOFF && (
-          <EuiFieldSearch
-            value={filterInputValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
+        <EuiSpacer size="s" />
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.title',
               {
-                defaultMessage: 'Filter {schemaFieldsLength} fields...',
-                values: {
-                  schemaFieldsLength: schemaFields.length,
-                },
+                defaultMessage: 'Manage fields',
               }
             )}
-            fullWidth
-          />
-        )}
+          </h2>
+        </EuiTitle>
         <EuiSpacer />
+        {schemaFields.length > FIELD_FILTER_CUTOFF && (
+          <>
+            <EuiFieldSearch
+              value={filterInputValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              placeholder={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
+                {
+                  defaultMessage: 'Filter {schemaFieldsLength} fields...',
+                  values: {
+                    schemaFieldsLength: schemaFields.length,
+                  },
+                }
+              )}
+              fullWidth
+            />
+            <EuiSpacer />
+          </>
+        )}
         {filteredSchemaFields.map((fieldName) => (
-          <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+          <EuiPanel key={fieldName} hasBorder className="relevanceTuningForm__panel">
             <EuiAccordion
               key={fieldName}
               id={fieldName}
@@ -115,7 +113,7 @@ export const RelevanceTuningForm: React.FC = () => {
             </EuiTitle>
             <EuiSpacer size="s" />
             {filteredSchemaFieldsWithConflicts.map((fieldName) => (
-              <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+              <EuiPanel key={fieldName} hasBorder className="relevanceTuningForm__panel">
                 <EuiTitle size="xs">
                   <h4 data-test-subj="DisabledField">{fieldName}</h4>
                 </EuiTitle>

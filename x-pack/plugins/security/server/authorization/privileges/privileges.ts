@@ -8,8 +8,8 @@
 import { uniq } from 'lodash';
 
 import type {
-  KibanaFeature,
   PluginSetupContract as FeaturesPluginSetup,
+  KibanaFeature,
 } from '../../../../features/server';
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';

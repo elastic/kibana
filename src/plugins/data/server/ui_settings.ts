@@ -304,23 +304,29 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: {
       name: i18n.translate('data.advancedSettings.histogram.barTargetTitle', {
-        defaultMessage: 'Target bars',
+        defaultMessage: 'Target buckets',
       }),
       value: 50,
       description: i18n.translate('data.advancedSettings.histogram.barTargetText', {
         defaultMessage:
-          'Attempt to generate around this many bars when using "auto" interval in date histograms',
+          'Attempt to generate around this many buckets when using "auto" interval in date and numeric histograms',
       }),
       schema: schema.number(),
     },
     [UI_SETTINGS.HISTOGRAM_MAX_BARS]: {
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
-        defaultMessage: 'Maximum bars',
+        defaultMessage: 'Maximum buckets',
       }),
       value: 100,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
-        defaultMessage:
-          'Never show more than this many bars in date histograms, scale values if needed',
+        defaultMessage: `
+          Limits the density of date and number histograms across Kibana
+          for better performance using a test query. If the test query would too many buckets,
+          the interval between buckets will be increased. This setting applies separately
+          to each histogram aggregation, and does not apply to other types of aggregation.
+          To find the maximum value of this setting, divide the Elasticsearch 'search.max_buckets'
+          value by the maximum number of aggregations in each visualization.
+        `,
       }),
       schema: schema.number(),
     },
@@ -417,7 +423,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.numberFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.numberFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -439,7 +445,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.percentFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.percentFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -461,7 +467,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.bytesFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -483,7 +489,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.currencyFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -509,7 +515,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.formattingLocaleText',
         values: {
           numeralLanguageLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate(
               'data.advancedSettings.format.formattingLocale.numeralLanguageLinkText',
               {

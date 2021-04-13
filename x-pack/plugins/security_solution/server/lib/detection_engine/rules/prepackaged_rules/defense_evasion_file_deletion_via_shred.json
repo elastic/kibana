@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "File Deletion via Shred",
   "query": "event.category:process and event.type:(start or process_started) and process.name:shred and process.args:(\"-u\" or \"--remove\" or \"-z\" or \"--zero\")",
   "risk_score": 21,
@@ -48,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiText,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 import type { Observable, Subscription } from 'rxjs';
@@ -30,6 +29,7 @@ export interface UserMenuLink {
   iconType: IconType;
   href: string;
   order?: number;
+  setAsProfile?: boolean;
 }
 
 interface Props {
@@ -123,35 +123,39 @@ export class SecurityNavControl extends Component<Props, State> {
     const isAnonymousUser = authenticatedUser?.authentication_provider.type === 'anonymous';
     const items: EuiContextMenuPanelItemDescriptor[] = [];
 
-    if (!isAnonymousUser) {
-      const profileMenuItem = {
-        name: (
-          <FormattedMessage
-            id="xpack.security.navControlComponent.editProfileLinkText"
-            defaultMessage="Profile"
-          />
-        ),
-        icon: <EuiIcon type="user" size="m" />,
-        href: editProfileUrl,
-        'data-test-subj': 'profileLink',
-      };
-      items.push(profileMenuItem);
-    }
-
     if (userMenuLinks.length) {
       const userMenuLinkMenuItems = userMenuLinks
         .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
         .map(({ label, iconType, href }: UserMenuLink) => ({
-          name: <EuiText>{label}</EuiText>,
+          name: label,
           icon: <EuiIcon type={iconType} size="m" />,
           href,
           'data-test-subj': `userMenuLink__${label}`,
         }));
+      items.push(...userMenuLinkMenuItems);
+    }
 
-      items.push(...userMenuLinkMenuItems, {
-        isSeparator: true,
-        key: 'securityNavControlComponent__userMenuLinksSeparator',
-      });
+    if (!isAnonymousUser) {
+      const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+      const profileMenuItem = {
+        name: (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkText"
+            defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
+            values={{ profileOverridden: hasCustomProfileLinks }}
+          />
+        ),
+        icon: <EuiIcon type={hasCustomProfileLinks ? 'controlsHorizontal' : 'user'} size="m" />,
+        href: editProfileUrl,
+        'data-test-subj': 'profileLink',
+      };
+
+      // Set this as the first link if there is no user-defined profile link
+      if (!hasCustomProfileLinks) {
+        items.unshift(profileMenuItem);
+      } else {
+        items.push(profileMenuItem);
+      }
     }
 
     const logoutMenuItem = {

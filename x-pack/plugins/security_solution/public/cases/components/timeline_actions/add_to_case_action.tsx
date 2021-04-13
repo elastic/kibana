@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CommentType, CaseStatuses } from '../../../../../case/common/api';
+import { CommentType, CaseStatuses } from '../../../../../cases/common/api';
 import { Ecs } from '../../../../common/ecs';
 import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -172,7 +172,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           size="s"
           iconType="folderClosed"
           onClick={openPopover}
-          disabled={isDisabled}
+          isDisabled={isDisabled}
         />
       </EuiToolTip>
     ),

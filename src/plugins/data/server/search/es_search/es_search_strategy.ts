@@ -8,7 +8,6 @@
 
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import type { SearchResponse } from 'elasticsearch';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
@@ -44,7 +43,7 @@ export const esSearchStrategyProvider = (
           ...getShardTimeout(config),
           ...request.params,
         };
-        const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+        const promise = esClient.asCurrentUser.search(params);
         const { body } = await shimAbortSignal(promise, abortSignal);
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);
@@ -53,6 +52,6 @@ export const esSearchStrategyProvider = (
       }
     };
 
-    return from(search()).pipe(tap(searchUsageObserver(logger, usage)));
+    return from(search()).pipe(tap(searchUsageObserver(logger, usage, options)));
   },
 });

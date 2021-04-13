@@ -37,7 +37,8 @@ const defaultConfig = {
 
 function createLayer(
   layerOptions: Partial<VectorLayerDescriptor> = {},
-  sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {}
+  sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
+  isTimeAware: boolean = false
 ): TiledVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -47,6 +48,14 @@ function createLayer(
     ...sourceOptions,
   };
   const mvtSource = new MVTSingleLayerVectorSource(sourceDescriptor);
+  if (isTimeAware) {
+    mvtSource.isTimeAware = async () => {
+      return true;
+    };
+    mvtSource.getApplyGlobalTime = () => {
+      return true;
+    };
+  }
 
   const defaultLayerOptions = {
     ...layerOptions,
@@ -107,62 +116,75 @@ describe('syncData', () => {
   });
 
   it('Should not resync when no changes to source params', async () => {
-    const layer1: TiledVectorLayer = createLayer({}, {});
-    const syncContext1 = new MockSyncContext({ dataFilters: {} });
-
-    await layer1.syncData(syncContext1);
-
     const dataRequestDescriptor: DataRequestDescriptor = {
       data: { ...defaultConfig },
       dataId: 'source',
     };
-    const layer2: TiledVectorLayer = createLayer(
+    const layer: TiledVectorLayer = createLayer(
       {
         __dataRequests: [dataRequestDescriptor],
       },
       {}
     );
-    const syncContext2 = new MockSyncContext({ dataFilters: {} });
-    await layer2.syncData(syncContext2);
+    const syncContext = new MockSyncContext({ dataFilters: {} });
+    await layer.syncData(syncContext);
     // @ts-expect-error
-    sinon.assert.notCalled(syncContext2.startLoading);
+    sinon.assert.notCalled(syncContext.startLoading);
     // @ts-expect-error
-    sinon.assert.notCalled(syncContext2.stopLoading);
+    sinon.assert.notCalled(syncContext.stopLoading);
+  });
+
+  it('Should resync when changes to syncContext', async () => {
+    const dataRequestDescriptor: DataRequestDescriptor = {
+      data: { ...defaultConfig },
+      dataId: 'source',
+    };
+    const layer: TiledVectorLayer = createLayer(
+      {
+        __dataRequests: [dataRequestDescriptor],
+      },
+      {},
+      true
+    );
+    const syncContext = new MockSyncContext({
+      dataFilters: {
+        timeFilters: {
+          from: 'now',
+          to: '30m',
+          mode: 'relative',
+        },
+      },
+    });
+    await layer.syncData(syncContext);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
   });
 
   describe('Should resync when changes to source params: ', () => {
-    [
-      { layerName: 'barfoo' },
-      { urlTemplate: 'https://sub.example.com/{z}/{x}/{y}.pbf' },
-      { minSourceZoom: 1 },
-      { maxSourceZoom: 12 },
-    ].forEach((changes) => {
+    [{ layerName: 'barfoo' }, { minSourceZoom: 1 }, { maxSourceZoom: 12 }].forEach((changes) => {
       it(`change in ${Object.keys(changes).join(',')}`, async () => {
-        const layer1: TiledVectorLayer = createLayer({}, {});
-        const syncContext1 = new MockSyncContext({ dataFilters: {} });
-
-        await layer1.syncData(syncContext1);
-
         const dataRequestDescriptor: DataRequestDescriptor = {
           data: defaultConfig,
           dataId: 'source',
         };
-        const layer2: TiledVectorLayer = createLayer(
+        const layer: TiledVectorLayer = createLayer(
           {
             __dataRequests: [dataRequestDescriptor],
           },
           changes
         );
-        const syncContext2 = new MockSyncContext({ dataFilters: {} });
-        await layer2.syncData(syncContext2);
+        const syncContext = new MockSyncContext({ dataFilters: {} });
+        await layer.syncData(syncContext);
 
         // @ts-expect-error
-        sinon.assert.calledOnce(syncContext2.startLoading);
+        sinon.assert.calledOnce(syncContext.startLoading);
         // @ts-expect-error
-        sinon.assert.calledOnce(syncContext2.stopLoading);
+        sinon.assert.calledOnce(syncContext.stopLoading);
 
         // @ts-expect-error
-        const call = syncContext2.stopLoading.getCall(0);
+        const call = syncContext.stopLoading.getCall(0);
         expect(call.args[2]).toEqual({ ...defaultConfig, ...changes });
       });
     });

@@ -18,5 +18,5 @@ it('returns the `JsonCodeEditor` component', () => {
     _score: 1,
     _source: { test: 123 },
   };
-  expect(shallow(<JsonCodeEditor hit={value} />)).toMatchSnapshot();
+  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
 });

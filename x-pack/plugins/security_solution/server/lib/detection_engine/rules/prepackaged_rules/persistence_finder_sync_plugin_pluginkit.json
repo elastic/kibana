@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Finder Sync Plugin Registered and Enabled",
   "query": "sequence by host.id, user.id with maxspan = 5s\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"pluginkit\" and process.args : \"-a\"]\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"pluginkit\" and\n    process.args : \"-e\" and process.args : \"use\" and process.args : \"-i\" and\n    not process.args :\n    (\n      \"com.google.GoogleDrive.FinderSyncAPIExtension\",\n      \"com.google.drivefs.findersync\",\n      \"com.boxcryptor.osx.Rednif\",\n      \"com.adobe.accmac.ACCFinderSync\",\n      \"com.microsoft.OneDrive.FinderSync\",\n      \"com.insynchq.Insync.Insync-Finder-Integration\",\n      \"com.box.desktop.findersyncext\"\n    )\n  ]\n",
   "references": [

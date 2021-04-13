@@ -21,7 +21,7 @@ export const postAgentAcksHandlerBuilder = function (
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
       const esClient = ackService.getElasticsearchClientContract();
-      const agent = await ackService.authenticateAgentWithAccessToken(soClient, esClient, request);
+      const agent = await ackService.authenticateAgentWithAccessToken(esClient, request);
       const agentEvents = request.body.events as AgentEvent[];
 
       // validate that all events are for the authorized agent obtained from the api key

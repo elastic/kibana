@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
 describe('fetchClusters', () => {
@@ -12,54 +16,60 @@ describe('fetchClusters', () => {
   const clusterName = 'monitoring';
 
   it('return a list of clusters', async () => {
-    const callCluster = jest.fn().mockImplementation(() => ({
-      hits: {
-        hits: [
-          {
-            _source: {
-              cluster_uuid: clusterUuid,
-              cluster_name: clusterName,
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _source: {
+                cluster_uuid: clusterUuid,
+                cluster_name: clusterName,
+              },
             },
-          },
-        ],
-      },
-    }));
+          ],
+        },
+      } as estypes.SearchResponse)
+    );
     const index = '.monitoring-es-*';
-    const result = await fetchClusters(callCluster, index);
+    const result = await fetchClusters(esClient, index);
     expect(result).toEqual([{ clusterUuid, clusterName }]);
   });
 
   it('return the metadata name if available', async () => {
     const metadataName = 'custom-monitoring';
-    const callCluster = jest.fn().mockImplementation(() => ({
-      hits: {
-        hits: [
-          {
-            _source: {
-              cluster_uuid: clusterUuid,
-              cluster_name: clusterName,
-              cluster_settings: {
-                cluster: {
-                  metadata: {
-                    display_name: metadataName,
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _source: {
+                cluster_uuid: clusterUuid,
+                cluster_name: clusterName,
+                cluster_settings: {
+                  cluster: {
+                    metadata: {
+                      display_name: metadataName,
+                    },
                   },
                 },
               },
             },
-          },
-        ],
-      },
-    }));
+          ],
+        },
+      } as estypes.SearchResponse)
+    );
     const index = '.monitoring-es-*';
-    const result = await fetchClusters(callCluster, index);
+    const result = await fetchClusters(esClient, index);
     expect(result).toEqual([{ clusterUuid, clusterName: metadataName }]);
   });
 
   it('should limit the time period in the query', async () => {
-    const callCluster = jest.fn();
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     const index = '.monitoring-es-*';
-    await fetchClusters(callCluster, index);
-    const params = callCluster.mock.calls[0][1];
-    expect(params.body.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
+    await fetchClusters(esClient, index);
+    const params = esClient.search.mock.calls[0][0] as any;
+    expect(params?.body?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
   });
 });

@@ -38,14 +38,6 @@ export const USER_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ROLE_SELECTOR_DISABLED_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleSelectorDisabledText',
-  {
-    defaultMessage:
-      'You need at least one admin role mapping before you can create a user role mapping.',
-  }
-);
-
 export const GROUP_ASSIGNMENT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentTitle',
   {
@@ -67,13 +59,6 @@ export const GROUP_ASSIGNMENT_ALL_GROUPS_LABEL = i18n.translate(
   }
 );
 
-export const EMPTY_ROLE_MAPPINGS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.emptyRoleMappingsTitle',
-  {
-    defaultMessage: 'No role mappings yet',
-  }
-);
-
 export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.emptyRoleMappingsBody',
   {
@@ -86,20 +71,5 @@ export const ROLE_MAPPINGS_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleMappingsTableHeader',
   {
     defaultMessage: 'Group Access',
-  }
-);
-
-export const ROLE_MAPPINGS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleMappingsTitle',
-  {
-    defaultMessage: 'Users & roles',
-  }
-);
-
-export const ROLE_MAPPINGS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleMappingsDescription',
-  {
-    defaultMessage:
-      'Define role mappings for elasticsearch-native and elasticsearch-saml authentication.',
   }
 );

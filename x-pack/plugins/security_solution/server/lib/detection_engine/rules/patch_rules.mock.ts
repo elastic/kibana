@@ -6,10 +6,10 @@
  */
 
 import { PatchRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { SanitizedAlert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { RuleTypeParams } from '../types';
 
 const rule: SanitizedAlert<RuleTypeParams> = {

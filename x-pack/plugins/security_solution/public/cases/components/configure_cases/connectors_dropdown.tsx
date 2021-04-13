@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../../../case/common/api';
+import { ConnectorTypes } from '../../../../../cases/common/api';
 import { ActionConnector } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
@@ -34,7 +34,7 @@ const EuiIconExtended = styled(EuiIcon)`
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
       </EuiFlexItem>
@@ -77,7 +77,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           {
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
                     type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}

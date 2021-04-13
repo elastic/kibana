@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flow } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -12,7 +13,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { TextEditor } from '../field_components';
 
-import { EDITOR_PX_HEIGHT, FieldsConfig } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig, from, to, isJSONStringValidator } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
@@ -26,7 +27,8 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldLabel', {
       defaultMessage: 'Pattern',
     }),
-    deserializer: String,
+    deserializer: flow(String, to.escapeBackslashes),
+    serializer: from.unescapeBackslashes,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldHelpText', {
       defaultMessage: 'Regular expression used to match substrings in the field.',
     }),
@@ -37,6 +39,9 @@ const fieldsConfig: FieldsConfig = {
             defaultMessage: 'A value is required.',
           })
         ),
+      },
+      {
+        validator: isJSONStringValidator,
       },
     ],
   },

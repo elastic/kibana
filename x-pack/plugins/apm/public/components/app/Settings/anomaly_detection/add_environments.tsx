@@ -21,26 +21,33 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 
 interface Props {
   currentEnvironments: string[];
   onCreateJobSuccess: () => void;
   onCancel: () => void;
 }
+
+type ApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/environments'>;
+const INITIAL_DATA: ApiResponse = { environments: [] };
+
 export function AddEnvironments({
   currentEnvironments,
   onCreateJobSuccess,
   onCancel,
 }: Props) {
   const { notifications, application } = useApmPluginContext().core;
+  const { anomalyDetectionJobsRefetch } = useAnomalyDetectionJobsContext();
   const canCreateJob = !!application.capabilities.ml.canCreateJob;
   const { toasts } = notifications;
-  const { data = [], status } = useFetcher(
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({
         endpoint: `GET /api/apm/settings/anomaly-detection/environments`,
@@ -49,7 +56,7 @@ export function AddEnvironments({
     { preservePreviousData: false }
   );
 
-  const environmentOptions = data.map((env) => ({
+  const environmentOptions = data.environments.map((env) => ({
     label: getEnvironmentLabel(env),
     value: env,
     disabled: currentEnvironments.includes(env),
@@ -158,6 +165,7 @@ export function AddEnvironments({
                 toasts,
               });
               if (success) {
+                anomalyDetectionJobsRefetch();
                 onCreateJobSuccess();
               }
               setIsSaving(false);

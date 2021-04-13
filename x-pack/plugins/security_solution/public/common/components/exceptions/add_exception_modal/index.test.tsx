@@ -12,14 +12,13 @@ import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useAsync } from '../../../../shared_imports';
+import { useAsync, ExceptionBuilder } from '../../../../shared_imports';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
@@ -30,8 +29,9 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { AlertData } from '../types';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiBreakpoints: {
       l: '1200px',
@@ -40,7 +40,7 @@ const mockTheme = {
       m: '10px',
     },
   },
-};
+});
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -48,7 +48,6 @@ jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
-jest.mock('../builder');
 jest.mock('../../../../shared_imports');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
 
@@ -58,12 +57,12 @@ describe('When the add exception modal is opened', () => {
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof builder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.ExceptionBuilderComponent>
   >;
   beforeEach(() => {
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest
-      .spyOn(builder, 'ExceptionBuilderComponent')
+      .spyOn(ExceptionBuilder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
 
     (useAsync as jest.Mock).mockImplementation(() => ({
