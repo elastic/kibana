@@ -139,6 +139,7 @@ export function DiscoverGridDocumentToolbarBtn({
     <EuiPopover
       closePopover={() => setIsSelectionPopoverOpen(false)}
       isOpen={isSelectionPopoverOpen}
+      panelPaddingSize="none"
       button={
         <EuiButtonEmpty
           size="xs"
