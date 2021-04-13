@@ -85,7 +85,8 @@ describe('actions', () => {
         'my_source_index',
         'my_target_index',
         Option.none,
-        false
+        false,
+        Option.none
       );
       try {
         await task();
