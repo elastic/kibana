@@ -7,7 +7,7 @@
 
 import './dimension_container.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -37,10 +37,10 @@ export function DimensionContainer({
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     handleClose();
     setFocusTrapIsEnabled(false);
-  };
+  }, [handleClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,12 +51,15 @@ export function DimensionContainer({
     }
   }, [isOpen]);
 
-  const closeOnEscape = (event: KeyboardEvent) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      closeFlyout();
-    }
-  };
+  const closeOnEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        event.preventDefault();
+        closeFlyout();
+      }
+    },
+    [closeFlyout]
+  );
 
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
