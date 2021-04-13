@@ -260,11 +260,3 @@ function sortByName(a: { name: string }, b: { name: string }) {
     return 0;
   }
 }
-
-export async function getKibanaSavedObject(
-  savedObjectsClient: SavedObjectsClientContract,
-  type: KibanaAssetType,
-  id: string
-) {
-  return savedObjectsClient.get(type, id);
-}
