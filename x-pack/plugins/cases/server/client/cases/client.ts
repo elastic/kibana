@@ -13,6 +13,7 @@ import {
   CasesResponse,
   CasesFindRequest,
   CasesFindResponse,
+  User,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -20,7 +21,7 @@ import { CasesClientArgs } from '../types';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
-import { get } from './get';
+import { get, getReporters, getTags } from './get';
 import { push } from './push';
 import { update } from './update';
 
@@ -46,6 +47,8 @@ export interface CasesSubClient {
   push(args: CasePush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
   delete(ids: string[]): Promise<void>;
+  getTags(): Promise<string[]>;
+  getReporters(): Promise<User[]>;
 }
 
 /**
@@ -121,6 +124,8 @@ export const createCasesSubClient = (
         logger,
       }),
     delete: (ids: string[]) => deleteCases(ids, args),
+    getTags: () => getTags(args),
+    getReporters: () => getReporters(args),
   };
 
   return Object.freeze(casesSubClient);

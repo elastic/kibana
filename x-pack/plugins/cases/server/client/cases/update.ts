@@ -19,7 +19,6 @@ import {
 } from 'kibana/server';
 
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import {} from '../../routes/api/utils';
 
 import {
   throwErrors,

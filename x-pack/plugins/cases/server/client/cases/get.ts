@@ -7,11 +7,12 @@
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
-import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
+import { CaseResponseRt, CaseResponse, ESCaseAttributes, User, UsersRt } from '../../../common/api';
 import { CaseService } from '../../services';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CasesClientArgs } from '..';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -92,3 +93,38 @@ export const get = async ({
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
 };
+
+/**
+ * Retrieves the tags from all the cases.
+ */
+export async function getTags({
+  savedObjectsClient: soClient,
+  caseService,
+  logger,
+}: CasesClientArgs): Promise<string[]> {
+  try {
+    return await caseService.getTags({
+      soClient,
+    });
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
+  }
+}
+
+/**
+ * Retrieves the reporters from all the cases.
+ */
+export async function getReporters({
+  savedObjectsClient: soClient,
+  caseService,
+  logger,
+}: CasesClientArgs): Promise<User[]> {
+  try {
+    const reporters = await caseService.getReporters({
+      soClient,
+    });
+    return UsersRt.encode(reporters);
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
+  }
+}
