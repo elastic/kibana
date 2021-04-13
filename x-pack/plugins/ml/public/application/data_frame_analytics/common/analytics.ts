@@ -523,6 +523,9 @@ export const loadEvalData = async ({
       [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
+        ...(jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+          ? { top_classes_field: `${resultsField}.top_classes` }
+          : {}),
         metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },

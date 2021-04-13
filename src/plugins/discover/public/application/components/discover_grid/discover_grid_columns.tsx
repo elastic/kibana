@@ -14,6 +14,7 @@ import { DiscoverGridSettings } from './types';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
+import { SelectButton } from './discover_grid_document_selection';
 
 export function getLeadControlColumns() {
   return [
@@ -30,6 +31,20 @@ export function getLeadControlColumns() {
         </EuiScreenReaderOnly>
       ),
       rowCellRender: ExpandButton,
+    },
+    {
+      id: 'select',
+      width: 32,
+      rowCellRender: SelectButton,
+      headerCellRender: () => (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('discover.selectColumnHeader', {
+              defaultMessage: 'Select column',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
     },
   ];
 }

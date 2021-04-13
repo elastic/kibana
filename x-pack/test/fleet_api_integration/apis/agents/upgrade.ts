@@ -26,11 +26,14 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
     });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
       await esArchiver.load('fleet/agents');
+    });
+    afterEach(async () => {
+      await esArchiver.unload('fleet/agents');
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');

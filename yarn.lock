@@ -2616,7 +2616,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-utils@link:packages/kbn-apm-utils":
+"@kbn/apm-utils@link:bazel-bin/packages/kbn-apm-utils/npm_module":
   version "0.0.0"
   uid ""
 

@@ -70,7 +70,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.tempIndex,
         Option.none,
         false,
-        state.unusedTypesToExclude
+        state.unusedTypesQuery
       ),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock(client, state.tempIndex),
@@ -115,7 +115,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.sourceIndex.value,
         state.preMigrationScript,
         false,
-        state.unusedTypesToExclude
+        state.unusedTypesQuery
       ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),

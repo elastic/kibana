@@ -84,7 +84,7 @@ export async function renderTemplates({
         answers.ui ? [] : 'public/**/*',
         answers.ui && !answers.internal ? [] : ['translations/**/*', 'i18nrc.json'],
         answers.server ? [] : 'server/**/*',
-        !answers.internal ? [] : ['eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
+        !answers.internal ? [] : ['.eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
       )
     ),
 
