@@ -38,7 +38,7 @@ import {
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import type { PackagePermissions } from '../../common';
+import type { FullAgentPolicyOutputPermissions, PackagePermissions } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   Settings,
@@ -749,31 +749,40 @@ class AgentPolicyService {
           }),
     };
 
-    const permissions = Object.fromEntries(
-      await Promise.all(
-        // Original type is `string[] | PackagePolicy[]`, but TS doesn't allow to `map()` over that.
-        (agentPolicy.package_policies as Array<string | PackagePolicy>).map(
-          async (packagePolicy): Promise<[string, PackagePermissions]> => {
-            if (typeof packagePolicy === 'string' || !packagePolicy.package) {
-              return ['_fallback', DEFAULT_PERMISSIONS];
+    const hasTightPermissions = appContextService.getConfig()?.agents.agentPolicyTightPermissions;
+    let permissions: FullAgentPolicyOutputPermissions;
+
+    if (hasTightPermissions) {
+      permissions = Object.fromEntries(
+        await Promise.all(
+          // Original type is `string[] | PackagePolicy[]`, but TS doesn't allow to `map()` over that.
+          (agentPolicy.package_policies as Array<string | PackagePolicy>).map(
+            async (packagePolicy): Promise<[string, PackagePermissions]> => {
+              if (typeof packagePolicy === 'string' || !packagePolicy.package) {
+                return ['_fallback', DEFAULT_PERMISSIONS];
+              }
+
+              const { name, version } = packagePolicy.package;
+
+              const packagePermissions = await getPackagePermissions(
+                soClient,
+                name,
+                version,
+                packagePolicy.namespace
+              );
+
+              return packagePermissions
+                ? [packagePolicy.name, packagePermissions]
+                : ['_fallback', DEFAULT_PERMISSIONS];
             }
-
-            const { name, version } = packagePolicy.package;
-
-            const packagePermissions = await getPackagePermissions(
-              soClient,
-              name,
-              version,
-              packagePolicy.namespace
-            );
-
-            return packagePermissions
-              ? [packagePolicy.name, packagePermissions]
-              : ['_fallback', DEFAULT_PERMISSIONS];
-          }
+          )
         )
-      )
-    );
+      );
+    } else {
+      permissions = {
+        _fallback: DEFAULT_PERMISSIONS,
+      };
+    }
 
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
