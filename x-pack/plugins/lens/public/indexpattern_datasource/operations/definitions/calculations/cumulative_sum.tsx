@@ -63,8 +63,7 @@ export const cumulativeSumOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined);
+    return ofName(columns[column.references[0]]?.label);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
@@ -72,7 +71,7 @@ export const cumulativeSumOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
+      label: ofName(ref && 'label' in ref ? ref.label : undefined),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,
