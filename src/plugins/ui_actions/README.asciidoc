@@ -3,8 +3,11 @@
 
 UI Actions plugins provides API to manage *triggers* and *actions*.
 
-*Triggers* are like events that can be "triggered". For, example one such
-trigger is when somebody applies filters on dashboard.
+*Trigger* is an abstract description of user's intent to perform an action
+(like user clicking on a value inside chart). It allows us to do runtime
+binding between code from different plugins. For, example one such
+trigger is when somebody applies filters on dashboard; another one is when
+somebody opens a Dashboard panel context menu.
 
 *Actions* are pieces of code that execute in response to a trigger. For example,
 to the dashboard filtering trigger multiple actions can be attached. Once a user
@@ -60,7 +63,7 @@ plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
 ----
 
 Now your `DO_SOMETHING` action will automatically execute when `MY_APP_PIE_CHART_CLICK`
-trigger is triggered; or, if more than one compatible action, is attached to
+trigger is triggered; or, if more than one compatible action is attached to
 that trigger, user will be presented with a context menu popup to select one
 action to execute.
 
