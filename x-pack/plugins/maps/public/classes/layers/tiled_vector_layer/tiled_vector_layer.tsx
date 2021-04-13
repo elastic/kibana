@@ -203,7 +203,7 @@ export class TiledVectorLayer extends VectorLayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
+  async syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);

@@ -119,7 +119,7 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
+  async syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
 
     const heatmapLayerId = this._getHeatmapLayerId();

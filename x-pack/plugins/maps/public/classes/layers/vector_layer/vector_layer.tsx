@@ -1000,10 +1000,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       : undefined;
   }
 
-  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
+  async syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
     this._syncFeatureCollectionWithMb(mbMap);
-    this._syncStylePropertiesWithMb(mbMap, timeslice);
+    await this._syncStylePropertiesWithMb(mbMap, timeslice);
   }
 
   _getMbPointLayerId() {

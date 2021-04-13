@@ -76,7 +76,7 @@ export interface ILayer {
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   canShowTooltip(): boolean;
-  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): Promise<void>;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
@@ -443,7 +443,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): Promise<void> {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 

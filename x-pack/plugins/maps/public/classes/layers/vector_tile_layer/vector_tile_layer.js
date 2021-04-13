@@ -153,7 +153,7 @@ export class VectorTileLayer extends TileLayer {
     });
   }
 
-  syncLayerWithMB(mbMap) {
+  async syncLayerWithMB(mbMap) {
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle) {
       return;
