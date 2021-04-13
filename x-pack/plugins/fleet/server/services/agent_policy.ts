@@ -19,7 +19,7 @@ import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_METADATA_INDEX,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -585,11 +585,8 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.preconfiguration_id) {
-      await esClient.index({
-        index: PRECONFIGURATION_METADATA_INDEX,
-        body: {
-          deleted_preconfiguration_id: String(agentPolicy.preconfiguration_id),
-        },
+      await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
+        preconfiguration_id: String(agentPolicy.preconfiguration_id),
       });
     }
 

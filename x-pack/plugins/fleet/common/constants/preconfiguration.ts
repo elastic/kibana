@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const PRECONFIGURATION_METADATA_INDEX = '.fleet-preconfiguration';
+export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
+  'fleet-preconfiguration-deletion-record';

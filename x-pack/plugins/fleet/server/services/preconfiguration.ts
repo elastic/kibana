@@ -19,7 +19,9 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
 } from '../../common';
-import { PRECONFIGURATION_METADATA_INDEX } from '../constants';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
+
+import { escapeSearchQueryPhrase } from './saved_object';
 
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
@@ -70,29 +72,21 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
     policies.map(async (preconfiguredAgentPolicy) => {
-      // Check to see if a preconfigured policy with te same preconfigurationId was already deleted by the user
-      try {
-        const preconfigurationId = String(preconfiguredAgentPolicy.preconfiguration_id);
-        const deletionRecord = await esClient.search({
-          index: PRECONFIGURATION_METADATA_INDEX,
-          body: {
-            query: {
-              match: {
-                deleted_preconfiguration_id: preconfigurationId,
-              },
-            },
-          },
-        });
-
-        const { total } = deletionRecord.body.hits;
-        const wasDeleted = (typeof total === 'number' ? total : total.value) > 0;
-        if (wasDeleted) {
-          return { created: false, deleted: preconfigurationId };
-        }
-      } catch (e) {
-        // If ES failed on an index not found error, ignore it. This means nothing has been deleted yet.
-        if (e.body.status !== 404) throw e;
+      // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
+      const preconfigurationId = String(preconfiguredAgentPolicy.id);
+      const searchParams = {
+        searchFields: ['preconfiguration_id'],
+        search: escapeSearchQueryPhrase(preconfigurationId),
+      };
+      const deletionRecords = await soClient.find({
+        type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+        ...searchParams,
+      });
+      const wasDeleted = deletionRecords.total > 0;
+      if (wasDeleted) {
+        return { created: false, deleted: preconfigurationId };
       }
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
