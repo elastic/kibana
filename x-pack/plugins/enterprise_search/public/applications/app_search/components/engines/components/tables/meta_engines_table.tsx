@@ -12,13 +12,10 @@ import { useActions, useValues } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { TelemetryLogic } from '../../../../../shared/telemetry';
 import { AppLogic } from '../../../../app_logic';
-import { ENGINE_PATH } from '../../../../routes';
-import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { EngineDetails } from '../../../engine/types';
 
+import { navigateToEngine } from './engine_link_helpers';
 import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
@@ -50,8 +47,6 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { expandedSourceEngines } = useValues(MetaEnginesTableLogic);
   const { hideRow, fetchOrDisplayRow } = useActions(MetaEnginesTableLogic);
-  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
-  const { navigateToUrl } = useValues(KibanaLogic);
   const {
     myRole: { canManageMetaEngines },
   } = useValues(AppLogic);
@@ -83,12 +78,6 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
     [expandedSourceEngines, conflictingEnginesSets]
   );
 
-  const sendEngineTableLinkClickTelemetry = () =>
-    sendAppSearchTelemetry({
-      action: 'clicked',
-      metric: 'engine_table_link',
-    });
-
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       ...NAME_COLUMN,
@@ -98,7 +87,6 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
           isExpanded={!!itemIdToExpandedRowMap[item.name]}
           hideRow={hideRow}
           showRow={fetchOrDisplayRow}
-          sendEngineTableLinkClickTelemetry={sendEngineTableLinkClickTelemetry}
         />
       ),
     },
@@ -128,10 +116,7 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
         ),
         type: 'icon',
         icon: 'eye',
-        onClick: (engineDetails) => {
-          sendEngineTableLinkClickTelemetry();
-          navigateToUrl(generateEncodedPath(ENGINE_PATH, { engineName: engineDetails.name }));
-        },
+        onClick: (engineDetails) => navigateToEngine(engineDetails.name),
       },
       {
         name: i18n.translate(

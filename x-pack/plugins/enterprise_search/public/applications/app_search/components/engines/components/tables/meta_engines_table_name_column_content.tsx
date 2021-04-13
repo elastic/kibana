@@ -11,34 +11,25 @@ import { EuiFlexGroup, EuiIcon, EuiHealth, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { ENGINE_PATH } from '../../../../routes';
-import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { EngineDetails } from '../../../engine/types';
+
+import { renderEngineLink } from './engine_link_helpers';
 
 interface MetaEnginesTableNameContentProps {
   isExpanded: boolean;
   item: EngineDetails;
   hideRow: (name: string) => void;
-  sendEngineTableLinkClickTelemetry: () => void;
   showRow: (name: string) => void;
 }
 
 export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameContentProps> = ({
   item: { name, schemaConflicts, engine_count: engineCount },
   isExpanded,
-  sendEngineTableLinkClickTelemetry,
   hideRow,
   showRow,
 }) => (
   <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiLinkTo
-      to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
-      onClick={sendEngineTableLinkClickTelemetry}
-      data-test-subj="EngineName"
-    >
-      <strong>{name}</strong>
-    </EuiLinkTo>
+    {renderEngineLink(name)}
     <button
       type="button"
       onClick={() => (isExpanded ? hideRow(name) : showRow(name))}

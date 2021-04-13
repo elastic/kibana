@@ -34,7 +34,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
           } as EngineDetails
         }
         isExpanded={false}
-        sendEngineTableLinkClickTelemetry={jest.fn()}
       />
     );
 
@@ -61,7 +60,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
             } as EngineDetails
           }
           isExpanded={false}
-          sendEngineTableLinkClickTelemetry={jest.fn()}
         />
       );
       wrapper.find('[data-test-subj="ExpandRowButton"]').at(0).simulate('click');
@@ -88,7 +86,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
             } as EngineDetails
           }
           isExpanded
-          sendEngineTableLinkClickTelemetry={jest.fn()}
         />
       );
       wrapper.find('[data-test-subj="ExpandRowButton"]').at(0).simulate('click');
@@ -119,7 +116,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
             } as EngineDetails
           }
           isExpanded
-          sendEngineTableLinkClickTelemetry={jest.fn()}
         />
       );
 
@@ -150,7 +146,6 @@ describe('MetaEnginesTableNameColumnContent', () => {
           } as EngineDetails
         }
         isExpanded
-        sendEngineTableLinkClickTelemetry={jest.fn()}
       />
     );
 

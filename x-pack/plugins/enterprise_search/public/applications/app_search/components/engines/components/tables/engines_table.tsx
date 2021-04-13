@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiBasicTable,
@@ -18,15 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { TelemetryLogic } from '../../../../../shared/telemetry';
 import { AppLogic } from '../../../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../../../constants';
-import { ENGINE_PATH } from '../../../../routes';
-import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { EngineDetails } from '../../../engine/types';
 
+import { renderEngineLink, navigateToEngine } from './engine_link_helpers';
 import {
   CREATED_AT_COLUMN,
   DOCUMENT_COUNT_COLUMN,
@@ -52,30 +48,14 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   onChange,
   onDeleteEngine,
 }) => {
-  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
-  const { navigateToUrl } = useValues(KibanaLogic);
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);
 
-  const sendEngineTableLinkClickTelemetry = () =>
-    sendAppSearchTelemetry({
-      action: 'clicked',
-      metric: 'engine_table_link',
-    });
-
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       ...NAME_COLUMN,
-      render: (name: string) => (
-        <EuiLinkTo
-          data-test-subj="EngineNameLink"
-          to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
-          onClick={sendEngineTableLinkClickTelemetry}
-        >
-          {name}
-        </EuiLinkTo>
-      ),
+      render: (name: string) => renderEngineLink(name),
     },
     CREATED_AT_COLUMN,
     LANGUAGE_COLUMN,
@@ -98,9 +78,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         ),
         type: 'icon',
         icon: 'eye',
-        onClick: (engineDetails) => {
-          sendEngineTableLinkClickTelemetry();
-          navigateToUrl(generateEncodedPath(ENGINE_PATH, { engineName: engineDetails.name }));
+        onClick: (engineDetails) => navigateToEngine(engineDetails.name),
         },
       },
       {
