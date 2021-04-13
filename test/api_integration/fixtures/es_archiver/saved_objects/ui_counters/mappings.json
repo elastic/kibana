@@ -36,9 +36,11 @@
           }
         },
         "usage-counters": {
+          "dynamic": false,
           "properties": {
-            "count": {
-              "type": "integer"
+            "domainId": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         },

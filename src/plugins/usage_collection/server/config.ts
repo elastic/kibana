@@ -14,7 +14,7 @@ export const configSchema = schema.object({
   usageCounters: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     retryCount: schema.number({ defaultValue: 1 }),
-    bufferDebounceMs: schema.number({ defaultValue: 5 * 1000 }),
+    bufferDurationMs: schema.duration({ defaultValue: '5s' }),
   }),
   uiCounters: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

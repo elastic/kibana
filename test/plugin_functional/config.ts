@@ -61,7 +61,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--corePluginDeprecations.secret=100',
         '--corePluginDeprecations.noLongerUsed=still_using',
         // for testing set debounce to 0 to immediately flush counters into saved objects.
-        '--usageCollection.usageCounters.bufferDebounceMs=0',
+        '--usageCollection.usageCounters.bufferDurationMs=0',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

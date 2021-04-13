@@ -20,7 +20,7 @@ export interface UsageCounterDeps {
   counter$: Rx.Subject<CounterMetric>;
 }
 
-export interface IncrementCounterConfig {
+export interface IncrementCounterParams {
   counterName: string;
   counterType?: string;
   incrementBy?: number;
@@ -35,8 +35,8 @@ export class UsageCounter {
     this.counter$ = counter$;
   }
 
-  public incrementCounter = (config: IncrementCounterConfig) => {
-    const { counterName, counterType = 'count', incrementBy = 1 } = config;
+  public incrementCounter = (params: IncrementCounterParams) => {
+    const { counterName, counterType = 'count', incrementBy = 1 } = params;
 
     this.counter$.next({
       counterName,

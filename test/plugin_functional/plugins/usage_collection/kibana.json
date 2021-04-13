@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["usageCollectionTestPlugin"],
-  "optionalPlugins": ["usageCollection"],
+  "requiredPlugins": ["usageCollection"],
   "server": true,
   "ui": false
 }

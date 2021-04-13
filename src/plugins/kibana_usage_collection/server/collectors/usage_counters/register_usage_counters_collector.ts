@@ -13,7 +13,6 @@ import {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
-  deserializeCounterKey,
 } from '../../../../usage_collection/server';
 
 interface UsageCounterEvent {
@@ -33,11 +32,9 @@ export function transformRawCounter(
   rawUsageCounter: UsageCountersSavedObject
 ): UsageCounterEvent | undefined {
   const {
-    id,
-    attributes: { count },
+    attributes: { count, counterName, counterType, domainId },
     updated_at: lastUpdatedAt,
   } = rawUsageCounter;
-  const { domainId, counterType, counterName } = deserializeCounterKey(id);
   const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
 
   if (domainId === 'uiCounter' || typeof count !== 'number' || count < 1) {
@@ -93,7 +90,8 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
         saved_objects: rawUsageCounters,
       } = await soClient.find<UsageCountersSavedObjectAttributes>({
         type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-        fields: ['count'],
+        fields: ['count', 'counterName', 'counterType', 'domainId'],
+        filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
         perPage: 10000,
       });
 
@@ -104,7 +102,6 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
             if (event) {
               acc.push(event);
             }
-            return acc;
           } catch (_) {
             // swallow error; allows sending successfully transformed objects.
           }

@@ -22,12 +22,12 @@ export type {
 export type {
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
+  IncrementCounterParams,
 } from './usage_counters';
 
 export {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   serializeCounterKey,
-  deserializeCounterKey,
   UsageCounter,
 } from './usage_counters';
 

@@ -11,9 +11,9 @@ import { UsageCounter } from '../../../../../src/plugins/usage_collection/server
 
 export function registerRoutes(http: HttpServiceSetup, usageCounter: UsageCounter) {
   const router = http.createRouter();
-  router.post(
+  router.get(
     {
-      path: '/api/usage_collection_test_plugin/',
+      path: '/api/usage_collection_test_plugin',
       validate: false,
     },
     async (context, req, res) => {

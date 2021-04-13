@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import {
   UsageCountersSavedObject,
-  deserializeCounterKey,
   serializeCounterKey,
 } from '../../../../src/plugins/usage_collection/server/usage_counters';
 
@@ -28,10 +27,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       .then(({ body }) => {
         expect(body.total).to.above(1);
         return (body.saved_objects as UsageCountersSavedObject[]).reduce((acc, savedObj) => {
-          const { counterName, domainId } = deserializeCounterKey(savedObj.id);
-
+          const { count, counterName, domainId } = savedObj.attributes;
           if (domainId === 'usageCollectionTestPlugin') {
-            const { count } = savedObj.attributes;
             acc[counterName] = count;
           }
 
@@ -61,10 +58,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('stores usage counters triggered by runtime activities', async () => {
-      await supertest
-        .post('/api/usage_collection_test_plugin/')
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      await supertest.get('/api/usage_collection_test_plugin').set('kbn-xsrf', 'true').expect(200);
 
       const { routeAccessed } = await getSavedObjectCounters();
       expect(routeAccessed).to.be(1);

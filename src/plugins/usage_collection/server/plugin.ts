@@ -76,7 +76,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     this.usageCountersService = new UsageCountersService({
       logger: this.logger.get('usage-collection', 'usage-counters-service'),
       retryCount: config.usageCounters.retryCount,
-      bufferDebounceMs: config.usageCounters.bufferDebounceMs,
+      bufferDurationMs: config.usageCounters.bufferDurationMs.asMilliseconds(),
     });
 
     const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);

@@ -7,7 +7,6 @@
  */
 
 import moment from 'moment';
-import { chain } from 'lodash';
 
 import {
   UICounterSavedObject,
@@ -21,7 +20,6 @@ import {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
-  deserializeCounterKey,
   serializeCounterKey,
 } from '../../../../usage_collection/server';
 
@@ -73,11 +71,9 @@ export function transformRawUsageCounterObject(
   rawUsageCounter: UsageCountersSavedObject
 ): UiCounterEvent | undefined {
   const {
-    id,
-    attributes: { count },
+    attributes: { count, counterName, counterType, domainId },
     updated_at: lastUpdatedAt,
   } = rawUsageCounter;
-  const { counterName, counterType, domainId } = deserializeCounterKey(id);
 
   if (domainId !== 'uiCounter' || typeof count !== 'number' || count < 1) {
     return;
@@ -101,7 +97,8 @@ export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
     saved_objects: rawUsageCounters,
   } = await soClient.find<UsageCountersSavedObjectAttributes>({
     type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    fields: ['count'],
+    fields: ['count', 'counterName', 'counterType', 'domainId'],
+    filter: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
     perPage: 10000,
   });
 
@@ -143,24 +140,18 @@ export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
     return acc;
   }, {} as Record<string, UiCounterEvent>);
 
-  return {
-    dailyEvents: chain(dailyEventsFromUsageCounters)
-      .mergeWith(
-        dailyEventsFromUiCounters,
-        (value: UiCounterEvent | undefined, srcValue: UiCounterEvent): UiCounterEvent => {
-          if (!value) {
-            return srcValue;
-          }
+  const mergedDailyCounters = Object.entries(dailyEventsFromUiCounters).reduce(
+    (acc, [key, value]) => {
+      if (acc[key]) {
+        value.total = acc[key].total + value.total;
+      }
+      acc[key] = value;
+      return acc;
+    },
+    dailyEventsFromUsageCounters
+  );
 
-          return {
-            ...srcValue,
-            total: srcValue.total + value.total,
-          };
-        }
-      )
-      .values()
-      .value(),
-  };
+  return { dailyEvents: Object.values(mergedDailyCounters) };
 }
 
 export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {

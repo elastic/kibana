@@ -19,7 +19,7 @@ const tick = () => {
 
 describe('UsageCountersService', () => {
   const retryCount = 1;
-  const bufferDebounceMs = 0;
+  const bufferDurationMs = 100;
   const mockNow = 1617954426939;
   const logger = loggingSystemMock.createLogger();
   const coreSetup = coreMock.createSetup();
@@ -34,7 +34,7 @@ describe('UsageCountersService', () => {
   });
 
   it('stores data in cache during setup', async () => {
-    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDebounceMs });
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
 
     const usageCounter = createUsageCounter('test-counter');
@@ -49,13 +49,13 @@ describe('UsageCountersService', () => {
   });
 
   it('registers savedObject type during setup', () => {
-    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDebounceMs });
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
     usageCountersService.setup(coreSetup);
     expect(coreSetup.savedObjects.registerType).toBeCalledTimes(1);
   });
 
   it('flushes cached data on start', async () => {
-    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDebounceMs });
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
     const mockIncrementCounter = jest.fn();
@@ -74,25 +74,25 @@ describe('UsageCountersService', () => {
     usageCountersService['source$'].complete();
 
     await expect(dataInSourcePromise).resolves.toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "counterName": "counterA",
-          "counterType": "count",
-          "domainId": "test-counter",
-          "incrementBy": 1,
-        },
-        Object {
-          "counterName": "counterA",
-          "counterType": "count",
-          "domainId": "test-counter",
-          "incrementBy": 1,
-        },
-      ]
-    `);
+                  Array [
+                    Object {
+                      "counterName": "counterA",
+                      "counterType": "count",
+                      "domainId": "test-counter",
+                      "incrementBy": 1,
+                    },
+                    Object {
+                      "counterName": "counterA",
+                      "counterType": "count",
+                      "domainId": "test-counter",
+                      "incrementBy": 1,
+                    },
+                  ]
+              `);
   });
 
   it('buffers data into savedObject', async () => {
-    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDebounceMs });
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
     const mockIncrementCounter = jest.fn().mockResolvedValue('success');
@@ -122,6 +122,13 @@ describe('UsageCountersService', () => {
               "incrementBy": 3,
             },
           ],
+          Object {
+            "upsertAttributes": Object {
+              "counterName": "counterA",
+              "counterType": "count",
+              "domainId": "test-counter",
+            },
+          },
         ],
         Array [
           "usage-counters",
@@ -132,6 +139,13 @@ describe('UsageCountersService', () => {
               "incrementBy": 1,
             },
           ],
+          Object {
+            "upsertAttributes": Object {
+              "counterName": "counterB",
+              "counterType": "count",
+              "domainId": "test-counter",
+            },
+          },
         ],
       ]
     `);
@@ -141,7 +155,7 @@ describe('UsageCountersService', () => {
     const usageCountersService = new UsageCountersService({
       logger,
       retryCount: 1,
-      bufferDebounceMs,
+      bufferDurationMs,
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
@@ -179,11 +193,11 @@ describe('UsageCountersService', () => {
     ]);
   });
 
-  it('buffers counters within `bufferDebounceMs` time', async () => {
+  it('buffers counters within `bufferDurationMs` time', async () => {
     const usageCountersService = new UsageCountersService({
       logger,
       retryCount,
-      bufferDebounceMs: 30000,
+      bufferDurationMs: 30000,
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();

@@ -26,7 +26,7 @@ import {
 export interface UsageCountersServiceDeps {
   logger: Logger;
   retryCount: number;
-  bufferDebounceMs: number;
+  bufferDurationMs: number;
 }
 
 export interface UsageCountersServiceSetup {
@@ -47,7 +47,7 @@ export interface UsageCountersServiceStartDeps {
 export class UsageCountersService {
   private readonly stop$ = new Rx.Subject();
   private readonly retryCount: number;
-  private readonly bufferDebounceMs: number;
+  private readonly bufferDurationMs: number;
 
   private readonly counterSets = new Map<string, UsageCounter>();
   private readonly source$ = new Rx.Subject<CounterMetric>();
@@ -58,10 +58,10 @@ export class UsageCountersService {
 
   private readonly logger: Logger;
 
-  constructor({ logger, retryCount, bufferDebounceMs }: UsageCountersServiceDeps) {
+  constructor({ logger, retryCount, bufferDurationMs }: UsageCountersServiceDeps) {
     this.logger = logger;
     this.retryCount = retryCount;
-    this.bufferDebounceMs = bufferDebounceMs;
+    this.bufferDurationMs = bufferDurationMs;
   }
 
   public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
@@ -103,7 +103,14 @@ export class UsageCountersService {
     const internalRepository = savedObjects.createInternalRepository();
     this.counter$
       .pipe(
-        rxOp.buffer(this.source$.pipe(rxOp.debounceTime(this.bufferDebounceMs))),
+        /* buffer source events every ${bufferDurationMs} */
+        rxOp.bufferTime(this.bufferDurationMs),
+        /**
+         * bufferTime will trigger every ${bufferDurationMs}
+         * regardless if source emitted anything or not.
+         * using filter will stop cut the pipe short
+         */
+        rxOp.filter((counters) => Array.isArray(counters) && counters.length > 0),
         rxOp.map((counters) => Object.values(this.mergeCounters(counters))),
         rxOp.takeUntil(this.stop$),
         rxOp.concatMap((counters) => this.storeDate$(counters, internalRepository))

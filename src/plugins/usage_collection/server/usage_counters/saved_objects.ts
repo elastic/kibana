@@ -16,6 +16,9 @@ import moment from 'moment';
 import { CounterMetric } from './usage_counter';
 
 export interface UsageCountersSavedObjectAttributes extends SavedObjectAttributes {
+  domainId: string;
+  counterName: string;
+  counterType: string;
   count: number;
 }
 
@@ -31,8 +34,9 @@ export const registerUsageCountersSavedObjectType = (
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      dynamic: false,
       properties: {
-        count: { type: 'integer' },
+        domainId: { type: 'keyword' },
       },
     },
   });
@@ -55,23 +59,11 @@ export const serializeCounterKey = ({
   return `${domainId}:${dayDate}:${counterType}:${counterName}`;
 };
 
-export const deserializeCounterKey = (key: string) => {
-  const [domainId, , counterType, ...restKey] = key.split(':');
-  const counterName = restKey.join(':');
-
-  return {
-    domainId,
-    counterName,
-    counterType,
-  };
-};
-
 export const storeCounter = async (
   counterMetric: CounterMetric,
   internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
 ) => {
   const { counterName, counterType, domainId, incrementBy } = counterMetric;
-
   const key = serializeCounterKey({
     date: moment.now(),
     domainId,
@@ -79,7 +71,16 @@ export const storeCounter = async (
     counterType,
   });
 
-  return await internalRepository.incrementCounter(USAGE_COUNTERS_SAVED_OBJECT_TYPE, key, [
-    { fieldName: 'count', incrementBy },
-  ]);
+  return await internalRepository.incrementCounter(
+    USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    key,
+    [{ fieldName: 'count', incrementBy }],
+    {
+      upsertAttributes: {
+        domainId,
+        counterName,
+        counterType,
+      },
+    }
+  );
 };

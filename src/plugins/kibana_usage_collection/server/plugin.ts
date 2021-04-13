@@ -52,11 +52,13 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
+  private stopRollingUiCounterIndicies$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
+    this.stopRollingUiCounterIndicies$ = new Subject<void>();
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
@@ -66,6 +68,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       usageCollection,
       coreSetup,
       this.metric$,
+      this.stopRollingUiCounterIndicies$,
       coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
@@ -81,12 +84,14 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public stop() {
     this.metric$.complete();
+    this.stopRollingUiCounterIndicies$.complete();
   }
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
     coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
+    stopRollingUiCounterIndicies$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
@@ -94,7 +99,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getCoreUsageDataService = () => this.coreUsageData!;
 
     registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(this.logger.get('ui-counters'), getSavedObjectsClient);
+    registerUiCountersRollups(
+      this.logger.get('ui-counters'),
+      stopRollingUiCounterIndicies$,
+      getSavedObjectsClient
+    );
     registerUiCountersUsageCollector(usageCollection);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);

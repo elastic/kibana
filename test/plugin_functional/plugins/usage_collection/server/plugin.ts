@@ -14,17 +14,13 @@ import {
 import { registerRoutes } from './routes';
 
 export interface TestPluginDepsSetup {
-  usageCollection?: UsageCollectionSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class UsageCollectionTestPlugin implements Plugin {
   private usageCounter?: UsageCounter;
 
   public setup(core: CoreSetup, { usageCollection }: TestPluginDepsSetup) {
-    if (!usageCollection) {
-      throw new Error('Optional plugin `usageCollection` is expected to be enabled for testing.');
-    }
-
     const usageCounter = usageCollection.createUsageCounter('usageCollectionTestPlugin');
 
     registerRoutes(core.http, usageCounter);
@@ -38,7 +34,7 @@ export class UsageCollectionTestPlugin implements Plugin {
 
   public start() {
     if (!this.usageCounter) {
-      throw new Error('Optional plugin `usageCollection` is expected to be enabled for testing.');
+      throw new Error('this.usageCounter is expected to be defined during setup.');
     }
     this.usageCounter.incrementCounter({ counterName: 'duringStart' });
   }

@@ -11,8 +11,14 @@ import type { UsageCountersSavedObject } from '../../../../../usage_collection/s
 export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
-    id: 'uiCounter:09042021:count:myApp:my_event_malformed',
-    attributes: { count: 13 },
+    id: 'uiCounter:09042021:count:myApp:my_event',
+    attributes: {
+      count: 13,
+      counterName: 'my_event',
+      counterType: 'count',
+      domainId: 'uiCounter',
+      timestamp: '2021-04-09T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.030Z',
@@ -20,7 +26,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId:09042021:count:some_event_name',
-    attributes: { count: 4 },
+    attributes: {
+      count: 4,
+      counterName: 'some_event_name',
+      counterType: 'count',
+      domainId: 'anotherDomainId',
+      timestamp: '2021-04-09T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-09T08:18:03.030Z',
@@ -28,7 +40,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId:09042021:count:some_event_name',
-    attributes: { count: 4 },
+    attributes: {
+      count: 4,
+      counterName: 'some_event_name',
+      counterType: 'count',
+      domainId: 'anotherDomainId',
+      timestamp: '2021-04-11T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-11T08:18:03.030Z',
@@ -36,7 +54,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId2:09042021:count:some_event_name',
-    attributes: { count: 1 },
+    attributes: {
+      count: 1,
+      counterName: 'some_event_name',
+      counterType: 'count',
+      domainId: 'anotherDomainId2',
+      timestamp: '2021-04-20T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-20T08:18:03.030Z',
@@ -44,8 +68,14 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId2:09042021:count:malformed_event',
-    // @ts-expect-error
-    attributes: { count: 'malformed' },
+    attributes: {
+      // @ts-expect-error
+      count: 'malformed',
+      counterName: 'malformed_event',
+      counterType: 'count',
+      domainId: 'anotherDomainId2',
+      timestamp: '2021-04-20T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-20T08:18:03.030Z',
@@ -53,7 +83,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId2:09042021:custom_type:some_event_name',
-    attributes: { count: 3 },
+    attributes: {
+      count: 3,
+      counterName: 'some_event_name',
+      counterType: 'custom_type',
+      domainId: 'anotherDomainId2',
+      timestamp: '2021-04-20T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-20T08:18:03.030Z',
@@ -61,7 +97,13 @@ export const rawUsageCounters: UsageCountersSavedObject[] = [
   {
     type: 'usage-counters',
     id: 'anotherDomainId3:09042021:custom_type:zero_count',
-    attributes: { count: 0 },
+    attributes: {
+      count: 0,
+      counterName: 'zero_count',
+      counterType: 'custom_type',
+      domainId: 'anotherDomainId3',
+      timestamp: '2021-04-20T08:18:03.030Z',
+    },
     references: [],
     coreMigrationVersion: '8.0.0',
     updated_at: '2021-04-20T08:18:03.030Z',

@@ -7,6 +7,4 @@
  */
 
 import { UsageCollectionTestPlugin } from './plugin';
-
-export { config } from './config';
 export const plugin = () => new UsageCollectionTestPlugin();

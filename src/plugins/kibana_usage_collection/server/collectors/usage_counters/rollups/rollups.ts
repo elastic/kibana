@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, Logger } from 'kibana/server';
+import type { ISavedObjectsRepository, Logger } from 'kibana/server';
 import moment from 'moment';
 
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';

@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }) {
         '--server.compression.referrerWhitelist=["some-host.com"]',
         `--savedObjects.maxImportExportSize=10001`,
         // for testing set debounce to 0 to immediately flush counters into saved objects.
-        '--usageCollection.usageCounters.bufferDebounceMs=0',
+        '--usageCollection.usageCounters.bufferDurationMs=0',
       ],
     },
   };

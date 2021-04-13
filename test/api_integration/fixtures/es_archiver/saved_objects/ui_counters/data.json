@@ -80,7 +80,10 @@
     "id": "uiCounter:09042021:count:myApp:some_app_event",
     "source": {
       "usage-counters": {
-        "count": 2
+        "count": 2,
+        "domainId": "uiCounter",
+        "counterName": "myApp:some_app_event",
+        "counterType": "count"
       },
       "type": "usage-counters",
       "updated_at": "2021-11-20T11:43:00.961Z"
@@ -95,7 +98,10 @@
     "id": "anotherDomainId:09042021:count:some_event_name",
     "source": {
       "usage-counters": {
-        "count": 2
+        "count": 2,
+        "domainId": "anotherDomainId",
+        "counterName": "some_event_name",
+        "counterType": "count"
       },
       "type": "usage-counters",
       "updated_at": "2021-11-20T11:43:00.961Z"

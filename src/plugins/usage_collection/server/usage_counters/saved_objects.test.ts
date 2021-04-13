@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { deserializeCounterKey, serializeCounterKey, storeCounter } from './saved_objects';
+import { serializeCounterKey, storeCounter } from './saved_objects';
 import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { CounterMetric } from './usage_counter';
 import moment from 'moment';
@@ -21,17 +21,6 @@ describe('counterKey', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`"a:09042021:c:b"`);
-  });
-
-  test('#deserializeCounterKey', () => {
-    const key = deserializeCounterKey('a:09042021:c:b');
-    expect(key).toMatchInlineSnapshot(`
-      Object {
-        "counterName": "b",
-        "counterType": "c",
-        "domainId": "a",
-      }
-    `);
   });
 });
 
@@ -69,6 +58,13 @@ describe('storeCounter', () => {
             "incrementBy": 13,
           },
         ],
+        Object {
+          "upsertAttributes": Object {
+            "counterName": "b",
+            "counterType": "c",
+            "domainId": "a",
+          },
+        },
       ]
     `);
   });
