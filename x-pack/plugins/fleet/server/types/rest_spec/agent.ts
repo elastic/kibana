@@ -172,7 +172,7 @@ export const PostAgentUnenrollRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.boolean(),
+      revoke: schema.boolean(),
     })
   ),
 };
@@ -180,7 +180,7 @@ export const PostAgentUnenrollRequestSchema = {
 export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-    force: schema.maybe(schema.boolean()),
+    revoke: schema.maybe(schema.boolean()),
   }),
 };
 

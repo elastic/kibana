@@ -94,12 +94,12 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(200);
     });
 
-    it('/agents/{agent_id}/unenroll { force: true } should invalidate related API keys', async () => {
+    it('/agents/{agent_id}/unenroll { revoke: true } should invalidate related API keys', async () => {
       await supertest
         .post(`/api/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          force: true,
+          revoke: true,
         })
         .expect(200);
 
@@ -192,8 +192,8 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          agents: 'fleet-agents.active: true',
-          force: true,
+          agents: 'active: true',
+          revoke: true,
         })
         .expect(200);
 

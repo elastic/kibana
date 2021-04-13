@@ -57,14 +57,14 @@ export async function unenrollAgent(
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: GetAgentsOptions & { force?: boolean }
+  options: GetAgentsOptions & { revoke?: boolean }
 ): Promise<{ items: BulkActionResult[] }> {
   // start with all agents specified
   const givenAgents = await getAgents(esClient, options);
 
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
-    if (options.force) {
+    if (options.revoke) {
       return !agent.unenrolled_at;
     }
     return !agent.unenrollment_started_at && !agent.unenrolled_at;
@@ -87,7 +87,7 @@ export async function unenrollAgents(
   }, []);
 
   const now = new Date().toISOString();
-  if (options.force) {
+  if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
   } else {
@@ -104,7 +104,7 @@ export async function unenrollAgents(
   }
 
   // Update the necessary agents
-  const updateData = options.force
+  const updateData = options.revoke
     ? { unenrolled_at: now, active: false }
     : { unenrollment_started_at: now };
 
