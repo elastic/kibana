@@ -31,6 +31,7 @@ import type {
   CloneTempToSource,
   SetTempWriteBlock,
   WaitForYellowSourceState,
+  TransformedDocumentsBulkIndex,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -868,6 +869,7 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
+        failedDocumentIds: [],
       };
       test('OUTDATED_DOCUMENTS_SEARCH -> OUTDATED_DOCUMENTS_TRANSFORM if some outdated documents were found', () => {
         const outdatedDocuments = ([
@@ -923,15 +925,110 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         outdatedDocuments,
+        failedDocumentIds: [],
       };
-      test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if action succeeds', () => {
-        const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right(
-          'bulk_index_succeeded'
-        );
-        const newState = model(outdatedDocumentsTransformState, res);
-        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+      describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
+        const processedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+        const failedTransformDocumentIds = ([
+          Symbol('raw saved object doc ID'),
+        ] as unknown) as string[];
+        test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
+          const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
+          const newState = model(
+            outdatedDocumentsTransformState,
+            res
+          ) as TransformedDocumentsBulkIndex;
+          expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+          expect(newState.transformedDocs).toEqual(processedDocs);
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+        test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if there are are existing documents that failed transformation', () => {
+          const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
+            ...outdatedDocumentsTransformState,
+            failedDocumentIds: [...failedTransformDocumentIds],
+          };
+          const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
+          const newState = model(
+            outdatedDocumentsTransformStateWithFailedDocuments,
+            res
+          ) as OutdatedDocumentsSearch;
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.failedDocumentIds).toEqual(failedTransformDocumentIds);
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+        test("OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if we don't have any processed docs returned", () => {
+          const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({
+            processedDocs: [],
+          });
+          const newState = model(outdatedDocumentsTransformState, res) as OutdatedDocumentsSearch;
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.failedDocumentIds).toEqual([]);
+        });
+      });
+      describe('OUTDATED_DOCUMENTS_TRANSFORM if action fails', () => {
+        test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH adding newly failed documents to state if documents failed the transform', () => {
+          const failedTransformDocumentIds = ([
+            Symbol('raw saved object doc ID'),
+          ] as unknown) as string[];
+          const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.left({
+            type: 'documents_transform_failed',
+            failedDocumentIds: failedTransformDocumentIds,
+          });
+          const newState = model(outdatedDocumentsTransformState, res) as OutdatedDocumentsSearch;
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.failedDocumentIds).toEqual(failedTransformDocumentIds);
+        });
+        test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH combines newly failed documents with those already on state if documents failed the transform', () => {
+          const failedTransformDocumentIds = ([
+            Symbol('raw saved object doc ID'),
+          ] as unknown) as string[];
+          const newFailedTransformDocumentIds = ([
+            Symbol('raw saved object doc ID 2'),
+          ] as unknown) as string[];
+          const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
+            ...outdatedDocumentsTransformState,
+            failedDocumentIds: [...failedTransformDocumentIds],
+          };
+          const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.left({
+            type: 'documents_transform_failed',
+            failedDocumentIds: newFailedTransformDocumentIds,
+          });
+          const newState = model(
+            outdatedDocumentsTransformStateWithFailedDocuments,
+            res
+          ) as OutdatedDocumentsSearch;
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.failedDocumentIds).toEqual([
+            ...failedTransformDocumentIds,
+            ...newFailedTransformDocumentIds,
+          ]);
+        });
+      });
+    });
+    describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
+      const transformedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+      const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
+        ...baseState,
+        controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+        transformedDocs,
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX should throw a throwBadResponse error if action failed', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'random transform documents bulk error',
+        });
+        const newState = model(
+          transformedDocumentsBulkIndexState,
+          res
+        ) as TransformedDocumentsBulkIndex;
+        expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
     describe('UPDATE_TARGET_MAPPINGS', () => {

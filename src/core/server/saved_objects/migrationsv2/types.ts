@@ -220,6 +220,7 @@ export type TransformedDocumentsBulkIndex = PostInitState & {
    * documents that are still on their outdated version.
    */
   readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
+  readonly transformedDocs: SavedObjectsRawDoc[];
 };
 
 export type MarkVersionIndexReady = PostInitState & {

@@ -9,7 +9,6 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
-import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
