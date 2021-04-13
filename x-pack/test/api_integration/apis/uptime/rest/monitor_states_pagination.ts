@@ -27,14 +27,15 @@ export default function ({ getService }: FtrProviderContext) {
         beforeMonitorId: firstMonitorId,
         afterMonitorId,
       };
-      const result = await supertest.get(
+      const response = await supertest.get(
         `${API_URLS.MONITOR_LIST_PAGINATION}?${stringify(queryParams)}`
       );
 
-      expectSnapshot(result.body).toMatch();
-      expect(result.status).to.eql(200);
-      expect(result.body.result.aggregations.before.buckets).to.have.length(0);
-      expect(result.body.result.aggregations.after.buckets).to.have.length(1);
+      expectSnapshot(response.body.result.aggregations).toMatch();
+      expectSnapshot(response.body.result.hits).toMatch();
+      expect(response.status).to.eql(200);
+      expect(response.body.result.aggregations.before.buckets).to.have.length(0);
+      expect(response.body.result.aggregations.after.buckets).to.have.length(1);
     });
 
     it('will fetch no pagination info for a single page', async () => {
@@ -51,14 +52,15 @@ export default function ({ getService }: FtrProviderContext) {
         beforeMonitorId: firstMonitorId,
       };
 
-      const result = await supertest.get(
+      const response = await supertest.get(
         `${API_URLS.MONITOR_LIST_PAGINATION}?${stringify(queryParams)}`
       );
 
-      expectSnapshot(result.body).toMatch();
-      expect(result.status).to.eql(200);
-      expect(result.body.result.aggregations.before.buckets).to.have.length(0);
-      expect(result.body.result.aggregations.after.buckets).to.have.length(0);
+      expectSnapshot(response.body.result.aggregations).toMatch();
+      expectSnapshot(response.body.result.hits).toMatch();
+      expect(response.status).to.eql(200);
+      expect(response.body.result.aggregations.before.buckets).to.have.length(0);
+      expect(response.body.result.aggregations.after.buckets).to.have.length(0);
     });
   });
 }
