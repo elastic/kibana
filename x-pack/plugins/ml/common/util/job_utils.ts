@@ -180,7 +180,7 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  // if job has runtime mappings with no model plot
+  // if job has runtime fields with no model plot
   if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
     return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
       defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',

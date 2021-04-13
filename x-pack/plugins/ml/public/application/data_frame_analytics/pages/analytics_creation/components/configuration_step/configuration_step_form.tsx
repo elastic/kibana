@@ -364,7 +364,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           }
           return !option.key?.includes(runtimeMappingKey);
         });
-        // Runtime mappings have been removed
+        // Runtime fields have been removed
         if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
           setDependentVariableOptions(filteredOptions);
         } else if (runtimeMappings) {

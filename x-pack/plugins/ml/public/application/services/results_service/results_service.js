@@ -1111,7 +1111,7 @@ export function resultsServiceProvider(mlApiServices) {
                   },
                 },
               },
-              // Runtime mappings only needed to support when query includes a runtime field
+              // Runtime fields only needed to support when query includes a runtime field
               // even though the default timeField can be a search time runtime field
               // because currently Kibana doesn't support that
               ...(isPopulatedObject(runtimeMappings) && query

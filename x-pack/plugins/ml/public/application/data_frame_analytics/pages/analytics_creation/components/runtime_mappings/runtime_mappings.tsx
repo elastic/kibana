@@ -27,12 +27,13 @@ import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/pu
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
+import { isRuntimeMappings } from '../../../../../../../common';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
-  'xpack.ml.dataframe.analytics.createWizard.indexPreview.copyRuntimeMappingsClipboardTooltip',
+  'xpack.ml.dataframe.analytics.createWizard.indexPreview.copyRuntimeFieldsClipboardTooltip',
   {
-    defaultMessage: 'Copy Dev Console statement of the runtime mappings to the clipboard.',
+    defaultMessage: 'Copy Dev Console statement of the runtime fields to the clipboard.',
   }
 );
 
@@ -44,8 +45,6 @@ interface Props {
   actions: CreateAnalyticsFormProps['actions'];
   state: CreateAnalyticsFormProps['state'];
 }
-
-type RuntimeMappings = Record<string, RuntimeField>;
 
 export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] = useState<boolean>(
@@ -90,7 +89,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       runtimeMappingsUpdated: true,
       previousRuntimeMapping: previous,
     });
-    setAdvancedEditorRuntimeMappings(prettySourceConfig);
+    setAdvancedRuntimeMappingsConfig(prettySourceConfig);
     setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);
   };
@@ -105,7 +104,8 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     }
 
     setIsRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
-    setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+
+    setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(advancedEditorRuntimeMappings));
   };
 
   useEffect(function getInitialRuntimeMappings() {
@@ -127,8 +127,8 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth={true}
-        label={i18n.translate('xpack.ml.dataframe.analytics.createWizard.runtimeMappingsLabel', {
-          defaultMessage: 'Runtime mappings',
+        label={i18n.translate('xpack.ml.dataframe.analytics.createWizard.runtimeFieldsLabel', {
+          defaultMessage: 'Runtime fields',
         })}
       >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -139,8 +139,8 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
               </EuiText>
             ) : (
               <FormattedMessage
-                id="xpack.ml.dataframe.analytics.createWizard.noRuntimeMappingsLabel"
-                defaultMessage="No runtime mapping"
+                id="xpack.ml.dataframe.analytics.createWizard.noRuntimeFieldLabel"
+                defaultMessage="No runtime field"
               />
             )}
 
@@ -171,9 +171,9 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     <EuiSwitch
                       disabled={jobType === undefined}
                       label={i18n.translate(
-                        'xpack.ml.dataframe.analytics.createWizard.advancedEditorRuntimeMappingsSwitchLabel',
+                        'xpack.ml.dataframe.analytics.createWizard.advancedEditorRuntimeFieldsSwitchLabel',
                         {
-                          defaultMessage: 'Edit runtime mappings',
+                          defaultMessage: 'Edit runtime fields',
                         }
                       )}
                       checked={isRuntimeMappingsEditorEnabled}
@@ -203,10 +203,10 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                   <EuiSpacer size="s" />
                   <EuiText size="xs">
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.createWizard.advancedRuntimeMappingsEditorHelpText',
+                      'xpack.ml.dataframe.analytics.createWizard.advancedRuntimeFieldsEditorHelpText',
                       {
                         defaultMessage:
-                          'The advanced editor allows you to edit the runtime mappings of the source.',
+                          'The advanced editor allows you to edit the runtime fields of the source.',
                       }
                     )}
                   </EuiText>
