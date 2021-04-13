@@ -74,7 +74,7 @@ Just above the `✖ fail:` line, there is a line `info Taking screenshot ...` wh
 
 Clicking the `[Download]` link for that png shows this image;
 
-image::'images\Kibana spaces page meets a11y validations a11y test for click on create space page.png'[]
+image::images\a11l_screenshot[Kibana spaces page meets a11y validations a11y test for click on create space page.png]
 
 If we use a running Kibana instance and inspect elements, we find that the `createSpace` data-test-subj attribute is on this button in the Stack Management / Spaces page;
 
