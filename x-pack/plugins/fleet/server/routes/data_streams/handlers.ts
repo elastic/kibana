@@ -13,7 +13,6 @@ import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
-import { appContextService } from '../../services';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
 
@@ -47,7 +46,6 @@ interface ESDataStreamStats {
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const logger = appContextService.getLogger();
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -195,16 +193,22 @@ export const getListHandler: RequestHandler = async (context, request, response)
         if (!packageMetadata[pkgName]) {
           // then pick the dashboards from the package saved object
           const packageDashboardIds = dashboardIdsByPackageName[pkgName] || [];
-          const packageDashboards = packageDashboardIds.map((dashboardId) => {
+          const packageDashboards = packageDashboardIds.reduce<
+            Array<{ id: string; title: string }>
+          >((dashboards, dashboardId) => {
             const dashboard = allDashboardSavedObjectsById[dashboardId];
-            return dashboard
-              ? { id: dashboard.id, title: dashboard.attributes.title || dashboard.id }
-              : undefined;
-          });
+            if (dashboard) {
+              dashboards.push({
+                id: dashboard.id,
+                title: dashboard.attributes.title || dashboard.id,
+              });
+            }
+            return dashboards;
+          }, []);
 
           packageMetadata[pkgName] = {
             version: pkgSavedObject.attributes?.version || '',
-            dashboards: packageDashboards.filter((dashboard) => !!dashboard),
+            dashboards: packageDashboards,
           };
         }
 
@@ -226,7 +230,6 @@ export const getListHandler: RequestHandler = async (context, request, response)
       body,
     });
   } catch (error) {
-    logger.error(error);
     return defaultIngestErrorHandler({ error, response });
   }
 };
