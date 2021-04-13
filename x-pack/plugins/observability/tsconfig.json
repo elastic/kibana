@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.project.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -23,6 +23,7 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }

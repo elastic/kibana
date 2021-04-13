@@ -19,6 +19,7 @@ export const mockKibanaValues = {
   history: mockHistory,
   navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
+  setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   renderHeaderActions: jest.fn(),
 };

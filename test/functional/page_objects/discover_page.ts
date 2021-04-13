@@ -255,6 +255,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         .map((field) => $(field).text());
     }
 
+    public async editField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.click(`field-${field}`);
+        await testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
+    }
+
     public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }

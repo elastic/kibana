@@ -27,13 +27,13 @@ check_rules_nodejs_version(minimum_version_string = "3.2.3")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "14.16.0-darwin_amd64": ("node-v14.16.0-darwin-x64.tar.gz", "node-v14.16.0-darwin-x64", "14ec767e376d1e2e668f997065926c5c0086ec46516d1d45918af8ae05bd4583"),
-    "14.16.0-linux_arm64": ("node-v14.16.0-linux-arm64.tar.xz", "node-v14.16.0-linux-arm64", "440489a08bfd020e814c9e65017f58d692299ac3f150c8e78d01abb1104c878a"),
-    "14.16.0-linux_s390x": ("node-v14.16.0-linux-s390x.tar.xz", "node-v14.16.0-linux-s390x", "335348e46f45284b6356416ef58f85602d2dee99094588b65900f6c8839df77e"),
-    "14.16.0-linux_amd64": ("node-v14.16.0-linux-x64.tar.xz", "node-v14.16.0-linux-x64", "2e079cf638766fedd720d30ec8ffef5d6ceada4e8b441fc2a093cb9a865f4087"),
-    "14.16.0-windows_amd64": ("node-v14.16.0-win-x64.zip", "node-v14.16.0-win-x64", "716045c2f16ea10ca97bd04cf2e5ef865f9c4d6d677a9bc25e2ea522b594af4f"),
+    "14.16.1-darwin_amd64": ("node-v14.16.1-darwin-x64.tar.gz", "node-v14.16.1-darwin-x64", "b762b72fc149629b7e394ea9b75a093cad709a9f2f71480942945d8da0fc1218"),
+    "14.16.1-linux_arm64": ("node-v14.16.1-linux-arm64.tar.xz", "node-v14.16.1-linux-arm64", "b4d474e79f7d33b3b4430fad25c3f836b82ce2d5bb30d4a2c9fa20df027e40da"),
+    "14.16.1-linux_s390x": ("node-v14.16.1-linux-s390x.tar.xz", "node-v14.16.1-linux-s390x", "af9982fef32e4a3e4a5d66741dcf30ac9c27613bd73582fa1dae1fb25003047a"),
+    "14.16.1-linux_amd64": ("node-v14.16.1-linux-x64.tar.xz", "node-v14.16.1-linux-x64", "85a89d2f68855282c87851c882d4c4bbea4cd7f888f603722f0240a6e53d89df"),
+    "14.16.1-windows_amd64": ("node-v14.16.1-win-x64.zip", "node-v14.16.1-win-x64", "e469db37b4df74627842d809566c651042d86f0e6006688f0f5fe3532c6dfa41"),
   },
-  node_version = "14.16.0",
+  node_version = "14.16.1",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
@@ -52,9 +52,6 @@ node_repositories(
 # NOTE: FORCE_COLOR env var forces colors on non tty mode
 yarn_install(
   name = "npm",
-  environment = {
-    "FORCE_COLOR": "True",
-  },
   package_json = "//:package.json",
   yarn_lock = "//:yarn.lock",
   data = [
