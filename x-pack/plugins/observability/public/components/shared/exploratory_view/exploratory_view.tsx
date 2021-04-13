@@ -39,7 +39,7 @@ export function ExploratoryView() {
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
   return (
-    <EuiPanel style={{ maxWidth: 1800, minWidth: 1200, margin: '0 auto' }}>
+    <EuiPanel style={{ maxWidth: 1800, minWidth: 800, margin: '0 auto' }}>
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />

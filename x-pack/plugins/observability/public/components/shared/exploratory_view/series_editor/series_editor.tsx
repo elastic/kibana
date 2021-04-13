@@ -32,7 +32,7 @@ export function SeriesEditor() {
       render: (val: string) => (
         <EuiText>
           <EuiIcon type="dot" color="green" size="l" />{' '}
-          {val === NEW_SERIES_KEY ? 'new-series-preview' : val}
+          {val === NEW_SERIES_KEY ? 'series-preview' : val}
         </EuiText>
       ),
     },

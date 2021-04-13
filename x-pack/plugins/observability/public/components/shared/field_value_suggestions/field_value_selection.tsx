@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, Fragment, useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -15,6 +15,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
 
 const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
@@ -25,6 +26,7 @@ const formatOptions = (values?: string[], value?: string): EuiSelectableOption[]
 };
 
 export function FieldValueSelection({
+  fullWidth,
   label,
   value,
   loading,
@@ -69,13 +71,14 @@ export function FieldValueSelection({
       iconSide="right"
       onClick={onButtonClick}
       data-test-subj={'fieldValueSelectionBtn'}
+      fullWidth={fullWidth}
     >
       {label}
     </EuiButton>
   );
 
   return (
-    <Fragment>
+    <Wrapper>
       <EuiPopover
         id="popover"
         panelPaddingSize="none"
@@ -83,6 +86,7 @@ export function FieldValueSelection({
         isOpen={isPopoverOpen || forceOpen}
         closePopover={closePopover}
         anchorPosition={anchorPosition}
+        style={{ width: '100%' }}
       >
         <EuiSelectable
           searchable
@@ -126,6 +130,18 @@ export function FieldValueSelection({
           )}
         </EuiSelectable>
       </EuiPopover>
-    </Fragment>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  &&& {
+    div.euiPopover__anchor {
+      width: 100%;
+      max-width: 250px;
+      .euiButton {
+        width: 100%;
+      }
+    }
+  }
+`;

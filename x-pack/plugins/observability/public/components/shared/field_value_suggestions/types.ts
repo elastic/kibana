@@ -18,6 +18,7 @@ interface CommonProps {
   singleSelection?: boolean;
   forceOpen?: boolean;
   anchorPosition?: PopoverAnchorPosition;
+  fullWidth?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {

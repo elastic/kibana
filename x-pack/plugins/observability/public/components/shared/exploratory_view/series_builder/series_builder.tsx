@@ -173,7 +173,7 @@ export function SeriesBuilder() {
         <EuiSpacer size="xs" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plus" color="primary" onClick={addSeries}>
+            <EuiButton fill iconType="plus" color="primary" onClick={addSeries} size="s">
               {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
                 defaultMessage: 'Add',
               })}
@@ -181,6 +181,7 @@ export function SeriesBuilder() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              size="s"
               iconType="cross"
               color="text"
               onClick={() => {

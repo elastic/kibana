@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { AppDataType } from '../../types';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
@@ -38,7 +39,7 @@ export function DataTypesCol() {
   const selectedDataType = series.dataType;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <FlexGroup direction="column" gutterSize="xs">
       {dataTypes.map(({ id: dataTypeId, label }) => (
         <EuiFlexItem key={dataTypeId}>
           <EuiButton
@@ -57,6 +58,10 @@ export function DataTypesCol() {
           </EuiButton>
         </EuiFlexItem>
       ))}
-    </EuiFlexGroup>
+    </FlexGroup>
   );
 }
+
+const FlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;

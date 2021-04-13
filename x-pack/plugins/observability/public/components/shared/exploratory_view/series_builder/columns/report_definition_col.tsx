@@ -16,6 +16,20 @@ import { DataSeries } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
+import { parseCustomFieldName } from '../../configurations/lens_attributes';
+
+function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, string>) {
+  const { reportDefinitions } = dataView;
+  const customColumn = reportDefinitions.find((item) => item.custom);
+  if (customColumn?.field && selectedDefinition[customColumn?.field]) {
+    const { columnType } = parseCustomFieldName(customColumn.field, dataView, selectedDefinition);
+
+    return columnType;
+  }
+  return null;
+}
+
+const MaxWidthStyle = { maxWidth: 250 };
 
 export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   const { indexPattern } = useIndexPatternContext();
@@ -56,6 +70,8 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
     });
   };
 
+  const columnType = getColumnType(dataViewSeries, rtd);
+
   return (
     <FlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -65,8 +81,8 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
         reportDefinitions.map(({ field, custom, options, defaultValue }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
+                <EuiFlexItem grow={false} style={{ flexBasis: 250 }}>
                   <FieldValueSuggestions
                     label={labels[field]}
                     sourceField={field}
@@ -75,7 +91,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                     onChange={(val?: string) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
-                    width={250}
+                    fullWidth={true}
                   />
                 </EuiFlexItem>
                 {rtd?.[field] && (
@@ -105,17 +121,17 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
             )}
           </EuiFlexItem>
         ))}
-      <EuiFlexItem style={{ width: 250 }}>
-        <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
-      </EuiFlexItem>
-      {hasOperationType && (
-        <EuiFlexItem style={{ width: 250 }}>
+      {(hasOperationType || columnType === 'operation') && (
+        <EuiFlexItem style={MaxWidthStyle}>
           <OperationTypeSelect
             seriesId={NEW_SERIES_KEY}
             defaultOperationType={yAxisColumn.operationType}
           />
         </EuiFlexItem>
       )}
+      <EuiFlexItem style={MaxWidthStyle}>
+        <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
+      </EuiFlexItem>
     </FlexGroup>
   );
 }
