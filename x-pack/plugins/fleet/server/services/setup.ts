@@ -169,8 +169,6 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     return;
   }
-  // Wait on PR create API keys as internal user to be merged
-  return; //
 
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,

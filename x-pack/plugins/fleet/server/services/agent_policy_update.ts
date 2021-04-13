@@ -34,17 +34,13 @@ export async function agentPolicyUpdateEventHandler(
   action: string,
   agentPolicyId: string
 ) {
-  // If Agents are not setup skip this hook
-  if (!(await isAgentsSetup(soClient))) {
-    return;
-  }
-
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
   const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, esClient, {
+      name: 'Default',
       agentPolicyId,
     });
     await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { first } from 'rxjs/operators';
 
 import { appContextService } from '../app_context';
@@ -31,6 +31,7 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
     index: FLEET_SERVER_SERVERS_INDEX,
     ignore_unavailable: true,
   });
+
   // @ts-expect-error value is number | TotalHits
   return res.body.hits.total.value > 0;
 }

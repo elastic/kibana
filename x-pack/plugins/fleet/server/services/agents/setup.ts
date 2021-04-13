@@ -27,11 +27,6 @@ export async function isAgentsSetup(soClient: SavedObjectsClientContract): Promi
  * @param soClient
  */
 export async function ensureAgentActionPolicyChangeExists(soClient: SavedObjectsClientContract) {
-  // If Agents are not setup skip
-  if (!(await isAgentsSetup(soClient))) {
-    return;
-  }
-
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
