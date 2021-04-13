@@ -11,8 +11,8 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('list', () => {
-    const archive = 'monitoring/apm';
+  describe('list mb', () => {
+    const archive = 'monitoring/apm_mb';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',
