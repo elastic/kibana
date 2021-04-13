@@ -50,17 +50,10 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const [
-    installedPackages,
-    defaultOutput,
-    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
-    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
-  ] = await Promise.all([
+  const [installedPackages, defaultOutput] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
-    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
-    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
     updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -88,6 +81,32 @@ async function createSetupSideEffects(
     esClient,
   });
 
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
+
+  const policies = policiesOrUndefined ?? [];
+  const packages = packagesOrUndefined ?? [];
+
+  await ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient,
+    policies,
+    packages,
+    defaultOutput
+  );
+
+  // Ensure the predefined default policies AFTER loading preconfigured policies. This allows the kibana config
+  // to override the default agent policies.
+
+  const [
+    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
+    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
+  ] = await Promise.all([
+    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
+  ]);
+
+  // If we just created the default fleet server policy add the fleet server package
   if (defaultFleetServerPolicyCreated) {
     await addPackageToAgentPolicy(
       soClient,
@@ -97,8 +116,6 @@ async function createSetupSideEffects(
       defaultOutput
     );
   }
-
-  // If we just created the default fleet server policy add the fleet server package
 
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
@@ -152,20 +169,6 @@ async function createSetupSideEffects(
   }
 
   await ensureAgentActionPolicyChangeExists(soClient);
-
-  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
-    appContextService.getConfig() ?? {};
-
-  const policies = policiesOrUndefined ?? [];
-  const packages = packagesOrUndefined ?? [];
-
-  await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput
-  );
 
   return { isIntialized: true };
 }
