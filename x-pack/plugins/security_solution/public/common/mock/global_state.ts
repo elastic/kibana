@@ -37,6 +37,7 @@ export const mockGlobalState: State = {
     enableExperimental: {
       fleetServerEnabled: false,
       trustedAppsByPolicyEnabled: false,
+      eventFilteringEnabled: false,
       metricsEntitiesEnabled: false,
     },
     notesById: {},
