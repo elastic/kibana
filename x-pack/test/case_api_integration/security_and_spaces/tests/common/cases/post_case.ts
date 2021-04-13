@@ -73,6 +73,35 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case: none connector', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            })
+          )
+        );
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getAllUserAction(supertest, postedCase.id);

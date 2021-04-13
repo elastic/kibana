@@ -729,7 +729,9 @@ export const createConfiguration = async (
   return configuration;
 };
 
-type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & { connector_type_id: string };
+export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
+  connector_type_id: string;
+};
 
 export const createConnector = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
@@ -810,6 +812,21 @@ export const findCases = async (
     .query({ sortOrder: 'asc', ...query })
     .set('kbn-xsrf', 'true')
     .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const pushCase = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  caseId: string,
+  connectorId: string,
+  expectedHttpCode: number = 200
+): Promise<CaseResponse> => {
+  const { body: res } = await supertest
+    .post(`${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .set('kbn-xsrf', 'true')
+    .send({})
     .expect(expectedHttpCode);
 
   return res;

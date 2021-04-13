@@ -7,8 +7,6 @@
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/cases/common/constants';
-
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
   deleteCases,
@@ -17,6 +15,10 @@ import {
   deleteConfiguration,
   getConfigurationRequest,
   getServiceNowConnector,
+  createConnector,
+  createConfiguration,
+  createCase,
+  pushCase,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 
@@ -34,53 +36,36 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get 403 when trying to create a connector', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...getServiceNowConnector(),
-        })
-        .expect(403);
+      await createConnector(supertest, getServiceNowConnector(), 403);
     });
 
     it('should get 404 when trying to push to a case without a valid connector id', async () => {
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(
-          getConfigurationRequest({
-            id: 'not-exist',
-            name: 'Not exist',
-            type: ConnectorTypes.serviceNowITSM,
-          })
-        )
-        .expect(200);
-
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...postCaseReq,
-          connector: getConfigurationRequest({
-            id: 'not-exist',
-            name: 'Not exist',
-            type: ConnectorTypes.serviceNowITSM,
-            fields: {
-              urgency: '2',
-              impact: '2',
-              severity: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          }).connector,
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'not-exist',
+          name: 'Not exist',
+          type: ConnectorTypes.serviceNowITSM,
         })
-        .expect(200);
+      );
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/connector/not-exist/_push`)
-        .set('kbn-xsrf', 'true')
-        .send({})
-        .expect(404);
+      const postedCase = await createCase(supertest, {
+        ...postCaseReq,
+        connector: {
+          id: 'not-exist',
+          name: 'Not exist',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: {
+            urgency: '2',
+            impact: '2',
+            severity: '2',
+            category: 'software',
+            subcategory: 'os',
+          },
+        },
+      });
+
+      await pushCase(supertest, postedCase.id, 'not-exist', 404);
     });
   });
 };
