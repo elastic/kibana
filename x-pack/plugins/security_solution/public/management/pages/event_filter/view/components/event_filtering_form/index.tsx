@@ -60,6 +60,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
     const [hasNameError, setHasNameError] = useState(!exception || !exception.name);
     const [hasItemsError, setHasItemsError] = useState(false);
     const [comment, setComment] = useState<string>('');
+
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
         if (isEmpty(arg.exceptionItems)) return;
@@ -85,6 +86,20 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
         });
       },
       [dispatch, exception, hasItemsError, hasNameError]
+    );
+
+    const handleOnChangeComment = useCallback(
+      (value: string) => {
+        setComment(value);
+        if (!exception) return;
+        dispatch({
+          type: 'eventFilterChangeForm',
+          payload: {
+            entry: { ...exception, comments: [{ comment: value }] },
+          },
+        });
+      },
+      [dispatch, exception, setComment]
     );
 
     const exceptionBuilderComponentMemo = useMemo(
@@ -146,8 +161,13 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
     );
 
     const commentsInputMemo = useMemo(
-      () => <AddExceptionComments newCommentValue={comment} newCommentOnChange={setComment} />,
-      [comment, setComment]
+      () => (
+        <AddExceptionComments
+          newCommentValue={comment}
+          newCommentOnChange={handleOnChangeComment}
+        />
+      ),
+      [comment, handleOnChangeComment]
     );
 
     return !isIndexPatternLoading && exception ? (

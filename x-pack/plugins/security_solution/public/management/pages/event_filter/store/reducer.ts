@@ -14,7 +14,6 @@ import {
   EventFilterChangeForm,
   EventFilterCreateStart,
   EventFilterFormStateChanged,
-  EventFilterCreateError,
 } from './action';
 
 import { EventFilterListPageState } from '../state';
@@ -42,7 +41,12 @@ const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) =>
 const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action) => {
   return {
     ...state,
-    form: { ...state.form, entry: action.payload.entry, hasError: action.payload.hasError },
+    form: {
+      ...state.form,
+      entry: action.payload.entry,
+      hasError:
+        action.payload.hasError !== undefined ? action.payload.hasError : state.form.hasError,
+    },
   };
 };
 
