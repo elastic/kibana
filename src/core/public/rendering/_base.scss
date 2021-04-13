@@ -1,11 +1,11 @@
 @import '../mixins';
 
 /**
- * stretch the root element of the Kibana application to set the base-size that
+ * Stretch the root element of the Kibana application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
  * by core service from new platform
  */
-// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
+
 #kibana-body {
   // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
   // It will break the sticky navigation
@@ -14,6 +14,7 @@
   flex-direction: column;
 }
 
+// Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
 #app-fixed-viewport {
   pointer-events: none;
   visibility: hidden;

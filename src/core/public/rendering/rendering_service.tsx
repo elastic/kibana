@@ -49,13 +49,21 @@ export class RenderingService {
     ReactDOM.render(
       <I18nProvider>
         <>
+          {/* Fixed headers */}
           {chromeHeader}
+
+          {/* banners$.subscribe() for things like the No data banner */}
           <div id="globalBannerList">{bannerComponent}</div>
+
+          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
           <AppWrapper
             chromeVisible$={chrome.getIsVisible$()}
             classes$={chrome.getApplicationClasses$()}
           >
+            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
             <div id="app-fixed-viewport" />
+
+            {/* The actual plugin/app */}
             {appComponent}
           </AppWrapper>
         </>
