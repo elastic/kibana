@@ -8,12 +8,6 @@ steps:
 
   - command: .ci/buildkite/jobs/agent-packer.sh
     label: Build Agent Image
-    plugins:
-      - docker#v3.8.0:
-          image: 'hashicorp/packer:latest'
-          workdir: /app
-          entrypoint: ''
-          shell: ['/bin/sh', '-e', '-c']
 
   - wait: ~
     continue_on_failure: true
