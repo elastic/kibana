@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import { format } from 'url';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
 import { ApmRuleRegistry } from '../../plugin';
@@ -28,7 +30,14 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
             serviceName: alert['service.name']!,
           },
         }),
-        link: `/app/apm/services/${alert['service.name']!}`,
+        link: format({
+          pathname: `/app/apm/services/${alert['service.name']!}`,
+          query: {
+            ...(alert['service.environment']
+              ? { environment: alert['service.environment'] }
+              : { environment: ENVIRONMENT_ALL.value }),
+          },
+        }),
       };
     },
     iconClass: 'bell',
@@ -78,7 +87,15 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           },
         }
       ),
-      link: `/app/apm/services/${alert['service.name']!}`,
+      link: format({
+        pathname: `/app/apm/services/${alert['service.name']!}`,
+        query: {
+          transactionType: alert['transaction.type']!,
+          ...(alert['service.environment']
+            ? { environment: alert['service.environment'] }
+            : { environment: ENVIRONMENT_ALL.value }),
+        },
+      }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -132,7 +149,15 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           },
         }
       ),
-      link: `/app/apm/services/${alert['service.name']!}`,
+      link: format({
+        pathname: `/app/apm/services/${alert['service.name']!}`,
+        query: {
+          transactionType: alert['transaction.type']!,
+          ...(alert['service.environment']
+            ? { environment: alert['service.environment'] }
+            : { environment: ENVIRONMENT_ALL.value }),
+        },
+      }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -179,7 +204,15 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           },
         }
       ),
-      link: `/app/apm/services/${alert['service.name']!}`,
+      link: format({
+        pathname: `/app/apm/services/${alert['service.name']!}`,
+        query: {
+          transactionType: alert['transaction.type']!,
+          ...(alert['service.environment']
+            ? { environment: alert['service.environment'] }
+            : { environment: ENVIRONMENT_ALL.value }),
+        },
+      }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {

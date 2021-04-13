@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { Assign } from 'utility-types';
 import { RuleType } from '../../../rule_registry/public';
 import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../rule_registry/common';
 import { RuleRegistry } from '../../../rule_registry/public';
-import { observabilityAlertRt } from '../../common/observability_rule_registry';
 
-type AlertTypeOf<TFieldMap extends BaseRuleFieldMap> = Assign<
-  OutputOfFieldMap<TFieldMap>,
-  t.OutputOf<typeof observabilityAlertRt>
->;
+type AlertTypeOf<TFieldMap extends BaseRuleFieldMap> = OutputOfFieldMap<TFieldMap>;
 
 type FormattableRuleType<TFieldMap extends BaseRuleFieldMap> = RuleType & {
   format?: (options: {

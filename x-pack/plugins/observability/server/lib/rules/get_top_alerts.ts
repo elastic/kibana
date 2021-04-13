@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isLeft } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { observabilityAlertRt } from '../../../common/observability_rule_registry';
 import { ObservabilityRuleRegistryClient } from '../../types';
 import { kqlQuery, rangeQuery } from '../../utils/queries';
 
@@ -42,13 +39,5 @@ export async function getTopAlerts({
     },
   });
 
-  return response.events.map((event) => {
-    const validation = observabilityAlertRt.decode(event);
-
-    if (isLeft(validation)) {
-      const error = new Error(PathReporter.report(validation).join('\n'));
-      throw error;
-    }
-    return validation.right;
-  });
+  return response.events;
 }
