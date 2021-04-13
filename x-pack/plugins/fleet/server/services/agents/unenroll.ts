@@ -150,13 +150,15 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
 export async function forceUnenrollAgent(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agentId: string
+  agentIdOrAgent: string | Agent
 ) {
-  const agent = await getAgentById(esClient, agentId);
+  const agent =
+    typeof agentIdOrAgent === 'string'
+      ? await getAgentById(esClient, agentIdOrAgent)
+      : agentIdOrAgent;
 
-
-  await updateAgent(esClient, agentId, {
   await invalidateAPIKeysForAgents([agent]);
+  await updateAgent(esClient, agent.id, {
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
