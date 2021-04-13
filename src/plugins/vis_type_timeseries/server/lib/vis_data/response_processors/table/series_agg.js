@@ -7,7 +7,7 @@
  */
 
 import { SeriesAgg } from './_series_agg';
-import _ from 'lodash';
+import { last, first } from 'lodash';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
 export function seriesAgg(resp, panel, series, meta, extractFields) {
@@ -25,15 +25,13 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
       });
       const fn = SeriesAgg[series.aggregate_function];
       const data = fn(targetSeries);
-
-      const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
 
       results.push({
         id: `${series.id}`,
         label:
-          series.label ||
-          calculateLabel(_.last(series.metrics), series.metrics, fieldsForMetaIndex),
-        data: _.first(data),
+          series.label || calculateLabel(last(series.metrics), series.metrics, fieldsForSeries),
+        data: first(data),
       });
     }
     return next(results);

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';
@@ -39,12 +39,14 @@ export const RoleMappings: React.FC = () => {
 
   const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
   const emptyPrompt = (
-    <EuiEmptyPrompt
-      iconType="usersRolesApp"
-      title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
-      body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
-      actions={addMappingButton}
-    />
+    <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
+      <EuiEmptyPrompt
+        iconType="usersRolesApp"
+        title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
+        body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
+        actions={addMappingButton}
+      />
+    </EuiPanel>
   );
   const roleMappingsTable = (
     <RoleMappingsTable
