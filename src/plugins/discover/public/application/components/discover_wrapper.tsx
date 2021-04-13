@@ -86,6 +86,8 @@ export function DiscoverWrapper(props: DiscoverProps) {
       services.core.notifications.toasts,
     ]
   );
+  // temporary hack, to be removed
+  props.opts.stateContainer = stateContainer;
   const { appStateContainer, getPreviousAppState, stopSync } = stateContainer;
 
   const [state, setState] = useState(stateContainer.appStateContainer.getState());
