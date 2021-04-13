@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 export const LabsStrings = {
   Components: {
@@ -18,7 +19,8 @@ export const LabsStrings = {
           defaultMessage: 'Kibana',
         }),
         help: i18n.translate('presentationUtil.labs.components.kibanaSwitchHelp', {
-          defaultMessage: 'Sets the corresponding Advanced Setting for this lab project in Kibana',
+          defaultMessage:
+            'Sets the corresponding Advanced Setting for this lab project; affects all Kibana users',
         }),
       }),
       getBrowserSwitchText: () => ({
@@ -64,9 +66,9 @@ export const LabsStrings = {
       getDisabledStatusMessage: () => (
         <FormattedMessage
           id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Disabled</strong>,
+            status: <EuiCode>Disabled</EuiCode>,
           }}
           description="Displays the current status of a lab project"
         />
