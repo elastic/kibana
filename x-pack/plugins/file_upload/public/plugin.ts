@@ -11,7 +11,6 @@ import {
   getFileUploadComponent,
   importerFactory,
   hasImportPermission,
-  analyzeFile,
   checkIndexExists,
   getTimeFieldRange,
 } from './api';
@@ -46,7 +45,6 @@ export class FileUploadPlugin
       getMaxBytes,
       getMaxBytesFormatted,
       hasImportPermission,
-      analyzeFile,
       checkIndexExists,
       getTimeFieldRange,
     };

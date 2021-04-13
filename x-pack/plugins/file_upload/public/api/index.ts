@@ -16,7 +16,6 @@ export interface FileUploadStartApi {
   getMaxBytes(): number;
   getMaxBytesFormatted(): string;
   hasImportPermission(params: HasImportPermissionParams): Promise<boolean>;
-  analyzeFile(file: string, params: Record<string, string>): Promise<any>;
   checkIndexExists(index: string, params: Record<string, string>): Promise<boolean>;
   getTimeFieldRange(
     index: string,
@@ -64,20 +63,6 @@ export async function hasImportPermission(params: HasImportPermissionParams): Pr
   } catch (error) {
     return false;
   }
-}
-
-export async function analyzeFile(
-  file: string,
-  params: Record<string, string> = {}
-): Promise<boolean> {
-  const body = JSON.stringify(file);
-  const fileUploadModules = await lazyLoadFileUploadModules();
-  return await fileUploadModules.getHttp().fetch<any>({
-    path: `/internal/file_upload/analyze_file`,
-    method: 'POST',
-    body,
-    query: params,
-  });
 }
 
 export async function checkIndexExists(

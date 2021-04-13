@@ -19,7 +19,7 @@ export function getApi(http: HttpStart) {
   async function analyzeFile(file: string, params: Record<string, string> = {}): Promise<boolean> {
     const body = JSON.stringify(file);
     return await http.fetch<any>({
-      path: `/internal/file_upload/analyze_file`,
+      path: `/internal/file_data_visualizer/analyze_file`,
       method: 'POST',
       body,
       query: params,

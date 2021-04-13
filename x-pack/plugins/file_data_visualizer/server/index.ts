@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/server';
-import { FileUploadPlugin } from './plugin';
+import { FileDataVisualizerPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FileUploadPlugin(initializerContext);
+  new FileDataVisualizerPlugin(initializerContext);

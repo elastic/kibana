@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 // import { schema } from '@kbn/config-schema';
-// import { fileUploadRoutes } from './routes';
+import { fileDataVisualizerRoutes } from './routes';
 // import { initFileUploadTelemetry } from './telemetry';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 // import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '../common';
@@ -23,7 +23,7 @@ interface SetupDeps {
   usageCollection: UsageCollectionSetup;
 }
 
-export class FileUploadPlugin implements Plugin {
+export class FileDataVisualizerPlugin implements Plugin {
   // private readonly _logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -31,7 +31,7 @@ export class FileUploadPlugin implements Plugin {
   }
 
   async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    // fileUploadRoutes(coreSetup, this._logger);
+    fileDataVisualizerRoutes(coreSetup);
     // initFileUploadTelemetry(coreSetup, plugins.usageCollection);
   }
 
