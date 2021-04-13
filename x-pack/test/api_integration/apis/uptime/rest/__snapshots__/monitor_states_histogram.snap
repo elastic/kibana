@@ -1,0 +1,164 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states histogram will fetch monitor state data for the given down filters 1`] = `
+Object {
+  "histograms": Object {
+    "0002-up": Object {
+      "points": Array [
+        Object {
+          "timestamp": 1568172624744,
+        },
+        Object {
+          "timestamp": 1568172677247,
+        },
+        Object {
+          "timestamp": 1568172729750,
+        },
+        Object {
+          "timestamp": 1568172782253,
+        },
+        Object {
+          "timestamp": 1568172834756,
+        },
+        Object {
+          "timestamp": 1568172887259,
+        },
+        Object {
+          "timestamp": 1568172939762,
+        },
+        Object {
+          "timestamp": 1568172992265,
+        },
+        Object {
+          "timestamp": 1568173044768,
+        },
+        Object {
+          "timestamp": 1568173097271,
+        },
+        Object {
+          "timestamp": 1568173149774,
+        },
+        Object {
+          "timestamp": 1568173202277,
+        },
+      ],
+    },
+    "0010-down": Object {
+      "points": Array [
+        Object {
+          "down": 1,
+          "timestamp": 1568172624744,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172677247,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568172729750,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172782253,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172834756,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172887259,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568172939762,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172992265,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173044768,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173097271,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568173149774,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173202277,
+        },
+      ],
+    },
+    "0020-down": Object {
+      "points": Array [
+        Object {
+          "down": 1,
+          "timestamp": 1568172624744,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172677247,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568172729750,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172782253,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172834756,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172887259,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568172939762,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568172992265,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173044768,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173097271,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 1568173149774,
+        },
+        Object {
+          "down": 2,
+          "timestamp": 1568173202277,
+        },
+      ],
+    },
+  },
+  "minInterval": 52503,
+}
+`;
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states histogram will fetch monitor state histogram data for the given filters and range 1`] = `
+Object {
+  "histograms": Object {
+    "0002-up": Object {
+      "points": Array [],
+    },
+  },
+  "minInterval": 52503,
+}
+`;

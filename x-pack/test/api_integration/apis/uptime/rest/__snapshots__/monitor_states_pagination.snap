@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch next page info for a first page result 1`] = `
+Object {
+  "result": Object {
+    "_shards": Object {
+      "failed": 0,
+      "skipped": 0,
+      "successful": 1,
+      "total": 1,
+    },
+    "aggregations": Object {
+      "after": Object {
+        "after_key": Object {
+          "monitorId": "0001-up",
+        },
+        "buckets": Array [
+          Object {
+            "doc_count": 20,
+            "key": Object {
+              "monitorId": "0001-up",
+            },
+          },
+        ],
+      },
+      "before": Object {
+        "buckets": Array [],
+      },
+    },
+    "hits": Object {
+      "hits": Array [],
+      "max_score": null,
+      "total": Object {
+        "relation": "eq",
+        "value": 1857,
+      },
+    },
+    "timed_out": false,
+    "took": 0,
+  },
+}
+`;
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch no pagination info for a single page 1`] = `
+Object {
+  "result": Object {
+    "_shards": Object {
+      "failed": 0,
+      "skipped": 0,
+      "successful": 1,
+      "total": 1,
+    },
+    "aggregations": Object {
+      "after": Object {
+        "buckets": Array [],
+      },
+      "before": Object {
+        "buckets": Array [],
+      },
+    },
+    "hits": Object {
+      "hits": Array [],
+      "max_score": null,
+      "total": Object {
+        "relation": "eq",
+        "value": 143,
+      },
+    },
+    "timed_out": false,
+    "took": 0,
+  },
+}
+`;
