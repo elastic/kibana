@@ -39,10 +39,18 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
-      alert_history_connector_enabled: { type: 'boolean' },
+      alert_history_connector_enabled: {
+        type: 'boolean',
+        _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },
+      },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
-      count_active_alert_history_connectors: { type: 'long' },
+      count_active_alert_history_connectors: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of preconfigured alert history connectors used by rules.',
+        },
+      },
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
     },

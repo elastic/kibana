@@ -3,7 +3,10 @@
     "actions": {
       "properties": {
         "alert_history_connector_enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if preconfigured alert history connector is enabled."
+          }
         },
         "count_total": {
           "type": "long"
@@ -12,7 +15,10 @@
           "type": "long"
         },
         "count_active_alert_history_connectors": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
         },
         "count_by_type": {
           "properties": {
