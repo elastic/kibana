@@ -25,7 +25,7 @@ import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
 import { KibanaDeprecationList } from './deprecation_list';
-import { StepsFlyout, FlyoutContent } from './steps_flyout';
+import { StepsModal, ModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 
 const i18nTexts = {
@@ -52,7 +52,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [flyoutContent, setFlyoutContent] = useState<FlyoutContent | undefined>(undefined);
+  const [modalContent, setModalContent] = useState<ModalContent | undefined>(undefined);
 
   const { deprecations, breadcrumbs, docLinks, api } = useAppContext();
 
@@ -69,12 +69,12 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     setIsLoading(false);
   }, [deprecations]);
 
-  const toggleFlyout = (newFlyoutContent?: FlyoutContent) => {
-    if (typeof newFlyoutContent === 'undefined') {
-      setFlyoutContent(undefined);
+  const toggleModal = (newModalContent?: ModalContent) => {
+    if (typeof newModalContent === 'undefined') {
+      setModalContent(undefined);
     }
 
-    setFlyoutContent(newFlyoutContent);
+    setModalContent(newModalContent);
   };
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
       content = (
         <KibanaDeprecationList
           deprecations={kibanaDeprecations}
-          showFlyout={toggleFlyout}
+          showModal={toggleModal}
           reloadDeprecations={getAllDeprecations}
           isLoading={isLoading}
         />
@@ -149,8 +149,8 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
         <EuiPageContentBody>
           {getPageContent()}
-          {flyoutContent && (
-            <StepsFlyout closeFlyout={() => toggleFlyout()} flyoutContent={flyoutContent} />
+          {modalContent && (
+            <StepsModal closeModal={() => toggleModal()} modalContent={modalContent} />
           )}
         </EuiPageContentBody>
       </EuiPageContent>

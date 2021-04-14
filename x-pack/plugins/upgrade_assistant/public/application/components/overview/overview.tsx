@@ -117,23 +117,23 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <ESDeprecationStats history={history} />
-
-                <EuiSpacer />
-
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
               </EuiFlexItem>
 
               <EuiFlexItem>
                 <KibanaDeprecationStats history={history} />
               </EuiFlexItem>
             </EuiFlexGroup>
+
+            <EuiSpacer />
+
+            <EuiFormRow
+              helpText={i18nTexts.getDeprecationLoggingLabel(
+                docLinks.links.elasticsearch.deprecationLogging
+              )}
+              data-test-subj="deprecationLoggingFormRow"
+            >
+              <DeprecationLoggingToggle />
+            </EuiFormRow>
           </>
         </EuiPageContentBody>
       </EuiPageContent>

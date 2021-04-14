@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { DomainDeprecationDetails } from 'src/core/server/types';
 import { DeprecationHealth } from '../shared';
 import { LEVEL_MAP } from '../constants';
-import { FlyoutContent } from './steps_flyout';
+import { ModalContent } from './steps_modal';
 
 const i18nTexts = {
   getDeprecationTitle: (domainId: string) => {
@@ -40,7 +40,7 @@ export interface Props {
   deprecation: DomainDeprecationDetails;
   index: number;
   forceExpand: boolean;
-  showFlyout: (flyoutContent: FlyoutContent) => void;
+  showModal: (modalContent: ModalContent) => void;
 }
 
 /**
@@ -50,7 +50,7 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
   deprecation,
   forceExpand,
   index,
-  showFlyout,
+  showModal,
 }) => {
   const { domainId, level, message, documentationUrl, correctiveActions } = deprecation;
 
@@ -93,7 +93,7 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              onClick={() => showFlyout({ domainId, steps: correctiveActions.manualSteps! })}
+              onClick={() => showModal({ domainId, steps: correctiveActions.manualSteps! })}
             >
               {i18nTexts.fixButtonLabel}
             </EuiButton>

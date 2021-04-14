@@ -8,14 +8,14 @@
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
   EuiSpacer,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DomainDeprecationDetails } from 'src/core/server/types';
 import { DeprecationInfo } from '../../../../../common/types';
@@ -118,9 +118,9 @@ export const SearchBar: FunctionComponent<SearchBarProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={loadData} iconType="refresh" isLoading={isLoading}>
+          <EuiButton onClick={loadData} iconType="refresh" isLoading={isLoading}>
             {i18nTexts.reloadButtonLabel}
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -136,7 +136,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = ({
         </>
       )}
 
-      <EuiHorizontalRule />
+      <EuiSpacer />
     </>
   );
 };

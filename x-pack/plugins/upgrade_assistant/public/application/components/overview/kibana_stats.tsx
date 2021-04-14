@@ -40,6 +40,12 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
+  viewDeprecationsLink: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecationStats.viewDeprecationsLinkText',
+    {
+      defaultMessage: 'View deprecations',
+    }
+  ),
 };
 
 interface Props {
@@ -73,17 +79,22 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ history }) =>
   }, [deprecations]);
 
   return (
-    <EuiPanel data-test-subj="kibanaStatsPanel">
-      <EuiTitle size="s">
-        <h3>
+    <EuiPanel data-test-subj="kibanaStatsPanel" hasShadow={false} hasBorder={true}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{i18nTexts.statsTitle}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiLink
             {...reactRouterNavigate(history, '/kibana_deprecations')}
             data-test-subj="kibanaDeprecationsLink"
           >
-            {i18nTexts.statsTitle}
+            {i18nTexts.viewDeprecationsLink}
           </EuiLink>
-        </h3>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer />
 
