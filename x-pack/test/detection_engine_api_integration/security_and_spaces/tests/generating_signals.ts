@@ -807,5 +807,70 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    /**
+     * Here we test the functionality of timestamp overrides. If the rule specifies a timestamp override,
+     * then the documents will be queried and sorted using the timestamp overrid field.
+     * If no timestamp override field exists, the search will default to using `@timestamp` field
+     */
+    describe('Signals generated from events with timestamp override fields', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+        await esArchiver.load('security_solution/timestamp_override');
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('security_solution/timestamp_override');
+      });
+
+      const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 3, [id, id, id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id, id, id], 3);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        return signalsOrderedByEventId;
+      };
+
+      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfa*']),
+          timestamp_override: 'event.ingested',
+        };
+
+        const signals = await executeRuleAndGetSignals(rule);
+
+        expect(signals.length).equal(3);
+      });
+
+      it('should generate 2 signals with @timestamp', async () => {
+        const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
+
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, undefined, [id, id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id]);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+
+        expect(signals.length).equal(2);
+      });
+
+      it('should generate 2 signals when timestamp override does not exist', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfa*']),
+          timestamp_override: 'event.fakeingestfield',
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, undefined, [id]);
+
+        const signalsResponse = await getSignalsByIds(supertest, [id]);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        expect(signals.length).equal(2);
+      });
+    });
   });
 };
