@@ -229,14 +229,6 @@ Visualizing saved searches in unsupported in *Lens*.
 Configuring the *Suggestions* that *Lens* automatically populates is unsupported.
 
 [float]
-[[is-it-possible-to-inspect-the-elastic-search-query-in-lens]]
-===== Is it possible to inspect the Elasticsearch query in Lens?
-
-It is possible to use the Inspector to visualize the Elasticsearch query used in a visualization made with *Lens*.
-There's currently a limitation for visualizations with multiple *Lens* layers, where only the latest request will be shown in the Inspector.
-While the Inspect button is not available within the *Lens* editor, it can be accessed embedding a *Lens* visualization in a dashboard and using the `Inspect` action for the panel.
-
-[float]
 [[is-it-possible-to-use-different-indexpatterns-in-lens]]
 ===== Is it possible to use different index patterns in a single visualization?
 
