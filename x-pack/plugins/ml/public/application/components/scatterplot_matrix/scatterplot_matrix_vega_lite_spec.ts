@@ -27,7 +27,7 @@ export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
 export const getColorSpec = (
-  euiTheme: typeof euiThemeLight,
+  euiTheme: typeof euiThemeVars,
   escapedOutlierScoreField?: string,
   color?: string,
   legendType?: LegendType
