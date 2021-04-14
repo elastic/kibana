@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import { NumericField, SelectField, useFormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
@@ -39,7 +39,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
   return (
     <FieldDeprecationWarning
       message={i18nTexts.deprecationMessage}
-      isShowing={showDeprecationWarning}
+      isShowing={false}
       data-test-subj="maxIndexSizeFieldDeprecationWarning-hot"
     >
       <EuiFlexGroup>
@@ -48,7 +48,13 @@ export const MaxIndexSizeField: FunctionComponent = () => {
             path={ROLLOVER_FORM_PATHS.maxSize}
             component={NumericField}
             componentProps={{
-              euiFieldProps: { 'data-test-subj': 'hot-selectedMaxSizeStored', min: 1 },
+              euiFieldProps: {
+                prepend: showDeprecationWarning ? (
+                  <EuiIconTip type="alert" color="warning" content="not ok" />
+                ) : undefined,
+                'data-test-subj': 'hot-selectedMaxSizeStored',
+                min: 1,
+              },
             }}
           />
         </EuiFlexItem>
