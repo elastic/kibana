@@ -111,7 +111,7 @@ export const SearchExamplesApp = ({
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
   }, [fields]);
 
-  const doAsyncSearch = async (strategy?: string) => {
+  const doAsyncSearch = async (strategy?: string, sessionId?: string) => {
     if (!indexPattern || !selectedNumericField) return;
 
     // Construct the query portion of the search request
@@ -138,6 +138,7 @@ export const SearchExamplesApp = ({
     const searchSubscription$ = data.search
       .search(req, {
         strategy,
+        sessionId,
       })
       .subscribe({
         next: (res) => {
@@ -148,19 +149,30 @@ export const SearchExamplesApp = ({
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
               : undefined;
+            const isCool = (res as IMyStrategyResponse).cool;
+            const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
                 The average of {selectedNumericField!.name} is{' '}
                 {avgResult ? Math.floor(avgResult) : 0}.
                 <br />
-                Is it Cool? {String((res as IMyStrategyResponse).cool)}
+                {isCool ? `Is it Cool? ${isCool}` : undefined}
+                <br />
+                <EuiText data-test-subj="requestExecutedAt">
+                  {executedAt ? `Executed at? ${executedAt}` : undefined}
+                </EuiText>
               </EuiText>
             );
-            notifications.toasts.addSuccess({
-              title: 'Query result',
-              text: mountReactNode(message),
-            });
+            notifications.toasts.addSuccess(
+              {
+                title: 'Query result',
+                text: mountReactNode(message),
+              },
+              {
+                toastLifeTimeMs: 30000,
+              }
+            );
             searchSubscription$.unsubscribe();
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
@@ -225,6 +237,10 @@ export const SearchExamplesApp = ({
 
   const onMyStrategyClickHandler = () => {
     doAsyncSearch('myStrategy');
+  };
+
+  const onClientSideSessionCacheClickHandler = () => {
+    doAsyncSearch('myStrategy', data.search.session.getSessionId());
   };
 
   const onServerClickHandler = async () => {
@@ -367,6 +383,45 @@ export const SearchExamplesApp = ({
                   onChange={(event) => setGetCool(event.target.checked)}
                 />
                 <EuiButtonEmpty size="xs" onClick={onMyStrategyClickHandler} iconType="play">
+                  <FormattedMessage
+                    id="searchExamples.myStrategyButtonText"
+                    defaultMessage="Request from low-level client via My Strategy"
+                  />
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="s">
+                <h3>Client side search session caching</h3>
+              </EuiTitle>
+              <EuiText>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => data.search.session.start()}
+                  iconType="alert"
+                  data-test-subj="searchExamplesStartSession"
+                >
+                  <FormattedMessage
+                    id="searchExamples.startNewSession"
+                    defaultMessage="Start a new session"
+                  />
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => data.search.session.clear()}
+                  iconType="alert"
+                  data-test-subj="searchExamplesClearSession"
+                >
+                  <FormattedMessage
+                    id="searchExamples.clearSession"
+                    defaultMessage="Clear session"
+                  />
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onClientSideSessionCacheClickHandler}
+                  iconType="play"
+                  data-test-subj="searchExamplesCacheSearch"
+                >
                   <FormattedMessage
                     id="searchExamples.myStrategyButtonText"
                     defaultMessage="Request from low-level client via My Strategy"
