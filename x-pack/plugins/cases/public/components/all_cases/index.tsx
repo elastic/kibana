@@ -202,27 +202,28 @@ export const AllCases = React.memo<AllCasesProps>(
       [refreshCases, setQueryParams, setFilters]
     );
 
-    const casesColumns = useCasesColumns({
+    const showActions = userCanCrud && !isModal;
+
+    const columns = useCasesColumns({
       caseDetailsNavigation,
       filterStatus: filterOptions.status,
       refreshCases,
       handleIsLoading,
       showCaseTitleAsHref: !isModal,
-      showActions: !isModal && userCanCrud,
+      showActions,
     });
 
     const itemIdToExpandedRowMap = useMemo(
       () =>
         getExpandedRowMap({
-          columns: casesColumns,
+          columns,
           data: data.cases,
-          isModal,
           onSubCaseClick: onRowClick,
         }),
-      [data.cases, isModal, casesColumns, onRowClick]
+      [data.cases, columns, onRowClick]
     );
 
-    const memoizedPagination = useMemo(
+    const pagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
@@ -275,8 +276,6 @@ export const AllCases = React.memo<AllCasesProps>(
       [isModal, alertData, onRowClick, postComment, updateCase]
     );
 
-    const enableBulkActions = userCanCrud && !isModal;
-
     return (
       <>
         {!isEmpty(actionsErrors) && (
@@ -317,16 +316,16 @@ export const AllCases = React.memo<AllCasesProps>(
             <Div>
               <CasesTableUtilityBar
                 data={data}
-                enableBulkActions={enableBulkActions}
+                enableBulkActions={showActions}
                 filterOptions={filterOptions}
                 handleIsLoading={handleIsLoading}
                 selectedCases={selectedCases}
                 refreshCases={refreshCases}
               />
               <BasicTable
-                columns={casesColumns}
+                columns={columns}
                 data-test-subj="cases-table"
-                isSelectable={enableBulkActions}
+                isSelectable={showActions}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -352,9 +351,9 @@ export const AllCases = React.memo<AllCasesProps>(
                   />
                 }
                 onChange={tableOnChangeCallback}
-                pagination={memoizedPagination}
+                pagination={pagination}
                 rowProps={tableRowProps}
-                selection={enableBulkActions ? euiBasicTableSelectionProps : undefined}
+                selection={showActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
                 className={classnames({ isModal })}
               />

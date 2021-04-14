@@ -34,12 +34,10 @@ BasicTable.displayName = 'BasicTable';
 export const getExpandedRowMap = ({
   data,
   columns,
-  isModal,
   onSubCaseClick,
 }: {
   data: Case[] | null;
   columns: CasesColumns[];
-  isModal: boolean;
   onSubCaseClick?: (theSubCase: SubCase) => void;
 }): ExpandedRowMap => {
   if (data == null) {
@@ -48,7 +46,7 @@ export const getExpandedRowMap = ({
 
   const rowProps = (theSubCase: SubCase) => {
     return {
-      ...(isModal && onSubCaseClick ? { onClick: () => onSubCaseClick(theSubCase) } : {}),
+      ...(onSubCaseClick ? { onClick: () => onSubCaseClick(theSubCase) } : {}),
       className: 'subCase',
     };
   };

@@ -59,7 +59,7 @@ interface GetCasesColumn {
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   showActions: boolean;
-  showCaseTitleAsHref: boolean;
+  showCaseTitleAsHref?: boolean;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -67,7 +67,7 @@ export const useCasesColumns = ({
   handleIsLoading,
   refreshCases,
   showActions,
-  showCaseTitleAsHref,
+  showCaseTitleAsHref = true,
 }: GetCasesColumn): CasesColumns[] => {
   const { loading: isLoadingCases, dispatchUpdateCaseProperty } = useGetCases();
   // Delete case
