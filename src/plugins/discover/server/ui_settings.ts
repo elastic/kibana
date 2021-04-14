@@ -41,11 +41,11 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
-      defaultMessage: 'Maximum document column entries',
+      defaultMessage: 'Maximum document fields displayed',
     }),
     value: 200,
     description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
-      defaultMessage: 'Maximum number of entries rendered in the document column',
+      defaultMessage: 'Maximum number of fields rendered in the document column',
     }),
     category: ['discover'],
     schema: schema.number(),
