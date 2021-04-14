@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
 import { Connections } from './get_connections';
 
@@ -21,20 +22,15 @@ export function findCommonConnections({
   currentPeriodConnections: Connections;
   previousPeriodConnections?: Connections;
 }) {
-  const currentPeriodConnectionsMap: Record<
-    string,
-    Connections
-  > = currentPeriodConnections.reduce((acc, curr) => {
-    if (curr.service?.name) {
-      const serviceName = curr.service.name;
-      return { ...acc, [serviceName]: curr };
+  const currentPeriodConnectionsMap = keyBy(
+    currentPeriodConnections,
+    (item) => {
+      const serviceName = item.service?.name;
+      return serviceName
+        ? serviceName
+        : item[SPAN_DESTINATION_SERVICE_RESOURCE];
     }
-    const destinationSource = curr[SPAN_DESTINATION_SERVICE_RESOURCE];
-    if (destinationSource) {
-      return { ...acc, [destinationSource]: curr };
-    }
-    return acc;
-  }, {});
+  );
 
   return previousPeriodConnections
     .map((item) => {
