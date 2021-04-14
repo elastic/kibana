@@ -166,7 +166,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
         <EuiSpacer />
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
-            <EuiPanel hasBorder paddingSize="l">
+            <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
               <EuiTitle size="s">
                 <h3>{ROLE_TITLE}</h3>
               </EuiTitle>
@@ -189,7 +189,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
           </EuiFlexItem>
           {hasAdvancedRoles && (
             <EuiFlexItem>
-              <EuiPanel hasBorder paddingSize="l">
+              <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
                 <EuiTitle size="s">
                   <h3>{ENGINE_ACCESS_TITLE}</h3>
                 </EuiTitle>

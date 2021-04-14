@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.changeFieldScript('emit(6);');
+        await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
       });
