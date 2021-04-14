@@ -28,7 +28,7 @@ import {
   generateSelectedAgentsMessage,
 } from './translations';
 
-import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue } from './types';
+import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue, Group } from './types';
 
 export interface AgentsSelection {
   agents: string[];
@@ -45,6 +45,17 @@ interface AgentsTableProps {
 type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
 const getColor = generateColorPicker();
+
+const generateOptions = (groupType: AGENT_GROUP_KEY, label: string, collection: Group[]) => {
+  return {
+    label,
+    options: collection.map(({ name, id, size }) => ({
+      label: name,
+      color: getColor(groupType),
+      value: { groupType, id, size },
+    })),
+  };
+}
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const osqueryPolicyData = useOsqueryPolicies();
@@ -74,26 +85,12 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
 
     if (groups.platforms.length > 0) {
       const groupType = AGENT_GROUP_KEY.Platform;
-      opts.push({
-        label: AGENT_PLATFORMS_LABEL,
-        options: groups.platforms.map(({ name, size }) => ({
-          label: name,
-          color: getColor(groupType),
-          value: { groupType, size },
-        })),
-      });
+      opts.push(generateOptions(groupType, AGENT_PLATFORMS_LABEL, groups.platforms))
     }
 
     if (groups.policies.length > 0) {
       const groupType = AGENT_GROUP_KEY.Policy;
-      opts.push({
-        label: AGENT_POLICY_LABEL,
-        options: groups.policies.map(({ name, size }) => ({
-          label: name,
-          color: getColor(groupType),
-          value: { groupType, size },
-        })),
-      });
+      opts.push(generateOptions(groupType, AGENT_POLICY_LABEL, groups.policies))
     }
 
     if (agents && agents.length > 0) {
@@ -102,6 +99,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         label: AGENT_SELECTION_LABEL,
         options: (agents as Agent[]).map((agent: Agent) => ({
           label: agent.local_metadata.host.hostname,
+          key: agent.local_metadata.elastic.agent.id,
           color: getColor(groupType),
           value: {
             groupType,
@@ -126,7 +124,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         policiesSelected: [],
       };
       // parse through the selections to be able to determine how many are actually selected
-      const selectedAgents = [];
+      const selectedAgents: AgentOptionValue[] = [];
       const selectedGroups: SelectedGroups = {
         policy: {},
         platform: {},
@@ -144,7 +142,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
             value = opt.value as GroupOptionValue;
             if (!newAgentSelection.allAgentsSelected) {
               // we don't need to calculate diffs when all agents are selected
-              selectedGroups.platform[opt.label] = value.size;
+              selectedGroups.platform[opt.value?.id ?? opt.label] = value.size;
             }
             newAgentSelection.platformsSelected.push(opt.label);
             break;
@@ -152,7 +150,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
             value = opt.value as GroupOptionValue;
             if (!newAgentSelection.allAgentsSelected) {
               // we don't need to calculate diffs when all agents are selected
-              selectedGroups.policy[opt.label] = value.size ?? 0;
+              selectedGroups.policy[opt.value?.id ?? opt.label] = value.size;
             }
             newAgentSelection.policiesSelected.push(opt.label);
             break;
@@ -160,10 +158,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
             value = opt.value as AgentOptionValue;
             if (!newAgentSelection.allAgentsSelected) {
               // we don't need to count how many agents are selected if they are all selected
-              selectedAgents.push(opt.value);
+              selectedAgents.push(value);
             }
-            // TODO: fix this casting by updating the opt type to be a union
-            newAgentSelection.agents.push(value.id as string);
+            if (value?.id) {
+              newAgentSelection.agents.push(value.id);
+            }
             break;
           default:
             // this should never happen!
@@ -177,7 +176,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         const checkAgent = generateAgentCheck(selectedGroups);
         setNumAgentsSelected(
           // filter out all the agents counted by selected policies and platforms
-          selectedAgents.filter((a) => checkAgent(a as AgentOptionValue)).length +
+          selectedAgents.filter(checkAgent).length +
             // add the number of agents added via policy and platform groups
             getNumAgentsInGrouping(selectedGroups) -
             // subtract the number of agents double counted by policy/platform selections
@@ -191,18 +190,22 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   );
 
   const renderOption = useCallback((option, searchValue, contentClassName) => {
-    const { label, value } = option;
+    const { label, value, key } = option;
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
       <EuiHealth color={value?.online ? 'success' : 'danger'}>
         <span className={contentClassName}>
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+          &nbsp;
+          <span>({key})</span>
         </span>
       </EuiHealth>
     ) : (
       <span className={contentClassName}>
+        <span>[{value?.size}]</span>
+        &nbsp;
         <EuiHighlight search={searchValue}>{label}</EuiHighlight>
         &nbsp;
-        <span>({value?.size})</span>
+        {value?.id && label !== value?.id && (<span>({value?.id})</span>)}
       </span>
     );
   }, []);

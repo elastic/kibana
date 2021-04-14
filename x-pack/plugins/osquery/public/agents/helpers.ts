@@ -43,11 +43,11 @@ export const processAggregations = (aggs: Record<string, Aggregate>) => {
   const platformTerms = aggs.platforms as TermsAggregate<AggregationDataPoint>;
   const policyTerms = aggs.policies as TermsAggregate<AggregationDataPoint>;
 
-  const policies = policyTerms?.buckets.map((o) => ({ name: o.key, size: o.doc_count })) ?? [];
+  const policies = policyTerms?.buckets.map((o) => ({ name: o.key, id: o.key, size: o.doc_count })) ?? [];
 
   if (platformTerms?.buckets) {
     for (const { key, doc_count: size, policies: platformPolicies } of platformTerms.buckets) {
-      platforms.push({ name: key, size });
+      platforms.push({ name: key, id: key, size });
       if (platformPolicies?.buckets && policies.length > 0) {
         overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
           acc[pol.key] = pol.doc_count;

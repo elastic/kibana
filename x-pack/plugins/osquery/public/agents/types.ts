@@ -17,6 +17,7 @@ export type AggregationDataPoint = BaseDataPoint & {
 };
 
 export interface Group {
+  id: string;
   name: string;
   size: number;
 }
@@ -29,13 +30,13 @@ export interface SelectedGroups {
 }
 
 interface BaseGroupOption {
+  id?: string;
   groupType: AGENT_GROUP_KEY;
 }
 
 export type AgentOptionValue = BaseGroupOption & {
   groups: { [groupType: string]: string };
   online: boolean;
-  id: string;
 };
 
 export type GroupOptionValue = BaseGroupOption & {
