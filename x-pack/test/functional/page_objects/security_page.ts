@@ -108,7 +108,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     if (expectedResult === 'chrome') {
       await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
         20000
       );
       log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
