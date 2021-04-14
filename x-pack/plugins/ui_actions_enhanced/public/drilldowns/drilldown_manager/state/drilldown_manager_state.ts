@@ -196,7 +196,6 @@ export class DrilldownManagerState {
    */
   public setActionFactory(actionFactory: undefined | ActionFactory): void {
     if (!actionFactory) {
-      // this.actionFactory$.next(undefined);
       const route = this.route$.getValue();
       if (route[0] === 'new' && route.length > 1) this.setRoute(['new']);
       return;
@@ -219,7 +218,6 @@ export class DrilldownManagerState {
       this.drilldownStateByFactoryId.set(actionFactory.id, drilldownState);
     }
 
-    // this.actionFactory$.next(actionFactory);
     this.route$.next(['new', actionFactory.id]);
   }
 

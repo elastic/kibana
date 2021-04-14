@@ -21,8 +21,8 @@ import type { SavedObjectReference } from '../../../../../src/core/types';
 import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
-  readonly getLicense: () => ILicense;
-  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
+  readonly getLicense?: () => ILicense;
+  readonly getFeatureUsageStart?: () => LicensingPluginStart['featureUsage'];
 }
 
 export class ActionFactory<
@@ -82,7 +82,7 @@ export class ActionFactory<
    * compatible with current license?
    */
   public isCompatibleLicense() {
-    if (!this.minimalLicense) return true;
+    if (!this.minimalLicense || !this.deps.getLicense) return true;
     const license = this.deps.getLicense();
     return license.isAvailable && license.isActive && license.hasAtLeast(this.minimalLicense);
   }
@@ -110,7 +110,7 @@ export class ActionFactory<
   }
 
   private notifyFeatureUsage(): void {
-    if (!this.minimalLicense || !this.licenseFeatureName) return;
+    if (!this.minimalLicense || !this.licenseFeatureName || !this.deps.getFeatureUsageStart) return;
     this.deps
       .getFeatureUsageStart()
       .notifyUsage(this.licenseFeatureName)
