@@ -14,6 +14,7 @@ import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -150,7 +151,7 @@ export const patchRules = async ({
       severity,
       severityMapping,
       threat,
-      threshold,
+      threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
       threatFilters,
       threatIndex,
       threatQuery,

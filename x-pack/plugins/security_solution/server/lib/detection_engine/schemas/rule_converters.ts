@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { SavedObject } from 'kibana/server';
-import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
+import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
   RuleParams,
@@ -96,10 +96,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query,
         filters: params.filters,
         savedId: params.saved_id,
-        threshold: {
-          ...params.threshold,
-          field: normalizeThresholdField(params.threshold.field),
-        },
+        threshold: normalizeThresholdObject(params.threshold),
       };
     }
     case 'machine_learning': {
