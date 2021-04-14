@@ -32,8 +32,6 @@ import {
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { scaleTime } from 'd3-scale';
-import d3 from 'd3';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -41,17 +39,18 @@ import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip, MlTooltipComponent } from '../components/chart_tooltip/chart_tooltip';
-import {
-  formatHumanReadableDateTime,
-  formatHumanReadableDateTimeSeconds,
-} from '../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
+import {
+  SwimlaneAnnotationContainer,
+  Y_AXIS_LABEL_WIDTH,
+  Y_AXIS_LABEL_PADDING,
+} from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
-import { ChartTooltipService } from '../components/chart_tooltip';
 
 declare global {
   interface Window {
@@ -68,13 +67,10 @@ declare global {
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
-const ANNOTATION_HEIGHT = 12;
 
 const Y_AXIS_HEIGHT = 24;
 
 export const SWIM_LANE_LABEL_WIDTH = 200;
-const Y_AXIS_LABEL_WIDTH = 170;
-const Y_AXIS_LABEL_PADDING = 8;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -157,99 +153,8 @@ export interface SwimlaneProps {
    * Enables/disables timeline on the X-axis.
    */
   showTimeline?: boolean;
+  annotationsData?: AnnotationsTable['annotationsData'];
 }
-
-interface SwimlaneAnnotationContainerProps {
-  chartWidth: number;
-  domain: {
-    min: number;
-    max: number;
-  };
-  annotationsData: AnnotationsTable['annotationsData'];
-  tooltipService: ChartTooltipService;
-}
-export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
-  chartWidth,
-  domain,
-  annotationsData,
-  tooltipService,
-}) => {
-  const canvasRef = React.useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (canvasRef.current !== null) {
-      const chartElement = d3.select(canvasRef.current);
-      chartElement.selectAll('*').remove();
-
-      const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = startingXPos + chartWidth - Y_AXIS_LABEL_PADDING;
-
-      const svg = chartElement
-        .append('svg')
-        .attr('width', '100%')
-        .attr('height', ANNOTATION_HEIGHT);
-
-      const xScale = scaleTime().domain([domain.min, domain.max]).range([startingXPos, endingXPos]);
-
-      // remove container altogether
-      // const container = svg.append('rect');
-      // container
-      //   .attr('x', startingXPos)
-      //   .attr('y', 0)
-      //   .attr('height', ANNOTATION_HEIGHT)
-      //   .attr('width', endingXPos - startingXPos)
-      //   .style('stroke', 'none')
-      //   .style('fill', '#ccc')
-      //   .style('stroke-width', 1);
-
-      annotationsData.forEach((d) => {
-        svg
-          .append('rect')
-          .classed('mlAnnotationRect', true)
-          .attr('x', xScale(d.timestamp))
-          .attr('y', 0)
-          .attr('height', ANNOTATION_HEIGHT)
-          .attr('width', 5)
-          .on('mouseover', function (a) {
-            const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
-            const endingTime =
-              d.end_timestamp !== undefined
-                ? formatHumanReadableDateTimeSeconds(d.end_timestamp)
-                : undefined;
-
-            const timeLabel = endingTime ? `${startingTime} - ${endingTime}` : startingTime;
-
-            tooltipService.show(
-              [
-                // @ts-ignore only need label to show
-                {
-                  label: `${d.annotation}`,
-                  seriesIdentifier: {
-                    key: 'anomaly_timeline',
-                    specId: d._id ?? `${d.annotation}-${d.timestamp}-label`,
-                  },
-                  valueAccessor: 'timespan',
-                },
-                // @ts-ignore only need label to show
-                {
-                  label: `${timeLabel}`,
-                  seriesIdentifier: {
-                    key: 'anomaly_timeline',
-                    specId: d._id ?? `${d.annotation}-${d.timestamp}-ts`,
-                  },
-                  valueAccessor: 'timespan',
-                },
-              ],
-              this
-            );
-          })
-          .on('mouseout', () => tooltipService.hide());
-      });
-    }
-  }, [chartWidth, domain, annotationsData]);
-
-  return <div ref={canvasRef} />;
-};
 
 /**
  * Anomaly swim lane container responsible for handling resizing, pagination and

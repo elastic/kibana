@@ -440,13 +440,6 @@ export function loadAllAnnotationsData(selectedJobs, interval, bounds) {
 }
 
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
-  console.log(
-    'selectedCells, selectedJobs, interval, bounds',
-    selectedCells,
-    selectedJobs,
-    interval,
-    bounds
-  );
   const jobIds =
     selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes

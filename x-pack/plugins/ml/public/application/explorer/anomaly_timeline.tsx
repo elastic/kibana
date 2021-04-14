@@ -244,7 +244,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             annotationsData={allAnnotations.annotationsData}
           />
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           {viewBySwimlaneOptions.length > 0 && (
             <SwimlaneContainer
