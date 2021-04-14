@@ -22977,7 +22977,6 @@
     "xpack.upgradeAssistant.checkupTab.noDeprecationsLabel": "无弃用内容",
     "xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail": "选中 {overviewTabButton} 以执行后续步骤。",
     "xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel": "“概述”选项卡",
-    "xpack.upgradeAssistant.checkupTab.noIssues.noIssuesLabel": "您没有 {strongCheckupLabel} 问题。",
     "xpack.upgradeAssistant.checkupTab.noIssues.noIssuesTitle": "全部清除！",
     "xpack.upgradeAssistant.checkupTab.numDeprecationsShownLabel": "显示 {numShown} 个，共 {total} 个",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel": "取消",

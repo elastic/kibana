@@ -71,9 +71,6 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesLabel"
                 defaultMessage="Your configuration is up to date."
-                values={{
-                  strongCheckupLabel: <strong>{checkupLabel}</strong>,
-                }}
               />
             </p>
             <p>

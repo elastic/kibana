@@ -22619,7 +22619,6 @@
     "xpack.upgradeAssistant.checkupTab.noDeprecationsLabel": "説明がありません",
     "xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail": "{overviewTabButton} で次のステップを確認してください。",
     "xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel": "概要タブ",
-    "xpack.upgradeAssistant.checkupTab.noIssues.noIssuesLabel": "{strongCheckupLabel} の問題がありません。",
     "xpack.upgradeAssistant.checkupTab.noIssues.noIssuesTitle": "完璧です！",
     "xpack.upgradeAssistant.checkupTab.numDeprecationsShownLabel": "{total} 件中 {numShown} 件を表示中",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel": "キャンセル",
