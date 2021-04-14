@@ -25,7 +25,7 @@ const i18nTexts = {
   upgradedMessage: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage',
     {
-      defaultMessage: 'All Elasticsearch nodes have been upgraded.',
+      defaultMessage: 'Your configuration is up to date. Kibana and all Elasticsearch nodes are running <version xyz>.',
     }
   ),
   loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {
