@@ -11,7 +11,6 @@ import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
 import { DefaultFieldMap } from '../defaults/field_map';
-import { DefaultAlertLifecycleMap } from '../defaults/lifecycle_map';
 import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
 import { PrepopulatedRuleEventFields } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
@@ -31,17 +30,15 @@ type LifecycleAlertService<
 
 type CreateLifecycleRuleType<TFieldMap extends DefaultFieldMap> = <
   TRuleParams extends RuleParams,
-  TActionVariable extends ActionVariable,
-  TAlertLifecycleMap extends DefaultAlertLifecycleMap
+  TActionVariable extends ActionVariable
 >(
   type: RuleType<
     TFieldMap,
     TRuleParams,
     TActionVariable,
-    TAlertLifecycleMap,
     { alertWithLifecycle: LifecycleAlertService<TFieldMap, TActionVariable> }
   >
-) => RuleType<TFieldMap, TRuleParams, TActionVariable, TAlertLifecycleMap>;
+) => RuleType<TFieldMap, TRuleParams, TActionVariable>;
 
 const trackedAlertStateRt = t.type({
   alertId: t.string,
