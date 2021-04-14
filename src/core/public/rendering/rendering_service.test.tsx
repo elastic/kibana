@@ -13,7 +13,7 @@ import { RenderingService } from './rendering_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 describe('RenderingService#start', () => {
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;
@@ -28,6 +28,7 @@ describe('RenderingService#start', () => {
 
     chrome = chromeServiceMock.createStartContract();
     chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getApplicationClasses$.mockReturnValue(of([]));
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -50,8 +51,11 @@ describe('RenderingService#start', () => {
     startService();
     expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
       <div
-        class="kbnAppWrapper kbnAppWrapper--hiddenChrome class-name"
+        class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
       >
+        <div
+          id="app-fixed-viewport"
+        />
         <div>
           Hello application!
         </div>

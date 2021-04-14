@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -17,7 +17,11 @@ describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
 
-    const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} classes$={of([])}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"

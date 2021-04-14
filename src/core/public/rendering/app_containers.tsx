@@ -15,7 +15,7 @@ export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
-  classes$?: Observable<string[]>;
+  classes$: Observable<string[]>;
 }> = ({ chromeVisible$, classes$, children }) => {
   const visible = useObservable(chromeVisible$);
   const classes = useObservable(classes$, ['']);
