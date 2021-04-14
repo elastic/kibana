@@ -512,9 +512,6 @@ export class VectorStyle implements IVectorStyle {
         styleMeta.fieldMeta[name] = {};
       }
 
-      // todo - should support ALL countable metrics
-      console.log('pluck tile meta!', name, foobar);
-      // if (name === COUNT_PROP_NAME) {
       styleMeta.fieldMeta[name] = {};
 
       let min = Infinity;
@@ -534,10 +531,8 @@ export class VectorStyle implements IVectorStyle {
           delta: max - min,
         },
       };
-      // }
     });
 
-    console.log('sm', styleMeta);
     return styleMeta;
   }
 

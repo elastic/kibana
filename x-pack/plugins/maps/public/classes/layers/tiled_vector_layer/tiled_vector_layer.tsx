@@ -11,7 +11,6 @@ import {
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
 } from 'mapbox-gl';
-import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -56,7 +55,9 @@ export class TiledVectorLayer extends VectorLayer {
 
   getCustomIconAndTooltipContent() {
     return {
-      icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
+      icon: this.getCurrentStyle().getIcon(),
+      tooltipContent: 'foobar',
+      areResultsTrimmed: false,
     };
   }
 

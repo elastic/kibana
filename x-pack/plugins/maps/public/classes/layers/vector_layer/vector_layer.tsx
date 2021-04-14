@@ -24,6 +24,7 @@ import {
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  KBN_IS_TILE_COMPLETE,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -879,7 +880,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
-        ['==', ['get', 'isComplete'], false],
+        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
       ]);
       mbMap.setPaintProperty(
         tooManyFeaturesLayerId,

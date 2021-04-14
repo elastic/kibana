@@ -17,11 +17,14 @@ import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   GEOTILE_GRID_AGG_NAME,
+  KBN_IS_TILE_COMPLETE,
   KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   MAX_ZOOM,
   MVT_SOURCE_LAYER_NAME,
   RENDER_AS,
   SUPER_FINE_ZOOM_DELTA,
+  VECTOR_SHAPE_TYPE,
 } from '../../common/constants';
 
 import {
@@ -60,7 +63,7 @@ export async function getGridTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
-  requestType: RENDER_AS;
+  requestType: RENDER_AS.GRID | RENDER_AS.POINT;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
   abortSignal: AbortSignal;
@@ -137,11 +140,24 @@ export async function getGridTile({
         type: 'Feature',
         properties: {
           [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
-          isComplete: true,
+          [KBN_IS_TILE_COMPLETE]: true,
+          [KBN_VECTOR_SHAPE_TYPE_COUNTS]:
+            requestType === RENDER_AS.GRID
+              ? {
+                  [VECTOR_SHAPE_TYPE.POINT]: 0,
+                  [VECTOR_SHAPE_TYPE.LINE]: 0,
+                  [VECTOR_SHAPE_TYPE.POLYGON]: features.length,
+                }
+              : {
+                  [VECTOR_SHAPE_TYPE.POINT]: features.length,
+                  [VECTOR_SHAPE_TYPE.LINE]: 0,
+                  [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+                },
           ...rangeMeta,
         },
         geometry: bounds,
       };
+
       features.push(metaDataFeature);
     }
 
@@ -249,7 +265,7 @@ export async function getTile({
           type: 'Feature',
           properties: {
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
-            isComplete: false,
+            [KBN_IS_TILE_COMPLETE]: false,
           },
           geometry: esBboxToGeoJsonPolygon(
             // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
