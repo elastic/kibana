@@ -15,7 +15,7 @@ import {
   getConfigureCasesLazy,
   getCreateCaseLazy,
   getRecentCasesLazy,
-  useAllCasesSelectorModal,
+  getAllCasesSelectorModalLazy,
 } from './methods';
 import { ENABLE_CASE_CONNECTOR } from '../common';
 
@@ -83,8 +83,8 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        * @param props UseAllCasesSelectorModalProps
        * @return UseAllCasesSelectorModalReturnedValues
        */
-      useAllCasesSelectorModal: (props) => {
-        return useAllCasesSelectorModal(props);
+      getAllCasesSelectorModal: (props) => {
+        return getAllCasesSelectorModalLazy(props);
       },
     };
   }

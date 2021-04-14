@@ -50,9 +50,11 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     )
   );
   const [isPopoverOpen, setPopover] = useState(false);
+  const [isCaseModalOpen, openCaseModal] = useState(false);
 
   const onRowClick = useCallback(
     async (theCase?: Case | SubCase) => {
+      openCaseModal(false);
       await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
@@ -77,14 +79,6 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     },
     [onRowClick]
   );
-  const { modal: allCasesModal, openModal: openCaseModal } = cases.useAllCasesSelectorModal({
-    createCaseNavigation: {
-      href: formatUrl(getCreateCaseUrl()),
-      onClick: goToCreateCase,
-    },
-    onRowClick,
-    userCanCrud: userPermissions?.crud ?? false,
-  });
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -121,7 +115,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const handleExistingCaseClick = useCallback(() => {
     handlePopoverClose();
-    openCaseModal();
+    openCaseModal(true);
   }, [openCaseModal, handlePopoverClose]);
 
   const closePopover = useCallback(() => {
@@ -177,7 +171,15 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      {allCasesModal}
+      {isCaseModalOpen &&
+        cases.getAllCasesSelectorModal({
+          createCaseNavigation: {
+            href: formatUrl(getCreateCaseUrl()),
+            onClick: goToCreateCase,
+          },
+          onRowClick,
+          userCanCrud: userPermissions?.crud ?? false,
+        })}
     </>
   );
 };

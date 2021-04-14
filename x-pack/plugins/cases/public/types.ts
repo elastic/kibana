@@ -17,10 +17,7 @@ import { CaseViewProps } from './components/case_view';
 import { ConfigureCasesProps } from './components/configure_cases';
 import { CreateCaseProps } from './components/create';
 import { RecentCasesProps } from './components/recent_cases';
-import {
-  UseAllCasesSelectorModalProps,
-  UseAllCasesSelectorModal,
-} from './components/use_all_cases_selector_modal';
+import { AllCasesSelectorModalProps } from './components/all_cases_selector_modal';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -44,9 +41,11 @@ export type StartServices = CoreStart &
 
 export interface CasesUiStart {
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  getAllCasesSelectorModal: (
+    props: AllCasesSelectorModalProps
+  ) => ReactElement<AllCasesSelectorModalProps>;
   getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
   getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
   getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
   getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
-  useAllCasesSelectorModal: (props: UseAllCasesSelectorModalProps) => UseAllCasesSelectorModal;
 }

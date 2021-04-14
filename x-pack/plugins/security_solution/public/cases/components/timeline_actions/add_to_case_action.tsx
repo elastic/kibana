@@ -91,20 +91,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
   );
 
-  const onCaseClicked = useCallback(
-    (theCase) => {
-      /**
-       * No cases listed on the table.
-       * The user pressed the add new case table's button.
-       * We gonna open the create case modal.
-       */
-      if (theCase == null) {
-        openCaseFlyoutOpen();
-      }
-    },
-    [openCaseFlyoutOpen]
-  );
-
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const goToCreateCase = useCallback(
     (ev) => {
@@ -115,25 +101,22 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     },
     [navigateToApp, urlSearch]
   );
-  const { modal: allCasesModal, openModal: openAllCaseModal } = cases.useAllCasesSelectorModal({
-    alertData: {
-      alertId: eventId,
-      index: eventIndex ?? '',
-      rule: {
-        id: rule?.id != null ? rule.id[0] : null,
-        name: rule?.name != null ? rule.name[0] : null,
-      },
-    },
-    createCaseNavigation: {
-      href: formatUrl(getCreateCaseUrl()),
-      onClick: goToCreateCase,
-    },
-    disabledStatuses: [CaseStatuses.closed],
-    onRowClick: onCaseClicked,
-    updateCase: onCaseSuccess,
-    userCanCrud: userPermissions?.crud ?? false,
-  });
+  const [isAllCaseModalOpen, openAllCaseModal] = useState(false);
 
+  const onCaseClicked = useCallback(
+    (theCase) => {
+      /**
+       * No cases listed on the table.
+       * The user pressed the add new case table's button.
+       * We gonna open the create case modal.
+       */
+      if (theCase == null) {
+        openCaseFlyoutOpen();
+      }
+      openAllCaseModal(false);
+    },
+    [openCaseFlyoutOpen]
+  );
   const addNewCaseClick = useCallback(() => {
     closePopover();
     openCaseFlyoutOpen();
@@ -141,7 +124,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const addExistingCaseClick = useCallback(() => {
     closePopover();
-    openAllCaseModal();
+    openAllCaseModal(true);
   }, [openAllCaseModal, closePopover]);
 
   const items = useMemo(
@@ -202,7 +185,25 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onSuccess={onCaseSuccess} />
       )}
-      {allCasesModal}
+      {isAllCaseModalOpen &&
+        cases.getAllCasesSelectorModal({
+          alertData: {
+            alertId: eventId,
+            index: eventIndex ?? '',
+            rule: {
+              id: rule?.id != null ? rule.id[0] : null,
+              name: rule?.name != null ? rule.name[0] : null,
+            },
+          },
+          createCaseNavigation: {
+            href: formatUrl(getCreateCaseUrl()),
+            onClick: goToCreateCase,
+          },
+          disabledStatuses: [CaseStatuses.closed],
+          onRowClick: onCaseClicked,
+          updateCase: onCaseSuccess,
+          userCanCrud: userPermissions?.crud ?? false,
+        })}
     </>
   );
 };

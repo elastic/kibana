@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { CaseType } from '../../../common';
-import { Case } from '../../containers/types';
+import { Case, CaseType } from '../../../common';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
@@ -38,7 +37,7 @@ export const useCreateCaseModal = ({
     [onCaseCreated, closeModal]
   );
 
-  const state = useMemo(
+  return useMemo(
     () => ({
       modal: (
         <CreateCaseModal
@@ -55,6 +54,4 @@ export const useCreateCaseModal = ({
     }),
     [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal]
   );
-
-  return state;
 };
