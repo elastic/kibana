@@ -5,43 +5,48 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { httpServerMock } from 'src/core/server/http/http_server.mocks';
 
 import { License } from './license';
-import { LicenseCheckState } from './shared_imports';
+import { LicenseCheckState, licensingMock } from './shared_imports';
 
 describe('License API guard', () => {
   const pluginName = 'testPlugin';
-  const currentLicenseType = 'currentLicenseType';
+  const currentLicenseType = 'basic';
 
-  const testRoute = ({ licenseState }: { licenseState: LicenseCheckState }) => {
+  const testRoute = ({ licenseState }: { licenseState: string }) => {
     const license = new License();
+
     const logger = {
       warn: jest.fn(),
     };
 
-    const licensingMock = {
-      license$: {
-        subscribe: (callback: (config: unknown) => {}) =>
-          callback({
-            type: currentLicenseType,
-            check: (): { state: LicenseCheckState } => ({ state: licenseState }),
-            getFeature: () => ({}),
-          }),
-      },
+    license.setup({ pluginName, logger });
+
+    const licenseMock = licensingMock.createLicenseMock();
+    licenseMock.type = currentLicenseType;
+    licenseMock.check('test', 'basic'); // Flush default mocked state
+    licenseMock.check.mockReturnValue({ state: licenseState as LicenseCheckState }); // Replace with new mocked state
+
+    const licensing = {
+      license$: of(licenseMock),
     };
 
-    license.setup({ pluginName, logger });
     license.start({
       pluginId: 'id',
       minimumLicenseType: 'basic',
-      licensing: licensingMock,
+      licensing,
     });
 
     const route = jest.fn();
     const guardedRoute = license.guardApiRoute(route);
     const customError = jest.fn();
-    guardedRoute({} as RequestHandlerContext, {} as KibanaRequest, { customError });
+    const responseMock = httpServerMock.createResponseFactory();
+    responseMock.customError = customError;
+    guardedRoute({} as RequestHandlerContext, {} as KibanaRequest, responseMock);
 
     return {
       errorResponse:

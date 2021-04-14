@@ -8,3 +8,5 @@
 export type { ILicense, LicenseType, LicenseCheckState } from '../../licensing/common/types';
 
 export type { LicensingPluginStart } from '../../licensing/server';
+
+export { licensingMock } from '../../licensing/server/mocks';
