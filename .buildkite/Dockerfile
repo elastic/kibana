@@ -1,4 +1,4 @@
-# NOTE: This Dockerfile is ONLY used to run certain tasks in CI. It is not used to run Kibana or as a distributable.
+# NOTE: This Dockerfile is ONLY used to run tasks in CI. It is not used to run Kibana or as a distributable.
 # If you're looking for the Kibana Docker image distributable, please see: src/dev/build/tasks/os_packages/docker_generator/templates/dockerfile.template.ts
 
 ARG NODE_VERSION=14.16.1
@@ -44,4 +44,4 @@ RUN node scripts/build_plugin_list_docs
 RUN chown -R kibana:kibana /var/lib/kibana/
 
 USER kibana
-ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.ci/buildkite/entrypoint.sh"]
+ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.buildkite/scripts/entrypoint.sh"]

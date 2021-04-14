@@ -79,5 +79,5 @@
 /.bazelrc.user
 
 # /.git
-/.ci/Dockerfile
+/.buildkite/Dockerfile
 .buildkite/pipeline.yml

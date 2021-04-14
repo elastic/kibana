@@ -27,7 +27,7 @@ GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamac
 export GITHUB_TOKEN
 
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
-  if [[ -d .ci/buildkite && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .ci/buildkite/setup.sh
+  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
+    source .buildkite/scripts/setup.sh
   fi
 fi

@@ -3,13 +3,13 @@ steps:
   # - command: |
   #     export DOCKER_BUILDKIT=1 && \
   #     docker buildx create --use && \
-  #     docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain \
+  #     docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain \
   #       --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
   #       --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
   #       --cache-from type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache
   - command: |
       export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
+      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain && \
       docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
     agents:
       queue: bootstrap
@@ -28,12 +28,12 @@ steps:
     timeout_in_minutes: 120
   - command: |
       export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .ci/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
+      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .buildkite/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
       docker push gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT
     agents:
       queue: bootstrap
     key: default-build
-  - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
+  - command: 'CI_GROUP=1 .buildkite/scripts/xpack-cigroup.sh'
     label: 'Default CI Group 1'
     agents:
       queue: ci-group
@@ -44,67 +44,67 @@ steps:
           propagate-environment: true
           mount-checkout: false
     depends_on: default-build
-  # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=1 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 1'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=2 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=2 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 2'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=3 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=3 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 3'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=4 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=4 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 4'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=5 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=5 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 5'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=6 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=6 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 6'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=7 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=7 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 7'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=8 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=8 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 8'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=9 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=9 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 9'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=10 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=10 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 10'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=11 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=11 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 11'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=12 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=12 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 12'
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - command: 'CI_GROUP=13 .ci/buildkite/xpack-cigroup.sh'
+  # - command: 'CI_GROUP=13 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 13'
   #   agents:
   #     queue: ci-group
