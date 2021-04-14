@@ -49,7 +49,7 @@ const i18nTexts = {
   getTotalDeprecationsTooltip: (clusterCount: number, indexCount: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
       defaultMessage:
-        'This cluster contains {clusterCount} cluster deprecations and {indexCount} index deprecations',
+        'This cluster is using {clusterCount} deprecated cluster settings and {indexCount} deprecated index settings',
       values: {
         clusterCount,
         indexCount,
