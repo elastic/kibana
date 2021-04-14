@@ -23,6 +23,7 @@
   "requiredBundles": [
     "home",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "presentationUtil"
   ]
 }
