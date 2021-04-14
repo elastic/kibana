@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { PanelToolbar } from './panel_toolbar';
 
-storiesOf('components/PanelToolbar', module).add('default', () => (
-  <PanelToolbar
-    onAddPanelClick={action('onAddPanelClick')}
-    onLibraryClick={action('onLibraryClick')}
-  />
-));
+import { SolutionToolbarPopover, Props as SolutionToolbarPopoverProps } from './popover';
+
+export type Props = Omit<SolutionToolbarPopoverProps, 'primary'>;
+
+export const PrimaryActionPopover = (props: Omit<SolutionToolbarPopoverProps, 'primary'>) => (
+  <SolutionToolbarPopover primary={true} {...props} />
+);
