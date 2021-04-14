@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData } from '../lib/get_vis_data';
-import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { Framework } from '../plugin';
 import type { VisTypeTimeseriesRouter } from '../types';
