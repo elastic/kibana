@@ -69,7 +69,8 @@ export const counterRateOperation: OperationDefinition<
     return ofName(
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-        : undefined
+        : undefined,
+      column.timeScale
     );
   },
   toExpression: (layer, columnId) => {
