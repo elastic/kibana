@@ -268,7 +268,7 @@ describe('<FieldEditor />', () => {
       expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
 
       // We change the type and expect the form error to not be there anymore
-      await changeFieldType('long');
+      await changeFieldType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });

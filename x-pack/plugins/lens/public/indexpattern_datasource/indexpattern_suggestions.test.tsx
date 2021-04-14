@@ -70,7 +70,10 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
-  documentField,
+  {
+    ...documentField,
+    displayName: 'Records label',
+  },
 ];
 
 const fieldsTwo = [
@@ -2242,7 +2245,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records',
+                    label: 'Cumulative sum of Records label',
                     scale: undefined,
                   },
                 },
