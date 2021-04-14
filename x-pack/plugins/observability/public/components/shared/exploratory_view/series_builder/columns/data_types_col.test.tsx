@@ -28,7 +28,7 @@ describe('DataTypesCol', function () {
     fireEvent.click(screen.getByText(/user experience\(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: 'rum' });
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, { dataType: 'rum' });
   });
 
   it('should set series on change on already selected', function () {
@@ -54,6 +54,6 @@ describe('DataTypesCol', function () {
     fireEvent.click(button);
 
     // undefined on click selected
-    expect(removeSeries).toHaveBeenCalledWith('newSeriesKey');
+    expect(removeSeries).toHaveBeenCalledWith(NEW_SERIES_KEY);
   });
 });

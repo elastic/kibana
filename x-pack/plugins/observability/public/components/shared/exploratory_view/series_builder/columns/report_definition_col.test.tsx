@@ -54,7 +54,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     fireEvent.click(removeBtn);
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith('newSeriesKey', {
+    expect(setSeries).toHaveBeenCalledWith(NEW_SERIES_KEY, {
       dataType: 'rum',
       reportDefinitions: {},
       reportType: 'pld',
