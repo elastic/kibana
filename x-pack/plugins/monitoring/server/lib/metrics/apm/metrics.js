@@ -615,4 +615,31 @@ export const metrics = {
       defaultMessage: 'HTTP Requests received by agent configuration managemen',
     }),
   }),
+  apm_cgroup_memory: new QuotaMetric({
+    app: 'apm',
+    ...ApmMetric.getMetricFields(),
+    fieldSource: 'beats_stats.metrics.beat.cgroup',
+    usageField: 'memory.mem.usage.bytes',
+    periodsField: 'memory.stats.periods',
+    quotaField: 'memory.cfs.quota.us',
+    field: '',
+    title: i18n.translate('xpack.monitoring.metrics.apmInstance.memoryUtilizationTitle', {
+      defaultMessage: 'Memory Utilization',
+    }),
+    label: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.memoryUtilization.cgroupMemoryUtilizationLabel',
+      {
+        defaultMessage: 'Cgroup Memory Utilization',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.memoryUtilization.cgroupMemoryUtilizationDescription',
+      {
+        defaultMessage:
+          'Memory Usage time compared to the memory quota shown in percentage. If memory quotas are not set, then no data will be shown.',
+      }
+    ),
+    format: LARGE_BYTES,
+    units: 'B',
+  }),
 };

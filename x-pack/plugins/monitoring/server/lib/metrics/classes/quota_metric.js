@@ -58,6 +58,9 @@ export class QuotaMetric extends Metric {
 
       if (deltaUsageDerivNormalizedValue && periodsDerivNormalizedValue && quota > 0) {
         // if throttling is configured
+        if (this.units !== '%') {
+          return deltaUsageDerivNormalizedValue / (periodsDerivNormalizedValue * quota);
+        }
         const factor =
           deltaUsageDerivNormalizedValue / (periodsDerivNormalizedValue * quota * 1000); // convert quota from microseconds to nanoseconds by multiplying 1000
         return factor * 100; // convert factor to percentage
