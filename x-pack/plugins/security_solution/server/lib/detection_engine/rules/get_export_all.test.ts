@@ -6,7 +6,7 @@
  */
 
 import {
-  getResult,
+  getAlertMock,
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
@@ -20,7 +20,7 @@ describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {
     const alertsClient = alertsClientMock.create();
     const result = getFindResultWithSingleHit();
-    const alert = getResult(getQueryRuleParams());
+    const alert = getAlertMock(getQueryRuleParams());
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],

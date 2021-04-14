@@ -8,7 +8,7 @@
 import { PatchRulesOptions } from './types';
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { getResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
@@ -59,7 +59,7 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getResult(getQueryRuleParams()),
+  rule: getAlertMock(getQueryRuleParams()),
 });
 
 export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
@@ -110,5 +110,5 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getResult(getMlRuleParams()),
+  rule: getAlertMock(getMlRuleParams()),
 });

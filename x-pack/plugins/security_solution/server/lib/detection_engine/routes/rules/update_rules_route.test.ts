@@ -9,7 +9,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
@@ -36,9 +36,9 @@ describe('update_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams())); // existing rule
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.alertsClient.update.mockResolvedValue(getResult(getQueryRuleParams())); // successful update
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
 
     updateRulesRoute(server.router, ml);

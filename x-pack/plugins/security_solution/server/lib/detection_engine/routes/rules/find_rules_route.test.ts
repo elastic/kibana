@@ -7,7 +7,7 @@
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  getResult,
+  getAlertMock,
   getFindRequest,
   getFindResultWithSingleHit,
   getFindResultStatus,
@@ -26,7 +26,7 @@ describe('find_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
     findRulesRoute(server.router);

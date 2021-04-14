@@ -10,7 +10,7 @@ import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getFindResultWithSingleHit,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
@@ -171,7 +171,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.create.mockResolvedValue(getResult(getQueryRuleParams()));
+      clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

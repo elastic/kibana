@@ -13,7 +13,7 @@ import {
   getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   createBulkMlRuleRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
@@ -37,7 +37,7 @@ describe('create_rules_bulk', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.alertsClient.create.mockResolvedValue(getResult(getQueryRuleParams())); // successful creation
+    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(

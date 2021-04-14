@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
 import { AlertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
@@ -16,7 +16,7 @@ describe('updateRules', () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
     ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
-      getResult(getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
 
     await updateRules(rulesOptionsMock);
@@ -33,7 +33,7 @@ describe('updateRules', () => {
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue({
-      ...getResult(getQueryRuleParams()),
+      ...getAlertMock(getQueryRuleParams()),
       enabled: false,
     });
 
@@ -51,7 +51,7 @@ describe('updateRules', () => {
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
-      getResult(getMlRuleParams())
+      getAlertMock(getMlRuleParams())
     );
 
     await updateRules(rulesOptionsMock);

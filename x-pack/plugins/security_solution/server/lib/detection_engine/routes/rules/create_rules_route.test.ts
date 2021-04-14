@@ -8,7 +8,7 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getCreateRequest,
   getFindResultStatus,
   getNonEmptyIndex,
@@ -39,7 +39,7 @@ describe('create_rules', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.alertsClient.create.mockResolvedValue(getResult(getQueryRuleParams())); // creation succeeds
+    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

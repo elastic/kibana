@@ -7,7 +7,7 @@
 
 import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
 import {
-  getResult,
+  getAlertMock,
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
@@ -86,7 +86,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not export immutable rules', async () => {
       const alertsClient = alertsClientMock.create();
-      const result = getResult(getQueryRuleParams());
+      const result = getAlertMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -96,7 +96,7 @@ describe('get_export_by_object_ids', () => {
         data: [result],
       };
 
-      alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       alertsClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
@@ -176,7 +176,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it returns error when readRules throws error', async () => {
       const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
         throw new Error('Test error');
@@ -193,7 +193,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
       const alertsClient = alertsClientMock.create();
-      const result = getResult(getQueryRuleParams());
+      const result = getAlertMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {

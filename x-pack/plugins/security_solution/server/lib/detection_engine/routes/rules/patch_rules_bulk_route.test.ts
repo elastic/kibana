@@ -12,7 +12,7 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
-  getResult,
+  getAlertMock,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
@@ -33,7 +33,7 @@ describe('patch_rules_bulk', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.alertsClient.update.mockResolvedValue(getResult(getQueryRuleParams())); // update succeeds
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
 
     patchRulesBulkRoute(server.router, ml);
   });

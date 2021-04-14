@@ -172,7 +172,7 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getResult(getQueryRuleParams())],
+  data: [getAlertMock(getQueryRuleParams())],
 });
 
 export const nonRuleFindResult = (): FindHit => ({
@@ -339,13 +339,13 @@ export const createActionResult = (): ActionResult => ({
 
 export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getResult(getQueryRuleParams()),
+  ...getAlertMock(getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getResult = <T extends RuleParams>(params: T): Alert<T> => ({
+export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
