@@ -132,7 +132,7 @@ describe('Indices tab', () => {
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('All clear!');
+      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
     });
   });
 
@@ -156,7 +156,7 @@ describe('Indices tab', () => {
 
       expect(exists('permissionsError')).toBe(true);
       expect(find('permissionsError').text()).toContain(
-        'You do not have sufficient privileges to view Elasticsearch deprecations.'
+        'You are not authorized to view Elasticsearch deprecations.'
       );
     });
 
@@ -182,7 +182,7 @@ describe('Indices tab', () => {
 
       expect(exists('upgradedCallout')).toBe(true);
       expect(find('upgradedCallout').text()).toContain(
-        'All Elasticsearch nodes have been upgraded.'
+        'Your configuration is up to date. Kibana and all Elasticsearch nodes are running the same version.'
       );
     });
 
@@ -208,7 +208,7 @@ describe('Indices tab', () => {
 
       expect(exists('partiallyUpgradedWarning')).toBe(true);
       expect(find('partiallyUpgradedWarning').text()).toContain(
-        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.'
+        'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
       );
     });
 
@@ -231,7 +231,7 @@ describe('Indices tab', () => {
 
       expect(exists('requestError')).toBe(true);
       expect(find('requestError').text()).toContain(
-        'An error occurred while retrieving Elasticsearch deprecations.'
+        'Could not retrieve Elasticsearch deprecations.'
       );
     });
   });
