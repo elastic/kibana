@@ -52,4 +52,5 @@ export {
   // Fleet Server index
   ENROLLMENT_API_KEYS_INDEX,
   AGENTS_INDEX,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../common';

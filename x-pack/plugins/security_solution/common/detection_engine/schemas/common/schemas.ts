@@ -494,7 +494,7 @@ export const threshold = t.intersection([
   thresholdField,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);
@@ -507,7 +507,7 @@ export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);
