@@ -16,7 +16,7 @@ const defaultProps = {
   onSubmit: () => {},
 };
 
-test('should not render relation select when geo field is geo_point', async () => {
+test('should render relation select without "within"-relation when geo field is geo_point', async () => {
   const component = shallow(
     <GeometryFilterForm
       {...defaultProps}

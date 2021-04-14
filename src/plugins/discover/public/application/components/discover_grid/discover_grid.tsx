@@ -37,7 +37,11 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
+<<<<<<< HEAD
 import { MAX_DOC_COLUMN_ENTRIES } from '../../../../common';
+=======
+import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
+>>>>>>> upstream/master
 
 interface SortObj {
   id: string;
@@ -159,14 +163,27 @@ export const DiscoverGrid = ({
   sort,
   useNewFieldsApi,
 }: DiscoverGridProps) => {
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
+  const displayedRows = useMemo(() => {
+    if (!rows) {
+      return [];
+    }
+    if (!isFilterActive || selectedDocs.length === 0) {
+      return rows;
+    }
+    return rows.filter((row) => {
+      return selectedDocs.includes(getDocId(row));
+    });
+  }, [rows, selectedDocs, isFilterActive]);
 
   /**
    * Pagination
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
-  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
     rowCount,
     pagination,
@@ -208,12 +225,20 @@ export const DiscoverGrid = ({
     () =>
       getRenderCellValueFn(
         indexPattern,
+<<<<<<< HEAD
         rows,
         rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : [],
         useNewFieldsApi,
         services.uiSettings.get(MAX_DOC_COLUMN_ENTRIES)
       ),
     [rows, indexPattern, useNewFieldsApi, services.uiSettings]
+=======
+        displayedRows,
+        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        useNewFieldsApi
+      ),
+    [displayedRows, indexPattern, useNewFieldsApi]
+>>>>>>> upstream/master
   );
 
   /**
@@ -242,6 +267,20 @@ export const DiscoverGrid = ({
   ]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
+  const additionalControls = useMemo(
+    () =>
+      selectedDocs.length ? (
+        <DiscoverGridDocumentToolbarBtn
+          isFilterActive={isFilterActive}
+          rows={rows!}
+          selectedDocs={selectedDocs}
+          setSelectedDocs={setSelectedDocs}
+          setIsFilterActive={setIsFilterActive}
+        />
+      ) : null,
+    [selectedDocs, isFilterActive, rows, setIsFilterActive]
+  );
+
   if (!rowCount) {
     return (
       <div className="euiDataGrid__noResults">
@@ -259,10 +298,17 @@ export const DiscoverGrid = ({
       value={{
         expanded: expandedDoc,
         setExpanded: setExpandedDoc,
-        rows: rows || [],
+        rows: displayedRows,
         onFilter,
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
+        selectedDocs,
+        setSelectedDocs: (newSelectedDocs) => {
+          setSelectedDocs(newSelectedDocs);
+          if (isFilterActive && newSelectedDocs.length === 0) {
+            setIsFilterActive(false);
+          }
+        },
       }}
     >
       <span
@@ -271,6 +317,7 @@ export const DiscoverGrid = ({
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
+        data-document-number={displayedRows.length}
       >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized
@@ -296,8 +343,12 @@ export const DiscoverGrid = ({
                 ? {
                     ...toolbarVisibility,
                     showColumnSelector: false,
+                    additionalControls,
                   }
-                : toolbarVisibility
+                : {
+                    ...toolbarVisibility,
+                    additionalControls,
+                  }
             }
           />
         </KibanaContextProvider>
@@ -337,7 +388,7 @@ export const DiscoverGrid = ({
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}
-            hits={rows}
+            hits={displayedRows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
             onFilter={onFilter}

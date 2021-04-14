@@ -107,6 +107,7 @@ describe('Row formatter', () => {
         },
         {
           'object.value': [5, 10],
+          getByName: jest.fn(),
         },
         indexPattern
       ).trim()
@@ -124,7 +125,7 @@ describe('Row formatter', () => {
     });
     const formatted = formatTopLevelObject(
       { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
-      { 'a.zzz': [100], 'a.ccc': [50] },
+      { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
       indexPattern
     ).trim();
     expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
@@ -151,6 +152,7 @@ describe('Row formatter', () => {
         {
           'object.value': [5, 10],
           'object.keys': ['a', 'b'],
+          getByName: jest.fn(),
         },
         indexPattern
       ).trim()
@@ -171,6 +173,7 @@ describe('Row formatter', () => {
         },
         {
           'object.value': [5, 10],
+          getByName: jest.fn(),
         },
         indexPattern
       ).trim()

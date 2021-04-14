@@ -88,7 +88,7 @@ describe('SourceRouter', () => {
     const contentBreadCrumb = wrapper.find(SetPageChrome).at(1);
     const settingsBreadCrumb = wrapper.find(SetPageChrome).at(2);
 
-    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.OVERVIEW]);
+    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs]);
     expect(contentBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.CONTENT]);
     expect(settingsBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SETTINGS]);
   });
