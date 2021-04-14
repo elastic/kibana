@@ -150,14 +150,23 @@ const loadExplorerDataProvider = (
 
     const dateFormatTz = getDateFormatTz();
 
+    const interval = swimlaneBucketInterval.asSeconds();
+
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
     return forkJoin({
+      rawAnnotationsData: memoizedLoadAnnotationsTableData(
+        lastRefresh,
+        undefined,
+        selectedJobs,
+        interval,
+        bounds
+      ),
       annotationsData: memoizedLoadAnnotationsTableData(
         lastRefresh,
         selectedCells,
         selectedJobs,
-        swimlaneBucketInterval.asSeconds(),
+        interval,
         bounds
       ),
       anomalyChartRecords: memoizedLoadDataForCharts(
@@ -282,10 +291,11 @@ const loadExplorerDataProvider = (
             ),
           }),
         (
-          { annotationsData, overallState, tableData },
+          { rawAnnotationsData, annotationsData, overallState, tableData },
           { influencers, viewBySwimlaneState }
         ): Partial<ExplorerState> => {
           return {
+            allAnnotations: rawAnnotationsData,
             annotations: annotationsData,
             influencers: influencers as any,
             loading: false,

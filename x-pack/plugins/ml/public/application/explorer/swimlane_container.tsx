@@ -32,19 +32,26 @@ import {
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { scaleTime } from 'd3-scale';
+import d3 from 'd3';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
-import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
+import { FormattedTooltip, MlTooltipComponent } from '../components/chart_tooltip/chart_tooltip';
+import {
+  formatHumanReadableDateTime,
+  formatHumanReadableDateTimeSeconds,
+} from '../../../common/util/date_utils';
 import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
+import { AnnotationsTable } from '../../../common/types/annotations';
+import { ChartTooltipService } from '../components/chart_tooltip';
 
 declare global {
   interface Window {
@@ -61,8 +68,13 @@ declare global {
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
+const ANNOTATION_HEIGHT = 12;
+
 const Y_AXIS_HEIGHT = 24;
+
 export const SWIM_LANE_LABEL_WIDTH = 200;
+const Y_AXIS_LABEL_WIDTH = 170;
+const Y_AXIS_LABEL_PADDING = 8;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -147,6 +159,98 @@ export interface SwimlaneProps {
   showTimeline?: boolean;
 }
 
+interface SwimlaneAnnotationContainerProps {
+  chartWidth: number;
+  domain: {
+    min: number;
+    max: number;
+  };
+  annotationsData: AnnotationsTable['annotationsData'];
+  tooltipService: ChartTooltipService;
+}
+export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
+  chartWidth,
+  domain,
+  annotationsData,
+  tooltipService,
+}) => {
+  const canvasRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (canvasRef.current !== null) {
+      const chartElement = d3.select(canvasRef.current);
+      chartElement.selectAll('*').remove();
+
+      const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
+      const endingXPos = startingXPos + chartWidth - Y_AXIS_LABEL_PADDING;
+
+      const svg = chartElement
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', ANNOTATION_HEIGHT);
+
+      const xScale = scaleTime().domain([domain.min, domain.max]).range([startingXPos, endingXPos]);
+
+      // remove container altogether
+      // const container = svg.append('rect');
+      // container
+      //   .attr('x', startingXPos)
+      //   .attr('y', 0)
+      //   .attr('height', ANNOTATION_HEIGHT)
+      //   .attr('width', endingXPos - startingXPos)
+      //   .style('stroke', 'none')
+      //   .style('fill', '#ccc')
+      //   .style('stroke-width', 1);
+
+      annotationsData.forEach((d) => {
+        svg
+          .append('rect')
+          .classed('mlAnnotationRect', true)
+          .attr('x', xScale(d.timestamp))
+          .attr('y', 0)
+          .attr('height', ANNOTATION_HEIGHT)
+          .attr('width', 5)
+          .on('mouseover', function (a) {
+            const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
+            const endingTime =
+              d.end_timestamp !== undefined
+                ? formatHumanReadableDateTimeSeconds(d.end_timestamp)
+                : undefined;
+
+            const timeLabel = endingTime ? `${startingTime} - ${endingTime}` : startingTime;
+
+            tooltipService.show(
+              [
+                // @ts-ignore only need label to show
+                {
+                  label: `${d.annotation}`,
+                  seriesIdentifier: {
+                    key: 'anomaly_timeline',
+                    specId: d._id ?? `${d.annotation}-${d.timestamp}-label`,
+                  },
+                  valueAccessor: 'timespan',
+                },
+                // @ts-ignore only need label to show
+                {
+                  label: `${timeLabel}`,
+                  seriesIdentifier: {
+                    key: 'anomaly_timeline',
+                    specId: d._id ?? `${d.annotation}-${d.timestamp}-ts`,
+                  },
+                  valueAccessor: 'timespan',
+                },
+              ],
+              this
+            );
+          })
+          .on('mouseout', () => tooltipService.hide());
+      });
+    }
+  }, [chartWidth, domain, annotationsData]);
+
+  return <div ref={canvasRef} />;
+};
+
 /**
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
@@ -168,6 +272,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   timeBuckets,
   maskAll,
   showTimeline = true,
+  annotationsData,
   'data-test-subj': dataTestSubj,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
@@ -292,10 +397,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       },
       yAxisLabel: {
         visible: true,
-        width: 170,
+        width: Y_AXIS_LABEL_WIDTH,
         // eui color subdued
         fill: `#6a717d`,
-        padding: 8,
+        padding: Y_AXIS_LABEL_PADDING,
         formatter: (laneLabel: string) => {
           return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
         },
@@ -354,6 +459,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
+  const xDomain = {
+    min: swimlaneData.earliest * 1000,
+    max: swimlaneData.latest * 1000,
+    minInterval: swimlaneData.interval * 1000,
+  };
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -372,77 +483,92 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
-              {showSwimlane && !isLoading && (
-                <Chart className={'mlSwimLaneContainer'}>
-                  <Settings
-                    onElementClick={onElementClick}
-                    showLegend
-                    legendPosition={Position.Top}
-                    xDomain={{
-                      min: swimlaneData.earliest * 1000,
-                      max: swimlaneData.latest * 1000,
-                      minInterval: swimlaneData.interval * 1000,
-                    }}
-                    tooltip={tooltipOptions}
-                    debugState={window._echDebugStateFlag ?? false}
-                  />
-                  <Heatmap
-                    id={id}
-                    colorScale={ScaleType.Threshold}
-                    ranges={[
-                      ANOMALY_THRESHOLD.LOW,
-                      ANOMALY_THRESHOLD.WARNING,
-                      ANOMALY_THRESHOLD.MINOR,
-                      ANOMALY_THRESHOLD.MAJOR,
-                      ANOMALY_THRESHOLD.CRITICAL,
-                    ]}
-                    colors={[
-                      SEVERITY_COLORS.BLANK,
-                      SEVERITY_COLORS.LOW,
-                      SEVERITY_COLORS.WARNING,
-                      SEVERITY_COLORS.MINOR,
-                      SEVERITY_COLORS.MAJOR,
-                      SEVERITY_COLORS.CRITICAL,
-                    ]}
-                    data={swimLanePoints}
-                    xAccessor="time"
-                    yAccessor="laneLabel"
-                    valueAccessor="value"
-                    highlightedData={highlightedData}
-                    valueFormatter={getFormattedSeverityScore}
-                    xScaleType={ScaleType.Time}
-                    ySortPredicate="dataIndex"
-                    config={swimLaneConfig}
-                  />
-                </Chart>
-              )}
+            <>
+              <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
+                {showSwimlane && !isLoading && (
+                  <Chart className={'mlSwimLaneContainer'}>
+                    <Settings
+                      onElementClick={onElementClick}
+                      showLegend
+                      legendPosition={Position.Top}
+                      xDomain={{
+                        min: swimlaneData.earliest * 1000,
+                        max: swimlaneData.latest * 1000,
+                        minInterval: swimlaneData.interval * 1000,
+                      }}
+                      tooltip={tooltipOptions}
+                      debugState={window._echDebugStateFlag ?? false}
+                    />
 
-              {isLoading && (
-                <EuiText
-                  textAlign={'center'}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%,-50%)',
-                  }}
-                >
-                  <EuiLoadingChart
-                    size="xl"
-                    mono={true}
-                    data-test-subj="mlSwimLaneLoadingIndicator"
+                    <Heatmap
+                      id={id}
+                      colorScale={ScaleType.Threshold}
+                      ranges={[
+                        ANOMALY_THRESHOLD.LOW,
+                        ANOMALY_THRESHOLD.WARNING,
+                        ANOMALY_THRESHOLD.MINOR,
+                        ANOMALY_THRESHOLD.MAJOR,
+                        ANOMALY_THRESHOLD.CRITICAL,
+                      ]}
+                      colors={[
+                        SEVERITY_COLORS.BLANK,
+                        SEVERITY_COLORS.LOW,
+                        SEVERITY_COLORS.WARNING,
+                        SEVERITY_COLORS.MINOR,
+                        SEVERITY_COLORS.MAJOR,
+                        SEVERITY_COLORS.CRITICAL,
+                      ]}
+                      data={swimLanePoints}
+                      xAccessor="time"
+                      yAccessor="laneLabel"
+                      valueAccessor="value"
+                      highlightedData={highlightedData}
+                      valueFormatter={getFormattedSeverityScore}
+                      xScaleType={ScaleType.Time}
+                      ySortPredicate="dataIndex"
+                      config={swimLaneConfig}
+                    />
+                  </Chart>
+                )}
+
+                {isLoading && (
+                  <EuiText
+                    textAlign={'center'}
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%,-50%)',
+                    }}
+                  >
+                    <EuiLoadingChart
+                      size="xl"
+                      mono={true}
+                      data-test-subj="mlSwimLaneLoadingIndicator"
+                    />
+                  </EuiText>
+                )}
+                {!isLoading && !showSwimlane && (
+                  <EuiEmptyPrompt
+                    titleSize="xs"
+                    style={{ padding: 0 }}
+                    title={<h2>{noDataWarning}</h2>}
                   />
-                </EuiText>
+                )}
+              </div>
+              {swimlaneType === SWIMLANE_TYPE.OVERALL && showSwimlane && !isLoading && (
+                <MlTooltipComponent>
+                  {(tooltipService) => (
+                    <SwimlaneAnnotationContainer
+                      chartWidth={chartWidth}
+                      domain={xDomain}
+                      annotationsData={annotationsData}
+                      tooltipService={tooltipService}
+                    />
+                  )}
+                </MlTooltipComponent>
               )}
-              {!isLoading && !showSwimlane && (
-                <EuiEmptyPrompt
-                  titleSize="xs"
-                  style={{ padding: 0 }}
-                  title={<h2>{noDataWarning}</h2>}
-                />
-              )}
-            </div>
+            </>
           </EuiFlexItem>
 
           {isPaginationVisible && (

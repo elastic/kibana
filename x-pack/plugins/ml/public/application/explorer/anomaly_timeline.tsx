@@ -87,6 +87,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewByPerPage,
       swimlaneLimit,
       loading,
+      allAnnotations,
     } = explorerState;
 
     const menuItems = useMemo(() => {
@@ -240,6 +241,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             isLoading={loading}
             noDataWarning={<NoOverallData />}
             showTimeline={false}
+            annotationsData={allAnnotations.annotationsData}
           />
 
           <EuiSpacer size="m" />
