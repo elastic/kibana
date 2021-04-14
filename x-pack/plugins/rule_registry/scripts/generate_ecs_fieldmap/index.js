@@ -48,13 +48,9 @@ async function generate() {
 do not manually edit
 */
 
-    import { Mutable } from 'utility-types';
+    export const ecsFieldMap = ${JSON.stringify(fields, null, 2)} as const
 
-    const plainEcsFieldMap = ${JSON.stringify(fields, null, 2)} as const
-
-    export type EcsFieldMap = Mutable<typeof plainEcsFieldMap>;
-
-    export const ecsFieldMap:EcsFieldMap = plainEcsFieldMap;
+    export type EcsFieldMap = typeof ecsFieldMap;
     `,
       { encoding: 'utf-8' }
     ).then(() => {

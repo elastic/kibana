@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Mutable } from 'utility-types';
 import { ecsFieldMap } from './ecs_field_map';
 import { pickWithPatterns } from '../pick_with_patterns';
 
@@ -31,4 +30,4 @@ export const baseRuleFieldMap = {
   'kibana.rac.alert.status': { type: 'keyword' },
 } as const;
 
-export type BaseRuleFieldMap = Mutable<typeof baseRuleFieldMap>;
+export type BaseRuleFieldMap = typeof baseRuleFieldMap;
