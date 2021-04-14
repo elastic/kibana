@@ -111,7 +111,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
     if (this.state.indexNames.includes(indexName)) {
       this.setState({
         indexError: i18n.translate(
-          'xpack.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
+          'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
           {
             defaultMessage: 'Index name already exists.',
           }
@@ -121,7 +121,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
     } else if (!checkIndexPatternValid(indexName)) {
       this.setState({
         indexError: i18n.translate(
-          'xpack.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
+          'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
           {
             defaultMessage: 'Index name contains illegal characters.',
           }
@@ -146,7 +146,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
           <EuiEmptyPrompt
             title={
               <h4>
-                {i18n.translate('xpack.layers.newVectorLayerWizard.drawVectorShapes', {
+                {i18n.translate('xpack.maps.layers.newVectorLayerWizard.drawVectorShapes', {
                   defaultMessage: 'Draw vector shapes',
                 })}
               </h4>
@@ -154,16 +154,19 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
             body={
               <Fragment>
                 <p>
-                  {i18n.translate('xpack.layers.newVectorLayerWizard.vectorEditorDescription', {
-                    defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
-                  })}
+                  {i18n.translate(
+                    'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
+                    {
+                      defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
+                    }
+                  )}
                 </p>
               </Fragment>
             }
           />
           <EuiFormRow
             label={i18n.translate(
-              'xpack.layers.newVectorLayerWizard.indexSettings.enterIndexNameLabel',
+              'xpack.maps.layers.newVectorLayerWizard.indexSettings.enterIndexNameLabel',
               {
                 defaultMessage: 'Index name',
               }
@@ -176,15 +179,18 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               value={this.state.indexName}
               onChange={this._onIndexNameChangeEvent}
               isInvalid={!!this.state.indexError}
-              aria-label={i18n.translate('xpack.layers.newVectorLayerWizard.indexNameReqField', {
-                defaultMessage: 'Index name, required field',
-              })}
+              aria-label={i18n.translate(
+                'xpack.maps.layers.newVectorLayerWizard.indexNameReqField',
+                {
+                  defaultMessage: 'Index name, required field',
+                }
+              )}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.layers.newVectorLayerWizard.indexSettings.indexNameGuidelines',
+              'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameGuidelines',
               {
                 defaultMessage: 'Index name guidelines',
               }
@@ -194,7 +200,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
             <ul style={{ marginBottom: 0 }}>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.mustBeNewIndex',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.mustBeNewIndex',
                   {
                     defaultMessage: 'Must be a new index',
                   }
@@ -202,7 +208,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               </li>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.lowercaseOnly',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.lowercaseOnly',
                   {
                     defaultMessage: 'Lowercase only',
                   }
@@ -210,7 +216,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               </li>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.cannotInclude',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotInclude',
                   {
                     defaultMessage:
                       'Cannot include \\\\, /, *, ?, ", <, >, |, \
@@ -220,7 +226,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               </li>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.cannotStartWith',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotStartWith',
                   {
                     defaultMessage: 'Cannot start with -, _, +',
                   }
@@ -228,7 +234,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               </li>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.cannotBe',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotBe',
                   {
                     defaultMessage: 'Cannot be . or ..',
                   }
@@ -236,7 +242,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               </li>
               <li>
                 {i18n.translate(
-                  'xpack.layers.newVectorLayerWizard.indexSettings.guidelines.length',
+                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.length',
                   {
                     defaultMessage:
                       'Cannot be longer than 255 bytes (note it is bytes, \
