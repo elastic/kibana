@@ -26,19 +26,10 @@ import { CaseStatuses, CaseType, CommentRequestAlertType, CommentType } from '..
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { EuiBasicTableOnChange } from './types';
 import { Panel } from '../panel';
-import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../utility_bar';
-import { getBulkItems } from '../bulk_actions';
-import { CaseHeaderPage } from '../case_header_page';
+
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
@@ -47,13 +38,12 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostComment } from '../../containers/use_post_comment';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
-import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 import { CaseDetailsHrefSchema, CasesNavigation, LinkButton } from '../links';
-import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { getExpandedRowMap } from './expanded_row';
-import { isSelectedCasesIncludeCollections } from './helpers';
+import { AllCasesFilters } from './filters';
+import { AllCasesHeader } from './header';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -137,13 +127,7 @@ export const AllCases = React.memo<AllCasesProps>(
     updateCase,
   }) => {
     const { actionLicense } = useGetActionLicense();
-    const {
-      countOpenCases,
-      countInProgressCases,
-      countClosedCases,
-      isLoading: isCasesStatusLoading,
-      fetchCasesStatus,
-    } = useGetCasesStatus();
+    const [refresh, doRefresh] = useState(0);
     const {
       data,
       dispatchUpdateCaseProperty,
@@ -168,16 +152,13 @@ export const AllCases = React.memo<AllCasesProps>(
     } = useDeleteCases();
 
     // Update case
-    const {
-      dispatchResetIsUpdated,
-      isLoading: isUpdating,
-      isUpdated,
-      updateBulkStatus,
-    } = useUpdateCases();
+    const { dispatchResetIsUpdated, isLoading: isUpdating, isUpdated } = useUpdateCases();
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentsUpdating } = usePostComment();
 
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
@@ -194,14 +175,14 @@ export const AllCases = React.memo<AllCasesProps>(
     const refreshCases = useCallback(
       (dataRefresh = true) => {
         if (dataRefresh) refetchCases();
-        fetchCasesStatus();
+        doRefresh((prev) => prev + 1);
         setSelectedCases([]);
         setDeleteBulk([]);
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
-      [filterRefetch, refetchCases, setSelectedCases, fetchCasesStatus]
+      [filterRefetch, refetchCases, setSelectedCases]
     );
 
     useEffect(() => {
@@ -244,57 +225,14 @@ export const AllCases = React.memo<AllCasesProps>(
       [handleToggleModal]
     );
 
-    const toggleBulkDeleteModal = useCallback(
-      (cases: Case[]) => {
-        handleToggleModal();
-        if (cases.length === 1) {
-          const singleCase = cases[0];
-          if (singleCase) {
-            return setDeleteThisCase({
-              id: singleCase.id,
-              title: singleCase.title,
-              type: singleCase.type,
-            });
-          }
-        }
-        const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title, type }) => ({
-          id,
-          title,
-          type,
-        }));
-        setDeleteBulk(convertToDeleteCases);
-      },
-      [setDeleteBulk, handleToggleModal]
-    );
-
-    const handleUpdateCaseStatus = useCallback(
-      (status: string) => {
-        updateBulkStatus(selectedCases, status);
-      },
-      [selectedCases, updateBulkStatus]
-    );
-
-    const getBulkItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          data-test-subj="cases-bulk-actions"
-          items={getBulkItems({
-            caseStatus: filterOptions.status,
-            closePopover,
-            deleteCasesAction: toggleBulkDeleteModal,
-            selectedCases,
-            updateCaseStatus: handleUpdateCaseStatus,
-            includeCollections: isSelectedCasesIncludeCollections(selectedCases),
-          })}
-        />
-      ),
-      [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
-    );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-        dispatchUpdateCaseProperty({ ...args, refetchCasesStatus: fetchCasesStatus });
+        dispatchUpdateCaseProperty({
+          ...args,
+          refetchCasesStatus: () => doRefresh((prev) => prev + 1),
+        });
       },
-      [dispatchUpdateCaseProperty, fetchCasesStatus]
+      [dispatchUpdateCaseProperty, doRefresh]
     );
 
     const { onClick: onCreateCaseNavClick } = createCaseNavigation;
@@ -441,7 +379,7 @@ export const AllCases = React.memo<AllCasesProps>(
       [isModal, alertData, onRowClick, postComment, updateCase]
     );
 
-    const enableBuckActions = userCanCrud && !isModal;
+    const enableBulkActions = userCanCrud && !isModal;
 
     return (
       <>
@@ -449,62 +387,12 @@ export const AllCases = React.memo<AllCasesProps>(
           <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
         )}
         {!isModal && (
-          <CaseHeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="m"
-              responsive={false}
-              wrap={true}
-              data-test-subj="all-cases-header"
-            >
-              <EuiFlexItem grow={false}>
-                <Stats
-                  dataTestSubj="openStatsHeader"
-                  caseCount={countOpenCases}
-                  caseStatus={CaseStatuses.open}
-                  isLoading={isCasesStatusLoading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <Stats
-                  dataTestSubj="inProgressStatsHeader"
-                  caseCount={countInProgressCases}
-                  caseStatus={CaseStatuses['in-progress']}
-                  isLoading={isCasesStatusLoading}
-                />
-              </EuiFlexItem>
-              <FlexItemDivider grow={false}>
-                <Stats
-                  dataTestSubj="closedStatsHeader"
-                  caseCount={countClosedCases}
-                  caseStatus={CaseStatuses.closed}
-                  isLoading={isCasesStatusLoading}
-                />
-              </FlexItemDivider>
-              <EuiFlexItem grow={false}>
-                <ConfigureCaseButton
-                  configureCasesNavigation={configureCasesNavigation}
-                  label={i18n.CONFIGURE_CASES_BUTTON}
-                  isDisabled={!isEmpty(actionsErrors) || !userCanCrud}
-                  showToolTip={!isEmpty(actionsErrors)}
-                  msgTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].description : <></>}
-                  titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LinkButton
-                  isDisabled={!userCanCrud}
-                  fill
-                  onClick={createCaseNavigation.onClick}
-                  href={createCaseNavigation.href}
-                  iconType="plusInCircle"
-                  data-test-subj="createNewCaseBtn"
-                >
-                  {i18n.CREATE_TITLE}
-                </LinkButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </CaseHeaderPage>
+          <AllCasesHeader
+            actionsErrors={actionsErrors}
+            configureCasesNavigation={configureCasesNavigation}
+            refresh={refresh}
+            userCanCrud={userCanCrud}
+          />
         )}
         {(isCasesLoading || isDeleting || isUpdating || isCommentsUpdating) && !isDataEmpty && (
           <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
@@ -530,41 +418,18 @@ export const AllCases = React.memo<AllCasesProps>(
             </Div>
           ) : (
             <Div>
-              <UtilityBar border>
-                <UtilityBarSection>
-                  <UtilityBarGroup>
-                    <UtilityBarText data-test-subj="case-table-case-count">
-                      {i18n.SHOWING_CASES(data.total ?? 0)}
-                    </UtilityBarText>
-                  </UtilityBarGroup>
-                  {!isModal && (
-                    <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-                      {enableBuckActions && (
-                        <UtilityBarText data-test-subj="case-table-selected-case-count">
-                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                        </UtilityBarText>
-                      )}
-                      {enableBuckActions && (
-                        <UtilityBarAction
-                          data-test-subj="case-table-bulk-actions"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          popoverContent={getBulkItemsPopoverContent}
-                        >
-                          {i18n.BULK_ACTIONS}
-                        </UtilityBarAction>
-                      )}
-                      <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
-                        {i18n.REFRESH}
-                      </UtilityBarAction>
-                    </UtilityBarGroup>
-                  )}
-                </UtilityBarSection>
-              </UtilityBar>
+              <AllCasesFilters
+                data={data}
+                enableBulkActions={enableBulkActions}
+                handleIsDeleting={setIsDeleting}
+                handleIsUpdating={setIsUpdating}
+                selectedCases={selectedCases}
+                refreshCases={refreshCases}
+              />
               <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
-                isSelectable={enableBuckActions}
+                isSelectable={enableBulkActions}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -592,7 +457,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
                 rowProps={tableRowProps}
-                selection={enableBuckActions ? euiBasicTableSelectionProps : undefined}
+                selection={enableBulkActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
                 className={classnames({ isModal })}
               />
