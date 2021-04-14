@@ -40,21 +40,18 @@ import {
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { Ecs } from '../../common/ecs_types';
+import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
+import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 
-// TODO: All below imports depend on Timeline or SecuritySolution in some form or another
-// import { SpyRoute } from '../../../common/utils/route/spy_routes';
-
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
-export interface CaseViewProps {
+export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation;
   caseId: string;
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
-  renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
-  renderTimelineDetailsPanel?: () => JSX.Element;
   ruleDetailsNavigation: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails: (alertId: string, index: string) => void;
   subCaseId?: string;
@@ -62,6 +59,10 @@ export interface CaseViewProps {
   userCanCrud: boolean;
 }
 
+export interface CaseViewProps extends CaseViewComponentProps {
+  onCaseDataSuccess?: (data: Case) => void;
+  timelineIntegration?: CasesTimelineIntegration;
+}
 export interface OnUpdateFields {
   key: keyof Case;
   value: Case[keyof Case];
@@ -85,7 +86,7 @@ const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
   }
 `;
 
-export interface CaseComponentProps extends CaseViewProps {
+export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: () => void;
   caseData: Case;
   updateCase: (newCase: Case) => void;
@@ -101,8 +102,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     getCaseDetailHrefWithCommentId,
     fetchCase,
     onComponentInitialized,
-    renderInvestigateInTimelineActionComponent,
-    renderTimelineDetailsPanel,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -112,6 +111,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
   }) => {
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
+    const timelineUi = useTimelineContext()?.ui;
 
     const {
       caseUserActions,
@@ -300,9 +300,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       fetchCase();
     }, [caseData.connector.id, caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
-    // TODO: Handle spyRoute (pass as a prop or allow component to have children??)
-    // const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
@@ -399,7 +396,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       onShowAlertDetails={onShowAlertDetails}
                       onUpdateField={onUpdateField}
                       renderInvestigateInTimelineActionComponent={
-                        renderInvestigateInTimelineActionComponent
+                        timelineUi?.renderInvestigateInTimelineActionComponent
                       }
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
@@ -470,9 +467,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        {renderTimelineDetailsPanel ? renderTimelineDetailsPanel() : null}
-        {/* TODO: Determine spyroute changes */}
-        {/* <SpyRoute state={spyState} pageName={SecurityPageName.case} /> */}
+        {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );
   }
@@ -485,12 +480,12 @@ export const CaseView = React.memo(
     caseId,
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
+    onCaseDataSuccess,
     onComponentInitialized,
-    renderInvestigateInTimelineActionComponent,
-    renderTimelineDetailsPanel,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
+    timelineIntegration,
     useFetchAlertData,
     userCanCrud,
   }: CaseViewProps) => {
@@ -507,27 +502,30 @@ export const CaseView = React.memo(
         </MyEuiFlexGroup>
       );
     }
+    if (onCaseDataSuccess && data) {
+      onCaseDataSuccess(data);
+    }
 
     return (
       data && (
-        <CaseComponent
-          allCasesNavigation={allCasesNavigation}
-          caseData={data}
-          caseDetailsNavigation={caseDetailsNavigation}
-          caseId={caseId}
-          configureCasesNavigation={configureCasesNavigation}
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-          fetchCase={fetchCase}
-          onComponentInitialized={onComponentInitialized}
-          renderInvestigateInTimelineActionComponent={renderInvestigateInTimelineActionComponent}
-          renderTimelineDetailsPanel={renderTimelineDetailsPanel}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          subCaseId={subCaseId}
-          updateCase={updateCase}
-          useFetchAlertData={useFetchAlertData}
-          userCanCrud={userCanCrud}
-        />
+        <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+          <CaseComponent
+            allCasesNavigation={allCasesNavigation}
+            caseData={data}
+            caseDetailsNavigation={caseDetailsNavigation}
+            caseId={caseId}
+            configureCasesNavigation={configureCasesNavigation}
+            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+            fetchCase={fetchCase}
+            onComponentInitialized={onComponentInitialized}
+            ruleDetailsNavigation={ruleDetailsNavigation}
+            showAlertDetails={showAlertDetails}
+            subCaseId={subCaseId}
+            updateCase={updateCase}
+            useFetchAlertData={useFetchAlertData}
+            userCanCrud={userCanCrud}
+          />
+        </CasesTimelineIntegrationProvider>
       )
     );
   }
