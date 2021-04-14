@@ -249,6 +249,21 @@ export async function setupFleet(
     fleet_enroll_username: FLEET_ENROLL_USERNAME,
     fleet_enroll_password: password,
   });
+
+  if (options?.forceRecreate) {
+    const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+    });
+    await Promise.all(
+      agentPolicies.map(async (agentPolicy) => {
+        return generateEnrollmentAPIKey(soClient, esClient, {
+          name: `Default`,
+          agentPolicyId: agentPolicy.id,
+          forceRecreate: true,
+        });
+      })
+    );
+  }
 }
 
 function generateRandomPassword() {
