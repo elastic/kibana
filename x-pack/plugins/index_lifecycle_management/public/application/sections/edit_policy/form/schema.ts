@@ -12,7 +12,6 @@ import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
 import { MinAgePhase } from '../types';
 import { i18nTexts } from '../i18n_texts';
-import { FormInternal } from '../types';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,

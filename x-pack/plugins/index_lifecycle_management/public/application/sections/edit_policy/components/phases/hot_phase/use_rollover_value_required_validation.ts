@@ -15,7 +15,7 @@ const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 export const useRolloverValueRequiredValidation = (): boolean => {
   const [isValid, setIsValid] = useState(false);
-  const [formData] = useFormData({ watch: rolloverFieldPaths });
+  const [{ getFields }] = useFormData({ watch: rolloverFieldPaths });
   const form = useFormContext();
 
   useEffect(() => {
@@ -23,14 +23,14 @@ export const useRolloverValueRequiredValidation = (): boolean => {
     // it has the ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE error, all the other rollover
     // fields should too.
     const rolloverFieldErrors: ValidationError[] =
-      get(form.getFields(), ROLLOVER_FORM_PATHS.maxPrimaryShardSize)?.errors ?? [];
+      get(getFields(), ROLLOVER_FORM_PATHS.maxPrimaryShardSize)?.errors ?? [];
 
     setIsValid(
       rolloverFieldErrors.some(
         (validation) => validation.code === ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE
       )
     );
-  }, [form, formData]);
+  }, [form, getFields]);
 
   return isValid;
 };
