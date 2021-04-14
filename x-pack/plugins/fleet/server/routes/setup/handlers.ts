@@ -63,13 +63,13 @@ export const createFleetSetupHandler: RequestHandler<
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    await setupIngestManager(soClient, esClient);
+    const body = await setupIngestManager(soClient, esClient);
     await setupFleet(soClient, esClient, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 
     return response.ok({
-      body: { isInitialized: true },
+      body,
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
@@ -81,8 +81,7 @@ export const FleetSetupHandler: RequestHandler = async (context, request, respon
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient);
+    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
     return response.ok({
       body,
     });
