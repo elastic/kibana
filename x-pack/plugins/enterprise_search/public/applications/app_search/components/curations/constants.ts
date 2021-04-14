@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiButtonIconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const CURATIONS_TITLE = i18n.translate(
@@ -49,26 +50,26 @@ export const PROMOTE_DOCUMENT_ACTION = {
     defaultMessage: 'Promote this result',
   }),
   iconType: 'starPlusEmpty',
-  iconColor: 'primary',
+  iconColor: 'primary' as EuiButtonIconColor,
 };
 export const DEMOTE_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.demoteButtonLabel', {
     defaultMessage: 'Demote this result',
   }),
   iconType: 'starMinusFilled',
-  iconColor: 'primary',
+  iconColor: 'primary' as EuiButtonIconColor,
 };
 export const HIDE_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.hideButtonLabel', {
     defaultMessage: 'Hide this result',
   }),
   iconType: 'eyeClosed',
-  iconColor: 'danger',
+  iconColor: 'danger' as EuiButtonIconColor,
 };
 export const SHOW_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.showButtonLabel', {
     defaultMessage: 'Show this result',
   }),
   iconType: 'eye',
-  iconColor: 'primary',
+  iconColor: 'primary' as EuiButtonIconColor,
 };

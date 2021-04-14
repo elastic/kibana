@@ -96,3 +96,38 @@ PUT test
     }
 }
 --------------------------------------------------
+
+[float]
+[[preconfigured-connector-alert-history]]
+=== Alert history {es} index connector
+
+experimental[] {kib} offers a preconfigured index connector to facilitate indexing active alert data into {es}.
+
+[WARNING]
+==================================================
+This functionality is experimental and may be changed or removed completely in a future release.
+==================================================
+
+To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`. 
+
+```js
+  xpack.actions.preconfiguredAlertHistoryEsIndex: true
+```
+
+When creating a new rule, add an <<index-action-type, Index action>> and select the `Alert history Elasticsearch index (preconfigured)` connector.
+
+[role="screenshot"]
+image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
+
+Documents are indexed using a preconfigured schema that captures the <<defining-alerts-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index. Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
+
+[IMPORTANT]
+==============================================
+To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<xpack-kibana-role-management>> for more information.
+==============================================
+
+[NOTE]
+==================================================
+The `kibana-alert-history-*` indices are not configured to use ILM so they must be maintained manually. If the index size grows large,
+consider using the {ref}/docs-delete-by-query.html[delete by query] API to clean up older documents in the index.
+==================================================

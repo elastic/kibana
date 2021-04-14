@@ -158,21 +158,17 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={aggWithOptionsRestrictFields}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={aggWithOptionsRestrictFields}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -223,23 +219,19 @@ const TopHitAggUi = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('order_by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.orderByLabel"
                 defaultMessage="Order by"
               />
             }
-          >
-            <FieldSelect
-              restrict={ORDER_DATE_RESTRICT_FIELDS}
-              value={model.order_by}
-              onChange={handleSelectChange('order_by')}
-              indexPattern={indexPattern}
-              fields={fields}
-            />
-          </EuiFormRow>
+            restrict={ORDER_DATE_RESTRICT_FIELDS}
+            value={model.order_by}
+            onChange={handleSelectChange('order_by')}
+            indexPattern={indexPattern}
+            fields={fields}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
