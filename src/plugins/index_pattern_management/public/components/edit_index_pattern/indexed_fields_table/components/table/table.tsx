@@ -205,7 +205,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
       <span>
         &nbsp;
         <EuiIconTip
-          type="indexSettings"
+          type="indexRuntime"
           title={runtimeIconTipTitle}
           content={<span>{runtimeIconTipText}</span>}
         />
