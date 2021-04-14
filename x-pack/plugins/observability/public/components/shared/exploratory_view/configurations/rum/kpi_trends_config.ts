@@ -45,7 +45,7 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     defaultFilters: [
       {
         field: TRANSACTION_URL,
-        negation: false,
+        isNegated: false,
       },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,

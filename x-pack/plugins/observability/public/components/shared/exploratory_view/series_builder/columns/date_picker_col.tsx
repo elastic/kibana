@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { SeriesDatePicker } from '../../series_date_picker';
 
 interface Props {
@@ -14,10 +13,8 @@ interface Props {
 }
 export function DatePickerCol({ seriesId }: Props) {
   return (
-    <Wrapper>
+    <div>
       <SeriesDatePicker seriesId={seriesId} />
-    </Wrapper>
+    </div>
   );
 }
-
-const Wrapper = styled.div``;

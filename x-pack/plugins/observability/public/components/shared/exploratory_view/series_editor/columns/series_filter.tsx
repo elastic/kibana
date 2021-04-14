@@ -32,7 +32,7 @@ export interface Field {
   label: string;
   field: string;
   nested?: string;
-  negation?: boolean;
+  isNegated?: boolean;
 }
 
 export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
@@ -40,7 +40,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
-  const options = defaultFilters.map((field) => {
+  const options: Field[] = defaultFilters.map((field) => {
     if (typeof field === 'string') {
       return { label: FieldLabels[field], field };
     }
@@ -49,7 +49,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       label: FieldLabels[field.field],
       field: field.field,
       nested: field.nested,
-      negation: field.negation,
+      isNegated: field.isNegated,
     };
   });
   const disabled = seriesId === NEW_SERIES_KEY && !isNew;
@@ -99,7 +99,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       field={selectedField.field}
       label={selectedField.label}
       nestedField={selectedField.nested}
-      negation={selectedField.negation}
+      isNegated={selectedField.isNegated}
       goBack={() => {
         setSelectedField(undefined);
       }}

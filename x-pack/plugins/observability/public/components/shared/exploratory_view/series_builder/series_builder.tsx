@@ -233,6 +233,6 @@ const INITIATING_VIEW = i18n.translate('xpack.observability.expView.seriesBuilde
 const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
   {
-    defaultMessage: 'Select a Report Type to define visualization.',
+    defaultMessage: 'Select a report type to define visualization.',
   }
 );

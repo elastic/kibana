@@ -13,7 +13,7 @@ import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
 
 export function FieldValueSuggestions({
-  fullwidth,
+  fullWidth,
   sourceField,
   label,
   indexPattern,
@@ -42,7 +42,7 @@ export function FieldValueSuggestions({
 
   return (
     <FieldValueSelection
-      fullwidth={fullwidth}
+      fullWidth={fullWidth}
       singleSelection={singleSelection}
       values={values as string[]}
       label={label}

@@ -57,7 +57,7 @@ export interface DataSeries {
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; negation?: boolean }>;
+  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];

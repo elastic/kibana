@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
 import { Breakdowns } from './columns/breakdowns';
 import { DataSeries } from '../types';
@@ -68,9 +69,10 @@ export function SeriesEditor() {
           {
             name: (
               <div>
-                {i18n.translate('xpack.observability.expView.seriesEditor.time', {
-                  defaultMessage: 'Time',
-                })}
+                <FormattedMessage
+                  id="xpack.observability.expView.seriesEditor.time"
+                  defaultMessage="Time"
+                />
               </div>
             ),
             width: '20%',
