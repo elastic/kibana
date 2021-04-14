@@ -29,7 +29,7 @@ const i18nTexts = {
     }
   ),
   loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {
-    defaultMessage: 'An error occurred while retrieving Elasticsearch deprecations.',
+    defaultMessage: 'Could not retrieve Elasticsearch deprecations.',
   }),
 };
 
