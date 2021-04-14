@@ -12,7 +12,7 @@ import { validateField } from '../../../../../common/fields_utils';
 export function topHits(req, panel, annotation, esQueryConfig, annotationIndex) {
   return (next) => (doc) => {
     const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField = annotation.time_field;
+    const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
 
     validateField(timeField, annotationIndex);
 

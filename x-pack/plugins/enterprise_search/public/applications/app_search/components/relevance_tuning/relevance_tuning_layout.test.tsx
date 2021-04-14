@@ -6,6 +6,7 @@
  */
 
 import { setMockActions, setMockValues } from '../../../__mocks__/kea.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -32,7 +33,7 @@ describe('RelevanceTuningLayout', () => {
     setMockActions(actions);
   });
 
-  const subject = () => shallow(<RelevanceTuningLayout engineBreadcrumb={['test']} />);
+  const subject = () => shallow(<RelevanceTuningLayout />);
   const findButtons = (wrapper: ShallowWrapper) =>
     wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
