@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export async function parallelize<T>(items: T[], fn: (item: T) => Promise<void>, concurrency = 4) {
+export async function parallelize<T>(
+  items: T[],
+  fn: (item: T) => Promise<void>,
+  concurrency: number
+) {
   if (items.length === 0) {
     return;
   }

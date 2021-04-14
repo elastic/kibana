@@ -10,14 +10,14 @@ import { TASK_TYPE } from './constants';
 import { ActionsConfig } from '../config';
 import { taskRunner } from './task_runner';
 import { ActionsPluginsStart } from '../plugin';
-import { ActionTypeRegistry } from '../action_type_registry';
+import { ActionTypeRegistryContract } from '../types';
 import { TaskManagerSetupContract } from '../../../task_manager/server';
 
 export function registerTaskDefinition(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
-  actionTypeRegistry: ActionTypeRegistry,
+  actionTypeRegistry: ActionTypeRegistryContract,
   config: ActionsConfig['cleanupFailedExecutionsTask']
 ) {
   taskManager.registerTaskDefinitions({

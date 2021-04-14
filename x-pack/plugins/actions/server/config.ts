@@ -53,6 +53,7 @@ export const configSchema = schema.object({
   cleanupFailedExecutionsTask: schema.object({
     interval: schema.duration({ defaultValue: '15s' }),
     pageSize: schema.number({ defaultValue: 100 }),
+    concurrency: schema.number({ defaultValue: 5 }),
   }),
 });
 

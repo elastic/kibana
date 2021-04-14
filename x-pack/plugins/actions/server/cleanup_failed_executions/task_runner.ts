@@ -9,15 +9,15 @@ import { Logger, CoreStart } from 'kibana/server';
 import { ActionsConfig } from '../config';
 import { RunContext, TaskInstance, asInterval } from '../../../task_manager/server';
 import { ActionsPluginsStart } from '../plugin';
-import { ActionTypeRegistry } from '../action_type_registry';
+import { ActionTypeRegistryContract } from '../types';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { parallelize } from '../lib';
 
 export function taskRunner(
   logger: Logger,
-  actionTypeRegistry: ActionTypeRegistry,
+  actionTypeRegistry: ActionTypeRegistryContract,
   coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>,
-  { interval, pageSize }: ActionsConfig['cleanupFailedExecutionsTask']
+  { interval, pageSize, concurrency }: ActionsConfig['cleanupFailedExecutionsTask']
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -47,16 +47,24 @@ export function taskRunner(
           sortOrder: 'asc',
         });
         const taskIds = result.saved_objects.map(({ id }) => id);
-        await parallelize<string>(taskIds, async (taskId) => {
-          await taskManager.removeIfExists(taskId);
-        });
+        await parallelize<string>(
+          taskIds,
+          async (taskId) => {
+            await taskManager.removeIfExists(taskId);
+          },
+          concurrency
+        );
         const actionTaskParamIds = result.saved_objects.map(
           ({ attributes }) =>
             JSON.parse((attributes.params as unknown) as string).actionTaskParamsId
         );
-        await parallelize<string>(actionTaskParamIds, async (actionTaskParamsId) => {
-          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
-        });
+        await parallelize<string>(
+          actionTaskParamIds,
+          async (actionTaskParamsId) => {
+            await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          },
+          concurrency
+        );
         logger.debug(`Finished cleanup of failed executions by removing ${taskIds.length} task(s)`);
         return {
           state: {
