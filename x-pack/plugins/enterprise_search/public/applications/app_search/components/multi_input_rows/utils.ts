@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { CurationQueries } from './curation_queries';
+export const filterEmptyValues = (values: string[]) => {
+  return values.filter((value) => value.length);
+};
