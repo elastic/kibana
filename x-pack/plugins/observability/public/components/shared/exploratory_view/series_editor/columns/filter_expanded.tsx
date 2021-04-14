@@ -14,7 +14,7 @@ import {
   EuiFilterGroup,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
@@ -30,7 +30,7 @@ interface Props {
 }
 
 export function FilterExpanded({ seriesId, field, label, goBack, nestedField, isNegated }: Props) {
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   const [value, setValue] = useState('');
 

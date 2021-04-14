@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
@@ -32,7 +32,7 @@ function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, 
 const MaxWidthStyle = { maxWidth: 250 };
 
 export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
 

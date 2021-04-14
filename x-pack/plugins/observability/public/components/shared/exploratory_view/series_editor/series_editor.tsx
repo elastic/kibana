@@ -16,7 +16,7 @@ import { SeriesBuilder } from '../series_builder/series_builder';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
-import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { ChartOptions } from './columns/chart_options';
 import { SeriesActions } from './columns/series_actions';
 
@@ -97,7 +97,7 @@ export function SeriesEditor() {
 
   const items: DataSeries[] = [];
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   allSeriesKeys.forEach((seriesKey) => {
     const series = allSeries[seriesKey];

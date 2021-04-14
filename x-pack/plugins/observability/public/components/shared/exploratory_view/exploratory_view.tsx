@@ -15,6 +15,8 @@ import { useUrlStorage } from './hooks/use_url_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
+import { ReportToDataTypeMap } from './configurations/constants';
 
 export function ExploratoryView() {
   const {
@@ -25,6 +27,8 @@ export function ExploratoryView() {
     null
   );
 
+  const { loadIndexPattern } = useAppIndexPatternContext();
+
   const LensComponent = lens?.EmbeddableComponent;
 
   const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
@@ -32,6 +36,12 @@ export function ExploratoryView() {
   const lensAttributesT = useLensAttributes({
     seriesId,
   });
+
+  useEffect(() => {
+    if (series?.reportType || series?.dataType) {
+      loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
+    }
+  }, [series?.reportType, series?.dataType, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);

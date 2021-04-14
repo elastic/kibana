@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 
 interface Props {
   reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
@@ -24,7 +25,16 @@ export function ReportTypesCol({ reportTypes }: Props) {
     setSeries,
   } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { indexPattern } = useIndexPatternContext();
+  const { loading, hasData } = useAppIndexPatternContext();
+
+  if (!loading && !hasData) {
+    return (
+      <FormattedMessage
+        id="xpack.observability.reportTypeCol.nodata"
+        defaultMessage="No data available"
+      />
+    );
+  }
 
   return reportTypes?.length > 0 ? (
     <FlexGroup direction="column" gutterSize="xs">
@@ -37,7 +47,7 @@ export function ReportTypesCol({ reportTypes }: Props) {
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            isDisabled={!indexPattern}
+            isDisabled={loading}
             onClick={() => {
               if (reportType === selectedReportType) {
                 setSeries(NEW_SERIES_KEY, {

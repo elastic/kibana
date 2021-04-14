@@ -22,7 +22,7 @@ import {
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
-import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
+import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
 import {
   withNotifyOnErrors,
