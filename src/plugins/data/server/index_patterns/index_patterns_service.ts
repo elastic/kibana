@@ -75,7 +75,7 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
             logger.error(error);
           },
           onNotification: ({ title, text }) => {
-            logger.warn(`${title} : ${text}`);
+            logger.warn(`${title}${text ? ` : ${text}` : ''}`);
           },
           onUnsupportedTimePattern: ({ index, title }) => {
             logger.warn(

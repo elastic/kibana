@@ -74,6 +74,11 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be available in the upgraded index.
+   */
+  readonly unusedTypesQuery: Option.Option<any>;
 }
 
 export type InitState = BaseState & {
@@ -107,6 +112,13 @@ export type FatalState = BaseState & {
   /** The reason the migration was terminated */
   readonly reason: string;
 };
+
+export interface WaitForYellowSourceState extends BaseState {
+  /** Wait for the source index to be yellow before requesting it. */
+  readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: string;
+  readonly sourceIndexMappings: IndexMapping;
+}
 
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
@@ -270,6 +282,7 @@ export type State =
   | FatalState
   | InitState
   | DoneState
+  | WaitForYellowSourceState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
