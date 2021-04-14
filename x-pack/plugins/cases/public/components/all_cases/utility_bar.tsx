@@ -33,7 +33,7 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const AllCasesFilters: FunctionComponent<Props> = ({
+export const CasesTableUtilityBar: FunctionComponent<Props> = ({
   data,
   enableBulkActions = false,
   filterOptions,

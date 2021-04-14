@@ -35,7 +35,7 @@ const FlexItemDivider = styled(EuiFlexItem)`
   `}
 `;
 
-export const AllCasesHeader: FunctionComponent<Props> = ({
+export const CasesTableHeader: FunctionComponent<Props> = ({
   actionsErrors,
   configureCasesNavigation,
   createCaseNavigation,

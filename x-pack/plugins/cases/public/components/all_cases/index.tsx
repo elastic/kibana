@@ -40,10 +40,10 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
-import { AllCasesFilters } from './filters';
-import { AllCasesHeader } from './header';
+import { CasesTableHeader } from './header';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
+import { CasesTableUtilityBar } from './utility_bar';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -57,14 +57,8 @@ const ProgressLoader = styled(EuiProgress)`
   `}
 `;
 
-const getSortField = (field: string): SortFieldCase => {
-  if (field === SortFieldCase.createdAt) {
-    return SortFieldCase.createdAt;
-  } else if (field === SortFieldCase.closedAt) {
-    return SortFieldCase.closedAt;
-  }
-  return SortFieldCase.createdAt;
-};
+const getSortField = (field: string): SortFieldCase =>
+  field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
 
 const EuiBasicTable: any = _EuiBasicTable;
 const BasicTable = styled(EuiBasicTable)`
@@ -289,7 +283,7 @@ export const AllCases = React.memo<AllCasesProps>(
           <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
         )}
         {!isModal && (
-          <AllCasesHeader
+          <CasesTableHeader
             actionsErrors={actionsErrors}
             createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
@@ -321,7 +315,7 @@ export const AllCases = React.memo<AllCasesProps>(
             </Div>
           ) : (
             <Div>
-              <AllCasesFilters
+              <CasesTableUtilityBar
                 data={data}
                 enableBulkActions={enableBulkActions}
                 filterOptions={filterOptions}
