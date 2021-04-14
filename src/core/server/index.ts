@@ -536,6 +536,8 @@ export type {
   PluginOpaqueId,
 };
 
+export { APP_WRAPPER_CLASS } from '../public/rendering';
+
 /**
  * Config schemas for the platform services.
  *
