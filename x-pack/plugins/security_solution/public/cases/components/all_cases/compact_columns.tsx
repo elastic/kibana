@@ -19,13 +19,12 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty, memoize } from 'lodash/fp';
 import styled from 'styled-components';
 import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case, DeleteCase, SubCase, SortFieldCase } from '../../containers/types';
 import { getCreateCaseUrl, useFormatUrl } from '../../../common/components/link_to';
-import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { EuiBasicTableOnChange } from '../../../detections/pages/detection_engine/rules/types';
 import { CaseDetailsLink, LinkButton } from '../../../common/components/links';
@@ -149,8 +148,8 @@ export const getCompactCasesColumns = (): CasesColumns[] => {
   return columns;
 };
 
-export const CompactCasesTable = React.memo(({ userCanCrud }: { userCanCrud: boolean }) => {
-  const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
+const CompactCasesTable = React.memo(({ userCanCrud }: { userCanCrud: boolean }) => {
+  const [, setDeleteBulk] = useState<DeleteCase[]>([]);
   const { fetchCasesStatus } = useGetCasesStatus();
   const { data, queryParams, refetchCases, setQueryParams, setSelectedCases } = useGetCases();
   const { navigateToApp } = useKibana().services.application;
@@ -193,12 +192,6 @@ export const CompactCasesTable = React.memo(({ userCanCrud }: { userCanCrud: boo
   );
 
   const filterRefetch = useRef<() => void>();
-  const setFilterRefetch = useCallback(
-    (refetchFilter: () => void) => {
-      filterRefetch.current = refetchFilter;
-    },
-    [filterRefetch]
-  );
 
   const refreshCases = useCallback(
     (dataRefresh = true) => {
