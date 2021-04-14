@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { DEFAULT_TRANSFORMS } from '../../../common/constants';
+import { defaultTransformsSetting, DEFAULT_TRANSFORMS } from '../../../common/constants';
 import { TransformConfigSchema } from '../../../common/transforms/types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import * as i18n from './translations';
@@ -25,7 +25,10 @@ export const noop: Func = () => Promise.resolve();
 export const useCreateTransforms = (): ReturnTransform => {
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
-  const [transformSettings] = useUiSetting$<TransformConfigSchema>(DEFAULT_TRANSFORMS);
+  const [transformSettings] = useUiSetting$<TransformConfigSchema>(
+    DEFAULT_TRANSFORMS,
+    defaultTransformsSetting
+  );
   const [transforms, setTransforms] = useState<Omit<ReturnTransform, 'loading'>>({
     createTransforms: noop,
   });

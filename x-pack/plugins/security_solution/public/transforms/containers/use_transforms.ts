@@ -12,7 +12,7 @@ import {
   TimerangeInput,
 } from '../../../common/search_strategy';
 import { TransformConfigSchema } from '../../../common/transforms/types';
-import { DEFAULT_TRANSFORMS } from '../../../common/constants';
+import { defaultTransformsSetting, DEFAULT_TRANSFORMS } from '../../../common/constants';
 import { useUiSetting$ } from '../../common/lib/kibana';
 import { getTransformChangesIfTheyExist } from '../utils';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -41,7 +41,10 @@ export interface ReturnTransform {
 }
 
 export const useTransforms = (): ReturnTransform => {
-  const [transformSettings] = useUiSetting$<TransformConfigSchema>(DEFAULT_TRANSFORMS);
+  const [transformSettings] = useUiSetting$<TransformConfigSchema>(
+    DEFAULT_TRANSFORMS,
+    defaultTransformsSetting
+  );
   // TODO: Once we are past experimental phase this code should be removed
   const metricsEntitiesEnabled = useIsExperimentalFeatureEnabled('metricsEntitiesEnabled');
   const [transforms, setTransforms] = useState<ReturnTransform>({
