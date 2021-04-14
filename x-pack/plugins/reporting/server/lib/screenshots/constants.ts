@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/common';
 export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
