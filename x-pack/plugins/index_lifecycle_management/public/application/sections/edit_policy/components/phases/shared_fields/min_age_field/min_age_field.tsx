@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 
 import {
   EuiFieldNumber,
@@ -20,10 +21,9 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { getFieldValidityAndErrorMessage } from '../../../../../../../shared_imports';
-
-import { UseField, useConfiguration } from '../../../../form';
-
+import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
+import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
+import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
 type PhaseWithMinAgeAction = 'warm' | 'cold' | 'delete';
@@ -81,9 +81,43 @@ interface Props {
 }
 
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
+  const minAgeValuePath = `phases.${phase}.min_age`;
+  const minAgeUnitPath = `_meta.${phase}.minAgeUnit`;
+
   const { isUsingRollover } = useConfiguration();
+  const globalFields = useGlobalFields();
+
+  const { setValue: setMillisecondValue } = globalFields[
+    `${phase}MinAgeMilliSeconds` as 'coldMinAgeMilliSeconds'
+  ];
+  const [formData] = useFormData({ watch: [minAgeValuePath, minAgeUnitPath] });
+  const minAgeValue = get(formData, minAgeValuePath);
+  const minAgeUnit = get(formData, minAgeUnitPath);
+
+  useEffect(() => {
+    // Whenever the min_age value of the field OR the min_age unit
+    // changes, we update the corresponding millisecond global field for the phase
+    if (minAgeValue === undefined) {
+      return;
+    }
+
+    const milliseconds =
+      minAgeValue.trim() === '' ? -1 : getPhaseMinAgeInMilliseconds(minAgeValue, minAgeUnit);
+
+    setMillisecondValue(milliseconds);
+  }, [minAgeValue, minAgeUnit, setMillisecondValue]);
+
+  useEffect(() => {
+    return () => {
+      // When unmounting (meaning we have disabled the phase), we remove
+      // the millisecond value so the next time we enable the phase it will
+      // be updated and trigger the validation
+      setMillisecondValue(-1);
+    };
+  }, [setMillisecondValue]);
+
   return (
-    <UseField path={`phases.${phase}.min_age`}>
+    <UseField path={minAgeValuePath}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         return (
@@ -118,7 +152,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={true} style={{ minWidth: 165 }}>
-                    <UseField path={`_meta.${phase}.minAgeUnit`}>
+                    <UseField path={minAgeUnitPath}>
                       {(unitField) => {
                         const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
                           unitField

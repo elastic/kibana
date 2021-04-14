@@ -184,10 +184,10 @@ export const removeWriteBlock = (
  * yellow at any point in the future. So ultimately data-redundancy is up to
  * users to maintain.
  */
-const waitForIndexStatusYellow = (
+export const waitForIndexStatusYellow = (
   client: ElasticsearchClient,
   index: string,
-  timeout: string
+  timeout = DEFAULT_TIMEOUT
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
     .health({ index, wait_for_status: 'yellow', timeout })
