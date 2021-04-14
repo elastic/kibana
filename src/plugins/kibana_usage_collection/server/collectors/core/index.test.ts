@@ -9,7 +9,7 @@
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerCoreUsageCollector } from '.';
 import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
