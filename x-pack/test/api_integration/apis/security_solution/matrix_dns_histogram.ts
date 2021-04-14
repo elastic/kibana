@@ -6,17 +6,32 @@
  */
 
 import expect from '@kbn/expect';
+import request from 'superagent';
+
 import {
-  NetworkDnsEdges,
   MatrixHistogramQuery,
   MatrixHistogramType,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+/**
+ * Function copied from here:
+ * test/api_integration/apis/search/bsearch.ts
+ *
+ * Splits the JSON lines from bsearch
+ */
+export const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
+  return resp.text
+    .trim()
+    .split('\n')
+    .map((item) => JSON.parse(item));
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
@@ -43,11 +58,48 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            wait_for_completion_timeout: '10s',
           })
           .expect(200);
-        expect(networkDns.isRunning).to.equal(false);
-        expect(networkDns.rawResponse.aggregations.dns_count.value).to.equal(6604);
+
+        if (networkDns.isRunning === true) {
+          await retry.waitForWithTimeout('bsearch to give us results', 5000, async () => {
+            const resp = await supertest
+              .post('/internal/bsearch')
+              .set('kbn-xsrf', 'true')
+              .send({
+                batch: [
+                  {
+                    request: {
+                      id: networkDns.id,
+                      defaultIndex: ['large_volume_dns_data'],
+                      docValueFields: [],
+                      factoryQueryType: MatrixHistogramQuery,
+                      histogramType: MatrixHistogramType.dns,
+                      filterQuery:
+                        '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+                      isPtrIncluded: false,
+                      timerange: {
+                        interval: '12h',
+                        to: TO,
+                        from: FROM,
+                      },
+                    },
+                    options: {
+                      strategy: 'securitySolutionSearchStrategy',
+                    },
+                  },
+                ],
+              });
+            const parsedResponse = parseBfetchResponse(resp);
+            expect(parsedResponse[0].result.rawResponse.aggregations.dns_count.value).to.equal(
+              6604
+            );
+            return true;
+          });
+        } else {
+          expect(networkDns.isRunning).to.equal(false);
+          expect(networkDns.rawResponse.aggregations.dns_count.value).to.equal(6604);
+        }
       });
     });
   });
