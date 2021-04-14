@@ -12,7 +12,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval } from '../../common/util/parse_interval';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../common/constants/states';
-import { resolveBucketSpanInSeconds } from '../../common/util/job_utils';
+import { resolveMaxTimeInterval } from '../../common/util/job_utils';
 
 interface ConfigValidatorProps {
   alertInterval: string;
@@ -25,7 +25,7 @@ interface ConfigValidatorProps {
 export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
   ({ jobConfigs = [], alertInterval }) => {
     const resultBucketSpanInSeconds = useMemo(
-      () => resolveBucketSpanInSeconds(jobConfigs.map((v) => v.analysis_config.bucket_span)),
+      () => resolveMaxTimeInterval(jobConfigs.map((v) => v.analysis_config.bucket_span)) ?? 0,
       [jobConfigs]
     );
 

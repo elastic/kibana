@@ -27,7 +27,7 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
+import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 
 type AggResultsResponse = { key?: number } & {
@@ -335,15 +335,22 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       return;
     }
 
+    const maxBucket = resolveMaxTimeInterval(
+      jobsResponse.map((v) => v.analysis_config.bucket_span)
+    );
+
+    if (maxBucket === undefined) {
+      // Technically it's not possible, just in case.
+      throw new Error('Unable to resolve a valid bucket length');
+    }
+
     /**
      * The check interval might be bigger than the 2x bucket span.
      * We need to check the biggest time range to make sure anomalies are not missed.
      */
     const lookBackTimeInterval = `${Math.max(
       // Double the max bucket span
-      Math.round(
-        resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2
-      ),
+      Math.round(maxBucket * 2),
       checkIntervalGap ? Math.round(checkIntervalGap.asSeconds()) : 0
     )}s`;
 

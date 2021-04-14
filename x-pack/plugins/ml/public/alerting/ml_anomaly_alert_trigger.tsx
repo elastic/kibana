@@ -27,6 +27,7 @@ import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
+import { getLookbackInterval } from '../../common/util/alerts';
 
 interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
@@ -119,11 +120,18 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   });
 
   const advancedSettings = useMemo(() => {
+    let { lookbackInterval, topNBuckets } = alertParams;
+    if (lookbackInterval === undefined && jobConfigs.length > 0) {
+      lookbackInterval = `${getLookbackInterval(jobConfigs)}s`;
+    }
+    if (topNBuckets === undefined && jobConfigs.length > 0) {
+      topNBuckets = 1;
+    }
     return {
-      lookbackInterval: alertParams.lookbackInterval,
-      topNBuckets: alertParams.topNBuckets,
+      lookbackInterval,
+      topNBuckets,
     };
-  }, [alertParams.lookbackInterval, alertParams.topNBuckets]);
+  }, [alertParams.lookbackInterval, alertParams.topNBuckets, jobConfigs]);
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
