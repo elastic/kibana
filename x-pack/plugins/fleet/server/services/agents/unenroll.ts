@@ -39,10 +39,18 @@ async function unenrollAgentIsAllowed(
 export async function unenrollAgent(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agentId: string
+  agentId: string,
+  options?: {
+    force?: boolean;
+    revoke?: boolean;
+  }
 ) {
-  await unenrollAgentIsAllowed(soClient, esClient, agentId);
-
+  if (!options?.force) {
+    await unenrollAgentIsAllowed(soClient, esClient, agentId);
+  }
+  if (options?.revoke) {
+    return forceUnenrollAgent(soClient, esClient, agentId);
+  }
   const now = new Date().toISOString();
   await createAgentAction(soClient, esClient, {
     agent_id: agentId,
@@ -57,7 +65,10 @@ export async function unenrollAgent(
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: GetAgentsOptions & { revoke?: boolean }
+  options: GetAgentsOptions & {
+    force?: boolean;
+    revoke?: boolean;
+  }
 ): Promise<{ items: BulkActionResult[] }> {
   // start with all agents specified
   const givenAgents = await getAgents(esClient, options);
@@ -76,15 +87,17 @@ export async function unenrollAgents(
     )
   );
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
-    if (result.status === 'fulfilled') {
-      agents.push(result.value);
-    } else {
-      const id = givenAgents[index].id;
-      outgoingErrors[id] = result.reason;
-    }
-    return agents;
-  }, []);
+  const agentsToUpdate = options.force
+    ? agentsEnrolled
+    : agentResults.reduce<Agent[]>((agents, result, index) => {
+        if (result.status === 'fulfilled') {
+          agents.push(result.value);
+        } else {
+          const id = givenAgents[index].id;
+          outgoingErrors[id] = result.reason;
+        }
+        return agents;
+      }, []);
 
   const now = new Date().toISOString();
   if (options.revoke) {
