@@ -96,7 +96,10 @@ describe('ServiceOverview', () => {
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
-      'GET /api/apm/services/{serviceName}/dependencies': [],
+      'GET /api/apm/services/{serviceName}/dependencies': {
+        currentPeriod: [],
+        previousPeriod: [],
+      },
       'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
     };
     /* eslint-enable @typescript-eslint/naming-convention */

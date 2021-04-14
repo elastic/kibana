@@ -18,7 +18,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
-import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceDependenciesPerPeriod } from '../lib/services/get_service_dependencies';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
 import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
@@ -562,9 +562,8 @@ const serviceDependenciesRoute = createApmServerRoute({
     query: t.intersection([
       t.type({
         numBuckets: toNumberRt,
-        comparisonStart: isoToEpochRt,
-        comparisonEnd: isoToEpochRt,
       }),
+      comparisonRangeRt,
       environmentRt,
       rangeRt,
     ]),
@@ -572,18 +571,18 @@ const serviceDependenciesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
 
-    const { serviceName } = context.params.path;
+    const { serviceName } = resources.params.path;
     const {
       environment,
       numBuckets,
       comparisonStart,
       comparisonEnd,
-    } = context.params.query;
+    } = resources.params.query;
 
-    const serviceDependencies = await getServiceDependencies({
+    return getServiceDependenciesPerPeriod({
       serviceName,
       environment,
       setup,
@@ -591,8 +590,6 @@ const serviceDependenciesRoute = createApmServerRoute({
       comparisonStart,
       comparisonEnd,
     });
-
-    return { serviceDependencies };
   },
 });
 

@@ -17,7 +17,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export const getMetrics = ({
@@ -28,7 +28,7 @@ export const getMetrics = ({
   start,
   end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   environment?: string;
   numBuckets: number;
