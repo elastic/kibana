@@ -68,8 +68,15 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           }),
         });
       } catch (e) {
+        if (e instanceof errors.TimeoutError) {
+          logger.info(`Field existence check timed out on ${req.params.indexPatternId}`);
+          // 408 is Request Timeout
+          return res.customError({ statusCode: 408, body: e.message });
+        }
         logger.info(
-          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+          `Field existence check failed on ${req.params.indexPatternId}: ${
+            isBoomError(e) ? e.output.payload.message : e.message
+          }`
         );
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
@@ -182,31 +189,43 @@ async function fetchIndexPatternStats({
 
   const scriptedFields = fields.filter((f) => f.isScript);
   const runtimeFields = fields.filter((f) => f.runtimeField);
-  const { body: result } = await client.search({
-    index,
-    body: {
-      size: SAMPLE_SIZE,
-      query,
-      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
-      fields: ['*'],
-      _source: false,
-      runtime_mappings: runtimeFields.reduce((acc, field) => {
-        if (!field.runtimeField) return acc;
-        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
-        acc[field.name] = field.runtimeField;
-        return acc;
-      }, {} as Record<string, estypes.RuntimeField>),
-      script_fields: scriptedFields.reduce((acc, field) => {
-        acc[field.name] = {
-          script: {
-            lang: field.lang!,
-            source: field.script!,
-          },
-        };
-        return acc;
-      }, {} as Record<string, estypes.ScriptField>),
+  const { body: result } = await client.search(
+    {
+      index,
+      body: {
+        size: SAMPLE_SIZE,
+        query,
+        sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+        fields: ['*'],
+        _source: false,
+        runtime_mappings: runtimeFields.reduce((acc, field) => {
+          if (!field.runtimeField) return acc;
+          // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
+          acc[field.name] = field.runtimeField;
+          return acc;
+        }, {} as Record<string, estypes.RuntimeField>),
+        script_fields: scriptedFields.reduce((acc, field) => {
+          acc[field.name] = {
+            script: {
+              lang: field.lang!,
+              source: field.script!,
+            },
+          };
+          return acc;
+        }, {} as Record<string, estypes.ScriptField>),
+        // Small improvement because we don't need to load timings
+        track_total_hits: false,
+        // Per-shard timeout, must be lower than overall
+        timeout: '500ms',
+      },
     },
-  });
+    {
+      // Global request timeout. Will cancel the request if exceeded. Overrides the elasticsearch.requestTimeout
+      requestTimeout: '5s',
+      // Fails fast instead of retrying- default is to retry
+      maxRetries: 0,
+    }
+  );
   return result.hits.hits;
 }
 
