@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { normalizeDataTypeDifferences } from '../normalize_data_type_differences';
 import nodeDetailFixture from './fixtures/node_detail';
 import nodeDetailAdvancedFixture from './fixtures/node_detail_advanced';
 
@@ -37,6 +38,7 @@ export default function ({ getService }) {
         .send({ timeRange, is_advanced: false })
         .expect(200);
 
+      body.metrics = normalizeDataTypeDifferences(body.metrics, nodeDetailFixture);
       expect(body).to.eql(nodeDetailFixture);
     });
 
@@ -49,6 +51,7 @@ export default function ({ getService }) {
         .send({ timeRange, is_advanced: true })
         .expect(200);
 
+      body.metrics = normalizeDataTypeDifferences(body.metrics, nodeDetailAdvancedFixture);
       expect(body).to.eql(nodeDetailAdvancedFixture);
     });
   });

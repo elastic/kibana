@@ -292,7 +292,7 @@ export async function fetchLogstashStats(
             bool: {
               should: [
                 { term: { type: 'logstash_stats' } },
-                { term: { 'metricset.name': 'node_stats' } },
+                { term: { 'metricset.name': 'stats' } },
               ],
             },
           },

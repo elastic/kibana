@@ -183,6 +183,7 @@ function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any, legacyDocId: 
     set(mbDoc, 'elasticsearch.shard.relocating_node.id', legacyDoc.shard.relocating_node);
   }
   if (legacyDoc.type === 'cluster_stats') {
+    set(mbDoc, 'elasticsearch.version', legacyDoc.version);
     set(
       mbDoc,
       'elasticsearch.cluster.stats.indices.docs.total',

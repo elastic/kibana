@@ -157,7 +157,7 @@ export function getPipelineStatsAggregation(
   end = version.lastSeen;
 
   const query = createQuery({
-    types: ['node_stats', 'logstash_stats'],
+    types: ['stats', 'logstash_stats'],
     start,
     end,
     metric: LogstashMetric.getMetricFields(),

@@ -108,7 +108,7 @@ async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throug
                 bool: {
                   should: [
                     { term: { type: 'logstash_stats' } },
-                    { term: { 'metricset.name': 'logstash_stats' } },
+                    { term: { 'metricset.name': 'stats' } },
                   ],
                 },
               },
@@ -145,10 +145,7 @@ async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountM
     [
       {
         bool: {
-          should: [
-            { term: { type: 'logstash_stats' } },
-            { term: { 'metricset.name': 'logstash_stats' } },
-          ],
+          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
         },
       },
     ],
@@ -197,7 +194,7 @@ async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughput
               bool: {
                 should: [
                   { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'logstash_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
                 ],
               },
             },
@@ -223,10 +220,7 @@ async function getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric
     [
       {
         bool: {
-          should: [
-            { term: { type: 'logstash_stats' } },
-            { term: { 'metricset.name': 'logstash_stats' } },
-          ],
+          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
         },
       },
     ],

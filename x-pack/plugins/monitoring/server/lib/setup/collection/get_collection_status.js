@@ -171,7 +171,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                     bool: {
                       should: [
                         { term: { type: 'logstash_stats' } },
-                        { term: { 'metricset.name': 'node_stats' } },
+                        { term: { 'metricset.name': 'stats' } },
                       ],
                     },
                   },
@@ -511,7 +511,7 @@ export const getCollectionStatus = async (
             map[key].isPrimary = true;
           }
           if (product.name === BEATS_SYSTEM_ID) {
-            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+            map[key].beatType = get(bucket.single_type, 'beat_type.buckets[0].key');
           }
           if (singleType.cluster_uuid) {
             map[key].clusterUuid = get(singleType.cluster_uuid, 'buckets[0].key', '') || null;

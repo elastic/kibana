@@ -51,7 +51,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
       ignoreUnavailable: true,
       body: {
         query: createQuery({
-          types: ['node_stats', 'logstash_stats'],
+          types: ['stats', 'logstash_stats'],
           start,
           end,
           clusterUuid,

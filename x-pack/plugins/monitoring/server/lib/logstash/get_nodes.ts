@@ -89,7 +89,7 @@ export async function getNodes(
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        type: 'logstash_stats',
+        types: ['stats', 'logstash_stats'],
       }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',

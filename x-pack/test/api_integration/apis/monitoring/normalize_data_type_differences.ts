@@ -6,6 +6,16 @@
  */
 import numeral from '@elastic/numeral';
 
+/**
+ * This function is designed to handle type differences between fields in legacy monitoring and MB monitoring.
+ * During the conversion to using MB, we changed some number fields that slightly change how the output
+ * is returned (such as, `long` instead of `half_float`). This function ensures the tests still pass if the
+ * numbers are _basically_ the same.
+ *
+ * @param metrics
+ * @param fixture
+ * @returns
+ */
 export function normalizeDataTypeDifferences(metrics: any, fixture: any) {
   return Object.keys(metrics).reduce((accum: any, metricName) => {
     accum[metricName] = metrics[metricName].map((item: { data: number[][] }, index: number) => {
