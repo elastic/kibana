@@ -8,7 +8,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { inspect } from 'util';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -544,7 +543,7 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(inspect(err, { depth: null }));
+            this.logger.error(message);
           }
           return originalState;
         }
