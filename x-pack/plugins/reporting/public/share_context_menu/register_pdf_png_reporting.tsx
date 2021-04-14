@@ -8,15 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { ShareContext } from '../../../../../src/plugins/share/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
-import { LayoutParams } from '../../common/types';
-import { JobParamsPNG } from '../../server/export_types/png/types';
-import { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
+import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import type { ShareContext } from '../../../../../src/plugins/share/public';
+import type { LicensingPluginSetup } from '../../../licensing/public';
+import type { LayoutParams } from '../../common/types';
+import type { JobParamsPNG } from '../../server/export_types/png/types';
+import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface ReportingPDFPNGProvider {
   apiClient: ReportingAPIClient;
