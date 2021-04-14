@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
 import React from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from '../../../../common/types';
-import { LevelFilterOption } from '../types';
+import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {
   warning: i18n.translate(
@@ -26,24 +24,19 @@ const LocalizedOptions: { [option: string]: string } = {
     { defaultMessage: 'critical' }
   ),
 };
-
-interface FilterBarProps {
-  allDeprecations?: DeprecationInfo[];
+interface DeprecationLevelProps {
+  levelsCount: {
+    [key: string]: number;
+  };
   currentFilter: LevelFilterOption;
   onFilterChange(level: LevelFilterOption): void;
 }
 
-export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
-  allDeprecations = [],
+export const DeprecationLevelFilter: React.FunctionComponent<DeprecationLevelProps> = ({
+  levelsCount,
   currentFilter,
   onFilterChange,
 }) => {
-  const levelGroups = groupBy(allDeprecations, 'level');
-  const levelCounts = Object.keys(levelGroups).reduce((counts, level) => {
-    counts[level] = levelGroups[level].length;
-    return counts;
-  }, {} as { [level: string]: number });
-
   return (
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
@@ -58,7 +51,7 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
             );
           }}
           hasActiveFilters={currentFilter === LevelFilterOption.critical}
-          numFilters={levelCounts[LevelFilterOption.critical] || undefined}
+          numFilters={levelsCount[LevelFilterOption.critical] || undefined}
           data-test-subj="criticalLevelFilter"
         >
           {LocalizedOptions[LevelFilterOption.critical]}
@@ -73,7 +66,7 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
             );
           }}
           hasActiveFilters={currentFilter === LevelFilterOption.warning}
-          numFilters={levelCounts[LevelFilterOption.warning] || undefined}
+          numFilters={levelsCount[LevelFilterOption.warning] || undefined}
           data-test-subj="warningLevelFilter"
         >
           {LocalizedOptions[LevelFilterOption.warning]}

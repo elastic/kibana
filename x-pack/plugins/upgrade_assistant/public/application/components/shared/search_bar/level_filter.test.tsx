@@ -7,27 +7,26 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { DeprecationInfo } from '../../../../common/types';
 
-import { LevelFilterOption } from '../types';
-import { FilterBar } from './filter_bar';
+import { LevelFilterOption } from '../../types';
+import { DeprecationLevelFilter } from './level_filter';
 
 const defaultProps = {
-  allDeprecations: [
-    { level: LevelFilterOption.critical },
-    { level: LevelFilterOption.critical },
-  ] as DeprecationInfo[],
+  levelsCount: {
+    warning: 4,
+    critical: 1,
+  },
   currentFilter: LevelFilterOption.all,
   onFilterChange: jest.fn(),
 };
 
-describe('FilterBar', () => {
+describe('DeprecationLevelFilter', () => {
   test('renders', () => {
-    expect(shallow(<FilterBar {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<DeprecationLevelFilter {...defaultProps} />)).toMatchSnapshot();
   });
 
   test('clicking button calls onFilterChange', () => {
-    const wrapper = mount(<FilterBar {...defaultProps} />);
+    const wrapper = mount(<DeprecationLevelFilter {...defaultProps} />);
     wrapper.find('button[data-test-subj="criticalLevelFilter"]').simulate('click');
     expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
     expect(defaultProps.onFilterChange.mock.calls[0][0]).toEqual(LevelFilterOption.critical);

@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../common/types';
 import { GroupByOption } from '../../types';
 
-import { COLOR_MAP, LEVEL_MAP } from '../constants';
+import { COLOR_MAP, LEVEL_MAP } from '../../constants';
 import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
@@ -85,7 +85,7 @@ const IndexDeprecation: FunctionComponent<IndexDeprecationProps> = ({ deprecatio
  * A list of deprecations that is either shown as individual deprecation cells or as a
  * deprecation summary for a list of indices.
  */
-export const DeprecationList: FunctionComponent<{
+export const EsDeprecationList: FunctionComponent<{
   deprecations: EnrichedDeprecationInfo[];
   currentGroupBy: GroupByOption;
 }> = ({ deprecations, currentGroupBy }) => {
@@ -105,16 +105,16 @@ export const DeprecationList: FunctionComponent<{
   } else if (currentGroupBy === GroupByOption.index) {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map((dep) => (
-          <MessageDeprecation deprecation={dep} key={dep.message} />
+        {deprecations.sort(sortByLevelDesc).map((dep, index) => (
+          <MessageDeprecation deprecation={dep} key={`${dep.message}-${index}`} />
         ))}
       </div>
     );
   } else {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map((dep) => (
-          <SimpleMessageDeprecation deprecation={dep} key={dep.message} />
+        {deprecations.sort(sortByLevelDesc).map((dep, index) => (
+          <SimpleMessageDeprecation deprecation={dep} key={`${dep.message}-${index}`} />
         ))}
       </div>
     );

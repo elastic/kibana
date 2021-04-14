@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { GroupByOption } from '../types';
+import { GroupByOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {
   message: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIssueLabel', {
@@ -21,13 +21,13 @@ const LocalizedOptions: { [option: string]: string } = {
   }),
 };
 
-interface GroupByBarProps {
+interface GroupByFilterProps {
   availableGroupByOptions: GroupByOption[];
   currentGroupBy: GroupByOption;
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export const GroupByBar: React.FunctionComponent<GroupByBarProps> = ({
+export const GroupByFilter: React.FunctionComponent<GroupByFilterProps> = ({
   availableGroupByOptions,
   currentGroupBy,
   onGroupByChange,

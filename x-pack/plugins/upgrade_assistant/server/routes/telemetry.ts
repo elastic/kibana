@@ -20,17 +20,19 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
           overview: schema.boolean({ defaultValue: false }),
           cluster: schema.boolean({ defaultValue: false }),
           indices: schema.boolean({ defaultValue: false }),
+          kibana: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     async (ctx, request, response) => {
-      const { cluster, indices, overview } = request.body;
+      const { cluster, indices, overview, kibana } = request.body;
       return response.ok({
         body: await upsertUIOpenOption({
           savedObjects: getSavedObjectsService(),
           cluster,
           indices,
           overview,
+          kibana,
         }),
       });
     }
