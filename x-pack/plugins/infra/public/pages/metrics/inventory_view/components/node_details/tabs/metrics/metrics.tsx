@@ -28,7 +28,7 @@ import {
 } from '../../../../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { ChartSection } from './chart_section';
 import {
   SYSTEM_METRIC_NAME,
@@ -228,8 +228,6 @@ const TabComponent = (props: TabProps) => {
     [chartRefs]
   );
 
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
-
   const getTimeseries = useCallback(
     (metricName: string) => {
       if (!nodes || !nodes.length) {
@@ -326,7 +324,7 @@ const TabComponent = (props: TabProps) => {
       <EuiSpacer size={'l'} />
 
       <EuiFlexGrid columns={2} gutterSize={'l'} responsive={false}>
-        <EuiFlexItem>
+        <ChartGridItem>
           <ChartSection
             title={CPU_CHART_TITLE}
             style={MetricsExplorerChartType.line}
@@ -339,11 +337,10 @@ const TabComponent = (props: TabProps) => {
             tickFormatter={cpuFormatter}
             onPointerUpdate={pointerUpdate}
             domain={getDomain(cpuTimeseries, cpuChartMetrics)}
-            isDarkMode={isDarkMode}
           />
-        </EuiFlexItem>
+        </ChartGridItem>
 
-        <EuiFlexItem>
+        <ChartGridItem>
           <ChartSection
             title={LOAD_CHART_TITLE}
             style={MetricsExplorerChartType.line}
@@ -357,11 +354,10 @@ const TabComponent = (props: TabProps) => {
             tickFormatter={loadFormatter}
             onPointerUpdate={pointerUpdate}
             domain={getDomain(loadTimeseries, loadChartMetrics)}
-            isDarkMode={isDarkMode}
           />
-        </EuiFlexItem>
+        </ChartGridItem>
 
-        <EuiFlexItem>
+        <ChartGridItem>
           <ChartSection
             title={MEMORY_CHART_TITLE}
             style={MetricsExplorerChartType.line}
@@ -374,11 +370,10 @@ const TabComponent = (props: TabProps) => {
             tickFormatter={memoryFormatter}
             onPointerUpdate={pointerUpdate}
             domain={getDomain(memoryTimeseries, memoryChartMetrics)}
-            isDarkMode={isDarkMode}
           />
-        </EuiFlexItem>
+        </ChartGridItem>
 
-        <EuiFlexItem>
+        <ChartGridItem>
           <ChartSection
             title={NETWORK_CHART_TITLE}
             style={MetricsExplorerChartType.line}
@@ -391,12 +386,11 @@ const TabComponent = (props: TabProps) => {
             tickFormatter={networkFormatter}
             onPointerUpdate={pointerUpdate}
             domain={getDomain(networkTimeseries, networkChartMetrics)}
-            isDarkMode={isDarkMode}
             stack={true}
           />
-        </EuiFlexItem>
+        </ChartGridItem>
 
-        <EuiFlexItem>
+        <ChartGridItem>
           <ChartSection
             title={LOG_RATE_CHART_TITLE}
             style={MetricsExplorerChartType.line}
@@ -406,17 +400,16 @@ const TabComponent = (props: TabProps) => {
             tickFormatter={logRateFormatter}
             onPointerUpdate={pointerUpdate}
             domain={getDomain(logRateTimeseries, logRateChartMetrics)}
-            isDarkMode={isDarkMode}
             stack={true}
           />
-        </EuiFlexItem>
+        </ChartGridItem>
 
         {customMetrics.map((c) => {
           const metricTS = getTimeseries(c.id);
           const chartMetrics = buildChartMetricLabels([c.field], c.aggregation);
           if (!metricTS) return null;
           return (
-            <EuiFlexItem>
+            <ChartGridItem>
               <ChartSection
                 title={getCustomMetricLabel(c)}
                 style={MetricsExplorerChartType.line}
@@ -428,16 +421,19 @@ const TabComponent = (props: TabProps) => {
                 tickFormatter={createFormatterForMetric(c)}
                 onPointerUpdate={pointerUpdate}
                 domain={getDomain(mergeTimeseries(metricTS), chartMetrics)}
-                isDarkMode={isDarkMode}
                 stack={true}
               />
-            </EuiFlexItem>
+            </ChartGridItem>
           );
         })}
       </EuiFlexGrid>
     </TabContent>
   );
 };
+
+const ChartGridItem = euiStyled(EuiFlexItem)`
+  overflow: hidden
+`;
 
 const LoadingPlaceholder = () => {
   return (

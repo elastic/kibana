@@ -25,6 +25,7 @@ import {
 } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
 import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 
@@ -37,7 +38,6 @@ interface Props {
   tickFormatter: TickFormatter<any>;
   onPointerUpdate: PointerUpdateListener;
   domain: { max: number; min: number };
-  isDarkMode: boolean;
   stack?: boolean;
 }
 
@@ -55,11 +55,10 @@ export const ChartSection = ({
   tickFormatter,
   onPointerUpdate,
   domain,
-  isDarkMode,
   stack = false,
 }: Props) => {
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const metrics = series.map((chartSeries) => chartSeries.metric);
-
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>
       moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
@@ -74,6 +73,7 @@ export const ChartSection = ({
             type={style}
             metric={chartSeries.metric}
             id="0"
+            key={chartSeries.series.id}
             series={chartSeries.series}
             stack={stack}
           />
