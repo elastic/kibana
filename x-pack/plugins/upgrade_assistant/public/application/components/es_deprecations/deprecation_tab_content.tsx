@@ -61,7 +61,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
           <h2>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.noIssues.noIssuesTitle"
-              defaultMessage="All clear!"
+              defaultMessage="Ready to upgrade!"
             />
           </h2>
         }
