@@ -122,12 +122,15 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const threatIntelTab = useMemo(
-    () => ({
-      id: EventsViewType.threatIntelView,
-      name: `${i18n.THREAT_INTEL} (${threatCount})`,
-      content: <ThreatDetailsView threatDetailsRows={threatDetailsRows} />,
-    }),
-    [threatDetailsRows, threatCount]
+    () =>
+      isAlert
+        ? {
+            id: EventsViewType.threatIntelView,
+            name: `${i18n.THREAT_INTEL} (${threatCount})`,
+            content: <ThreatDetailsView threatDetailsRows={threatDetailsRows} />,
+          }
+        : undefined,
+    [isAlert, threatDetailsRows, threatCount]
   );
 
   const tableTab = useMemo(

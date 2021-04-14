@@ -73,7 +73,7 @@ const ThreatDetailsViewComponent: React.FC<{
   threatDetailsRows: ThreatDetailsRow[][];
 }> = ({ threatDetailsRows }) =>
   !threatDetailsRows[0] || threatDetailsRows[0].length === 0 ? (
-    <StyledNoEnrichmentContainer>
+    <StyledNoEnrichmentContainer data-test-subj="empty-threat-details-view">
       <EuiSpacer size="xxl" />
       <EuiTitle size="m">
         <h2>{i18n.NO_ENRICHMENT_FOUND}</h2>

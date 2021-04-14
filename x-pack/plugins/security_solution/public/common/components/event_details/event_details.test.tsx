@@ -77,13 +77,14 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
+        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
+            .containsMatchingElement(<span>{expectedCopy}</span>)
         ).toBeTruthy();
       });
     });
@@ -96,17 +97,6 @@ describe('EventDetails', () => {
           .first()
           .text()
       ).toEqual('Summary');
-    });
-  });
-
-  describe('threat intel tab', () => {
-    test(`it renders the Threat Intel tab`, () => {
-      expect(
-        alertsWrapper
-          .find('[data-test-subj="threatIntel"]')
-          .find('[role="tablist"]')
-          .containsMatchingElement(<span>{'Threat Intel'}</span>)
-      ).toBeTruthy();
     });
   });
 });
