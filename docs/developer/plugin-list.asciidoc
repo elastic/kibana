@@ -79,7 +79,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 Expressions power visualizations in Dashboard and Lens, as well as, every
@@ -380,6 +380,10 @@ actitivies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
+|WARNING: Missing README.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/file_data_visualizer[fileDataVisualizer]
 |WARNING: Missing README.
 
 
