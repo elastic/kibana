@@ -1,92 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    alignItems="flexStart"
-    data-test-subj="threat-match-group"
-    direction="row"
-    gutterSize="none"
-    justifyContent="center"
+<EuiFlexGroup
+  alignItems="center"
+  data-test-subj="threat-match-row"
+  gutterSize="s"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-indicator-type"
-        eventId="eventId"
-        field="threat.indicator.matched.type"
-        value="domain"
-      />
-    </EuiFlexItem>
-    indicator matched on
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-source-field"
-        eventId="eventId"
-        field="threat.indicator.matched.field"
-        value="host.name"
-      />
-    </EuiFlexItem>
-    , whose value was
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-source-value"
-        eventId="eventId"
-        field="host.name"
-        value="http://elastic.co"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    alignItems="flexStart"
-    data-test-subj="threat-match-indicator-group"
-    direction="row"
-    gutterSize="none"
-    justifyContent="center"
+    <MatchDetails
+      contextId="contextId"
+      eventId="eventId"
+      sourceField="host.name"
+      sourceValue="http://elastic.co"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-indicator-dataset"
-        eventId="eventId"
-        field="threat.indicator.event.dataset"
-        value="dataset"
-      />
-    </EuiFlexItem>
-    via
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-indicator-provider"
-        eventId="eventId"
-        field="threat.indicator.provider"
-        value="provider"
-      />
-    </EuiFlexItem>
-    :
-    <EuiFlexItem
-      grow={false}
-    >
-      <DraggableBadge
-        contextId="contextId"
-        data-test-subj="threat-match-row-indicator-reference"
-        eventId="eventId"
-        field="threat.indicator.event.reference"
-        value="http://example.com"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+    <IndicatorDetails
+      contextId="contextId"
+      eventId="eventId"
+      indicatorDataset="dataset"
+      indicatorProvider="provider"
+      indicatorReference="http://example.com"
+      indicatorType="domain"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Fields } from '../../../../../../../common/search_strategy';
 import {
@@ -65,21 +66,30 @@ export const ThreatMatchRowView = ({
   sourceValue,
 }: ThreatMatchRowProps) => {
   return (
-    <>
-      <MatchDetails
-        contextId={contextId}
-        eventId={eventId}
-        sourceField={sourceField}
-        sourceValue={sourceValue}
-      />
-      <IndicatorDetails
-        contextId={contextId}
-        eventId={eventId}
-        indicatorDataset={indicatorDataset}
-        indicatorProvider={indicatorProvider}
-        indicatorReference={indicatorReference}
-        indicatorType={indicatorType}
-      />
-    </>
+    <EuiFlexGroup
+      alignItems="center"
+      data-test-subj="threat-match-row"
+      gutterSize="s"
+      justifyContent="center"
+    >
+      <EuiFlexItem grow={false}>
+        <MatchDetails
+          contextId={contextId}
+          eventId={eventId}
+          sourceField={sourceField}
+          sourceValue={sourceValue}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <IndicatorDetails
+          contextId={contextId}
+          eventId={eventId}
+          indicatorDataset={indicatorDataset}
+          indicatorProvider={indicatorProvider}
+          indicatorReference={indicatorReference}
+          indicatorType={indicatorType}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

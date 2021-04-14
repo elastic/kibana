@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
+import styled from 'styled-components';
 
 import { INDICATOR_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
@@ -21,3 +22,7 @@ export const hasThreatMatchValue = (data: Ecs): boolean =>
       (indicatorMatchSubField) => !isEmpty(get(indicator, indicatorMatchSubField))
     )
   );
+
+export const HorizontalSpacer = styled.div`
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+`;

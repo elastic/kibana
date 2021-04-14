@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { INDICATOR_MATCHED_FIELD } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
+import { HorizontalSpacer } from './helpers';
 
 interface MatchDetailsProps {
   contextId: string;
@@ -25,13 +27,13 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   sourceValue,
 }) => (
   <EuiFlexGroup
-    alignItems="flexStart"
+    alignItems="center"
     data-test-subj="threat-match-details"
     direction="row"
     justifyContent="center"
     gutterSize="none"
+    wrap
   >
-    {'match found on'}
     <EuiFlexItem grow={false}>
       <DraggableBadge
         contextId={contextId}
@@ -41,7 +43,14 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         value={sourceField}
       />
     </EuiFlexItem>
-    {'whose value was'}
+    <EuiFlexItem grow={false}>
+      <HorizontalSpacer>
+        <FormattedMessage
+          defaultMessage="matched"
+          id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.matchedVerb"
+        />
+      </HorizontalSpacer>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <DraggableBadge
         contextId={contextId}
