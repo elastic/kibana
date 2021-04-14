@@ -8,33 +8,34 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
-import { DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 interface Props {
-  queryValue: string;
+  value: string;
+  placeholder: string;
   onChange(newValue: string): void;
   onDelete(): void;
   disableDelete: boolean;
+  deleteLabel: string;
 }
 
-export const CurationQuery: React.FC<Props> = ({
-  queryValue,
+import './input_row.scss';
+
+export const InputRow: React.FC<Props> = ({
+  value,
+  placeholder,
   onChange,
   onDelete,
   disableDelete,
+  deleteLabel,
 }) => (
-  <EuiFlexGroup className="curationQueryRow" alignItems="center" responsive={false} gutterSize="s">
+  <EuiFlexGroup className="inputRow" alignItems="center" responsive={false} gutterSize="s">
     <EuiFlexItem>
       <EuiFieldText
         fullWidth
-        placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.curations.queryPlaceholder',
-          { defaultMessage: 'Enter a query' }
-        )}
-        value={queryValue}
+        placeholder={placeholder}
+        value={value}
         onChange={(e) => onChange(e.target.value)}
+        autoFocus
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -43,8 +44,9 @@ export const CurationQuery: React.FC<Props> = ({
         color="danger"
         onClick={onDelete}
         isDisabled={disableDelete}
-        aria-label={DELETE_BUTTON_LABEL}
-        data-test-subj="deleteCurationQueryButton"
+        aria-label={deleteLabel}
+        title={deleteLabel}
+        data-test-subj="deleteInputRowButton"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
