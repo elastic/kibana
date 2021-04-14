@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -47,12 +47,10 @@ export const MultiInputRows: React.FC<Props> = ({
   const { values, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
 
-  const hasChanged = useRef(false);
   useEffect(() => {
-    if (onChange && hasChanged.current) {
+    if (onChange) {
       onChange(filterEmptyValues(values));
     }
-    hasChanged.current = true;
   }, [values]);
 
   return (

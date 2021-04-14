@@ -129,12 +129,5 @@ describe('MultiInputRows', () => {
 
       expect(onChange).toHaveBeenCalledWith(['updated']);
     });
-
-    it('does not submit on initial render/mount (due to useRef)', () => {
-      setMockValues({ ...values, values: ['initial value'] });
-      shallow(<MultiInputRows {...props} onChange={onChange} />);
-
-      expect(onChange).not.toHaveBeenCalled();
-    });
   });
 });
