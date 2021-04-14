@@ -14,7 +14,6 @@ import { generatePngObservableFactory } from '../../export_types/png/lib/generat
 import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
