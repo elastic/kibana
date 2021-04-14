@@ -12,25 +12,23 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 
 import { registerCloudProviderUsageCollector } from './cloud_provider_collector';
 
 describe('registerCloudProviderUsageCollector', () => {
   let collector: Collector<unknown>;
   const logger = loggingSystemMock.createLogger();
-
-  const usageCollectionMock = createUsageCollectionSetupMock();
-  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = new Collector(logger, config);
-    return createUsageCollectionSetupMock().makeUsageCollector(config);
-  });
-
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeEach(() => {
     cloudDetailsMock.mockClear();
     detectCloudServiceMock.mockClear();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
     registerCloudProviderUsageCollector(usageCollectionMock);
   });
 
