@@ -18,6 +18,7 @@ import type { AuthenticationResult } from '../authentication/authentication_resu
  * @public
  */
 export interface AuditEvent extends LogMeta {
+  message: string;
   kibana?: {
     /**
      * The ID of the space associated with this event.

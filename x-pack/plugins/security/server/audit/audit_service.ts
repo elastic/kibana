@@ -168,7 +168,8 @@ export class AuditService {
           trace: { id: request.id },
         };
         if (filterEvent(meta, config.ignore_filters)) {
-          this.ecsLogger.info(event.message!, meta);
+          const { message, ...eventMeta } = meta;
+          this.ecsLogger.info(message, eventMeta);
         }
       };
       return { log };
