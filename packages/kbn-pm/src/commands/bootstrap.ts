@@ -66,7 +66,7 @@ export const BootstrapCommand: ICommand = {
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
     }
 
-    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+    await runBazel(['build', '//packages:build'], runOffline);
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
@@ -114,37 +114,48 @@ export const BootstrapCommand: ICommand = {
      * have to, as it will slow down the bootstrapping process.
      */
 
-    const checksums = await getAllChecksums(kbn, log, yarnLock);
     const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
     let cachedProjectCount = 0;
 
-    for (const project of nonBazelProjectsOnly.values()) {
-      if (project.hasScript('kbn:bootstrap') && !project.isBazelPackage()) {
-        const file = new BootstrapCacheFile(kbn, project, checksums);
-        const valid = options.cache && file.isValid();
+    if (options.cache) {
+      const checksums = await getAllChecksums(kbn, log, yarnLock);
 
-        if (valid) {
-          log.debug(`[${project.name}] cache up to date`);
-          cachedProjectCount += 1;
+      for (const project of nonBazelProjectsOnly.values()) {
+        if (project.hasScript('kbn:bootstrap') && !project.isBazelPackage()) {
+          const file = new BootstrapCacheFile(kbn, project, checksums);
+          const valid = options.cache && file.isValid();
+
+          if (valid) {
+            log.debug(`[${project.name}] cache up to date`);
+            cachedProjectCount += 1;
+          }
+
+          caches.set(project, { file, valid });
         }
-
-        caches.set(project, { file, valid });
       }
-    }
 
-    if (cachedProjectCount > 0) {
-      log.success(`${cachedProjectCount} bootstrap builds are cached`);
+      if (cachedProjectCount > 0) {
+        log.success(`${cachedProjectCount} bootstrap builds are cached`);
+      }
     }
 
     await parallelizeBatches(batchedNonBazelProjects, async (project) => {
-      const cache = caches.get(project);
-      if (cache && !cache.valid) {
-        log.info(`[${project.name}] running [kbn:bootstrap] script`);
-        cache.file.delete();
-        await project.runScriptStreaming('kbn:bootstrap');
-        cache.file.write();
-        log.success(`[${project.name}] bootstrap complete`);
+      if (options.cache) {
+        const cache = caches.get(project);
+        if (cache && !cache.valid) {
+          log.info(`[${project.name}] running [kbn:bootstrap] script`);
+          cache.file.delete();
+          await project.runScriptStreaming('kbn:bootstrap');
+          cache.file.write();
+        }
+      } else {
+        if (project.hasScript('kbn:bootstrap')) {
+          log.info(`[${project.name}] running [kbn:bootstrap] script`);
+          await project.runScriptStreaming('kbn:bootstrap');
+        }
       }
+
+      log.success(`[${project.name}] bootstrap complete`);
     });
   },
 };
