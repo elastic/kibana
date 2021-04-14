@@ -192,11 +192,24 @@ function buildCustomPalette(): PaletteDefinition {
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
     getCategoricalColors: (
       size: number,
-      { colors, gradient }: { colors: string[]; gradient: boolean } = {
+      {
+        colors,
+        gradient,
+        stepped,
+        stops,
+      }: { colors: string[]; gradient: boolean; stepped: boolean; stops: number[] } = {
         colors: [],
         gradient: false,
+        stepped: false,
+        stops: [],
       }
     ) => {
+      if (stepped) {
+        const range = stops[stops.length - 1] - stops[0];
+        const offset = stops[0];
+        const finalStops = [...stops.map((stop) => (stop - offset) / range)];
+        return chroma.scale(colors).domain(finalStops).colors(size);
+      }
       return gradient ? chroma.scale(colors).colors(size) : colors;
     },
     canDynamicColoring: false,

@@ -21,7 +21,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
-import { CustomizablePalette, applyPaletteParams, defaultParams } from './palette_picker';
+import { CustomizablePalette, applyPaletteParams, defaultParams } from './palette_configuration';
 import { PalettePanelContainer } from './palette_panel_container';
 
 const idPrefix = htmlIdGenerator()();
@@ -211,7 +211,10 @@ export function TableDimensionEditor(
                 if (!column?.palette && newMode !== 'none') {
                   params.palette = {
                     ...activePalette,
-                    params: { ...activePalette.params, stops: colorStops },
+                    params: {
+                      ...activePalette.params,
+                      stops: colorStops,
+                    },
                   };
                 }
                 setState({
@@ -233,8 +236,12 @@ export function TableDimensionEditor(
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={colorStops || []}
-                    type={paletteMode}
+                    palette={
+                      activePalette?.params?.name !== 'custom'
+                        ? colorStops || []
+                        : (colorStops || []).map(({ color }) => color)
+                    }
+                    type={paletteMode === 'stepped' ? 'fixed' : paletteMode}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

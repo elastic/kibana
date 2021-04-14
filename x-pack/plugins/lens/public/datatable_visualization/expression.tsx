@@ -190,6 +190,7 @@ export interface CustomPaletteParams {
   rangeMax?: number;
   progression?: 'gradient' | 'stepped' | 'fixed';
   stops?: Array<{ color: string; stop: number }>;
+  controlStops?: Array<{ color: string; stop: number }>;
   steps?: number;
 }
 

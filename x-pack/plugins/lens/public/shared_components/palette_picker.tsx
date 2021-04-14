@@ -15,35 +15,25 @@ export function PalettePicker({
   palettes,
   activePalette,
   setPalette,
-  showCustomPalette,
-  showDynamicColorOnly,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput;
   setPalette: (palette: PaletteOutput) => void;
-  showCustomPalette?: boolean;
-  showDynamicColorOnly?: boolean;
 }) {
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
-    .filter(({ internal, canDynamicColoring }) =>
-      showDynamicColorOnly ? canDynamicColoring : !internal
-    )
+    .filter(({ internal }) => !internal)
     .map(({ id, title, getCategoricalColors }) => {
       return {
         value: id,
         title,
-        type: 'fixed' as const,
+        type: 'fixed',
         palette: getCategoricalColors(
           10,
           id === activePalette?.name ? activePalette?.params : undefined
         ),
       };
     });
-  if (showCustomPalette) {
-    const { id, title } = palettes.get('custom');
-    palettesToShow.push({ value: id, title, type: 'text' });
-  }
   return (
     <EuiFormRow
       display="columnCompressed"
