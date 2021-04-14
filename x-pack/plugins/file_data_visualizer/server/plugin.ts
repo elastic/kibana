@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { CoreSetup, Plugin } from 'src/core/server';
 import { fileDataVisualizerRoutes } from './routes';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { StartDeps } from './types';
 
-interface SetupDeps {
-  usageCollection: UsageCollectionSetup;
-}
-
 export class FileDataVisualizerPlugin implements Plugin {
-  async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
+  async setup(coreSetup: CoreSetup<StartDeps, unknown>) {
     fileDataVisualizerRoutes(coreSetup);
   }
 
-  start(core: CoreStart) {}
+  start() {}
 }

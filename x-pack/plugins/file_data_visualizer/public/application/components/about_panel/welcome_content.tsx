@@ -21,7 +21,7 @@ import {
 
 import { ExperimentalBadge } from '../experimental_badge';
 
-import { getMaxBytesFormatted } from '../../../../../file_upload/public';
+import { useFileDataVisualizerKibana } from '../../kibana_context';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
@@ -31,6 +31,11 @@ export const WelcomeContent: FC = () => {
     }
   );
 
+  const {
+    services: {
+      fileUpload: { getMaxBytesFormatted },
+    },
+  } = useFileDataVisualizerKibana();
   const maxFileSize = getMaxBytesFormatted();
 
   return (

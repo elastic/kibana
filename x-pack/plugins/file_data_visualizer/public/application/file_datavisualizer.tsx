@@ -15,7 +15,7 @@ import { FileDataVisualizerView } from './components/file_datavisualizer_view/in
 export const FileDataVisualizer: FC = () => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
-  const services = { data, maps, embeddable, share, security, ...coreStart };
+  const services = { data, maps, embeddable, share, security, fileUpload, ...coreStart };
 
   return (
     <KibanaContextProvider services={{ ...services }}>

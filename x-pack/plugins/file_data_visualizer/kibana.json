@@ -19,7 +19,6 @@
   "requiredBundles": [
     "esUiShared",
     "kibanaReact",
-    "fileUpload",
     "maps"
   ],
   "extraPublicDirs": [

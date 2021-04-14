@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import numeral from '@elastic/numeral';
 import {
   MAX_FILE_SIZE,
