@@ -15,8 +15,6 @@ import {
   createQueryFilterClauses,
 } from '../../../../../utils/build_query';
 
-const HUGE_QUERY_SIZE = 1000000;
-
 const getCountAgg = () => ({
   dns_count: {
     cardinality: {
@@ -89,7 +87,7 @@ export const buildDnsHistogramQuery = ({
         dns_name_query_count: {
           terms: {
             field: stackByField,
-            size: HUGE_QUERY_SIZE,
+            size: 10,
           },
           aggs: {
             dns_question_name: getHistogramAggregation({ from, to }),
