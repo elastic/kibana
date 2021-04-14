@@ -51,6 +51,7 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   cleanupFailedExecutionsTask: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     interval: schema.duration({ defaultValue: '15s' }),
     pageSize: schema.number({ defaultValue: 100 }),
     concurrency: schema.number({ defaultValue: 5 }),

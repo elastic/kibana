@@ -25,6 +25,7 @@ describe('registerTaskDefinition', () => {
   >;
 
   const config: ActionsConfig['cleanupFailedExecutionsTask'] = {
+    enabled: true,
     interval: schema.duration().validate('5m'),
     pageSize: 100,
     concurrency: 5,

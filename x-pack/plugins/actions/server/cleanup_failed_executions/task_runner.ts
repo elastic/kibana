@@ -11,24 +11,31 @@ import { RunContext, TaskInstance, asInterval } from '../../../task_manager/serv
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { parallelize } from '../lib';
+import { SpacesPluginStart } from '../../../spaces/server';
 
-export function taskRunner(
-  logger: Logger,
-  actionTypeRegistry: ActionTypeRegistryContract,
-  coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>,
-  { interval, pageSize, concurrency }: ActionsConfig['cleanupFailedExecutionsTask']
-) {
+export interface TaskRunnerOpts {
+  logger: Logger;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>;
+  config: ActionsConfig['cleanupFailedExecutionsTask'];
+}
+
+export function taskRunner({
+  logger,
+  actionTypeRegistry,
+  coreStartServices,
+  config,
+}: TaskRunnerOpts) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     return {
       async run() {
         logger.debug('Starting cleanup of failed executions');
-        const [{ savedObjects }, { taskManager }] = await coreStartServices;
-        const savedObjectsClient = savedObjects.createInternalRepository([
-          'task',
-          'action_task_params',
-        ]);
+        const [{ savedObjects, elasticsearch }, { spaces }] = await coreStartServices;
+        const esClient = elasticsearch.client.asInternalUser;
+        const savedObjectsClient = savedObjects.createInternalRepository(['task']);
+        const savedObjectsSerializer = savedObjects.createSerializer();
+
         const result = await savedObjectsClient.find<TaskInstance>({
           type: 'task',
           filter: nodeBuilder.and([
@@ -42,40 +49,59 @@ export function taskRunner(
             ),
           ]),
           page: 1,
-          perPage: pageSize,
+          perPage: config.pageSize,
           sortField: 'runAt',
           sortOrder: 'asc',
         });
-        const taskIds = result.saved_objects.map(({ id }) => id);
-        await parallelize<string>(
-          taskIds,
-          async (taskId) => {
-            await taskManager.removeIfExists(taskId);
-          },
-          concurrency
+        logger.debug(
+          `Removing ${result.saved_objects.length} of ${result.total} failed execution task(s)`
         );
-        const actionTaskParamIds = result.saved_objects.map(
-          ({ attributes }) =>
-            JSON.parse((attributes.params as unknown) as string).actionTaskParamsId
+
+        if (result.saved_objects.length > 0) {
+          // Remove accumulated action task params
+          await esClient.bulk({
+            body: result.saved_objects.map((savedObject) => {
+              const { spaceId, actionTaskParamsId } = JSON.parse(
+                (savedObject.attributes.params as unknown) as string
+              );
+              const namespace = spaceIdToNamespace(spaces, spaceId);
+              const rawId = savedObjectsSerializer.generateRawId(
+                namespace,
+                'action_task_params',
+                actionTaskParamsId
+              );
+              // TODO: .kibana is configurable
+              return { delete: { _index: '.kibana', _id: rawId } };
+            }),
+          });
+
+          // Remove accumulated tasks
+          await esClient.bulk({
+            body: result.saved_objects.map((savedObject) => {
+              const rawId = savedObjectsSerializer.generateRawId(undefined, 'task', savedObject.id);
+              // TODO: .kibana_task_manager is configurable
+              return { delete: { _index: '.kibana_task_manager', _id: rawId } };
+            }),
+          });
+        }
+
+        logger.debug(
+          `Finished cleanup of failed executions by removing ${result.saved_objects.length} task(s)`
         );
-        await parallelize<string>(
-          actionTaskParamIds,
-          async (actionTaskParamsId) => {
-            await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
-          },
-          concurrency
-        );
-        logger.debug(`Finished cleanup of failed executions by removing ${taskIds.length} task(s)`);
         return {
           state: {
             runs: state.runs + 1,
-            total_cleaned_up: state.total_cleaned_up + taskIds.length,
+            total_cleaned_up: state.total_cleaned_up + result.saved_objects.length,
           },
           schedule: {
-            interval: asInterval(interval.asMilliseconds()),
+            interval: asInterval(config.interval.asMilliseconds()),
           },
         };
       },
     };
   };
 }
+
+const spaceIdToNamespace = (spaces?: SpacesPluginStart, spaceId?: string) => {
+  return spaces && spaceId ? spaces.spacesService.spaceIdToNamespace(spaceId) : undefined;
+};

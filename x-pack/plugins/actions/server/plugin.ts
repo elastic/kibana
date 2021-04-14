@@ -26,7 +26,7 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import {
@@ -119,6 +119,7 @@ export interface ActionsPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -249,13 +250,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
     // Cleanup failed execution task definition
-    registerCleanupFailedExecutionsTaskDefinition(
-      this.logger,
-      core.getStartServices(),
-      plugins.taskManager,
-      actionTypeRegistry,
-      this.actionsConfig.cleanupFailedExecutionsTask
-    );
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
+        actionTypeRegistry,
+        logger: this.logger,
+        coreStartServices: core.getStartServices(),
+        config: this.actionsConfig.cleanupFailedExecutionsTask,
+      });
+    }
 
     return {
       registerType: <
@@ -390,11 +392,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Cleanup failed execution task
-    ensureCleanupFailedExecutionsTaskScheduled(
-      plugins.taskManager,
-      this.logger,
-      this.actionsConfig.cleanupFailedExecutionsTask
-    );
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      ensureCleanupFailedExecutionsTaskScheduled(
+        plugins.taskManager,
+        this.logger,
+        this.actionsConfig.cleanupFailedExecutionsTask
+      );
+    }
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
