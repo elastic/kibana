@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.12.x releases.
 
+* <<release-notes-7.12.1>>
 * <<release-notes-7.12.0>>
 // * <<release-notes-7.11.2>>
 // * <<release-notes-7.11.1>>
@@ -50,6 +51,70 @@ Review important information about the {kib} 7.12.x releases.
 // * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.12.1]]
+== {kib} 7.12.1
+
+For information about the {kib} 7.12.1 release, review the following information.
+
+[float]
+[[breaking-changes-7.12.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the <<breaking-changes-7.12.0,breaking changes>>, then mitigate the impact to your application.
+
+[float]
+[[enhancement-v7.12.1]]
+=== Enhancement
+Management::
+* Adds generated copy for all processors {kibana-pull}95507[#95507]
+
+[float]
+[[fixes-v7.12.1]]
+=== Bug Fixes
+Dashboard::
+* Fixes iFrame Filtering Issues {kibana-pull}95997[#95997]
+* Allows By Value Flow Without Visualize Save Permissions {kibana-pull}95951[#95951]
+* Fixes adding columns from doc viewer table tab {kibana-pull}95748[#95748]
+* Adds Discrete Library Option to Save Modal {kibana-pull}94589[#94589]
+Design::
+* Customize Panel Submit {kibana-pull}95704[#95704]
+Elastic Security::
+For the Elastic Security 7.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Machine Learning::
+* Data Frame Analytics creation: ensure job config validity persists when switching from/to form/editor {kibana-pull}94654[#94654]
+* Data Frame Analytics results: Ensure outlier detection results view displays feature influence correctly {kibana-pull}94493[#94493]
+* Fixes Index data visualizer not removing query string with loaded saved search {kibana-pull}94245[#94245]
+Management::
+* Transforms: Wizard displays warning callout for source preview when used with CCS against clusters below 7.10 {kibana-pull}96297[#96297]
+* Fixes updating deleting sessions from non-default space {kibana-pull}96123[#96123]
+* Disables navigation when a step is invalid {kibana-pull}95939[#95939]
+* Fixes 7.12 migration fail if the "timepicker:quickRanges" is null {kibana-pull}95767[#95767]
+* Fixes serialization and deserialization of user input for "patterns" fields {kibana-pull}94689[#94689]
+* Transforms: Fixes missing number of transform nodes and error reporting in stats bar {kibana-pull}93956[#93956]
+* Transforms: Improves error handling for transform wizard when Kibana index pattern or saved search fails to load {kibana-pull}93915[#93915]
+* Improves error message when localStorage quota is reached {kibana-pull}93779[#93779]
+Maps::
+* Fixes Kibana does not recognize a valid geo_shape index when attempting to create a Tracking Containment alert {kibana-pull}96633[#96633]
+* Shows empty list when all saved maps in list deleted {kibana-pull}95126[#95126]
+* Fixes tooltips with timestamp appear as epoch {kibana-pull}95106[#95106]
+Monitoring::
+* Fixes issue with loading logstash node page under standalone cluster {kibana-pull}93617[#93617]
+* Fetches status once and change fetchStatus to support an array of clusters {kibana-pull}91749[#91749]
+Operations::
+* Improves performance of data stream API {kibana-pull}97058[#97058]
+* Migrations v2 ignore fleet agent events {kibana-pull}96690[#96690]
+* Data Frame Analytics: Fix scatterplot matrix boilerplate visibility with no fields selected {kibana-pull}96590[#96590]
+* Data Frame Analytics: Don't allow user to pick an index pattern or saved search based on CCS {kibana-pull}96555[#96555]
+* Resolves regression where Elastic Endgame rules would warn about unmapped timestamp override field {kibana-pull}96394[#96394]
+* Updates query for ping histogram {kibana-pull}95495[#95495]
+* Migrations v2: Retry tasks that timeout {kibana-pull}95305[#95305]
+* Fixes issues preventing the SysV service from starting Kibana {kibana-pull}95018[#95018]
+* Tolerate log entries for which fields retrieval fails {kibana-pull}94972[#94972]
+* Fixes positioning of space name and avatar in selector dropdown {kibana-pull}94169[#94169]
+Security::
+* Improves role management error handling for partially authorized users {kibana-pull}96468[#96468]
+
 
 [[release-notes-7.12.0]]
 == {kib} 7.12.0
