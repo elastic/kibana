@@ -6,7 +6,6 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
-import { pageObjects } from '../functional/page_objects'; // Reporting APIs depend on UI functionality
 import { services } from './services';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
