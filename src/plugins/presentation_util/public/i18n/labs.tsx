@@ -53,6 +53,10 @@ export const LabsStrings = {
         i18n.translate('presentationUtil.labs.components.overrideFlagsLabel', {
           defaultMessage: 'Override flags',
         }),
+      getOverriddenIconTipLabel: () =>
+        i18n.translate('presentationUtil.labs.components.overridenIconTipLabel', {
+          defaultMessage: 'Default overridden',
+        }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
           id="presentationUtil.labs.components.defaultStatusMessage"
@@ -90,6 +94,10 @@ export const LabsStrings = {
       getRefreshLabel: () =>
         i18n.translate('presentationUtil.labs.components.calloutHelp', {
           defaultMessage: 'Refresh to apply changes',
+        }),
+      getCloseButtonLabel: () =>
+        i18n.translate('presentationUtil.labs.components.closeButtonLabel', {
+          defaultMessage: 'Close',
         }),
     },
   },

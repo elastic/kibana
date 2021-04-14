@@ -436,4 +436,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:canvas:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };

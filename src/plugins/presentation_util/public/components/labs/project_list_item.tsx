@@ -55,7 +55,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                   {isOverride ? (
                     <span className="projectListItem__titlePendingChangesIndicator">
                       <EuiIconTip
-                        content="Default overridden"
+                        content={strings.getOverriddenIconTipLabel()}
                         position="top"
                         type="dot"
                         color="secondary"

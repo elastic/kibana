@@ -6,5 +6,5 @@
  */
 
 export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'canvas:labs:enable_ui',
+  ENABLE_LABS_UI: 'labs:canvas:enable_ui',
 };

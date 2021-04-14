@@ -118,5 +118,6 @@ export interface UsageStats {
   'banners:placement': string;
   'banners:textColor': string;
   'banners:backgroundColor': string;
+  'labs:canvas:enable_ui': boolean;
   'labs:presentation:unifiedToolbar': boolean;
 }

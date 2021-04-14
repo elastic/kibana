@@ -16,10 +16,10 @@ import { UI_SETTINGS } from '../common';
  */
 export const getUISettings = (): Record<string, UiSettingsParams<boolean>> => ({
   [UI_SETTINGS.ENABLE_LABS_UI]: {
-    name: i18n.translate('canvas.labs.enableUI', {
+    name: i18n.translate('xpack.canvas.labs.enableUI', {
       defaultMessage: 'Enable labs button in Canvas',
     }),
-    description: i18n.translate('presentationUtil.labs.enableUnifiedToolbarProjectDescription', {
+    description: i18n.translate('xpack.canvas.labs.enableUnifiedToolbarProjectDescription', {
       defaultMessage:
         'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable experimental features in Canvas.',
     }),

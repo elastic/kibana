@@ -108,7 +108,7 @@ export const LabsFlyout = (props: Props) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
-            Close
+            {strings.getCloseButtonLabel()}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
