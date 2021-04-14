@@ -19,6 +19,8 @@ import {
   MlJobMetric,
   DetectionRuleMetric,
   DetectionRuleAdoption,
+  AlertsAggregationResponse,
+  CasesSavedObject,
 } from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
@@ -481,28 +483,6 @@ export const getMlJobMetrics = async (
 
   return [];
 };
-
-interface AlertsAggregationResponse {
-  hits: {
-    total: { value: number };
-  };
-  aggregations: {
-    [aggName: string]: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-  };
-}
-
-interface CasesSavedObject {
-  associationType: string;
-  type: string;
-  alertId: string;
-  index: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
 
 export const getDetectionRuleMetrics = async (
   index: string,

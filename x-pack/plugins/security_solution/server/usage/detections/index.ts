@@ -113,6 +113,28 @@ export interface DetectionRuleAdoption {
   detection_rule_usage: DetectionRulesTypeUsage;
 }
 
+export interface AlertsAggregationResponse {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    [aggName: string]: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
+}
+
+export interface CasesSavedObject {
+  associationType: string;
+  type: string;
+  alertId: string;
+  index: string;
+  rule: {
+    id: string;
+    name: string;
+  };
+}
+
 export const defaultDetectionsUsage = {
   detection_rules: initialRulesUsage,
   ml_jobs: initialMlJobsUsage,
