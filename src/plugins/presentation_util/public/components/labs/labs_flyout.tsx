@@ -105,9 +105,18 @@ export const LabsFlyout = (props: Props) => {
 
   footer = (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
+            Close
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
