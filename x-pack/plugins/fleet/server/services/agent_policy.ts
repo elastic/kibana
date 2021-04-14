@@ -19,6 +19,7 @@ import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -150,7 +151,7 @@ class AgentPolicyService {
     config: PreconfiguredAgentPolicy
   ): Promise<{
     created: boolean;
-    policy: AgentPolicy;
+    policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
     const preconfigurationId = String(id);
@@ -466,7 +467,9 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
-    options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
+    options: { user?: AuthenticatedUser; bumpRevision: boolean; force?: boolean } = {
+      bumpRevision: true,
+    }
   ): Promise<AgentPolicy> {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
@@ -474,7 +477,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (oldAgentPolicy.is_managed) {
+    if (oldAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
     }
 
@@ -497,7 +500,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<AgentPolicy> {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
@@ -505,7 +508,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (oldAgentPolicy.is_managed) {
+    if (oldAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
     }
 
@@ -580,6 +583,13 @@ class AgentPolicyService {
         }
       );
     }
+
+    if (agentPolicy.preconfiguration_id) {
+      await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
+        preconfiguration_id: String(agentPolicy.preconfiguration_id),
+      });
+    }
+
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
     return {
@@ -817,5 +827,6 @@ export async function addPackageToAgentPolicy(
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     bumpRevision: false,
+    skipEnsureInstalled: true,
   });
 }
