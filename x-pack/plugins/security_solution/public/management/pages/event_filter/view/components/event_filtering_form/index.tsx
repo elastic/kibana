@@ -21,6 +21,7 @@ import {
 import { isEmpty } from 'lodash';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
+import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
@@ -127,6 +128,7 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
           data-test-subj="alert-exception-builder"
           id-aria="alert-exception-builder"
           onChange={handleOnBuilderChange}
+          listTypeSpecificIndexPatternFilter={filterIndexPatterns}
         />
       ),
       // eslint-disable-next-line react-hooks/exhaustive-deps
