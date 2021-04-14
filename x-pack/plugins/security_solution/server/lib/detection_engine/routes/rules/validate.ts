@@ -6,22 +6,17 @@
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
 
 import {
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 import { validateNonExact } from '../../../../../common/validate';
-import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { formatErrors } from '../../../../../common/format_errors';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialAlert } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -29,38 +24,9 @@ import {
   IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { transformFindAlerts, transform, transformAlertToRule } from './utils';
+import { transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
 import { RuleParams } from '../../schemas/rule_schemas';
-
-export const transformValidateFindAlerts = (
-  findResults: FindResult<RuleParams>,
-  ruleActions: Array<RuleActions | null>,
-  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
-): [
-  {
-    page: number;
-    perPage: number;
-    total: number;
-    data: Array<Partial<RulesSchema>>;
-  } | null,
-  string | null
-] => {
-  const transformed = transformFindAlerts(findResults, ruleActions, ruleStatuses);
-  if (transformed == null) {
-    return [null, 'Internal error transforming'];
-  } else {
-    const decoded = findRulesSchema.decode(transformed);
-    const left = (errors: t.Errors): string[] => formatErrors(errors);
-    const right = (): string[] => [];
-    const piped = pipe(decoded, fold(left, right));
-    if (piped.length === 0) {
-      return [transformed, null];
-    } else {
-      return [null, piped.join(',')];
-    }
-  }
-};
 
 export const transformValidate = (
   alert: PartialAlert<RuleParams>,
