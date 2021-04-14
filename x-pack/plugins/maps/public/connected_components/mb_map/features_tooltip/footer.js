@@ -7,7 +7,6 @@
 
 import React, { Component, Fragment } from 'react';
 import {
-  EuiButtonIcon,
   EuiPagination,
   EuiSelect,
   EuiHorizontalRule,
@@ -22,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
 
-export class TooltipHeader extends Component {
+export class Footer extends Component {
   state = {
     filteredFeatures: this.props.features,
     pageNumber: DEFAULT_PAGE_NUMBER,
@@ -121,11 +120,11 @@ export class TooltipHeader extends Component {
     const { filteredFeatures, pageNumber, selectedLayerId, layerOptions } = this.state;
 
     const isLayerSelectVisible = isLocked && layerOptions.length > 1;
-    const headerItems = [];
+    const items = [];
 
     // Pagination controls
     if (isLocked && filteredFeatures.length > 1) {
-      headerItems.push(
+      items.push(
         <EuiFlexItem grow={false} key="pagination">
           <EuiPagination
             pageCount={filteredFeatures.length}
@@ -139,7 +138,7 @@ export class TooltipHeader extends Component {
 
     // Page number readout
     if (!isLocked && filteredFeatures.length > 1) {
-      headerItems.push(
+      items.push(
         <EuiFlexItem grow={!isLayerSelectVisible} key="pageNumber">
           <EuiTextColor color="subdued">
             <FormattedMessage
@@ -157,7 +156,7 @@ export class TooltipHeader extends Component {
 
     // Layer select
     if (isLayerSelectVisible) {
-      headerItems.push(
+      items.push(
         <EuiFlexItem key="layerSelect">
           <EuiFormRow display="rowCompressed">
             <EuiSelect
@@ -183,39 +182,14 @@ export class TooltipHeader extends Component {
       );
     }
 
-    // Close button
-    if (isLocked) {
-      // When close button is the only item, add empty FlexItem to push close button to right
-      if (headerItems.length === 0) {
-        headerItems.push(<EuiFlexItem key="spacer" />);
-      }
-
-      headerItems.push(
-        <EuiFlexItem grow={false} key="closeButton">
-          <EuiButtonIcon
-            onClick={this.props.onClose}
-            iconType="cross"
-            aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-              defaultMessage: 'Close tooltip',
-            })}
-            data-test-subj="mapTooltipCloseButton"
-          />
-        </EuiFlexItem>
-      );
-    }
-
-    if (headerItems.length === 0) {
-      return null;
-    }
-
-    return (
+    return items.length ? (
       <Fragment>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          {headerItems}
-        </EuiFlexGroup>
-
         <EuiHorizontalRule margin="xs" />
+
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          {items}
+        </EuiFlexGroup>
       </Fragment>
-    );
+    ) : null;
   }
 }

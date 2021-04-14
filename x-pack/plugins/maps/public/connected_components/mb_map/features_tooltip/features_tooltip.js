@@ -10,7 +10,8 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 import { FeatureProperties } from './feature_properties';
 import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
-import { TooltipHeader } from './tooltip_header';
+import { Footer } from './footer';
+import { Header } from './header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -167,12 +168,12 @@ export class FeaturesTooltip extends Component {
 
     return (
       <Fragment>
-        <TooltipHeader
-          onClose={this.props.closeTooltip}
-          features={this.props.features}
+        <Header
+          key={this.state.currentFeature.id}
+          layerId={this.state.currentFeature.layerId}
+          getLayerName={this.props.getLayerName}
           isLocked={this.props.isLocked}
-          findLayerById={this.props.findLayerById}
-          setCurrentFeature={this._setCurrentFeature}
+          onClose={this.props.closeTooltip}
         />
         <FeatureProperties
           featureId={this.state.currentFeature.id}
@@ -188,6 +189,12 @@ export class FeaturesTooltip extends Component {
           showFilterActions={this._showFilterActionsView}
         />
         {this._renderActions(geoFields)}
+        <Footer
+          features={this.props.features}
+          isLocked={this.props.isLocked}
+          findLayerById={this.props.findLayerById}
+          setCurrentFeature={this._setCurrentFeature}
+        />
       </Fragment>
     );
   }

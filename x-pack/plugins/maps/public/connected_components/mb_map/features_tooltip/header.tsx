@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { Component, Fragment, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+} from '@elastic/eui';
+
+interface Props {
+  getLayerName: () => Promise<string>;
+  isLocked: boolean;
+  layerId: string;
+  onClose: () => void;
+}
+
+interface State {
+  layerName: string | null;
+}
+
+export class Header extends Component<Props, State> {
+  private _isMounted = false;
+  state: State = { layerName: null };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadLayerName();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _loadLayerName() {
+    const layerName = await this.props.getLayerName(this.props.layerId);
+    if (this._isMounted) {
+      this.setState({ layerName });
+    }
+  }
+
+  render() {
+    const items: ReactNode[] = [];
+    if (this.state.layerName) {
+      items.push(
+        <EuiFlexItem grow={true} key="layerName">
+          <EuiTextColor>{this.state.layerName}</EuiTextColor>
+        </EuiFlexItem>
+      );
+    }
+
+    if (this.props.isLocked) {
+      // When close button is the only item, add empty FlexItem to push close button to right
+      if (items.length === 0) {
+        items.push(<EuiFlexItem key="spacer" />);
+      }
+
+      items.push(
+        <EuiFlexItem grow={false} key="closeButton">
+          <EuiButtonIcon
+            onClick={this.props.onClose}
+            iconType="cross"
+            aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+              defaultMessage: 'Close tooltip',
+            })}
+            data-test-subj="mapTooltipCloseButton"
+          />
+        </EuiFlexItem>
+      );
+    }
+
+    return items.length ? (
+      <Fragment>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          {items}
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
+      </Fragment>
+    ) : null;
+  }
+}
