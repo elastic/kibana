@@ -15,8 +15,8 @@
 
 - name: copy kibana configuration
   become: yes
-  copy:
-    src: files/kibana.yml
+  template:
+    src: templates/kibana.yml
     dest: /etc/kibana/kibana.yml
   register: config
 
