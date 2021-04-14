@@ -5,7 +5,7 @@ kibanaPipeline(timeoutMinutes: 300) {
   slackNotifications.onFailure(disabled: true) {
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
-        workers.ci(ramDisk: false, name: "package-build", size: 'l') {
+        workers.ci(ramDisk: false, name: "package-build", size: 'l', runErrorReporter: false) {
           withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
             kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Package builds")
           }
