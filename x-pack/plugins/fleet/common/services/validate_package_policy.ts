@@ -20,7 +20,7 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import { isValidNamespace } from './';
 
 type Errors = string[] | null;
 
@@ -49,7 +49,6 @@ export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): PackagePolicyValidationResults => {
-  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
@@ -92,8 +91,17 @@ export const validatePackagePolicy = (
   }
 
   // Build cache for fast var definition lookup
-  const inputVarDefsByType: Record<string, Record<string, RegistryVarsEntry>> = {};
-  const dataStreamsByPath = keyBy(packageInfo.data_streams || [], 'path');
+  const inputVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
+    Record<string, Record<string, RegistryVarsEntry>>
+  >((varDefs, policyTemplate) => {
+    (policyTemplate.inputs || []).forEach((input) => {
+      const varDefKey = `${policyTemplate.name}-${input.type}`;
+      if ((input.vars || []).length) {
+        varDefs[varDefKey] = keyBy(input.vars || [], 'name');
+      }
+    });
+    return varDefs;
+  }, {});
   const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
     Record<string, RegistryStream>
   >((streams, dataStream) => {
@@ -109,53 +117,27 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
-  // Collect all input var definitions
-  packageInfo.policy_templates.forEach((packagePolicyTemplate) => {
-    (packagePolicyTemplate.inputs || []).forEach(({ type, vars }) => {
-      if (!(vars || []).length) {
-        return;
-      }
-      const varDefs = keyBy(vars, 'name');
-
-      // If a package has integrations, copy all input-level vars to its streams
-      // Otherwise leave it at the input level
-      if (hasIntegrations) {
-        packagePolicyTemplate.data_streams?.forEach((dataStream) => {
-          const dataStreamDataset = dataStreamsByPath[dataStream]?.dataset;
-          const datasetAndInputKey = `${dataStreamDataset}-${type}`;
-          if (streamsByDatasetAndInput[datasetAndInputKey]) {
-            if (!streamVarDefsByDatasetAndInput[datasetAndInputKey]) {
-              streamVarDefsByDatasetAndInput[datasetAndInputKey] = varDefs;
-            } else {
-              streamVarDefsByDatasetAndInput[datasetAndInputKey] = {
-                ...varDefs,
-                ...streamVarDefsByDatasetAndInput[datasetAndInputKey],
-              };
-            }
-          }
-        });
-      } else {
-        inputVarDefsByType[type] = varDefs;
-      }
-    });
-  });
-
-  // Validate each package policy input with either its own var fields or streams
+  // Validate each package policy input with either its own var fields and stream vars
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
+    const inputValidationKey = `${input.policy_template}-${input.type}`;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       streams: {},
     };
 
-    // Validate input-level config fields
+    // Validate input-level var fields
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
+        const varDefKey = `${input.policy_template}-${input.type}`;
         results[name] = input.enabled
-          ? validatePackagePolicyConfig(configEntry, inputVarDefsByType[input.type][name])
+          ? validatePackagePolicyConfig(
+              configEntry,
+              inputVarDefsByPolicyTemplateAndType[varDefKey][name]
+            )
           : null;
         return results;
       }, {} as ValidationEntry);
@@ -163,7 +145,7 @@ export const validatePackagePolicy = (
       delete inputValidationResults.vars;
     }
 
-    // Validate each input stream with config fields
+    // Validate each input stream with var definitions
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
@@ -191,7 +173,7 @@ export const validatePackagePolicy = (
     }
 
     if (inputValidationResults.vars || inputValidationResults.streams) {
-      validationResults.inputs![input.type] = inputValidationResults;
+      validationResults.inputs![inputValidationKey] = inputValidationResults;
     }
   });
 

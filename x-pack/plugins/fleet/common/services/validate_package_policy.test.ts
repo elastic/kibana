@@ -151,6 +151,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       inputs: [
         {
           type: 'foo',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'foo-input-var-name': { value: 'foo-input-var-value', type: 'text' },
@@ -167,6 +168,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'bar',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'bar-input-var-name': { value: ['value1', 'value2'], type: 'text' },
@@ -187,11 +189,13 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'with-no-config-or-streams',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           streams: [],
         },
         {
           type: 'with-disabled-streams',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           streams: [
             {
@@ -207,6 +211,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'with-no-stream-vars',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'var-name': { value: 'test', type: 'text' },
@@ -227,6 +232,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       inputs: [
         {
           type: 'foo',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'foo-input-var-name': { value: undefined, type: 'text' },
@@ -243,6 +249,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'bar',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'bar-input-var-name': { value: 'invalid value for multi', type: 'text' },
@@ -263,11 +270,13 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'with-no-config-or-streams',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           streams: [],
         },
         {
           type: 'with-disabled-streams',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           streams: [
             {
@@ -288,6 +297,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
         {
           type: 'with-no-stream-vars',
+          policy_template: 'pkgPolicy1',
           enabled: true,
           vars: {
             'var-name': { value: undefined, type: 'text' },
@@ -307,7 +317,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       description: null,
       namespace: null,
       inputs: {
-        foo: {
+        'pkgPolicy1-foo': {
           vars: {
             'foo-input-var-name': null,
             'foo-input2-var-name': null,
@@ -315,14 +325,14 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           streams: { foo: { vars: { 'var-name': null } } },
         },
-        bar: {
+        'pkgPolicy1-bar': {
           vars: { 'bar-input-var-name': null, 'bar-input2-var-name': null },
           streams: {
             bar: { vars: { 'var-name': null } },
             bar2: { vars: { 'var-name': null } },
           },
         },
-        'with-disabled-streams': {
+        'pkgPolicy1-with-disabled-streams': {
           streams: {
             disabled: {
               vars: { 'var-name': null },
@@ -330,7 +340,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             disabled2: {},
           },
         },
-        'with-no-stream-vars': {
+        'pkgPolicy1-with-no-stream-vars': {
           streams: {
             'with-no-stream-vars-bar': {},
           },
@@ -351,7 +361,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: {
-          foo: {
+          'pkgPolicy1-foo': {
             vars: {
               'foo-input-var-name': null,
               'foo-input2-var-name': ['foo-input2-var-name is required'],
@@ -359,7 +369,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
             streams: { foo: { vars: { 'var-name': ['Invalid YAML format'] } } },
           },
-          bar: {
+          'pkgPolicy1-bar': {
             vars: {
               'bar-input-var-name': ['Invalid format'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
@@ -369,13 +379,13 @@ describe('Fleet - validatePackagePolicy()', () => {
               bar2: { vars: { 'var-name': null } },
             },
           },
-          'with-disabled-streams': {
+          'pkgPolicy1-with-disabled-streams': {
             streams: {
               disabled: { vars: { 'var-name': null } },
               disabled2: {},
             },
           },
-          'with-no-stream-vars': {
+          'pkgPolicy1-with-no-stream-vars': {
             vars: {
               'var-name': ['var-name is required'],
             },
@@ -414,7 +424,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: {
-          foo: {
+          'pkgPolicy1-foo': {
             vars: {
               'foo-input-var-name': null,
               'foo-input2-var-name': ['foo-input2-var-name is required'],
@@ -422,7 +432,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
             streams: { foo: { vars: { 'var-name': null } } },
           },
-          bar: {
+          'pkgPolicy1-bar': {
             vars: {
               'bar-input-var-name': ['Invalid format'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
@@ -432,7 +442,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               bar2: { vars: { 'var-name': null } },
             },
           },
-          'with-disabled-streams': {
+          'pkgPolicy1-with-disabled-streams': {
             streams: {
               disabled: {
                 vars: { 'var-name': null },
@@ -440,7 +450,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               disabled2: {},
             },
           },
-          'with-no-stream-vars': {
+          'pkgPolicy1-with-no-stream-vars': {
             vars: {
               'var-name': ['var-name is required'],
             },

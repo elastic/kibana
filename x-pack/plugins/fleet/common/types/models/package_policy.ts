@@ -23,7 +23,6 @@ export interface NewPackagePolicyInputStream {
   enabled: boolean;
   keep_enabled?: boolean;
   data_stream: {
-    policy_template?: string;
     dataset: string;
     type: string;
   };
@@ -38,6 +37,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
+  policy_template: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
