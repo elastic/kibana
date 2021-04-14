@@ -22,6 +22,7 @@ import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertsFlyout } from './alerts_flyout';
 import type { TopAlert } from './';
+import { SeverityBadge } from './severity_badge';
 
 type AlertsTableProps = Omit<
   EuiBasicTableProps<TopAlert>,
@@ -94,7 +95,7 @@ export function AlertsTable(props: AlertsTableProps) {
       field: 'severity',
       name: 'Severity',
       render: (_, alert) => {
-        return alert['kibana.rac.alert.severity.level'];
+        return <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />;
       },
     },
     {

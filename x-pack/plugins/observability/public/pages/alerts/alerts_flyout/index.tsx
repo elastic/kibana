@@ -27,6 +27,7 @@ import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/publ
 import { asDuration } from '../../../../common/utils/formatters';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { TopAlert } from '../';
+import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
 
@@ -42,7 +43,7 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     },
     {
       title: 'Severity',
-      description: alert['kibana.rac.alert.severity.level'] ?? '-', // TODO: badge and "(changed 2 min ago)"
+      description: <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />,
     },
     {
       title: 'Triggered',
