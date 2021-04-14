@@ -13,10 +13,10 @@ docker run -it --rm --init --volume "$(pwd)":/app --workdir /app --env PKR_VAR_b
 
 echo --- Deleting images older than 30 days
 
-IMAGES=$(gcloud compute images list --format="value(name)" --filter="creationTimestamp > -P30D AND family:kibana-bk-dev-agents")
+IMAGES=$(gcloud compute images list --format="value(name)" --filter="creationTimestamp < -P30D AND family:kibana-bk-dev-agents")
 
 for IMAGE in $IMAGES
 do
   echo "Deleting image $IMAGE"
-  echo gcloud compute images delete "$IMAGE"
+  gcloud compute images delete "$IMAGE" --quiet
 done
