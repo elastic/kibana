@@ -25,22 +25,6 @@ interface CollectorSetConfig {
   collectors?: AnyCollector[];
 }
 
-/**
- * Public interface of the CollectorSet (makes it easier to mock only the public methods)
- */
-export type CollectorSetPublic = Pick<
-  CollectorSet,
-  | 'makeStatsCollector'
-  | 'makeUsageCollector'
-  | 'registerCollector'
-  | 'getCollectorByType'
-  | 'areAllCollectorsReady'
-  | 'bulkFetch'
-  | 'bulkFetchUsage'
-  | 'toObject'
-  | 'toApiFieldNames'
->;
-
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
   private readonly logger: Logger;
@@ -215,19 +199,19 @@ export class CollectorSet {
    * Convert an array of fetched stats results into key/object
    * @param statsData Array of fetched stats results
    */
-  public toObject<Result extends Record<string, unknown>, T = unknown>(
+  public toObject = <Result extends Record<string, unknown>, T = unknown>(
     statsData: Array<{ type: string; result: T }> = []
-  ): Result {
+  ): Result => {
     return Object.fromEntries(statsData.map(({ type, result }) => [type, result])) as Result;
-  }
+  };
 
   /**
    * Rename fields to use API conventions
    * @param apiData Data to be normalized
    */
-  public toApiFieldNames(
+  public toApiFieldNames = (
     apiData: Record<string, unknown> | unknown[]
-  ): Record<string, unknown> | unknown[] {
+  ): Record<string, unknown> | unknown[] => {
     // handle array and return early, or return a reduced object
     if (Array.isArray(apiData)) {
       return apiData.map((value) => this.getValueOrRecurse(value));
@@ -244,14 +228,14 @@ export class CollectorSet {
         return [newName, this.getValueOrRecurse(value)];
       })
     );
-  }
+  };
 
-  private getValueOrRecurse(value: unknown) {
+  private getValueOrRecurse = (value: unknown) => {
     if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
       return this.toApiFieldNames(value as Record<string, unknown> | unknown[]); // recurse
     }
     return value;
-  }
+  };
 
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {
     return new CollectorSet({
