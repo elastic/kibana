@@ -67,7 +67,7 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
   configuration: {
     description: `description for ${sourceId}`,
     logIndices: {
-      type: 'indexPattern',
+      type: 'index_pattern',
       indexPatternId: 'some-id',
     },
     logColumns: [],

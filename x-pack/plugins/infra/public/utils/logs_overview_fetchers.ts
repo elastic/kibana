@@ -62,7 +62,7 @@ export function getLogsOverviewDataFetcher(
 
     const { stats, series } = await fetchLogsOverview(
       {
-        index: resolvedLogSourceConfiguration.indexPattern,
+        index: resolvedLogSourceConfiguration.indices,
         timestampField: resolvedLogSourceConfiguration.timestampField,
       },
       params,

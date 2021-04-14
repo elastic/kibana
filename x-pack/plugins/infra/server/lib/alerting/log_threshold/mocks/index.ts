@@ -14,7 +14,7 @@ export const libsMock = {
         id: sourceId,
         configuration: {
           logIndices: {
-            type: 'indexPattern',
+            type: 'index_pattern',
             indexPatternId: 'some-id',
           },
           fields: { timestamp: '@timestamp' },

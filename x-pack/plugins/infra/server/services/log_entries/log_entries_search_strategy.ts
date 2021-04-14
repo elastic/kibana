@@ -57,7 +57,6 @@ import {
   LogEntryHit,
 } from './queries/log_entries';
 import { resolveLogSourceConfiguration } from '../../../common/log_sources';
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;
 type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePayload>;
@@ -65,11 +64,9 @@ type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePa
 export const logEntriesSearchStrategyProvider = ({
   data,
   sources,
-  framework,
 }: {
   data: DataPluginStart;
   sources: IInfraSources;
-  framework: KibanaFramework;
 }): ISearchStrategy<LogEntriesSearchRequest, LogEntriesSearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -78,19 +75,17 @@ export const logEntriesSearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const sourceConfiguration$ = defer(() =>
-          sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
-        ).pipe(take(1), shareReplay(1));
-
-        const indexPatternsService$ = defer(() =>
-          framework.getIndexPatternsService(
-            dependencies.savedObjectsClient,
-            dependencies.esClient.asCurrentUser
-          )
-        ).pipe(take(1), shareReplay(1));
-
         const resolvedSourceConfiguration$ = defer(() =>
-          forkJoin([sourceConfiguration$, indexPatternsService$]).pipe(
+          forkJoin([
+            sources.getSourceConfiguration(
+              dependencies.savedObjectsClient,
+              request.params.sourceId
+            ),
+            data.indexPatterns.indexPatternsServiceFactory(
+              dependencies.savedObjectsClient,
+              dependencies.esClient.asCurrentUser
+            ),
+          ]).pipe(
             concatMap(([sourceConfiguration, indexPatternsService]) =>
               resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
             )
@@ -114,13 +109,13 @@ export const logEntriesSearchStrategyProvider = ({
             forkJoin([resolvedSourceConfiguration$, messageFormattingRules$]).pipe(
               map(
                 ([
-                  { indexPattern, timestampField, tiebreakerField, columns },
+                  { indices, timestampField, tiebreakerField, columns },
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
                     // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
-                      indexPattern,
+                      indices,
                       params.startTimestamp,
                       params.endTimestamp,
                       pickRequestCursor(params),

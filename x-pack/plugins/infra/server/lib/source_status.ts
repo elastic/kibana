@@ -49,7 +49,7 @@ export class InfraSourceStatus {
   ): Promise<SourceIndexStatus> {
     const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
-      resolvedLogSourceConfiguration.indexPattern
+      resolvedLogSourceConfiguration.indices
     );
     return indexStatus;
   }

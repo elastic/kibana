@@ -28,7 +28,7 @@ export const createGetLogQueryFields = (sources: InfraSources, framework: Kibana
     );
 
     return {
-      indexPattern: resolvedLogSourceConfiguration.indexPattern,
+      indexPattern: resolvedLogSourceConfiguration.indices,
       timestamp: resolvedLogSourceConfiguration.timestampField,
     };
   };

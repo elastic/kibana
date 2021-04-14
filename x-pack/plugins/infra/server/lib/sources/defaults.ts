@@ -17,7 +17,7 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
   description: '',
   metricAlias: METRICS_INDEX_PATTERN,
   logIndices: {
-    type: 'indexName',
+    type: 'index_name',
     indexName: LOGS_INDEX_PATTERN,
   },
   fields: {

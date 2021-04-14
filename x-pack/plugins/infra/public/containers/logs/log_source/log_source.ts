@@ -18,12 +18,12 @@ import {
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   ResolvedLogSourceConfiguration,
+  resolveLogSourceConfiguration,
 } from '../../../../common/log_sources';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
 
 export {
@@ -128,7 +128,7 @@ export const useLogSource = ({
   const derivedIndexPattern = useMemo(
     () => ({
       fields: resolvedSourceConfiguration?.fields ?? [],
-      title: resolvedSourceConfiguration?.indexPattern ?? 'unknown',
+      title: resolvedSourceConfiguration?.indices ?? 'unknown',
     }),
     [resolvedSourceConfiguration]
   );

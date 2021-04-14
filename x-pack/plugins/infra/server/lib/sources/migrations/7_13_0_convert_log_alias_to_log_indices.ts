@@ -18,11 +18,11 @@ export const convertLogAliasToLogIndices: SavedObjectMigrationFn<
   InfraSourceConfiguration
 > = (sourceConfigurationDocument) => {
   const { logAlias, ...otherAttributes } = sourceConfigurationDocument.attributes;
-  
+
   const newAttributes: InfraSourceConfiguration = {
     ...otherAttributes,
     logIndices: {
-      type: 'indexName',
+      type: 'index_name',
       indexName: logAlias ?? LOGS_INDEX_PATTERN,
     },
   };

@@ -266,7 +266,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
     logIndices: {
-      type: 'indexPattern',
+      type: 'index_pattern',
       indexPatternId: 'some-test-id',
     },
     metricAlias: 'metric-indices-*',

@@ -70,7 +70,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const esQuery = {
       allowNoIndices: true,
-      index: resolvedLogSourceConfiguration.indexPattern,
+      index: resolvedLogSourceConfiguration.indices,
       ignoreUnavailable: true,
       body: {
         size: size + 1, // Extra one to test if it has more before or after
@@ -139,7 +139,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const query = {
       allowNoIndices: true,
-      index: resolvedLogSourceConfiguration.indexPattern,
+      index: resolvedLogSourceConfiguration.indices,
       ignoreUnavailable: true,
       body: {
         aggregations: {

@@ -162,7 +162,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
     const logEntriesService = new LogEntriesService();
-    logEntriesService.setup(core, { ...plugins, sources, framework });
+    logEntriesService.setup(core, { ...plugins, sources });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

@@ -52,20 +52,15 @@ export const logSourceColumnConfigurationRT = rt.union([
 ]);
 export type LogSourceColumnConfiguration = rt.TypeOf<typeof logSourceColumnConfigurationRT>;
 
-// const LogIndexPatternReferenceTypes = rt.keyof({
-//   indexPattern: null, // Kibana index pattern
-//   indexName: null // Legacy support
-// });
-
 // Kibana index pattern
 const logIndexPatternReferenceRT = rt.type({
-  type: rt.literal('indexPattern'),
+  type: rt.literal('index_pattern'),
   indexPatternId: rt.string,
 });
 
 // Legacy support
 const logIndexNameReferenceRT = rt.type({
-  type: rt.literal('indexName'),
+  type: rt.literal('index_name'),
   indexName: rt.string,
 });
 

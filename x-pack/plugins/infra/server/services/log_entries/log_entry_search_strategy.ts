@@ -32,7 +32,6 @@ import {
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
@@ -41,11 +40,9 @@ type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayloa
 export const logEntrySearchStrategyProvider = ({
   data,
   sources,
-  framework,
 }: {
   data: DataPluginStart;
   sources: IInfraSources;
-  framework: KibanaFramework;
 }): ISearchStrategy<LogEntrySearchRequest, LogEntrySearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -54,19 +51,17 @@ export const logEntrySearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const sourceConfiguration$ = defer(() =>
-          sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
-        ).pipe(shareReplay(1));
-
-        const indexPatternsService$ = defer(() =>
-          framework.getIndexPatternsService(
-            dependencies.savedObjectsClient,
-            dependencies.esClient.asCurrentUser
-          )
-        ).pipe(take(1), shareReplay(1));
-
         const resolvedSourceConfiguration$ = defer(() =>
-          forkJoin([sourceConfiguration$, indexPatternsService$]).pipe(
+          forkJoin([
+            sources.getSourceConfiguration(
+              dependencies.savedObjectsClient,
+              request.params.sourceId
+            ),
+            data.indexPatterns.indexPatternsServiceFactory(
+              dependencies.savedObjectsClient,
+              dependencies.esClient.asCurrentUser
+            ),
+          ]).pipe(
             concatMap(([sourceConfiguration, indexPatternsService]) =>
               resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
             )
@@ -83,10 +78,10 @@ export const logEntrySearchStrategyProvider = ({
           concatMap(({ params }) =>
             resolvedSourceConfiguration$.pipe(
               map(
-                ({ indexPattern, timestampField, tiebreakerField }): IEsSearchRequest => ({
+                ({ indices, timestampField, tiebreakerField }): IEsSearchRequest => ({
                   // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                   params: createGetLogEntryQuery(
-                    indexPattern,
+                    indices,
                     params.logEntryId,
                     timestampField,
                     tiebreakerField

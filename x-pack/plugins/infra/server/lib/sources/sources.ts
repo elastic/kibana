@@ -213,7 +213,7 @@ export class InfraSources {
       } = {
         ...staticSourceConfiguration,
         logIndices: {
-          type: 'indexName',
+          type: 'index_name',
           indexName: staticSourceConfiguration.logAlias,
         },
       };

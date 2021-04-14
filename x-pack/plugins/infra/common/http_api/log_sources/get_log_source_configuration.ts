@@ -9,11 +9,6 @@ import * as rt from 'io-ts';
 import { badRequestErrorRT, forbiddenErrorRT, routeTimingMetadataRT } from '../shared';
 import { logSourceConfigurationRT } from '../../log_sources/log_source_configuration';
 
-export const LOG_SOURCE_CONFIGURATION_PATH_PREFIX = '/api/infra/log_source_configurations';
-export const LOG_SOURCE_CONFIGURATION_PATH = `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/{sourceId}`;
-export const getLogSourceConfigurationPath = (sourceId: string) =>
-  `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/${sourceId}`;
-
 /**
  * request
  */

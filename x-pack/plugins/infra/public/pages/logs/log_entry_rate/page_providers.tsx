@@ -27,13 +27,13 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
   return (
     <LogFlyout.Provider>
       <LogEntryRateModuleProvider
-        indexPattern={resolvedSourceConfiguration.indexPattern ?? ''}
+        indexPattern={resolvedSourceConfiguration.indices ?? ''}
         sourceId={sourceId}
         spaceId={space.id}
         timestampField={resolvedSourceConfiguration.timestampField ?? ''}
       >
         <LogEntryCategoriesModuleProvider
-          indexPattern={resolvedSourceConfiguration.indexPattern ?? ''}
+          indexPattern={resolvedSourceConfiguration.indices ?? ''}
           sourceId={sourceId}
           spaceId={space.id}
           timestampField={resolvedSourceConfiguration.timestampField ?? ''}

@@ -17,7 +17,7 @@ export const DEFAULT_SOURCE_CONFIGURATION: GetLogSourceConfigurationSuccessRespo
       name: 'Default',
       description: '',
       logIndices: {
-        type: 'indexPattern',
+        type: 'index_pattern',
         indexPatternId: 'some-test-id',
       },
       fields: {

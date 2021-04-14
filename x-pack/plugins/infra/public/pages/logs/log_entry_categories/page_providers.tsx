@@ -24,7 +24,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
 
   return (
     <LogEntryCategoriesModuleProvider
-      indexPattern={resolvedSourceConfiguration.indexPattern}
+      indexPattern={resolvedSourceConfiguration.indices}
       sourceId={sourceId}
       spaceId={space.id}
       timestampField={resolvedSourceConfiguration.timestampField}

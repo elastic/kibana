@@ -80,7 +80,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         scopedClusterClient.asCurrentUser
       )
     );
-    const indexPattern = resolvedLogSourceConfiguration.indexPattern;
+    const indexPattern = resolvedLogSourceConfiguration.indices;
     const timestampField = resolvedLogSourceConfiguration.timestampField;
 
     try {

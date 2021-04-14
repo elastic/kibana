@@ -67,7 +67,7 @@ export const LogsSettingsPage = () => {
       ...(formStateChanges.logAlias
         ? {
             logIndices: {
-              type: 'indexName',
+              type: 'index_name',
               indexName: formStateChanges.logAlias,
             },
           }

@@ -20,7 +20,7 @@ export const useLogSourceConfigurationFormState = (
           ? {
               name: configuration.name,
               description: configuration.description,
-              logAlias: configuration.indexPattern,
+              logAlias: configuration.indices,
               tiebreakerField: configuration.tiebreakerField,
               timestampField: configuration.timestampField,
             }

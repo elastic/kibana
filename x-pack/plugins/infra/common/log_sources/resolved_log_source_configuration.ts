@@ -14,7 +14,7 @@ import { IndexPatternsContract, IndexPattern } from '../../../../../src/plugins/
 export interface ResolvedLogSourceConfiguration {
   name: string;
   description: string;
-  indexPattern: string;
+  indices: string;
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
@@ -26,7 +26,7 @@ export const resolveLogSourceConfiguration = async (
   sourceConfiguration: LogSourceConfigurationProperties,
   indexPatternsService: IndexPatternsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
-  if (sourceConfiguration.logIndices.type === 'indexName') {
+  if (sourceConfiguration.logIndices.type === 'index_name') {
     return await resolveLegacyReference(sourceConfiguration, indexPatternsService);
   } else {
     return await resolveKibanaIndexPatternReference(sourceConfiguration, indexPatternsService);
@@ -37,7 +37,7 @@ const resolveLegacyReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
   indexPatternsService: IndexPatternsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
-  if (sourceConfiguration.logIndices.type !== 'indexName') {
+  if (sourceConfiguration.logIndices.type !== 'index_name') {
     throw new Error('This function can only resolve legacy references');
   }
 
@@ -47,7 +47,7 @@ const resolveLegacyReference = async (
   });
 
   return {
-    indexPattern: sourceConfiguration.logIndices.indexName,
+    indices: sourceConfiguration.logIndices.indexName,
     timestampField: sourceConfiguration.fields.timestamp,
     tiebreakerField: sourceConfiguration.fields.tiebreaker,
     messageField: sourceConfiguration.fields.message,
@@ -62,7 +62,7 @@ const resolveKibanaIndexPatternReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
   indexPatternsService: IndexPatternsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
-  if (sourceConfiguration.logIndices.type !== 'indexPattern') {
+  if (sourceConfiguration.logIndices.type !== 'index_pattern') {
     throw new Error('This function can only resolve Kibana Index Pattern references');
   }
 
@@ -71,10 +71,10 @@ const resolveKibanaIndexPatternReference = async (
   );
 
   return {
-    indexPattern: indexPattern.title,
+    indices: indexPattern.title,
     timestampField: indexPattern.timeFieldName ?? '@timestamp',
     tiebreakerField: '_doc',
-    messageField: sourceConfiguration.fields.message,
+    messageField: ['message'],
     fields: indexPattern.fields,
     columns: sourceConfiguration.logColumns,
     name: sourceConfiguration.name,

@@ -36,7 +36,7 @@ export async function getChartPreviewData(
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const indexPattern = resolvedLogSourceConfiguration.indexPattern;
+  const indexPattern = resolvedLogSourceConfiguration.indices;
   const timestampField = resolvedLogSourceConfiguration.timestampField;
 
   const { groupBy, timeSize, timeUnit } = alertParams;

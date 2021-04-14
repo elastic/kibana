@@ -113,7 +113,7 @@ describe('Logs UI Observability Homepage Functions', () => {
         data: {
           configuration: {
             logIndices: {
-              type: 'indexPattern',
+              type: 'index_pattern',
               indexPatternId: 'some-test-id',
             },
             fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
