@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 import { BuilderAndBadgeComponent } from './and_badge';
-
-const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 
 describe('BuilderAndBadgeComponent', () => {
   test('it renders exceptionItemEntryFirstRowAndBadge for very first exception item in builder', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={0} />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(
@@ -30,9 +27,9 @@ describe('BuilderAndBadgeComponent', () => {
 
   test('it renders exceptionItemEntryInvisibleAndBadge if "entriesLength" is 1 or less', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <BuilderAndBadgeComponent entriesLength={1} exceptionItemIndex={0} />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(
@@ -42,9 +39,9 @@ describe('BuilderAndBadgeComponent', () => {
 
   test('it renders regular "and" badge if exception item is not the first one and includes more than one entry', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={1} />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeTruthy();

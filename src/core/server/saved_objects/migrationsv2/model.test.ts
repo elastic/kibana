@@ -70,7 +70,17 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
-    unusedTypesToExclude: Option.some(['unused-fleet-agent-events']),
+    unusedTypesQuery: Option.of({
+      bool: {
+        must_not: [
+          {
+            term: {
+              type: 'unused-fleet-agent-events',
+            },
+          },
+        ],
+      },
+    }),
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -1177,12 +1187,40 @@ describe('migrations v2 model', () => {
               },
             },
           },
-          "unusedTypesToExclude": Object {
+          "unusedTypesQuery": Object {
             "_tag": "Some",
-            "value": Array [
-              "fleet-agent-events",
-              "tsvb-validation-telemetry",
-            ],
+            "value": Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "term": Object {
+                      "type": "fleet-agent-events",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "type": "tsvb-validation-telemetry",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must": Array [
+                        Object {
+                          "match": Object {
+                            "type": "search-session",
+                          },
+                        },
+                        Object {
+                          "match": Object {
+                            "search-session.persisted": false,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           },
           "versionAlias": ".kibana_task_manager_8.1.0",
           "versionIndex": ".kibana_task_manager_8.1.0_001",
