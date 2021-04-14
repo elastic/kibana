@@ -25,9 +25,9 @@ export function ReportTypesCol({ reportTypes }: Props) {
     setSeries,
   } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { loading, hasData } = useAppIndexPatternContext();
+  const { loading, hasData, selectedApp } = useAppIndexPatternContext();
 
-  if (!loading && !hasData) {
+  if (!loading && !hasData && selectedApp) {
     return (
       <FormattedMessage
         id="xpack.observability.reportTypeCol.nodata"

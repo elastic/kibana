@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
@@ -25,7 +24,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'upd', label: 'Monitor duration' },
     { id: 'upp', label: 'Pings histogram' },
   ],
-  rum: [
+  ux: [
     { id: 'pld', label: 'Performance distribution' },
     { id: 'kpi', label: 'KPI over time' },
   ],
@@ -33,13 +32,13 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'svl', label: 'Latency' },
     { id: 'tpt', label: 'Throughput' },
   ],
-  logs: [
+  infra_logs: [
     {
       id: 'logs',
       label: 'Logs Frequency',
     },
   ],
-  metrics: [
+  infra_metrics: [
     { id: 'cpu', label: 'CPU usage' },
     { id: 'mem', label: 'Memory usage' },
     { id: 'nwk', label: 'Network activity' },
@@ -164,7 +163,7 @@ export function SeriesBuilder() {
 
   if (isFlyoutVisible) {
     flyout = (
-      <BottomFlyout aria-labelledby="flyoutTitle">
+      <>
         <EuiBasicTable
           items={items as any}
           columns={columns}
@@ -173,7 +172,14 @@ export function SeriesBuilder() {
         <EuiSpacer size="xs" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plus" color="primary" onClick={addSeries} size="s">
+            <EuiButton
+              fill
+              iconType="plus"
+              color="primary"
+              onClick={addSeries}
+              size="s"
+              isDisabled={!series?.reportType}
+            >
               {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
                 defaultMessage: 'Add',
               })}
@@ -195,7 +201,7 @@ export function SeriesBuilder() {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </BottomFlyout>
+      </>
     );
   }
 
@@ -221,10 +227,6 @@ export function SeriesBuilder() {
     </div>
   );
 }
-
-const BottomFlyout = styled.div`
-  height: 300px;
-`;
 
 const INITIATING_VIEW = i18n.translate('xpack.observability.expView.seriesBuilder.initView', {
   defaultMessage: 'Initiating view ...',

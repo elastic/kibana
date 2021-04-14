@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, useState, useCallback } from 'react';
+import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -28,7 +28,7 @@ interface ProviderProps {
   children: JSX.Element;
 }
 
-type HasAppDataState = Record<AppDataType, boolean>;
+type HasAppDataState = Record<AppDataType, boolean | null>;
 type IndexPatternState = Record<AppDataType, IndexPattern>;
 
 export function IndexPatternContextProvider({ children }: ProviderProps) {
@@ -36,11 +36,11 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [selectedApp, setSelectedApp] = useState<AppDataType>();
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({
-    infra_metrics: true,
-    infra_logs: true,
-    synthetics: true,
-    ux: true,
-    apm: true,
+    infra_metrics: null,
+    infra_logs: null,
+    synthetics: null,
+    ux: null,
+    apm: null,
   } as HasAppDataState);
 
   const {
@@ -54,7 +54,9 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
   const loadIndexPattern: IIndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
-      if (hasAppData[dataType] === undefined) {
+      setSelectedApp(dataType);
+
+      if (hasAppData[dataType] === null) {
         setLoading(true);
         try {
           let hasDataT = await checkIfAppHasData(dataType);
@@ -63,7 +65,6 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
             hasDataT = (hasDataT as UXHasDataResponse).hasData as boolean;
           }
 
-          setSelectedApp(dataType);
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT || hasAppData?.[dataType]) {
@@ -101,11 +102,14 @@ export const useAppIndexPatternContext = () => {
     (IndexPatternContext as unknown) as Context<IIndexPatternContext>
   );
 
-  return {
-    hasAppData,
-    loading,
-    indexPattern: indexPatterns?.[selectedApp],
-    hasData: hasAppData?.[selectedApp],
-    loadIndexPattern,
-  };
+  return useMemo(() => {
+    return {
+      hasAppData,
+      selectedApp,
+      loading,
+      indexPattern: indexPatterns?.[selectedApp],
+      hasData: hasAppData?.[selectedApp],
+      loadIndexPattern,
+    };
+  }, [hasAppData, indexPatterns, loadIndexPattern, loading, selectedApp]);
 };

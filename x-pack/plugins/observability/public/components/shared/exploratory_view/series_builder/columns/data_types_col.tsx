@@ -15,15 +15,15 @@ import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'ux', label: 'User Experience(RUM)' },
-  { id: 'infra_logs', label: 'Logs' },
-  { id: 'infra_metrics', label: 'Metrics' },
-  { id: 'apm', label: 'APM' },
+  // { id: 'infra_logs', label: 'Logs' },
+  // { id: 'infra_metrics', label: 'Metrics' },
+  // { id: 'apm', label: 'APM' },
 ];
 
 export function DataTypesCol() {
   const { series, setSeries, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { hasAppData, loading } = useAppIndexPatternContext();
+  const { loading } = useAppIndexPatternContext();
 
   const onDataTypeChange = (dataType?: AppDataType) => {
     if (!dataType) {
@@ -45,7 +45,7 @@ export function DataTypesCol() {
             iconType="arrowRight"
             color={selectedDataType === dataTypeId ? 'primary' : 'text'}
             fill={selectedDataType === dataTypeId}
-            isDisabled={!hasAppData[dataTypeId]}
+            isDisabled={loading}
             isLoading={loading && selectedDataType === dataTypeId}
             onClick={() => {
               onDataTypeChange(dataTypeId);

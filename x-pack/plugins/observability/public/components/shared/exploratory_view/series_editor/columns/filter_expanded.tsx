@@ -39,9 +39,10 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField, is
   const { series } = useUrlStorage(seriesId);
 
   const { values, loading } = useValuesList({
+    query: value,
+    indexPattern,
     sourceField: field,
     time: series.time,
-    indexPattern,
   });
 
   const filters = series?.filters ?? [];
