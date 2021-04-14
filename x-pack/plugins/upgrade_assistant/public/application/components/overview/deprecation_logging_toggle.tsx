@@ -29,7 +29,7 @@ const i18nTexts = {
   enabledMessage: i18n.translate(
     'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledToastMessage',
     {
-      defaultMessage: 'Deprecation logs will be displayed in the Elasticsearch console.',
+      defaultMessage: 'Log deprecated actions.',
     }
   ),
   disabledMessage: i18n.translate(
