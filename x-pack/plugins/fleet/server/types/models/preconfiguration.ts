@@ -17,6 +17,7 @@ const varsSchema = schema.maybe(
       name: schema.string(),
       type: schema.maybe(schema.string()),
       value: schema.oneOf([schema.string(), schema.number()]),
+      frozen: schema.maybe(schema.boolean()),
     })
   )
 );
