@@ -12,6 +12,8 @@ import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 
+jest.mock('./agent_policy_update');
+
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
 

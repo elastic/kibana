@@ -139,7 +139,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         ) : (
           <StandaloneInstructions agentPolicies={agentPolicies} />
         )}
-        {}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
