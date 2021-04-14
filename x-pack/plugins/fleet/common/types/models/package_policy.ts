@@ -37,7 +37,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
-  policy_template: string;
+  policy_template?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;

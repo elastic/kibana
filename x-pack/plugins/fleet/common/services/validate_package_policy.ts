@@ -20,7 +20,7 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace } from './';
+import { isValidNamespace, doesPackageHaveIntegrations } from './';
 
 type Errors = string[] | null;
 
@@ -49,6 +49,7 @@ export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): PackagePolicyValidationResults => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
@@ -95,7 +96,7 @@ export const validatePackagePolicy = (
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
     (policyTemplate.inputs || []).forEach((input) => {
-      const varDefKey = `${policyTemplate.name}-${input.type}`;
+      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
       }
@@ -122,7 +123,7 @@ export const validatePackagePolicy = (
     if (!input.vars && !input.streams) {
       return;
     }
-    const inputValidationKey = `${input.policy_template}-${input.type}`;
+    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       streams: {},
@@ -132,11 +133,10 @@ export const validatePackagePolicy = (
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
-        const varDefKey = `${input.policy_template}-${input.type}`;
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[varDefKey][name]
+              inputVarDefsByPolicyTemplateAndType[inputKey][name]
             )
           : null;
         return results;
@@ -173,7 +173,7 @@ export const validatePackagePolicy = (
     }
 
     if (inputValidationResults.vars || inputValidationResults.streams) {
-      validationResults.inputs![inputValidationKey] = inputValidationResults;
+      validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
 

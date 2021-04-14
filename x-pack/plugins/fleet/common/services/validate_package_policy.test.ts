@@ -317,7 +317,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       description: null,
       namespace: null,
       inputs: {
-        'pkgPolicy1-foo': {
+        foo: {
           vars: {
             'foo-input-var-name': null,
             'foo-input2-var-name': null,
@@ -325,14 +325,14 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           streams: { foo: { vars: { 'var-name': null } } },
         },
-        'pkgPolicy1-bar': {
+        bar: {
           vars: { 'bar-input-var-name': null, 'bar-input2-var-name': null },
           streams: {
             bar: { vars: { 'var-name': null } },
             bar2: { vars: { 'var-name': null } },
           },
         },
-        'pkgPolicy1-with-disabled-streams': {
+        'with-disabled-streams': {
           streams: {
             disabled: {
               vars: { 'var-name': null },
@@ -340,7 +340,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             disabled2: {},
           },
         },
-        'pkgPolicy1-with-no-stream-vars': {
+        'with-no-stream-vars': {
           streams: {
             'with-no-stream-vars-bar': {},
           },
@@ -361,7 +361,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: {
-          'pkgPolicy1-foo': {
+          foo: {
             vars: {
               'foo-input-var-name': null,
               'foo-input2-var-name': ['foo-input2-var-name is required'],
@@ -369,7 +369,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
             streams: { foo: { vars: { 'var-name': ['Invalid YAML format'] } } },
           },
-          'pkgPolicy1-bar': {
+          bar: {
             vars: {
               'bar-input-var-name': ['Invalid format'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
@@ -379,13 +379,13 @@ describe('Fleet - validatePackagePolicy()', () => {
               bar2: { vars: { 'var-name': null } },
             },
           },
-          'pkgPolicy1-with-disabled-streams': {
+          'with-disabled-streams': {
             streams: {
               disabled: { vars: { 'var-name': null } },
               disabled2: {},
             },
           },
-          'pkgPolicy1-with-no-stream-vars': {
+          'with-no-stream-vars': {
             vars: {
               'var-name': ['var-name is required'],
             },
@@ -424,7 +424,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: {
-          'pkgPolicy1-foo': {
+          foo: {
             vars: {
               'foo-input-var-name': null,
               'foo-input2-var-name': ['foo-input2-var-name is required'],
@@ -432,7 +432,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
             streams: { foo: { vars: { 'var-name': null } } },
           },
-          'pkgPolicy1-bar': {
+          bar: {
             vars: {
               'bar-input-var-name': ['Invalid format'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
@@ -442,7 +442,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               bar2: { vars: { 'var-name': null } },
             },
           },
-          'pkgPolicy1-with-disabled-streams': {
+          'with-disabled-streams': {
             streams: {
               disabled: {
                 vars: { 'var-name': null },
@@ -450,7 +450,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               disabled2: {},
             },
           },
-          'pkgPolicy1-with-no-stream-vars': {
+          'with-no-stream-vars': {
             vars: {
               'var-name': ['var-name is required'],
             },
