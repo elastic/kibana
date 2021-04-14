@@ -22,9 +22,11 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
       <div
         class="euiText euiText--medium"
       >
-        <p>
+        <div
+          class="euiText euiText--extraSmall"
+        >
           No results found
-        </p>
+        </div>
       </div>
     </span>
   </div>

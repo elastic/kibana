@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -23,11 +23,11 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
           iconColor="default"
           data-test-subj="visualization-error"
           body={
-            <p>
+            <EuiText size="xs">
               {i18n.translate('visualizations.noResultsFoundTitle', {
                 defaultMessage: 'No results found',
               })}
-            </p>
+            </EuiText>
           }
         />
       </div>
