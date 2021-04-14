@@ -122,7 +122,7 @@ export async function deleteComment(
 
     const caseRef = myComment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}).`);
+      throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
 
     await attachmentService.delete({
