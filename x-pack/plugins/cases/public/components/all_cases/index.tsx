@@ -8,10 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable as _EuiBasicTable,
-  EuiContextMenuPanel,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingContent,
   EuiProgress,
   EuiTableSortingType,
@@ -47,16 +44,6 @@ import { AllCasesHeader } from './header';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-`;
-
-const FlexItemDivider = styled(EuiFlexItem)`
-  ${({ theme }) => css`
-    .euiFlexGroup--gutterMedium > &.euiFlexItem {
-      border-right: ${theme.eui.euiBorderThin};
-      padding-right: ${theme.eui.euiSize};
-      margin-right: ${theme.eui.euiSize};
-    }
-  `}
 `;
 
 const ProgressLoader = styled(EuiProgress)`
@@ -146,13 +133,17 @@ export const AllCases = React.memo<AllCasesProps>(
       dispatchResetIsDeleted,
       handleOnDeleteConfirm,
       handleToggleModal,
-      isLoading: isDeleting,
-      isDeleted,
+      isLoading: isDeletingSingleCase,
+      isDeleted: isDeletedSingleCase,
       isDisplayConfirmDeleteModal,
     } = useDeleteCases();
 
     // Update case
-    const { dispatchResetIsUpdated, isLoading: isUpdating, isUpdated } = useUpdateCases();
+    const {
+      dispatchResetIsUpdated,
+      isLoading: isUpdatingSingleCase,
+      isUpdated: isUpdatedSingleCase,
+    } = useUpdateCases();
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentsUpdating } = usePostComment();
@@ -184,17 +175,6 @@ export const AllCases = React.memo<AllCasesProps>(
       },
       [filterRefetch, refetchCases, setSelectedCases]
     );
-
-    useEffect(() => {
-      if (isDeleted) {
-        refreshCases();
-        dispatchResetIsDeleted();
-      }
-      if (isUpdated) {
-        refreshCases();
-        dispatchResetIsUpdated();
-      }
-    }, [isDeleted, isUpdated, refreshCases, dispatchResetIsDeleted, dispatchResetIsUpdated]);
     const confirmDeleteModal = useMemo(
       () => (
         <ConfirmDeleteCaseModal
@@ -216,6 +196,22 @@ export const AllCases = React.memo<AllCasesProps>(
         handleOnDeleteConfirm,
       ]
     );
+    useEffect(() => {
+      if (isDeletedSingleCase) {
+        refreshCases();
+        dispatchResetIsDeleted();
+      }
+      if (isUpdatedSingleCase) {
+        refreshCases();
+        dispatchResetIsUpdated();
+      }
+    }, [
+      dispatchResetIsDeleted,
+      dispatchResetIsUpdated,
+      isDeletedSingleCase,
+      isUpdatedSingleCase,
+      refreshCases,
+    ]);
 
     const toggleDeleteModal = useCallback(
       (deleteCase: Case) => {
@@ -251,11 +247,10 @@ export const AllCases = React.memo<AllCasesProps>(
     const actions = useMemo(
       () =>
         getActions({
-          caseStatus: filterOptions.status,
           deleteCaseOnClick: toggleDeleteModal,
           dispatchUpdate: handleDispatchUpdate,
         }),
-      [filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
+      [toggleDeleteModal, handleDispatchUpdate]
     );
 
     const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
@@ -389,14 +384,21 @@ export const AllCases = React.memo<AllCasesProps>(
         {!isModal && (
           <AllCasesHeader
             actionsErrors={actionsErrors}
+            createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
             refresh={refresh}
             userCanCrud={userCanCrud}
           />
         )}
-        {(isCasesLoading || isDeleting || isUpdating || isCommentsUpdating) && !isDataEmpty && (
-          <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
-        )}
+        {(isCasesLoading ||
+          isDeleting ||
+          isDeletingSingleCase ||
+          isUpdatingSingleCase ||
+          isUpdating ||
+          isCommentsUpdating) &&
+          !isDataEmpty && (
+            <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
+          )}
         <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
@@ -421,6 +423,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <AllCasesFilters
                 data={data}
                 enableBulkActions={enableBulkActions}
+                filterOptions={filterOptions}
                 handleIsDeleting={setIsDeleting}
                 handleIsUpdating={setIsUpdating}
                 selectedCases={selectedCases}
