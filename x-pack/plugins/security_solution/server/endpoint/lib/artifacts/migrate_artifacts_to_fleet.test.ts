@@ -66,8 +66,8 @@ describe('When migrating artifacts to fleet', () => {
 
   it('should do nothing if `fleetServerEnabled` flag is false', async () => {
     await migrateArtifactsToFleet(soClient, artifactClient, logger, false);
-    expect(logger.info).toHaveBeenCalledWith(
-      'Skipping Artifacts migration to fleet. [fleetServerEnabled] flag is off'
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping Artifacts migration. [fleetServerEnabled] flag is off'
     );
     expect(soClient.find).not.toHaveBeenCalled();
   });
@@ -94,7 +94,7 @@ describe('When migrating artifacts to fleet', () => {
     const error = new Error('test: delete failed');
     soClient.delete.mockRejectedValue(error);
     await expect(migrateArtifactsToFleet(soClient, artifactClient, logger, true)).rejects.toThrow(
-      'Artifact SO migration to fleet failed'
+      'Artifact SO migration failed'
     );
   });
 });
