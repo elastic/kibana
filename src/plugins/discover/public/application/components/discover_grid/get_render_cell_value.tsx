@@ -27,7 +27,7 @@ export const getRenderCellValueFn = (
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean,
-  maxDocColumnEntries: number
+  maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
@@ -99,7 +99,7 @@ export const getRenderCellValueFn = (
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].slice(0, maxDocColumnEntries).map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
@@ -142,7 +142,7 @@ export const getRenderCellValueFn = (
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].slice(0, maxDocColumnEntries).map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription

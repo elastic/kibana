@@ -7,7 +7,7 @@
  */
 
 import { template } from 'lodash';
-import { MAX_DOC_COLUMN_ENTRIES } from '../../../../common';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { getServices, IndexPattern } from '../../../kibana_services';
 
 function noWhiteSpace(html: string) {
@@ -37,7 +37,7 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, val]);
   });
-  const maxEntries = getServices().uiSettings.get(MAX_DOC_COLUMN_ENTRIES);
+  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs].slice(0, maxEntries) });
 };
 
@@ -69,6 +69,6 @@ export const formatTopLevelObject = (
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
-  const maxEntries = getServices().uiSettings.get(MAX_DOC_COLUMN_ENTRIES);
+  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs].slice(0, maxEntries) });
 };
