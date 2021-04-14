@@ -13669,8 +13669,6 @@
     "xpack.ml.dataframe.analytics.rocChartSpec.yAxisTitle": "真正类率 (TPR) (也称为查全率) ",
     "xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel": "作业消息",
     "xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel": "作业统计信息",
-    "xpack.ml.dataframe.analyticsList.betaBadgeLabel": "公测版",
-    "xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent": "数据帧分析是公测版功能。我们很乐意听取您的反馈意见。",
     "xpack.ml.dataframe.analyticsList.cloneActionNameText": "克隆",
     "xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip": "您无权克隆分析作业。",
     "xpack.ml.dataframe.analyticsList.completeBatchAnalyticsToolTip": "{analyticsId} 为已完成的分析作业，无法重新启动。",
