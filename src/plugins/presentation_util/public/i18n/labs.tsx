@@ -59,22 +59,22 @@ export const LabsStrings = {
         }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
+          id="presentationUtil.labs.components.enabledStatusMessage"
           defaultMessage="Default: {status}"
           values={{
             status: <EuiCode>Enabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the enabled status of a lab project"
         />
       ),
       getDisabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.defaultStatusMessage"
+          id="presentationUtil.labs.components.disabledStatusMessage"
           defaultMessage="Default: {status}"
           values={{
             status: <EuiCode>Disabled</EuiCode>,
           }}
-          description="Displays the current status of a lab project"
+          description="Displays the disabled status of a lab project"
         />
       ),
     },
