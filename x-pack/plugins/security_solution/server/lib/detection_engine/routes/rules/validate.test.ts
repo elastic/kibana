@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import {
-  transformValidate,
-  transformValidateFindAlerts,
-  transformValidateBulkError,
-} from './validate';
-import { FindResult } from '../../../../../../alerting/server';
+import { transformValidate, transformValidateBulkError } from './validate';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getResult, getFindResultStatus } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { RuleParams } from '../../schemas/rule_schemas';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -87,45 +81,6 @@ describe('validate', () => {
       const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
-    });
-  });
-
-  describe('transformValidateFindAlerts', () => {
-    test('it should do a validation correctly of a find alert', () => {
-      const findResult: FindResult<RuleParams> = {
-        data: [getResult(getQueryRuleParams())],
-        page: 1,
-        perPage: 0,
-        total: 0,
-      };
-      const [validated, errors] = transformValidateFindAlerts(findResult, []);
-      const expected: {
-        page: number;
-        perPage: number;
-        total: number;
-        data: Array<Partial<RulesSchema>>;
-      } | null = {
-        data: [ruleOutput()],
-        page: 1,
-        perPage: 0,
-        total: 0,
-      };
-      expect(validated).toEqual(expected);
-      expect(errors).toEqual(null);
-    });
-
-    test('it should do an in-validation correctly of a partial alert', () => {
-      const findResult: FindResult<RuleParams> = {
-        data: [getResult(getQueryRuleParams())],
-        page: 1,
-        perPage: 0,
-        total: 0,
-      };
-      // @ts-expect-error
-      delete findResult.page;
-      const [validated, errors] = transformValidateFindAlerts(findResult, []);
-      expect(validated).toEqual(null);
-      expect(errors).toEqual('Invalid value "undefined" supplied to "page"');
     });
   });
 
