@@ -71,7 +71,7 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
            */
           dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
         />
-        {showLabel && <div>{metric.label}</div>}
+        {showLabel && <div className="mtrVis__subValue">{metric.label}</div>}
       </div>
     );
 
