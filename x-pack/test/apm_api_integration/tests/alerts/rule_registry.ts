@@ -277,8 +277,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               match_all: {},
             },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
-          size: 1,
         });
 
         expect(beforeDataResponse.body.hits.hits.length).to.be(0);
@@ -301,8 +304,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               match_all: {},
             },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
-          size: 1,
         });
 
         expect(afterInitialDataResponse.body.hits.hits.length).to.be(0);
@@ -325,8 +331,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               match_all: {},
             },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
-          size: 1,
         });
 
         expect(afterViolatingDataResponse.body.hits.hits.length).to.be(1);
@@ -335,8 +344,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           string,
           any
         >;
-
-        expect(alertEvent['event.action']);
 
         const exclude = [
           '@timestamp',
@@ -384,6 +391,96 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(topAlerts.length).to.be.greaterThan(0);
 
         expect(omit(topAlerts[0], exclude)).to.eql(toCompare);
+
+        await es.bulk({
+          index: APM_TRANSACTION_INDEX_NAME,
+          body: [
+            { index: {} },
+            createTransactionEvent({
+              event: {
+                outcome: 'success',
+              },
+            }),
+            { index: {} },
+            createTransactionEvent({
+              event: {
+                outcome: 'success',
+              },
+            }),
+          ],
+          refresh: true,
+        });
+
+        alert = await waitUntilNextExecution(alert);
+
+        const afterRecoveryResponse = await es.search({
+          index: ALERTS_INDEX_TARGET,
+          body: {
+            query: {
+              match_all: {},
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        });
+
+        expect(afterRecoveryResponse.body.hits.hits.length).to.be(1);
+
+        const recoveredAlertEvent = afterRecoveryResponse.body.hits.hits[0]._source as Record<
+          string,
+          any
+        >;
+
+        expect(recoveredAlertEvent['kibana.rac.alert.status']).to.eql('closed');
+        expect(recoveredAlertEvent['kibana.rac.alert.duration.us']).to.be.greaterThan(0);
+        expect(new Date(recoveredAlertEvent['kibana.rac.alert.end']).getTime()).to.be.greaterThan(
+          0
+        );
+
+        expect(
+          omit(
+            recoveredAlertEvent,
+            exclude.concat(['kibana.rac.alert.duration.us', 'kibana.rac.alert.end'])
+          )
+        ).to.eql({
+          'event.action': 'close',
+          'event.kind': 'state',
+          'kibana.rac.alert.id': 'apm.transaction_error_rate_opbeans-go_request',
+          'kibana.rac.alert.status': 'closed',
+          'kibana.rac.producer': 'apm',
+          'kibana.observability.evaluation.threshold': 30,
+          'kibana.observability.evaluation.value': 50,
+          'processor.event': 'transaction',
+          'rule.category': 'Transaction error rate threshold',
+          'rule.id': 'apm.transaction_error_rate',
+          'rule.name': 'Transaction error rate threshold | opbeans-go',
+          'service.name': 'opbeans-go',
+          tags: ['apm', 'service.name:opbeans-go'],
+          'transaction.type': 'request',
+        });
+
+        const {
+          body: topAlertsAfterRecovery,
+          status: topAlertStatusAfterRecovery,
+        } = await supertest
+          .get(
+            format({
+              pathname: '/api/observability/rules/alerts/top',
+              query: {
+                start: new Date(now - 30 * 60 * 1000).toISOString(),
+                end: new Date().toISOString(),
+              },
+            })
+          )
+          .set('kbn-xsrf', 'foo');
+
+        expect(topAlertStatusAfterRecovery).to.eql(200);
+
+        expect(topAlertsAfterRecovery.length).to.be(1);
+
+        expect(topAlertsAfterRecovery[0]['kibana.rac.alert.status']).to.be('closed');
       });
     });
   });
