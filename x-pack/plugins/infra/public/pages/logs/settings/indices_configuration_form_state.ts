@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import { LogIndexNameReference, LogIndexPatternReference } from '../../../../common/log_sources';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useCompositeFormElement, useFormElement } from './form_elements';
-import { LogIndexNameReference, LogIndexPatternReference } from './types';
 import {
   FormValidationError,
   validateIndexPattern,
@@ -26,19 +26,19 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
       () => async (logIndices) => {
         if (logIndices == null) {
           return validateStringNotEmpty('log index pattern', '');
-        } else if (logIndices.type === 'index-name') {
+        } else if (logIndices.type === 'indexName') {
           return validateStringNotEmpty('log indices', logIndices.indexName);
         } else {
           const emptyStringErrors = validateStringNotEmpty(
             'log index pattern',
-            logIndices.indexPattern
+            logIndices.indexPatternId
           );
 
           if (emptyStringErrors.length > 0) {
             return emptyStringErrors;
           }
 
-          return validateIndexPattern(await indexPatternService.get(logIndices.indexPattern));
+          return validateIndexPattern(await indexPatternService.get(logIndices.indexPatternId));
         }
       },
       [indexPatternService]

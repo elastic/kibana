@@ -8,10 +8,10 @@
 import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
+import { LogIndexPatternReference } from '../../../../common/log_sources';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
-import { LogIndexPatternReference } from './types';
 import { FormValidationError } from './validation_errors';
 
 export const IndexPatternConfigurationPanel: React.FC<{
@@ -20,11 +20,11 @@ export const IndexPatternConfigurationPanel: React.FC<{
   indexPatternFormElement: FormElement<LogIndexPatternReference | undefined, FormValidationError>;
 }> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
   const changeIndexPatternId = useCallback(
-    (indexPattern: string | undefined) => {
-      if (indexPattern != null) {
+    (indexPatternId: string | undefined) => {
+      if (indexPatternId != null) {
         indexPatternFormElement.updateValue(() => ({
-          type: 'index-pattern',
-          indexPattern,
+          type: 'indexPattern',
+          indexPatternId,
         }));
       } else {
         indexPatternFormElement.updateValue(() => undefined);
@@ -81,7 +81,7 @@ export const IndexPatternConfigurationPanel: React.FC<{
           <IndexPatternSelector
             isLoading={isLoading || indexPatternFormElement.validity.validity === 'pending'}
             isReadOnly={isReadOnly}
-            indexPatternId={indexPatternFormElement.value?.indexPattern}
+            indexPatternId={indexPatternFormElement.value?.indexPatternId}
             onChangeIndexPatternId={changeIndexPatternId}
           />
         </EuiFormRow>

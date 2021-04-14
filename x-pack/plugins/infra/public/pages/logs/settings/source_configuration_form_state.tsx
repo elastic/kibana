@@ -61,27 +61,8 @@ export const useLogSourceConfigurationFormState = (
     )
   );
 
-  // TODO: use sourceConfigurationFormElement.value directly once the
-  // logIndices property exists
-  const formState = useMemo(
-    () => ({
-      name: sourceConfigurationFormElement.value.name,
-      description: '',
-      logAlias:
-        sourceConfigurationFormElement.value.logIndices?.type === 'index-name'
-          ? sourceConfigurationFormElement.value.logIndices.indexName
-          : '',
-      fields: {
-        tiebreaker: sourceConfigurationFormElement.value.fields.tiebreaker,
-        timestamp: sourceConfigurationFormElement.value.fields.timestamp,
-      },
-      logColumns: sourceConfigurationFormElement.value.logColumns,
-    }),
-    [sourceConfigurationFormElement.value]
-  );
-
   return {
-    formState,
+    formState: sourceConfigurationFormElement.value,
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,

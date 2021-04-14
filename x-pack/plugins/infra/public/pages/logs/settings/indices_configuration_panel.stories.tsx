@@ -114,7 +114,7 @@ const defaultArgs = {
   isLoading: false,
   isReadOnly: false,
   logIndices: {
-    type: 'index-name' as const,
+    type: 'indexName' as const,
     indexName: 'logs-*',
   },
   fields: {

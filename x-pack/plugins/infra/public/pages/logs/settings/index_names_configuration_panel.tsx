@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { LogIndexNameReference } from '../../../../common/log_sources';
 import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
-import { LogIndexNameReference } from './types';
 import { FormValidationError } from './validation_errors';
 
 export const IndexNamesConfigurationPanel: React.FC<{
@@ -105,7 +105,7 @@ export const IndexNamesConfigurationPanel: React.FC<{
 
 const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
   (value) => ({
-    type: 'index-name',
+    type: 'indexName',
     indexName: value,
   }),
   ({ indexName }) => indexName

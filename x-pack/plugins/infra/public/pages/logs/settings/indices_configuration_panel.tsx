@@ -6,11 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
+import {
+  logIndexNameReferenceRT,
+  LogIndexPatternReference,
+  logIndexPatternReferenceRT,
+  LogIndexReference,
+} from '../../../../common/log_sources';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
-import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } from './types';
 import { FormValidationError } from './validation_errors';
 
 export const IndicesConfigurationPanel = React.memo<{
@@ -64,9 +69,7 @@ export const IndicesConfigurationPanel = React.memo<{
 
 const isIndexPatternFormElement = isFormElementForType(
   (value): value is LogIndexPatternReference | undefined =>
-    value == null || value?.type === 'index-pattern'
+    value == null || logIndexPatternReferenceRT.is(value)
 );
 
-const isIndexNamesFormElement = isFormElementForType(
-  (value): value is LogIndexNameReference => value?.type === 'index-name'
-);
+const isIndexNamesFormElement = isFormElementForType(logIndexNameReferenceRT.is);
