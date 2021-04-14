@@ -78,8 +78,7 @@ export const mlExecutor = async ({
     );
     logger.warn(errorMessage);
     result.warning = true;
-    // TODO: change this to partialFailure since we don't immediately exit rule function and still do actions at the end?
-    await ruleStatusService.error(errorMessage);
+    await ruleStatusService.partialFailure(errorMessage);
   }
 
   const anomalyResults = await findMlSignals({
