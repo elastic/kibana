@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockValues, setMockActions } from '../../../__mocks__';
+import '../../../__mocks__/shallow_useeffect.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -37,7 +37,7 @@ describe('RelevanceTuning', () => {
     jest.clearAllMocks();
   });
 
-  const subject = () => shallow(<ResultSettings engineBreadcrumb={['test']} />);
+  const subject = () => shallow(<ResultSettings />);
   const findButtons = (wrapper: ShallowWrapper) =>
     wrapper.find(EuiPageHeader).prop('rightSideItems') as React.ReactElement[];
 
@@ -48,7 +48,7 @@ describe('RelevanceTuning', () => {
   });
 
   it('initializes result settings data when mounted', () => {
-    shallow(<ResultSettings engineBreadcrumb={['test']} />);
+    shallow(<ResultSettings />);
     expect(actions.initializeResultSettingsData).toHaveBeenCalled();
   });
 
