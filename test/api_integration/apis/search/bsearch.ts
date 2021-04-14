@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 when unknown index type is provided', async () => {
+      it('should return 400 when index type is provided in "es" strategy', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -130,6 +130,9 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                 },
               },
+              options: {
+                strategy: 'es',
+              },
             },
           ],
         });
@@ -137,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.status).to.be(200);
         parseBfetchResponse(resp).forEach((responseJson, i) => {
           expect(responseJson.id).to.be(i);
-          verifyErrorResponse(responseJson.error, 400, 'Unknown indexType');
+          verifyErrorResponse(responseJson.error, 400, 'Unsupported index pattern type baad');
         });
       });
 
@@ -151,11 +154,14 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
         });
-        it('should return 400 for Painless error', async () => {
+        it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
           const resp = await supertest.post(`/internal/bsearch`).send({
             batch: [
               {
                 request: painlessErrReq,
+                options: {
+                  strategy: 'es',
+                },
               },
             ],
           });
@@ -163,8 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.status).to.be(200);
           parseBfetchResponse(resp).forEach((responseJson, i) => {
             expect(responseJson.id).to.be(i);
-            expect(responseJson.error.statusCode).to.be(400);
-            expect(responseJson.error.message).to.be('status_exception');
+            verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
           });
         });
       });
