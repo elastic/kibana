@@ -476,7 +476,6 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
 export interface DeprecationsServiceStart {
-    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
@@ -656,6 +655,15 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
     };
+}
+
+// Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface DomainDeprecationDetails extends DeprecationsDetails {
+    // (undocumented)
+    domainId: string;
 }
 
 export { EnvironmentMode }
