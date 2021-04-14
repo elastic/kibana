@@ -125,8 +125,7 @@ async function isFieldGeoShape(
   if (!indexPattern) {
     return false;
   }
-  const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
-  return fieldsForIndexPattern.some(
+  return indexPattern.fields.some(
     (fieldDescriptor: IFieldType) => fieldDescriptor.name && fieldDescriptor.name === geoField!
   );
 }
@@ -192,13 +191,9 @@ async function filterIndexPatternsByField(fields: string[]) {
   await Promise.all(
     indexPatternIds.map(async (indexPatternId: string) => {
       const indexPattern = await indexPatternsService.get(indexPatternId);
-      const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(
-        indexPattern
-      );
       const containsField = fields.some((field: string) =>
-        fieldsForIndexPattern.some(
-          (fieldDescriptor: IFieldType) =>
-            fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
+        indexPattern.fields.some(
+          (fieldDescriptor) => fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
         )
       );
       if (containsField) {
