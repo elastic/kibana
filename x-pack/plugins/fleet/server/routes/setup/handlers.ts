@@ -48,12 +48,12 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
 };
 
 export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-
   try {
+    const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
     const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, esClient);
+
     return response.ok({
       body,
     });
@@ -68,13 +68,13 @@ export const FleetAgentSetupHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostFleetSetupRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-
   try {
+    const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
     const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, esClient);
     await setupFleet(soClient, esClient, { forceRecreate: request.body?.forceRecreate === true });
+
     return response.ok({
       body,
     });
