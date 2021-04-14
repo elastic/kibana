@@ -3846,36 +3846,38 @@
                 },
                 "detection_rule_detail": {
                   "type": "array",
-                  "itmes": {
-                    "rule_name": {
-                      "type": "keyword"
-                    },
-                    "rule_id": {
-                      "type": "keyword"
-                    },
-                    "rule_type": {
-                      "type": "keyword"
-                    },
-                    "rule_version": {
-                      "type": "long"
-                    },
-                    "enabled": {
-                      "type": "keyword"
-                    },
-                    "elastic_rule": {
-                      "type": "keyword"
-                    },
-                    "created_on": {
-                      "type": "keyword"
-                    },
-                    "updated_on": {
-                      "type": "keyword"
-                    },
-                    "alert_count_daily": {
-                      "type": "long"
-                    },
-                    "cases_count_daily": {
-                      "type": "long"
+                  "items": {
+                    "properties": {
+                      "rule_name": {
+                        "type": "keyword"
+                      },
+                      "rule_id": {
+                        "type": "keyword"
+                      },
+                      "rule_type": {
+                        "type": "keyword"
+                      },
+                      "rule_version": {
+                        "type": "long"
+                      },
+                      "enabled": {
+                        "type": "keyword"
+                      },
+                      "elastic_rule": {
+                        "type": "keyword"
+                      },
+                      "created_on": {
+                        "type": "keyword"
+                      },
+                      "updated_on": {
+                        "type": "keyword"
+                      },
+                      "alert_count_daily": {
+                        "type": "long"
+                      },
+                      "cases_count_daily": {
+                        "type": "long"
+                      }
                     }
                   }
                 }
