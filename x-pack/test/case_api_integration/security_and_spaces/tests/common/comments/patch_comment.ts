@@ -21,7 +21,6 @@ import {
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
-  postCommentGenAlertReq,
 } from '../../../../common/lib/mock';
 import {
   createCaseAction,
