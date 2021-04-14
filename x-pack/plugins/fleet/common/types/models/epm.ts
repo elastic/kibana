@@ -286,8 +286,8 @@ export interface RegistryDataStreamPermissions {
 }
 
 export interface PackagePermissions {
-  cluster: string[];
-  indices: Array<{ names: string[]; privileges: string[] }>;
+  cluster?: string[];
+  indices?: Array<{ names: string[]; privileges: string[] }>;
 }
 
 export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';

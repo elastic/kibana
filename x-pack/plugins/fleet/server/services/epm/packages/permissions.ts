@@ -26,8 +26,6 @@ export async function getPackagePermissions(
   const indices: PackagePermissions['indices'] = pkg.data_streams!.map((ds) => {
     if (ds.permissions?.cluster) {
       ds.permissions.cluster.forEach((p) => clusterPermissions.add(p));
-    } else {
-      clusterPermissions.add('monitor');
     }
 
     let index = `${ds.type}-${ds.dataset}-${namespace}`;
@@ -45,7 +43,7 @@ export async function getPackagePermissions(
   });
 
   return {
-    cluster: Array.from(clusterPermissions),
+    cluster: clusterPermissions.size > 0 ? Array.from(clusterPermissions) : undefined,
     indices,
   };
 }
