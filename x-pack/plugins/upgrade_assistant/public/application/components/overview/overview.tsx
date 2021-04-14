@@ -45,7 +45,7 @@ const i18nTexts = {
   getDeprecationLoggingLabel: (href: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Display deprecation logs in the Elasticsearch console. {learnMore}"
+      defaultMessage="Log deprecated actions. {learnMore}"
       values={{
         learnMore: (
           <EuiLink href={href} target="_blank">
