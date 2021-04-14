@@ -11,7 +11,7 @@ import React from 'react';
 
 interface VisualizationNoResultsProps {
   onInit?: () => void;
-  error: string;
+  error: string | Error;
 }
 
 export class VisualizationError extends React.Component<VisualizationNoResultsProps> {
@@ -21,7 +21,11 @@ export class VisualizationError extends React.Component<VisualizationNoResultsPr
         iconType="alert"
         iconColor="danger"
         data-test-subj="visualization-error"
-        body={<p>{this.props.error}</p>}
+        body={
+          <p>
+            {typeof this.props.error === 'string' ? this.props.error : this.props.error.message}
+          </p>
+        }
       />
     );
   }
