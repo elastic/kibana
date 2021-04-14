@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { FindRulesSchema } from './find_rules_schema';
-import { getRulesSchemaMock } from './rules_schema.mocks';
-
-export const getFindRulesSchemaMock = (): FindRulesSchema => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [getRulesSchemaMock()],
-});
+export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
+  'fleet-preconfiguration-deletion-record';
