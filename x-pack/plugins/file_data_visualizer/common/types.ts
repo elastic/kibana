@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
 import { ML_JOB_FIELD_TYPES } from './constants';
-
-export interface HasImportPermission {
-  hasImportPermission: boolean;
-}
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -87,57 +82,6 @@ export interface FindFileStructureErrorResponse {
 }
 
 export type InputData = any[];
-
-export interface ImportResponse {
-  success: boolean;
-  id: string;
-  index?: string;
-  pipelineId?: string;
-  docCount: number;
-  failures: ImportFailure[];
-  error?: {
-    error: estypes.ErrorCause;
-  };
-  ingestError?: boolean;
-}
-
-export interface ImportFailure {
-  item: number;
-  reason: string;
-  doc: ImportDoc;
-}
-
-export interface Doc {
-  message: string;
-}
-
-export type ImportDoc = Doc | string | object;
-
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
-}
-
-export interface Mappings {
-  _meta?: {
-    created_by: string;
-  };
-  properties: {
-    [key: string]: any;
-  };
-}
-
-export interface IngestPipelineWrapper {
-  id: string;
-  pipeline: IngestPipeline;
-}
-
-export interface IngestPipeline {
-  description: string;
-  processors: any[];
-}
 
 export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
 

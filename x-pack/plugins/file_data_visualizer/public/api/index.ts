@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-// import React from 'react';
-// import { HttpStart } from 'src/core/public';
-// import { FileUploadComponentProps, lazyLoadFileUploadModules } from '../lazy_load_bundle';
-// import type { IImporter, ImportFactoryOptions } from '../importer';
-// import { HasImportPermission } from '../../common';
-// import { getCoreStart } from '../kibana_services';
 import { lazyLoadFileUploadModules } from '../lazy_load_bundle';
 import { FileDataVisualizer } from '../application';
+import { FindFileStructureResponse } from '../../common';
 
 export interface FileDataVisualizerStartApi {
   analyzeFile(file: string, params: Record<string, string>): Promise<any>;
@@ -21,10 +16,10 @@ export interface FileDataVisualizerStartApi {
 export async function analyzeFile(
   file: string,
   params: Record<string, string> = {}
-): Promise<boolean> {
+): Promise<FindFileStructureResponse> {
   const { getHttp } = await lazyLoadFileUploadModules();
   const body = JSON.stringify(file);
-  return await getHttp().fetch<any>({
+  return await getHttp().fetch<FindFileStructureResponse>({
     path: `/internal/file_data_visualizer/analyze_file`,
     method: 'POST',
     body,

@@ -13,8 +13,8 @@ import {
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
   UI_SETTING_MAX_FILE_SIZE,
-} from '../common';
-import { getUiSettings } from './kibana_services';
+} from '../../common';
+import { getUiSettings } from '../kibana_services';
 
 export function getMaxBytes() {
   const maxFileSize = getUiSettings().get(UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE);

@@ -15,5 +15,3 @@ export * from './importer/types';
 
 export { FileUploadPluginStart } from './plugin';
 export { FileUploadComponentProps } from './lazy_load_bundle';
-
-export { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';

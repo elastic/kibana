@@ -6,10 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "usageCollection",
-    "embeddable",
-    "share",
-    "discover"
+    "usageCollection"
   ],
   "optionalPlugins": [
     "security"
