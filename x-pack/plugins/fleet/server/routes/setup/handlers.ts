@@ -47,7 +47,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;

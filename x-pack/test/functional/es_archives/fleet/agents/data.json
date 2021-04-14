@@ -185,3 +185,43 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest-outputs:output-1",
+    "index": ".kibana",
+    "source": {
+      "type": "ingest-outputs",
+      "ingest-outputs": {
+        "name": "default",
+        "is_default": true,
+        "type": "elasticsearch",
+        "hosts": [
+          "http://localhost:9200"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest_manager_settings:settings-1",
+    "index": ".kibana",
+    "source": {
+      "ingest_manager_settings": {
+        "kibana_urls": [
+          "http://localhost:5601"
+        ]
+      },
+      "type": "ingest_manager_settings",
+      "references": [],
+      "migrationVersion": {
+        "ingest_manager_settings": "7.13.0"
+      },
+      "updated_at": "2021-04-14T21:59:29.562Z"
+    }
+  }
+}

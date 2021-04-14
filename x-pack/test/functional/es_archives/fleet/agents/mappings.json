@@ -1965,7 +1965,7 @@
             "kibana_ca_sha256": {
               "type": "keyword"
             },
-            "kibana_url": {
+            "kibana_urls": {
               "type": "keyword"
             },
             "package_auto_upgrade": {

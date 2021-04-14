@@ -22,12 +22,17 @@ export const useUrlModal = () => {
 
   const setModal = useCallback(
     (modal: Modal | null) => {
+      const newUrlParams: any = {
+        ...urlParams,
+        modal,
+      };
+
+      if (modal === null) {
+        delete newUrlParams.modal;
+      }
       history.push({
         ...location,
-        search: toUrlParams({
-          ...urlParams,
-          modal,
-        }),
+        search: toUrlParams(newUrlParams),
       });
     },
     [history, location, toUrlParams, urlParams]

@@ -11,7 +11,7 @@ import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../const
 import type { FleetConfigType } from '../../../common';
 import { PostFleetSetupRequestSchema } from '../../types';
 
-import { getFleetStatusHandler, FleetSetupHandler, FleetAgentSetupHandler } from './handlers';
+import { getFleetStatusHandler, fleetSetupHandler, FleetAgentSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: IRouter) => {
   router.post(
@@ -22,7 +22,7 @@ export const registerFleetSetupRoute = (router: IRouter) => {
       // and will see `Unable to initialize Ingest Manager` in the UI
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    FleetSetupHandler
+    fleetSetupHandler
   );
 };
 

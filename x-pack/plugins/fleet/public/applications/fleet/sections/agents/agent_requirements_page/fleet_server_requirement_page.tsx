@@ -45,12 +45,10 @@ function renderOnPremInstructions() {
           </h2>
         }
         body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.setupText"
-              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. See the Fleet User Guide for instructions on how to add a Fleet Server."
-            />
-          </EuiText>
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.setupText"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. See the Fleet User Guide for instructions on how to add a Fleet Server."
+          />
         }
         actions={
           <EuiButton
@@ -87,17 +85,25 @@ function renderCloudInstructions(deploymentUrl: string) {
           <h2>
             <FormattedMessage
               id="xpack.fleet.fleetServerSetup.cloudSetupTitle"
-              defaultMessage="Enable Fleet"
+              defaultMessage="Enable APM & Fleet"
             />
           </h2>
         }
         body={
-          <EuiText color="subdued" style={{ maxWidth: '420px' }}>
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.cloudSetupText"
-              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling Fleet."
-            />
-          </EuiText>
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.cloudSetupText"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling APM & Fleet. For more information see the {link}"
+            values={{
+              link: (
+                <EuiLink href="https://ela.st/add-fleet-server" target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.userGuideLink"
+                    defaultMessage="Fleet User Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         }
         actions={
           <>
@@ -115,23 +121,6 @@ function renderCloudInstructions(deploymentUrl: string) {
                 defaultMessage="Edit deployment"
               />
             </EuiButton>
-            <EuiSpacer size="m" />
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.settings.cloudFleetUserGuideText"
-                defaultMessage="For more information, see the {link}."
-                values={{
-                  link: (
-                    <EuiLink href="https://ela.st/add-fleet-server" target="_blank" external>
-                      <FormattedMessage
-                        id="xpack.fleet.settings.userGuideLink"
-                        defaultMessage="Fleet User Guide"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
           </>
         }
       />
