@@ -6,15 +6,28 @@
  */
 
 import { some } from 'lodash/fp';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import _ from 'lodash';
+import {
+  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { FormattedMessage } from 'react-intl';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { HostIsolationContent } from '../../../../detections/components/host_isolation/content';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -56,33 +69,77 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
+  const [hostIsolationPanelOpen, setHostIsolationPanel] = useState(false);
+
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
-  const isEndpointAlert = some({ category: 'signal', field: 'signal.rule.type' }, detailsData);
+  const isEndpointAlert =
+    _.find(detailsData, { category: 'agent', field: 'agent.type' })?.values[0] === 'endpoint';
 
   if (!expandedEvent?.eventId) {
     return null;
   }
 
-  // console.log('i am details data', detailsData);
-  // console.log('endpoint', isEndpointAlert);
-
   return isFlyoutView ? (
     <>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle isAlert={isAlert} loading={loading} />
+        {hostIsolationPanelOpen ? (
+          <>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
+                  defaultMessage="Isolate host"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiButtonEmpty flush="left" onClick={() => setHostIsolationPanel(false)}>
+              <FormattedMessage
+                id="xpack.securitySolution.hostIsolation.backToAlertDetails"
+                defaultMessage="Back to alert details"
+              />
+            </EuiButtonEmpty>
+          </>
+        ) : (
+          <ExpandableEventTitle isAlert={isAlert} loading={loading} />
+        )}
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <ExpandableEvent
-          browserFields={browserFields}
-          detailsData={detailsData}
-          event={expandedEvent}
-          isAlert={isAlert}
-          loading={loading}
-          timelineId={timelineId}
-          timelineTabType="flyout"
-        />
+        {hostIsolationPanelOpen ? (
+          <HostIsolationContent details={detailsData} />
+        ) : (
+          <ExpandableEvent
+            browserFields={browserFields}
+            detailsData={detailsData}
+            event={expandedEvent}
+            isAlert={isAlert}
+            loading={loading}
+            timelineId={timelineId}
+            timelineTabType="flyout"
+          />
+        )}
       </StyledEuiFlyoutBody>
+      {isEndpointAlert && hostIsolationPanelOpen === false && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconSide="right"
+                fill
+                iconType="arrowDown"
+                onClick={() => {
+                  setHostIsolationPanel(true);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.eventDetails.actionsMenu"
+                  defaultMessage="Take action"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </>
   ) : (
     <>

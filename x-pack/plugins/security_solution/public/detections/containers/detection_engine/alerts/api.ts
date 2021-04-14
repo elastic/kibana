@@ -112,13 +112,13 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
-  hostId,
+  agentId,
 }: {
-  hostId: string;
+  agentId: string;
 }): Promise<HostIsolationIndex> =>
   KibanaServices.get().http.fetch<HostIsolationIndex>(HOST_ISOLATION_URL, {
     method: 'POST',
     body: JSON.stringify({
-      hostId,
+      agent_ids: [agentId],
     }),
   });

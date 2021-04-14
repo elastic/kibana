@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { isSecurityAppError } from '../../../../common/utils/api';
@@ -17,10 +18,10 @@ interface HostIsolationStatus {
 }
 
 interface UseHostIsolationProps {
-  hostId: string;
+  agentId: string;
 }
 
-export const useHostIsolation = ({ hostId }: UseHostIsolationProps): HostIsolationStatus => {
+export const useHostIsolation = ({ agentId }: UseHostIsolationProps): HostIsolationStatus => {
   const [loading, setLoading] = useState(true);
   const [isolated, setIsolated] = useState(false);
   const [, dispatchToaster] = useStateToaster();
@@ -31,10 +32,12 @@ export const useHostIsolation = ({ hostId }: UseHostIsolationProps): HostIsolati
     const fetchData = async () => {
       try {
         setLoading(true);
-        const isolationStatus = await createHostIsolation({ hostId });
+        const isolationStatus = await createHostIsolation({ agentId });
 
         if (isSubscribed && isolationStatus != null) {
-          setIsolated(true);
+          if (isolationStatus.action) {
+            setIsolated(true);
+          }
         }
       } catch (error) {
         if (isSubscribed) {
@@ -56,10 +59,12 @@ export const useHostIsolation = ({ hostId }: UseHostIsolationProps): HostIsolati
       }
     };
 
-    fetchData();
+    if (!isEmpty(agentId)) {
+      fetchData();
+    }
     return () => {
       isSubscribed = false;
     };
-  });
+  }, [agentId, dispatchToaster]);
   return { loading, isIsolated: isolated };
 };
