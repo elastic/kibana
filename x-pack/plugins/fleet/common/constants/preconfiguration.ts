@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useScatterplotFieldOptions } from './use_scatterplot_field_options';
-export { ScatterplotMatrix, ScatterplotMatrixProps } from './scatterplot_matrix';
+export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
+  'fleet-preconfiguration-deletion-record';
