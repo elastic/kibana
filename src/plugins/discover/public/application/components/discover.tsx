@@ -43,6 +43,7 @@ import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { InspectorSession } from '../../../../inspector/public';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -71,6 +72,7 @@ export function Discover({
   refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -131,7 +133,20 @@ export function Discover({
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-  }, [setExpandedDoc]);
+    const session = services.inspector.open(opts.inspectorAdapters, {
+      title: savedSearch.title,
+    });
+    setInspectorSession(session);
+  }, [setExpandedDoc, opts.inspectorAdapters, savedSearch, services.inspector]);
+
+  useEffect(() => {
+    return () => {
+      if (inspectorSession) {
+        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+        inspectorSession.close();
+      }
+    };
+  }, [inspectorSession]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
