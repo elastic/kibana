@@ -7,7 +7,6 @@
 
 import { generateId } from './utils';
 import {
-  sampleRuleAlertParams,
   sampleDocSearchResultsNoSortId,
   mockLogger,
   sampleRuleGuid,
@@ -16,6 +15,7 @@ import {
   sampleBulkCreateDuplicateResult,
   sampleBulkCreateErrorResult,
   sampleDocWithAncestors,
+  sampleRuleSO,
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
@@ -23,6 +23,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -140,7 +141,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -155,22 +156,12 @@ describe('singleBulkCreate', () => {
     );
     const { success, createdItemsCount } = await singleBulkCreate({
       filteredEvents: sampleDocSearchResultsNoSortId(),
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      actions: [],
-      name: 'rule-name',
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
     expect(success).toEqual(true);
@@ -178,7 +169,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create with docs with no versioning', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -193,22 +184,12 @@ describe('singleBulkCreate', () => {
     );
     const { success, createdItemsCount } = await singleBulkCreate({
       filteredEvents: sampleDocSearchResultsNoSortIdNoVersion(),
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
     expect(success).toEqual(true);
@@ -216,29 +197,19 @@ describe('singleBulkCreate', () => {
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise(false)
     );
     const { success, createdItemsCount } = await singleBulkCreate({
       filteredEvents: sampleEmptyDocSearchResults(),
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
     expect(success).toEqual(true);
@@ -246,29 +217,18 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create when bulk create has duplicate errors', async () => {
-    const sampleParams = sampleRuleAlertParams();
-    const sampleSearchResult = sampleDocSearchResultsNoSortId;
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
     );
     const { success, createdItemsCount } = await singleBulkCreate({
-      filteredEvents: sampleSearchResult(),
-      ruleParams: sampleParams,
+      filteredEvents: sampleDocSearchResultsNoSortId(),
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
 
@@ -278,29 +238,18 @@ describe('singleBulkCreate', () => {
   });
 
   test('create failed bulk create when bulk create has multiple error statuses', async () => {
-    const sampleParams = sampleRuleAlertParams();
-    const sampleSearchResult = sampleDocSearchResultsNoSortId;
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateErrorResult)
     );
     const { success, createdItemsCount, errors } = await singleBulkCreate({
-      filteredEvents: sampleSearchResult(),
-      ruleParams: sampleParams,
+      filteredEvents: sampleDocSearchResultsNoSortId(),
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
     expect(mockLogger.error).toHaveBeenCalled();
@@ -349,28 +298,18 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful and returns proper createdItemsCount', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
     );
     const { success, createdItemsCount } = await singleBulkCreate({
       filteredEvents: sampleDocSearchResultsNoSortId(),
-      ruleParams: sampleParams,
+      ruleSO,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      actions: [],
-      name: 'rule-name',
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
       refresh: false,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       buildRuleMessage,
     });
     expect(success).toEqual(true);
