@@ -3,10 +3,10 @@ steps:
   # - command: |
   #     export DOCKER_BUILDKIT=1 && \
   #     docker buildx create --use && \
-  #     docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain \
-  #       --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
-  #       --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
-  #       --cache-from type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache
+  #     docker buildx build -t us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain \
+  #       --output type=image,name=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
+  #       --cache-to type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache \
+  #       --cache-from type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache
   - command: .buildkite/scripts/bootstrap_docker.sh
     agents:
       queue: bootstrap
@@ -18,7 +18,7 @@ steps:
     artifact_paths: target/junit/**/*.xml
     plugins:
       - docker#v3.8.0:
-          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
+          image: 'us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT'
           propagate-environment: true
           volumes:
             - './.git:/var/lib/kibana/workspace/kibana/.git'
@@ -27,8 +27,9 @@ steps:
     timeout_in_minutes: 120
   - command: |
       export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .buildkite/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
-      docker push gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT
+      gcloud auth configure-docker us-central1-docker.pkg.dev,gcr.io,us.gcr.io --quiet && \
+      docker build -t us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .buildkite/Dockerfile-build --build-arg BASE_IMAGE=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
+      docker push us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT
     agents:
       queue: bootstrap
     key: default-build
@@ -39,7 +40,7 @@ steps:
     artifact_paths: target/junit/**/*.xml
     plugins:
       - docker#v3.8.0:
-          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT'
+          image: 'us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT'
           propagate-environment: true
           volumes:
             - './.git:/var/lib/kibana/workspace/kibana/.git'
