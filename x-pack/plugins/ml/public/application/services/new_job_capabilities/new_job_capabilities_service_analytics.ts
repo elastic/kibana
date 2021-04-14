@@ -11,7 +11,7 @@ import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './ne
 import { ml } from '../ml_api_service';
 
 // Keep top nested field and remove all <nested_field>.* fields
-function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {
+export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {
   const results = resp[indexPatternTitle];
   const fields: Field[] = [];
   const nestedFields: Record<string, boolean> = {};
