@@ -26,8 +26,7 @@ interface OwnProps {
   data: AllCases;
   enableBulkActions: boolean;
   filterOptions: FilterOptions;
-  handleIsDeleting: (a: boolean) => void;
-  handleIsUpdating: (a: boolean) => void;
+  handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   selectedCases: Case[];
 }
@@ -38,8 +37,7 @@ export const AllCasesFilters: FunctionComponent<Props> = ({
   data,
   enableBulkActions = false,
   filterOptions,
-  handleIsDeleting,
-  handleIsUpdating,
+  handleIsLoading,
   refreshCases,
   selectedCases,
 }) => {
@@ -68,12 +66,12 @@ export const AllCasesFilters: FunctionComponent<Props> = ({
   } = useUpdateCases();
 
   useEffect(() => {
-    handleIsDeleting(isDeleting);
-  }, [handleIsDeleting, isDeleting]);
+    handleIsLoading(isDeleting);
+  }, [handleIsLoading, isDeleting]);
 
   useEffect(() => {
-    handleIsUpdating(isUpdating);
-  }, [handleIsUpdating, isUpdating]);
+    handleIsLoading(isUpdating);
+  }, [handleIsLoading, isUpdating]);
   useEffect(() => {
     if (isDeleted) {
       if (refreshCases != null) refreshCases();

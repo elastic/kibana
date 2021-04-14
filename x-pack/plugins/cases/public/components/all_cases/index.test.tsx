@@ -21,7 +21,7 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { getCasesColumns } from './columns';
+import { useCasesColumns } from './columns';
 import { AllCases } from '.';
 
 jest.mock('../../containers/use_bulk_update_case');
@@ -252,7 +252,7 @@ describe('AllCases', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
     await waitFor(() => {
-      getCasesColumns({
+      useCasesColumns({
         actions: [],
         filterStatus: CaseStatuses.open,
         isModal: false,
@@ -348,7 +348,7 @@ describe('AllCases', () => {
       const checkIt = (columnName: string) => {
         expect(columnName).not.toEqual(i18n.ACTIONS);
       };
-      getCasesColumns({
+      useCasesColumns({
         actions: [],
         filterStatus: CaseStatuses.open,
         isModal: true,

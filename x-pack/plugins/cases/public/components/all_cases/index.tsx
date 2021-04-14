@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable as _EuiBasicTable,
   EuiEmptyPrompt,
@@ -19,28 +19,31 @@ import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
 import * as i18n from './translations';
-import { CaseStatuses, CaseType, CommentRequestAlertType, CommentType } from '../../../common';
-import { getCasesColumns } from './columns';
-import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
-import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { EuiBasicTableOnChange } from './types';
-import { Panel } from '../panel';
-
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { getActions } from './actions';
-import { CasesTableFilters } from './table_filters';
-import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { usePostComment } from '../../containers/use_post_comment';
-import { getActionLicenseError } from '../use_push_to_service/helpers';
-import { CaseCallOut } from '../callout';
-import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
-import { CaseDetailsHrefSchema, CasesNavigation, LinkButton } from '../links';
+import {
+  Case,
+  CaseStatuses,
+  CaseType,
+  CommentRequestAlertType,
+  CommentType,
+  FilterOptions,
+  SortFieldCase,
+  SubCase,
+} from '../../../common';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useGetCases } from '../../containers/use_get_cases';
+import { usePostComment } from '../../containers/use_post_comment';
+import { CaseCallOut } from '../callout';
+import { CaseDetailsHrefSchema, CasesNavigation, LinkButton } from '../links';
+import { Panel } from '../panel';
+import { getActionLicenseError } from '../use_push_to_service/helpers';
+import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
+import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
 import { AllCasesFilters } from './filters';
 import { AllCasesHeader } from './header';
+import { CasesTableFilters } from './table_filters';
+import { EuiBasicTableOnChange } from './types';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -114,10 +117,8 @@ export const AllCases = React.memo<AllCasesProps>(
     updateCase,
   }) => {
     const { actionLicense } = useGetActionLicense();
-    const [refresh, doRefresh] = useState(0);
     const {
       data,
-      dispatchUpdateCaseProperty,
       filterOptions,
       loading,
       queryParams,
@@ -128,34 +129,9 @@ export const AllCases = React.memo<AllCasesProps>(
       setSelectedCases,
     } = useGetCases();
 
-    // Delete case
-    const {
-      dispatchResetIsDeleted,
-      handleOnDeleteConfirm,
-      handleToggleModal,
-      isLoading: isDeletingSingleCase,
-      isDeleted: isDeletedSingleCase,
-      isDisplayConfirmDeleteModal,
-    } = useDeleteCases();
-
-    // Update case
-    const {
-      dispatchResetIsUpdated,
-      isLoading: isUpdatingSingleCase,
-      isUpdated: isUpdatedSingleCase,
-    } = useUpdateCases();
-
     // Post Comment to Case
     const { postComment, isLoading: isCommentsUpdating } = usePostComment();
 
-    const [isDeleting, setIsDeleting] = useState<boolean>(false);
-    const [isUpdating, setIsUpdating] = useState<boolean>(false);
-    const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
-      title: '',
-      id: '',
-      type: null,
-    });
-    const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
     const filterRefetch = useRef<() => void>();
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
@@ -163,72 +139,18 @@ export const AllCases = React.memo<AllCasesProps>(
       },
       [filterRefetch]
     );
+    const [refresh, doRefresh] = useState<number>(0);
+    const [isLoading, handleIsLoading] = useState<boolean>(false);
     const refreshCases = useCallback(
       (dataRefresh = true) => {
         if (dataRefresh) refetchCases();
         doRefresh((prev) => prev + 1);
         setSelectedCases([]);
-        setDeleteBulk([]);
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
       [filterRefetch, refetchCases, setSelectedCases]
-    );
-    const confirmDeleteModal = useMemo(
-      () => (
-        <ConfirmDeleteCaseModal
-          caseTitle={deleteThisCase.title}
-          isModalVisible={isDisplayConfirmDeleteModal}
-          isPlural={deleteBulk.length > 0}
-          onCancel={handleToggleModal}
-          onConfirm={handleOnDeleteConfirm.bind(
-            null,
-            deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
-          )}
-        />
-      ),
-      [
-        deleteBulk,
-        deleteThisCase,
-        isDisplayConfirmDeleteModal,
-        handleToggleModal,
-        handleOnDeleteConfirm,
-      ]
-    );
-    useEffect(() => {
-      if (isDeletedSingleCase) {
-        refreshCases();
-        dispatchResetIsDeleted();
-      }
-      if (isUpdatedSingleCase) {
-        refreshCases();
-        dispatchResetIsUpdated();
-      }
-    }, [
-      dispatchResetIsDeleted,
-      dispatchResetIsUpdated,
-      isDeletedSingleCase,
-      isUpdatedSingleCase,
-      refreshCases,
-    ]);
-
-    const toggleDeleteModal = useCallback(
-      (deleteCase: Case) => {
-        handleToggleModal();
-        setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
-      },
-      [handleToggleModal]
-    );
-
-    const handleDispatchUpdate = useCallback(
-      (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-        dispatchUpdateCaseProperty({
-          ...args,
-          refetchCasesStatus: () => doRefresh((prev) => prev + 1),
-        });
-      },
-      [dispatchUpdateCaseProperty, doRefresh]
     );
 
     const { onClick: onCreateCaseNavClick } = createCaseNavigation;
@@ -243,16 +165,6 @@ export const AllCases = React.memo<AllCasesProps>(
       },
       [isModal, onCreateCaseNavClick, onRowClick]
     );
-
-    const actions = useMemo(
-      () =>
-        getActions({
-          deleteCaseOnClick: toggleDeleteModal,
-          dispatchUpdate: handleDispatchUpdate,
-        }),
-      [toggleDeleteModal, handleDispatchUpdate]
-    );
-
     const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
     const tableOnChangeCallback = useCallback(
@@ -296,26 +208,24 @@ export const AllCases = React.memo<AllCasesProps>(
       [refreshCases, setQueryParams, setFilters]
     );
 
-    const memoizedGetCasesColumns = useMemo(
-      () =>
-        getCasesColumns({
-          actions: userCanCrud ? actions : [],
-          caseDetailsNavigation,
-          filterStatus: filterOptions.status,
-          isModal,
-        }),
-      [actions, caseDetailsNavigation, filterOptions.status, isModal, userCanCrud]
-    );
+    const casesColumns = useCasesColumns({
+      caseDetailsNavigation,
+      filterStatus: filterOptions.status,
+      refreshCases,
+      handleIsLoading,
+      showCaseTitleAsHref: !isModal,
+      showActions: !isModal && userCanCrud,
+    });
 
     const itemIdToExpandedRowMap = useMemo(
       () =>
         getExpandedRowMap({
-          columns: memoizedGetCasesColumns,
+          columns: casesColumns,
           data: data.cases,
           isModal,
           onSubCaseClick: onRowClick,
         }),
-      [data.cases, isModal, memoizedGetCasesColumns, onRowClick]
+      [data.cases, isModal, casesColumns, onRowClick]
     );
 
     const memoizedPagination = useMemo(
@@ -339,10 +249,7 @@ export const AllCases = React.memo<AllCasesProps>(
       }),
       [setSelectedCases]
     );
-    const isCasesLoading = useMemo(
-      () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
-      [loading]
-    );
+    const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
@@ -390,15 +297,9 @@ export const AllCases = React.memo<AllCasesProps>(
             userCanCrud={userCanCrud}
           />
         )}
-        {(isCasesLoading ||
-          isDeleting ||
-          isDeletingSingleCase ||
-          isUpdatingSingleCase ||
-          isUpdating ||
-          isCommentsUpdating) &&
-          !isDataEmpty && (
-            <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
-          )}
+        {(isCasesLoading || isLoading || isCommentsUpdating) && !isDataEmpty && (
+          <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
+        )}
         <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
@@ -424,13 +325,12 @@ export const AllCases = React.memo<AllCasesProps>(
                 data={data}
                 enableBulkActions={enableBulkActions}
                 filterOptions={filterOptions}
-                handleIsDeleting={setIsDeleting}
-                handleIsUpdating={setIsUpdating}
+                handleIsLoading={handleIsLoading}
                 selectedCases={selectedCases}
                 refreshCases={refreshCases}
               />
               <BasicTable
-                columns={memoizedGetCasesColumns}
+                columns={casesColumns}
                 data-test-subj="cases-table"
                 isSelectable={enableBulkActions}
                 itemId="id"
@@ -467,7 +367,6 @@ export const AllCases = React.memo<AllCasesProps>(
             </Div>
           )}
         </TableWrap>
-        {confirmDeleteModal}
       </>
     );
   }
