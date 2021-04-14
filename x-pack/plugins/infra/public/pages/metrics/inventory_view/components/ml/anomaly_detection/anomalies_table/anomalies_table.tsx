@@ -190,7 +190,6 @@ export const AnomaliesTable = (props: Props) => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
-  const [canShowInInventory, setCanShowInInventory] = useState(false);
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
     start: datemathToEpochMillis(start) || 0,
