@@ -79,7 +79,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail"
-                defaultMessage="Check the {overviewTabButton} for next steps."
+                defaultMessage="Check the {overviewTabButton} for other Stack deprecations."
                 values={{
                   overviewTabButton: (
                     <EuiLink onClick={navigateToOverviewPage}>
@@ -110,11 +110,11 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
           isLoading={isLoading}
           loadData={refreshCheckupData}
           currentFilter={currentFilter}
-          onFilterChange={(filter: LevelFilterOption) => setCurrentFilter(filter)}
-          onSearchChange={(newSearch: string) => setSearch(newSearch)}
+          onFilterChange={setCurrentFilter}
+          onSearchChange={setSearch}
           availableGroupByOptions={availableGroupByOptions()}
           currentGroupBy={currentGroupBy}
-          onGroupByChange={(groupBy: GroupByOption) => setCurrentGroupBy(groupBy)}
+          onGroupByChange={setCurrentGroupBy}
         />
 
         <EuiSpacer />

@@ -19,13 +19,14 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecationErrors.partiallyUpgradedWarningMessage',
     {
       defaultMessage:
-        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.',
+        'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.',
     }
   ),
   upgradedMessage: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage',
     {
-      defaultMessage: 'Your configuration is up to date. Kibana and all Elasticsearch nodes are running <version xyz>.',
+      defaultMessage:
+        'Your configuration is up to date. Kibana and all Elasticsearch nodes are running the same version.',
     }
   ),
   loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {

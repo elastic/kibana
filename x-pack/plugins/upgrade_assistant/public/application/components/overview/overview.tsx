@@ -36,8 +36,7 @@ const i18nTexts = {
   getPageDescription: (nextMajor: string) =>
     i18n.translate('xpack.upgradeAssistant.pageDescription', {
       defaultMessage:
-        'Prepare to upgrade by identifying deprecated settings and updating
-        your configuration. Enable deprecation logging to see if your are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}.',
+        'Prepare to upgrade by identifying deprecated settings and updating your configuration. Enable deprecation logging to see if your are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}.',
       values: {
         nextMajor,
       },
