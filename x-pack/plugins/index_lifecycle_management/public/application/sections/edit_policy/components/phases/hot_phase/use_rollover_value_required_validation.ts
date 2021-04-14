@@ -15,8 +15,8 @@ const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 export const useRolloverValueRequiredValidation = (): boolean => {
   const [isValid, setIsValid] = useState(false);
-  const [{ getFields }] = useFormData({ watch: rolloverFieldPaths });
-  const form = useFormContext();
+  const [formData] = useFormData({ watch: rolloverFieldPaths });
+  const { getFields } = useFormContext();
 
   useEffect(() => {
     // We check just the ROLLOVER_FORM_PATHS.maxPrimaryShardSize field because if
@@ -30,7 +30,7 @@ export const useRolloverValueRequiredValidation = (): boolean => {
         (validation) => validation.code === ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE
       )
     );
-  }, [form, getFields]);
+  }, [getFields, formData]);
 
   return isValid;
 };
