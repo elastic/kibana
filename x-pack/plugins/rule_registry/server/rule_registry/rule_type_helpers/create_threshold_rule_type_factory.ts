@@ -216,7 +216,7 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
 
             if (isRecovered) {
               event['kibana.rac.alert.end'] = timestamp;
-              event['event.action'] = '';
+              event['event.action'] = 'recovered';
               event['kibana.rac.alert.status'] = 'recovered';
             }
 
@@ -261,7 +261,7 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
 
         const nextTrackedAlerts = Object.fromEntries(
           alertsToIndex
-            .filter((event) => event['kibana.rac.alert.status'] !== 'closed')
+            .filter((event) => event['kibana.rac.alert.status'] !== 'recovered')
             .map((event) => {
               const alertId = event['kibana.rac.alert.id']!;
               const alertUuid = event['kibana.rac.alert.uuid']!;
