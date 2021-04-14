@@ -6,14 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL } from '../../../../../../plugins/cases/common/constants';
 import {
-  getConfiguration,
-  removeServerGeneratedPropertiesFromConfigure,
+  getConfigurationRequest,
+  removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   deleteConfiguration,
+  createConfiguration,
+  getConfiguration,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,55 +29,130 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create a configuration', async () => {
-      const { body } = await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
-        .expect(200);
+      const configuration = await createConfiguration(supertest);
 
-      const data = removeServerGeneratedPropertiesFromConfigure(body);
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput());
     });
 
     it('should keep only the latest configuration', async () => {
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getConfiguration({ id: 'connector-2' }))
-        .expect(200);
+      await createConfiguration(supertest, getConfigurationRequest({ id: 'connector-2' }));
+      await createConfiguration(supertest);
+      const configuration = await getConfiguration(supertest);
 
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
-        .expect(200);
-
-      const { body } = await supertest
-        .get(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      const data = removeServerGeneratedPropertiesFromConfigure(body);
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput());
     });
 
+    it('should not create a configuration when missing connector.id', async () => {
+      await createConfiguration(
+        supertest,
+        {
+          // @ts-expect-error
+          connector: {
+            name: 'Connector',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when missing connector.name', async () => {
+      await createConfiguration(
+        supertest,
+        {
+          // @ts-expect-error
+          connector: {
+            id: 'test-id',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when missing connector.type', async () => {
+      await createConfiguration(
+        supertest,
+        {
+          // @ts-expect-error
+          connector: {
+            id: 'test-id',
+            name: 'Connector',
+            fields: null,
+          },
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when missing connector.fields', async () => {
+      await createConfiguration(
+        supertest,
+        {
+          // @ts-expect-error
+          connector: {
+            id: 'test-id',
+            type: ConnectorTypes.none,
+            name: 'Connector',
+          },
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when when missing closure_type', async () => {
+      await createConfiguration(
+        supertest,
+        // @ts-expect-error
+        {
+          connector: {
+            id: 'test-id',
+            type: ConnectorTypes.none,
+            name: 'Connector',
+            fields: null,
+          },
+        },
+        400
+      );
+    });
+
+    it('should not create a configuration when when fields are not null', async () => {
+      await createConfiguration(
+        supertest,
+        {
+          connector: {
+            id: 'test-id',
+            type: ConnectorTypes.none,
+            name: 'Connector',
+            // @ts-expect-error
+            fields: {},
+          },
+          closure_type: 'close-by-user',
+        },
+        400
+      );
+    });
+
     it('should not create a configuration with unsupported connector type', async () => {
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        // @ts-ignore We need it to test unsupported types
-        .send(getConfiguration({ type: '.unsupported' }))
-        .expect(400);
+      // @ts-expect-error
+      await createConfiguration(supertest, getConfigurationRequest({ type: '.unsupported' }), 400);
     });
 
     it('should not create a configuration with unsupported connector fields', async () => {
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        // @ts-ignore We need it to test unsupported types
-        .send(getConfiguration({ type: '.jira', fields: { unsupported: 'value' } }))
-        .expect(400);
+      await createConfiguration(
+        supertest,
+        // @ts-expect-error
+        getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
+        400
+      );
     });
   });
 };

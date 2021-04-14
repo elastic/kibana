@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
   CasesResponse,
   CaseStatuses,
   CaseType,
   CommentType,
+  ConnectorTypes,
 } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
@@ -23,9 +23,18 @@ import {
   postCollectionReq,
   postCommentAlertReq,
   postCommentUserReq,
-  removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
-import { deleteAllCaseItems, getSignalsWithES, setStatus } from '../../../../common/lib/utils';
+import {
+  deleteAllCaseItems,
+  getSignalsWithES,
+  setStatus,
+  createCase,
+  createComment,
+  updateCase,
+  getAllUserAction,
+  removeServerGeneratedPropertiesFromCase,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -49,47 +58,99 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('should patch a case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCases } = await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+    describe('happy path', () => {
+      it('should patch a case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase(supertest, {
           cases: [
             {
               id: postedCase.id,
               version: postedCase.version,
-              status: 'closed',
+              title: 'new title',
             },
           ],
-        })
-        .expect(200);
+        });
 
-      const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-      expect(data).to.eql({
-        ...postCaseResp(postedCase.id),
-        closed_by: defaultUser,
-        status: 'closed',
-        updated_by: defaultUser,
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(data).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          updated_by: defaultUser,
+        });
       });
-    });
 
-    it('should patch a case with new connector', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      it('should closes the case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase(supertest, {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+        });
 
-      const { body: patchedCases } = await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          status: CaseStatuses.closed,
+          closed_by: defaultUser,
+          updated_by: defaultUser,
+        });
+
+        expect(statusUserAction).to.eql({
+          action_field: ['status'],
+          action: 'update',
+          action_by: defaultUser,
+          new_value: CaseStatuses.closed,
+          old_value: CaseStatuses.open,
+          case_id: `${postedCase.id}`,
+          comment_id: null,
+          sub_case_id: '',
+        });
+      });
+
+      it('should change the status of case to in-progress correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase(supertest, {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        });
+
+        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          status: CaseStatuses['in-progress'],
+          updated_by: defaultUser,
+        });
+
+        expect(statusUserAction).to.eql({
+          action_field: ['status'],
+          action: 'update',
+          action_by: defaultUser,
+          new_value: CaseStatuses['in-progress'],
+          old_value: CaseStatuses.open,
+          case_id: `${postedCase.id}`,
+          comment_id: null,
+          sub_case_id: '',
+        });
+      });
+
+      it('should patch a case with new connector', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase(supertest, {
           cases: [
             {
               id: postedCase.id,
@@ -97,303 +158,293 @@ export default ({ getService }: FtrProviderContext): void => {
               connector: {
                 id: 'jira',
                 name: 'Jira',
-                type: '.jira',
+                type: ConnectorTypes.jira,
                 fields: { issueType: 'Task', priority: null, parent: null },
               },
             },
           ],
-        })
-        .expect(200);
+        });
 
-      const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-      expect(data).to.eql({
-        ...postCaseResp(postedCase.id),
-        connector: {
-          id: 'jira',
-          name: 'Jira',
-          type: '.jira',
-          fields: { issueType: 'Task', priority: null, parent: null },
-        },
-        updated_by: defaultUser,
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(data).to.eql({
+          ...postCaseResp(),
+          connector: {
+            id: 'jira',
+            name: 'Jira',
+            type: '.jira',
+            fields: { issueType: 'Task', priority: null, parent: null },
+          },
+          updated_by: defaultUser,
+        });
+      });
+
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+      it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+        await updateCase(supertest, {
+          cases: [
+            {
+              id: patchedCase.id,
+              version: patchedCase.version,
+              type: CaseType.collection,
+            },
+          ],
+        });
       });
     });
 
-    it('unhappy path - 404s when case is not there', async () => {
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: 'not-real',
-              version: 'version',
-              status: 'closed',
-            },
-          ],
-        })
-        .expect(404);
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              type: CaseType.individual,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: patchedCase.id,
-              version: patchedCase.version,
-              type: CaseType.collection,
-            },
-          ],
-        })
-        .expect(200);
-    });
-
-    it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: patchedCase.id,
-              version: patchedCase.version,
-              type: CaseType.collection,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              type: CaseType.collection,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip("should 400 when attempting to update a collection case's status", async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'closed',
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('unhappy path - 406s when excess data sent', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              badKey: 'closed',
-            },
-          ],
-        })
-        .expect(406);
-    });
-
-    it('unhappy path - 400s when bad data sent', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: true,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when unsupported status sent', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'not-supported',
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when bad connector type sent', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              connector: { id: 'none', name: 'none', type: '.not-exists', fields: null },
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when bad connector sent', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              connector: {
-                id: 'none',
-                name: 'none',
-                type: '.jira',
-                fields: { unsupported: 'value' },
+    describe('unhappy path', () => {
+      it('404s when case is not there', async () => {
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: 'not-real',
+                version: 'version',
+                status: CaseStatuses.closed,
               },
-            },
-          ],
-        })
-        .expect(400);
-    });
+            ],
+          },
+          404
+        );
+      });
 
-    it('unhappy path - 409s when conflict', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      it('400s when id is missing', async () => {
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              // @ts-expect-error
+              {
+                version: 'version',
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          400
+        );
+      });
 
-      await supertest
-        .patch(`${CASES_URL}`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: 'version',
-              status: 'closed',
-            },
-          ],
-        })
-        .expect(409);
+      it('406s when fields are identical', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          406
+        );
+      });
+
+      it('400s when version is missing', async () => {
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              // @ts-expect-error
+              {
+                id: 'not-real',
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+      it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
+        const postedCase = await createCase(supertest, postCollectionReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                type: CaseType.individual,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('406s when excess data sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                // @ts-expect-error
+                badKey: 'closed',
+              },
+            ],
+          },
+          406
+        );
+      });
+
+      it('400s when bad data sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                // @ts-expect-error
+                status: true,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('400s when unsupported status sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                // @ts-expect-error
+                status: 'not-supported',
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('400s when bad connector type sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                // @ts-expect-error
+                connector: { id: 'none', name: 'none', type: '.not-exists', fields: null },
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('400s when bad connector sent', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                connector: {
+                  id: 'jira',
+                  name: 'Jira',
+                  // @ts-expect-error
+                  type: ConnectorTypes.jira,
+                  // @ts-expect-error
+                  fields: { unsupported: 'value' },
+                },
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('409s when version does not match', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: 'version',
+                // @ts-expect-error
+                status: 'closed',
+              },
+            ],
+          },
+          409
+        );
+      });
+
+      it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: patchedCase.id,
+                version: patchedCase.version,
+                type: CaseType.collection,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed delete these tests
+      it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                type: CaseType.collection,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+      it.skip("should 400 when attempting to update a collection case's status", async () => {
+        const postedCase = await createCase(supertest, postCollectionReq);
+        await updateCase(
+          supertest,
+          {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          400
+        );
+      });
     });
 
     describe('alerts', () => {
@@ -412,47 +463,34 @@ export default ({ getService }: FtrProviderContext): void => {
           const signalID = '5f2b9ec41f8febb1c06b5d1045aeabb9874733b7617e88a370510f2fb3a41a5d';
           const signalID2 = '4d0f4b1533e46b66b43bdd0330d23f39f2cf42a7253153270e38d30cce9ff0c6';
 
-          const { body: individualCase1 } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              ...postCaseReq,
-              settings: {
-                syncAlerts: false,
-              },
-            });
+          // does NOT updates alert status when adding comments and syncAlerts=false
+          const individualCase1 = await createCase(supertest, {
+            ...postCaseReq,
+            settings: {
+              syncAlerts: false,
+            },
+          });
 
-          const { body: updatedInd1WithComment } = await supertest
-            .post(`${CASES_URL}/${individualCase1.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: signalID,
-              index: defaultSignalsIndex,
-              rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const updatedInd1WithComment = await createComment(supertest, individualCase1.id, {
+            alertId: signalID,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+          });
 
-          const { body: individualCase2 } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              ...postCaseReq,
-              settings: {
-                syncAlerts: false,
-              },
-            });
+          const individualCase2 = await createCase(supertest, {
+            ...postCaseReq,
+            settings: {
+              syncAlerts: false,
+            },
+          });
 
-          const { body: updatedInd2WithComment } = await supertest
-            .post(`${CASES_URL}/${individualCase2.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: signalID2,
-              index: defaultSignalsIndex,
-              rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const updatedInd2WithComment = await createComment(supertest, individualCase2.id, {
+            alertId: signalID2,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+          });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -470,6 +508,7 @@ export default ({ getService }: FtrProviderContext): void => {
             CaseStatuses.open
           );
 
+          // does NOT updates alert status when the status is updated and syncAlerts=false
           const updatedIndWithStatus: CasesResponse = (await setStatus({
             supertest,
             cases: [
@@ -503,18 +542,15 @@ export default ({ getService }: FtrProviderContext): void => {
             CaseStatuses.open
           );
 
+          // it updates alert status when syncAlerts is turned on
           // turn on the sync settings
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: updatedIndWithStatus.map((caseInfo) => ({
-                id: caseInfo.id,
-                version: caseInfo.version,
-                settings: { syncAlerts: true },
-              })),
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: updatedIndWithStatus.map((caseInfo) => ({
+              id: caseInfo.id,
+              version: caseInfo.version,
+              settings: { syncAlerts: true },
+            })),
+          });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -561,37 +597,26 @@ export default ({ getService }: FtrProviderContext): void => {
           const signalIDInSecondIndex = 'duplicate-signal-id';
           const signalsIndex2 = '.siem-signals-default-000002';
 
-          const { body: individualCase } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              ...postCaseReq,
-              settings: {
-                syncAlerts: false,
-              },
-            });
+          const individualCase = await createCase(supertest, {
+            ...postCaseReq,
+            settings: {
+              syncAlerts: false,
+            },
+          });
 
-          const { body: updatedIndWithComment } = await supertest
-            .post(`${CASES_URL}/${individualCase.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: signalIDInFirstIndex,
-              index: defaultSignalsIndex,
-              rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const updatedIndWithComment = await createComment(supertest, individualCase.id, {
+            alertId: signalIDInFirstIndex,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+          });
 
-          const { body: updatedIndWithComment2 } = await supertest
-            .post(`${CASES_URL}/${updatedIndWithComment.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: signalIDInSecondIndex,
-              index: signalsIndex2,
-              rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const updatedIndWithComment2 = await createComment(supertest, updatedIndWithComment.id, {
+            alertId: signalIDInSecondIndex,
+            index: signalsIndex2,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+          });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -629,19 +654,15 @@ export default ({ getService }: FtrProviderContext): void => {
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: updatedIndWithStatus[0].id,
-                  version: updatedIndWithStatus[0].version,
-                  settings: { syncAlerts: true },
-                },
-              ],
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: [
+              {
+                id: updatedIndWithStatus[0].id,
+                version: updatedIndWithStatus[0].version,
+                settings: { syncAlerts: true },
+              },
+            ],
+          });
           await es.indices.refresh({ index: defaultSignalsIndex });
 
           signals = await getSignals();
@@ -675,12 +696,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
-
-          const { body: postedCase } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
-            .expect(200);
+          const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
@@ -690,35 +706,26 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const { body: caseUpdated } = await supertest
-            .post(`${CASES_URL}/${postedCase.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: alert._id,
-              index: alert._index,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const caseUpdated = await createComment(supertest, postedCase.id, {
+            alertId: alert._id,
+            index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+            type: CommentType.alert,
+          });
 
           await es.indices.refresh({ index: alert._index });
-
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseUpdated.id,
-                  version: caseUpdated.version,
-                  status: 'in-progress',
-                },
-              ],
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: [
+              {
+                id: caseUpdated.id,
+                version: caseUpdated.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          });
 
           // force a refresh on the index that the signal is stored in so that we can search for it and get the correct
           // status
@@ -736,11 +743,10 @@ export default ({ getService }: FtrProviderContext): void => {
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
-          const { body: postedCase } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ...postCaseReq, settings: { syncAlerts: false } })
-            .expect(200);
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            settings: { syncAlerts: false },
+          });
 
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
@@ -750,33 +756,25 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const { body: caseUpdated } = await supertest
-            .post(`${CASES_URL}/${postedCase.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: alert._id,
-              index: alert._index,
-              type: CommentType.alert,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-            })
-            .expect(200);
+          const caseUpdated = await createComment(supertest, postedCase.id, {
+            alertId: alert._id,
+            index: alert._index,
+            type: CommentType.alert,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+          });
 
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseUpdated.id,
-                  version: caseUpdated.version,
-                  status: 'in-progress',
-                },
-              ],
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: [
+              {
+                id: caseUpdated.id,
+                version: caseUpdated.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          });
 
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -790,11 +788,10 @@ export default ({ getService }: FtrProviderContext): void => {
         it('it updates alert status when syncAlerts is turned on', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
-          const { body: postedCase } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ...postCaseReq, settings: { syncAlerts: false } })
-            .expect(200);
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            settings: { syncAlerts: false },
+          });
 
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
@@ -804,49 +801,37 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const { body: caseUpdated } = await supertest
-            .post(`${CASES_URL}/${postedCase.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: alert._id,
-              index: alert._index,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-              type: CommentType.alert,
-            })
-            .expect(200);
+          const caseUpdated = await createComment(supertest, postedCase.id, {
+            alertId: alert._id,
+            index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+            type: CommentType.alert,
+          });
 
           // Update the status of the case with sync alerts off
-          const { body: caseStatusUpdated } = await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseUpdated.id,
-                  version: caseUpdated.version,
-                  status: 'in-progress',
-                },
-              ],
-            })
-            .expect(200);
+          const caseStatusUpdated = await updateCase(supertest, {
+            cases: [
+              {
+                id: caseUpdated.id,
+                version: caseUpdated.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          });
 
           // Turn sync alerts on
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseStatusUpdated[0].id,
-                  version: caseStatusUpdated[0].version,
-                  settings: { syncAlerts: true },
-                },
-              ],
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: [
+              {
+                id: caseStatusUpdated[0].id,
+                version: caseStatusUpdated[0].version,
+                settings: { syncAlerts: true },
+              },
+            ],
+          });
 
           // refresh the index because syncAlerts was set to true so the alert's status should have been updated
           await es.indices.refresh({ index: alert._index });
@@ -863,12 +848,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
-          const { body: postedCase } = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
-            .expect(200);
-
+          const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
@@ -877,49 +857,37 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source.signal.status).eql('open');
 
-          const { body: caseUpdated } = await supertest
-            .post(`${CASES_URL}/${postedCase.id}/comments`)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertId: alert._id,
-              index: alert._index,
-              type: CommentType.alert,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-            })
-            .expect(200);
+          const caseUpdated = await createComment(supertest, postedCase.id, {
+            alertId: alert._id,
+            index: alert._index,
+            type: CommentType.alert,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
+          });
 
           // Turn sync alerts off
-          const { body: caseSettingsUpdated } = await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseUpdated.id,
-                  version: caseUpdated.version,
-                  settings: { syncAlerts: false },
-                },
-              ],
-            })
-            .expect(200);
+          const caseSettingsUpdated = await updateCase(supertest, {
+            cases: [
+              {
+                id: caseUpdated.id,
+                version: caseUpdated.version,
+                settings: { syncAlerts: false },
+              },
+            ],
+          });
 
           // Update the status of the case with sync alerts off
-          await supertest
-            .patch(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send({
-              cases: [
-                {
-                  id: caseSettingsUpdated[0].id,
-                  version: caseSettingsUpdated[0].version,
-                  status: 'in-progress',
-                },
-              ],
-            })
-            .expect(200);
+          await updateCase(supertest, {
+            cases: [
+              {
+                id: caseSettingsUpdated[0].id,
+                version: caseSettingsUpdated[0].version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          });
 
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)

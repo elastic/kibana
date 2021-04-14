@@ -113,6 +113,7 @@ export const CommentsResponseRt = rt.type({
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
+export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;

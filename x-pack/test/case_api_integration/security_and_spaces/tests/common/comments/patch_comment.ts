@@ -7,25 +7,34 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../../plugins/cases/common/constants';
-import { CaseResponse, CommentType } from '../../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import {
+  AttributesTypeAlerts,
+  AttributesTypeUser,
+  CaseResponse,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
-} from '../../../../../common/lib/mock';
+  postCommentGenAlertReq,
+} from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-} from '../../../../../common/lib/utils';
+  createCase,
+  createComment,
+  updateComment,
+} from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -34,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('patch_comment', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });
@@ -138,121 +147,88 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should patch a comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      const { body } = await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
-          comment: newComment,
-          type: CommentType.user,
-        })
-        .expect(200);
+      const updatedCase = await updateComment(supertest, postedCase.id, {
+        id: patchedCase.comments![0].id,
+        version: patchedCase.comments![0].version,
+        comment: newComment,
+        type: CommentType.user,
+      });
 
-      expect(body.comments[0].comment).to.eql(newComment);
-      expect(body.comments[0].type).to.eql('user');
-      expect(body.updated_by).to.eql(defaultUser);
+      const userComment = updatedCase.comments![0] as AttributesTypeUser;
+      expect(userComment.comment).to.eql(newComment);
+      expect(userComment.type).to.eql(CommentType.user);
+      expect(updatedCase.updated_by).to.eql(defaultUser);
     });
 
     it('should patch an alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+      const updatedCase = await updateComment(supertest, postedCase.id, {
+        id: patchedCase.comments![0].id,
+        version: patchedCase.comments![0].version,
+        type: CommentType.alert,
+        alertId: 'new-id',
+        index: postCommentAlertReq.index,
+        rule: {
+          id: 'id',
+          name: 'name',
+        },
+      });
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentAlertReq)
-        .expect(200);
-
-      const { body } = await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
-          type: CommentType.alert,
-          alertId: 'new-id',
-          index: postCommentAlertReq.index,
-          rule: {
-            id: 'id',
-            name: 'name',
-          },
-        })
-        .expect(200);
-
-      expect(body.comments[0].alertId).to.eql('new-id');
-      expect(body.comments[0].index).to.eql(postCommentAlertReq.index);
-      expect(body.comments[0].type).to.eql('alert');
-      expect(body.updated_by).to.eql(defaultUser);
+      const alertComment = updatedCase.comments![0] as AttributesTypeAlerts;
+      expect(alertComment.alertId).to.eql('new-id');
+      expect(alertComment.index).to.eql(postCommentAlertReq.index);
+      expect(alertComment.type).to.eql(CommentType.alert);
+      expect(alertComment.rule).to.eql({
+        id: 'id',
+        name: 'name',
+      });
+      expect(alertComment.updated_by).to.eql(defaultUser);
     });
 
     it('unhappy path - 404s when comment is not there', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const postedCase = await createCase(supertest, postCaseReq);
+      await updateComment(
+        supertest,
+        postedCase.id,
+        {
           id: 'id',
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
-        })
-        .expect(404);
+        },
+        404
+      );
     });
 
     it('unhappy path - 404s when case is not there', async () => {
-      await supertest
-        .patch(`${CASES_URL}/fake-id/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
+      await updateComment(
+        supertest,
+        'fake-id',
+        {
           id: 'id',
           version: 'version',
           type: CommentType.user,
           comment: 'comment',
-        })
-        .expect(404);
+        },
+        404
+      );
     });
 
     it('unhappy path - 400s when trying to change comment type', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
+      await updateComment(
+        supertest,
+        postedCase.id,
+        {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
@@ -260,73 +236,50 @@ export default ({ getService }: FtrProviderContext): void => {
             id: 'id',
             name: 'name',
           },
-        })
-        .expect(400);
+        },
+        400
+      );
     });
 
     it('unhappy path - 400s when missing attributes for type user', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
-        })
-        .expect(400);
+      await updateComment(
+        supertest,
+        postedCase.id,
+        // @ts-expect-error
+        {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+        },
+        400
+      );
     });
 
     it('unhappy path - 400s when adding excess attributes for type user', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
       for (const attribute of ['alertId', 'index']) {
-        await supertest
-          .patch(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: patchedCase.comments[0].id,
-            version: patchedCase.comments[0].version,
+        await updateComment(
+          supertest,
+          postedCase.id,
+          {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
             comment: 'a comment',
             type: CommentType.user,
             [attribute]: attribute,
-          })
-          .expect(400);
+          },
+          400
+        );
       }
     });
 
     it('unhappy path - 400s when missing attributes for type alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
 
       const allRequestAttributes = {
         type: CommentType.alert,
@@ -340,38 +293,31 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const attribute of ['alertId', 'index']) {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        await supertest
-          .patch(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: patchedCase.comments[0].id,
-            version: patchedCase.comments[0].version,
+        await updateComment(
+          supertest,
+          postedCase.id,
+          // @ts-expect-error
+          {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
             ...requestAttributes,
-          })
-          .expect(400);
+          },
+          400
+        );
       }
     });
 
     it('unhappy path - 400s when adding excess attributes for type alert', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
 
       for (const attribute of ['comment']) {
-        await supertest
-          .patch(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: patchedCase.comments[0].id,
-            version: patchedCase.comments[0].version,
+        await updateComment(
+          supertest,
+          postedCase.id,
+          {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
             type: CommentType.alert,
             index: 'test-index',
             alertId: 'test-id',
@@ -380,35 +326,81 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'name',
             },
             [attribute]: attribute,
-          })
-          .expect(400);
+          },
+          400
+        );
       }
     });
 
     it('unhappy path - 409s when conflict', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
+      await updateComment(
+        supertest,
+        postedCase.id,
+        {
+          id: patchedCase.comments![0].id,
           version: 'version-mismatch',
           type: CommentType.user,
           comment: newComment,
-        })
-        .expect(409);
+        },
+        409
+      );
+    });
+
+    describe('alert format', () => {
+      type AlertComment = CommentType.alert | CommentType.generatedAlert;
+
+      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed create a test case for generated alerts here
+      for (const [alertId, index, type] of [
+        ['1', ['index1', 'index2'], CommentType.alert],
+        [['1', '2'], 'index', CommentType.alert],
+      ]) {
+        it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          const patchedCase = await createComment(supertest, postedCase.id, postCommentAlertReq);
+
+          await updateComment(
+            supertest,
+            patchedCase.id,
+            {
+              id: patchedCase.comments![0].id,
+              version: patchedCase.comments![0].version,
+              type: type as AlertComment,
+              alertId,
+              index,
+              rule: postCommentAlertReq.rule,
+            },
+            400
+          );
+        });
+      }
+
+      for (const [alertId, index, type] of [
+        ['1', ['index1'], CommentType.alert],
+        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+      ]) {
+        it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          const patchedCase = await createComment(supertest, postedCase.id, {
+            ...postCommentAlertReq,
+            alertId,
+            index,
+            type: type as AlertComment,
+          });
+
+          await updateComment(supertest, postedCase.id, {
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+            type: type as AlertComment,
+            alertId,
+            index,
+            rule: postCommentAlertReq.rule,
+          });
+        });
+      }
     });
   });
 };

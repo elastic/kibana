@@ -70,9 +70,7 @@ export function initDeleteCommentApi({
 
         const caseRef = myComment.references.find((c) => c.type === type);
         if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
-          throw Boom.notFound(
-            `This comment ${request.params.comment_id} does not exist in ${id}).`
-          );
+          throw Boom.notFound(`This comment ${request.params.comment_id} does not exist in ${id}.`);
         }
 
         await attachmentService.delete({

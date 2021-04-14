@@ -6,17 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCommentUserReq } from '../../../../../common/lib/mock';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-} from '../../../../../common/lib/utils';
-import { CommentResponse, CommentType } from '../../../../../../../plugins/cases/common/api';
+  createCase,
+  createComment,
+  getComment,
+} from '../../../../common/lib/utils';
+import { CommentType } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -29,33 +32,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get a comment', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment(supertest, postedCase.id, postCommentUserReq);
+      const comment = await getComment(supertest, postedCase.id, patchedCase.comments![0].id);
 
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: comment } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(comment).to.eql(patchedCase.comments[0]);
+      expect(comment).to.eql(patchedCase.comments![0]);
     });
 
     it('unhappy path - 404s when comment is not there', async () => {
-      await supertest
-        .get(`${CASES_URL}/fake-id/comments/fake-comment`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(404);
+      await getComment(supertest, 'fake-id', 'fake-id', 404);
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
@@ -69,9 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       it('should get a sub case comment', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        const { body: comment }: { body: CommentResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}`)
-          .expect(200);
+        const comment = await getComment(supertest, caseInfo.id, caseInfo.comments![0].id);
         expect(comment.type).to.be(CommentType.generatedAlert);
       });
     });

@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../../../common/ftr_provider_contex
 
 import { CASES_URL, CASE_REPORTERS_URL } from '../../../../../../../plugins/cases/common/constants';
 import { defaultUser, postCaseReq } from '../../../../../common/lib/mock';
-import { deleteCases } from '../../../../../common/lib/utils';
+import { deleteCasesByESQuery } from '../../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_reporters', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
     it('should return reporters', async () => {

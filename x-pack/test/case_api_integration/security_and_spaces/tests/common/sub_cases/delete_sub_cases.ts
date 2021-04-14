@@ -5,21 +5,21 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
-} from '../../../../../../../plugins/cases/common/constants';
-import { postCommentUserReq } from '../../../../../common/lib/mock';
+} from '../../../../../../plugins/cases/common/constants';
+import { postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
-} from '../../../../../common/lib/utils';
-import { getSubCaseDetailsUrl } from '../../../../../../../plugins/cases/common/api/helpers';
-import { CaseResponse } from '../../../../../../../plugins/cases/common/api';
+} from '../../../../common/lib/utils';
+import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
+import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

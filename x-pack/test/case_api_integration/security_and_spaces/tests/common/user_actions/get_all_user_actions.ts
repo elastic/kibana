@@ -6,21 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../../plugins/cases/common/constants';
-import { CommentType } from '../../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { CommentType } from '../../../../../../plugins/cases/common/api';
+import { userActionPostResp, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  userActionPostResp,
-  postCaseReq,
-  postCommentUserReq,
-} from '../../../../../common/lib/mock';
-import {
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-} from '../../../../../common/lib/utils';
+} from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -29,7 +25,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_all_user_actions', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);
