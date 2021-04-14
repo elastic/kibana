@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[0].click();
+        await rowActions[1].click();
       });
 
       await PageObjects.context.waitUntilContextLoadingHasFinished();
