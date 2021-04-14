@@ -164,6 +164,19 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleAssetSOAttributes extends Record<string, any> {
+  rule_id: string | null | undefined;
+  version: string | null | undefined;
+  name: string | null | undefined;
+}
+
+export interface IRuleAssetSavedObject {
+  type: string;
+  id: string;
+  attributes: IRuleAssetSOAttributes & SavedObjectAttributes;
+}
+
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;

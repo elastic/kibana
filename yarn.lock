@@ -1417,10 +1417,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@31.10.0":
-  version "31.10.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-31.10.0.tgz#07c1ca88bc042d124e0a4d3bc38b05bb0c6dd697"
-  integrity sha512-OsFs3WyFNWM1Uvs0y/h1MA50Pnf1c9KBX8A7sBmcFbMRpbD033AKOzH67crK8xmqRHB3vD23Yc+IVQdB6SMEGg==
+"@elastic/eui@32.0.4":
+  version "32.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-32.0.4.tgz#46c001abb162e494e2c11ea48def840b5520f1dc"
+  integrity sha512-NL+bzzxAB6t/BPwaXqELIAWT0wZMcHyciAq+dGS44n7ZYbGzlDgTf77hlvwUsdDhFPhpMyFHJ55rE6ZtqBX/+w==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1433,7 +1433,7 @@
     chroma-js "^2.1.0"
     classnames "^2.2.6"
     highlight.js "^9.18.5"
-    lodash "^4.17.20"
+    lodash "^4.17.21"
     numeral "^2.0.6"
     prop-types "^15.6.0"
     react-ace "^7.0.5"
@@ -1454,7 +1454,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^9.2.0"
-    url-parse "^1.4.7"
+    url-parse "^1.5.0"
     uuid "^8.3.0"
     vfile "^4.2.0"
 
@@ -2740,7 +2740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:packages/kbn-tinymath":
+"@kbn/tinymath@link:bazel-bin/packages/kbn-tinymath/npm_module":
   version "0.0.0"
   uid ""
 
@@ -28665,7 +28665,7 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.4.3, url-parse@^1.4.7:
+url-parse@^1.4.3, url-parse@^1.5.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.1.tgz#d5fa9890af8a5e1f274a2c98376510f6425f6e3b"
   integrity sha512-HOfCOUJt7iSYzEx/UqgtwKRMC6EU91NFhsCHMv9oM03VJcVo2Qrp8T8kI9D7amFf1cu+/3CEhgb3rF9zL7k85Q==
