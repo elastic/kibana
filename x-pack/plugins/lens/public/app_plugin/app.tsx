@@ -221,7 +221,9 @@ export function App({
 
     const sessionSubscription = data.search.session
       .getSession$()
+      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
       .pipe(delay(0))
+      // then update if it didn't get updated yet
       .subscribe((newSessionId) => {
         if (newSessionId) {
           setState((prevState) => {
