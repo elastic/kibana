@@ -62,7 +62,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       this.setState({
         doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
           return this.props?.isGeoPointsOnly
-            ? [ES_GEO_FIELD_TYPE.GEO_POINT as string].includes(field.type)
+            ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
             : ES_GEO_FIELD_TYPES.includes(field.type);
         }),
       });
@@ -95,7 +95,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             <EuiLink href={getHttp().basePath.prepend(`/app/management/kibana/indexPatterns`)}>
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
-                defaultMessage="create an index pattern."
+                defaultMessage="Create an index pattern."
               />
             </EuiLink>
           </p>
@@ -119,10 +119,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
   render() {
     const IndexPatternSelect = getIndexPatternSelectComponent();
-    const isIndexPatternInvalid =
-      this.props.value !== null &&
-      this.props.value !== '' &&
-      !this.state.doesIndexPatternHaveGeoField;
+    const isIndexPatternInvalid = this.props.value && !this.state.doesIndexPatternHaveGeoField;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
           defaultMessage: 'Index pattern does not contain any geospatial fields',

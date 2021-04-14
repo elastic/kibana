@@ -94,7 +94,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             >
               <FormattedMessage
                 id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
-                defaultMessage="create an index pattern."
+                defaultMessage="Create an index pattern."
               />
             </EuiLink>
           </p>
@@ -120,10 +120,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
   render() {
     const IndexPatternSelectComponent = this.props.IndexPatternSelectComponent;
-    const isIndexPatternInvalid =
-      this.props.value !== null &&
-      this.props.value !== '' &&
-      !this.state.doesIndexPatternHaveGeoField;
+    const isIndexPatternInvalid = this.props.value && !this.state.doesIndexPatternHaveGeoField;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
           defaultMessage: 'Index pattern does not contain any geospatial fields',
