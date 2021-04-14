@@ -13,7 +13,7 @@ import { CasesClientInternal, createCasesClientInternal } from './client_interna
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
-import { createStatsSubClient, StatsSubClient } from './status_stats/client';
+import { createStatsSubClient, StatsSubClient } from './stats/client';
 
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
