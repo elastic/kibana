@@ -41,8 +41,14 @@ export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreSta
         (integration) =>
           integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
       );
+
       updater$.next(() => ({
         navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+      }));
+    })
+    .catch(() => {
+      updater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
       }));
     });
 }
