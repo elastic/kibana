@@ -56,28 +56,28 @@ export class License {
   private getLicenseErrorMessage(licenseCheckState: LicenseCheckState): string {
     switch (licenseCheckState) {
       case 'invalid':
-        return i18n.translate('esUi.license.errorUnsupportedMessage', {
+        return i18n.translate('xpack.licenseApiGuard.license.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
           values: { licenseType: this.licenseType!, pluginName: this.pluginName },
         });
 
       case 'expired':
-        return i18n.translate('esUi.license.errorExpiredMessage', {
+        return i18n.translate('xpack.licenseApiGuard.license.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
           values: { licenseType: this.licenseType!, pluginName: this.pluginName },
         });
 
       case 'unavailable':
-        return i18n.translate('esUi.license.errorUnavailableMessage', {
+        return i18n.translate('xpack.licenseApiGuard.license.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
           values: { pluginName: this.pluginName },
         });
     }
 
-    return i18n.translate('esUi.license.genericErrorMessage', {
+    return i18n.translate('xpack.licenseApiGuard.license.genericErrorMessage', {
       defaultMessage: 'You cannot use {pluginName} because the license check failed.',
       values: { pluginName: this.pluginName },
     });
