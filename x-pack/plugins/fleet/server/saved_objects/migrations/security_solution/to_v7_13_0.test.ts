@@ -12,8 +12,6 @@ import type { PackagePolicy } from '../../../../common';
 
 import { migrationMocks } from '../../../../../../../src/core/server/mocks';
 
-import { appContextService } from '../../../services';
-
 import { migrateEndpointPackagePolicyToV7130 } from './to_v7_13_0';
 
 describe('7.13.0 Endpoint Package Policy migration', () => {
