@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Footer multiple features, multiple layers: locked should show pagination controls, features count, layer select, and close button 1`] = `
+exports[`Footer multiple features, multiple layers: locked should show pagination controls, features count, and layer select 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -92,7 +92,7 @@ exports[`Footer multiple features, multiple layers: mouseover (unlocked) should 
 </Fragment>
 `;
 
-exports[`Footer multiple features, single layer: locked should show pagination controls, features count, and close button 1`] = `
+exports[`Footer multiple features, single layer: locked should show pagination controls and features count 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -147,7 +147,5 @@ exports[`Footer multiple features, single layer: mouseover (unlocked) should onl
   </EuiFlexGroup>
 </Fragment>
 `;
-
-exports[`Footer single feature: locked should show close button when locked 1`] = `""`;
 
 exports[`Footer single feature: mouseover (unlocked) should not render header 1`] = `""`;

@@ -169,7 +169,7 @@ export class FeaturesTooltip extends Component {
     return (
       <Fragment>
         <Header
-          key={this.state.currentFeature.id}
+          key={this.state.currentFeature.layerId}
           layerId={this.state.currentFeature.layerId}
           getLayerName={this.props.getLayerName}
           isLocked={this.props.isLocked}

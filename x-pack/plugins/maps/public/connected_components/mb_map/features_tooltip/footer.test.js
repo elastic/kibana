@@ -22,7 +22,6 @@ class MockLayer {
 }
 
 const defaultProps = {
-  onClose: () => {},
   isLocked: false,
   findLayerById: (id) => {
     return new MockLayer(id);
@@ -41,20 +40,6 @@ describe('Footer', () => {
     describe('mouseover (unlocked)', () => {
       test('should not render header', async () => {
         const component = shallow(<Footer {...defaultProps} features={SINGLE_FEATURE} />);
-
-        // Ensure all promises resolve
-        await new Promise((resolve) => process.nextTick(resolve));
-        // Ensure the state changes are reflected
-        component.update();
-
-        expect(component).toMatchSnapshot();
-      });
-    });
-    describe('locked', () => {
-      test('should show close button when locked', async () => {
-        const component = shallow(
-          <Footer {...defaultProps} isLocked={true} features={SINGLE_FEATURE} />
-        );
 
         // Ensure all promises resolve
         await new Promise((resolve) => process.nextTick(resolve));
@@ -92,7 +77,7 @@ describe('Footer', () => {
       });
     });
     describe('locked', () => {
-      test('should show pagination controls, features count, and close button', async () => {
+      test('should show pagination controls and features count', async () => {
         const component = shallow(
           <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_SINGE_LAYER} />
         );
@@ -137,7 +122,7 @@ describe('Footer', () => {
       });
     });
     describe('locked', () => {
-      test('should show pagination controls, features count, layer select, and close button', async () => {
+      test('should show pagination controls, features count, and layer select', async () => {
         const component = shallow(
           <Footer {...defaultProps} isLocked={true} features={MULTI_FEATURES_MULTI_LAYERS} />
         );

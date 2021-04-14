@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  getLayerName: () => Promise<string>;
+  getLayerName: (layerId: string) => Promise<string>;
   isLocked: boolean;
   layerId: string;
   onClose: () => void;
