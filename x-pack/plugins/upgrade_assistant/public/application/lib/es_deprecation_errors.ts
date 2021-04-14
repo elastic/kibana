@@ -12,7 +12,7 @@ const i18nTexts = {
   permissionsError: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage',
     {
-      defaultMessage: 'You do not have sufficient privileges to view Elasticsearch deprecations.',
+      defaultMessage: 'You are not authorized to view Elasticsearch deprecations.',
     }
   ),
   partiallyUpgradedWarning: i18n.translate(
