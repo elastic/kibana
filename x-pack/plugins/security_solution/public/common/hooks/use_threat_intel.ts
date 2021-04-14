@@ -52,8 +52,8 @@ export const useThreatIntel = (
         items.forEach(({ field, originalValue }) => {
           const index = sortedThreatSummaryFields.indexOf(field);
           if (index > -1) {
-            const existingItem = acc.find((item) => item && item.index === index);
             const newValues = Array.isArray(originalValue) ? originalValue : [originalValue];
+            const existingItem = acc[index];
             acc[index] = existingItem
               ? {
                   ...existingItem,
