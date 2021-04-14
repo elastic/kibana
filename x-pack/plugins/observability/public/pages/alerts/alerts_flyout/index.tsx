@@ -26,7 +26,7 @@ import React from 'react';
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { TopAlert } from '../alerts_table';
+import { TopAlert } from '../';
 
 type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
 
@@ -42,12 +42,8 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     },
     {
       title: 'Severity',
-      description: alert.severityLevel || '-', // TODO: badge and "(changed 2 min ago)"
+      description: alert['kibana.rac.alert.severity.level'] ?? '-', // TODO: badge and "(changed 2 min ago)"
     },
-    // {
-    //   title: 'Affected entity',
-    //   description: affectedEntity || '-', // TODO: link to entity
-    // },
     {
       title: 'Triggered',
       description: (
@@ -56,23 +52,19 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     },
     {
       title: 'Duration',
-      description: (
-        <span title={alert.duration.toString()}>
-          {asDuration(alert.duration, { extended: true }) || '-'}
-        </span>
-      ),
+      description: asDuration(alert['kibana.rac.alert.duration.us'], { extended: true }),
     },
-    // {
-    //   title: 'Expected value',
-    //   description: expectedValue || '-',
-    // },
-    // {
-    //   title: 'Actual value',
-    //   description: actualValue || '-',
-    // },
+    {
+      title: 'Expected value',
+      description: alert['kibana.observability.evaluation.threshold'] ?? '-',
+    },
+    {
+      title: 'Actual value',
+      description: alert['kibana.observability.evaluation.value'] ?? '-',
+    },
     {
       title: 'Rule type',
-      description: alert.ruleCategory || '-',
+      description: alert['rule.category'] ?? '-',
     },
   ];
 
@@ -95,7 +87,7 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{alert.ruleName}</h2>
+          <h2>{alert['rule.name']}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">{alert.reason}</EuiText>

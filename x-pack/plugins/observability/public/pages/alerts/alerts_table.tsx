@@ -6,6 +6,7 @@
  */
 
 import {
+  CustomItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
@@ -14,24 +15,13 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-import { CustomItemAction } from '@elastic/eui/src/components/basic_table/custom_item_action';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertsFlyout } from './alerts_flyout';
-
-export interface TopAlert {
-  start: number;
-  duration: number;
-  reason: string;
-  link?: string;
-  severityLevel?: string;
-  active: boolean;
-  ruleName: string;
-  ruleCategory: string;
-}
+import type { TopAlert } from './';
 
 type AlertsTableProps = Omit<
   EuiBasicTableProps<TopAlert>,
@@ -46,11 +36,14 @@ export function AlertsTable(props: AlertsTableProps) {
 
   const actions: Array<CustomItemAction<TopAlert>> = [
     {
-      render: (item) => (
-        <EuiButton href={prepend(item.link)} size="s">
-          View in app
-        </EuiButton>
-      ),
+      render: (alert) =>
+        alert.link ? (
+          <EuiButton href={prepend(alert.link)} size="s">
+            View in app
+          </EuiButton>
+        ) : (
+          <></>
+        ),
       isPrimary: true,
     },
   ];
@@ -90,15 +83,18 @@ export function AlertsTable(props: AlertsTableProps) {
     {
       field: 'duration',
       name: 'Duration',
-      render: (_, { duration, active }) => {
-        return active ? null : asDuration(duration, { extended: true });
+      render: (_, alert) => {
+        const { active } = alert;
+        return active
+          ? null
+          : asDuration(alert['kibana.rac.alert.duration.us'], { extended: true });
       },
     },
     {
       field: 'severity',
       name: 'Severity',
-      render: (_, { severityLevel }) => {
-        return severityLevel;
+      render: (_, alert) => {
+        return alert['kibana.rac.alert.severity.level'];
       },
     },
     {

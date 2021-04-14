@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
+import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -26,6 +27,15 @@ import { callObservabilityApi } from '../../services/call_observability_api';
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
+
+export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
+
+export interface TopAlert extends TopAlertResponse {
+  start: number;
+  reason: string;
+  link?: string;
+  active: boolean;
+}
 
 interface AlertsPageProps {
   routeParams: RouteParams<'/alerts'>;
@@ -74,6 +84,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
 
           return {
+            ...alert,
             ...formatted,
             link: parsedLink
               ? format({
@@ -86,11 +97,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                 })
               : undefined,
             active: alert['event.action'] !== 'close',
-            severityLevel: alert['kibana.rac.alert.severity.level'],
             start: new Date(alert['kibana.rac.alert.start']).getTime(),
-            duration: alert['kibana.rac.alert.duration.us'],
-            ruleCategory: alert['rule.category'],
-            ruleName: alert['rule.name'],
           };
         });
       });
