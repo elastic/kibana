@@ -18,7 +18,7 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
-    "GetDataFrameAnalyticsIndexFields",
+    "AnalyticsNewJobCaps",
     "ValidateDataFrameAnalytics",
 
     "DataVisualizer",

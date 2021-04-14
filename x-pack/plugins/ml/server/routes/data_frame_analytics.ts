@@ -10,7 +10,6 @@ import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
 import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
-import { _DOC_COUNT, _TIER } from '../../common/constants/field_types';
 import { Field, Aggregation } from '../../common/types/fields';
 import {
   dataAnalyticsJobConfigSchema,
@@ -23,8 +22,8 @@ import {
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
   analyticsQuerySchema,
-  analyticsFieldsParamsSchema,
-  analyticsFieldsQuerySchema,
+  analyticsNewJobCapsParamsSchema,
+  analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
 import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
@@ -698,15 +697,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    * @apiGroup DataFrameAnalytics
    *
    * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
-   * @apiName GetDataFrameAnalyticsIndexFields
+   * @apiName AnalyticsNewJobCaps
    * @apiDescription Retrieve the index fields for analytics
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/fields/{indexPattern}',
+      path: '/api/ml/data_frame/analytics/new_job_caps/{indexPattern}',
       validate: {
-        params: analyticsFieldsParamsSchema,
-        query: analyticsFieldsQuerySchema,
+        params: analyticsNewJobCapsParamsSchema,
+        query: analyticsNewJobCapsQuerySchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],

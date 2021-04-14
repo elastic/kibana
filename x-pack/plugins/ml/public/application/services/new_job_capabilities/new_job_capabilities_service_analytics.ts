@@ -44,7 +44,7 @@ function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: 
 class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   public async initializeFromIndexPattern(indexPattern: IIndexPattern) {
     try {
-      const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.analyticsFields(
+      const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
         indexPattern.title,
         indexPattern.type === 'rollup'
       );

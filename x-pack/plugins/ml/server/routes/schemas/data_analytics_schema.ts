@@ -103,8 +103,8 @@ export const analyticsMapQuerySchema = schema.maybe(
   schema.object({ treatAsRoot: schema.maybe(schema.any()), type: schema.maybe(schema.string()) })
 );
 
-export const analyticsFieldsParamsSchema = schema.object({ indexPattern: schema.string() });
+export const analyticsNewJobCapsParamsSchema = schema.object({ indexPattern: schema.string() });
 
-export const analyticsFieldsQuerySchema = schema.maybe(
+export const analyticsNewJobCapsQuerySchema = schema.maybe(
   schema.object({ rollup: schema.maybe(schema.string()) })
 );
