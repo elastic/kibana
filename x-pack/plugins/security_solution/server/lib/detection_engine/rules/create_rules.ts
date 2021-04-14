@@ -12,6 +12,7 @@ import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
+import { normalizeMachineLearningJobIds } from '../../../../common/detection_engine/utils';
 
 export const createRules = async ({
   alertsClient,
@@ -89,7 +90,7 @@ export const createRules = async ({
         timelineId,
         timelineTitle,
         meta,
-        machineLearningJobId,
+        machineLearningJobId: normalizeMachineLearningJobIds(machineLearningJobId),
         filters,
         maxSignals,
         riskScore,
