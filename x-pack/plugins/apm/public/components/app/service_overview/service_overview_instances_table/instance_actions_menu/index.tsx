@@ -86,7 +86,7 @@ export function InstanceActionsMenu({
     });
   };
 
-  const analizeRuntimeMetricsHref = isJavaAgentName(data.agent?.name)
+  const metricsHref = isJavaAgentName(data.agent?.name)
     ? serviceNodeMetricOverviewHref
     : metricOverviewHref;
 
@@ -94,7 +94,7 @@ export function InstanceActionsMenu({
     instanceDetails: data,
     basePath: core.http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
-    analizeRuntimeMetricsHref,
+    metricsHref,
   });
 
   return (

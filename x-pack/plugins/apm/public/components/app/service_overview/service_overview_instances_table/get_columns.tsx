@@ -9,6 +9,7 @@ import {
   EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -223,9 +224,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      align: RIGHT_ALIGNMENT,
       width: '40px',
-      isExpander: true,
       render: (instanceItem: PrimaryStatsServiceInstanceItem) => {
         return (
           <ActionMenu
@@ -237,11 +236,13 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonEmpty
-                iconType="boxesHorizontal"
+                style={{ height: px(22) }}
                 onClick={() =>
                   toggleRowActionMenu(instanceItem.serviceNodeName)
                 }
-              />
+              >
+                <EuiIcon type="boxesHorizontal" />
+              </EuiButtonEmpty>
             }
           >
             <InstanceActionsMenu

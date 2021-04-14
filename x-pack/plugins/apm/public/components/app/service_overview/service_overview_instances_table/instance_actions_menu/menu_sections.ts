@@ -48,12 +48,12 @@ export function getMenuSections({
   instanceDetails,
   basePath,
   onFilterByInstanceClick,
-  analizeRuntimeMetricsHref,
+  metricsHref,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
   onFilterByInstanceClick: () => void;
-  analizeRuntimeMetricsHref: string;
+  metricsHref: string;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -139,12 +139,12 @@ export function getMenuSections({
     {
       key: 'analyzeRuntimeMetric',
       label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.analyzeRuntimeMetric',
+        'xpack.apm.serviceOverview.instancesTable.actionMenus.metrics',
         {
-          defaultMessage: 'Analyze runtime metric',
+          defaultMessage: 'Metrics',
         }
       ),
-      href: analizeRuntimeMetricsHref,
+      href: metricsHref,
       condition: true,
     },
   ];
