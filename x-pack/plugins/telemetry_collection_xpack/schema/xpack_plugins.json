@@ -2,10 +2,16 @@
   "properties": {
     "actions": {
       "properties": {
+        "alert_history_connector_enabled": {
+          "type": "boolean"
+        },
         "count_total": {
           "type": "long"
         },
         "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
           "type": "long"
         },
         "count_by_type": {
