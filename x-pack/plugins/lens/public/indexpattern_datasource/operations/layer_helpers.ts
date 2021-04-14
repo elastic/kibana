@@ -929,9 +929,17 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
-    isColumnTransferable(column, newIndexPattern)
-  );
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) => {
+    if ('references' in column) {
+      return (
+        isColumnTransferable(column, newIndexPattern) &&
+        column.references.every((columnId) =>
+          isColumnTransferable(layer.columns[columnId], newIndexPattern)
+        )
+      );
+    }
+    return isColumnTransferable(column, newIndexPattern);
+  });
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
