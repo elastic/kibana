@@ -99,27 +99,22 @@ export const PositiveRateAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.postiveRate.fieldLabel"
                 defaultMessage="Field"
               />
             }
+            fields={props.fields}
+            type={model.type}
+            restrict={[KBN_FIELD_TYPES.NUMBER]}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+            uiRestrictions={props.uiRestrictions}
             fullWidth
-          >
-            <FieldSelect
-              fields={props.fields}
-              type={model.type}
-              restrict={[KBN_FIELD_TYPES.NUMBER]}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-              uiRestrictions={props.uiRestrictions}
-              fullWidth
-            />
-          </EuiFormRow>
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
