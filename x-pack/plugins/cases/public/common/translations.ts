@@ -254,3 +254,6 @@ export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
     defaultMessage: 'Cases with sub-cases cannot be selected',
   }
 );
+export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
+  defaultMessage: 'Select case',
+});

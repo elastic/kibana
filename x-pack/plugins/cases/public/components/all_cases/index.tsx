@@ -88,8 +88,8 @@ BasicTable.displayName = 'BasicTable';
 
 export interface AllCasesProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  configureCasesNavigation: CasesNavigation;
+  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isModal)
+  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isModal)
   createCaseNavigation: CasesNavigation;
   disabledStatuses?: CaseStatuses[];
   isModal?: boolean;
@@ -209,7 +209,6 @@ export const AllCases = React.memo<AllCasesProps>(
       filterStatus: filterOptions.status,
       refreshCases,
       handleIsLoading,
-      showCaseTitleAsHref: !isModal,
       showActions,
     });
 
@@ -281,7 +280,7 @@ export const AllCases = React.memo<AllCasesProps>(
         {!isEmpty(actionsErrors) && (
           <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
         )}
-        {!isModal && (
+        {configureCasesNavigation != null && (
           <CasesTableHeader
             actionsErrors={actionsErrors}
             createCaseNavigation={createCaseNavigation}

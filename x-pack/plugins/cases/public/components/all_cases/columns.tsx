@@ -54,12 +54,11 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 interface GetCasesColumn {
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
+  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   showActions: boolean;
-  showCaseTitleAsHref?: boolean;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -67,7 +66,6 @@ export const useCasesColumns = ({
   handleIsLoading,
   refreshCases,
   showActions,
-  showCaseTitleAsHref = true,
 }: GetCasesColumn): CasesColumns[] => {
   const { loading: isLoadingCases, dispatchUpdateCaseProperty } = useGetCases();
   // Delete case
@@ -142,18 +140,19 @@ export const useCasesColumns = ({
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent = showCaseTitleAsHref ? (
-            <CaseDetailsLink
-              caseDetailsNavigation={caseDetailsNavigation}
-              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-              title={theCase.title}
-            >
-              {theCase.title}
-            </CaseDetailsLink>
-          ) : (
-            <span>{theCase.title}</span>
-          );
+          const caseDetailsLinkComponent =
+            caseDetailsNavigation != null ? (
+              <CaseDetailsLink
+                caseDetailsNavigation={caseDetailsNavigation}
+                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+                title={theCase.title}
+              >
+                {theCase.title}
+              </CaseDetailsLink>
+            ) : (
+              <span>{theCase.title}</span>
+            );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
