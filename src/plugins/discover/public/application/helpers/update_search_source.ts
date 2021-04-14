@@ -21,6 +21,7 @@ export function updateSearchSource({
   sort,
   useNewFieldsApi,
   showUnmappedFields,
+  persistentSearchSource,
   volatileSearchSource,
 }: {
   indexPattern: IndexPattern;
@@ -28,6 +29,7 @@ export function updateSearchSource({
   sort: SortOrder[];
   useNewFieldsApi: boolean;
   showUnmappedFields?: boolean;
+  persistentSearchSource?: ISearchSource;
   volatileSearchSource?: ISearchSource;
 }) {
   const { uiSettings, data } = services;
@@ -36,9 +38,11 @@ export function updateSearchSource({
     indexPattern,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
-  const persistentSearchSource = volatileSearchSource!.getParent() as SearchSource;
+  const searchSource = persistentSearchSource
+    ? persistentSearchSource
+    : (volatileSearchSource!.getParent() as SearchSource);
 
-  persistentSearchSource
+  searchSource
     .setField('index', indexPattern)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
