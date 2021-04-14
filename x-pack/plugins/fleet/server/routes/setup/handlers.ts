@@ -63,7 +63,7 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
 };
 
 // TODO should be removed as part https://github.com/elastic/kibana/issues/94303
-export const FleetAgentSetupHandler: RequestHandler<
+export const fleetAgentSetupHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostFleetSetupRequestSchema.body>

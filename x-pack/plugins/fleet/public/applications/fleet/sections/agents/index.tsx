@@ -71,12 +71,12 @@ export const FleetApp: React.FunctionComponent = () => {
     );
   }
 
-  const hasOnlyFleetServerMissignRequirement =
+  const hasOnlyFleetServerMissingRequirement =
     fleetStatus?.missingRequirements?.length === 1 &&
     fleetStatus.missingRequirements[0] === 'fleet_server';
 
   if (
-    !hasOnlyFleetServerMissignRequirement &&
+    !hasOnlyFleetServerMissingRequirement &&
     fleetStatus.missingRequirements &&
     fleetStatus.missingRequirements.length > 0
   ) {
@@ -99,7 +99,7 @@ export const FleetApp: React.FunctionComponent = () => {
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
           <ListLayout>
-            {hasOnlyFleetServerMissignRequirement ? (
+            {hasOnlyFleetServerMissingRequirement ? (
               <FleetServerRequirementPage />
             ) : (
               <AgentListPage />
