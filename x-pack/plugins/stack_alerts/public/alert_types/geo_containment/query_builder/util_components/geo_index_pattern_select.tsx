@@ -120,7 +120,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
   render() {
     const IndexPatternSelectComponent = this.props.IndexPatternSelectComponent;
-    const isIndexPatternInvalid = this.props.value && !this.state.doesIndexPatternHaveGeoField;
+    const isIndexPatternInvalid = !!this.props.value && !this.state.doesIndexPatternHaveGeoField;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
           defaultMessage: 'Index pattern does not contain any geospatial fields',
