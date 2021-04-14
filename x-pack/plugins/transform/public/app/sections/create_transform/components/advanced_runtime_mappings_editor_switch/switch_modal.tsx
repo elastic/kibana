@@ -47,7 +47,6 @@ export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, confirmButtonDisab
     cancelButtonText={cancelButtonText}
     confirmButtonText={applyChangesText}
     confirmButtonDisabled={confirmButtonDisabled}
-    buttonColor="danger"
     defaultFocusedButton="confirm"
   >
     <p>{modalMessage}</p>
