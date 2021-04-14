@@ -13486,8 +13486,6 @@
     "xpack.ml.dataframe.analytics.rocChartSpec.yAxisTitle": "検出率 (TRP)  (Recall) ",
     "xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel": "ジョブメッセージ",
     "xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel": "ジョブ統計情報",
-    "xpack.ml.dataframe.analyticsList.betaBadgeLabel": "ベータ",
-    "xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent": "データフレーム分析はベータ機能です。フィードバックをお待ちしています。",
     "xpack.ml.dataframe.analyticsList.cloneActionNameText": "クローンを作成",
     "xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip": "分析ジョブを複製する権限がありません。",
     "xpack.ml.dataframe.analyticsList.completeBatchAnalyticsToolTip": "{analyticsId}は完了済みの分析ジョブで、再度開始できません。",
