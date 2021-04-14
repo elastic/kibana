@@ -64,4 +64,5 @@ yarn kbn watch-bazel
 - @elastic/datemath
 - @kbn/apm-utils
 - @kbn/config-schema
+- @kbn/tinymath
 
