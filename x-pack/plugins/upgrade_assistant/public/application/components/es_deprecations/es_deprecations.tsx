@@ -32,7 +32,8 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Some Elasticsearch issues may require your attention. Resolve them before upgrading.',
+      'Review the deprecated cluster and index settings. You 
+      must resolve any critical issues before upgrading.',
   }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
