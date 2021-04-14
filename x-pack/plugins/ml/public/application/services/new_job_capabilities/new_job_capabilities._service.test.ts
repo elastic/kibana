@@ -12,7 +12,7 @@ import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 // ensures it can be lazily loaded by the jest.mock function below.
 import mockCloudwatchResponse from '../__mocks__/cloudwatch_job_caps_response.json';
 
-jest.mock('./ml_api_service', () => ({
+jest.mock('../ml_api_service', () => ({
   ml: {
     jobs: {
       newJobCaps: jest.fn(() => Promise.resolve(mockCloudwatchResponse)),

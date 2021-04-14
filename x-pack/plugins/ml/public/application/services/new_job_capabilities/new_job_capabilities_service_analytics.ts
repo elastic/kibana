@@ -42,10 +42,6 @@ function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: 
 }
 
 class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
-  constructor() {
-    super();
-  }
-
   public async initializeFromIndexPattern(indexPattern: IIndexPattern) {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.analyticsFields(

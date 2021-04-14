@@ -30,8 +30,8 @@ export function processTextAndKeywordFields(fields: Field[]) {
 }
 
 export class NewJobCapabilitiesServiceBase {
-  public _fields: Field[];
-  public _aggs: Aggregation[];
+  protected _fields: Field[];
+  protected _aggs: Aggregation[];
 
   constructor() {
     this._fields = [];
@@ -56,5 +56,10 @@ export class NewJobCapabilitiesServiceBase {
   public getFieldById(id: string): Field | null {
     const field = this._fields.find((f) => f.id === id);
     return field === undefined ? null : field;
+  }
+
+  public getAggById(id: string): Aggregation | null {
+    const agg = this._aggs.find((f) => f.id === id);
+    return agg === undefined ? null : agg;
   }
 }

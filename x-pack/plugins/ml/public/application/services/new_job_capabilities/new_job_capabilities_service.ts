@@ -18,18 +18,10 @@ import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './ne
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService extends NewJobCapabilitiesServiceBase {
-  private _catFields: Field[];
-  private _dateFields: Field[];
-  private _includeEventRateField: boolean;
-  private _removeTextFields: boolean;
-
-  constructor() {
-    super();
-    this._catFields = [];
-    this._dateFields = [];
-    this._includeEventRateField = true;
-    this._removeTextFields = true;
-  }
+  private _catFields: Field[] = [];
+  private _dateFields: Field[] = [];
+  private _includeEventRateField: boolean = true;
+  private _removeTextFields: boolean = true;
 
   public get catFields(): Field[] {
     return this._catFields;
@@ -79,11 +71,6 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
     }
-  }
-
-  public getAggById(id: string): Aggregation | null {
-    const agg = this._aggs.find((f) => f.id === id);
-    return agg === undefined ? null : agg;
   }
 }
 

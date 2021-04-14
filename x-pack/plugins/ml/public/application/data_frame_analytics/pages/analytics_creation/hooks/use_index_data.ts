@@ -53,7 +53,9 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
 function getInitialColumns(indexPattern: IndexPattern) {
   const { fields } = newJobCapsServiceAnalytics;
   const columns = fields.map((field: any) => {
-    const schema = getDataGridSchemaFromKibanaFieldType(field);
+    const schema =
+      getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
+
     return {
       id: field.name,
       schema,
