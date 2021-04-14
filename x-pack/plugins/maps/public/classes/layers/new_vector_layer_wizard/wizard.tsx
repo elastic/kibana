@@ -154,9 +154,12 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
             body={
               <Fragment>
                 <p>
-                  {i18n.translate('xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription', {
-                    defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
-                  })}
+                  {i18n.translate(
+                    'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
+                    {
+                      defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
+                    }
+                  )}
                 </p>
               </Fragment>
             }
@@ -176,9 +179,12 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
               value={this.state.indexName}
               onChange={this._onIndexNameChangeEvent}
               isInvalid={!!this.state.indexError}
-              aria-label={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexNameReqField', {
-                defaultMessage: 'Index name, required field',
-              })}
+              aria-label={i18n.translate(
+                'xpack.maps.layers.newVectorLayerWizard.indexNameReqField',
+                {
+                  defaultMessage: 'Index name, required field',
+                }
+              )}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
