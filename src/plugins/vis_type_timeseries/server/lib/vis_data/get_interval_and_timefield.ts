@@ -19,7 +19,9 @@ export function getIntervalAndTimefield(
     (series.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;
 
-  validateField(timeField!, index);
+  if (panel.use_kibana_indexes) {
+    validateField(timeField!, index);
+  }
 
   let interval = panel.interval;
   let maxBars = panel.max_bars;
