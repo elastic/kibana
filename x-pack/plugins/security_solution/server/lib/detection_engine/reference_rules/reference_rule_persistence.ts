@@ -28,20 +28,10 @@ export const referenceRulePersistenceAlertType = createSecurityPersistenceRuleTy
       id: 'default',
       name: 'Default',
     },
-    {
-      id: 'warning',
-      name: 'Warning',
-    },
   ],
   defaultActionGroupId: 'default',
   actionVariables: {
-    context: [
-      { name: 'server', description: 'the server' },
-      {
-        name: 'hasCpuUsageIncreased',
-        description: 'boolean indicating if the cpu usage has increased',
-      },
-    ],
+    context: [{ name: 'server', description: 'the server' }],
   },
   minimumLicenseRequired: 'basic',
   producer: 'security-solution',
@@ -68,7 +58,7 @@ export const referenceRulePersistenceAlertType = createSecurityPersistenceRuleTy
 
     const alerts = await findAlerts(query);
     alertWithPersistence(alerts).forEach((alert) => {
-      alert.scheduleActions('action-group-tbd', {});
+      alert.scheduleActions('default', { server: 'server-test' });
     });
 
     return {

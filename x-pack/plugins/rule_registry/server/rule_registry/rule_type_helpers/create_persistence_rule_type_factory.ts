@@ -10,7 +10,7 @@ import v4 from 'uuid/v4';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
-import { DefaultFieldMap } from '../defaults/field_map';
+import { DefaultFieldMap, defaultFieldMap } from '../defaults/field_map';
 import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
 import { RuleRegistry } from '..';
 
@@ -56,8 +56,9 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
         } = options;
 
         const currentAlerts: Array<OutputOfFieldMap<DefaultFieldMap>> = [];
+        const timestamp = options.startedAt.toISOString();
 
-        await type.executor({
+        const state = await type.executor({
           ...options,
           services: {
             ...options.services,
@@ -66,24 +67,36 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
               return alerts.map((alert) => alertInstanceFactory(alert['kibana.rac.alert.uuid']!));
             },
             findAlerts: async (query) => {
-              const { body } = await scopedClusterClient.asCurrentUser.search({
+              const { body } = await scopedClusterClient.asCurrentUser.search<
+                OutputOfFieldMap<DefaultFieldMap>
+              >({
                 ...query,
+                body: {
+                  ...query.body,
+                  _source: Object.keys(defaultFieldMap),
+                },
                 ignore_unavailable: true,
               });
+              // console.log('FOUND EVENT');
+              // console.log(JSON.stringify(body.hits.hits[0]));
               return body.hits.hits
-                .map((event) => event._source as OutputOfFieldMap<DefaultFieldMap>)
+                .map((event) => event._source!)
                 .map((event) => {
+                  // console.log(JSON.stringify(event));
                   const alertUuid = event['kibana.rac.alert.uuid'];
                   const isAlert = alertUuid != null;
                   return {
                     ...event,
+                    event: {
+                      action: event['event.action'],
+                      kind: 'signal',
+                    },
                     'kibana.rac.alert.id': '???',
                     'kibana.rac.alert.uuid': v4(),
                     'kibana.rac.alert.ancestors': isAlert
                       ? (event['kibana.rac.alert.ancestors'] ?? []).concat([alertUuid!])
                       : [],
                     'kibana.rac.alert.depth': isAlert ? event['kibana.rac.alert.depth']! + 1 : 0,
-                    'event.kind': 'signal',
                     '@timestamp': timestamp,
                   };
                 });
@@ -91,16 +104,14 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
           },
         });
 
-        const timestamp = options.startedAt.toISOString();
-
-        const numAlerts = Object.keys(currentAlerts).length;
+        const numAlerts = currentAlerts.length;
         logger.debug(`Found ${numAlerts} alerts.`);
 
         if (scopedRuleRegistryClient && numAlerts) {
           await scopedRuleRegistryClient.bulkIndex(currentAlerts);
         }
 
-        return currentAlerts;
+        return state;
       },
     };
   };

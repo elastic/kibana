@@ -23,10 +23,10 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
    },
    "actions":[],
    "tags":[
-      "cpu"
+      "persistence"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Oh hai world!"
+   "name":"Basic persistence rule"
 }'
 
 

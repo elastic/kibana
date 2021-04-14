@@ -26,10 +26,10 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
    },
    "actions":[],
    "tags":[
-      "cpu"
+      "hierarchical"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Oh hai world!"
+   "name":"Hierarchical persistence rule"
 }'
 
 

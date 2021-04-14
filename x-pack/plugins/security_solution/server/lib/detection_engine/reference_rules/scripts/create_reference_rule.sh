@@ -27,7 +27,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
       "cpu"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Oh hai world!"
+   "name":"Basic lifecycle rule"
 }'
 
 
