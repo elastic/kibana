@@ -12,7 +12,7 @@ import {
   getDetectionRuleMetrics,
   getRulesUsage,
   initialRulesUsage,
-  initalDetectionRulesUsage,
+  initialDetectionRulesUsage,
   initialMlJobsUsage,
 } from './detections_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -151,6 +151,6 @@ export const fetchDetectionsMetrics = async (
     detection_rules:
       detectionRuleMetrics.status === 'fulfilled'
         ? detectionRuleMetrics.value
-        : { detection_rule_detail: [], detection_rule_usage: initalDetectionRulesUsage },
+        : { detection_rule_detail: [], detection_rule_usage: initialDetectionRulesUsage },
   };
 };
