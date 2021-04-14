@@ -60,9 +60,9 @@ export const LabsStrings = {
       getEnabledStatusMessage: () => (
         <FormattedMessage
           id="presentationUtil.labs.components.defaultStatusMessage"
-          defaultMessage="{status} by default"
+          defaultMessage="Default: {status}"
           values={{
-            status: <strong>Enabled</strong>,
+            status: <EuiCode>Enabled</EuiCode>,
           }}
           description="Displays the current status of a lab project"
         />

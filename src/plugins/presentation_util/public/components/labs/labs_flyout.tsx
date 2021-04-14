@@ -123,7 +123,7 @@ export const LabsFlyout = (props: Props) => {
 
   return (
     <EuiOverlayMask onClick={() => onClose()} headerZindexLocation="below">
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout onClose={onClose} hideCloseButton={true}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2>

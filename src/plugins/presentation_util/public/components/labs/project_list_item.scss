@@ -47,6 +47,8 @@
 
 .projectListItem__titlePendingChangesIndicator {
   margin-left: $euiSizeS;
+  position: relative;
+  top: -1px;
 }
 
 .projectListItem__solutions {
