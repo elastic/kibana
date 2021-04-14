@@ -29,6 +29,7 @@ export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '1d',
         actions: {
           migrate: { enabled: false },
         },
@@ -54,6 +55,7 @@ export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           allocate: {
             include: {
@@ -196,6 +198,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           my_unfollow_action: {},
           set_priority: {
@@ -205,6 +208,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       delete: {
+        min_age: '15d',
         wait_for_snapshot: {
           policy: SNAPSHOT_POLICY_NAME,
         },
