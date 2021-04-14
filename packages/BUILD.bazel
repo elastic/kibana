@@ -4,6 +4,8 @@ filegroup(
   name = "build",
   srcs = [
       "//packages/elastic-datemath:build",
-      "//packages/kbn-apm-utils:build"
+      "//packages/kbn-apm-utils:build",
+      "//packages/kbn-config-schema:build",
+      "//packages/kbn-tinymath:build",
   ],
 )
