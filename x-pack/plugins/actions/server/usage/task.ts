@@ -119,8 +119,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  // return moment().add(1, 'd').startOf('d').toDate();
-  const runAt = new Date();
-  runAt.setMilliseconds(new Date().getMilliseconds() + 15000);
-  return runAt;
+  return moment().add(1, 'd').startOf('d').toDate();
 }

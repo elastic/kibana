@@ -173,7 +173,8 @@ export async function getInUseTotalCount(
   }));
   const actions = await actionsBulkGet(bulkFilter);
 
-  // filter out preconfigured connectors, which are not saved objects
+  // filter out preconfigured connectors, which are not saved objects and return
+  // an error in the bulk response
   const actionsWithActionTypeId = actions.saved_objects.filter(
     (action) => action?.attributes?.actionTypeId != null
   );
@@ -192,13 +193,6 @@ export async function getInUseTotalCount(
     (action) => action.id === AlertHistoryEsIndexConnectorId
   );
 
-  console.log(
-    `actions telemetry ${JSON.stringify({
-      countTotal: aggs.total,
-      countByType: countByActionTypeId,
-      countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnector.length,
-    })}`
-  );
   return {
     countTotal: aggs.total,
     countByType: countByActionTypeId,
