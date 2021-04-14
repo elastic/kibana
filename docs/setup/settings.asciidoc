@@ -473,7 +473,7 @@ confident your server can hold this many objects in memory.
  | The maximum byte size of a saved objects import that the {kib} server will accept.
 This setting exists to prevent the {kib} server from runnning out of memory when handling
 a large import payload. Note that this setting overrides the more general
-<<server-maxPayloadBytes, `server.maxPayloadBytes`>> for saved object imports only.
+<<server-maxPayload, `server.maxPayload`>> for saved object imports only.
 *Default: `26214400`*
 
 |[[server-basePath]] `server.basePath:`
@@ -517,6 +517,10 @@ back end server. To allow remote users to connect, set the value to the IP addre
 the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
 |[[server-maxPayloadBytes]] `server.maxPayloadBytes:`
+ | deprecated:[7.13.0,"This setting will no longer be supported as of 8.0."]
+ This setting has been renamed to <<server-maxPayload,`server.maxPayload`>>.
+
+|[[server-maxPayload]] `server.maxPayload:`
  | The maximum payload size in bytes
 for incoming server requests. *Default: `1048576`*
 

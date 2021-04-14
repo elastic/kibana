@@ -122,6 +122,7 @@ kibana_vars=(
     server.host
     server.keepAliveTimeout
     server.maxPayloadBytes
+    server.maxPayload
     server.name
     server.port
     server.rewriteBasePath
