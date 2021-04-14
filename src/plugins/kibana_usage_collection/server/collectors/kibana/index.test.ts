@@ -15,7 +15,7 @@ import {
   Collector,
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 import { registerKibanaUsageCollector } from './';
 
 const logger = loggingSystemMock.createLogger();

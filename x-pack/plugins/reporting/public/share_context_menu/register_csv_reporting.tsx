@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { ShareContext } from '../../../../../src/plugins/share/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import type { SearchSourceFields } from 'src/plugins/data/common';
+import type { ShareContext } from '../../../../../src/plugins/share/public';
+import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
-import { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
+import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
 import { ReportingPanelContent } from '../components/reporting_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface ReportingProvider {
   apiClient: ReportingAPIClient;
@@ -65,7 +66,8 @@ export const csvReportingProvider = ({
       browserTimezone,
       title: sharingData.title as string,
       objectType,
-      searchSource: sharingData.searchSource,
+      searchSource: sharingData.searchSource as SearchSourceFields,
+      columns: sharingData.columns as string[] | undefined,
     };
 
     const getJobParams = () => jobParams;
