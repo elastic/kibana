@@ -19,8 +19,16 @@ interface MultiInputRowsActions {
   editValue(index: number, newValueValue: string): { index: number; newValueValue: string };
 }
 
-export const MultiInputRowsLogic = kea<MakeLogicType<MultiInputRowsValues, MultiInputRowsActions>>({
-  path: ['enterprise_search', 'app_search', 'multi_input_rows_logic'],
+interface MultiInputRowsProps {
+  values: string[];
+  id: string;
+}
+
+export const MultiInputRowsLogic = kea<
+  MakeLogicType<MultiInputRowsValues, MultiInputRowsActions, MultiInputRowsProps>
+>({
+  path: (key: string) => ['enterprise_search', 'app_search', 'multi_input_rows_logic', key],
+  key: (props) => props.id,
   actions: () => ({
     addValue: true,
     deleteValue: (indexToDelete) => ({ indexToDelete }),

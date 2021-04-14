@@ -23,6 +23,7 @@ import { MultiInputRowsLogic } from './multi_input_rows_logic';
 import { filterEmptyValues } from './utils';
 
 interface Props {
+  id: string;
   values: string[];
   onSubmit?(values: string[]): void;
   onChange?(values: string[]): void;
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export const MultiInputRows: React.FC<Props> = ({
+  id,
   values: initialValues,
   onSubmit,
   onChange,
@@ -41,7 +43,7 @@ export const MultiInputRows: React.FC<Props> = ({
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
   inputPlaceholder = INPUT_ROW_PLACEHOLDER,
 }) => {
-  const logic = MultiInputRowsLogic({ values: initialValues });
+  const logic = MultiInputRowsLogic({ id, values: initialValues });
   const { values, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
 

@@ -51,6 +51,7 @@ export const CurationCreation: React.FC = () => {
         </EuiText>
         <EuiSpacer />
         <MultiInputRows
+          id="createNewCuration"
           addRowText={QUERY_INPUTS_BUTTON}
           inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
           values={['']}

@@ -18,6 +18,7 @@ import { MultiInputRows } from './';
 
 describe('MultiInputRows', () => {
   const props = {
+    id: 'test',
     values: ['a', 'b', 'c'],
   };
   const values = {

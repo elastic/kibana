@@ -63,6 +63,7 @@ export const ManageQueriesModal: React.FC = () => {
             </EuiText>
             <EuiSpacer />
             <MultiInputRows
+              id="manageCurationQueries"
               values={queries}
               addRowText={QUERY_INPUTS_BUTTON}
               inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
