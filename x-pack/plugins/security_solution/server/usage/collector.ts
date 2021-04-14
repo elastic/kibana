@@ -112,7 +112,7 @@ export const registerCollector: RegisterCollector = ({
           },
           detection_rule_detail: {
             type: 'array',
-            itmes: {
+            items: {
               rule_name: { type: 'keyword' },
               rule_id: { type: 'keyword' },
               rule_type: { type: 'keyword' },
