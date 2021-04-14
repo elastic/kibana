@@ -42,8 +42,8 @@ test('isLocked', async () => {
   expect(component).toMatchSnapshot();
 });
 
+// Test is sync to show render before async state is set.
 test('should only show close button when layer name is not yet loaded', () => {
   const component = shallow(<Header {...defaultProps} isLocked={true} />);
-
   expect(component).toMatchSnapshot();
 });
