@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesUserActions(es);
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings]`, async () => {
+    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings, owner]`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
         'title',
         'connector',
         'settings',
+        'owner',
       ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);

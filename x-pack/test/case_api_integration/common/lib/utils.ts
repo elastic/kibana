@@ -614,7 +614,9 @@ export const deleteCases = async ({
 }) => {
   const { body } = await supertest
     .delete(`${CASES_URL}`)
-    .query({ ids: caseIDs })
+    // we need to json stringify here because just passing in the array of case IDs will cause a 400 with Kibana
+    // not being able to parse the array correctly. The format ids=["1", "2"] seems to work, which stringify outputs.
+    .query({ ids: JSON.stringify(caseIDs) })
     .set('kbn-xsrf', 'true')
     .send()
     .expect(expectedHttpCode);
