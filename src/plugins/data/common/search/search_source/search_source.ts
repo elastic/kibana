@@ -504,7 +504,7 @@ export class SearchSource {
     const filterSourceFields = (fieldName: string) => {
       return (
         fieldName &&
-        !sourceFiltersValues.some((sourceFilter) => fieldName.match(sourceFilter)) &&
+        !sourceFiltersValues.some((sourceFilter) => fieldName.match(`^${sourceFilter}`)) &&
         !metaFields.includes(fieldName)
       );
     };

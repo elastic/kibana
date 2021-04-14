@@ -385,10 +385,9 @@ describe('SearchSource', () => {
             docvalueFields: [],
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fields', ['hello', 'foo']);
-
+        searchSource.setField('fields', ['hello', 'foo', 'somethingfoo']);
         const request = searchSource.getSearchRequestBody();
-        expect(request.fields).toEqual(['hello']);
+        expect(request.fields).toEqual(['hello', 'somethingfoo']);
       });
 
       test('request all fields from index pattern except the ones specified with source filters', async () => {
