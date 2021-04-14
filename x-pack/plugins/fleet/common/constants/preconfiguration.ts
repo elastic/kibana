@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export interface PostIngestSetupResponse {
-  isInitialized: boolean;
-  preconfigurationError?: { name: string; message: string };
-}
+export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
+  'fleet-preconfiguration-deletion-record';
