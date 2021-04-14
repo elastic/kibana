@@ -116,7 +116,6 @@ export function registerErrorCountAlertType({
 
         const response = await alertingEsClient({
           scopedClusterClient: services.scopedClusterClient,
-          logger: services.logger,
           params: searchParams,
         });
 

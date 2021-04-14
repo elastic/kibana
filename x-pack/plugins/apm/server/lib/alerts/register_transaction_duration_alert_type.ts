@@ -114,7 +114,6 @@ export function registerTransactionDurationAlertType({
 
         const response = await alertingEsClient({
           scopedClusterClient: services.scopedClusterClient,
-          logger: services.logger,
           params: searchParams,
         });
 
