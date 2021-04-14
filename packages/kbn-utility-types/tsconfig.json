@@ -16,6 +16,7 @@
   },
   "include": [
     "index.ts",
-    "jest/**/*"
+    "jest/**/*",
+    "tsd_tests/**/*"
   ]
 }
