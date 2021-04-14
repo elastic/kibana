@@ -34,14 +34,6 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
         });
       }
 
-      try {
-        visPayloadSchema.validate(request.body);
-      } catch (error) {
-        framework.logger.debug(
-          `Request validation error: ${error.message}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
-        );
-      }
-
       const results = await getVisData(requestContext, request, framework);
       return response.ok({ body: results });
     }
