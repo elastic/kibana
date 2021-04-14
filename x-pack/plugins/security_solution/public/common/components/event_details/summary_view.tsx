@@ -40,6 +40,9 @@ const StyledEuiTitle = styled(EuiTitle)`
   h2 {
     min-width: 120px;
   }
+  hr {
+    max-width: 75%;
+  }
 `;
 
 const StyledDiv = styled.div`
