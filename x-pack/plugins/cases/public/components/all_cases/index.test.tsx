@@ -54,6 +54,7 @@ describe('AllCases', () => {
     },
   };
 
+  const handleIsLoading = jest.fn();
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
@@ -255,7 +256,7 @@ describe('AllCases', () => {
       useCasesColumns({
         actions: [],
         filterStatus: CaseStatuses.open,
-        isModal: false,
+        isSelector: false,
         caseDetailsNavigation: {
           href: jest.fn(),
           onClick: jest.fn(),
@@ -338,10 +339,10 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not render case link or actions on modal=true', async () => {
+  it('should not render case link when caseDetailsNavigation is not passed or actions on showActions=false', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -349,13 +350,9 @@ describe('AllCases', () => {
         expect(columnName).not.toEqual(i18n.ACTIONS);
       };
       useCasesColumns({
-        actions: [],
         filterStatus: CaseStatuses.open,
-        isModal: true,
-        caseDetailsNavigation: {
-          href: jest.fn(),
-          onClick: jest.fn(),
-        },
+        handleIsLoading,
+        showActions: false,
       }).map((i, key) => i.name != null && checkIt(`${i.name}`));
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
@@ -677,7 +674,7 @@ describe('AllCases', () => {
   it('should not render header when modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -688,7 +685,7 @@ describe('AllCases', () => {
   it('should not render table utility bar when modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -701,7 +698,7 @@ describe('AllCases', () => {
   it('case table should not be selectable when modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={true} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -726,7 +723,7 @@ describe('AllCases', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isModal={true}
+          isSelector={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -754,7 +751,7 @@ describe('AllCases', () => {
           {...defaultAllCasesProps}
           createCaseNavigation={createCaseNavigation}
           userCanCrud={true}
-          isModal={false}
+          isSelector={false}
         />
       </TestProviders>
     );
@@ -770,7 +767,7 @@ describe('AllCases', () => {
         <AllCases
           {...defaultAllCasesProps}
           userCanCrud={true}
-          isModal={true}
+          isSelector={true}
           onRowClick={onRowClick}
         />
       </TestProviders>
@@ -827,7 +824,7 @@ describe('AllCases', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={false} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
@@ -839,7 +836,7 @@ describe('AllCases', () => {
   it('should change the status to closed', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -854,7 +851,7 @@ describe('AllCases', () => {
   it('should change the status to in-progress', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -869,7 +866,7 @@ describe('AllCases', () => {
   it('should change the status to open', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -884,7 +881,7 @@ describe('AllCases', () => {
   it('should show the correct count on stats', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} userCanCrud={true} isModal={false} />
+        <AllCases {...defaultAllCasesProps} userCanCrud={true} isSelector={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');

@@ -67,17 +67,17 @@ const BasicTable = styled(EuiBasicTable)`
       padding: 8px 0 8px 32px;
     }
 
-    &.isModal .euiTableRow.isDisabled {
+    &.isSelector .euiTableRow.isDisabled {
       cursor: not-allowed;
       background-color: ${theme.eui.euiTableHoverClickableColor};
     }
 
-    &.isModal .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
-    &.isModal .euiTableRow.euiTableRow-isExpandedRow:hover {
+    &.isSelector .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
+    &.isSelector .euiTableRow.euiTableRow-isExpandedRow:hover {
       background-color: transparent;
     }
 
-    &.isModal .euiTableRow.euiTableRow-isExpandedRow {
+    &.isSelector .euiTableRow.euiTableRow-isExpandedRow {
       .subCase:hover {
         background-color: ${theme.eui.euiTableHoverClickableColor};
       }
@@ -88,11 +88,11 @@ BasicTable.displayName = 'BasicTable';
 
 export interface AllCasesProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isModal)
-  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isModal)
+  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelector)
+  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)
   createCaseNavigation: CasesNavigation;
   disabledStatuses?: CaseStatuses[];
-  isModal?: boolean;
+  isSelector?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
   userCanCrud: boolean;
   updateCase?: (newCase: Case) => void;
@@ -105,7 +105,7 @@ export const AllCases = React.memo<AllCasesProps>(
     configureCasesNavigation,
     createCaseNavigation,
     disabledStatuses,
-    isModal = false,
+    isSelector = false,
     onRowClick,
     userCanCrud,
     updateCase,
@@ -151,13 +151,13 @@ export const AllCases = React.memo<AllCasesProps>(
     const goToCreateCase = useCallback(
       (ev) => {
         ev.preventDefault();
-        if (isModal && onRowClick != null) {
+        if (isSelector && onRowClick != null) {
           onRowClick();
         } else if (onCreateCaseNavClick) {
           onCreateCaseNavClick(ev);
         }
       },
-      [isModal, onCreateCaseNavClick, onRowClick]
+      [isSelector, onCreateCaseNavClick, onRowClick]
     );
     const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
@@ -202,7 +202,7 @@ export const AllCases = React.memo<AllCasesProps>(
       [refreshCases, setQueryParams, setFilters]
     );
 
-    const showActions = userCanCrud && !isModal;
+    const showActions = userCanCrud && !isSelector;
 
     const columns = useCasesColumns({
       caseDetailsNavigation,
@@ -246,7 +246,7 @@ export const AllCases = React.memo<AllCasesProps>(
     const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
-    const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
+    const TableWrap = useMemo(() => (isSelector ? 'span' : Panel), [isSelector]);
 
     const tableRowProps = useCallback(
       (theCase: Case) => {
@@ -269,10 +269,12 @@ export const AllCases = React.memo<AllCasesProps>(
         return {
           'data-test-subj': `cases-table-row-${theCase.id}`,
           className: classnames({ isDisabled: theCase.type === CaseType.collection }),
-          ...(isModal && theCase.type !== CaseType.collection ? { onClick: onTableRowClick } : {}),
+          ...(isSelector && theCase.type !== CaseType.collection
+            ? { onClick: onTableRowClick }
+            : {}),
         };
       },
-      [isModal, alertData, onRowClick, postComment, updateCase]
+      [isSelector, alertData, onRowClick, postComment, updateCase]
     );
 
     return (
@@ -292,7 +294,7 @@ export const AllCases = React.memo<AllCasesProps>(
         {(isCasesLoading || isLoading || isCommentsUpdating) && !isDataEmpty && (
           <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
         )}
-        <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
+        <TableWrap data-test-subj="table-wrap" loading={!isSelector ? isCasesLoading : undefined}>
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
             countOpenCases={data.countOpenCases}
@@ -354,7 +356,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 rowProps={tableRowProps}
                 selection={showActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
-                className={classnames({ isModal })}
+                className={classnames({ isSelector })}
               />
             </Div>
           )}

@@ -52,7 +52,7 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorProps> = ({
           alertData,
           createCaseNavigation,
           disabledStatuses,
-          isModal: true,
+          isSelector: true,
           onRowClick,
           userCanCrud,
           updateCase,

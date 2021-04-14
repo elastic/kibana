@@ -19,10 +19,10 @@ export interface UseAllCasesSelectorModalProps {
   userCanCrud: boolean;
 }
 
-export interface UseAllCasesSelectorModalReturnedValues {
-  modal: JSX.Element;
-  isModalOpen: boolean;
+export interface UseAllCasesSelectorModal {
   closeModal: () => void;
+  isModalOpen: boolean;
+  modal: JSX.Element;
   openModal: () => void;
 }
 
@@ -33,7 +33,7 @@ export const useAllCasesSelectorModal = ({
   onRowClick,
   updateCase,
   userCanCrud,
-}: UseAllCasesSelectorModalProps): UseAllCasesSelectorModalReturnedValues => {
+}: UseAllCasesSelectorModalProps): UseAllCasesSelectorModal => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -47,6 +47,8 @@ export const useAllCasesSelectorModal = ({
 
   return useMemo(
     () => ({
+      closeModal,
+      isModalOpen,
       modal: (
         <AllCasesSelectorModal
           alertData={alertData}
@@ -59,10 +61,8 @@ export const useAllCasesSelectorModal = ({
           userCanCrud={userCanCrud}
         />
       ),
-      isModalOpen,
-      closeModal,
-      openModal,
       onRowClick,
+      openModal,
     }),
     [
       alertData,

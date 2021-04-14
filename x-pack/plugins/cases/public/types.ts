@@ -19,7 +19,7 @@ import { CreateCaseProps } from './components/create';
 import { RecentCasesProps } from './components/recent_cases';
 import {
   UseAllCasesSelectorModalProps,
-  UseAllCasesSelectorModalReturnedValues,
+  UseAllCasesSelectorModal,
 } from './components/use_all_cases_selector_modal';
 
 export interface SetupPlugins {
@@ -48,7 +48,5 @@ export interface CasesUiStart {
   getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
   getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
   getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
-  useAllCasesSelectorModal: (
-    props: UseAllCasesSelectorModalProps
-  ) => UseAllCasesSelectorModalReturnedValues;
+  useAllCasesSelectorModal: (props: UseAllCasesSelectorModalProps) => UseAllCasesSelectorModal;
 }

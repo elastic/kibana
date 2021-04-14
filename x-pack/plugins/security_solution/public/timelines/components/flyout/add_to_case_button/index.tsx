@@ -56,14 +56,6 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
-
-      console.log('onRowClick DISPATCH INSERT TIMELINE!!!', {
-        theCase,
-        graphEventId,
-        timelineId,
-        timelineSavedObjectId: savedObjectId,
-        timelineTitle,
-      });
       dispatch(
         setInsertTimeline({
           graphEventId,
@@ -107,22 +99,16 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
     navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
       path: getCreateCaseUrl(),
-    }).then(() => {
-      console.log('handleNewCaseClick DISPATCH INSERT TIMELINE!!!', {
-        graphEventId,
-        timelineId,
-        timelineSavedObjectId: savedObjectId,
-        timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-      });
-      return dispatch(
+    }).then(() =>
+      dispatch(
         setInsertTimeline({
           graphEventId,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
         })
-      );
-    });
+      )
+    );
   }, [
     dispatch,
     graphEventId,

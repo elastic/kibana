@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import { mount } from 'enzyme';
 
-import { CreateCaseModal } from './create_case_modal';
+import { AllCasesSelectorModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../create/form_context', () => {
@@ -60,9 +60,10 @@ const defaultProps = {
   isModalOpen: true,
   onCloseCaseModal,
   onSuccess,
+  userCanCrud: true,
 };
 
-describe('CreateCaseModal', () => {
+describe('AllCasesSelectorModal', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -70,7 +71,7 @@ describe('CreateCaseModal', () => {
   it('renders', () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCaseModal {...defaultProps} />
+        <AllCasesSelectorModal {...defaultProps} />
       </TestProviders>
     );
 
@@ -80,7 +81,7 @@ describe('CreateCaseModal', () => {
   it('it does not render the modal isModalOpen=false ', () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCaseModal {...defaultProps} isModalOpen={false} />
+        <AllCasesSelectorModal {...defaultProps} isModalOpen={false} />
       </TestProviders>
     );
 
@@ -90,7 +91,7 @@ describe('CreateCaseModal', () => {
   it('Closing modal calls onCloseCaseModal', () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCaseModal {...defaultProps} />
+        <AllCasesSelectorModal {...defaultProps} />
       </TestProviders>
     );
 
@@ -101,7 +102,7 @@ describe('CreateCaseModal', () => {
   it('pass the correct props to FormContext component', () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCaseModal {...defaultProps} />
+        <AllCasesSelectorModal {...defaultProps} />
       </TestProviders>
     );
 
@@ -116,7 +117,7 @@ describe('CreateCaseModal', () => {
   it('onSuccess called when creating a case', () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCaseModal {...defaultProps} />
+        <AllCasesSelectorModal {...defaultProps} />
       </TestProviders>
     );
 

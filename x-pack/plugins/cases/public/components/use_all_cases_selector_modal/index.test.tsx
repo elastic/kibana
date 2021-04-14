@@ -11,7 +11,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../common/lib/kibana';
-import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
+import {
+  useAllCasesSelectorModal,
+  UseCreateCaseModalProps,
+  UseCreateCaseModalReturnedValues,
+} from '.';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
@@ -60,8 +64,10 @@ jest.mock('../create/submit_button', () => {
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onCaseCreated = jest.fn();
-
-describe('useCreateCaseModal', () => {
+const defaultProps = {
+  userCanCrud: true,
+};
+describe('useAllCasesSelectorModal', () => {
   let navigateToApp: jest.Mock;
 
   beforeEach(() => {
@@ -71,7 +77,7 @@ describe('useCreateCaseModal', () => {
 
   it('init', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useAllCasesSelectorModal(defaultProps),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -82,7 +88,7 @@ describe('useCreateCaseModal', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useAllCasesSelectorModal(defaultProps),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -97,7 +103,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useAllCasesSelectorModal(defaultProps),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -115,7 +121,7 @@ describe('useCreateCaseModal', () => {
     const { result, rerender } = renderHook<
       UseCreateCaseModalProps,
       UseCreateCaseModalReturnedValues
-    >(() => useCreateCaseModal({ onCaseCreated }), {
+    >(() => useAllCasesSelectorModal(defaultProps), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -128,7 +134,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal when creating a case', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
+      () => useAllCasesSelectorModal(defaultProps),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
