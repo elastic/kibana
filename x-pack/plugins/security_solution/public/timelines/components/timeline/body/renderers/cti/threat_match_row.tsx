@@ -6,32 +6,27 @@
  */
 
 import { get } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { Fields } from '../../../../../../../common/search_strategy';
-import { DraggableBadge } from '../../../../../../common/components/draggables';
 import {
   EVENT_DATASET,
   EVENT_REFERENCE,
-  INDICATOR_DATASET,
-  INDICATOR_MATCHED_FIELD,
-  INDICATOR_MATCHED_TYPE,
-  INDICATOR_PROVIDER,
-  INDICATOR_REFERENCE,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_TYPE,
   PROVIDER,
 } from '../../../../../../../common/cti/constants';
+import { MatchDetails } from './match_details';
+import { IndicatorDetails } from './indicator_details';
 
 export interface ThreatMatchRowProps {
   contextId: string;
   eventId: string;
-  indicatorDataset: string;
-  indicatorProvider: string;
-  indicatorReference: string;
-  indicatorType: string;
+  indicatorDataset: string | undefined;
+  indicatorProvider: string | undefined;
+  indicatorReference: string | undefined;
+  indicatorType: string | undefined;
   sourceField: string;
   sourceValue: string;
 }
@@ -48,10 +43,10 @@ export const ThreatMatchRow = ({
   const props = {
     contextId: `threat-match-row-${timelineId}-${eventId}`,
     eventId,
-    indicatorDataset: get(data, EVENT_DATASET)[0] as string,
-    indicatorReference: get(data, EVENT_REFERENCE)[0] as string,
-    indicatorProvider: get(data, PROVIDER)[0] as string,
-    indicatorType: get(data, MATCHED_TYPE)[0] as string,
+    indicatorDataset: get(data, EVENT_DATASET)[0] as string | undefined,
+    indicatorReference: get(data, EVENT_REFERENCE)[0] as string | undefined,
+    indicatorProvider: get(data, PROVIDER)[0] as string | undefined,
+    indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
     sourceField: get(data, MATCHED_FIELD)[0] as string,
     sourceValue: get(data, MATCHED_ATOMIC)[0] as string,
   };
@@ -71,80 +66,20 @@ export const ThreatMatchRowView = ({
 }: ThreatMatchRowProps) => {
   return (
     <>
-      <EuiFlexGroup
-        alignItems="flexStart"
-        data-test-subj="threat-match-group"
-        direction="row"
-        justifyContent="center"
-        gutterSize="none"
-      >
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-indicator-type"
-            eventId={eventId}
-            field={INDICATOR_MATCHED_TYPE}
-            value={indicatorType}
-          />
-        </EuiFlexItem>
-        {'indicator matched on'}
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-source-field"
-            eventId={eventId}
-            field={INDICATOR_MATCHED_FIELD}
-            value={sourceField}
-          />
-        </EuiFlexItem>
-        {', whose value was'}
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-source-value"
-            eventId={eventId}
-            field={sourceField}
-            value={sourceValue}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="flexStart"
-        data-test-subj="threat-match-indicator-group"
-        direction="row"
-        justifyContent="center"
-        gutterSize="none"
-      >
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-indicator-dataset"
-            eventId={eventId}
-            field={INDICATOR_DATASET}
-            value={indicatorDataset}
-          />
-        </EuiFlexItem>
-        {'via'}
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-indicator-provider"
-            eventId={eventId}
-            field={INDICATOR_PROVIDER}
-            value={indicatorProvider}
-          />
-        </EuiFlexItem>
-        {':'}
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-row-indicator-reference"
-            eventId={eventId}
-            field={INDICATOR_REFERENCE}
-            value={indicatorReference}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <MatchDetails
+        contextId={contextId}
+        eventId={eventId}
+        sourceField={sourceField}
+        sourceValue={sourceValue}
+      />
+      <IndicatorDetails
+        contextId={contextId}
+        eventId={eventId}
+        indicatorDataset={indicatorDataset}
+        indicatorProvider={indicatorProvider}
+        indicatorReference={indicatorReference}
+        indicatorType={indicatorType}
+      />
     </>
   );
 };

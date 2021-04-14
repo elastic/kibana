@@ -7,11 +7,16 @@
 
 import { get } from 'lodash';
 import React from 'react';
+import styled from 'styled-components';
 
 import { Fields } from '../../../../../../../common/search_strategy';
 import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { ThreatMatchRow } from './threat_match_row';
+
+const SpacedContainer = styled.div`
+  margin: ${({ theme }) => theme.eui.paddingSizes.s} 0;
+`;
 
 export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) => {
   const indicators = get(data, 'threat.indicator') as Fields[];
@@ -19,15 +24,17 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) 
 
   return (
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
-      {indicators.map((indicator, index) => (
-        <ThreatMatchRow
-          // TODO index should be replaced with matched.id when it is available
-          key={`threat-match-row-${eventId}-${index}`}
-          data={indicator}
-          eventId={eventId}
-          timelineId={timelineId}
-        />
-      ))}
+      <SpacedContainer>
+        {indicators.map((indicator, index) => (
+          <ThreatMatchRow
+            // index should be replaced with matched.id when it is available
+            key={`threat-match-row-${eventId}-${index}`}
+            data={indicator}
+            eventId={eventId}
+            timelineId={timelineId}
+          />
+        ))}
+      </SpacedContainer>
     </RowRendererContainer>
   );
 };
