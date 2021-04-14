@@ -21,7 +21,7 @@ export function initGetCasesStatusApi({ router, logger }: RouteDeps) {
         const client = await context.cases.getCasesClient();
 
         return response.ok({
-          body: await client.statusStats.get(),
+          body: await client.stats.getStatusTotalsByType(),
         });
       } catch (error) {
         logger.error(`Failed to get status stats in route: ${error}`);

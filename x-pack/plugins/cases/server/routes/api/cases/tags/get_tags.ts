@@ -19,7 +19,7 @@ export function initGetTagsApi({ router, logger }: RouteDeps) {
       try {
         const client = await context.cases.getCasesClient();
 
-        return response.ok({ body: await client.tags.get() });
+        return response.ok({ body: await client.cases.getTags() });
       } catch (error) {
         logger.error(`Failed to retrieve tags in route: ${error}`);
         return response.customError(wrapError(error));

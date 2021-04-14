@@ -19,7 +19,7 @@ export function initGetReportersApi({ router, logger }: RouteDeps) {
       try {
         const client = await context.cases.getCasesClient();
 
-        return response.ok({ body: await client.reporters.get() });
+        return response.ok({ body: await client.cases.getReporters() });
       } catch (error) {
         logger.error(`Failed to get reporters in route: ${error}`);
         return response.customError(wrapError(error));

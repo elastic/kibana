@@ -13,7 +13,7 @@ import { CasesClientInternal, createCasesClientInternal } from './client_interna
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
-import { createStatusStatsSubClient, StatusStatsSubClient } from './status_stats/client';
+import { createStatsSubClient, StatsSubClient } from './status_stats/client';
 
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
@@ -22,7 +22,7 @@ export class CasesClient {
   private readonly _userActions: UserActionsSubClient;
   private readonly _subCases: SubCasesClient;
   private readonly _configure: ConfigureSubClient;
-  private readonly _stats: StatusStatsSubClient;
+  private readonly _stats: StatsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -31,7 +31,7 @@ export class CasesClient {
     this._userActions = createUserActionsSubClient(args);
     this._subCases = createSubCasesClient(args, this._casesClientInternal);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
-    this._stats = createStatusStatsSubClient(args);
+    this._stats = createStatsSubClient(args);
   }
 
   public get cases() {

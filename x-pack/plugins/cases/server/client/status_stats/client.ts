@@ -11,22 +11,22 @@ import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
 
 /**
- * Status statistics API contract.
+ * Statistics API contract.
  */
-export interface StatusStatsSubClient {
-  get(): Promise<CasesStatusResponse>;
+export interface StatsSubClient {
+  getStatusTotalsByType(): Promise<CasesStatusResponse>;
 }
 
 /**
  * Creates the interface for retrieving the number of open, closed, and in progress cases.
  */
-export function createStatusStatsSubClient(clientArgs: CasesClientArgs): StatusStatsSubClient {
+export function createStatsSubClient(clientArgs: CasesClientArgs): StatsSubClient {
   return Object.freeze({
-    get: () => get(clientArgs),
+    getStatusTotalsByType: () => getStatusTotalsByType(clientArgs),
   });
 }
 
-async function get({
+async function getStatusTotalsByType({
   savedObjectsClient: soClient,
   caseService,
   logger,
