@@ -6,13 +6,15 @@
  */
 
 import {
-  DefaultItemAction,
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
+  EuiButton,
+  EuiIcon,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
+import { CustomItemAction } from '@elastic/eui/src/components/basic_table/custom_item_action';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { asDuration } from '../../../common/utils/formatters';
@@ -42,13 +44,13 @@ export function AlertsTable(props: AlertsTableProps) {
   const { core } = usePluginContext();
   const { prepend } = core.http.basePath;
 
-  const actions: Array<DefaultItemAction<TopAlert>> = [
+  const actions: Array<CustomItemAction<TopAlert>> = [
     {
-      name: 'Alert details',
-      description: 'Alert details',
-      onClick: (item) => {
-        setFlyoutAlert(item);
-      },
+      render: (item) => (
+        <EuiButton href={prepend(item.link)} size="s">
+          View in app
+        </EuiButton>
+      ),
       isPrimary: true,
     },
   ];
@@ -57,25 +59,24 @@ export function AlertsTable(props: AlertsTableProps) {
     {
       field: 'active',
       name: 'Status',
-      width: '112px',
+      align: 'center',
       render: (_, { active }) => {
-        const style = {
-          width: '96px',
-          textAlign: 'center' as const,
-        };
-
         return active ? (
-          <EuiBadge iconType="alert" color="danger" style={style}>
-            {i18n.translate('xpack.observability.alertsTable.status.active', {
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.alertsTable.status.active', {
               defaultMessage: 'Active',
             })}
-          </EuiBadge>
+          >
+            <EuiIcon type="alert" color="danger" />
+          </EuiToolTip>
         ) : (
-          <EuiBadge iconType="check" color="hollow" style={style}>
-            {i18n.translate('xpack.observability.alertsTable.status.recovered', {
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.alertsTable.status.recovered', {
               defaultMessage: 'Recovered',
             })}
-          </EuiBadge>
+          >
+            <EuiIcon type="check" />
+          </EuiToolTip>
         );
       },
     },
@@ -94,11 +95,18 @@ export function AlertsTable(props: AlertsTableProps) {
       },
     },
     {
+      field: 'severity',
+      name: 'Severity',
+      render: (_, { severityLevel }) => {
+        return severityLevel;
+      },
+    },
+    {
       field: 'reason',
       name: 'Reason',
       dataType: 'string',
       render: (_, item) => {
-        return item.link ? <EuiLink href={prepend(item.link)}>{item.reason}</EuiLink> : item.reason;
+        return <EuiLink onClick={() => setFlyoutAlert(item)}>{item.reason}</EuiLink>;
       },
     },
     {
