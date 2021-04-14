@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { NewVectorLayerEditor } from './index';
-import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
+import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
 import { CREATE_DRAWN_FEATURES_INDEX_STEP_ID, ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID } from './wizard';
 import { getFileUpload } from '../../../kibana_services';
 
@@ -29,7 +29,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     });
     return !hasImportPermission;
   },
-  icon: DocumentsLayerIcon,
+  icon: DrawLayerIcon,
   prerequisiteSteps: [
     {
       id: CREATE_DRAWN_FEATURES_INDEX_STEP_ID,
