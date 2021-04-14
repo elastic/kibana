@@ -82,7 +82,7 @@ export const initialRulesUsage: DetectionRulesUsage = {
 /**
  * Default detection rule usage count, split by type + elastic/custom
  */
-export const initalDetectionRulesUsage: DetectionRulesTypeUsage = {
+export const initialDetectionRulesUsage: DetectionRulesTypeUsage = {
   query: {
     enabled: 0,
     disabled: 0,
@@ -141,7 +141,7 @@ export const initialMlJobsUsage: MlJobsUsage = {
   },
 };
 
-const updateDetectionRuleUsage = (
+export const updateDetectionRuleUsage = (
   detectionRuleMetric: DetectionRuleMetric,
   usage: DetectionRulesTypeUsage
 ): DetectionRulesTypeUsage => {
@@ -151,6 +151,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...usage,
       query: {
+        ...usage.query,
         enabled: detectionRuleMetric.enabled ? usage.query.enabled + 1 : usage.query.enabled,
         disabled: !detectionRuleMetric.enabled ? usage.query.disabled + 1 : usage.query.disabled,
         alerts: usage.query.alerts + detectionRuleMetric.alert_count_daily,
@@ -161,6 +162,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...usage,
       threshold: {
+        ...usage.threshold,
         enabled: detectionRuleMetric.enabled
           ? usage.threshold.enabled + 1
           : usage.threshold.enabled,
@@ -175,6 +177,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...usage,
       eql: {
+        ...usage.eql,
         enabled: detectionRuleMetric.enabled ? usage.eql.enabled + 1 : usage.eql.enabled,
         disabled: !detectionRuleMetric.enabled ? usage.eql.disabled + 1 : usage.eql.disabled,
         alerts: usage.eql.alerts + detectionRuleMetric.alert_count_daily,
@@ -185,6 +188,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...usage,
       machine_learning: {
+        ...usage.machine_learning,
         enabled: detectionRuleMetric.enabled
           ? usage.machine_learning.enabled + 1
           : usage.machine_learning.enabled,
@@ -199,6 +203,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...usage,
       threat_match: {
+        ...usage.threat_match,
         enabled: detectionRuleMetric.enabled
           ? usage.threat_match.enabled + 1
           : usage.threat_match.enabled,
@@ -215,6 +220,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...updatedUsage,
       elastic_total: {
+        ...updatedUsage.elastic_total,
         enabled: detectionRuleMetric.enabled
           ? updatedUsage.elastic_total.enabled + 1
           : updatedUsage.elastic_total.enabled,
@@ -229,6 +235,7 @@ const updateDetectionRuleUsage = (
     updatedUsage = {
       ...updatedUsage,
       custom_total: {
+        ...updatedUsage.custom_total,
         enabled: detectionRuleMetric.enabled
           ? updatedUsage.custom_total.enabled + 1
           : updatedUsage.custom_total.enabled,
@@ -502,7 +509,7 @@ export const getDetectionRuleMetrics = async (
   esClient: ElasticsearchClient,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionRuleAdoption> => {
-  let rulesUsage: DetectionRulesTypeUsage = initalDetectionRulesUsage;
+  let rulesUsage: DetectionRulesTypeUsage = initialDetectionRulesUsage;
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: [],
