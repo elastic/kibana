@@ -261,6 +261,7 @@ function endDataLoad(
     dispatch(unregisterCancelCallback(requestToken));
     const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
     if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      // todo - investigate - this may arise with failing style meta request and should not throw in that case
       throw new DataRequestAbortError();
     }
 

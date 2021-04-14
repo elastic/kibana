@@ -116,9 +116,12 @@ export async function getGridTile({
                 let numberValue: number;
                 if (key === COUNT_PROP_NAME) {
                   numberValue = parseFloat(rawValue);
+                } else if (typeof rawValue === 'number') {
+                  numberValue = rawValue;
+                } else if (rawValue) {
+                  numberValue = parseFloat(rawValue.value);
                 } else {
-                  numberValue =
-                    typeof rawValue === 'number' ? rawValue : parseFloat(rawValue.value);
+                  continue;
                 }
                 if (!isNaN(numberValue)) {
                   if (!rangeMeta[key]) {
