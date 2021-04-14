@@ -1,0 +1,18 @@
+env:
+  SKIP_CI_SETUP: 'true'
+steps:
+  - command: .buildkite/scripts/build-setup.sh
+    label: Pre-Build
+
+  - wait
+
+  - command: .ci/buildkite/jobs/agent-packer.sh
+    label: Build Agent Image
+    agents:
+      queue: packer
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/post-build.sh
+    label: Post-Build
