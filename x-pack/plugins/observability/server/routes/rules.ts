@@ -29,8 +29,9 @@ const alertsListRoute = createObservabilityServerRoute({
     ]),
   }),
   handler: async ({ ruleRegistry, context, params }) => {
-    const ruleRegistryClient = ruleRegistry.createScopedRuleRegistryClient({
+    const ruleRegistryClient = await ruleRegistry.createScopedRuleRegistryClient({
       context,
+      alertsClient: context.alerting.getAlertsClient(),
     });
 
     if (!ruleRegistryClient) {
@@ -57,8 +58,9 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
     tags: [],
   },
   handler: async ({ ruleRegistry, context }) => {
-    const ruleRegistryClient = ruleRegistry.createScopedRuleRegistryClient({
+    const ruleRegistryClient = await ruleRegistry.createScopedRuleRegistryClient({
       context,
+      alertsClient: context.alerting.getAlertsClient(),
     });
 
     if (!ruleRegistryClient) {

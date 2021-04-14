@@ -8,6 +8,7 @@
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  FormatterRuleRegistry,
   HasDataParams,
   ObservabilityPublicSetup,
 } from '../../observability/public';
@@ -161,6 +162,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const apmRuleRegistry = plugins.observability.ruleRegistry.create({
       ...apmRuleRegistrySettings,
+      ctor: FormatterRuleRegistry,
     });
 
     registerApmAlerts(apmRuleRegistry);

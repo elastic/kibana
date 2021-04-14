@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import {
   ESSearchRequest,
   ESSearchResponse,
@@ -14,7 +13,6 @@ import { AlertServices } from '../../../../alerting/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,
-  logger,
   params,
 }: {
   scopedClusterClient: AlertServices<
@@ -22,17 +20,12 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
     never,
     never
   >['scopedClusterClient'];
-  logger: Logger;
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
-  // logger.debug(JSON.stringify(params, null, 2));
-
   const response = await scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,
   });
-
-  // logger.debug(JSON.stringify(response.body, null, 2));
 
   return (response.body as unknown) as ESSearchResponse<unknown, TParams>;
 }

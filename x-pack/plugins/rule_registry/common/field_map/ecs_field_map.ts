@@ -9,9 +9,7 @@
 do not manually edit
 */
 
-import { Mutable } from 'utility-types';
-
-const plainEcsFieldMap = {
+export const ecsFieldMap = {
   '@timestamp': {
     type: 'date',
     array: false,
@@ -3379,6 +3377,4 @@ const plainEcsFieldMap = {
   },
 } as const;
 
-export type EcsFieldMap = Mutable<typeof plainEcsFieldMap>;
-
-export const ecsFieldMap: EcsFieldMap = plainEcsFieldMap;
+export type EcsFieldMap = typeof ecsFieldMap;

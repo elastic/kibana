@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import type { ScopedRuleRegistryClient, FieldMapOf } from '../../rule_registry/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 import type { ObservabilityRuleRegistry } from './plugin';
@@ -23,6 +24,7 @@ export type {
  */
 export interface ObservabilityRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
 }
 
 /**

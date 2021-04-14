@@ -7,7 +7,7 @@
 import type { CSSProperties } from 'react';
 import React, { memo, useCallback } from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { EuiAvatarProps } from '@elastic/eui/src/components/avatar/avatar';
+import type { EuiAvatarProps } from '@elastic/eui';
 
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 

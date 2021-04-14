@@ -7,8 +7,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -18,10 +21,13 @@ import {
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
+import type {
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+} from '../../../../src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
-import { LensPublicStart } from '../../lens/public';
+import type { LensPublicStart } from '../../lens/public';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { observabilityRuleRegistrySettings } from '../common/observability_rule_registry';
 import { FormatterRuleRegistry } from './rules/formatter_rule_registry';

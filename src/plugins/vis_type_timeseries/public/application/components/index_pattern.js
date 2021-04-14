@@ -77,8 +77,8 @@ export const IndexPattern = ({
   const intervalName = `${prefix}interval`;
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
-  const defaultIndex = useContext(DefaultIndexPatternContext);
   const updateControlValidity = useContext(FormValidationContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
@@ -192,22 +192,18 @@ export const IndexPattern = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('timeField')}
+          <FieldSelect
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
             })}
-          >
-            <FieldSelect
-              restrict={RESTRICT_FIELDS}
-              value={model[timeFieldName]}
-              disabled={disabled}
-              onChange={handleSelectChange(timeFieldName)}
-              indexPattern={model[indexPatternName]}
-              fields={fields}
-              placeholder={defaultIndex?.timeFieldName}
-            />
-          </EuiFormRow>
+            restrict={RESTRICT_FIELDS}
+            value={model[timeFieldName]}
+            disabled={disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
+            fields={fields}
+            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow

@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/lib/Either';
 import v4 from 'uuid/v4';
+import { Mutable } from 'utility-types';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
@@ -163,7 +164,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
               logger.warn(`Could not find alert data for ${alertId}`);
             }
 
-            const event: OutputOfFieldMap<BaseRuleFieldMap> = {
+            const event: Mutable<OutputOfFieldMap<BaseRuleFieldMap>> = {
               ...alertData,
               '@timestamp': timestamp,
               'event.kind': 'state',

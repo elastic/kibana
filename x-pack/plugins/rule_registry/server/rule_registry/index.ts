@@ -7,6 +7,7 @@
 
 import { CoreSetup, Logger, RequestHandlerContext } from 'kibana/server';
 import { inspect } from 'util';
+import { AlertsClient } from '../../../alerting/server';
 import { SpacesServiceStart } from '../../../spaces/server';
 import {
   ActionVariable,
@@ -17,7 +18,14 @@ import {
 import { createReadySignal, ClusterClientAdapter } from '../../../event_log/server';
 import { ILMPolicy } from './types';
 import { RuleParams, RuleType } from '../types';
-import { mergeFieldMaps, TypeOfFieldMap, FieldMap, BaseRuleFieldMap } from '../../common';
+import {
+  mergeFieldMaps,
+  TypeOfFieldMap,
+  FieldMap,
+  FieldMapType,
+  BaseRuleFieldMap,
+  runtimeTypeFromFieldMap,
+} from '../../common';
 import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
 import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
@@ -42,9 +50,14 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
     index: string;
   }>;
   private readonly children: Array<RuleRegistry<TFieldMap>> = [];
+  private readonly types: Array<RuleType<TFieldMap, any, any>> = [];
+
+  private readonly fieldmapType: FieldMapType<TFieldMap>;
 
   constructor(private readonly options: RuleRegistryOptions<TFieldMap>) {
     const { logger, coreSetup } = options;
+
+    this.fieldmapType = runtimeTypeFromFieldMap(options.fieldMap);
 
     const { wait, signal } = createReadySignal<boolean>();
 
@@ -179,21 +192,47 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
     }
   }
 
-  createScopedRuleRegistryClient({
+  getFieldMapType() {
+    return this.fieldmapType;
+  }
+
+  getRuleTypeById(ruleTypeId: string) {
+    return this.types.find((type) => type.id === ruleTypeId);
+  }
+
+  getRegistryByRuleTypeId(ruleTypeId: string): RuleRegistry<TFieldMap> | undefined {
+    if (this.getRuleTypeById(ruleTypeId)) {
+      return this;
+    }
+
+    return this.children.find((child) => child.getRegistryByRuleTypeId(ruleTypeId));
+  }
+
+  async createScopedRuleRegistryClient({
     context,
+    alertsClient,
   }: {
     context: RequestHandlerContext;
-  }): ScopedRuleRegistryClient<TFieldMap> | undefined {
+    alertsClient: AlertsClient;
+  }): Promise<ScopedRuleRegistryClient<TFieldMap> | undefined> {
     if (!this.options.writeEnabled) {
       return undefined;
     }
     const { indexAliasName, indexTarget } = this.getEsNames();
 
+    const frameworkAlerts = (
+      await alertsClient.find({
+        options: {
+          perPage: 1000,
+        },
+      })
+    ).data;
+
     return createScopedRuleRegistryClient({
-      savedObjectsClient: context.core.savedObjects.getClient({ includedHiddenTypes: ['alert'] }),
+      ruleUuids: frameworkAlerts.map((frameworkAlert) => frameworkAlert.id),
       scopedClusterClient: context.core.elasticsearch.client,
       clusterClientAdapter: this.esAdapter,
-      fieldMap: this.options.fieldMap,
+      registry: this,
       indexAliasName,
       indexTarget,
       logger: this.options.logger,
@@ -207,6 +246,8 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
 
     const { indexAliasName, indexTarget } = this.getEsNames();
 
+    this.types.push(type);
+
     this.options.alertingPluginSetupContract.registerType<
       AlertTypeParams,
       AlertTypeState,
@@ -216,7 +257,7 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
     >({
       ...type,
       executor: async (executorOptions) => {
-        const { services, namespace, alertId, name, tags } = executorOptions;
+        const { services, alertId, name, tags } = executorOptions;
 
         const rule = {
           id: type.id,
@@ -237,13 +278,12 @@ export class RuleRegistry<TFieldMap extends BaseRuleFieldMap> {
             ...(this.options.writeEnabled
               ? {
                   scopedRuleRegistryClient: createScopedRuleRegistryClient({
-                    savedObjectsClient: services.savedObjectsClient,
                     scopedClusterClient: services.scopedClusterClient,
+                    ruleUuids: [rule.uuid],
                     clusterClientAdapter: this.esAdapter,
-                    fieldMap: this.options.fieldMap,
+                    registry: this,
                     indexAliasName,
                     indexTarget,
-                    namespace,
                     ruleData: {
                       producer,
                       rule,
