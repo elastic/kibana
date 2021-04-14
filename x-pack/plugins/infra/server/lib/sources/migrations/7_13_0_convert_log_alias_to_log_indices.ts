@@ -17,16 +17,15 @@ export const convertLogAliasToLogIndices: SavedObjectMigrationFn<
   SevenTwelveZeroSourceConfig,
   InfraSourceConfiguration
 > = (sourceConfigurationDocument) => {
-  // Make logAlias optional here on the type to appease the delete operand later
-  const newAttributes: InfraSourceConfiguration & { logAlias?: string } = {
-    ...sourceConfigurationDocument.attributes,
+  const { logAlias, ...otherAttributes } = sourceConfigurationDocument.attributes;
+  
+  const newAttributes: InfraSourceConfiguration = {
+    ...otherAttributes,
     logIndices: {
       type: 'indexName',
-      indexName: sourceConfigurationDocument.attributes.logAlias ?? LOGS_INDEX_PATTERN,
+      indexName: logAlias ?? LOGS_INDEX_PATTERN,
     },
   };
-
-  delete newAttributes.logAlias;
 
   return {
     ...sourceConfigurationDocument,
