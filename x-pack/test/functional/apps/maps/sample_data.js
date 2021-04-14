@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
       await security.testUser.setRoles(
-        ['global_maps_all', 'geoall_data_writer', 'kibana_sample_admin'],
+        ['global_maps_all','kibana_sample_admin'],
         false
       );
     });
