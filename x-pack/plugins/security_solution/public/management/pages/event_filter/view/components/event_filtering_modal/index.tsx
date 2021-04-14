@@ -121,7 +121,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     );
 
     return (
-      <Modal onClose={onCancel} data-test-subj="add-exception-modal">
+      <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>

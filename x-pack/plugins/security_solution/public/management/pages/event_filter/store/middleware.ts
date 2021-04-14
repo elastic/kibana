@@ -16,6 +16,10 @@ import { EventFilterHttpService, EventFilterService } from '../service';
 
 import { EventFilterListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
+import {
+  CreateExceptionListItemSchema,
+  transformNewItemOutput,
+} from '../../../../../public/shared_imports';
 
 const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFilterListPageState, AppAction>,
@@ -24,7 +28,8 @@ const eventFilterCreate = async (
   try {
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
-    const exception = await eventFilterService.addEventFilter(formEntry);
+    const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
+    const exception = await eventFilterService.addEventFilter(sanitizedEntry);
     store.dispatch({
       type: 'eventFilterFormStateChanged',
       payload: {
