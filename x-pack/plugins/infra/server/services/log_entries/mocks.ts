@@ -25,9 +25,9 @@ const indexPattern: IIndexPattern = {
   fields: indexPatternFields,
 };
 
-export const getFrameworkMock = (): any => {
+export const getIndexPatternsMock = (): any => {
   return {
-    getIndexPatternsService: async () => {
+    indexPatternsServiceFactory: async () => {
       return {
         get: async (id) => indexPattern,
         getFieldsForWildcard: async (options) => indexPatternFields,
