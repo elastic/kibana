@@ -45,6 +45,7 @@ import { AnomalySeverityIndicator } from '../../../../../../../components/loggin
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
+import { useUiTracker } from '../../../../../../../../../observability/public';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
 interface JobOption {
@@ -56,15 +57,17 @@ const AnomalyActionMenu = ({
   type,
   startTime,
   closeFlyout,
-  partitionFieldName,
-  partitionFieldValue,
+  influencerField,
+  influencers,
+  disableShowInInventory,
 }: {
   jobId: string;
   type: string;
   startTime: number;
   closeFlyout: () => void;
-  partitionFieldName?: string;
-  partitionFieldValue?: string;
+  influencerField: string;
+  influencers: string[];
+  disableShowInInventory?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -95,10 +98,12 @@ const AnomalyActionMenu = ({
       region: '',
       autoReload: false,
       filterQuery: {
-        expression:
-          partitionFieldName && partitionFieldValue
-            ? `${partitionFieldName}: "${partitionFieldValue}"`
-            : ``,
+        expression: influencers.reduce((query, i) => {
+          if (query) {
+            query = `${query} or `;
+          }
+          return `${query} ${influencerField}: "${i}"`;
+        }, ''),
         kind: 'kuery',
       },
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
@@ -106,7 +111,7 @@ const AnomalyActionMenu = ({
     };
     onViewChange(anomalyViewParams);
     closeFlyout();
-  }, [jobId, onViewChange, startTime, type, partitionFieldName, partitionFieldValue, closeFlyout]);
+  }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
   const anomaliesUrl = useLinkProps({
     app: 'ml',
@@ -114,12 +119,6 @@ const AnomalyActionMenu = ({
   });
 
   const items = [
-    <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-        defaultMessage="Show in Inventory"
-      />
-    </EuiContextMenuItem>,
     <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
@@ -127,6 +126,17 @@ const AnomalyActionMenu = ({
       />
     </EuiContextMenuItem>,
   ];
+
+  if (!disableShowInInventory) {
+    items.push(
+      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+        <FormattedMessage
+          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+          defaultMessage="Show in Inventory"
+        />
+      </EuiContextMenuItem>
+    );
+  }
 
   return (
     <>
@@ -180,6 +190,8 @@ export const AnomaliesTable = (props: Props) => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
+  const [canShowInInventory, setCanShowInInventory] = useState(false);
+  const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
     start: datemathToEpochMillis(start) || 0,
     end: datemathToEpochMillis(end, 'up') || 0,
@@ -311,6 +323,16 @@ export const AnomaliesTable = (props: Props) => {
     [hostChangeSort, k8sChangeSort, jobType]
   );
 
+  useEffect(() => {
+    if (results) {
+      results.forEach((r) => {
+        if (r.influencers.length > 100) {
+          trackMetric({ metric: 'metrics_ml_anomaly_detection_more_than_100_influencers' });
+        }
+      });
+    }
+  }, [results, trackMetric]);
+
   const onTableChange = (criteria: Criteria<MetricsHostsAnomaly>) => {
     setSorting(criteria.sort);
     changeSortOptions({
@@ -384,8 +406,11 @@ export const AnomaliesTable = (props: Props) => {
               <AnomalyActionMenu
                 jobId={anomaly.jobId}
                 type={anomaly.type}
-                partitionFieldName={anomaly.partitionFieldName}
-                partitionFieldValue={anomaly.partitionFieldValue}
+                influencerField={
+                  anomaly.type === 'metrics_hosts' ? 'host.name' : 'kubernetes.pod.uid'
+                }
+                disableShowInInventory={anomaly.influencers.length > 100}
+                influencers={anomaly.influencers}
                 startTime={anomaly.startTime}
                 closeFlyout={closeFlyout}
               />
