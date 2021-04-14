@@ -134,6 +134,40 @@ const layer: IndexPatternLayer = {
   },
 };
 
+describe('labels', () => {
+  const calcColumnArgs = {
+    ...baseColumnArgs,
+    referenceIds: ['metric'],
+    layer,
+    previousColumn: layer.columns.metric,
+  };
+  it('should use label of referenced operation to create label for derivative and moving average', () => {
+    expect(derivativeOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Differences of metricLabel',
+      })
+    );
+    expect(movingAverageOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Moving average of metricLabel',
+      })
+    );
+  });
+
+  it('should use displayName of a field for a label for counter rate and cumulative sum', () => {
+    expect(counterRateOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Counter rate of bytesLabel per second',
+      })
+    );
+    expect(cumulativeSumOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Cumulative sum of bytesLabel',
+      })
+    );
+  });
+});
+
 describe('time scale transition', () => {
   it('should carry over time scale and adjust label on operation from count to sum', () => {
     expect(
@@ -158,60 +192,6 @@ describe('time scale transition', () => {
         expect(result.timeScale).toEqual('h');
         expect(result.label).toContain('per hour');
       }
-    );
-  });
-
-  it('should use label of referenced operation to create label for derivative and moving average', () => {
-    expect(
-      derivativeOperation.buildColumn({
-        ...baseColumnArgs,
-        referenceIds: ['metric'],
-        layer,
-        previousColumn: layer.columns.metric,
-      })
-    ).toEqual(
-      expect.objectContaining({
-        label: 'Differences of metricLabel',
-      })
-    );
-    expect(
-      movingAverageOperation.buildColumn({
-        ...baseColumnArgs,
-        referenceIds: ['metric'],
-        layer,
-        previousColumn: layer.columns.metric,
-      })
-    ).toEqual(
-      expect.objectContaining({
-        label: 'Moving average of metricLabel',
-      })
-    );
-  });
-
-  it('should use displayName of a field for a label for counter rate and cumulative sum', () => {
-    expect(
-      counterRateOperation.buildColumn({
-        ...baseColumnArgs,
-        referenceIds: ['metric'],
-        layer,
-        previousColumn: layer.columns.metric,
-      })
-    ).toEqual(
-      expect.objectContaining({
-        label: 'Counter rate of bytesLabel per second',
-      })
-    );
-    expect(
-      cumulativeSumOperation.buildColumn({
-        ...baseColumnArgs,
-        referenceIds: ['metric'],
-        layer,
-        previousColumn: layer.columns.metric,
-      })
-    ).toEqual(
-      expect.objectContaining({
-        label: 'Cumulative sum of bytesLabel',
-      })
     );
   });
 
