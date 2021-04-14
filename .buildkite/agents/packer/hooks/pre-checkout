@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -euo pipefail
-
-# There's some code in the kibana repository that depends on kibana being checked out to a directory named "kibana"
-if [[ "https://github.com/elastic/kibana.git" == *"/kibana.git" ]]; then
-  export BUILDKITE_BUILD_CHECKOUT_PATH="$BUILDKITE_BUILD_CHECKOUT_PATH/kibana"
-fi
