@@ -304,8 +304,10 @@ export function DiscoverField({
   const canDeleteField = onDeleteField && isRuntimeField;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-      <EuiFlexGroup responsive={false} gutterSize="xs">
-        <EuiFlexItem grow={true}>{field.displayName}</EuiFlexItem>
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem grow={true}>
+          <h5>{field.displayName}</h5>
+        </EuiFlexItem>
         {canEditField && (
           <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
             <EuiButtonIcon
