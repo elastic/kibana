@@ -34,7 +34,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
-    this.cache = defaultsDeep({ ...this.defaults }, params.initialSettings);
+    this.cache = defaultsDeep({}, this.defaults, params.initialSettings);
 
     params.done$.subscribe({
       complete: () => {
@@ -177,7 +177,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
     try {
       const { settings } = await this.api.batchSet(key, newVal);
-      this.cache = defaultsDeep({ ...defaults }, settings);
+      this.cache = defaultsDeep({}, defaults, settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {

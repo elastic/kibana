@@ -152,7 +152,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
 
     const userProvided = await this.getUserProvided();
-    const result = defaultsDeep({ ...userProvided }, this.defaults);
+    const result = defaultsDeep({}, userProvided, this.defaults);
 
     this.rawCache.set(result);
 
