@@ -28,7 +28,7 @@ RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/
   && mv vault /usr/local/bin/vault
 
 RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
-RUN mkdir -p /var/lib/kibana/workspace/kibana && chown kibana:kibana /var/lib/kibana/workspace/kibana
+RUN mkdir -p /var/lib/kibana/workspace/kibana && chown -R kibana:kibana /var/lib/kibana
 WORKDIR /var/lib/kibana/workspace/kibana
 COPY --chown=kibana:kibana package.json yarn.lock preinstall_check.js .bazeliskversion ./
 RUN npm install -g --force yarn@^"$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")" && \
