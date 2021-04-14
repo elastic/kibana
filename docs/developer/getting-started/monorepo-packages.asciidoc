@@ -62,5 +62,6 @@ yarn kbn watch-bazel
 === List of Already Migrated Packages to Bazel
 
 - @elastic/datemath
+- @kbn/apm-utils
 
 
