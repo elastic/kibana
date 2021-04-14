@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
 import { basicUiCounters } from './__fixtures__/ui_counters';
+import { basicUsageCounters } from './__fixtures__/usage_counters';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
@@ -150,6 +151,20 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns ui counters aggregated by day', async () => {
         const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
+      });
+    });
+
+    describe('Usage Counters telemetry', () => {
+      before('Add UI Counters saved objects', () =>
+        esArchiver.load('saved_objects/usage_counters')
+      );
+      after('cleanup saved objects changes', () =>
+        esArchiver.unload('saved_objects/usage_counters')
+      );
+
+      it('returns usage counters aggregated by day', async () => {
+        const stats = await retrieveTelemetry(supertest);
+        expect(stats.stack_stats.kibana.plugins.usage_counters).to.eql(basicUsageCounters);
       });
     });
 
