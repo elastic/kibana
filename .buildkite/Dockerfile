@@ -37,9 +37,8 @@ RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
 
 COPY . .
 
-RUN yarn kbn bootstrap
-RUN yarn kbn run build -i @kbn/pm
-RUN node scripts/build_plugin_list_docs
+ENV BUILD_TS_REFS_DISABLE=true
+RUN yarn kbn bootstrap --no-cache
 
 RUN chown -R kibana:kibana /var/lib/kibana/
 
