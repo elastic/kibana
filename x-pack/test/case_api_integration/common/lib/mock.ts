@@ -92,11 +92,11 @@ export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
 };
 
 export const postCaseResp = (
-  id: string,
+  id?: string | null,
   req: CasePostRequest = postCaseReq
 ): Partial<CaseResponse> => ({
   ...req,
-  id,
+  ...(id != null ? { id } : {}),
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
@@ -164,60 +164,6 @@ export const subCaseResp = ({
   created_by: defaultUser,
   updated_by: defaultUser,
 });
-
-interface FormattedCollectionResponse {
-  caseInfo: Partial<CaseResponse>;
-  subCases?: Array<Partial<SubCaseResponse>>;
-  comments?: Array<Partial<CommentResponse>>;
-}
-
-export const formatCollectionResponse = (caseInfo: CaseResponse): FormattedCollectionResponse => {
-  const subCase = removeServerGeneratedPropertiesFromSubCase(caseInfo.subCases?.[0]);
-  return {
-    caseInfo: removeServerGeneratedPropertiesFromCaseCollection(caseInfo),
-    subCases: subCase ? [subCase] : undefined,
-    comments: removeServerGeneratedPropertiesFromComments(
-      caseInfo.subCases?.[0].comments ?? caseInfo.comments
-    ),
-  };
-};
-
-export const removeServerGeneratedPropertiesFromSubCase = (
-  subCase: Partial<SubCaseResponse> | undefined
-): Partial<SubCaseResponse> | undefined => {
-  if (!subCase) {
-    return;
-  }
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, comments, ...rest } = subCase;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromCaseCollection = (
-  config: Partial<CaseResponse>
-): Partial<CaseResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, subCases, ...rest } = config;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromCase = (
-  config: Partial<CaseResponse>
-): Partial<CaseResponse> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, ...rest } = config;
-  return rest;
-};
-
-export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[] | undefined
-): Array<Partial<CommentResponse>> | undefined => {
-  return comments?.map((comment) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { created_at, updated_at, version, ...rest } = comment;
-    return rest;
-  });
-};
 
 const findCommon = {
   page: 1,

@@ -132,7 +132,7 @@ export const create = async ({
           actionAt: createdDate,
           actionBy: { username, full_name, email },
           caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
+          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', 'owner'],
           newValue: JSON.stringify(query),
         }),
       ],

@@ -5,115 +5,81 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest } from 'kibana/server';
-import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
-import {
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import {
-  AlertServiceContract,
-  CaseConfigureService,
-  CaseService,
-  CaseUserActionService,
-  ConnectorMappingsService,
-} from '../services';
-import { CasesClient } from './types';
-import { authenticationMock } from '../routes/api/__fixtures__';
-import { featuresPluginMock } from '../../../features/server/mocks';
+import { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
+
+import { CasesClient, CasesClientInternal } from '.';
+import { AttachmentsSubClient } from './attachments/client';
+import { CasesSubClient } from './cases/client';
 import { CasesClientFactory } from './factory';
-import { KibanaFeature } from '../../../features/common';
+import { SubCasesClient } from './sub_cases/client';
+import { UserActionsSubClient } from './user_actions/client';
 
-export type CasesClientPluginContractMock = jest.Mocked<CasesClient>;
-export const createExternalCasesClientMock = (): CasesClientPluginContractMock => ({
-  addComment: jest.fn(),
-  create: jest.fn(),
-  get: jest.fn(),
-  push: jest.fn(),
-  getAlerts: jest.fn(),
-  getFields: jest.fn(),
-  getMappings: jest.fn(),
-  getUserActions: jest.fn(),
-  update: jest.fn(),
-  updateAlertsStatus: jest.fn(),
-  find: jest.fn(),
-});
+type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
-export const createCasesClientWithMockSavedObjectsClient = async ({
-  savedObjectsClient,
-  badAuth = false,
-  omitFromContext = [],
-}: {
-  savedObjectsClient: any;
-  badAuth?: boolean;
-  omitFromContext?: string[];
-}): Promise<{
-  client: CasesClient;
-  services: {
-    userActionService: jest.Mocked<CaseUserActionService>;
-    alertsService: jest.Mocked<AlertServiceContract>;
-  };
-  esClient: DeeplyMockedKeys<ElasticsearchClient>;
-}> => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const log = loggingSystemMock.create().get('case');
-
-  const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
-  const caseService = new CaseService(log, auth);
-  const caseConfigureServicePlugin = new CaseConfigureService(log);
-  const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
-
-  const caseConfigureService = await caseConfigureServicePlugin.setup();
-
-  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
-  const userActionService = {
-    getUserActions: jest.fn(),
-    postUserActions: jest.fn(),
-  };
-
-  const alertsService = {
-    initialize: jest.fn(),
-    updateAlertsStatus: jest.fn(),
-    getAlerts: jest.fn(),
-  };
-
-  // since the cases saved objects are hidden we need to use getScopedClient(), we'll just have it return the mock client
-  // that is passed in to createRouteContext
-  const savedObjectsService = savedObjectsServiceMock.createStartContract();
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-
-  // create a fake feature
-  const featureStart = featuresPluginMock.createStart();
-  featureStart.getKibanaFeatures.mockReturnValue([
-    // all the authorization class cares about is the `cases` field in the kibana feature so just cast it to that
-    ({ cases: ['securitySolution'] } as unknown) as KibanaFeature,
-  ]);
-
-  const factory = new CasesClientFactory(log);
-  factory.initialize({
-    alertsService,
-    caseConfigureService,
-    caseService,
-    connectorMappingsService,
-    userActionService,
-    featuresPluginStart: featureStart,
-    getSpace: async (req: KibanaRequest) => undefined,
-    // intentionally not passing the security plugin so that security will be disabled
-  });
-
-  // create a single reference to the caseClient so we can mock its methods
-  const casesClient = await factory.create({
-    savedObjectsService,
-    // Since authorization is disabled for these unit tests we don't need any information from the request object
-    // so just pass in an empty one
-    request: {} as KibanaRequest,
-    scopedClusterClient: esClient,
-  });
-
+const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
-    client: casesClient,
-    services: { userActionService, alertsService },
-    esClient,
+    create: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    push: jest.fn(),
+    update: jest.fn(),
   };
+};
+
+type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
+
+const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
+  return {
+    add: jest.fn(),
+  };
+};
+
+type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
+
+const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
+  return {
+    getAll: jest.fn(),
+  };
+};
+
+type SubCasesClientMock = jest.Mocked<SubCasesClient>;
+
+const createSubCasesClientMock = (): SubCasesClientMock => {
+  return {
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+};
+
+type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
+
+export interface CasesClientMock extends CasesClient {
+  cases: CasesSubClientMock;
+  attachments: AttachmentsSubClientMock;
+  userActions: UserActionsSubClientMock;
+  subCases: SubCasesClientMock;
+}
+
+export const createCasesClientMock = (): CasesClientMock => {
+  const client: PublicContract<CasesClient> = {
+    casesClientInternal: (jest.fn() as unknown) as CasesClientInternalMock,
+    cases: createCasesSubClientMock(),
+    attachments: createAttachmentsSubClientMock(),
+    userActions: createUserActionsSubClientMock(),
+    subCases: createSubCasesClientMock(),
+  };
+  return (client as unknown) as CasesClientMock;
+};
+
+export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;
+
+export const createCasesClientFactory = (): CasesClientFactoryMock => {
+  const factory: PublicMethodsOf<CasesClientFactory> = {
+    initialize: jest.fn(),
+    create: jest.fn(),
+  };
+
+  return (factory as unknown) as CasesClientFactoryMock;
 };

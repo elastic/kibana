@@ -62,6 +62,36 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
+    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
+    const alertingAllFiles = fs.readdirSync(
+      path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'alerting_api_integration',
+        'common',
+        'fixtures',
+        'plugins'
+      )
+    );
+
+    const alertingPlugins = alertingAllFiles.filter((file) =>
+      fs
+        .statSync(
+          path.resolve(
+            __dirname,
+            '..',
+            '..',
+            'alerting_api_integration',
+            'common',
+            'fixtures',
+            'plugins',
+            file
+          )
+        )
+        .isDirectory()
+    );
+
     return {
       testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
       servers,
@@ -90,15 +120,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           // Actions simulators plugin. Needed for testing push to external services.
-          `--plugin-path=${path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'alerting_api_integration',
-            'common',
-            'fixtures',
-            'plugins'
-          )}`,
+          ...alertingPlugins.map(
+            (pluginDir) =>
+              `--plugin-path=${path.resolve(
+                __dirname,
+                '..',
+                '..',
+                'alerting_api_integration',
+                'common',
+                'fixtures',
+                'plugins',
+                pluginDir
+              )}`
+          ),
           ...plugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`

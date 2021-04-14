@@ -11,11 +11,11 @@ import { FtrProviderContext } from '../../../../../../common/ftr_provider_contex
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../../plugins/cases/common/constants';
 import { defaultUser, postCaseReq } from '../../../../../common/lib/mock';
 import {
-  deleteCases,
+  deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getConfiguration,
+  getConfigurationRequest,
   getServiceNowConnector,
 } from '../../../../../common/lib/utils';
 
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -63,10 +63,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(
-          getConfiguration({
+          getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
           })
         )
         .expect(200);
@@ -76,10 +76,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({
           ...postCaseReq,
-          connector: getConfiguration({
+          connector: getConfigurationRequest({
             id: connector.id,
             name: connector.name,
-            type: connector.actionTypeId,
+            type: connector.connector_type_id,
             fields: {
               urgency: '2',
               impact: '2',

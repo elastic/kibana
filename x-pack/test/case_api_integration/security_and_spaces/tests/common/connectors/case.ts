@@ -11,12 +11,11 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
+import { postCaseReq, postCaseResp } from '../../../../common/lib/mock';
 import {
-  postCaseReq,
-  postCaseResp,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromComments,
-} from '../../../../common/lib/mock';
+} from '../../../../common/lib/utils';
 import {
   createRule,
   createSignalsIndex,
@@ -38,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return 400 when creating a case action', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A case connector',
@@ -51,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should return 200 when creating a case action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A case connector',
@@ -71,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdActionId}`)
+        .get(`/api/actions/connector/${createdActionId}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -86,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe.skip('create', () => {
       it('should respond with a 400 Bad Request when creating a case without title', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -115,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -131,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating a case without description', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -160,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -176,7 +175,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating a case without tags', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -205,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -221,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating a case without connector', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -241,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -257,7 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating jira without issueType', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -286,7 +285,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -302,7 +301,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating a connector with wrong fields', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -332,7 +331,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -348,7 +347,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when creating a none without fields as null', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -374,7 +373,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -390,7 +389,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a case', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -423,7 +422,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -448,7 +447,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a case with connector with field as null if not provided', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -477,7 +476,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -516,7 +515,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe.skip('update', () => {
       it('should respond with a 400 Bad Request when updating a case without id', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -535,7 +534,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -551,7 +550,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when updating a case without version', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -570,7 +569,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -586,7 +585,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should update a case', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -613,7 +612,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -640,7 +639,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe.skip('addComment', () => {
       it('should respond with a 400 Bad Request when adding a comment to a case without caseId', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -658,7 +657,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -674,7 +673,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when missing attributes of type user', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -692,7 +691,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -728,7 +727,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
 
           const { body: createdAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'A case connector',
@@ -759,7 +758,7 @@ export default ({ getService }: FtrProviderContext): void => {
           };
 
           const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .post(`/api/actions/connector/${createdActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({ params })
             .expect(200);
@@ -790,7 +789,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -818,7 +817,7 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const attribute of ['alertId']) {
           const requestAttributes = omit(attribute, comment);
           const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .post(`/api/actions/connector/${createdActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -839,7 +838,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when adding excess attributes for type user', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -859,7 +858,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const attribute of ['blah', 'bogus']) {
           const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .post(`/api/actions/connector/${createdActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -882,7 +881,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -907,7 +906,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const attribute of ['comment']) {
           const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .post(`/api/actions/connector/${createdActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -931,7 +930,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should respond with a 400 Bad Request when adding a comment to a case without type', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -950,7 +949,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -966,7 +965,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should add a comment of type user', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -992,7 +991,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
@@ -1019,7 +1018,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should add a comment of type alert', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A case connector',
@@ -1050,7 +1049,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .post(`/api/actions/connector/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);

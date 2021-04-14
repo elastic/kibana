@@ -8,13 +8,22 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
+import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
+  defaultUser,
   postCaseReq,
   postCaseResp,
-  removeServerGeneratedPropertiesFromCase,
+  postCommentUserReq,
 } from '../../../../common/lib/mock';
-import { deleteCases } from '../../../../common/lib/utils';
+import {
+  deleteCasesByESQuery,
+  createCase,
+  getCase,
+  createComment,
+  removeServerGeneratedPropertiesFromCase,
+  removeServerGeneratedPropertiesFromSavedObject,
+} from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -23,24 +32,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
-    it('should return a case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    it('should return a case with no comments', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const theCase = await getCase(supertest, postedCase.id, true);
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const data = removeServerGeneratedPropertiesFromCase(theCase);
+      expect(data).to.eql(postCaseResp());
+      expect(data.comments?.length).to.eql(0);
+    });
 
-      const data = removeServerGeneratedPropertiesFromCase(body);
-      expect(data).to.eql(postCaseResp(postedCase.id));
+    it('should return a case with comments', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment(supertest, postedCase.id, postCommentUserReq);
+      const theCase = await getCase(supertest, postedCase.id, true);
+
+      const comment = removeServerGeneratedPropertiesFromSavedObject(
+        theCase.comments![0] as AttributesTypeUser
+      );
+
+      expect(theCase.comments?.length).to.eql(1);
+      expect(comment).to.eql({
+        type: postCommentUserReq.type,
+        comment: postCommentUserReq.comment,
+        associationType: 'case',
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
     it('should return a 400 when passing the includeSubCaseComments', async () => {

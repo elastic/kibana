@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
+  CaseStatuses,
+  CaseUserActionResponse,
 } from '../../../../../../plugins/cases/common/api';
+import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
-  getPostCaseRequest,
-  postCaseResp,
+  createCaseAsUser,
+  deleteCasesByESQuery,
+  createCase,
   removeServerGeneratedPropertiesFromCase,
-} from '../../../../common/lib/mock';
-import { createCaseAsUser, deleteCases } from '../../../../common/lib/utils';
+  removeServerGeneratedPropertiesFromUserAction,
+  getAllUserAction,
+} from '../../../../common/lib/utils';
 import {
   secOnly,
   secOnlyRead,
@@ -36,68 +43,195 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCases(es);
+      await deleteCasesByESQuery(es);
     });
 
-    it('should post a case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getPostCaseRequest())
-        .expect(200);
-
-      const data = removeServerGeneratedPropertiesFromCase(postedCase);
-      expect(data).to.eql(postCaseResp(postedCase.id));
-    });
-
-    it('unhappy path - 400s when bad query supplied', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        // @ts-expect-error
-        .send({ ...getPostCaseRequest({ badKey: true }) })
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when connector is not supplied', async () => {
-      const { connector, ...caseWithoutConnector } = getPostCaseRequest();
-
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(caseWithoutConnector)
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when connector has wrong type', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...getPostCaseRequest({
-            // @ts-expect-error
-            connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
-          }),
-        })
-        .expect(400);
-    });
-
-    it('unhappy path - 400s when connector has wrong fields', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...getPostCaseRequest({
-            // @ts-expect-error
+    describe('happy path', () => {
+      it('should post a case', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
             connector: {
-              id: 'wrong',
-              name: 'wrong',
+              id: '123',
+              name: 'Jira',
               type: ConnectorTypes.jira,
-              fields: { unsupported: 'value' },
-            } as ConnectorJiraTypeFields,
-          }),
-        })
-        .expect(400);
+              fields: { issueType: 'Task', priority: 'High', parent: null },
+            },
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              connector: {
+                id: '123',
+                name: 'Jira',
+                type: ConnectorTypes.jira,
+                fields: { issueType: 'Task', priority: 'High', parent: null },
+              },
+            })
+          )
+        );
+      });
+
+      it('should post a case: none connector', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            })
+          )
+        );
+      });
+
+      it('should create a user action when creating a case', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
+
+        const { new_value, ...rest } = creationUserAction as CaseUserActionResponse;
+        const parsedNewValue = JSON.parse(new_value!);
+
+        expect(rest).to.eql({
+          action_field: [
+            'description',
+            'status',
+            'tags',
+            'title',
+            'connector',
+            'settings',
+            'owner',
+          ],
+          action: 'create',
+          action_by: defaultUser,
+          old_value: null,
+          case_id: `${postedCase.id}`,
+          comment_id: null,
+          sub_case_id: '',
+        });
+
+        expect(parsedNewValue).to.eql({
+          type: postedCase.type,
+          description: postedCase.description,
+          title: postedCase.title,
+          tags: postedCase.tags,
+          connector: postedCase.connector,
+          settings: postedCase.settings,
+          owner: postedCase.owner,
+        });
+      });
+
+      it('creates the case without connector in the configuration', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(postCaseResp());
+      });
+    });
+
+    describe('unhappy path', () => {
+      it('400s when bad query supplied', async () => {
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          // @ts-expect-error
+          .send({ ...getPostCaseRequest({ badKey: true }) })
+          .expect(400);
+      });
+
+      it('400s when connector is not supplied', async () => {
+        const { connector, ...caseWithoutConnector } = getPostCaseRequest();
+
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(caseWithoutConnector)
+          .expect(400);
+      });
+
+      it('400s when connector has wrong type', async () => {
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getPostCaseRequest({
+              // @ts-expect-error
+              connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
+            }),
+          })
+          .expect(400);
+      });
+
+      it('400s when connector has wrong fields', async () => {
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getPostCaseRequest({
+              // @ts-expect-error
+              connector: {
+                id: 'wrong',
+                name: 'wrong',
+                type: ConnectorTypes.jira,
+                fields: { unsupported: 'value' },
+              } as ConnectorJiraTypeFields,
+            }),
+          })
+          .expect(400);
+      });
+
+      it('400s when missing title', async () => {
+        const { title, ...caseWithoutTitle } = getPostCaseRequest();
+
+        await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseWithoutTitle).expect(400);
+      });
+
+      it('400s when missing description', async () => {
+        const { description, ...caseWithoutDescription } = getPostCaseRequest();
+
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(caseWithoutDescription)
+          .expect(400);
+      });
+
+      it('400s when missing tags', async () => {
+        const { tags, ...caseWithoutTags } = getPostCaseRequest();
+
+        await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseWithoutTags).expect(400);
+      });
+
+      it('400s if you passing status for a new case', async () => {
+        const req = getPostCaseRequest();
+
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...req, status: CaseStatuses.open })
+          .expect(400);
+      });
     });
 
     describe('rbac', () => {

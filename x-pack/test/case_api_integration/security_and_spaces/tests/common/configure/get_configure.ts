@@ -8,49 +8,103 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL } from '../../../../../../plugins/cases/common/constants';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  getConfiguration,
-  removeServerGeneratedPropertiesFromConfigure,
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import {
+  removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   deleteConfiguration,
+  getConfiguration,
+  createConfiguration,
+  getConfigurationRequest,
+  createConnector,
+  getServiceNowConnector,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_configure', () => {
+    const actionsRemover = new ActionsRemover(supertest);
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
+
     afterEach(async () => {
       await deleteConfiguration(es);
+      await actionsRemover.removeAll();
     });
 
     it('should return an empty find body correctly if no configuration is loaded', async () => {
-      const { body } = await supertest
-        .get(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body).to.eql({});
+      const configuration = await getConfiguration(supertest);
+      expect(configuration).to.eql({});
     });
 
     it('should return a configuration', async () => {
-      await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
-        .expect(200);
+      await createConfiguration(supertest);
+      const configuration = await getConfiguration(supertest);
 
-      const { body } = await supertest
-        .get(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      const data = removeServerGeneratedPropertiesFromConfigure(body);
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should return a configuration with mapping', async () => {
+      const connector = await createConnector(supertest, {
+        ...getServiceNowConnector(),
+        config: { apiUrl: servicenowSimulatorURL },
+      });
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: connector.id,
+          name: connector.name,
+          type: connector.connector_type_id as ConnectorTypes,
+        })
+      );
+
+      const configuration = await getConfiguration(supertest);
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      expect(data).to.eql(
+        getConfigurationOutput(false, {
+          mappings: [
+            {
+              action_type: 'overwrite',
+              source: 'title',
+              target: 'short_description',
+            },
+            {
+              action_type: 'overwrite',
+              source: 'description',
+              target: 'description',
+            },
+            {
+              action_type: 'append',
+              source: 'comments',
+              target: 'work_notes',
+            },
+          ],
+          connector: {
+            id: connector.id,
+            name: connector.name,
+            type: connector.connector_type_id,
+            fields: null,
+          },
+        })
+      );
     });
   });
 };

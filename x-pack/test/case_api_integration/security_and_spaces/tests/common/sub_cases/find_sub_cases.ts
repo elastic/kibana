@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { findSubCasesResp, postCollectionReq } from '../../../../../common/lib/mock';
+import { findSubCasesResp, postCollectionReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -17,19 +17,19 @@ import {
   deleteAllCaseItems,
   deleteCaseAction,
   setStatus,
-} from '../../../../../common/lib/utils';
-import { getSubCasesUrl } from '../../../../../../../plugins/cases/common/api/helpers';
+} from '../../../../common/lib/utils';
+import { getSubCasesUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import {
   CaseResponse,
   CaseStatuses,
   CommentType,
   SubCasesFindResponse,
-} from '../../../../../../../plugins/cases/common/api';
-import { CASES_URL } from '../../../../../../../plugins/cases/common/constants';
+} from '../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   ContextTypeGeneratedAlertType,
   createAlertsString,
-} from '../../../../../../../plugins/cases/server/connectors';
+} from '../../../../../../plugins/cases/server/connectors';
 
 interface SubCaseAttributes {
   'cases-sub-case': {
