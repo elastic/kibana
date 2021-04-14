@@ -37,11 +37,8 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
-<<<<<<< HEAD
 import { MAX_DOC_COLUMN_ENTRIES } from '../../../../common';
-=======
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
->>>>>>> upstream/master
 
 interface SortObj {
   id: string;
@@ -225,20 +222,12 @@ export const DiscoverGrid = ({
     () =>
       getRenderCellValueFn(
         indexPattern,
-<<<<<<< HEAD
-        rows,
-        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        displayedRows,
+        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
         useNewFieldsApi,
         services.uiSettings.get(MAX_DOC_COLUMN_ENTRIES)
       ),
-    [rows, indexPattern, useNewFieldsApi, services.uiSettings]
-=======
-        displayedRows,
-        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
-        useNewFieldsApi
-      ),
-    [displayedRows, indexPattern, useNewFieldsApi]
->>>>>>> upstream/master
+    [displayedRows, indexPattern, useNewFieldsApi, services.uiSettings]
   );
 
   /**
