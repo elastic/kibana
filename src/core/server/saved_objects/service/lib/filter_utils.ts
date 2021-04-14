@@ -7,11 +7,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
 import { esKuery } from '../../es_query';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -23,7 +24,7 @@ export const validateConvertFilterToKueryNode = (
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,

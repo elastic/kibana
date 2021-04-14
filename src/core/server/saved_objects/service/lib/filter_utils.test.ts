@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep } from 'lodash';
 // @ts-expect-error no ts
 import { esKuery } from '../../es_query';
 
@@ -105,6 +106,22 @@ describe('Filter Utils', () => {
         )
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
+
+    test('does not mutate the input KueryNode', () => {
+      const input = esKuery.nodeTypes.function.buildNode(
+        'is',
+        `foo.attributes.title`,
+        'best',
+        true
+      );
+
+      const inputCopy = cloneDeep(input);
+
+      validateConvertFilterToKueryNode(['foo'], input, mockMappings);
+
+      expect(input).toEqual(inputCopy);
+    });
+
     test('Validate a simple KQL expression filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
