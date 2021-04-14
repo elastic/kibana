@@ -14,6 +14,7 @@ import { generatePngObservableFactory } from '../../export_types/png/lib/generat
 import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -47,8 +48,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           height: 2024,
         },
         selectors: {
-          screenshot: '.application',
-          renderComplete: '.application',
+          screenshot: `.kbnAppWrapper`,
+          renderComplete: `.kbnAppWrapper`,
           itemsCountAttribute: 'data-test-subj="kibanaChrome"',
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },

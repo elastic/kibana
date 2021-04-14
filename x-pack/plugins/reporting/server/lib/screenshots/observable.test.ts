@@ -204,7 +204,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(mockOpen.mock.calls.length).toBe(2);
 
     const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
-    expect(firstSelector).toBe('.application');
+    expect(firstSelector).toBe('.kbnAppWrapper');
 
     const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
     expect(secondSelector).toBe('[data-shared-page="2"]');

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+// export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`; // TODO: Doesn't like this, server crashes
 
-export const DEFAULT_PAGELOAD_SELECTOR = '.application';
+export const DEFAULT_PAGELOAD_SELECTOR = '.kbnAppWrapper'; // TODO: Can we use the var? ^^
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_GETBROWSERDIMENSIONS = 'GetBrowserDimensions';
