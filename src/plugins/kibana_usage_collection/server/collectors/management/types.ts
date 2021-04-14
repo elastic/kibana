@@ -119,4 +119,5 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:presentation:unifiedToolbar': boolean;
+  'labs:canvas:useDataService': boolean;
 }
