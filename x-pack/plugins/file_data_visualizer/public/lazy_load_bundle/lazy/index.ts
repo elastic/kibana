@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import { FileDataVisualizerPlugin } from './plugin';
-
-export function plugin() {
-  return new FileDataVisualizerPlugin();
-}
-
-export { FileDataVisualizerPluginStart } from './plugin';
-export type { FileDataVisualizer } from './application';
+export { FileDataVisualizer } from '../../application';
+export { analyzeFile } from '../../api';

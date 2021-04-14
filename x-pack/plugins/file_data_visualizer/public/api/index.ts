@@ -6,25 +6,33 @@
  */
 
 // import React from 'react';
-import { HttpStart } from 'src/core/public';
+// import { HttpStart } from 'src/core/public';
 // import { FileUploadComponentProps, lazyLoadFileUploadModules } from '../lazy_load_bundle';
 // import type { IImporter, ImportFactoryOptions } from '../importer';
 // import { HasImportPermission } from '../../common';
+// import { getCoreStart } from '../kibana_services';
+import { lazyLoadFileUploadModules } from '../lazy_load_bundle';
+import { FileDataVisualizer } from '../application';
 
 export interface FileDataVisualizerStartApi {
   analyzeFile(file: string, params: Record<string, string>): Promise<any>;
 }
 
-export function getApi(http: HttpStart) {
-  async function analyzeFile(file: string, params: Record<string, string> = {}): Promise<boolean> {
-    const body = JSON.stringify(file);
-    return await http.fetch<any>({
-      path: `/internal/file_data_visualizer/analyze_file`,
-      method: 'POST',
-      body,
-      query: params,
-    });
-  }
+export async function analyzeFile(
+  file: string,
+  params: Record<string, string> = {}
+): Promise<boolean> {
+  const { getHttp } = await lazyLoadFileUploadModules();
+  const body = JSON.stringify(file);
+  return await getHttp().fetch<any>({
+    path: `/internal/file_data_visualizer/analyze_file`,
+    method: 'POST',
+    body,
+    query: params,
+  });
+}
 
-  return { analyzeFile };
+export async function getFileDatavisualizerComponent(): Promise<typeof FileDataVisualizer> {
+  const fileUploadModules = await lazyLoadFileUploadModules();
+  return fileUploadModules.FileDataVisualizer;
 }

@@ -21,7 +21,7 @@ import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import { DEFAULT_LINES_TO_SAMPLE, readFile, createUrlOverrides, processResults } from '../utils';
 import { getMaxBytes } from '../../../../../file_upload/public';
-import { getApi } from '../../../api';
+import { analyzeFile } from '../../../api';
 
 import { MODE } from './constants';
 
@@ -128,7 +128,6 @@ export class FileDataVisualizerView extends Component {
 
   async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      const { analyzeFile } = getApi(this.props.http);
       const resp = await analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;

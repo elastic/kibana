@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-// import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  CoreStart,
-  /* Logger,*/ Plugin,
-  PluginInitializerContext,
-} from 'src/core/server';
-// import { schema } from '@kbn/config-schema';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { fileDataVisualizerRoutes } from './routes';
-// import { initFileUploadTelemetry } from './telemetry';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-// import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '../common';
 import { StartDeps } from './types';
 
 interface SetupDeps {
@@ -24,15 +15,8 @@ interface SetupDeps {
 }
 
 export class FileDataVisualizerPlugin implements Plugin {
-  // private readonly _logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    // this._logger = initializerContext.logger.get();
-  }
-
   async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
     fileDataVisualizerRoutes(coreSetup);
-    // initFileUploadTelemetry(coreSetup, plugins.usageCollection);
   }
 
   start(core: CoreStart) {}

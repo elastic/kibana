@@ -24,6 +24,7 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
 import type { FileUploadPluginStart } from '../../../../file_upload/public';
+import type { FileDataVisualizerPluginStart } from '../../../../file_data_visualizer/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -45,6 +46,7 @@ export interface DependencyCache {
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
   fileUpload: FileUploadPluginStart | null;
+  fileDataVisualizer: FileDataVisualizerPluginStart | null;
 }
 
 const cache: DependencyCache = {
@@ -67,6 +69,7 @@ const cache: DependencyCache = {
   urlGenerators: null,
   maps: null,
   fileUpload: null,
+  fileDataVisualizer: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -88,6 +91,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
   cache.fileUpload = deps.fileUpload || null;
+  cache.fileDataVisualizer = deps.fileDataVisualizer || null;
 }
 
 export function getTimefilter() {
@@ -219,4 +223,11 @@ export function getFileUpload() {
     throw new Error("fileUpload hasn't been initialized");
   }
   return cache.fileUpload;
+}
+
+export function getFileDataVisualizer() {
+  if (cache.fileDataVisualizer === null) {
+    throw new Error("fileDataVisualizer hasn't been initialized");
+  }
+  return cache.fileDataVisualizer;
 }

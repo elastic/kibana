@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
-import { FileDataVisualizer } from '../../../../../file_data_visualizer/public';
+import type { FileDataVisualizer as FileDataVisualizerType } from '../../../../../file_data_visualizer/public';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks },
+    services: { docLinks, fileDataVisualizer },
   } = useMlKibana();
-  const helpLink = docLinks.links.ml.guide;
+  const [FileDataVisualizer, setFileDataVisualizer] = useState<
+    typeof FileDataVisualizerType | null
+  >(null);
+
+  useEffect(() => {
+    if (fileDataVisualizer !== undefined) {
+      const { getFileDatavisualizerComponent } = fileDataVisualizer;
+      getFileDatavisualizerComponent().then(setFileDataVisualizer);
+    }
+  }, []);
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <FileDataVisualizer />
-      <HelpMenu docLink={helpLink} />
+      {FileDataVisualizer}
+      <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   );
 };

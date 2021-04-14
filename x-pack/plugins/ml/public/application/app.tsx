@@ -83,6 +83,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
     fileUpload: deps.fileUpload,
+    fileDataVisualizer: deps.fileDataVisualizer,
     ...coreStart,
   };
 
@@ -126,6 +127,7 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
     fileUpload: deps.fileUpload,
+    fileDataVisualizer: deps.fileDataVisualizer,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

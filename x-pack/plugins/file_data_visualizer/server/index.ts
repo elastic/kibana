@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
 import { FileDataVisualizerPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FileDataVisualizerPlugin(initializerContext);
+export const plugin = () => new FileDataVisualizerPlugin();

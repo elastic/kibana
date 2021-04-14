@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { HttpSetup } from 'src/core/public';
+import { FileDataVisualizer } from '../application';
+import { analyzeFile } from '../api';
+import { getCoreStart } from '../kibana_services';
+
+let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
+
+interface LazyLoadedFileUploadModules {
+  analyzeFile: typeof analyzeFile;
+  FileDataVisualizer: typeof FileDataVisualizer;
+  getHttp: () => HttpSetup;
+}
+
+export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
+  if (typeof loadModulesPromise !== 'undefined') {
+    return loadModulesPromise;
+  }
+
+  loadModulesPromise = new Promise(async (resolve) => {
+    const lazyImports = await import('./lazy');
+
+    resolve({
+      ...lazyImports,
+      getHttp: () => getCoreStart().http,
+    });
+  });
+  return loadModulesPromise;
+}
