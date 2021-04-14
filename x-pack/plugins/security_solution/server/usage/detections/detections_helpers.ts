@@ -575,7 +575,7 @@ export const getDetectionRuleMetrics = async (
       });
 
       // Only bring back rule detail on elastic prepackaged detection rules
-      const elasticRuleObjects = ruleObjects.filter((hit) => hit.enabled === true);
+      const elasticRuleObjects = ruleObjects.filter((hit) => hit.elastic_rule === true);
 
       rulesUsage = ruleObjects.reduce((usage, rule) => {
         return updateDetectionRuleUsage(rule, usage);
