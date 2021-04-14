@@ -8,10 +8,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
 import { isNestedFieldParent } from '../../helpers/nested_fields';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -23,6 +26,8 @@ export function DocViewTable({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
+  const maxDocFieldsDisplayed = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
+  const [collapsed, setCollapsed] = useState(true);
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
   const [multiFields, setMultiFields] = useState({} as Record<string, string[]>);
   const [fieldsWithParents, setFieldsWithParents] = useState([] as string[]);
@@ -79,22 +84,25 @@ export function DocViewTable({
     fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
+  const fieldList = Object.keys(flattened)
+    .filter((field) => {
+      return !fieldsWithParents.includes(field);
+    })
+    .sort((fieldA, fieldB) => {
+      const mappingA = mapping(fieldA);
+      const mappingB = mapping(fieldB);
+      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+      return nameA.localeCompare(nameB);
+    });
+
+  const truncatedFieldList = collapsed ? fieldList.slice(0, maxDocFieldsDisplayed) : fieldList;
 
   return (
-    <table className="table table-condensed kbnDocViewerTable">
-      <tbody>
-        {Object.keys(flattened)
-          .filter((field) => {
-            return !fieldsWithParents.includes(field);
-          })
-          .sort((fieldA, fieldB) => {
-            const mappingA = mapping(fieldA);
-            const mappingB = mapping(fieldB);
-            const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-            const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-            return nameA.localeCompare(nameB);
-          })
-          .map((field) => {
+    <>
+      <table className="table table-condensed kbnDocViewerTable">
+        <tbody>
+          {truncatedFieldList.map((field) => {
             const valueRaw = flattened[field];
             const value = trimAngularSpan(String(formatted[field]));
 
@@ -162,7 +170,34 @@ export function DocViewTable({
               </React.Fragment>
             );
           })}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+      {collapsed && fieldList.length > maxDocFieldsDisplayed && (
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                setCollapsed(false);
+              }}
+            >
+              {i18n.translate('discover.docViewTable.moreButtonLabel', {
+                defaultMessage: 'Show all fields',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiText size="s">
+              {i18n.translate('discover.docViewTable.partialListMessage', {
+                defaultMessage: 'Only showing {firstPage} of {totalFields} fields',
+                values: {
+                  firstPage: maxDocFieldsDisplayed,
+                  totalFields: fieldList.length,
+                },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 }
