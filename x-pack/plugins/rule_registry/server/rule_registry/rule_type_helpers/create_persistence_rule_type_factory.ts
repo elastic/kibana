@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ESSearchRequest } from 'typings/elasticsearch';
 import v4 from 'uuid/v4';
+
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
 import { DefaultFieldMap } from '../defaults/field_map';
 import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
-import { FieldsESSearchRequest } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
 
 type PersistenceAlertPersistenceService<
@@ -21,7 +22,7 @@ type PersistenceAlertPersistenceService<
 ) => Array<AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>>;
 
 type PersistenceAlertQueryService<TFieldMap extends DefaultFieldMap> = (
-  query: FieldsESSearchRequest<TFieldMap>
+  query: ESSearchRequest
 ) => Promise<Array<OutputOfFieldMap<TFieldMap>>>;
 
 type CreatePersistenceRuleType<TFieldMap extends DefaultFieldMap> = <
@@ -51,7 +52,7 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
       ...type,
       executor: async (options) => {
         const {
-          services: { scopedRuleRegistryClient, alertInstanceFactory, logger },
+          services: { scopedClusterClient, scopedRuleRegistryClient, alertInstanceFactory, logger },
         } = options;
 
         const currentAlerts: Array<OutputOfFieldMap<DefaultFieldMap>> = [];
@@ -65,28 +66,27 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
               return alerts.map((alert) => alertInstanceFactory(alert['kibana.rac.alert.uuid']!));
             },
             findAlerts: async (query) => {
-              const { events } = await scopedRuleRegistryClient!.search({
+              const { body } = await scopedClusterClient.asCurrentUser.search({
                 ...query,
-                body: {
-                  ...query.body,
-                  fields: ['*'], // FIXME
-                },
+                ignore_unavailable: true,
               });
-              return events.map((event) => {
-                const alertUuid = event['kibana.rac.alert.uuid'];
-                const isAlert = alertUuid != null;
-                return {
-                  ...event,
-                  'kibana.rac.alert.id': '???',
-                  'kibana.rac.alert.uuid': v4(),
-                  'kibana.rac.alert.ancestors': isAlert
-                    ? (event['kibana.rac.alert.ancestors'] ?? []).concat([alertUuid!])
-                    : [],
-                  'kibana.rac.alert.depth': isAlert ? event['kibana.rac.alert.depth']! + 1 : 0,
-                  'event.kind': 'signal',
-                  '@timestamp': timestamp,
-                };
-              });
+              return body.hits.hits
+                .map((event) => event._source as OutputOfFieldMap<DefaultFieldMap>)
+                .map((event) => {
+                  const alertUuid = event['kibana.rac.alert.uuid'];
+                  const isAlert = alertUuid != null;
+                  return {
+                    ...event,
+                    'kibana.rac.alert.id': '???',
+                    'kibana.rac.alert.uuid': v4(),
+                    'kibana.rac.alert.ancestors': isAlert
+                      ? (event['kibana.rac.alert.ancestors'] ?? []).concat([alertUuid!])
+                      : [],
+                    'kibana.rac.alert.depth': isAlert ? event['kibana.rac.alert.depth']! + 1 : 0,
+                    'event.kind': 'signal',
+                    '@timestamp': timestamp,
+                  };
+                });
             },
           },
         });

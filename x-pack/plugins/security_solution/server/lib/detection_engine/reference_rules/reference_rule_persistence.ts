@@ -53,7 +53,6 @@ export const referenceRulePersistenceAlertType = createSecurityPersistenceRuleTy
 
     const esQuery = buildEsQuery(indexPattern, { query: params.query, language: 'kuery' }, []);
     const query = {
-      index: ['*'],
       body: {
         query: {
           bool: {
