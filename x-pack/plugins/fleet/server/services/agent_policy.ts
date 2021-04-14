@@ -602,6 +602,11 @@ class AgentPolicyService {
     agentPolicyId: string
   ) {
     const esClient = appContextService.getInternalUserESClient();
+    const defaultOutput = await outputService.getDefaultOutput(soClient);
+
+    if (!defaultOutput) {
+      return;
+    }
 
     await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
 
@@ -661,6 +666,28 @@ class AgentPolicyService {
       id: uuid(),
       refresh: 'wait_for',
     });
+  }
+
+  public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
+    const res = await esClient.search({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          term: {
+            policy_id: agentPolicyId,
+          },
+        },
+        sort: [{ revision_idx: { order: 'desc' } }],
+      },
+    });
+
+    // @ts-expect-error value is number | TotalHits
+    if (res.body.hits.total.value === 0) {
+      return null;
+    }
+
+    return res.body.hits.hits[0]._source;
   }
 
   public async getFullAgentPolicy(

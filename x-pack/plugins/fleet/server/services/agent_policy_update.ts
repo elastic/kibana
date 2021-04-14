@@ -12,6 +12,7 @@ import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from
 import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
+import { outputService } from './output';
 
 const fakeRequest = ({
   headers: {},
