@@ -80,18 +80,19 @@ Arguments:
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
 |getCaseDetailHrefWithCommentId|`(commentId: string) => string;` callback to generate the case details url with a comment id reference from the case id and comment id
 |onComponentInitialized?|`() => void;` callback when component has initialized
-|ruleDetailsNavigation|: `CasesNavigation<string | null | undefined, 'configurable'>`
-|showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
-|subCaseId?|: `string;` subcase id
-|timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
-|timelineIntegration?.editor_plugins.parsingPlugin|: `Plugin;`
-|timelineIntegration?.editor_plugins.processingPluginRenderer|: `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
-|timelineIntegration?.editor_plugins.uiPlugin?|: `EuiMarkdownEditorUiPlugin`
-|timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
-|timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
-|timelineIntegration?.ui?renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
-|useFetchAlertData|: `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
-|userCanCrud|: `boolean;` user permissions to crud
+|onCaseDataSuccess?| `(data: Case) => void;` optional callback to handle case data in consuming application
+|ruleDetailsNavigation| `CasesNavigation<string \| null \| undefined, 'configurable'>`
+|showAlertDetails| `(alertId: string, index: string) => void;` callback to show alert details
+|subCaseId?| `string;` subcase id
+|timelineIntegration?.editor_plugins| Plugins needed for integrating timeline into markdown editor.
+|timelineIntegration?.editor_plugins.parsingPlugin| `Plugin;`
+|timelineIntegration?.editor_plugins.processingPluginRenderer| `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
+|timelineIntegration?.editor_plugins.uiPlugin?| `EuiMarkdownEditorUiPlugin`
+|timelineIntegration?.hooks.useInsertTimeline| `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
+|timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent?| `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
+|timelineIntegration?.ui?renderTimelineDetailsPanel?| `() => JSX.Element;` space to render `TimelineDetailsPanel`
+|useFetchAlertData| `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
+|userCanCrud| `boolean;` user permissions to crud
 
 UI component:
  ![Case View Component][case-view-img] 
@@ -104,11 +105,11 @@ Arguments:
 |afterCaseCreated?|`(theCase: Case) => Promise<void>;` callback passing newly created case before pushCaseToExternalService is called
 |onCancel|`() => void;` callback when create case is canceled
 |onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
-|timelineIntegration?.editor_plugins|: Plugins needed for integrating timeline into markdown editor.
-|timelineIntegration?.editor_plugins.parsingPlugin|: `Plugin;`
-|timelineIntegration?.editor_plugins.processingPluginRenderer|: `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
-|timelineIntegration?.editor_plugins.uiPlugin?|: `EuiMarkdownEditorUiPlugin`
-|timelineIntegration?.hooks.useInsertTimeline|: `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
+|timelineIntegration?.editor_plugins| Plugins needed for integrating timeline into markdown editor.
+|timelineIntegration?.editor_plugins.parsingPlugin| `Plugin;`
+|timelineIntegration?.editor_plugins.processingPluginRenderer| `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`
+|timelineIntegration?.editor_plugins.uiPlugin?| `EuiMarkdownEditorUiPlugin`
+|timelineIntegration?.hooks.useInsertTimeline| `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`
 
 UI component:
  ![Create Component][create-img]
