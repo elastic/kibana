@@ -12,6 +12,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { APP_WRAPPER_CLASS } from '../../../core/common';
 import {
   App,
   Plugin,
@@ -23,7 +24,6 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-  APP_WRAPPER_CLASS,
 } from '../../../core/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';

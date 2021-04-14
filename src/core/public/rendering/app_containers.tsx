@@ -10,12 +10,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
-
-/**
- * The class name for top level *and* nested application wrappers to ensure proper layout
- * @public
- */
-export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
+import { APP_WRAPPER_CLASS } from '../../common';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
