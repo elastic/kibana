@@ -107,7 +107,7 @@ String
   / [\'] value:(ValidChar)+ [\'] { return value.join(''); }
   / value:(ValidChar)+ { return value.join(''); }
 
-  
+
 Argument
  = name:[a-zA-Z_]+ _ '=' _ value:(Number / String) _ {
   return {
