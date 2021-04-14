@@ -33,6 +33,7 @@ import * as useUrlHook from './hooks/use_url_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
+import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
@@ -148,7 +149,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
       <EuiThemeProvider darkMode={false}>
         <I18nProvider>
-          <IndexPatternContextProvider indexPattern={indexPattern}>
+          <IndexPatternContextProvider>
             <UrlStorageContextProvider storage={kbnUrlStateStorage}>
               {children}
             </UrlStorageContextProvider>
@@ -232,6 +233,19 @@ export const mockUseHasData = () => {
     onRefreshTimeRange,
   } as any);
   return { spy, onRefreshTimeRange };
+};
+
+export const mockAppIndexPattern = () => {
+  const loadIndexPattern = jest.fn();
+  const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
+    indexPattern: mockIndexPattern,
+    selectedApp: 'ux',
+    hasData: true,
+    loading: false,
+    hasAppData: { ux: true } as any,
+    loadIndexPattern,
+  });
+  return { spy, loadIndexPattern };
 };
 
 export const mockUseValuesList = (values?: string[]) => {
