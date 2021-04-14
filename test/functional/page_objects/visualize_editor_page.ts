@@ -128,9 +128,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapColorsNumber`);
-      await input.clearValueWithKeyboard();
-      await input.type(`${value}`);
+      await testSubjects.setValue('heatmapColorsNumber', `${value}`);
     }
 
     public async getBucketErrorMessage() {
