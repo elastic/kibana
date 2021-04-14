@@ -84,13 +84,10 @@ export const setMockActions = (actions: object) => {
  *   unmount();
  * });
  */
-import { resetContext, Logic, LogicInput } from 'kea';
+import { resetContext, LogicWrapper } from 'kea';
 
-interface LogicFile {
-  inputs: Array<LogicInput<Logic>>;
-  build(props?: object): void;
-  mount(): Function;
-}
+type LogicFile = LogicWrapper<any>;
+
 export class LogicMounter {
   private logicFile: LogicFile;
   private unmountFn!: Function;
@@ -101,7 +98,7 @@ export class LogicMounter {
 
   // Reset context with optional default value overrides
   public resetContext = (values?: object, props?: object) => {
-    if (!values) {
+    if (!values || !Object.keys(values).length) {
       resetContext({});
     } else {
       let { path, key } = this.logicFile.inputs[0];
@@ -161,7 +158,7 @@ export class LogicMounter {
     const { listeners } = this.logicFile.inputs[0];
 
     return typeof listeners === 'function'
-      ? (listeners as Function)(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
+      ? listeners(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
       : listeners; // handles simpler logic files that just define listeners: { ... }
   };
 }
