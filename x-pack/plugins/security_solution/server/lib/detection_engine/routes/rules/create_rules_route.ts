@@ -89,9 +89,6 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        /**
-         * TODO: Remove this use of `as` by utilizing the proper type
-         */
         const createdRule = await alertsClient.create({
           data: internalRule,
         });

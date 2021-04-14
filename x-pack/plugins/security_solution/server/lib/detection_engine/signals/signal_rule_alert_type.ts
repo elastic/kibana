@@ -85,13 +85,6 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
-      /**
-       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
-       * Once that's done, you should be able to do:
-       * ```
-       * params: signalParamsSchema(),
-       * ```
-       */
       params: {
         validate: (object: unknown): RuleParams => {
           const [validated, errors] = validateNonExact(object, ruleParams);
