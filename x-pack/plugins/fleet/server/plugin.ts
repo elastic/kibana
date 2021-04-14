@@ -23,6 +23,7 @@ import type {
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
   EncryptedSavedObjectsPluginStart,
@@ -47,6 +48,7 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -63,6 +65,7 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
 import type {
   ESIndexPatternService,
@@ -100,12 +103,14 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
   elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
@@ -129,6 +134,7 @@ const allSavedObjectTypes = [
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -158,6 +164,12 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  * Describes public Fleet plugin contract returned at the `startup` stage.
  */
 export interface FleetStartContract {
+  /**
+   * returns a promise that resolved when fleet setup has been completed regardless if it was successful or failed).
+   * Any consumer of fleet start services should first `await` for this promise to be resolved before using those
+   * services
+   */
+  fleetSetupCompleted: () => Promise<void>;
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -206,6 +218,10 @@ export class FleetPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
+    const config = await this.config$.pipe(first()).toPromise();
+
+    appContextService.fleetServerEnabled = config.agents.fleetServerEnabled;
+
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
@@ -245,8 +261,6 @@ export class FleetPlugin
 
     const router = core.http.createRouter();
 
-    const config = await this.config$.pipe(first()).toPromise();
-
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
 
@@ -263,6 +277,7 @@ export class FleetPlugin
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
       registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -293,6 +308,7 @@ export class FleetPlugin
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
       elasticsearch: core.elasticsearch,
+      data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
@@ -308,9 +324,13 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    startFleetServerSetup();
+    const fleetServerSetup = startFleetServerSetup();
 
     return {
+      fleetSetupCompleted: () =>
+        new Promise<void>((resolve) => {
+          Promise.all([fleetServerSetup]).finally(() => resolve());
+        }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstalledEsAssetReferences: async (

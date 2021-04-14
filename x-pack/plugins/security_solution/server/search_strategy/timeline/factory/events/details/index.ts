@@ -19,7 +19,11 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
+import {
+  getDataFromFieldsHits,
+  getDataFromSourceHits,
+  getDataSafety,
+} from '../../../../../../common/utils/field_formatters';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -44,6 +48,7 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     }
     const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
       getDataFromSourceHits,
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       _source
     );
     const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(

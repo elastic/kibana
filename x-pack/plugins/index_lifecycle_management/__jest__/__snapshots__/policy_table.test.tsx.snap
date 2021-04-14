@@ -47,10 +47,11 @@ Array [
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
 <main
-  class="euiPageBody"
+  class="euiPageBody euiPageBody--borderRadiusNone"
 >
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    role="main"
   >
     <div
       class="euiEmptyPrompt"

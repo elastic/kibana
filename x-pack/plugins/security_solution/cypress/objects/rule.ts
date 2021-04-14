@@ -71,8 +71,10 @@ export interface OverrideRule extends CustomRule {
 
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
-  indicatorMapping: string;
+  indicatorMappingField: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
@@ -299,7 +301,7 @@ export const eqlSequenceRule: CustomRule = {
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['threat-data-*'],
+  index: ['suspicious-*'],
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
@@ -309,9 +311,11 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   note: '# test markdown',
   runsEvery,
   lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMappingField: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline,
   maxSignals: 100,
 };
@@ -328,5 +332,5 @@ export const editedRule = {
 export const expectedExportedRule = (ruleResponse: Cypress.Response) => {
   const jsonrule = ruleResponse.body;
 
-  return `{"author":[],"actions":[],"created_at":"${jsonrule.created_at}","updated_at":"${jsonrule.updated_at}","created_by":"elastic","description":"${jsonrule.description}","enabled":false,"false_positives":[],"from":"now-17520h","id":"${jsonrule.id}","immutable":false,"index":["exceptions-*"],"interval":"10s","rule_id":"rule_testing","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":${jsonrule.risk_score},"risk_score_mapping":[],"name":"${jsonrule.name}","query":"${jsonrule.query}","references":[],"severity":"${jsonrule.severity}","severity_mapping":[],"updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[],"throttle":"no_actions","version":1,"exceptions_list":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"10s","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-17520h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
 };

@@ -12,6 +12,7 @@ import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(
@@ -19,7 +20,7 @@ export function dateHistogram(
   panel,
   series,
   esQueryConfig,
-  indexPatternObject,
+  seriesIndex,
   capabilities,
   uiSettings
 ) {
@@ -27,11 +28,7 @@ export function dateHistogram(
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(
-      panel,
-      series,
-      indexPatternObject
-    );
+    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, seriesIndex);
     const { bucketSize, intervalString } = getBucketSize(
       req,
       interval,
@@ -41,7 +38,7 @@ export function dateHistogram(
 
     const getDateHistogramForLastBucketMode = () => {
       const { from, to } = offsetTime(req, series.offset_time);
-      const timezone = capabilities.searchTimezone;
+      const { timezone } = capabilities;
 
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
@@ -68,9 +65,9 @@ export function dateHistogram(
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
-      index: indexPatternObject?.title,
       bucketSize,
       seriesId: series.id,
+      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
     });
 
     return next(doc);

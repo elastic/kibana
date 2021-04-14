@@ -91,7 +91,7 @@ const createPlugin = (
   });
 };
 
-async function testSetup(options: { isDevCliParent?: boolean } = {}) {
+async function testSetup() {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -103,10 +103,7 @@ async function testSetup(options: { isDevCliParent?: boolean } = {}) {
   };
 
   coreId = Symbol('core');
-  env = Env.createDefault(REPO_ROOT, {
-    ...getEnvOptions(),
-    isDevCliParent: options.isDevCliParent ?? false,
-  });
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
@@ -565,12 +562,12 @@ describe('PluginsService', () => {
         plugin$: from([
           createPlugin('plugin-1', {
             path: 'path-1',
-            version: 'some-version',
+            version: 'version-1',
             configPath: 'plugin1',
           }),
           createPlugin('plugin-2', {
             path: 'path-2',
-            version: 'some-version',
+            version: 'version-2',
             configPath: 'plugin2',
           }),
         ]),
@@ -580,7 +577,7 @@ describe('PluginsService', () => {
     });
 
     describe('uiPlugins.internal', () => {
-      it('includes disabled plugins', async () => {
+      it('contains internal properties for plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
         const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
@@ -589,14 +586,22 @@ describe('PluginsService', () => {
               "publicAssetsDir": <absolute path>/path-1/public/assets,
               "publicTargetDir": <absolute path>/path-1/target/public,
               "requiredBundles": Array [],
+              "version": "version-1",
             },
             "plugin-2" => Object {
               "publicAssetsDir": <absolute path>/path-2/public/assets,
               "publicTargetDir": <absolute path>/path-2/target/public,
               "requiredBundles": Array [],
+              "version": "version-2",
             },
           }
         `);
+      });
+
+      it('includes disabled plugins', async () => {
+        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
+        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+        expect([...uiPlugins.internal.keys()].sort()).toEqual(['plugin-1', 'plugin-2']);
       });
     });
 
@@ -623,33 +628,6 @@ describe('PluginsService', () => {
     it('`stop` stops plugins system', async () => {
       await pluginsService.stop();
       expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
-    });
-  });
-});
-
-describe('PluginService when isDevCliParent is true', () => {
-  beforeEach(async () => {
-    await testSetup({
-      isDevCliParent: true,
-    });
-  });
-
-  describe('#discover()', () => {
-    it('does not try to run discovery', async () => {
-      await expect(pluginsService.discover({ environment: environmentSetup })).resolves
-        .toMatchInlineSnapshot(`
-              Object {
-                "pluginPaths": Array [],
-                "pluginTree": undefined,
-                "uiPlugins": Object {
-                  "browserConfigs": Map {},
-                  "internal": Map {},
-                  "public": Map {},
-                },
-              }
-            `);
-
-      expect(mockDiscover).not.toHaveBeenCalled();
     });
   });
 });

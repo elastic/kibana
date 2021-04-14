@@ -14,14 +14,23 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/ti
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
-import { SummaryView } from './summary_view';
+import { AlertSummaryView } from './alert_summary_view';
+import { ThreatSummaryView } from './threat_summary_view';
+import { ThreatDetailsView } from './threat_details_view';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
 
-export type View = EventsViewType.tableView | EventsViewType.jsonView | EventsViewType.summaryView;
+export type EventView =
+  | EventsViewType.tableView
+  | EventsViewType.jsonView
+  | EventsViewType.summaryView;
+export type ThreatView = EventsViewType.threatSummaryView | EventsViewType.threatDetailsView;
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
+  threatSummaryView = 'threat-summary-view',
+  threatDetailsView = 'threat-details-view',
 }
 
 interface Props {
@@ -29,8 +38,10 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
-  view: EventsViewType;
-  onViewSelected: (selected: EventsViewType) => void;
+  eventView: EventView;
+  threatView: ThreatView;
+  onEventViewSelected: (selected: EventView) => void;
+  onThreatViewSelected: (selected: ThreatView) => void;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
@@ -45,7 +56,16 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     display: flex;
     flex: 1;
     flex-direction: column;
-    overflow: hidden;
+    overflow: scroll;
+    ::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: 7px;
+    }
+    ::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.5);
+      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    }
   }
 `;
 
@@ -57,14 +77,19 @@ const TabContentWrapper = styled.div`
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
+  eventView,
   id,
-  view,
-  onViewSelected,
-  timelineTabType,
-  timelineId,
   isAlert,
+  onEventViewSelected,
+  onThreatViewSelected,
+  threatView,
+  timelineId,
+  timelineTabType,
 }) => {
-  const handleTabClick = useCallback((e) => onViewSelected(e.id), [onViewSelected]);
+  const handleEventTabClick = useCallback((e) => onEventViewSelected(e.id), [onEventViewSelected]);
+  const handleThreatTabClick = useCallback((e) => onThreatViewSelected(e.id), [
+    onThreatViewSelected,
+  ]);
 
   const alerts = useMemo(
     () => [
@@ -74,11 +99,13 @@ const EventDetailsComponent: React.FC<Props> = ({
         content: (
           <>
             <EuiSpacer size="l" />
-            <SummaryView
-              data={data}
-              eventId={id}
-              browserFields={browserFields}
-              timelineId={timelineId}
+            <AlertSummaryView
+              {...{
+                data,
+                eventId: id,
+                browserFields,
+                timelineId,
+              }}
             />
           </>
         ),
@@ -107,6 +134,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       },
       {
         id: EventsViewType.jsonView,
+        'data-test-subj': 'jsonViewTab',
         name: i18n.JSON_VIEW,
         content: (
           <>
@@ -121,15 +149,60 @@ const EventDetailsComponent: React.FC<Props> = ({
     [alerts, browserFields, data, id, isAlert, timelineId, timelineTabType]
   );
 
-  const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);
+  const selectedEventTab = useMemo(() => tabs.find((t) => t.id === eventView) ?? tabs[0], [
+    tabs,
+    eventView,
+  ]);
+
+  const isThreatPresent: boolean = useMemo(
+    () =>
+      selectedEventTab.id === tabs[0].id &&
+      isAlert &&
+      data.some((item) => item.field === INDICATOR_DESTINATION_PATH),
+    [tabs, selectedEventTab, isAlert, data]
+  );
+
+  const threatTabs: EuiTabbedContentTab[] = useMemo(() => {
+    return isAlert && isThreatPresent
+      ? [
+          {
+            id: EventsViewType.threatSummaryView,
+            name: i18n.THREAT_SUMMARY,
+            content: <ThreatSummaryView {...{ data, eventId: id, timelineId }} />,
+          },
+          {
+            id: EventsViewType.threatDetailsView,
+            name: i18n.THREAT_DETAILS,
+            content: <ThreatDetailsView data={data} />,
+          },
+        ]
+      : [];
+  }, [data, id, isAlert, timelineId, isThreatPresent]);
+
+  const selectedThreatTab = useMemo(
+    () => threatTabs.find((t) => t.id === threatView) ?? threatTabs[0],
+    [threatTabs, threatView]
+  );
 
   return (
-    <StyledEuiTabbedContent
-      data-test-subj="eventDetails"
-      tabs={tabs}
-      selectedTab={selectedTab}
-      onTabClick={handleTabClick}
-    />
+    <>
+      <StyledEuiTabbedContent
+        data-test-subj="eventDetails"
+        tabs={tabs}
+        selectedTab={selectedEventTab}
+        onTabClick={handleEventTabClick}
+        key="event-summary-tabs"
+      />
+      {isThreatPresent && (
+        <StyledEuiTabbedContent
+          data-test-subj="threatDetails"
+          tabs={threatTabs}
+          selectedTab={selectedThreatTab}
+          onTabClick={handleThreatTabClick}
+          key="threat-summary-tabs"
+        />
+      )}
+    </>
   );
 };
 

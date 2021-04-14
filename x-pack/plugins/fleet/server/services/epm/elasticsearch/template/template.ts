@@ -204,6 +204,12 @@ function generateMultiFields(fields: Fields): MultiFields {
         case 'keyword':
           multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
           break;
+        case 'long':
+          multiFields[f.name] = { type: f.type };
+          break;
+        case 'double':
+          multiFields[f.name] = { type: f.type };
+          break;
       }
     });
   }
@@ -497,6 +503,7 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
+      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream

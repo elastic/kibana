@@ -597,7 +597,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
@@ -606,7 +606,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           >
             <EuiPageBody>
               <main
-                className="euiPageBody"
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -617,9 +617,11 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
@@ -942,7 +944,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
@@ -951,7 +953,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
           >
             <EuiPageBody>
               <main
-                className="euiPageBody"
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -962,9 +964,11 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""

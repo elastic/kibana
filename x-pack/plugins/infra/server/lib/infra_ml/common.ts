@@ -27,6 +27,8 @@ export interface MappedAnomalyHit {
   duration: number;
   influencers: string[];
   categoryId?: string;
+  partitionFieldName?: string;
+  partitionFieldValue?: string;
 }
 
 export interface InfluencerFilter {

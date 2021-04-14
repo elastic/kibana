@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { normalizeThresholdObject } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
@@ -62,7 +63,7 @@ export const createRules = async ({
   version,
   exceptionsList,
   actions,
-}: CreateRulesOptions): Promise<Alert<RuleTypeParams>> => {
+}: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
   return alertsClient.create<RuleTypeParams>({
     data: {
       name,
@@ -97,7 +98,7 @@ export const createRules = async ({
         severity,
         severityMapping,
         threat,
-        threshold,
+        threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
         /**
          * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
          */

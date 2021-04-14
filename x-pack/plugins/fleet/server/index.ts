@@ -15,6 +15,8 @@ import {
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
 
+import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+
 import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
@@ -38,7 +40,6 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
-    unused('agents.fleetServerEnabled'),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -46,6 +47,7 @@ export const config: PluginConfigDescriptor = {
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      fleetServerEnabled: schema.boolean({ defaultValue: false }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
       pollingRequestTimeout: schema.number({
         defaultValue: AGENT_POLLING_REQUEST_TIMEOUT_MS,
@@ -65,6 +67,11 @@ export const config: PluginConfigDescriptor = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      fleet_server: schema.maybe(
+        schema.object({
+          hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+        })
+      ),
       agentPolicyRolloutRateLimitIntervalMs: schema.number({
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
       }),
@@ -72,6 +79,8 @@ export const config: PluginConfigDescriptor = {
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
     }),
+    packages: schema.maybe(PreconfiguredPackagesSchema),
+    agentPolicies: schema.maybe(PreconfiguredAgentPoliciesSchema),
   }),
 };
 

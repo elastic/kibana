@@ -7,9 +7,7 @@
 
 import React from 'react';
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import _kebabCase from 'lodash/kebabCase';
+import classNames from 'classnames';
 
 import {
   EuiFlexGroup,
@@ -34,7 +32,9 @@ import {
 import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
 
-const CREDENTIALS_INVALID_ERROR_REASON = 1;
+import './source_row.scss';
+
+const CREDENTIALS_INVALID_ERROR_REASON = 'credentials_invalid';
 
 export interface ISourceRow {
   showDetails?: boolean;
@@ -69,10 +69,12 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const showFix =
     isOrganization && hasError && allowsReauth && errorReason === CREDENTIALS_INVALID_ERROR_REASON;
 
+  const rowClass = classNames({ 'source-row--error': hasError });
+
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
-        `${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`,
+        `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
         isOrganization
       )}
     >
@@ -93,7 +95,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   );
 
   return (
-    <EuiTableRow data-test-subj="GroupsRow">
+    <EuiTableRow data-test-subj="GroupsRow" className={rowClass}>
       <EuiTableRowCell>
         <EuiFlexGroup
           justifyContent="flexStart"

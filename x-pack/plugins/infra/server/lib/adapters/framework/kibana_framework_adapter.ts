@@ -9,12 +9,11 @@ import {
   IndicesExistsAlias,
   IndicesGet,
   MlGetBuckets,
-  Msearch,
 } from '@elastic/elasticsearch/api/requestParams';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { estypes } from '@elastic/elasticsearch';
 import {
   InfraRouteConfig,
-  InfraTSVBResponse,
   InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
@@ -34,6 +33,7 @@ import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
@@ -153,7 +153,7 @@ export class KibanaFramework {
         apiResult = elasticsearch.client.asCurrentUser.msearch({
           ...params,
           ...frozenIndicesParams,
-        } as Msearch<any>);
+        } as estypes.MultiSearchRequest);
         break;
       case 'fieldCaps':
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
@@ -221,7 +221,7 @@ export class KibanaFramework {
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
-  ): Promise<InfraTSVBResponse> {
+  ): Promise<TimeseriesVisData> {
     const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');

@@ -13,6 +13,7 @@ import {
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { licensingMock } from '../../../../../licensing/public/mocks';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;
@@ -58,7 +59,7 @@ describe('<EditPolicy /> serialization', () => {
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.hot.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
-      await actions.delete.disablePhase();
+      await actions.delete.enable(false);
       await actions.savePolicy();
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -86,7 +87,79 @@ describe('<EditPolicy /> serialization', () => {
                 unknown_setting: true,
               },
             },
-            min_age: '0d',
+            min_age: '10d',
+          },
+        },
+      });
+    });
+
+    it('default policy (only policy name input) on enterprise license', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+      await actions.setPolicyName('test_policy');
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        name: 'test_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_size: '50gb',
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
+          },
+        },
+      });
+    });
+
+    it('default policy (only policy name input) on basic license', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([]);
+
+      await act(async () => {
+        testBed = await setup({
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'basic' } }),
+          },
+        });
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+      await actions.setPolicyName('test_policy');
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        name: 'test_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_size: '50gb',
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
           },
         },
       });
@@ -191,6 +264,7 @@ describe('<EditPolicy /> serialization', () => {
     test('default values', async () => {
       const { actions } = testBed;
       await actions.warm.enable(true);
+      await actions.warm.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
@@ -201,7 +275,7 @@ describe('<EditPolicy /> serialization', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0d",
+            "min_age": "11d",
           }
         `);
     });
@@ -209,6 +283,7 @@ describe('<EditPolicy /> serialization', () => {
     test('setting all values', async () => {
       const { actions } = testBed;
       await actions.warm.enable(true);
+      await actions.warm.setMinAgeValue('11');
       await actions.warm.setDataAllocation('node_attrs');
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
@@ -256,7 +331,7 @@ describe('<EditPolicy /> serialization', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "0d",
+                "min_age": "11d",
               },
             },
           }
@@ -328,6 +403,7 @@ describe('<EditPolicy /> serialization', () => {
       const { actions } = testBed;
 
       await actions.cold.enable(true);
+      await actions.cold.setMinAgeValue('11');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
@@ -338,7 +414,7 @@ describe('<EditPolicy /> serialization', () => {
                 "priority": 0,
               },
             },
-            "min_age": "0d",
+            "min_age": "11d",
           }
         `);
     });
@@ -353,6 +429,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
       await actions.cold.setFreeze(true);
+      await actions.cold.toggleReadonly(true);
       await actions.cold.setIndexPriority('123');
 
       await actions.savePolicy();
@@ -372,6 +449,7 @@ describe('<EditPolicy /> serialization', () => {
                     },
                   },
                   "freeze": Object {},
+                  "readonly": Object {},
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -396,6 +474,7 @@ describe('<EditPolicy /> serialization', () => {
     test('setting searchable snapshot', async () => {
       const { actions } = testBed;
       await actions.cold.enable(true);
+      await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
       await actions.savePolicy();
       const latestRequest2 = server.requests[server.requests.length - 1];
@@ -406,21 +485,85 @@ describe('<EditPolicy /> serialization', () => {
     });
   });
 
-  test('delete phase', async () => {
-    const { actions } = testBed;
-    await actions.delete.enablePhase();
-    await actions.setWaitForSnapshotPolicy('test');
-    await actions.savePolicy();
-    const latestRequest = server.requests[server.requests.length - 1];
-    const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-    expect(entirePolicy.phases.delete).toEqual({
-      min_age: '365d',
-      actions: {
-        delete: {},
-        wait_for_snapshot: {
-          policy: 'test',
+  describe('frozen phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.frozen.enable(true);
+      await actions.frozen.setMinAgeValue('13');
+      await actions.frozen.setSearchableSnapshot('myRepo');
+
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.frozen).toEqual({
+        min_age: '13d',
+        actions: {
+          searchable_snapshot: { snapshot_repository: 'myRepo' },
         },
-      },
+      });
+    });
+
+    describe('deserialization', () => {
+      beforeEach(async () => {
+        const policyToEdit = getDefaultHotPhasePolicy('my_policy');
+        policyToEdit.policy.phases.frozen = {
+          min_age: '1234m',
+          actions: { searchable_snapshot: { snapshot_repository: 'myRepo' } },
+        };
+
+        httpRequestsMockHelpers.setLoadPolicies([policyToEdit]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('default value', async () => {
+        const { actions } = testBed;
+
+        await actions.savePolicy();
+
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy.phases.frozen).toEqual({
+          min_age: '1234m',
+          actions: {
+            searchable_snapshot: {
+              snapshot_repository: 'myRepo',
+            },
+          },
+        });
+      });
+    });
+  });
+
+  describe('delete phase', () => {
+    test('default value', async () => {
+      const { actions } = testBed;
+      await actions.delete.enable(true);
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
     });
   });
 });

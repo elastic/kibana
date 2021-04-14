@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
@@ -79,13 +78,14 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const search = async (aggs: unknown) => {
+        const search = async (aggs: Record<string, estypes.AggregationContainer>) => {
           const { body: result } = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {
               query,
               aggs,
+              // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
               runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
@@ -135,7 +135,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<unknown>,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => Promise<unknown>,
   field: IFieldType,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
@@ -179,7 +179,10 @@ export async function getNumberHistogram(
   const terms =
     'top_values' in minMaxResult.aggregations!.sample
       ? minMaxResult.aggregations!.sample.top_values
-      : { buckets: [] };
+      : {
+          buckets: [] as Array<{ doc_count: number; key: string | number }>,
+        };
+
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -241,7 +244,7 @@ export async function getNumberHistogram(
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -280,7 +283,7 @@ export async function getStringSamples(
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {

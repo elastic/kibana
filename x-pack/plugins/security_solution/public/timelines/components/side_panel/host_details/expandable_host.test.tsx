@@ -70,9 +70,7 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('HostOverviewByNameComponentQuery').prop('indexNames')).toStrictEqual([
-        'IShouldBeUsed',
-      ]);
+      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(['IShouldBeUsed']);
     });
   });
 });

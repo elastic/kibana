@@ -14,10 +14,12 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
+import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -60,11 +62,7 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   }
 `;
 
-const ExitFullScreenFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    ${({ theme }) => `margin: ${theme.eui.euiSizeS} 0 0 ${theme.eui.euiSizeS};`}
-  }
-
+const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
 
@@ -87,6 +85,8 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -106,6 +106,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   pinnedEventIds,
   onEventClosed,
+  renderCellValue,
+  rowRenderers,
   showExpandedDetails,
   sort,
 }) => {
@@ -198,14 +200,16 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`} direction="column">
-        {timelineFullScreen && setTimelineFullScreen != null && (
-          <ExitFullScreenFlexItem grow={false}>
-            <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />
-          </ExitFullScreenFlexItem>
-        )}
-
+      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         <ScrollableFlexItem grow={2}>
+          {timelineFullScreen && setTimelineFullScreen != null && (
+            <ExitFullScreenContainer>
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            </ExitFullScreenContainer>
+          )}
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
@@ -217,6 +221,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 data={events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={sort}
                 tabType={TimelineTabs.pinned}
                 totalPages={calculateTotalPages({
