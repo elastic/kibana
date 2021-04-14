@@ -49,6 +49,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
   private readonly log: Logger;
   private readonly cache: Cache;
+  private readonly rawCache: Cache;
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
@@ -60,6 +61,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.overrides = overrides;
     this.log = log;
     this.cache = new Cache();
+    this.rawCache = new Cache();
   }
 
   getRegistered() {
@@ -107,6 +109,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   async setMany(changes: Record<string, any>) {
     this.cache.del();
+    this.rawCache.del();
     this.onWriteHook(changes);
     await this.write({ changes });
   }
@@ -143,8 +146,17 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   private async getRaw(): Promise<UiSettingsRaw> {
+    const cachedValue = this.rawCache.get();
+    if (cachedValue) {
+      return cachedValue;
+    }
+
     const userProvided = await this.getUserProvided();
-    return defaultsDeep({}, userProvided, this.defaults);
+    const result = defaultsDeep({ ...userProvided }, this.defaults);
+
+    this.rawCache.set(result);
+
+    return result;
   }
 
   private validateKey(key: string, value: unknown) {

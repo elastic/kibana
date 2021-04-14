@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 
@@ -724,18 +725,25 @@ describe('ui settings', () => {
       });
 
       it('getAll', async () => {
+        const lodashDefaultsDeep = jest.spyOn(_, 'defaultsDeep');
+
         const esDocSource = {};
         const { uiSettings, savedObjectsClient } = setup({ esDocSource });
 
         await uiSettings.getAll();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        expect(lodashDefaultsDeep).toHaveBeenCalledTimes(1);
 
         await uiSettings.getAll();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        expect(lodashDefaultsDeep).toHaveBeenCalledTimes(1);
 
         jest.advanceTimersByTime(10000);
         await uiSettings.getAll();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+        expect(lodashDefaultsDeep).toHaveBeenCalledTimes(2);
+
+        lodashDefaultsDeep.mockRestore();
       });
 
       it('getUserProvided', async () => {
