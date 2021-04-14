@@ -6,12 +6,14 @@
  */
 
 import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupFleet, setupIngestManager } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { PostFleetSetupRequestSchema } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -61,14 +63,18 @@ export const FleetSetupHandler: RequestHandler = async (context, request, respon
 };
 
 // TODO should be removed as part https://github.com/elastic/kibana/issues/94303
-export const FleetAgentSetupHandler: RequestHandler = async (context, request, response) => {
+export const FleetAgentSetupHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostFleetSetupRequestSchema.body>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, esClient);
-    await setupFleet(soClient, esClient);
+    await setupFleet(soClient, esClient, { forceRecreate: request.body?.forceRecreate === true });
     return response.ok({
       body,
     });
