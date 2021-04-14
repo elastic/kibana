@@ -93,32 +93,20 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      let urlToken;
-      if (prevDataRequest && prevDataRequest.getMeta()) {
-        const prevMeta = prevDataRequest.getMeta();
-        const prevData:
-          | MVTSingleLayerVectorSourceConfig
-          | undefined = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-
-        if (prevData) {
-          // re-use the token from the previous cycle, unless there was a force-refresh
-          const isRefreshOnly = prevMeta
-            ? isRefreshOnlyQuery(prevMeta.query, searchFilters.query)
-            : false;
-          urlToken = isRefreshOnly ? uuid() : prevData.urlToken;
-        } else {
-          urlToken = uuid();
-        }
-      } else {
-        // first cycle, no previous meta
-        urlToken = uuid();
-      }
+      const prevMeta = prevDataRequest ? prevDataRequest.getMeta() : undefined;
+      const prevData = prevDataRequest
+        ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
+        : undefined;
+      const urlToken =
+        !prevData || isRefreshOnlyQuery(prevMeta ? prevMeta.query : undefined, searchFilters.query)
+          ? uuid()
+          : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
       const urlTemplateAndMetaWithToken = {
         ...newUrlTemplateAndMeta,
         urlToken,
-        urlTemplate: newUrlTemplateAndMeta.urlTemplate + `&token=${urlToken}`, // append the token to the url
+        urlTemplate: newUrlTemplateAndMeta.urlTemplate + `&token=${urlToken}`,
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, urlTemplateAndMetaWithToken, {});
     } catch (error) {
