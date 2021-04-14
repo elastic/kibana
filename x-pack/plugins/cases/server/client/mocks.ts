@@ -7,10 +7,12 @@
 
 import { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 
-import { CasesClient, CasesClientInternal } from '.';
+import { CasesClient } from '.';
 import { AttachmentsSubClient } from './attachments/client';
 import { CasesSubClient } from './cases/client';
+import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
+import { StatsSubClient } from './stats/client';
 import { SubCasesClient } from './sub_cases/client';
 import { UserActionsSubClient } from './user_actions/client';
 
@@ -23,6 +25,9 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     get: jest.fn(),
     push: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
+    getTags: jest.fn(),
+    getReporters: jest.fn(),
   };
 };
 
@@ -31,6 +36,12 @@ type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
   return {
     add: jest.fn(),
+    deleteAll: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    getAll: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 };
 
@@ -53,7 +64,24 @@ const createSubCasesClientMock = (): SubCasesClientMock => {
   };
 };
 
-type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
+type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
+
+const createConfigureSubClientMock = (): ConfigureSubClientMock => {
+  return {
+    get: jest.fn(),
+    getConnectors: jest.fn(),
+    update: jest.fn(),
+    create: jest.fn(),
+  };
+};
+
+type StatsSubClientMock = jest.Mocked<StatsSubClient>;
+
+const createStatsSubClientMock = (): StatsSubClientMock => {
+  return {
+    getStatusTotalsByType: jest.fn(),
+  };
+};
 
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
@@ -64,11 +92,12 @@ export interface CasesClientMock extends CasesClient {
 
 export const createCasesClientMock = (): CasesClientMock => {
   const client: PublicContract<CasesClient> = {
-    casesClientInternal: (jest.fn() as unknown) as CasesClientInternalMock,
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
     subCases: createSubCasesClientMock(),
+    configure: createConfigureSubClientMock(),
+    stats: createStatsSubClientMock(),
   };
   return (client as unknown) as CasesClientMock;
 };

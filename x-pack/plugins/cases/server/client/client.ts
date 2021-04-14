@@ -12,6 +12,8 @@ import { UserActionsSubClient, createUserActionsSubClient } from './user_actions
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
 import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
+import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
+import { createStatsSubClient, StatsSubClient } from './stats/client';
 
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
@@ -19,13 +21,17 @@ export class CasesClient {
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
   private readonly _subCases: SubCasesClient;
+  private readonly _configure: ConfigureSubClient;
+  private readonly _stats: StatsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
-    this._subCases = createSubCasesClient(args, this);
+    this._subCases = createSubCasesClient(args, this._casesClientInternal);
+    this._configure = createConfigurationSubClient(args, this._casesClientInternal);
+    this._stats = createStatsSubClient(args);
   }
 
   public get cases() {
@@ -47,9 +53,12 @@ export class CasesClient {
     return this._subCases;
   }
 
-  // TODO: Remove it when all routes will be moved to the cases client.
-  public get casesClientInternal() {
-    return this._casesClientInternal;
+  public get configure() {
+    return this._configure;
+  }
+
+  public get stats() {
+    return this._stats;
   }
 }
 

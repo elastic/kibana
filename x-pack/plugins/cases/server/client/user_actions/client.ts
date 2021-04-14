@@ -19,7 +19,7 @@ export interface UserActionsSubClient {
 }
 
 export const createUserActionsSubClient = (args: CasesClientArgs): UserActionsSubClient => {
-  const { savedObjectsClient, userActionService } = args;
+  const { savedObjectsClient, userActionService, logger } = args;
 
   const attachmentSubClient: UserActionsSubClient = {
     getAll: (params: UserActionGet) =>
@@ -27,6 +27,7 @@ export const createUserActionsSubClient = (args: CasesClientArgs): UserActionsSu
         ...params,
         savedObjectsClient,
         userActionService,
+        logger,
       }),
   };
 

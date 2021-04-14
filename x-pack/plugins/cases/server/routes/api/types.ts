@@ -27,12 +27,6 @@ export interface RouteDeps {
   logger: Logger;
 }
 
-export enum SortFieldCase {
-  closedAt = 'closed_at',
-  createdAt = 'created_at',
-  status = 'status',
-}
-
 export interface TotalCommentByCase {
   caseId: string;
   totalComments: number;

@@ -17,15 +17,13 @@ import {
   SubCasesPatchRequest,
   SubCasesResponse,
 } from '../../../common/api';
-import { CasesClientArgs } from '..';
-import { flattenSubCaseSavedObject, transformSubCases } from '../../routes/api/utils';
-import { countAlertsForID } from '../../common';
+import { CasesClientArgs, CasesClientInternal } from '..';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
 import { createCaseError } from '../../common/error';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { constructQueryOptions } from '../../routes/api/cases/helpers';
+import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import { CasesClient } from '../client';
 import { update } from './update';
 
 interface FindArgs {
@@ -53,13 +51,14 @@ export interface SubCasesClient {
  */
 export function createSubCasesClient(
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClientInternal: CasesClientInternal
 ): SubCasesClient {
   return Object.freeze({
     delete: (ids: string[]) => deleteSubCase(ids, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
-    update: (subCases: SubCasesPatchRequest) => update(subCases, clientArgs, casesClient),
+    update: (subCases: SubCasesPatchRequest) =>
+      update({ subCases, clientArgs, casesClientInternal }),
   });
 }
 

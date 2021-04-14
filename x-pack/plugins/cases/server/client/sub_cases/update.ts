@@ -17,7 +17,6 @@ import {
 } from 'kibana/server';
 
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import { CasesClient } from '../../client';
 import { CaseService } from '../../services';
 import {
   CaseStatuses,
@@ -36,16 +35,17 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import {
-  flattenSubCaseSavedObject,
-  isCommentRequestTypeAlertOrGenAlert,
-} from '../../routes/api/utils';
-import { getCaseToUpdate } from '../../routes/api/cases/helpers';
+import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
-import { createAlertUpdateRequest } from '../../common';
+import {
+  createAlertUpdateRequest,
+  isCommentRequestTypeAlertOrGenAlert,
+  flattenSubCaseSavedObject,
+} from '../../common';
 import { createCaseError } from '../../common/error';
 import { UpdateAlertRequest } from '../../client/alerts/client';
 import { CasesClientArgs } from '../types';
+import { CasesClientInternal } from '../client_internal';
 
 function checkNonExistingOrConflict(
   toUpdate: SubCasePatchRequest[],
@@ -207,13 +207,13 @@ async function getAlertComments({
 async function updateAlerts({
   caseService,
   soClient,
-  casesClient,
+  casesClientInternal,
   logger,
   subCasesToSync,
 }: {
   caseService: CaseService;
   soClient: SavedObjectsClientContract;
-  casesClient: CasesClient;
+  casesClientInternal: CasesClientInternal;
   logger: Logger;
   subCasesToSync: SubCasePatchRequest[];
 }) {
@@ -241,7 +241,7 @@ async function updateAlerts({
       []
     );
 
-    await casesClient.casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+    await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -256,11 +256,15 @@ async function updateAlerts({
 /**
  * Handles updating the fields in a sub case.
  */
-export async function update(
-  subCases: SubCasesPatchRequest,
-  clientArgs: CasesClientArgs,
-  casesClient: CasesClient
-): Promise<SubCasesResponse> {
+export async function update({
+  subCases,
+  clientArgs,
+  casesClientInternal,
+}: {
+  subCases: SubCasesPatchRequest;
+  clientArgs: CasesClientArgs;
+  casesClientInternal: CasesClientInternal;
+}): Promise<SubCasesResponse> {
   const query = pipe(
     excess(SubCasesPatchRequestRt).decode(subCases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -349,7 +353,7 @@ export async function update(
     await updateAlerts({
       caseService,
       soClient,
-      casesClient,
+      casesClientInternal,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger: clientArgs.logger,
     });

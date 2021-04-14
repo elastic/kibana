@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import {
   SUB_CASE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -13,12 +13,15 @@ import {
 } from '../../../common/constants';
 import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
 import { CaseUserActionService } from '../../services';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionService;
   caseId: string;
   subCaseId?: string;
+  logger: Logger;
 }
 
 export const get = async ({
@@ -26,28 +29,39 @@ export const get = async ({
   userActionService,
   caseId,
   subCaseId,
+  logger,
 }: GetParams): Promise<CaseUserActionsResponse> => {
-  const userActions = await userActionService.getAll({
-    soClient: savedObjectsClient,
-    caseId,
-    subCaseId,
-  });
+  try {
+    checkEnabledCaseConnectorOrThrow(subCaseId);
 
-  return CaseUserActionsResponseRt.encode(
-    userActions.saved_objects.reduce<CaseUserActionsResponse>((acc, ua) => {
-      if (subCaseId == null && ua.references.some((uar) => uar.type === SUB_CASE_SAVED_OBJECT)) {
-        return acc;
-      }
-      return [
-        ...acc,
-        {
-          ...ua.attributes,
-          action_id: ua.id,
-          case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-          comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
-          sub_case_id: ua.references.find((r) => r.type === SUB_CASE_SAVED_OBJECT)?.id ?? '',
-        },
-      ];
-    }, [])
-  );
+    const userActions = await userActionService.getAll({
+      soClient: savedObjectsClient,
+      caseId,
+      subCaseId,
+    });
+
+    return CaseUserActionsResponseRt.encode(
+      userActions.saved_objects.reduce<CaseUserActionsResponse>((acc, ua) => {
+        if (subCaseId == null && ua.references.some((uar) => uar.type === SUB_CASE_SAVED_OBJECT)) {
+          return acc;
+        }
+        return [
+          ...acc,
+          {
+            ...ua.attributes,
+            action_id: ua.id,
+            case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
+            comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
+            sub_case_id: ua.references.find((r) => r.type === SUB_CASE_SAVED_OBJECT)?.id ?? '',
+          },
+        ];
+      }, [])
+    );
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to retrieve user actions case id: ${caseId} sub case id: ${subCaseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
 };

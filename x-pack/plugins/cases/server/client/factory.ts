@@ -24,6 +24,7 @@ import {
   AttachmentService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -38,6 +39,7 @@ interface CasesClientFactoryArgs {
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
+  actionsPluginStart: ActionsPluginStart;
 }
 
 /**
@@ -95,7 +97,7 @@ export class CasesClientFactory {
       auditLogger: new AuthorizationAuditLogger(auditLogger),
     });
 
-    const user = this.options.caseService.getUser({ request });
+    const userInfo = this.options.caseService.getUser({ request });
 
     return createCasesClient({
       alertsService: this.options.alertsService,
@@ -103,7 +105,8 @@ export class CasesClientFactory {
       savedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
       }),
-      user,
+      // We only want these fields from the userInfo object
+      user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
       caseService: this.options.caseService,
       caseConfigureService: this.options.caseConfigureService,
       connectorMappingsService: this.options.connectorMappingsService,
@@ -112,6 +115,7 @@ export class CasesClientFactory {
       logger: this.logger,
       authorization: auth,
       auditLogger,
+      actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });
   }
 }

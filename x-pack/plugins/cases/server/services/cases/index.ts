@@ -31,19 +31,17 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
+  CaseStatuses,
 } from '../../../common/api';
 import {
   defaultSortField,
+  flattenCaseSavedObject,
+  flattenSubCaseSavedObject,
   groupTotalAlertsByID,
   SavedObjectFindOptionsKueryNode,
 } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { defaultPage, defaultPerPage } from '../../routes/api';
-import {
-  flattenCaseSavedObject,
-  flattenSubCaseSavedObject,
-  transformNewSubCase,
-} from '../../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -173,6 +171,24 @@ interface CasesMapWithPageInfo {
 }
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
+
+const transformNewSubCase = ({
+  createdAt,
+  createdBy,
+}: {
+  createdAt: string;
+  createdBy: User;
+}): SubCaseAttributes => {
+  return {
+    closed_at: null,
+    closed_by: null,
+    created_at: createdAt,
+    created_by: createdBy,
+    status: CaseStatuses.open,
+    updated_at: null,
+    updated_by: null,
+  };
+};
 
 export class CaseService {
   constructor(

@@ -18,6 +18,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
 } from '../services';
+import { ActionsClient } from '../../../actions/server';
 
 export interface CasesClientArgs {
   readonly scopedClusterClient: ElasticsearchClient;
@@ -32,4 +33,5 @@ export interface CasesClientArgs {
   readonly logger: Logger;
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly auditLogger?: AuditLogger;
+  readonly actionsClient: PublicMethodsOf<ActionsClient>;
 }

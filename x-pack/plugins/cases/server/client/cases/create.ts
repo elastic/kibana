@@ -17,8 +17,6 @@ import {
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
 
-import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
-
 import {
   throwErrors,
   excess,
@@ -30,10 +28,7 @@ import {
   User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import {
-  getConnectorFromConfiguration,
-  transformCaseConnectorToEsConnector,
-} from '../../routes/api/cases/helpers';
+import { getConnectorFromConfiguration } from '../utils';
 
 import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
@@ -41,7 +36,12 @@ import { Authorization } from '../../authorization/authorization';
 import { Operations } from '../../authorization';
 import { AuditLogger, EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { createAuditMsg } from '../../common';
+import {
+  createAuditMsg,
+  flattenCaseSavedObject,
+  transformCaseConnectorToEsConnector,
+  transformNewCase,
+} from '../../common';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureService;

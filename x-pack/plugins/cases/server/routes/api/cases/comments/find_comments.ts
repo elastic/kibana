@@ -14,28 +14,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { esKuery } from '../../../../../../../../src/plugins/data/server';
-import {
-  AssociationType,
-  CommentsResponseRt,
-  SavedObjectFindOptionsRt,
-  throwErrors,
-} from '../../../../../common/api';
+import { SavedObjectFindOptionsRt, throwErrors } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
-import { escapeHatch, transformComments, wrapError } from '../../utils';
-import {
-  CASE_COMMENTS_URL,
-  SAVED_OBJECT_TYPES,
-  ENABLE_CASE_CONNECTOR,
-} from '../../../../../common/constants';
-import { defaultPage, defaultPerPage } from '../..';
+import { escapeHatch, wrapError } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
   subCaseId: rt.string,
 });
 
-export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
+export function initFindCaseCommentsApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASE_COMMENTS_URL}/_find`,
@@ -48,54 +37,18 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     },
     async (context, request, response) => {
       try {
-        const soClient = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
         const query = pipe(
           FindQueryParamsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        if (!ENABLE_CASE_CONNECTOR && query.subCaseId !== undefined) {
-          throw Boom.badRequest(
-            'The `subCaseId` is not supported when the case connector feature is disabled'
-          );
-        }
-
-        const id = query.subCaseId ?? request.params.case_id;
-        const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
-        const { filter, ...queryWithoutFilter } = query;
-        const args = query
-          ? {
-              caseService,
-              soClient,
-              id,
-              options: {
-                // We need this because the default behavior of getAllCaseComments is to return all the comments
-                // unless the page and/or perPage is specified. Since we're spreading the query after the request can
-                // still override this behavior.
-                page: defaultPage,
-                perPage: defaultPerPage,
-                sortField: 'created_at',
-                filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
-                ...queryWithoutFilter,
-              },
-              associationType,
-            }
-          : {
-              caseService,
-              soClient,
-              id,
-              options: {
-                page: defaultPage,
-                perPage: defaultPerPage,
-                sortField: 'created_at',
-              },
-              associationType,
-            };
-
-        const theComments = await caseService.getCommentsByAssociation(args);
-        return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
+        const client = await context.cases.getCasesClient();
+        return response.ok({
+          body: await client.attachments.find({
+            caseID: request.params.case_id,
+            queryParams: query,
+          }),
+        });
       } catch (error) {
         logger.error(
           `Failed to find comments in route case id: ${request.params.case_id}: ${error}`

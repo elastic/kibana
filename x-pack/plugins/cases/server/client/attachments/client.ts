@@ -5,18 +5,34 @@
  * 2.0.
  */
 
-import { CaseResponse, CommentRequest as AttachmentsRequest } from '../../../common/api';
+import {
+  AllCommentsResponse,
+  CaseResponse,
+  CommentRequest as AttachmentsRequest,
+  CommentResponse,
+  CommentsResponse,
+} from '../../../common/api';
+
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { addComment } from './add';
+import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
+import { find, FindArgs, get, getAll, GetAllArgs, GetArgs } from './get';
+import { update, UpdateArgs } from './update';
 
-export interface AttachmentsAdd {
+interface AttachmentsAdd {
   caseId: string;
   comment: AttachmentsRequest;
 }
 
 export interface AttachmentsSubClient {
   add(args: AttachmentsAdd): Promise<CaseResponse>;
+  deleteAll(deleteAllArgs: DeleteAllArgs): Promise<void>;
+  delete(deleteArgs: DeleteArgs): Promise<void>;
+  find(findArgs: FindArgs): Promise<CommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  get(getArgs: GetArgs): Promise<CommentResponse>;
+  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
 }
 
 export const createAttachmentsSubClient = (
@@ -31,6 +47,12 @@ export const createAttachmentsSubClient = (
         caseId,
         comment,
       }),
+    deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, args),
+    delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, args),
+    find: (findArgs: FindArgs) => find(findArgs, args),
+    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, args),
+    get: (getArgs: GetArgs) => get(getArgs, args),
+    update: (updateArgs: UpdateArgs) => update(updateArgs, args),
   };
 
   return Object.freeze(attachmentSubClient);
