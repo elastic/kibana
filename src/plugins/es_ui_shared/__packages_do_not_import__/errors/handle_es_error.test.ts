@@ -64,8 +64,4 @@ describe('handleEsError', () => {
 
     expect(status).toBe(400);
   });
-
-  test('unknown object', () => {
-    expect(() => handleEsError({ error: anyObject, response })).toThrow();
-  });
 });
