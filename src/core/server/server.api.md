@@ -349,7 +349,7 @@ export const config: {
             pingTimeout: Type<import("moment").Duration>;
             logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: Type<"full" | "none" | "certificate">;
+                verificationMode: Type<"none" | "certificate" | "full">;
                 certificateAuthorities: Type<string | string[] | undefined>;
                 certificate: Type<string | undefined>;
                 key: Type<string | undefined>;
