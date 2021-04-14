@@ -22,7 +22,7 @@ import {
 } from '../shared';
 import { DEPRECATIONS_PER_PAGE } from '../constants';
 import { EsDeprecationErrors } from './es_deprecation_errors';
-import { EsDeprecationAccordion } from './deprecations/deprecation_group_item';
+import { EsDeprecationAccordion } from './deprecations';
 
 const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {

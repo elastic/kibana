@@ -35,7 +35,7 @@ describe('Indices tab', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(upgradeStatusMockResponse);
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
       await act(async () => {
@@ -118,7 +118,7 @@ describe('Indices tab', () => {
         indices: [],
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(noDeprecationsResponse);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -144,7 +144,7 @@ describe('Indices tab', () => {
         message: 'Forbidden',
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -170,7 +170,7 @@ describe('Indices tab', () => {
         },
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -196,7 +196,7 @@ describe('Indices tab', () => {
         },
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -219,7 +219,7 @@ describe('Indices tab', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });

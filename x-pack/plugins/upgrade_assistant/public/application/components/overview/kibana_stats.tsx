@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -43,6 +44,12 @@ const i18nTexts = {
     'xpack.upgradeAssistant.kibanaDeprecationStats.viewDeprecationsLinkText',
     {
       defaultMessage: 'View deprecations',
+    }
+  ),
+  loadingError: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage',
+    {
+      defaultMessage: 'An error occurred while retrieving Kibana deprecations.',
     }
   ),
 };
@@ -120,7 +127,21 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ history }) =>
             titleColor="danger"
             isLoading={isLoading}
           >
-            {/* {error && <EsStatsErrors error={error} />} */}
+            {error && (
+              <>
+                <EuiSpacer size="s" />
+
+                <EuiIconTip
+                  type="alert"
+                  color="danger"
+                  size="l"
+                  content={i18nTexts.loadingError}
+                  iconProps={{
+                    'data-test-subj': 'requestErrorIconTip',
+                  }}
+                />
+              </>
+            )}
           </EuiStat>
         </EuiFlexItem>
       </EuiFlexGroup>
