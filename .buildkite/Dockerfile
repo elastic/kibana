@@ -28,19 +28,21 @@ RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/
   && mv vault /usr/local/bin/vault
 
 RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
-RUN mkdir -p /var/lib/kibana/workspace/kibana
+RUN mkdir -p /var/lib/kibana/workspace/kibana && chown kibana:kibana /var/lib/kibana/workspace/kibana
 WORKDIR /var/lib/kibana/workspace/kibana
-COPY package.json yarn.lock preinstall_check.js ./
-RUN npm install -g --force yarn@^"$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+COPY --chown=kibana:kibana package.json yarn.lock preinstall_check.js .bazeliskversion ./
+RUN npm install -g --force yarn@^"$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")" && \
+  npm install -g @bazel/bazelisk@"$(cat .bazeliskversion)"
+USER kibana
 RUN yarn config set yarn-offline-mirror "/var/lib/kibana/yarn-offline-cache"
 RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
 
-COPY . .
+COPY  --chown=kibana:kibana . .
 
 ENV BUILD_TS_REFS_DISABLE=true
 RUN yarn kbn bootstrap --no-cache
 
-RUN chown -R kibana:kibana /var/lib/kibana/
+# RUN chown -R kibana:kibana /var/lib/kibana/
 
 USER kibana
 ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.buildkite/scripts/entrypoint.sh"]
