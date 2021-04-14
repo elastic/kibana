@@ -63,5 +63,6 @@ yarn kbn watch-bazel
 
 - @elastic/datemath
 - @kbn/apm-utils
+- @kbn/utility-types
 
 
