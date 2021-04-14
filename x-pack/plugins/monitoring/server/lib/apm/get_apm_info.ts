@@ -29,15 +29,11 @@ export function handleResponse(
 
   const firstHit = response.hits.hits[0];
 
-  let firstStats = null;
   let firstStatsMetrics = null;
   if (
     firstHit.inner_hits?.first_hit?.hits?.hits &&
     firstHit.inner_hits?.first_hit?.hits?.hits.length > 0
   ) {
-    firstStats =
-      firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats ??
-      firstHit.inner_hits.first_hit.hits.hits[0]._source.beat?.stats;
     firstStatsMetrics =
       firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats?.metrics ??
       firstHit.inner_hits.first_hit.hits.hits[0]._source.beat?.stats;
