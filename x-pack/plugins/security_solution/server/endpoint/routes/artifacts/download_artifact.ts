@@ -91,9 +91,9 @@ export function registerDownloadArtifactRoute(
           return res.notFound({ body: `No artifact found for ${id}` });
         }
 
-        const bodyBuffer = Buffer.from(artifact.attributes.body, 'base64');
+        const bodyBuffer = Buffer.from(artifact.body, 'base64');
         cache.set(id, bodyBuffer);
-        return buildAndValidateResponse(artifact.attributes.identifier, bodyBuffer);
+        return buildAndValidateResponse(artifact.identifier, bodyBuffer);
       }
     }
   );

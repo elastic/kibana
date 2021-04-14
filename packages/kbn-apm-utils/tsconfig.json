@@ -2,17 +2,17 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./target",
-    "stripInternal": false,
     "declarationMap": true,
+    "incremental": true,
+    "outDir": "target",
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-apm-utils/src",
     "types": [
       "node"
     ]
   },
   "include": [
     "./src/**/*.ts"
-  ],
-  "exclude": [
-    "target"
   ]
 }

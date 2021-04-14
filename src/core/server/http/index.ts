@@ -56,7 +56,6 @@ export type {
   DestructiveRouteMethod,
   SafeRouteMethod,
 } from './router';
-export { BasePathProxyServer } from './base_path_proxy_server';
 export type { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 export type {
   AuthenticationHandler,

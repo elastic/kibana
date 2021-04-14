@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AddConfigDeprecation } from '@kbn/config';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
@@ -35,7 +36,6 @@ import { ClusterStateParams } from 'elasticsearch';
 import { ClusterStatsParams } from 'elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
-import { ConfigDeprecationLogger } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigOptions } from 'elasticsearch';
 import { ConfigPath } from '@kbn/config';
@@ -142,7 +142,6 @@ import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
-import { Server } from '@hapi/hapi';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
@@ -168,6 +167,8 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
+
+export { AddConfigDeprecation }
 
 // @public
 export interface AppCategory {
@@ -297,7 +298,7 @@ export class BasePath {
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
+export function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs): Promise<void>;
 
 // @public
 export interface Capabilities {
@@ -362,7 +363,7 @@ export const config: {
             healthCheck: import("@kbn/config-schema").ObjectType<{
                 delay: Type<import("moment").Duration>;
             }>;
-            ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
+            ignoreVersionMismatch: import("@kbn/config-schema/target/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
@@ -373,8 +374,6 @@ export const config: {
 export { ConfigDeprecation }
 
 export { ConfigDeprecationFactory }
-
-export { ConfigDeprecationLogger }
 
 export { ConfigDeprecationProvider }
 
@@ -490,6 +489,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
+    // (undocumented)
+    deprecations: DeprecationsServiceSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
@@ -830,10 +831,38 @@ export interface DeprecationInfo {
     url: string;
 }
 
+// Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface DeprecationsDetails {
+    // (undocumented)
+    correctiveActions: {
+        api?: {
+            path: string;
+            method: 'POST' | 'PUT';
+            body?: {
+                [key: string]: any;
+            };
+        };
+        manualSteps?: string[];
+    };
+    // (undocumented)
+    documentationUrl?: string;
+    level: 'warning' | 'critical' | 'fetch_error';
+    // (undocumented)
+    message: string;
+}
+
 // @public
 export interface DeprecationSettings {
     docLinksKey: string;
     message: string;
+}
+
+// @public
+export interface DeprecationsServiceSetup {
+    // (undocumented)
+    registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
 // @public
@@ -938,6 +967,16 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
     status: AuthStatus;
     state: T;
 };
+
+// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface GetDeprecationsContext {
+    // (undocumented)
+    esClient: IScopedClusterClient;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+}
 
 // @public (undocumented)
 export interface GetResponse<T> {
@@ -1265,7 +1304,7 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -1545,20 +1584,6 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     close(): void;
     }
 
-// @internal @deprecated
-export interface LegacyConfig {
-    // (undocumented)
-    get<T>(key?: string): T;
-    // (undocumented)
-    has(key: string): boolean;
-    // (undocumented)
-    set(key: string, value: any): void;
-    // Warning: (ae-forgotten-export) The symbol "LegacyVars" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    set(config: LegacyVars): void;
-}
-
 // @public @deprecated (undocumented)
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
@@ -1593,30 +1618,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     // @deprecated
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
-
-// @public @deprecated (undocumented)
-export interface LegacyServiceSetupDeps {
-    // Warning: (ae-forgotten-export) The symbol "LegacyCoreSetup" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    core: LegacyCoreSetup;
-    // (undocumented)
-    plugins: Record<string, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "UiPlugins" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    uiPlugins: UiPlugins;
-}
-
-// @public @deprecated (undocumented)
-export interface LegacyServiceStartDeps {
-    // Warning: (ae-forgotten-export) The symbol "LegacyCoreStart" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    core: LegacyCoreStart;
-    // (undocumented)
-    plugins: Record<string, unknown>;
-}
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 //
@@ -1911,6 +1912,16 @@ export type RedirectResponseOptions = HttpResponseOptions & {
         location: string;
     };
 };
+
+// Warning: (ae-missing-release-tag) "RegisterDeprecationsConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface RegisterDeprecationsConfig {
+    // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
+}
 
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
@@ -3209,9 +3220,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:289:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:394:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:296:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:401:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

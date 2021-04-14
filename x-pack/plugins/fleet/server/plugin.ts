@@ -48,6 +48,7 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -64,6 +65,7 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
 import type {
   ESIndexPatternService,
@@ -132,6 +134,7 @@ const allSavedObjectTypes = [
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -161,6 +164,12 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  * Describes public Fleet plugin contract returned at the `startup` stage.
  */
 export interface FleetStartContract {
+  /**
+   * returns a promise that resolved when fleet setup has been completed regardless if it was successful or failed).
+   * Any consumer of fleet start services should first `await` for this promise to be resolved before using those
+   * services
+   */
+  fleetSetupCompleted: () => Promise<void>;
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -268,6 +277,7 @@ export class FleetPlugin
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
       registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -314,9 +324,13 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    startFleetServerSetup();
+    const fleetServerSetup = startFleetServerSetup();
 
     return {
+      fleetSetupCompleted: () =>
+        new Promise<void>((resolve) => {
+          Promise.all([fleetServerSetup]).finally(() => resolve());
+        }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstalledEsAssetReferences: async (
