@@ -15,16 +15,17 @@ import { DeprecationInfo } from '../../../../common/types';
 import { LevelFilterOption } from '../types';
 
 const LocalizedOptions: { [option: string]: string } = {
-  all: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.filterBar.allButtonLabel', {
-    defaultMessage: 'all',
-  }),
+  warning: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.controls.filterBar.warningButtonLabel',
+    {
+      defaultMessage: 'warning',
+    }
+  ),
   critical: i18n.translate(
     'xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel',
     { defaultMessage: 'critical' }
   ),
 };
-
-const allFilterOptions = Object.keys(LevelFilterOption) as LevelFilterOption[];
 
 interface FilterBarProps {
   allDeprecations?: DeprecationInfo[];
@@ -43,23 +44,40 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
     return counts;
   }, {} as { [level: string]: number });
 
-  const allCount = allDeprecations.length;
-
   return (
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
-        {allFilterOptions.map((option) => (
-          <EuiFilterButton
-            key={option}
-            onClick={onFilterChange.bind(null, option)}
-            hasActiveFilters={currentFilter === option}
-            numFilters={
-              option === LevelFilterOption.all ? allCount : levelCounts[option] || undefined
-            }
-          >
-            {LocalizedOptions[option]}
-          </EuiFilterButton>
-        ))}
+        <EuiFilterButton
+          withNext
+          key={LevelFilterOption.critical}
+          onClick={() => {
+            onFilterChange(
+              currentFilter !== LevelFilterOption.critical
+                ? LevelFilterOption.critical
+                : LevelFilterOption.all
+            );
+          }}
+          hasActiveFilters={currentFilter === LevelFilterOption.critical}
+          numFilters={levelCounts[LevelFilterOption.critical] || undefined}
+          data-test-subj="criticalLevelFilter"
+        >
+          {LocalizedOptions[LevelFilterOption.critical]}
+        </EuiFilterButton>
+        <EuiFilterButton
+          key={LevelFilterOption.warning}
+          onClick={() => {
+            onFilterChange(
+              currentFilter !== LevelFilterOption.warning
+                ? LevelFilterOption.warning
+                : LevelFilterOption.all
+            );
+          }}
+          hasActiveFilters={currentFilter === LevelFilterOption.warning}
+          numFilters={levelCounts[LevelFilterOption.warning] || undefined}
+          data-test-subj="warningLevelFilter"
+        >
+          {LocalizedOptions[LevelFilterOption.warning]}
+        </EuiFilterButton>
       </EuiFilterGroup>
     </EuiFlexItem>
   );
