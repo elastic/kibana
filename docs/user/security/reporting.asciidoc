@@ -16,11 +16,12 @@ For more information, see
 ////
 
 [[reporting-app-users]]
-Access to reporting features is controlled by security privileges. In versions 7.12 and below, you can do this
+Access to reporting features is limited to privileged users. In versions 7.12 and below, you can grant the privilege
 by assigning users the `reporting_user` role in Elasticsearch. In 7.13 and above, you can configure Reporting to use
 <<kibana-privileges, {kib} privileges>> instead. It is recommended that Reporting is configured to
-use Kibana privileges by setting `xpack.reporting.roles.enabled` to `false` in kibana.yml. By using Kibana privileges, you can define
-custom roles that grant Reporting privileges as sub-features of Kibana applications in Role Management.
+use the new method of Kibana privileges by adding `xpack.reporting.roles.enabled: false` in your kibana.yml. By
+turning off the Elasticsearch built-in roles and using Kibana privileges, you can define custom roles that grant
+users access to reporting features, on a per-space basis and per-application basis.
 
 [float]
 [[reporting-roles-management-ui]]
@@ -52,10 +53,8 @@ the menu for each application, and grant the role the privileges to generate
 reports by choosing "All" privileges for all features, or "Customize" to grant
 the role the privilege to generate reports for only certain applications.
 +
-Reporting users typically save searches, create
-visualizations, and build dashboards. They require a space
-that provides read and write privileges in
-*Discover* and *Dashboard*.
+[role="screenshot"]
+image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 
 . Save your new role.
 
@@ -73,7 +72,7 @@ where they'll generate reports.
 
 [source, sh]
 ---------------------------------------------------------------
-POST /_security/role/reporter
+POST /_security/role/custom_reporting_user
 {
   metadata: {},
   elasticsearch: { cluster: [], indices: [], run_as: [] },
