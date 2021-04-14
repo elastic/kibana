@@ -44,9 +44,6 @@ import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../t
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 
-// TODO: All below imports depend on Timeline or SecuritySolution in some form or another
-// import { SpyRoute } from '../../../common/utils/route/spy_routes';
-
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
@@ -63,6 +60,7 @@ export interface CaseViewComponentProps {
 }
 
 export interface CaseViewProps extends CaseViewComponentProps {
+  onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
 export interface OnUpdateFields {
@@ -302,9 +300,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       fetchCase();
     }, [caseData.connector.id, caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
-    // TODO: Handle spyRoute (pass as a prop or allow component to have children??)
-    // const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
@@ -473,8 +468,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           </MyWrapper>
         </WhitePageWrapper>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
-        {/* TODO: Determine spyroute changes */}
-        {/* <SpyRoute state={spyState} pageName={SecurityPageName.case} /> */}
       </>
     );
   }
@@ -487,6 +480,7 @@ export const CaseView = React.memo(
     caseId,
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
+    onCaseDataSuccess,
     onComponentInitialized,
     ruleDetailsNavigation,
     showAlertDetails,
@@ -507,6 +501,9 @@ export const CaseView = React.memo(
           </EuiFlexItem>
         </MyEuiFlexGroup>
       );
+    }
+    if (onCaseDataSuccess && data) {
+      onCaseDataSuccess(data);
     }
 
     return (

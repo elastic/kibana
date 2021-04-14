@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { SearchResponse } from 'elasticsearch';
@@ -33,8 +33,9 @@ import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { buildAlertsQuery, formatAlertToEcsSignal, useFetchAlertData } from './helpers';
 import { SEND_ALERT_TO_TIMELINE } from './translations';
-import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { useInsertTimeline } from '../use_insert_timeline';
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 
 interface Props {
   caseId: string;
@@ -109,6 +110,17 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
 };
 
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
+  const [caseTitle, setCaseTitle] = useState<string | null>(null);
+
+  const onCaseDataSuccess = useCallback(
+    (data: Case) => {
+      if (!caseTitle || caseTitle !== data.title) {
+        setCaseTitle(data.title);
+      }
+    },
+    [caseTitle]
+  );
+
   const {
     cases: casesUi,
     application: { navigateToApp },
@@ -189,44 +201,50 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     );
   }, [dispatch]);
 
-  return casesUi.getCaseView({
-    allCasesNavigation: {
-      href: formattedAllCasesLink,
-      onClick: backToAllCasesOnClick,
-    },
-    caseDetailsNavigation: {
-      href: caseDetailsLink,
-    },
-    caseId,
-    configureCasesNavigation: {
-      href: configureCasesHref,
-      onClick: onConfigureCasesNavClick,
-    },
-    getCaseDetailHrefWithCommentId,
-    onComponentInitialized,
-    ruleDetailsNavigation: {
-      href: getDetectionsRuleDetailsHref,
-      onClick: onDetectionsRuleDetailsClick,
-    },
-    showAlertDetails,
-    subCaseId,
-    timelineIntegration: {
-      editor_plugins: {
-        parsingPlugin: timelineMarkdownPlugin.parser,
-        processingPluginRenderer: timelineMarkdownPlugin.renderer,
-        uiPlugin: timelineMarkdownPlugin.plugin,
-      },
-      hooks: {
-        useInsertTimeline,
-      },
-      ui: {
-        renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
-        renderTimelineDetailsPanel: TimelineDetailsPanel,
-      },
-    },
-    useFetchAlertData,
-    userCanCrud,
-  });
+  return (
+    <>
+      {casesUi.getCaseView({
+        allCasesNavigation: {
+          href: formattedAllCasesLink,
+          onClick: backToAllCasesOnClick,
+        },
+        caseDetailsNavigation: {
+          href: caseDetailsLink,
+        },
+        caseId,
+        configureCasesNavigation: {
+          href: configureCasesHref,
+          onClick: onConfigureCasesNavClick,
+        },
+        getCaseDetailHrefWithCommentId,
+        onCaseDataSuccess,
+        onComponentInitialized,
+        ruleDetailsNavigation: {
+          href: getDetectionsRuleDetailsHref,
+          onClick: onDetectionsRuleDetailsClick,
+        },
+        showAlertDetails,
+        subCaseId,
+        timelineIntegration: {
+          editor_plugins: {
+            parsingPlugin: timelineMarkdownPlugin.parser,
+            processingPluginRenderer: timelineMarkdownPlugin.renderer,
+            uiPlugin: timelineMarkdownPlugin.plugin,
+          },
+          hooks: {
+            useInsertTimeline,
+          },
+          ui: {
+            renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
+            renderTimelineDetailsPanel: TimelineDetailsPanel,
+          },
+        },
+        useFetchAlertData,
+        userCanCrud,
+      })}
+      {caseTitle && <SpyRoute state={{ caseTitle }} pageName={SecurityPageName.case} />}
+    </>
+  );
 });
 
 CaseView.displayName = 'CaseView';
