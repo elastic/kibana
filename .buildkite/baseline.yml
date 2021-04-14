@@ -1,8 +1,6 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/kibana-ci-baseline'
-  SLACK_NOTIFICATIONS_CHANNEL: '#kb-bk'
-  SLACK_NOTIFICATIONS_ENABLED: 'true'
 steps:
   - command: .buildkite/setup/pre_build.sh
     label: Pre-Build

@@ -78,6 +78,6 @@
 /bazel
 /.bazelrc.user
 
-# /.git
-/.buildkite/Dockerfile
+/.git
+/.buildkite/Dockerfile*
 .buildkite/pipeline.yml

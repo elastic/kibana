@@ -7,10 +7,7 @@ steps:
   #       --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
   #       --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
   #       --cache-from type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache
-  - command: |
-      export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .buildkite/Dockerfile . --progress plain && \
-      docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
+  - command: .buildkite/scripts/bootstrap_docker.sh
     agents:
       queue: bootstrap
   - wait
@@ -23,7 +20,9 @@ steps:
       - docker#v3.8.0:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
           propagate-environment: true
-          mount-checkout: false
+          volumes:
+            - './.git:/var/lib/kibana/workspace/kibana/.git'
+          # mount-checkout: false
     parallelism: 2
     timeout_in_minutes: 120
   - command: |
@@ -42,7 +41,9 @@ steps:
       - docker#v3.8.0:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT'
           propagate-environment: true
-          mount-checkout: false
+          volumes:
+            - './.git:/var/lib/kibana/workspace/kibana/.git'
+          # mount-checkout: false
     depends_on: default-build
   # - command: 'CI_GROUP=1 .buildkite/scripts/xpack-cigroup.sh'
   #   label: 'Default CI Group 1'
