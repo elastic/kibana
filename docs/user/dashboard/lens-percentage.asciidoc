@@ -1,0 +1,71 @@
+[[analyze-data-as-percentage-in-line]]
+== Advanced guide: Analyze data as percentage in Lens
+
+It is often useful to with with percentages within your data: from computing a single metric about performance goal, to representing the proportion of metrics over time.
+
+The aim of this guide is to provide an overview of representing percentages with several visualizations within the Lens editor: some of the content of this guide is inspired by this blog post based on TSVB, but applied to the Lens editor.
+
+In this guide we'll use the **flights** sample data sets to explore the different options we have to answer the following questions:
+
+* How are values distributed within my data?
+* What is the proportion of X within my data?
+* Is the distribution changing over time?
+
+=== Computing the proportion for the overall data
+
+The first step to understand the distribution is to have an overview for the overall data: this type of visualization is useful to compared multiple values to the whole dataset and understand their proportions.
+
+*Lens* offers different types of visualization in order to help with this type of question: *Pie* chart, *Donut* chart, *Treemap* and *Percentage* charts.
+
+In this example we'll investigate what are the most common reasons of flights delay within the dataset: the idea is to count all the available records, then group them by the type of delay recorded.
+
+To explain this visually, we can start from a *Pie* chart in Lens and drop the *Records* field into the `Size by` dimension, then drag and drop the *FlightDelayType* field into the `Slice by` dimension:
++
+[role="screenshot"]
+image::images/lens_percentage_1.png[Pie chart distribution]
+
+From the results it is possible to see that the majority of flights have had *No delay* at all, while the remaining flights had delay for several different reasons. One of these possible reasons has the label *Other*, which represents additional reasons not fetched yet by our configuration.
+In order to expand more what other reasons there are within the *Other* category, we can open the *Top values of FlightDelayType* configuration and increment the *Number of values* to 10:
++
+[role="screenshot"]
+image::images/lens_percentage_2.png[Pie chart distribution with all delay types]
+
+Notice how the suggestion system is also recommending other types of visualization for the same dataset, as the *Treemap* one. Clicking on the *Treemap* thumbnail an alternative representation of the proportion is now visualized on the main chart area:
++
+[role="screenshot"]
+image::images/lens_percentage_3.png[Treemap distribution]
+
+*Lens* lets you experiment with different types of chart, trying to keep the focus on the same type of question or similar. When not possible a warning sign will be shown in the Chart switcher.
+
+You can change now the chart type to *Bar vertical percentage* to have another alternative representation of the proportion:
++
+[role="screenshot"]
+image::images/lens_percentage_4.png[Percentage chart distribution]
+
+In the *Percentage* charts the *Break down by* configuration tells *Lens* how to split the value computed on the Vertical Axis, therefore the *Top values of FlightDelayType* configuration is moved there when changing chart.
+*Lens* rearranges the field configuration when changing from chart to chart in order to keep the same result as in the previous visualization.
+
+=== Computing the proportion over time
+
+Representing the overall distribution can be useful, but it provides a limited understanding of the data, as trends are not immediately visible with that type of representation.
+This is why *Lens* provides also a solution to visualize the distribution of the values over time: this requires the documents to have a time field.
+
+To build a visualization of a distribution over time in *Lens* it is possible to create first a *Percentage* chart - either Area or Bar as above - and then add a temporal dimension on the horizontal axis.
+
+From the previous setup with the *Bar vertical percentage* chart, drag and drop the *timestamp* field into the Horizontal axis area:
++
+[role="screenshot"]
+image::images/lens_percentage_5.png[Percentage chart distribution over time]
+
+The *Area percentage* visualization offers an alternative representation.
+While *Lens* attempts to pick the best interval to represent the distribution over time, it is sometimes useful to customize this in the visualiation. In the *timestamp* configuration it is possible to customize the interval duration.
++
+[role="screenshot"]
+image::images/lens_percentage_6.png[Area percentage chart distribution with custom interval]
+
+
+
+
+
+
+
