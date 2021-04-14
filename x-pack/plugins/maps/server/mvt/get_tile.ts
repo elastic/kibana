@@ -12,6 +12,7 @@ import vtpbf from 'vt-pbf';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
+import { countVectorShapeTypes } from '../../common/get_geometry_counts';
 import {
   COUNT_PROP_NAME,
   ES_GEO_FIELD_TYPE,
@@ -312,6 +313,21 @@ export async function getTile({
         }
       }
     }
+
+    const counts = countVectorShapeTypes(features);
+    const metadataFeature = {
+      type: 'Feature',
+      properties: {
+        [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+        [KBN_IS_TILE_COMPLETE]: true,
+        [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
+      },
+      // todo - constrain to actual features
+      geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
+    };
+
+    // @ts-expect-error
+    features.push(metadataFeature);
 
     const featureCollection: FeatureCollection = {
       features,

@@ -7,16 +7,18 @@
 
 import React from 'react';
 import {
-  Map as MbMap,
   GeoJSONSource as MbGeoJSONSource,
+  Map as MbMap,
   VectorSource as MbVectorSource,
 } from 'mapbox-gl';
 import { Feature } from 'geojson';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  SOURCE_DATA_REQUEST_ID,
-  LAYER_TYPE,
   KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_VECTOR_SHAPE_TYPE_COUNTS,
+  LAYER_TYPE,
+  SOURCE_DATA_REQUEST_ID,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
@@ -27,6 +29,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { IVectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -54,8 +57,49 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent() {
+    const tileMetas = this.getMetaFromTiles();
+
+    if (!tileMetas) {
+      return {
+        icon: this.getCurrentStyle().getIcon(),
+        tooltipContent: 'foobar',
+        areResultsTrimmed: false,
+      };
+    }
+
+    const shapeTypeCountMeta: IVectorShapeTypeCounts = tileMetas.reduce(
+      (accumulator: IVectorShapeTypeCounts, tileMeta: any) => {
+        if (
+          tileMeta.properties[KBN_TOO_MANY_FEATURES_PROPERTY] === true ||
+          typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string'
+        ) {
+          return accumulator;
+        }
+        const counts = JSON.parse(tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]);
+
+        accumulator[VECTOR_SHAPE_TYPE.POINT] += counts[VECTOR_SHAPE_TYPE.POINT];
+        accumulator[VECTOR_SHAPE_TYPE.LINE] += counts[VECTOR_SHAPE_TYPE.LINE];
+        accumulator[VECTOR_SHAPE_TYPE.POLYGON] += counts[VECTOR_SHAPE_TYPE.POLYGON];
+
+        return accumulator;
+      },
+      {
+        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+        [VECTOR_SHAPE_TYPE.LINE]: 0,
+        [VECTOR_SHAPE_TYPE.POINT]: 0,
+      }
+    );
+
+    const isLinesOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    const isPointsOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
     return {
-      icon: this.getCurrentStyle().getIcon(),
+      icon: this.getCurrentStyle().getIconFromGeometryTypes(isLinesOnly, isPointsOnly),
       tooltipContent: 'foobar',
       areResultsTrimmed: false,
     };

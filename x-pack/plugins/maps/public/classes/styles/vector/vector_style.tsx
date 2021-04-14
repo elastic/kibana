@@ -94,6 +94,7 @@ export interface IVectorStyle extends IStyle {
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
   getIcon: () => ReactElement<any>;
+  getIconFromGeometryTypes: (isLinesOnly: boolean, isPointsOnly: boolean) => ReactElement<any>;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement<any>;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -702,8 +703,7 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIcon = () => {
-    const isLinesOnly = this._getIsLinesOnly();
+  getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -725,14 +725,20 @@ export class VectorStyle implements IVectorStyle {
 
     return (
       <VectorIcon
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
         strokeColor={strokeColor}
         fillColor={fillColor}
       />
     );
-  };
+  }
+
+  getIcon() {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+    return this.getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
+  }
 
   _getLegendDetailStyleProperties = () => {
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
