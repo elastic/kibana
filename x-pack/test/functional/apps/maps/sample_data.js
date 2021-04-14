@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
   describe('maps loaded from sample data', () => {
     before(async () => {
-      //installing the sample data with test user with super user role
+      //installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], false);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -91,10 +91,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
       //running the rest of the tests with limited roles
-      await security.testUser.setRoles(
-        ['global_maps_all','kibana_sample_admin'],
-        false
-      );
+      await security.testUser.setRoles(['global_maps_all', 'kibana_sample_admin'], false);
     });
 
     after(async () => {
