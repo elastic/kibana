@@ -13,7 +13,7 @@ import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, EventsViewType, EventView, ThreatView } from './event_details';
+import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
@@ -32,8 +32,7 @@ describe('EventDetails', () => {
     onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    eventView: EventsViewType.summaryView as EventView,
-    threatView: EventsViewType.threatSummaryView as ThreatView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -100,26 +99,14 @@ describe('EventDetails', () => {
     });
   });
 
-  describe('threat tabs', () => {
-    ['Threat Summary', 'Threat Details'].forEach((tab) => {
-      test(`it renders the ${tab} tab`, () => {
-        expect(
-          alertsWrapper
-            .find('[data-test-subj="threatDetails"]')
-            .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
-        ).toBeTruthy();
-      });
-    });
-
-    test('the Summary tab is selected by default', () => {
+  describe('threat intel tab', () => {
+    test(`it renders the Threat Intel tab`, () => {
       expect(
         alertsWrapper
-          .find('[data-test-subj="threatDetails"]')
-          .find('.euiTab-isSelected')
-          .first()
-          .text()
-      ).toEqual('Threat Summary');
+          .find('[data-test-subj="threatIntel"]')
+          .find('[role="tablist"]')
+          .containsMatchingElement(<span>{'Threat Intel'}</span>)
+      ).toBeTruthy();
     });
   });
 });

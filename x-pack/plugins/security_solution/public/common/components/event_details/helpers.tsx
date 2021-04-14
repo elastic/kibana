@@ -67,6 +67,7 @@ export interface AlertSummaryRow {
 
 export interface ThreatSummaryRow {
   title: string;
+  index: number;
   description: {
     contextId: string;
     eventId: string;
