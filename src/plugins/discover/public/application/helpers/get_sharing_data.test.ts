@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from 'kibana/public';
-import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
-import { IUiSettingsClient } from 'kibana/public';
-import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { IndexPattern } from 'src/plugins/data/public';
+import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
   let mockConfig: IUiSettingsClient;
@@ -36,6 +35,32 @@ describe('getSharingData', () => {
     const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig);
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "columns": Array [],
+        "searchSource": Object {
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_score": "desc",
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('returns valid data for sharing when columns are selected', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const result = await getSharingData(
+      searchSourceMock,
+      { columns: ['column_a', 'column_b'] },
+      mockConfig
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "column_a",
+          "column_b",
+        ],
         "searchSource": Object {
           "index": "the-index-pattern-id",
           "sort": Array [
@@ -69,16 +94,16 @@ describe('getSharingData', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "columns": Array [
+          "cool-timefield",
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
         "searchSource": Object {
-          "fields": Array [
-            "cool-timefield",
-            "cool-field-1",
-            "cool-field-2",
-            "cool-field-3",
-            "cool-field-4",
-            "cool-field-5",
-            "cool-field-6",
-          ],
           "index": "the-index-pattern-id",
           "sort": Array [
             Object {
@@ -120,15 +145,15 @@ describe('getSharingData', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "columns": Array [
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
         "searchSource": Object {
-          "fields": Array [
-            "cool-field-1",
-            "cool-field-2",
-            "cool-field-3",
-            "cool-field-4",
-            "cool-field-5",
-            "cool-field-6",
-          ],
           "index": "the-index-pattern-id",
           "sort": Array [
             Object {
