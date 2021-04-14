@@ -43,7 +43,7 @@ const i18nTexts = {
       defaultMessage: 'Back up your data',
     }),
     tooltipText: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataTooltipText', {
-      defaultMessage: 'Before making index changes, back up your data using Snapshot and Restore.',
+      defaultMessage: 'Take a snapshot before you make any changes.',
     }),
   },
   clusterTab: {
