@@ -19,11 +19,13 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('fleet/empty_fleet_server');
     });
     beforeEach(async () => {
+      await esArchiver.unload('fleet/empty_fleet_server');
       await esArchiver.load('fleet/agents');
     });
     setupFleetAndAgents(providerContext);
     afterEach(async () => {
       await esArchiver.unload('fleet/agents');
+      await esArchiver.load('fleet/empty_fleet_server');
     });
     after(async () => {
       await esArchiver.unload('fleet/empty_fleet_server');
