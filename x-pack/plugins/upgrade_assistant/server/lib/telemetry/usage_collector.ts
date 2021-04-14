@@ -73,6 +73,7 @@ export async function fetchUpgradeAssistantMetrics(
         overview: 0,
         cluster: 0,
         indices: 0,
+        kibana: 0,
       },
       ui_reindex: {
         close: 0,
@@ -91,6 +92,7 @@ export async function fetchUpgradeAssistantMetrics(
         overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
         cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
         indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+        kibana: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.kibana', 0),
       },
       ui_reindex: {
         close: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.close', 0),
@@ -136,6 +138,7 @@ export function registerUpgradeAssistantUsageCollector({
           cluster: { type: 'long' },
           indices: { type: 'long' },
           overview: { type: 'long' },
+          kibana: { type: 'long' },
         },
         ui_reindex: {
           close: { type: 'long' },

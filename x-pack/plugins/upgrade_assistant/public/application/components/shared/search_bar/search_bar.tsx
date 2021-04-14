@@ -16,8 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { DomainDeprecationDetails } from 'kibana/public';
 import { DeprecationInfo } from '../../../../../common/types';
 import { validateRegExpString } from '../../../lib/utils';
 import { GroupByOption, LevelFilterOption } from '../../types';

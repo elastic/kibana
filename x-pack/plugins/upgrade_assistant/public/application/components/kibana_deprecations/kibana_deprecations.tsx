@@ -18,9 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DomainDeprecationDetails } from 'src/core/server/types';
-
+import { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';

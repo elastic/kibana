@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { DomainDeprecationDetails } from 'kibana/public';
 import { DeprecationHealth } from '../shared';
 import { LEVEL_MAP } from '../constants';
 import { ModalContent } from './steps_modal';
@@ -25,7 +24,10 @@ import { ModalContent } from './steps_modal';
 const i18nTexts = {
   getDeprecationTitle: (domainId: string) => {
     return i18n.translate('xpack.upgradeAssistant.deprecationGroupItemTitle', {
-      defaultMessage: `"${domainId}" is using a deprecated feature`,
+      defaultMessage: "'{domainId}' is using a deprecated feature",
+      values: {
+        domainId,
+      },
     });
   },
   docLinkText: i18n.translate('xpack.upgradeAssistant.deprecationGroupItem.docLinkText', {
@@ -43,9 +45,6 @@ export interface Props {
   showModal: (modalContent: ModalContent) => void;
 }
 
-/**
- * A single accordion item for a grouped deprecation item.
- */
 export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
   deprecation,
   forceExpand,
@@ -93,7 +92,9 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              onClick={() => showModal({ domainId, steps: correctiveActions.manualSteps! })}
+              onClick={() =>
+                showModal({ domainId, steps: correctiveActions.manualSteps!, documentationUrl })
+              }
             >
               {i18nTexts.fixButtonLabel}
             </EuiButton>

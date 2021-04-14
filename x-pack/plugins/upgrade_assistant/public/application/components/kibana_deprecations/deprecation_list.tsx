@@ -9,8 +9,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { groupBy } from 'lodash';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { DomainDeprecationDetails } from 'kibana/public';
 
 import { LevelFilterOption } from '../types';
 import { SearchBar, DeprecationListBar, DeprecationPagination } from '../shared';
@@ -67,14 +66,6 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
   });
   const [currentPage, setCurrentPage] = useState(0);
 
-  const changeFilter = (filter: LevelFilterOption) => {
-    setCurrentFilter(filter);
-  };
-
-  const changeSearch = (newSearch: string) => {
-    setSearch(newSearch);
-  };
-
   const setExpandAll = (expandAll: boolean) => {
     setExpandState({ forceExpand: expandAll, expandNumber: expandState.expandNumber + 1 });
   };
@@ -102,8 +93,8 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
         isLoading={isLoading}
         loadData={reloadDeprecations}
         currentFilter={currentFilter}
-        onFilterChange={changeFilter}
-        onSearchChange={changeSearch}
+        onFilterChange={setCurrentFilter}
+        onSearchChange={setSearch}
         totalDeprecationsCount={deprecations.length}
         deprecationLevelsCount={deprecationLevelsCount}
       />

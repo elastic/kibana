@@ -27,6 +27,7 @@ import {
 export interface ModalContent {
   domainId: string;
   steps: string[];
+  documentationUrl?: string;
 }
 
 interface Props {
@@ -37,7 +38,7 @@ interface Props {
 const i18nTexts = {
   getModalTitle: (domainId: string) =>
     i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.stepsModal.modalTitle', {
-      defaultMessage: `Fix '${domainId}'`,
+      defaultMessage: "Fix '{domainId}'",
       values: {
         domainId,
       },
@@ -55,10 +56,22 @@ const i18nTexts = {
       defaultMessage: 'Follow the steps below to address this deprecation.',
     }
   ),
+  docLinkLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.stepsModal.docLinkLabel',
+    {
+      defaultMessage: 'View documentation',
+    }
+  ),
+  closeButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.stepsModal.closeButtonLabel',
+    {
+      defaultMessage: 'Close',
+    }
+  ),
 };
 
 export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent }) => {
-  const { domainId, steps } = modalContent;
+  const { domainId, steps, documentationUrl } = modalContent;
 
   return (
     <EuiModal onClose={closeModal}>
@@ -96,16 +109,17 @@ export const StepsModal: FunctionComponent<Props> = ({ closeModal, modalContent 
 
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd">
+          {documentationUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="help" target="_blank" href={documentationUrl}>
+                {i18nTexts.docLinkLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+
           <EuiFlexItem grow={false}>
-            {/* TODO i18n and href */}
-            <EuiButtonEmpty iconType="help" target="_blank" href="#">
-              View documentation
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {/* TODO i18n */}
             <EuiButton onClick={closeModal} fill>
-              Close window
+              {i18nTexts.closeButtonLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

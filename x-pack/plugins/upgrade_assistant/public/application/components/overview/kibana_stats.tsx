@@ -19,8 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { RouteComponentProps } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { DomainDeprecationDetails } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../app_context';
 

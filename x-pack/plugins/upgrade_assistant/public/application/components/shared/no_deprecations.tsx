@@ -13,19 +13,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const i18nTexts = {
   emptyPromptTitle: i18n.translate('xpack.upgradeAssistant.noDeprecationsPrompt.title', {
-    defaultMessage: 'All clear!',
+    defaultMessage: 'Ready to upgrade!',
   }),
   getEmptyPromptDescription: (deprecationType: string) =>
     i18n.translate('xpack.upgradeAssistant.noDeprecationsPrompt.description', {
-      defaultMessage: 'You have no {deprecationType} issues.',
-      values: {
-        deprecationType,
-      },
+      defaultMessage: 'Your configuration is up to date.',
     }),
   getEmptyPromptNextStepsDescription: (navigateToOverviewPage: () => void) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription"
-      defaultMessage="Check the {overviewButton} for next steps."
+      defaultMessage="Check the {overviewButton} for other Stack deprecations."
       values={{
         overviewButton: (
           <EuiLink onClick={navigateToOverviewPage}>

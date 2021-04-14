@@ -4210,6 +4210,9 @@
             },
             "overview": {
               "type": "long"
+            },
+            "kibana": {
+              "type": "long"
             }
           }
         },
