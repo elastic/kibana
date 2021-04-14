@@ -12442,8 +12442,6 @@
     "xpack.maps.featureRegistry.mapsFeatureName": "マップ",
     "xpack.maps.fields.percentileMedianLabek": "中間",
     "xpack.maps.fileUploadWizard.description": "Elasticsearch で GeoJSON データにインデックスします",
-    "xpack.maps.fileUploadWizard.importFileSetupLabel": "ファイルのインポート",
-    "xpack.maps.fileUploadWizard.indexingLabel": "ファイルをインポートしています",
     "xpack.maps.fileUploadWizard.title": "GeoJSONをアップロード",
     "xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel": "レイヤーデータにグローバルフィルターを適用",
     "xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel": "グローバル時刻をレイヤーデータに適用",

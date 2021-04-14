@@ -79,7 +79,6 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       indexPatternId: results.indexPatternId,
       geoField: results.geoFieldName,
       // Only turn on bounds filter for large doc counts
-      // @ts-ignore
       filterByMapBounds: results.docCount > DEFAULT_MAX_RESULT_WINDOW,
       scalingType:
         results.geoFieldType === ES_FIELD_TYPES.GEO_POINT
