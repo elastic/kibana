@@ -12,15 +12,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_query';
 import { ScheduledQueryQueriesTable } from '../../../scheduled_queries/scheduled_query_queries_table';
+
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${({ theme }) => theme.eui.euiBorderThin};
+`;
 
 const ScheduledQueryDetailsPageComponent = () => {
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
@@ -28,6 +39,8 @@ const ScheduledQueryDetailsPageComponent = () => {
   const editQueryLinkProps = useRouterNavigate(`scheduled_queries/${scheduledQueryId}/edit`);
 
   const { data } = useScheduledQuery({ scheduledQueryId });
+
+  console.error('data', data);
 
   const LeftColumn = useMemo(
     () => (
@@ -76,12 +89,35 @@ const ScheduledQueryDetailsPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...editQueryLinkProps} iconType="pencil">
-        <FormattedMessage
-          id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
-          defaultMessage="Edit"
-        />
-      </EuiButton>
+      <EuiFlexGroup justifyContent="flexEnd" direction="row">
+        <EuiFlexItem grow={false} key="agents_failed_count">
+          {/* eslint-disable-next-line react-perf/jsx-no-new-object-as-prop */}
+          <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+            <EuiDescriptionListTitle className="eui-textNoWrap">
+              <FormattedMessage
+                id="xpack.osquery.liveQueryDetails.kpis.agentsFailedCountLabelText"
+                defaultMessage="Agents failed"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription className="eui-textNoWrap">
+              {/* <EuiTextColor color={actionResultsData?.aggregations.failed ? 'danger' : 'default'}>
+                {actionResultsData?.aggregations.failed}
+              </EuiTextColor> */}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} key="agents_failed_count_divider">
+          <Divider />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} key="agents_failed_count">
+          <EuiButton fill {...editQueryLinkProps} iconType="pencil">
+            <FormattedMessage
+              id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
+              defaultMessage="Edit"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
     [editQueryLinkProps]
   );

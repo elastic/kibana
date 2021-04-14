@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSteps } from '@elastic/eui';
+import { EuiButton, EuiSteps, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -88,23 +88,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const queryStatus = useMemo(() => {
     if (!agentSelected) return 'disabled';
-    if (!queryValueProvided) return 'incomplete';
-
-    return 'complete';
-  }, [agentSelected, queryValueProvided]);
-
-  const submitQueryStatus = useMemo(() => {
-    if (!agentSelected || !queryValueProvided) return 'disabled';
     if (isError) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
-    return 'incomplete';
-  }, [agentSelected, isError, isLoading, isSuccess, queryValueProvided]);
 
-  const resultsStatus = useMemo(
-    () => (submitQueryStatus === 'complete' ? 'incomplete' : 'disabled'),
-    [submitQueryStatus]
-  );
+    return 'incomplete';
+  }, [agentSelected, isError, isLoading, isSuccess]);
+
+  const resultsStatus = useMemo(() => (queryStatus === 'complete' ? 'incomplete' : 'disabled'), [
+    queryStatus,
+  ]);
 
   const formSteps: EuiContainedStepProps[] = useMemo(
     () => [
@@ -120,27 +113,26 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Enter query',
         }),
         children: (
-          <UseField
-            path="query"
-            component={LiveQueryQueryField}
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            componentProps={{
-              disabled: queryStatus === 'disabled',
-            }}
-          />
+          <>
+            <UseField
+              path="query"
+              component={LiveQueryQueryField}
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              componentProps={{
+                disabled: queryStatus === 'disabled',
+              }}
+            />
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+                  {'Submit'}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         ),
         status: queryStatus,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryForm.steps.runStepHeading', {
-          defaultMessage: 'Submit query',
-        }),
-        children: (
-          <EuiButton disabled={submitQueryStatus === 'disabled'} onClick={submit}>
-            {'Send query'}
-          </EuiButton>
-        ),
-        status: submitQueryStatus,
       },
       {
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.resultsStepHeading', {
@@ -152,7 +144,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         status: resultsStatus,
       },
     ],
-    [actionId, agentIds, agentSelected, queryStatus, resultsStatus, submit, submitQueryStatus]
+    [actionId, agentIds, agentSelected, queryStatus, queryValueProvided, resultsStatus, submit]
   );
 
   return (
