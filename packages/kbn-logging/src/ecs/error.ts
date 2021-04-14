@@ -7,6 +7,8 @@
  */
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-error.html
+ *
  * @internal
  */
 export interface EcsError {

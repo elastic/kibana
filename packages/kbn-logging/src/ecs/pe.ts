@@ -7,6 +7,8 @@
  */
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-pe.html
+ *
  * @internal
  */
 export interface EcsPe {

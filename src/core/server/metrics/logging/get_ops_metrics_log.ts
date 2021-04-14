@@ -15,7 +15,7 @@ import { OpsMetrics } from '..';
  *
  * @internal
  */
-export function getEcsOpsMetricsLog(metrics: OpsMetrics): LogMeta {
+export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   const { process, os } = metrics;
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
@@ -50,8 +50,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): LogMeta {
         })}] `
       : '';
 
-  return {
-    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+  const meta: LogMeta = {
     event: {
       kind: 'metric',
       category: ['process', 'host'],
@@ -73,5 +72,10 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): LogMeta {
         load: loadEntries,
       },
     },
+  };
+
+  return {
+    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+    meta,
   };
 }

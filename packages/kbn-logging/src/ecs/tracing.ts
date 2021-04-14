@@ -12,6 +12,8 @@
  * the base fields, we will need to do an intersection with these types at
  * the root level.
  *
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-tracing.html
+ *
  * @internal
  */
 export interface EcsTracing {

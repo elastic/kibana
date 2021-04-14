@@ -18,6 +18,8 @@ interface NestedFields {
 }
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-process.html
+ *
  * @internal
  */
 export interface EcsProcess extends NestedFields {

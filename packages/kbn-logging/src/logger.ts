@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LogMeta } from './log_meta';
 import { LogRecord } from './log_record';
-import { Ecs } from './ecs';
-
-/**
- * Contextual metadata
- *
- * @public
- */
-export type LogMeta = Partial<Omit<Ecs, 'ecs'>>;
 
 /**
  * Logger exposes all the necessary methods to log any type of information and

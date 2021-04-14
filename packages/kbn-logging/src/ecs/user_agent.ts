@@ -13,6 +13,8 @@ interface NestedFields {
 }
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-user_agent.html
+ *
  * @internal
  */
 export interface EcsUserAgent extends NestedFields {

@@ -182,33 +182,35 @@ describe('MetricsService', () => {
         Array [
           "",
           Object {
-            "event": Object {
-              "category": Array [
-                "process",
-                "host",
-              ],
-              "kind": "metric",
-              "type": Array [
-                "info",
-              ],
-            },
-            "host": Object {
-              "os": Object {
-                "load": Object {
-                  "15m": undefined,
-                  "1m": undefined,
-                  "5m": undefined,
+            "meta": Object {
+              "event": Object {
+                "category": Array [
+                  "process",
+                  "host",
+                ],
+                "kind": "metric",
+                "type": Array [
+                  "info",
+                ],
+              },
+              "host": Object {
+                "os": Object {
+                  "load": Object {
+                    "15m": undefined,
+                    "1m": undefined,
+                    "5m": undefined,
+                  },
                 },
               },
-            },
-            "process": Object {
-              "eventLoopDelay": undefined,
-              "memory": Object {
-                "heap": Object {
-                  "usedInBytes": undefined,
+              "process": Object {
+                "eventLoopDelay": undefined,
+                "memory": Object {
+                  "heap": Object {
+                    "usedInBytes": undefined,
+                  },
                 },
+                "uptime": undefined,
               },
-              "uptime": undefined,
             },
           },
         ]

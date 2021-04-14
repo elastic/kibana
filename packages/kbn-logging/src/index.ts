@@ -8,7 +8,8 @@
 
 export { LogLevel, LogLevelId } from './log_level';
 export { LogRecord } from './log_record';
-export { Logger, LogMeta } from './logger';
+export { Logger } from './logger';
+export { LogMeta } from './log_meta';
 export { LoggerFactory } from './logger_factory';
 export { Layout } from './layout';
 export { Appender, DisposableAppender } from './appenders';

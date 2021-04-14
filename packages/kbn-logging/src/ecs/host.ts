@@ -18,6 +18,8 @@ interface NestedFields {
 }
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-host.html
+ *
  * @internal
  */
 export interface EcsHost extends NestedFields {

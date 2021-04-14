@@ -7,8 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import { get, has, unset } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { unset } from 'lodash';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
 import { Ecs, LogMeta, LogRecord, Layout } from '@kbn/logging';
@@ -45,15 +44,10 @@ export class JsonLayout implements Layout {
 
   private static mergeLogMeta(log: Ecs, meta: LogMeta): Ecs {
     // Paths which cannot be overridden via `meta`.
-    const RESERVED_PATHS = ['ecs', 'message'];
+    const RESERVED_PATHS = ['ecs', '@timestamp', 'message', 'log.level', 'log.logger'];
 
     for (const path of RESERVED_PATHS) {
-      if (has(meta, path)) {
-        // To prevent losing useful data, we "quarantine" conflicting keys
-        // under a `kibana` property rather than deleting them entirely.
-        set(log, `kibana.${path}`, get(meta, path));
-        unset(meta, path);
-      }
+      unset(meta, path);
     }
 
     return merge(log, meta);

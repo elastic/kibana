@@ -43,7 +43,7 @@ function cloneAndFilterHeaders(headers?: HapiHeaders) {
  *
  * @internal
  */
-export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
+export function getEcsResponseLog(request: Request, log: Logger) {
   const { path, response } = request;
   const method = request.method.toUpperCase();
 
@@ -65,8 +65,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
   const bytes = getResponsePayloadBytes(response, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  return {
-    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+  const meta: LogMeta = {
     client: {
       ip: request.info.remoteAddress,
     },
@@ -96,5 +95,10 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
     user_agent: {
       original: request.headers['user-agent'],
     },
+  };
+
+  return {
+    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+    meta,
   };
 }

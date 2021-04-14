@@ -158,35 +158,6 @@ test('`format()` correctly formats error record with meta-data', () => {
   });
 });
 
-test('format() meta can override @timestamp', () => {
-  const layout = new JsonLayout();
-  expect(
-    JSON.parse(
-      layout.format({
-        message: 'foo',
-        timestamp,
-        level: LogLevel.Debug,
-        context: 'bar',
-        pid: 3,
-        meta: {
-          '@timestamp': '2099-05-01T09:30:22.011-05:00',
-        },
-      })
-    )
-  ).toStrictEqual({
-    ecs: { version: '1.9.0' },
-    '@timestamp': '2099-05-01T09:30:22.011-05:00',
-    message: 'foo',
-    log: {
-      level: 'DEBUG',
-      logger: 'bar',
-    },
-    process: {
-      pid: 3,
-    },
-  });
-});
-
 test('format() meta can merge override logs', () => {
   const layout = new JsonLayout();
   expect(
@@ -219,37 +190,6 @@ test('format() meta can merge override logs', () => {
   });
 });
 
-test('format() meta can override log level objects', () => {
-  const layout = new JsonLayout();
-  expect(
-    JSON.parse(
-      layout.format({
-        timestamp,
-        context: '123',
-        message: 'foo',
-        level: LogLevel.Error,
-        pid: 3,
-        meta: {
-          log: {
-            level: 'FATAL',
-          },
-        },
-      })
-    )
-  ).toStrictEqual({
-    ecs: { version: '1.9.0' },
-    '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    message: 'foo',
-    log: {
-      level: 'FATAL',
-      logger: '123',
-    },
-    process: {
-      pid: 3,
-    },
-  });
-});
-
 test('format() meta can not override message', () => {
   const layout = new JsonLayout();
   expect(
@@ -269,7 +209,6 @@ test('format() meta can not override message', () => {
     ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
-    kibana: { message: 'baz' },
     log: {
       level: 'DEBUG',
       logger: 'bar',
@@ -299,7 +238,67 @@ test('format() meta can not override ecs version', () => {
     ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
-    kibana: { message: 'baz' },
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can not override logger or level', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          log: {
+            level: 'IGNORE',
+            logger: 'me',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: '1.9.0' },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can not override timestamp', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          '@timestamp': '2099-02-01T09:30:22.011-05:00',
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: '1.9.0' },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
     log: {
       level: 'DEBUG',
       logger: 'bar',

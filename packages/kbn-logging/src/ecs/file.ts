@@ -19,6 +19,8 @@ interface NestedFields {
 }
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-file.html
+ *
  * @internal
  */
 export interface EcsFile extends NestedFields {

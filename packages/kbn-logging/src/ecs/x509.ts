@@ -7,6 +7,8 @@
  */
 
 /**
+ * https://www.elastic.co/guide/en/ecs/1.9/ecs-x509.html
+ *
  * @internal
  */
 export interface EcsX509 {
