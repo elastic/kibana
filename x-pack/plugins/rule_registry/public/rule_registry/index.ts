@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BaseRuleFieldMap } from '../../common';
-import { RuleType, CreateRuleRegistry, RuleRegistryConstructorOptions } from './types';
+import type { BaseRuleFieldMap } from '../../common';
+import type { RuleType, CreateRuleRegistry, RuleRegistryConstructorOptions } from './types';
 
 export class RuleRegistry<TFieldMap extends BaseRuleFieldMap, TRuleType extends RuleType> {
   protected types: TRuleType[] = [];

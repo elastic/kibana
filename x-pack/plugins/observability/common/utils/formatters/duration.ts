@@ -35,56 +35,71 @@ function getUnitLabelAndConvertedValue(unitKey: DurationTimeUnit, value: number)
   switch (unitKey) {
     case 'hours': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+        unitLabel: i18n.translate('xpack.observability.formatters.hoursTimeUnitLabel', {
           defaultMessage: 'h',
         }),
-        unitLabelExtended: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabelExtended', {
-          defaultMessage: 'hours',
-        }),
+        unitLabelExtended: i18n.translate(
+          'xpack.observability.formatters.hoursTimeUnitLabelExtended',
+          {
+            defaultMessage: 'hours',
+          }
+        ),
         convertedValue: asDecimalOrInteger(moment.duration(value / 1000).asHours()),
       };
     }
     case 'minutes': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+        unitLabel: i18n.translate('xpack.observability.formatters.minutesTimeUnitLabel', {
           defaultMessage: 'min',
         }),
-        unitLabelExtended: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabelExtended', {
-          defaultMessage: 'minutes',
-        }),
+        unitLabelExtended: i18n.translate(
+          'xpack.observability.formatters.minutesTimeUnitLabelExtended',
+          {
+            defaultMessage: 'minutes',
+          }
+        ),
         convertedValue: asDecimalOrInteger(moment.duration(value / 1000).asMinutes()),
       };
     }
     case 'seconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+        unitLabel: i18n.translate('xpack.observability.formatters.secondsTimeUnitLabel', {
           defaultMessage: 's',
         }),
-        unitLabelExtended: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabelExtended', {
-          defaultMessage: 'seconds',
-        }),
+        unitLabelExtended: i18n.translate(
+          'xpack.observability.formatters.secondsTimeUnitLabelExtended',
+          {
+            defaultMessage: 'seconds',
+          }
+        ),
         convertedValue: asDecimalOrInteger(moment.duration(value / 1000).asSeconds()),
       };
     }
     case 'milliseconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+        unitLabel: i18n.translate('xpack.observability.formatters.millisTimeUnitLabel', {
           defaultMessage: 'ms',
         }),
-        unitLabelExtended: i18n.translate('xpack.apm.formatters.millisTimeUnitLabelExtended', {
-          defaultMessage: 'milliseconds',
-        }),
+        unitLabelExtended: i18n.translate(
+          'xpack.observability.formatters.millisTimeUnitLabelExtended',
+          {
+            defaultMessage: 'milliseconds',
+          }
+        ),
         convertedValue: asDecimalOrInteger(moment.duration(value / 1000).asMilliseconds()),
       };
     }
     case 'microseconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+        unitLabel: i18n.translate('xpack.observability.formatters.microsTimeUnitLabel', {
           defaultMessage: 'μs',
         }),
-        unitLabelExtended: i18n.translate('xpack.apm.formatters.microsTimeUnitLabelExtended', {
-          defaultMessage: 'microseconds',
-        }),
+        unitLabelExtended: i18n.translate(
+          'xpack.observability.formatters.microsTimeUnitLabelExtended',
+          {
+            defaultMessage: 'microseconds',
+          }
+        ),
         convertedValue: asInteger(value),
       };
     }
@@ -164,7 +179,7 @@ export function asTransactionRate(value: Maybe<number>) {
     displayedValue = asDecimal(value);
   }
 
-  return i18n.translate('xpack.apm.transactionRateLabel', {
+  return i18n.translate('xpack.observability.transactionRateLabel', {
     defaultMessage: `{value} tpm`,
     values: {
       value: displayedValue,

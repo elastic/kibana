@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import {
+import type {
   PluginSetupContract as AlertingPluginPublicSetupContract,
   PluginStartContract as AlertingPluginPublicStartContract,
 } from '../../alerting/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';

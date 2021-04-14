@@ -6,8 +6,8 @@
  */
 
 import { formatRequest } from '@kbn/server-route-repository/target/format_request';
-import { HttpSetup } from 'kibana/public';
-import { AbstractObservabilityClient, ObservabilityClient } from './types';
+import type { HttpSetup } from 'kibana/public';
+import type { AbstractObservabilityClient, ObservabilityClient } from './types';
 
 export let callObservabilityApi: ObservabilityClient = () => {
   throw new Error('callObservabilityApi has not been initialized via createCallObservabilityApi');

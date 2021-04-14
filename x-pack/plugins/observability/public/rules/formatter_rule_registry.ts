@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleType } from '../../../rule_registry/public';
-import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../rule_registry/common';
+import type { RuleType } from '../../../rule_registry/public';
+import type { BaseRuleFieldMap, OutputOfFieldMap } from '../../../rule_registry/common';
 import { RuleRegistry } from '../../../rule_registry/public';
 
 type AlertTypeOf<TFieldMap extends BaseRuleFieldMap> = OutputOfFieldMap<TFieldMap>;
