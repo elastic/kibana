@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { BaseParams, BasePayload } from '../../types';
+import type { SearchSourceFields } from 'src/plugins/data/common';
+import type { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
 interface BaseParamsCSV {
   browserTimezone: string;
-  searchSource: any;
+  searchSource: SearchSourceFields;
+  columns?: string[];
 }
 
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
