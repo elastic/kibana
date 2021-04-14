@@ -446,9 +446,7 @@ export class SearchSource {
           } else {
             if (!this.hasPostFlightRequests()) {
               obs.next(response);
-              if (isCompleteResponse(response)) {
-                obs.complete();
-              }
+              obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
