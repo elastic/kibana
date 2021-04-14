@@ -27,6 +27,7 @@ const moduleIds = [
   'sample_data_ecommerce',
   'sample_data_weblogs',
   'security_linux',
+  'security_network',
   'security_windows',
   'siem_auditbeat',
   'siem_auditbeat_auth',

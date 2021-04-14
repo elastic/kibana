@@ -18,10 +18,10 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
+import { getEngineBreadcrumbs } from '../engine';
 
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
-
 import { SampleResponse } from './sample_response';
 
 import { ResultSettingsLogic } from '.';
@@ -31,11 +31,7 @@ const CLEAR_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Clear all values' }
 );
 
-interface Props {
-  engineBreadcrumb: string[];
-}
-
-export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const ResultSettings: React.FC = () => {
   const { dataLoading } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
@@ -52,7 +48,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   return (
     <>
-      <SetPageChrome trail={[...engineBreadcrumb, RESULT_SETTINGS_TITLE]} />
+      <SetPageChrome trail={getEngineBreadcrumbs([RESULT_SETTINGS_TITLE])} />
       <EuiPageHeader
         pageTitle={RESULT_SETTINGS_TITLE}
         description={i18n.translate(
