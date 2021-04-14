@@ -7,6 +7,8 @@
 
 import { LogicMounter } from '../../../__mocks__';
 
+import { Logic } from 'kea';
+
 import { MultiInputRowsLogic } from './multi_input_rows_logic';
 
 describe('MultiInputRowsLogic', () => {
@@ -14,7 +16,10 @@ describe('MultiInputRowsLogic', () => {
 
   const MOCK_VALUES = ['a', 'b', 'c'];
 
-  const DEFAULT_PROPS = { values: MOCK_VALUES };
+  const DEFAULT_PROPS = {
+    id: 'test',
+    values: MOCK_VALUES,
+  };
   const DEFAULT_VALUES = {
     values: MOCK_VALUES,
     hasEmptyValues: false,
@@ -26,22 +31,27 @@ describe('MultiInputRowsLogic', () => {
   });
 
   it('has expected default values passed from props', () => {
-    mount({}, DEFAULT_PROPS);
-    expect(MultiInputRowsLogic.values).toEqual(DEFAULT_VALUES);
+    const logic = mount({}, DEFAULT_PROPS);
+    expect(logic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
+    let logic: Logic;
+
+    beforeEach(() => {
+      logic = mount({}, DEFAULT_PROPS);
+    });
+
     afterEach(() => {
       // Should not mutate the original array
-      expect(MultiInputRowsLogic.values.values).not.toBe(MOCK_VALUES); // Would fail if we did not clone a new array
+      expect(logic.values.values).not.toBe(MOCK_VALUES); // Would fail if we did not clone a new array
     });
 
     describe('addValue', () => {
       it('appends an empty string to the values array', () => {
-        mount(DEFAULT_VALUES);
-        MultiInputRowsLogic.actions.addValue();
+        logic.actions.addValue();
 
-        expect(MultiInputRowsLogic.values).toEqual({
+        expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
           hasEmptyValues: true,
           values: ['a', 'b', 'c', ''],
@@ -51,10 +61,9 @@ describe('MultiInputRowsLogic', () => {
 
     describe('deleteValue', () => {
       it('deletes the value at the specified array index', () => {
-        mount(DEFAULT_VALUES);
-        MultiInputRowsLogic.actions.deleteValue(1);
+        logic.actions.deleteValue(1);
 
-        expect(MultiInputRowsLogic.values).toEqual({
+        expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
           values: ['a', 'c'],
         });
@@ -63,10 +72,9 @@ describe('MultiInputRowsLogic', () => {
 
     describe('editValue', () => {
       it('edits the value at the specified array index', () => {
-        mount(DEFAULT_VALUES);
-        MultiInputRowsLogic.actions.editValue(2, 'z');
+        logic.actions.editValue(2, 'z');
 
-        expect(MultiInputRowsLogic.values).toEqual({
+        expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
           values: ['a', 'b', 'z'],
         });
@@ -77,17 +85,17 @@ describe('MultiInputRowsLogic', () => {
   describe('selectors', () => {
     describe('hasEmptyValues', () => {
       it('returns true if values has any empty strings', () => {
-        mount({}, { values: ['', '', ''] });
+        const logic = mount({}, { ...DEFAULT_PROPS, values: ['', '', ''] });
 
-        expect(MultiInputRowsLogic.values.hasEmptyValues).toEqual(true);
+        expect(logic.values.hasEmptyValues).toEqual(true);
       });
     });
 
     describe('hasOnlyOneValue', () => {
       it('returns true if values only has one item', () => {
-        mount({}, { values: ['test'] });
+        const logic = mount({}, { ...DEFAULT_PROPS, values: ['test'] });
 
-        expect(MultiInputRowsLogic.values.hasOnlyOneValue).toEqual(true);
+        expect(logic.values.hasOnlyOneValue).toEqual(true);
       });
     });
   });

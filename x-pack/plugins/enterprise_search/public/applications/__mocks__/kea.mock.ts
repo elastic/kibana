@@ -100,24 +100,39 @@ export class LogicMounter {
   }
 
   // Reset context with optional default value overrides
-  public resetContext = (values?: object) => {
+  public resetContext = (values?: object, props?: object) => {
     if (!values) {
       resetContext({});
     } else {
-      const path = this.logicFile.inputs[0].path as string[]; // example: ['x', 'y', 'z']
-      const defaults = path.reduceRight((value: object, key: string) => ({ [key]: value }), values); // example: { x: { y: { z: values } } }
+      let { path, key } = this.logicFile.inputs[0];
+
+      // For keyed logic files, both key and path should be functions
+      if (this.logicFile._isKeaWithKey) {
+        key = key(props);
+        path = path(key);
+      }
+
+      // Generate the correct nested defaults obj based on the file path
+      // example path: ['x', 'y', 'z']
+      // example defaults: { x: { y: { z: values } } }
+      const defaults = path.reduceRight(
+        (value: object, name: string) => ({ [name]: value }),
+        values
+      );
       resetContext({ defaults });
     }
   };
 
   // Automatically reset context & mount the logic file
   public mount = (values?: object, props?: object) => {
-    this.resetContext(values);
-    if (props) this.logicFile.build(props);
+    this.resetContext(values, props);
 
-    const unmount = this.logicFile.mount();
-    this.unmountFn = unmount;
-    return unmount; // Keep Kea behavior of returning an unmount fn from mount
+    const logicWithProps = this.logicFile.build(props);
+    this.unmountFn = logicWithProps.mount();
+
+    return logicWithProps;
+    // NOTE: Unlike kea's mount(), this returns the current
+    // built logic instance with props, NOT the unmount fn
   };
 
   // Also add unmount as a class method that can be destructured on init without becoming stale later
