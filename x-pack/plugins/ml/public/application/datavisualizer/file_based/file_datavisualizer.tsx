@@ -11,16 +11,13 @@ import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
-import type { FileDataVisualizer as FileDataVisualizerType } from '../../../../../file_data_visualizer/public';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: { docLinks, fileDataVisualizer },
   } = useMlKibana();
-  const [FileDataVisualizer, setFileDataVisualizer] = useState<
-    typeof FileDataVisualizerType | null
-  >(null);
+  const [FileDataVisualizer, setFileDataVisualizer] = useState<FC<{}> | null>(null);
 
   useEffect(() => {
     if (fileDataVisualizer !== undefined) {

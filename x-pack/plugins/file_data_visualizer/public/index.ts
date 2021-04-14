@@ -12,4 +12,3 @@ export function plugin() {
 }
 
 export { FileDataVisualizerPluginStart } from './plugin';
-export type { FileDataVisualizer } from './application';
