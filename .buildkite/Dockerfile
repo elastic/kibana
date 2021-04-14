@@ -35,7 +35,8 @@ RUN npm install -g --force yarn@^"$(node -e "console.log(String(require('./packa
   npm install -g @bazel/bazelisk@"$(cat .bazeliskversion)"
 USER kibana
 RUN yarn config set yarn-offline-mirror "/var/lib/kibana/yarn-offline-cache"
-RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
+# RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
+RUN yarn install
 
 COPY  --chown=kibana:kibana . .
 
