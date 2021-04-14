@@ -757,6 +757,8 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
+    readonly disableEmbedding: boolean;
+    // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
@@ -1113,6 +1115,7 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 
 // @public
 export interface ICspConfig {
+    readonly disableEmbedding: boolean;
     readonly header: string;
     readonly rules: string[];
     readonly strict: boolean;

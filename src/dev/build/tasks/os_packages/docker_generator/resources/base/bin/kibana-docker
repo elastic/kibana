@@ -116,7 +116,14 @@ kibana_vars=(
     server.compression.referrerWhitelist
     server.cors
     server.cors.origin
-    server.customResponseHeaders
+    server.securityResponseHeaders.strictTransportSecurity
+    server.securityResponseHeaders.strictTransportSecurity.maxAge
+    server.securityResponseHeaders.strictTransportSecurity.includeSubDomains
+    server.securityResponseHeaders.strictTransportSecurity.preload
+    server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.referrerPolicy
+    server.securityResponseHeaders.permissionsPolicy
+    server.securityResponseHeaders.disableEmbedding
     server.customResponseHeaders
     server.defaultRoute
     server.host

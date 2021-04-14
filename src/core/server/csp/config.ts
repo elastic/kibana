@@ -29,3 +29,5 @@ export const config = {
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
   }),
 };
+
+export const FRAME_ANCESTORS_RULE = `frame-ancestors 'self'`; // only used by CspConfig when embedding is disabled

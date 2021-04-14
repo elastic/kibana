@@ -64,6 +64,17 @@ Object {
     "ipAllowlist": Array [],
   },
   "rewriteBasePath": false,
+  "securityResponseHeaders": Object {
+    "disableEmbedding": false,
+    "permissionsPolicy": "camera=(), microphone=()",
+    "referrerPolicy": "no-referrer-when-downgrade",
+    "strictTransportSecurity": Object {
+      "includeSubDomains": false,
+      "maxAge": "P1Y",
+      "preload": false,
+    },
+    "xContentTypeOptions": "nosniff",
+  },
   "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [

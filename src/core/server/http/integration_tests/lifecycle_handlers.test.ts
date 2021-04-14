@@ -7,6 +7,7 @@
  */
 
 import supertest from 'supertest';
+import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 
@@ -53,8 +54,16 @@ describe('core lifecycle handlers', () => {
           },
           compression: { enabled: true },
           name: kibanaName,
+          securityResponseHeaders: {
+            // reflects default config
+            strictTransportSecurity: { maxAge: moment.duration(1, 'year') },
+            xContentTypeOptions: 'nosniff',
+            referrerPolicy: 'strict-origin-when-cross-origin',
+            permissionsPolicy: 'camera=(), microphone=()',
+          },
           customResponseHeaders: {
             'some-header': 'some-value',
+            'permissions-policy': 'display-capture=(self)', // overrides a header that is defined by securityResponseHeaders
           },
           xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
           requestId: {
@@ -117,6 +126,15 @@ describe('core lifecycle handlers', () => {
     const testRoute = '/custom_headers/test/route';
     const testErrorRoute = '/custom_headers/test/error_route';
 
+    const expectedHeaders = {
+      [nameHeader]: kibanaName,
+      'strict-transport-security': 'max-age=31536000',
+      'x-content-type-options': 'nosniff',
+      'referrer-policy': 'strict-origin-when-cross-origin',
+      'permissions-policy': 'display-capture=(self)',
+      'some-header': 'some-value',
+    };
+
     beforeEach(async () => {
       router.get({ path: testRoute, validate: false }, (context, req, res) => {
         return res.ok({ body: 'ok' });
@@ -127,36 +145,16 @@ describe('core lifecycle handlers', () => {
       await server.start();
     });
 
-    it('adds the kbn-name header', async () => {
+    it('adds the expected headers in case of success', async () => {
       const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
-      expect(headers).toEqual(
-        expect.objectContaining({
-          [nameHeader]: kibanaName,
-        })
-      );
+      expect(headers).toEqual(expect.objectContaining(expectedHeaders));
     });
 
-    it('adds the kbn-name header in case of error', async () => {
+    it('adds the expected headers in case of error', async () => {
       const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
-      expect(headers).toEqual(
-        expect.objectContaining({
-          [nameHeader]: kibanaName,
-        })
-      );
-    });
-
-    it('adds the custom headers', async () => {
-      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
-      const headers = result.header as Record<string, string>;
-      expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
-    });
-
-    it('adds the custom headers in case of error', async () => {
-      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
-      const headers = result.header as Record<string, string>;
-      expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
+      expect(headers).toEqual(expect.objectContaining(expectedHeaders));
     });
   });
 
