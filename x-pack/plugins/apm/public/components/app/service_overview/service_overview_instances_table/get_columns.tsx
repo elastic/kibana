@@ -15,9 +15,11 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '../../../../../../observability/public';
 import { isJavaAgentName } from '../../../../../common/agent_name';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
   asPercent,
@@ -67,9 +69,7 @@ export function getColumns({
         const { serviceNodeName } = item;
         const isMissingServiceNodeName =
           serviceNodeName === SERVICE_NODE_NAME_MISSING;
-        const text = isMissingServiceNodeName
-          ? UNIDENTIFIED_SERVICE_NODES_LABEL
-          : serviceNodeName;
+        const text = getServiceNodeName(serviceNodeName);
 
         const link = isJavaAgentName(agentName) ? (
           <ServiceNodeMetricOverviewLink

@@ -44,7 +44,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   fieldFormat?: string;
   fieldName: string;
-  fieldType: string;
+  fieldType?: string;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
