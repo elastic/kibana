@@ -67,7 +67,12 @@ import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 
-export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
+export type {
+  PackageInfo,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  DomainDeprecationDetails,
+} from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 export type {

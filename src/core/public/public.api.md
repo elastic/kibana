@@ -479,7 +479,6 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
 export interface DeprecationsServiceStart {
-    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
@@ -574,6 +573,7 @@ export interface DocLinksStart {
             readonly top_hits: string;
         };
         readonly runtimeFields: {
+            readonly overview: string;
             readonly mapping: string;
         };
         readonly scriptedFields: {
@@ -593,6 +593,7 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly upgradeAssistant: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
@@ -600,9 +601,10 @@ export interface DocLinksStart {
         };
         readonly query: {
             readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuerySyntax: string;
+            readonly percolate: string;
+            readonly queryDsl: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -613,6 +615,7 @@ export interface DocLinksStart {
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -629,6 +632,7 @@ export interface DocLinksStart {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
             updateTransform: string;
@@ -655,6 +659,15 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
     };
+}
+
+// Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface DomainDeprecationDetails extends DeprecationsDetails {
+    // (undocumented)
+    domainId: string;
 }
 
 export { EnvironmentMode }
