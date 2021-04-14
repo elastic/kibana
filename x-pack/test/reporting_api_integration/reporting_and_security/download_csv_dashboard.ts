@@ -38,15 +38,14 @@ export default function ({ getService }: FtrProviderContext) {
         'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });
+      await reportingAPI.initEcommerce();
     });
     after(async () => {
+      await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
     });
 
     it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
-
       const {
         status: resStatus,
         text: resText,
@@ -145,15 +144,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resStatus).to.eql(200);
       expect(resType).to.eql('text/csv');
       expectSnapshot(resText).toMatch();
-
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
     });
 
     it('Exports CSV with all fields when using defaults', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
-
       const {
         status: resStatus,
         text: resText,
@@ -192,15 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resStatus).to.eql(200);
       expect(resType).to.eql('text/csv');
       expectSnapshot(resText).toMatch();
-
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
     });
 
     it('Logs the error explanation if the search query returns an error', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
-
       const { status: resStatus, text: resText } = (await generateAPI.getCSVFromSearchSource(
         getMockJobParams({
           searchSource: {
@@ -234,9 +221,6 @@ export default function ({ getService }: FtrProviderContext) {
       )) as supertest.Response;
       expect(resStatus).to.eql(500);
       expectSnapshot(resText).toMatch();
-
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
     });
 
     describe('date formatting', () => {
@@ -434,6 +418,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('validation', () => {
+      after(async () => {
+        await reportingAPI.deleteAllReports();
+      });
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -451,8 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it(`Searches large amount of data, stops at Max Size Reached`, async () => {
-        await esArchiver.load('reporting/ecommerce');
-        await esArchiver.load('reporting/ecommerce_kibana');
+        await reportingAPI.initEcommerce();
 
         const {
           status: resStatus,
@@ -504,8 +490,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
 
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
+        await reportingAPI.teardownEcommerce();
       });
     });
   });
