@@ -24,7 +24,9 @@ export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
     state: {
       isRuntimeMappingsEditorEnabled,
       isRuntimeMappingsEditorSwitchModalVisible,
-      runtimeMappingsUpdated,
+      advancedEditorRuntimeMappingsLastApplied,
+      advancedRuntimeMappingsConfig,
+      isRuntimeMappingsEditorApplyButtonEnabled,
     },
 
     applyChanges,
@@ -49,7 +51,10 @@ export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
         )}
         checked={isRuntimeMappingsEditorEnabled}
         onChange={() => {
-          if (isRuntimeMappingsEditorEnabled && runtimeMappingsUpdated) {
+          if (
+            isRuntimeMappingsEditorEnabled &&
+            advancedRuntimeMappingsConfig !== advancedEditorRuntimeMappingsLastApplied
+          ) {
             setRuntimeMappingsEditorSwitchModalVisible(true);
             return;
           }
@@ -61,6 +66,7 @@ export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
       {isRuntimeMappingsEditorSwitchModalVisible && (
         <SwitchModal
           onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
+          confirmButtonDisabled={!isRuntimeMappingsEditorApplyButtonEnabled}
           onConfirm={() => {
             setRuntimeMappingsEditorSwitchModalVisible(false);
             applyChanges();

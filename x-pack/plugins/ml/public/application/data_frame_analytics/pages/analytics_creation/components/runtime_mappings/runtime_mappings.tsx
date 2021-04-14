@@ -65,7 +65,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   ] = useState<string>();
 
   const { setFormState } = actions;
-  const { jobType, previousRuntimeMapping, runtimeMappings, runtimeMappingsUpdated } = state.form;
+  const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
 
   const {
     convertToJson,
@@ -78,6 +78,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
+
     const parsedRuntimeMappings = removeRuntimeMappings
       ? undefined
       : JSON.parse(advancedRuntimeMappingsConfig);
@@ -98,11 +99,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);
   };
 
-  // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
-    if (reset === true) {
-      setFormState({ runtimeMappingsUpdated: false });
-    }
     if (isRuntimeMappingsEditorEnabled === false) {
       setAdvancedEditorRuntimeMappingsLastApplied(advancedRuntimeMappingsConfig);
     }
@@ -182,7 +179,10 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                       )}
                       checked={isRuntimeMappingsEditorEnabled}
                       onChange={() => {
-                        if (isRuntimeMappingsEditorEnabled && runtimeMappingsUpdated) {
+                        if (
+                          isRuntimeMappingsEditorEnabled &&
+                          advancedRuntimeMappingsConfig !== advancedEditorRuntimeMappingsLastApplied
+                        ) {
                           setRuntimeMappingsEditorSwitchModalVisible(true);
                           return;
                         }
@@ -194,6 +194,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     {isRuntimeMappingsEditorSwitchModalVisible && (
                       <SwitchModal
                         onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
+                        confirmButtonDisabled={!isRuntimeMappingsEditorApplyButtonEnabled}
                         onConfirm={() => {
                           setRuntimeMappingsEditorSwitchModalVisible(false);
                           applyChanges();

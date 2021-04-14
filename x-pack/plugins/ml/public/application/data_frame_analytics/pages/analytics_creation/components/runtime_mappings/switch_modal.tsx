@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   onCancel: () => void;
   onConfirm: () => void;
+  confirmButtonDisabled?: boolean;
 }
 
 const modalTitle = i18n.translate(
@@ -37,18 +38,18 @@ const applyChangesText = i18n.translate(
 const modalMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalBodyText',
   {
-    defaultMessage: `The changes in the editor haven't been applied yet. By cancelling you will lose your edits.`,
+    defaultMessage: `The changes in the editor haven't been applied yet. Apply changes to avoid losing your edits.`,
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm }) => (
+export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, confirmButtonDisabled = false }) => (
   <EuiConfirmModal
     title={modalTitle}
     onCancel={onCancel}
     onConfirm={onConfirm}
     cancelButtonText={cancelButtonText}
     confirmButtonText={applyChangesText}
-    buttonColor="danger"
+    confirmButtonDisabled={confirmButtonDisabled}
     defaultFocusedButton="confirm"
   >
     <p>{modalMessage}</p>
