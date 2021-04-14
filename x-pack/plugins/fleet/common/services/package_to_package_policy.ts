@@ -19,7 +19,7 @@ import type {
 
 import { doesPackageHaveIntegrations } from './';
 
-const getStreamsForInputType = (
+export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
   dataStreamPaths: string[] = []
@@ -68,12 +68,13 @@ const varsReducer = (
 export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): NewPackagePolicyInput[] => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const inputs: NewPackagePolicyInput[] = [];
-  const packageInputsByType: {
-    [key: string]: Array<RegistryInput & { data_streams?: string[]; policy_template: string }>;
+  const packageInputsByPolicyTemplateAndType: {
+    [key: string]: RegistryInput & { data_streams?: string[]; policy_template: string };
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     packagePolicyTemplate.inputs?.forEach((packageInput) => {
+      const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
         ...(packagePolicyTemplate.data_streams
@@ -81,67 +82,47 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): NewPacka
           : {}),
         policy_template: packagePolicyTemplate.name,
       };
-      if (packageInputsByType[packageInput.type]) {
-        packageInputsByType[packageInput.type].push(input);
-      } else {
-        packageInputsByType[packageInput.type] = [input];
-      }
+      packageInputsByPolicyTemplateAndType[inputKey] = input;
     });
   });
 
-  Object.entries(packageInputsByType).forEach(([inputType, packageInputs]) => {
-    const streamsForInputType: NewPackagePolicyInputStream[] = [];
-    let varsForInputType: PackagePolicyConfigRecord = {};
+  Object.values(packageInputsByPolicyTemplateAndType).forEach((packageInput) => {
+    const streamsForInput: NewPackagePolicyInputStream[] = [];
+    let varsForInput: PackagePolicyConfigRecord = {};
 
-    packageInputs.forEach((packageInput) => {
-      // Map each package input stream into package policy input stream
-      const streams = getStreamsForInputType(
-        packageInput.type,
-        packageInfo,
-        packageInput.data_streams
-      ).map((packageStream) => {
-        const stream: NewPackagePolicyInputStream = {
-          enabled: packageStream.enabled === false ? false : true,
-          data_stream: {
-            ...packageStream.data_stream,
-            policy_template: packageInput.policy_template,
-          },
-        };
-        if (packageStream.vars && packageStream.vars.length) {
-          stream.vars = packageStream.vars.reduce(varsReducer, {});
-        }
-        return stream;
-      });
-
-      // If non-integration package, collect input-level vars, otherwise
-      // copy them to each stream
-      if (packageInput.vars?.length) {
-        const inputVars = packageInput.vars.reduce(varsReducer, {});
-        if (hasIntegrations) {
-          streams.map((stream) => {
-            stream.vars = {
-              ...inputVars,
-              ...(stream.vars || {}),
-            };
-          });
-        } else {
-          varsForInputType = inputVars;
-        }
+    // Map each package input stream into package policy input stream
+    const streams = getStreamsForInputType(
+      packageInput.type,
+      packageInfo,
+      packageInput.data_streams
+    ).map((packageStream) => {
+      const stream: NewPackagePolicyInputStream = {
+        enabled: packageStream.enabled === false ? false : true,
+        data_stream: packageStream.data_stream,
+      };
+      if (packageStream.vars && packageStream.vars.length) {
+        stream.vars = packageStream.vars.reduce(varsReducer, {});
       }
-
-      streamsForInputType.push(...streams);
+      return stream;
     });
 
+    // If non-integration package, collect input-level vars, otherwise skip them,
+    // we do not support input-level vars for packages with integrations yet)
+    if (packageInput.vars?.length && !hasIntegrations) {
+      varsForInput = packageInput.vars.reduce(varsReducer, {});
+    }
+
+    streamsForInput.push(...streams);
+
     const input: NewPackagePolicyInput = {
-      type: inputType,
-      enabled: streamsForInputType.length
-        ? !!streamsForInputType.find((stream) => stream.enabled)
-        : true,
-      streams: streamsForInputType,
+      type: packageInput.type,
+      policy_template: packageInput.policy_template,
+      enabled: streamsForInput.length ? !!streamsForInput.find((stream) => stream.enabled) : true,
+      streams: streamsForInput,
     };
 
-    if (Object.keys(varsForInputType).length) {
-      input.vars = varsForInputType;
+    if (Object.keys(varsForInput).length) {
+      input.vars = varsForInput;
     }
 
     inputs.push(input);

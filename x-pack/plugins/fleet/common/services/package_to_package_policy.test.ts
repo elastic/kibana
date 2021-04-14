@@ -71,15 +71,15 @@ describe('Fleet - packageToPackagePolicy', () => {
           ...mockPackage,
           policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }] }],
         } as unknown) as PackageInfo)
-      ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
+      ).toEqual([{ type: 'foo', enabled: true, policy_template: 'test_template', streams: [] }]);
       expect(
         packageToPackagePolicyInputs(({
           ...mockPackage,
           policy_templates: [{ name: 'test_template', inputs: [{ type: 'foo' }, { type: 'bar' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([
-        { type: 'foo', enabled: true, streams: [] },
-        { type: 'bar', enabled: true, streams: [] },
+        { type: 'foo', enabled: true, policy_template: 'test_template', streams: [] },
+        { type: 'bar', enabled: true, policy_template: 'test_template', streams: [] },
       ]);
     });
 
@@ -97,25 +97,28 @@ describe('Fleet - packageToPackagePolicy', () => {
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
           enabled: true,
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'foo', type: 'logs' },
             },
           ],
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
+
           enabled: true,
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar', type: 'logs' },
             },
             {
               enabled: true,
-              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar2', type: 'logs' },
             },
           ],
         },
@@ -158,27 +161,29 @@ describe('Fleet - packageToPackagePolicy', () => {
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
           enabled: true,
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'foo', type: 'logs' },
               vars: { 'var-name': { value: 'foo-var-value' } },
             },
           ],
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
           enabled: true,
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar', type: 'logs' },
               vars: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
               enabled: true,
-              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar2', type: 'logs' },
               vars: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
             },
           ],
@@ -267,6 +272,8 @@ describe('Fleet - packageToPackagePolicy', () => {
       ).toEqual([
         {
           type: 'foo',
+          policy_template: 'test_template',
+
           enabled: true,
           vars: {
             'foo-input-var-name': { value: 'foo-input-var-value' },
@@ -276,7 +283,7 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'foo', type: 'logs' },
               vars: {
                 'var-name': { value: 'foo-var-value' },
               },
@@ -285,6 +292,8 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
         {
           type: 'bar',
+          policy_template: 'test_template',
+
           enabled: true,
           vars: {
             'bar-input-var-name': { value: ['value1', 'value2'] },
@@ -293,14 +302,14 @@ describe('Fleet - packageToPackagePolicy', () => {
           streams: [
             {
               enabled: true,
-              data_stream: { dataset: 'bar', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar-var-value' },
               },
             },
             {
               enabled: true,
-              data_stream: { dataset: 'bar2', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'bar2', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar2-var-value' },
               },
@@ -309,18 +318,20 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
         {
           type: 'with-disabled-streams',
+          policy_template: 'test_template',
+
           enabled: false,
           streams: [
             {
               enabled: false,
-              data_stream: { dataset: 'disabled', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'disabled', type: 'logs' },
               vars: {
                 'var-name': { value: [] },
               },
             },
             {
               enabled: false,
-              data_stream: { dataset: 'disabled2', type: 'logs', policy_template: 'test_template' },
+              data_stream: { dataset: 'disabled2', type: 'logs' },
             },
           ],
         },
