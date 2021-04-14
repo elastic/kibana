@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it.skip('filters out connectors that are not enabled in license', async () => {
-      // Should find a way to downgrade license to gold and upgrade back to trial
+      // TODO: Should find a way to downgrade license to gold and upgrade back to trial
     });
   });
 };

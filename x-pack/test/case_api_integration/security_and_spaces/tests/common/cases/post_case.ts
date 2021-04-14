@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
@@ -12,6 +14,7 @@ import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
+  CaseUserActionResponse,
 } from '../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -107,21 +110,35 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getAllUserAction(supertest, postedCase.id);
         const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
 
-        expect(creationUserAction).to.eql({
-          action_field: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
+        const { new_value, ...rest } = creationUserAction as CaseUserActionResponse;
+        const parsedNewValue = JSON.parse(new_value!);
+
+        expect(rest).to.eql({
+          action_field: [
+            'description',
+            'status',
+            'tags',
+            'title',
+            'connector',
+            'settings',
+            'owner',
+          ],
           action: 'create',
           action_by: defaultUser,
-          new_value: `{"type":"${postedCase.type}","description":"${
-            postedCase.description
-          }","title":"${postedCase.title}","tags":${JSON.stringify(
-            postedCase.tags
-          )},"connector":${JSON.stringify(postedCase.connector)},"settings":${JSON.stringify(
-            postedCase.settings
-          )},"owner":"${postedCase.owner}"}`,
           old_value: null,
           case_id: `${postedCase.id}`,
           comment_id: null,
           sub_case_id: '',
+        });
+
+        expect(parsedNewValue).to.eql({
+          type: postedCase.type,
+          description: postedCase.description,
+          title: postedCase.title,
+          tags: postedCase.tags,
+          connector: postedCase.connector,
+          settings: postedCase.settings,
+          owner: postedCase.owner,
         });
       });
 

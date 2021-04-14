@@ -37,6 +37,7 @@ import {
   CaseConnector,
   CaseResponse,
   CaseStatuses,
+  CaseUserActionResponse,
   ConnectorTypes,
 } from '../../../../../../plugins/cases/common/api';
 
@@ -149,23 +150,27 @@ export default ({ getService }: FtrProviderContext): void => {
       const userActions = await getAllUserAction(supertest, pushedCase.id);
       const pushUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
-      expect(pushUserAction).to.eql({
+      const { new_value, ...rest } = pushUserAction as CaseUserActionResponse;
+      const parsedNewValue = JSON.parse(new_value!);
+
+      expect(rest).to.eql({
         action_field: ['pushed'],
         action: 'push-to-service',
         action_by: defaultUser,
-        new_value: `{"pushed_at":"${
-          pushedCase.external_service!.pushed_at
-        }","pushed_by":${JSON.stringify({
-          username: 'elastic',
-          full_name: null,
-          email: null,
-        })},"connector_id":"${connector.id}","connector_name":"${
-          connector.name
-        }","external_id":"123","external_title":"INC01","external_url":"${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123"}`,
         old_value: null,
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',
+      });
+
+      expect(parsedNewValue).to.eql({
+        pushed_at: pushedCase.external_service!.pushed_at,
+        pushed_by: defaultUser,
+        connector_id: connector.id,
+        connector_name: connector.name,
+        external_id: '123',
+        external_title: 'INC01',
+        external_url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
       });
     });
 

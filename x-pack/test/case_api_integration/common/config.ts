@@ -62,6 +62,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
+    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
     const alertingAllFiles = fs.readdirSync(
       path.resolve(
         __dirname,

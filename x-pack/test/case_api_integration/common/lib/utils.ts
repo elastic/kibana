@@ -613,7 +613,8 @@ export const deleteCases = async ({
   expectedHttpCode?: number;
 }) => {
   const { body } = await supertest
-    .delete(`${CASES_URL}?ids=${JSON.stringify(caseIDs)}`)
+    .delete(`${CASES_URL}`)
+    .query({ ids: caseIDs })
     .set('kbn-xsrf', 'true')
     .send()
     .expect(expectedHttpCode);
@@ -640,7 +641,7 @@ export const getAllUserAction = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   expectedHttpCode: number = 200
-) => {
+): Promise<CaseUserActionResponse[]> => {
   const { body: userActions } = await supertest
     .get(`${CASES_URL}/${caseId}/user_actions`)
     .set('kbn-xsrf', 'true')
