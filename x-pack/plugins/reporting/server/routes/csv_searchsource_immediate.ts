@@ -44,6 +44,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       path: `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`,
       validate: {
         body: schema.object({
+          columns: schema.maybe(schema.arrayOf(schema.string())),
           searchSource: schema.object({}, { unknowns: 'allow' }),
           browserTimezone: schema.string({ defaultValue: 'UTC' }),
           title: schema.string(),
