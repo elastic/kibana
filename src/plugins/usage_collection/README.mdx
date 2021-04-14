@@ -133,7 +133,7 @@ To create a usage counter for your plugin, use the API `usageCollection.createUs
 
 ```ts
 // server/plugin.ts
-import type { Plugin, CoreStart } from '../../../core/public';
+import type { Plugin, CoreStart } from '../../../core/server';
 import type { UsageCollectionSetup, UsageCounter } from '../../../plugins/usage_collection/server';
 
 export class MyPlugin implements Plugin {
