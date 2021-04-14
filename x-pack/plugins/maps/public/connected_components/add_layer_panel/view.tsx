@@ -68,13 +68,14 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
-    const layerSteps = [
-      ...(layerWizard.prerequisiteSteps ? layerWizard.prerequisiteSteps : []),
-      {
-        id: ADD_LAYER_STEP_ID,
-        label: ADD_LAYER_STEP_LABEL,
-      },
-    ];
+    const layerSteps = layerWizard.prerequisiteSteps
+      ? layerWizard.prerequisiteSteps
+      : [
+          {
+            id: ADD_LAYER_STEP_ID,
+            label: ADD_LAYER_STEP_LABEL,
+          },
+        ];
     this.setState({
       ...INITIAL_STATE,
       layerWizard,
