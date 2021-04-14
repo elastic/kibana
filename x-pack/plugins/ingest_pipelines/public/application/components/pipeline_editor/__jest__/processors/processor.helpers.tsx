@@ -103,6 +103,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   };
 };
 
+export const commonFormFields = {
+  if: undefined,
+  tag: undefined,
+  ignore_failure: undefined,
+  description: undefined,
+};
+
 export const setup = async (props: Props): Promise<SetupResult> => {
   const testBed = await testBedSetup(props);
   return {
@@ -139,7 +146,10 @@ type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'tagField.input'
   | 'ignoreMissingSwitch.input'
+  | 'ignoreFailureSwitch.input'
+  | 'ifField.textarea'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';
