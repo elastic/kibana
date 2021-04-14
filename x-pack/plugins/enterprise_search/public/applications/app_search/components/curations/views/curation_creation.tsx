@@ -54,7 +54,6 @@ export const CurationCreation: React.FC = () => {
           id="createNewCuration"
           addRowText={QUERY_INPUTS_BUTTON}
           inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
-          values={['']}
           onSubmit={(queries) => createCuration(queries)}
         />
       </EuiPageContent>

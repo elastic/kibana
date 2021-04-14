@@ -26,7 +26,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
 
   return (
     <MultiInputRows
-      values={values}
+      initialValues={values}
       onChange={(updatedValues) => updateBoostValue(name, index, updatedValues)}
       id={`${name}BoostValue-${index}`}
     />

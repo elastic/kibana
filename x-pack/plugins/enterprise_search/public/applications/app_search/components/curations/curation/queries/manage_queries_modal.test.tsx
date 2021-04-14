@@ -68,7 +68,7 @@ describe('ManageQueriesModal', () => {
 
     it('renders the MultiInputRows component with curation queries', () => {
       expect(wrapper.find(MultiInputRows)).toHaveLength(1);
-      expect(wrapper.find(MultiInputRows).prop('values')).toEqual(['hello', 'world']);
+      expect(wrapper.find(MultiInputRows).prop('initialValues')).toEqual(['hello', 'world']);
     });
 
     it('calls updateCuration and closes the modal on MultiInputRows form submit', () => {

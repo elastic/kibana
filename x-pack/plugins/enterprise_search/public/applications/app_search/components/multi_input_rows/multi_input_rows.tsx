@@ -24,7 +24,7 @@ import { filterEmptyValues } from './utils';
 
 interface Props {
   id: string;
-  values: string[];
+  initialValues?: string[];
   onSubmit?(values: string[]): void;
   onChange?(values: string[]): void;
   submitButtonText?: string;
@@ -35,7 +35,7 @@ interface Props {
 
 export const MultiInputRows: React.FC<Props> = ({
   id,
-  values: initialValues,
+  initialValues = [''],
   onSubmit,
   onChange,
   submitButtonText = CONTINUE_BUTTON_LABEL,

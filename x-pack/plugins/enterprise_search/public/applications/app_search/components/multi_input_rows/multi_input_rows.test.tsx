@@ -14,12 +14,16 @@ import { shallow } from 'enzyme';
 
 import { InputRow } from './input_row';
 
+jest.mock('./multi_input_rows_logic', () => ({
+  MultiInputRowsLogic: jest.fn(),
+}));
+import { MultiInputRowsLogic } from './multi_input_rows_logic';
+
 import { MultiInputRows } from './';
 
 describe('MultiInputRows', () => {
   const props = {
     id: 'test',
-    values: ['a', 'b', 'c'],
   };
   const values = {
     values: ['a', 'b', 'c'],
@@ -36,6 +40,11 @@ describe('MultiInputRows', () => {
     jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
+  });
+
+  it('initializes MultiInputRowsLogic with a keyed ID and initialValues', () => {
+    shallow(<MultiInputRows id="lorem" initialValues={['ipsum']} />);
+    expect(MultiInputRowsLogic).toHaveBeenCalledWith({ id: 'lorem', values: ['ipsum'] });
   });
 
   it('renders a InputRow row for each value', () => {

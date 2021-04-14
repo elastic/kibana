@@ -64,7 +64,7 @@ export const ManageQueriesModal: React.FC = () => {
             <EuiSpacer />
             <MultiInputRows
               id="manageCurationQueries"
-              values={queries}
+              initialValues={queries}
               addRowText={QUERY_INPUTS_BUTTON}
               inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
               submitButtonText={SAVE_BUTTON_LABEL}
