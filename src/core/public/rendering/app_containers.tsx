@@ -11,6 +11,10 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 
+/**
+ * The class name for top level *and* nested application wrappers to ensure proper layout
+ * @public
+ */
 export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
 
 export const AppWrapper: React.FunctionComponent<{
@@ -31,11 +35,3 @@ export const AppWrapper: React.FunctionComponent<{
     </div>
   );
 };
-
-// TODO: Permanently delete
-// export const AppContainer: React.FunctionComponent<{
-//   classes$: Observable<string[]>;
-// }> = ({ classes$, children }) => {
-//   const classes = useObservable(classes$);
-//   return <div className={classNames(APP_WRAPPER_CLASS, classes)}>{children}</div>;
-// };
