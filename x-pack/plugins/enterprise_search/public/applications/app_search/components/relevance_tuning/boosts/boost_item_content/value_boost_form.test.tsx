@@ -42,7 +42,7 @@ describe('ValueBoostForm', () => {
 
   it('updates the boost value whenever the MultiInputRows form component updates', () => {
     const wrapper = shallow(<ValueBoostForm boost={boost} index={3} name="foo" />);
-    wrapper.find(MultiInputRows).simulate('submit', ['bar', 'baz']);
+    wrapper.find(MultiInputRows).simulate('change', ['bar', 'baz']);
 
     expect(actions.updateBoostValue).toHaveBeenCalledWith('foo', 3, ['bar', 'baz']);
   });

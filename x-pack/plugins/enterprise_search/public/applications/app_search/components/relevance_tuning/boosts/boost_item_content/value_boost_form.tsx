@@ -27,8 +27,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
   return (
     <MultiInputRows
       values={values}
-      onSubmit={(updatedValues) => updateBoostValue(name, index, updatedValues)}
-      submitsOnChange
+      onChange={(updatedValues) => updateBoostValue(name, index, updatedValues)}
     />
   );
 };

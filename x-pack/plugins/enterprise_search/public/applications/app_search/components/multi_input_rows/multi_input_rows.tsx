@@ -24,8 +24,8 @@ import { filterEmptyValues } from './utils';
 
 interface Props {
   values: string[];
-  onSubmit(values: string[]): void;
-  submitsOnChange?: boolean;
+  onSubmit?(values: string[]): void;
+  onChange?(values: string[]): void;
   submitButtonText?: string;
   addRowText?: string;
   deleteRowLabel?: string;
@@ -35,7 +35,7 @@ interface Props {
 export const MultiInputRows: React.FC<Props> = ({
   values: initialValues,
   onSubmit,
-  submitsOnChange = false,
+  onChange,
   submitButtonText = CONTINUE_BUTTON_LABEL,
   addRowText = ADD_VALUE_BUTTON_LABEL,
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
@@ -47,8 +47,8 @@ export const MultiInputRows: React.FC<Props> = ({
 
   const hasChanged = useRef(false);
   useEffect(() => {
-    if (submitsOnChange && hasChanged.current) {
-      onSubmit(filterEmptyValues(values));
+    if (onChange && hasChanged.current) {
+      onChange(filterEmptyValues(values));
     }
     hasChanged.current = true;
   }, [values]);
@@ -75,7 +75,7 @@ export const MultiInputRows: React.FC<Props> = ({
       >
         {addRowText}
       </EuiButtonEmpty>
-      {!submitsOnChange && (
+      {onSubmit && (
         <>
           <EuiSpacer />
           <EuiButton
