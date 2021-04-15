@@ -56,7 +56,7 @@ describe('the InfraSources lib', () => {
         config: createMockStaticConfiguration({
           default: {
             metricAlias: 'METRIC_ALIAS',
-            logIndices: { type: 'indexPattern', indexPatternId: 'LOG_ALIAS' },
+            logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
             fields: {
               host: 'HOST',
               pod: 'POD',
