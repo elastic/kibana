@@ -59743,7 +59743,7 @@ const WatchBazelCommand = {
     // Note: --run_output=false arg will disable the iBazel notifications about gazelle and buildozer when running it
     // Can also be solved by adding a root `.bazel_fix_commands.json` but its not needed at the moment
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build'], runOffline);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build', '--show_result=1'], runOffline);
   }
 
 };
