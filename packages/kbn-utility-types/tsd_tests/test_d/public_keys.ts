@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../index';
+import { PublicKeys } from '../../index';
 
 class Test {
-  public name: string = '';
-  getName() {
-    return this.name;
-  }
+  public str: string = '';
   // @ts-ignore
-  private getDoubleName() {
-    return this.name.repeat(2);
-  }
+  private num: number = 0;
 }
 
-expectType<MethodKeysOf<Test>>('getName');
+type KEYS = PublicKeys<Test>;
+
+expectType<KEYS>('str');

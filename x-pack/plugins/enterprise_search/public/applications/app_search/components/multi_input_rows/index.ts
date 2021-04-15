@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CurationQueries } from './curation_queries';
+export { MultiInputRows } from './multi_input_rows';
