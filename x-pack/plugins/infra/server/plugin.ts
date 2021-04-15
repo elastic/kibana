@@ -31,6 +31,7 @@ import { LogEntriesService } from './services/log_entries';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
+import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 
 export const config = {
   schema: schema.object({
@@ -124,6 +125,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       sourceStatus,
       ...domainLibs,
       getLogQueryFields: createGetLogQueryFields(sources, framework),
+      handleEsError,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
