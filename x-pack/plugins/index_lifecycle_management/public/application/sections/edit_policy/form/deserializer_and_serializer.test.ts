@@ -41,8 +41,9 @@ const originalPolicy: SerializedPolicy = {
       actions: {
         rollover: {
           max_age: '1d',
-          max_size: '10gb',
+          max_primary_shard_size: '33gb',
           max_docs: 1000,
+          max_size: '10gb',
         },
         forcemerge: {
           index_codec: 'best_compression',

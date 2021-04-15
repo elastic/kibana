@@ -25,6 +25,7 @@ import {
   logEntriesSearchRequestStateRT,
   logEntriesSearchStrategyProvider,
 } from './log_entries_search_strategy';
+import { getIndexPatternsMock } from './mocks';
 
 describe('LogEntries search strategy', () => {
   it('handles initial search requests', async () => {
@@ -102,7 +103,7 @@ describe('LogEntries search strategy', () => {
               fields: {
                 '@timestamp': [1605116827143],
                 'event.dataset': ['HIT_DATASET'],
-                MESSAGE_FIELD: ['HIT_MESSAGE'],
+                message: ['HIT_MESSAGE'],
                 'container.id': ['HIT_CONTAINER_ID'],
               },
               sort: [1605116827143 as any, 1 as any], // incorrectly typed as string upstream
@@ -167,7 +168,7 @@ describe('LogEntries search strategy', () => {
             columnId: 'MESSAGE_COLUMN_ID',
             message: [
               {
-                field: 'MESSAGE_FIELD',
+                field: 'message',
                 value: ['HIT_MESSAGE'],
                 highlights: [],
               },
@@ -255,7 +256,10 @@ const createSourceConfigurationMock = (): InfraSource => ({
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'some-test-id',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
@@ -319,4 +323,5 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
+  indexPatterns: getIndexPatternsMock(),
 });

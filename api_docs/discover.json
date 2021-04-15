@@ -20,6 +20,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createSavedSearchesLoader.$1",
             "type": "Object",
             "label": "{ savedObjectsClient, savedObjects }",
             "isRequired": true,
@@ -449,13 +450,7 @@
               "lineNumber": 20
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[]"
             ]
           },
@@ -470,13 +465,7 @@
               "lineNumber": 21
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverGridSettings",
-                "text": "DiscoverGridSettings"
-              }
+              "DiscoverGridSettings"
             ]
           },
           {
@@ -739,13 +728,7 @@
               "lineNumber": 25
             },
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
+              "SortOrder",
               "[] | undefined"
             ]
           }
@@ -808,32 +791,20 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 76
+            "lineNumber": 77
           },
           "signature": [
             "{ addDocView(docViewRaw: ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInput",
-              "text": "DocViewInput"
-            },
+            "DocViewInput",
             " | ",
-            {
-              "pluginId": "discover",
-              "scope": "public",
-              "docId": "kibDiscoverPluginApi",
-              "section": "def-public.DocViewInputFn",
-              "text": "DocViewInputFn"
-            },
+            "DocViewInputFn",
             "): void; }"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 75
+        "lineNumber": 76
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -853,7 +824,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 87
+            "lineNumber": 88
           },
           "signature": [
             {
@@ -875,7 +846,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 105
+            "lineNumber": 106
           },
           "signature": [
             {
@@ -891,7 +862,7 @@
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 86
+        "lineNumber": 87
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1013,6 +984,21 @@
         },
         "signature": [
           "\"fields:popularLimit\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
+        "type": "string",
+        "label": "MAX_DOC_FIELDS_DISPLAYED",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 21
+        },
+        "signature": [
+          "\"discover:maxDocFieldsDisplayed\""
         ],
         "initialIsOpen": false
       },

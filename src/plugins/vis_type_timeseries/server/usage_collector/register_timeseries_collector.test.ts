@@ -8,7 +8,7 @@
 
 import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerTimeseriesUsageCollector } from './register_timeseries_collector';
 import { ConfigObservable } from '../types';
