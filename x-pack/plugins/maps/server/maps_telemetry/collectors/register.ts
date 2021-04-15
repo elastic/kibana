@@ -8,6 +8,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 import { MapsConfigType } from '../../../config';
+import { TELEMETRY_LAYER_TYPE } from '../layer_type_util';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -16,6 +17,13 @@ export function registerMapsUsageCollector(
   if (!usageCollection) {
     return;
   }
+
+  const layerTypeCounts = {
+    min: { type: 'long' },
+    max: { type: 'long' },
+    avg: { type: 'float' },
+    total: { type: 'long' },
+  };
 
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
@@ -31,6 +39,22 @@ export function registerMapsUsageCollector(
       geoShapeAggLayersCount: { type: 'long' },
       mapsTotalCount: { type: 'long' },
       timeCaptured: { type: 'date' },
+      layerTypes: {
+        [TELEMETRY_LAYER_TYPE.EMS_BASEMAP]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.EMS_REGION]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_TOP_HITS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_DOCS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.ES_TRACKS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.KBN_REGION]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.UX_TMS_MVT]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.UX_WMS]: layerTypeCounts,
+      },
       attributesPerMap: {
         dataSourcesCount: {
           min: { type: 'long' },

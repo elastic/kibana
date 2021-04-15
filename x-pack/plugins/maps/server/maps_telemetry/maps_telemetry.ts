@@ -25,6 +25,10 @@ import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
+import {
+  getTelemetryLayerTypesPerCluster,
+  TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
+} from './layer_type_util';
 
 interface Settings {
   showMapVisualizationTypes: boolean;
@@ -52,6 +56,7 @@ export interface GeoIndexPatternsUsage {
 export interface LayersStatsUsage {
   mapsTotalCount: number;
   timeCaptured: string;
+  layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -246,11 +251,14 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
+  const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
+
   return {
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
     timeCaptured: new Date().toISOString(),
+    layerTypes: telemetryLayerTypeCounts,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

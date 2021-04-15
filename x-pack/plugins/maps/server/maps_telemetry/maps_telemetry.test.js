@@ -74,73 +74,109 @@ describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
     const result = buildMapsSavedObjectsTelemetry([]);
 
-    expect(result).toMatchObject({
-      attributesPerMap: {
-        dataSourcesCount: {
-          avg: 0,
-          max: 0,
-          min: 0,
-        },
-        emsVectorLayersCount: {},
-        layerTypesCount: {},
-        layersCount: {
-          avg: 0,
-          max: 0,
-          min: 0,
-        },
+    expect(result.layerTypes).toEqual({});
+    expect(result.attributesPerMap).toEqual({
+      dataSourcesCount: {
+        avg: 0,
+        max: 0,
+        min: 0,
       },
-      mapsTotalCount: 0,
+      emsVectorLayersCount: {},
+      layerTypesCount: {},
+      layersCount: {
+        avg: 0,
+        max: 0,
+        min: 0,
+      },
     });
+    expect(result.mapsTotalCount).toEqual(0);
+    expect(new Date(Date.parse(result.timeCaptured)).toISOString()).toEqual(result.timeCaptured);
   });
 
   test('returns expected telemetry data from saved objects', async () => {
     const layerLists = getLayerLists(mapSavedObjects);
     const result = buildMapsSavedObjectsTelemetry(layerLists);
 
-    expect(result).toMatchObject({
-      attributesPerMap: {
-        dataSourcesCount: {
-          avg: 2,
-          max: 3,
+    expect(result.layerTypes).toEqual({
+      EMS_BASEMAP: {
+        avg: 0.6,
+        max: 1,
+        min: 1,
+        total: 3,
+      },
+      EMS_REGION: {
+        avg: 0.6,
+        max: 1,
+        min: 1,
+        total: 3,
+      },
+      ES_AGG_CLUSTERS: {
+        avg: 0.4,
+        max: 1,
+        min: 1,
+        total: 2,
+      },
+      ES_AGG_HEATMAP: {
+        avg: 0.2,
+        max: 1,
+        min: 1,
+        total: 1,
+      },
+      ES_DOCS: {
+        avg: 0.2,
+        max: 1,
+        min: 1,
+        total: 1,
+      },
+    });
+    expect(result.attributesPerMap).toEqual({
+      dataSourcesCount: {
+        avg: 2,
+        max: 3,
+        min: 1,
+      },
+      emsVectorLayersCount: {
+        canada_provinces: {
+          avg: 0.2,
+          max: 1,
           min: 1,
         },
-        emsVectorLayersCount: {
-          canada_provinces: {
-            avg: 0.2,
-            max: 1,
-            min: 1,
-          },
-          france_departments: {
-            avg: 0.2,
-            max: 1,
-            min: 1,
-          },
-          italy_provinces: {
-            avg: 0.2,
-            max: 1,
-            min: 1,
-          },
+        france_departments: {
+          avg: 0.2,
+          max: 1,
+          min: 1,
         },
-        layerTypesCount: {
-          TILE: {
-            avg: 0.6,
-            max: 1,
-            min: 1,
-          },
-          VECTOR: {
-            avg: 1.2,
-            max: 2,
-            min: 1,
-          },
-        },
-        layersCount: {
-          avg: 2,
-          max: 3,
+        italy_provinces: {
+          avg: 0.2,
+          max: 1,
           min: 1,
         },
       },
-      mapsTotalCount: 5,
+      layerTypesCount: {
+        HEATMAP: {
+          avg: 0.2,
+          max: 1,
+          min: 1,
+        },
+        TILE: {
+          avg: 0.6,
+          max: 1,
+          min: 1,
+        },
+        VECTOR: {
+          avg: 1.2,
+          max: 2,
+          min: 1,
+        },
+      },
+      layersCount: {
+        avg: 2,
+        max: 3,
+        min: 1,
+      },
     });
+    expect(result.mapsTotalCount).toEqual(5);
+    expect(new Date(Date.parse(result.timeCaptured)).toISOString()).toEqual(result.timeCaptured);
   });
 
   test('returns expected telemetry data from index patterns', async () => {
