@@ -40,7 +40,7 @@ export const eventHit = {
     'source.geo.location': [{ coordinates: [118.7778, 32.0617], type: 'Point' }],
     'threat.indicator': [
       {
-        'matched.field': ['matched_field'],
+        'matched.field': ['matched_field', 'other_matched_field'],
         first_seen: ['2021-02-22T17:29:25.195Z'],
         provider: ['yourself'],
         type: ['custom'],
@@ -259,8 +259,8 @@ export const eventDetailsFormattedFields = [
   {
     category: 'threat',
     field: 'threat.indicator.matched.field',
-    values: ['matched_field', 'matched_field_2'],
-    originalValue: ['matched_field', 'matched_field_2'],
+    values: ['matched_field', 'other_matched_field', 'matched_field_2'],
+    originalValue: ['matched_field', 'other_matched_field', 'matched_field_2'],
     isObjectArray: false,
   },
   {

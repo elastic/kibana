@@ -42,6 +42,6 @@ export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
         field: 'monitor.id',
       },
     ],
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, 'monitor.duration.us': 'Monitor duration' },
   };
 }
