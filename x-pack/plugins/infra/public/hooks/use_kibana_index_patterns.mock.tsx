@@ -6,37 +6,89 @@
  */
 
 import React, { useMemo } from 'react';
-import { of } from 'rxjs';
+import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { CoreStart } from '../../../../../src/core/public';
+import { FieldSpec } from '../../../../../src/plugins/data/common';
+import {
+  IIndexPattern,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternsContract,
+} from '../../../../../src/plugins/data/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { Pick2 } from '../../common/utility_types';
 
-export interface MockIndexPattern {
-  id: string;
-  title: string;
-}
+type MockIndexPattern = Pick<
+  IndexPattern,
+  'id' | 'title' | 'type' | 'getTimeField' | 'isTimeBased' | 'getFieldByName'
+>;
+export type MockIndexPatternSpec = Pick<
+  IIndexPattern,
+  'id' | 'title' | 'type' | 'timeFieldName'
+> & {
+  fields: FieldSpec[];
+};
 
 export const MockIndexPatternsKibanaContextProvider: React.FC<{
   asyncDelay: number;
-  mockIndexPatterns: MockIndexPattern[];
+  mockIndexPatterns: MockIndexPatternSpec[];
 }> = ({ asyncDelay, children, mockIndexPatterns }) => {
-  const indexPatterns = useMemo(() => createIndexPatternsMock(asyncDelay, mockIndexPatterns), [
-    asyncDelay,
-    mockIndexPatterns,
-  ]);
+  const indexPatterns = useMemo(
+    () =>
+      createIndexPatternsMock(
+        asyncDelay,
+        mockIndexPatterns.map(({ id, title, type = undefined, fields, timeFieldName }) => {
+          const indexPatternFields = fields.map((fieldSpec) => new IndexPatternField(fieldSpec));
+
+          return {
+            id,
+            title,
+            type,
+            getTimeField: () => indexPatternFields.find(({ name }) => name === timeFieldName),
+            isTimeBased: () => timeFieldName != null,
+            getFieldByName: (fieldName) =>
+              indexPatternFields.find(({ name }) => name === fieldName),
+          };
+        })
+      ),
+    [asyncDelay, mockIndexPatterns]
+  );
+
+  const core = useMemo<Pick2<CoreStart, 'application', 'getUrlForApp'>>(
+    () => ({
+      application: {
+        getUrlForApp: () => '',
+      },
+    }),
+    []
+  );
 
   return (
-    <KibanaContextProvider services={{ data: { indexPatterns } }}>{children}</KibanaContextProvider>
+    <KibanaContextProvider services={{ ...core, data: { indexPatterns } }}>
+      {children}
+    </KibanaContextProvider>
   );
 };
 
 const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: MockIndexPattern[]
-): Pick<IndexPatternsContract, 'getIdsWithTitle'> => {
+): {
+  getIdsWithTitle: IndexPatternsContract['getIdsWithTitle'];
+  get: (...args: Parameters<IndexPatternsContract['get']>) => Promise<MockIndexPattern>;
+} => {
   return {
     async getIdsWithTitle(_refresh?: boolean) {
-      const indexPatterns$ = of(indexPatterns);
+      const indexPatterns$ = of(
+        indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
+      );
+      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+    },
+    async get(indexPatternId: string) {
+      const indexPatterns$ = from(
+        indexPatterns.filter((indexPattern) => indexPattern.id === indexPatternId)
+      );
       return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
     },
   };
