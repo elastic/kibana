@@ -73,7 +73,7 @@ export const mlExecutor = async ({
           `job id: "${job.id}"`,
           `job status: "${job.jobState}"`,
           `datafeed status: "${job.datafeedState}"`,
-        ].join()
+        ].join(', ')
       )
     );
     logger.warn(errorMessage);
