@@ -181,7 +181,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: 'fleet-agents.active: true',
+            agents: 'active: true',
             policy_id: 'policy2',
           })
           .expect(200);
