@@ -16,7 +16,8 @@ const varsSchema = schema.maybe(
     schema.object({
       name: schema.string(),
       type: schema.maybe(schema.string()),
-      value: schema.oneOf([schema.string(), schema.number()]),
+      value: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+      frozen: schema.maybe(schema.boolean()),
     })
   )
 );
@@ -33,6 +34,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
+    force: schema.maybe(schema.boolean()),
   })
 );
 
@@ -41,6 +43,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ...AgentPolicyBaseSchema,
     namespace: schema.maybe(NamespaceSchema),
     id: schema.oneOf([schema.string(), schema.number()]),
+    is_default: schema.maybe(schema.boolean()),
+    is_default_fleet_server: schema.maybe(schema.boolean()),
     package_policies: schema.arrayOf(
       schema.object({
         name: schema.string(),

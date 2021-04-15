@@ -30,6 +30,7 @@ import {
   UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
+  waitForIndexStatusYellow,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -66,7 +67,8 @@ describe('migration actions', () => {
       { _source: { title: 'doc 1' } },
       { _source: { title: 'doc 2' } },
       { _source: { title: 'doc 3' } },
-      { _source: { title: 'saved object 4' } },
+      { _source: { title: 'saved object 4', type: 'another_unused_type' } },
+      { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
     ] as unknown) as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', sourceDocs)();
 
@@ -203,6 +205,51 @@ describe('migration actions', () => {
       await expect(task()).rejects.toMatchInlineSnapshot(
         `[ResponseError: index_not_found_exception]`
       );
+    });
+  });
+
+  describe('waitForIndexStatusYellow', () => {
+    afterAll(async () => {
+      await client.indices.delete({ index: 'red_then_yellow_index' });
+    });
+    it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
+      // Create a red index
+      await client.indices.create(
+        {
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
+            },
+          },
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      );
+
+      // Start tracking the index status
+      const indexStatusPromise = waitForIndexStatusYellow(client, 'red_then_yellow_index')();
+
+      const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(redStatusResponse.body.status).toBe('red');
+
+      client.indices.putSettings({
+        index: 'red_then_yellow_index',
+        body: {
+          // Enable all shard allocation so that the index status turns yellow
+          index: { routing: { allocation: { enable: 'all' } } },
+        },
+      });
+
+      await indexStatusPromise;
+      // Assert that the promise didn't resolve before the index became yellow
+
+      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      expect(yellowStatusResponse.body.status).toBe('yellow');
     });
   });
 
@@ -343,7 +390,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -364,6 +412,43 @@ describe('migration actions', () => {
           "doc 2",
           "doc 3",
           "saved object 4",
+          "f-agent-event 5",
+        ]
+      `);
+    });
+    it('resolves right and excludes all documents not matching the unusedTypesQuery', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'reindex_target_excluded_docs',
+        Option.none,
+        false,
+        Option.of({
+          bool: {
+            must_not: ['f_agent_event', 'another_unused_type'].map((type) => ({
+              term: { type },
+            })),
+          },
+        })
+      )()) as Either.Right<ReindexResponse>;
+      const task = waitForReindexTask(client, res.right.taskId, '10s');
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Right",
+          "right": "reindex_succeeded",
+        }
+      `);
+
+      const results = ((await searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'reindex_target_excluded_docs',
+        outdatedDocumentsQuery: undefined,
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+        Array [
+          "doc 1",
+          "doc 2",
+          "doc 3",
         ]
       `);
     });
@@ -374,7 +459,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_2',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -394,6 +480,7 @@ describe('migration actions', () => {
           "doc 2_updated",
           "doc 3_updated",
           "saved object 4_updated",
+          "f-agent-event 5_updated",
         ]
       `);
     });
@@ -405,7 +492,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_3',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -421,7 +509,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_3',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -443,6 +532,7 @@ describe('migration actions', () => {
           "doc 2_updated",
           "doc 3_updated",
           "saved object 4_updated",
+          "f-agent-event 5_updated",
         ]
       `);
     });
@@ -469,7 +559,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_4',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -491,6 +582,7 @@ describe('migration actions', () => {
           "doc 2",
           "doc 3_updated",
           "saved object 4_updated",
+          "f-agent-event 5_updated",
         ]
       `);
     });
@@ -517,7 +609,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_5',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -551,7 +644,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_6',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -571,7 +665,8 @@ describe('migration actions', () => {
         'no_such_index',
         'reindex_target',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -591,7 +686,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'existing_index_with_write_block',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -612,7 +708,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'existing_index_with_write_block',
         Option.none,
-        true
+        true,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -633,7 +730,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '0s');
@@ -659,7 +757,8 @@ describe('migration actions', () => {
         'existing_index_with_docs',
         'reindex_target_7',
         Option.none,
-        false
+        false,
+        Option.none
       )()) as Either.Right<ReindexResponse>;
       await waitForReindexTask(client, res.right.taskId, '10s')();
 
@@ -714,7 +813,7 @@ describe('migration actions', () => {
         targetIndex: 'existing_index_with_docs',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(resultsWithoutQuery.length).toBe(4);
+      expect(resultsWithoutQuery.length).toBe(5);
     });
     it('resolves with _id, _source, _seq_no and _primary_term', async () => {
       expect.assertions(1);

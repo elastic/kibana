@@ -6,10 +6,14 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { PageContent } from '../../public/application/components/page_content';
+import { EsDeprecationsContent } from '../../public/application/components/es_deprecations';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
+  memoryRouter: {
+    initialEntries: ['/es_deprecations/indices'],
+    componentRoutePath: '/es_deprecations/:tabName',
+  },
   doMountAsync: true,
 };
 
@@ -46,7 +50,10 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setup = async (overrides?: Record<string, unknown>): Promise<IndicesTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(PageContent, overrides), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(EsDeprecationsContent, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {
@@ -60,6 +67,9 @@ export type IndicesTestSubjects =
   | 'removeIndexSettingsButton'
   | 'deprecationsContainer'
   | 'permissionsError'
-  | 'upgradeStatusError'
+  | 'requestError'
+  | 'indexCount'
+  | 'upgradedCallout'
+  | 'partiallyUpgradedWarning'
   | 'noDeprecationsPrompt'
   | string;
