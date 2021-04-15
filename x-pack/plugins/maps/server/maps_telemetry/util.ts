@@ -41,10 +41,6 @@ interface ClusterCountStats {
   avg: number;
 }
 
-type TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP = {
-  [key in TELEMETRY_LAYER_TYPE]?: number;
-};
-
 export type TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {
   [key in TELEMETRY_LAYER_TYPE]?: ClusterCountStats;
 };
@@ -130,78 +126,7 @@ function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | nul
   ) {
     return null;
   }
-
   return (layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType;
-}
-
-export function getTelemetyLayerTypesPerMap(
-  layerDescriptors: LayerDescriptor[]
-): TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP {
-  const counts: TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP = {};
-
-  layerDescriptors.forEach((layerDescriptor: LayerDescriptor) => {
-    const telemetryLayerType: TELEMETRY_LAYER_TYPE | null = getTelemetryLayerType(layerDescriptor);
-
-    if (!telemetryLayerType) {
-      return;
-    }
-
-    if (!counts[telemetryLayerType]) {
-      counts[telemetryLayerType] = 1;
-    } else {
-      (counts[telemetryLayerType] as number) += 1;
-    }
-  });
-
-  return counts;
-}
-
-export function getTelemetryLayerTypesPerCluster(
-  layerLists: LayerDescriptor[][]
-): TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER {
-  const counts: TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP[] = layerLists.map(getTelemetyLayerTypesPerMap);
-
-  const clusterCounts: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {};
-  counts.forEach((count: TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP) => {
-    for (const key in count) {
-      if (!count.hasOwnProperty(key)) {
-        continue;
-      }
-
-      const telemetryLayerType = key as TELEMETRY_LAYER_TYPE;
-      if (!clusterCounts[telemetryLayerType]) {
-        clusterCounts[telemetryLayerType] = {
-          min: count[telemetryLayerType] as number,
-          max: count[telemetryLayerType] as number,
-          total: count[telemetryLayerType] as number,
-          avg: count[telemetryLayerType] as number,
-        };
-      } else {
-        (clusterCounts[telemetryLayerType] as ClusterCountStats).min = Math.min(
-          count[telemetryLayerType] as number,
-          (clusterCounts[telemetryLayerType] as ClusterCountStats).min
-        );
-        (clusterCounts[telemetryLayerType] as ClusterCountStats).max = Math.max(
-          count[telemetryLayerType] as number,
-          (clusterCounts[telemetryLayerType] as ClusterCountStats).max
-        );
-        (clusterCounts[telemetryLayerType] as ClusterCountStats).total =
-          (count[telemetryLayerType] as number) +
-          (clusterCounts[telemetryLayerType] as ClusterCountStats).total;
-      }
-    }
-  });
-
-  for (const key in clusterCounts) {
-    if (!clusterCounts.hasOwnProperty(key)) {
-      continue;
-    }
-
-    (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCountStats).avg =
-      (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCountStats).total / layerLists.length;
-  }
-
-  return clusterCounts;
 }
 
 export function getCountsByMap<K extends string>(
@@ -261,9 +186,21 @@ export function getCountsByCluster(
     }
   });
 
+  for (const key in clusterCounts) {
+    if (clusterCounts.hasOwnProperty(key)) {
+      clusterCounts[key].avg = clusterCounts[key].total / layerLists.length;
+    }
+  }
+
   return clusterCounts;
 }
 
 export function getScalingOptionsPerCluster(layerLists: LayerDescriptor[][]) {
   return getCountsByCluster(layerLists, getScalingOption);
+}
+
+export function getTelemetryLayerTypesPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER {
+  return getCountsByCluster(layerLists, getTelemetryLayerType);
 }

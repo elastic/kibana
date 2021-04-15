@@ -132,7 +132,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
     });
     expect(result.scalingOptions).toEqual({
       LIMIT: {
-        avg: 1,
+        avg: 0.2,
         max: 1,
         min: 1,
         total: 1,
