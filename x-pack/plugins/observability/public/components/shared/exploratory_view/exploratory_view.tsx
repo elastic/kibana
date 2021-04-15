@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiProgress, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -27,7 +27,7 @@ export function ExploratoryView() {
     null
   );
 
-  const { loadIndexPattern } = useAppIndexPatternContext();
+  const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
   const LensComponent = lens?.EmbeddableComponent;
 
@@ -61,7 +61,7 @@ export function ExploratoryView() {
               attributes={lensAttributes}
             />
           ) : (
-            <EmptyView />
+            <EmptyView loading={loading} />
           )}
           <SeriesEditor />
         </>
