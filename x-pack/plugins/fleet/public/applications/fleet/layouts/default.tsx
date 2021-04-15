@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
-import { useLink, useConfig } from '../hooks';
+import { useLink, useConfig, useUrlModal } from '../hooks';
 
 interface Props {
   showSettings?: boolean;
@@ -53,17 +53,18 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
-  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const { modal, setModal, getModalHref } = useUrlModal();
 
   return (
     <>
-      {isSettingsFlyoutOpen && (
+      {modal === 'settings' && (
         <SettingFlyout
           onClose={() => {
-            setIsSettingsFlyoutOpen(false);
+            setModal(null);
           }}
         />
       )}
+
       <Container>
         <Wrapper>
           <Nav>
@@ -122,7 +123,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   {showSettings ? (
                     <EuiFlexItem>
-                      <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                      <EuiButtonEmpty iconType="gear" href={getModalHref('settings')}>
                         <FormattedMessage
                           id="xpack.fleet.appNavigation.settingsButton"
                           defaultMessage="Fleet settings"
