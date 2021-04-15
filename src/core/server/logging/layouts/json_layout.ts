@@ -7,10 +7,9 @@
  */
 
 import moment from 'moment-timezone';
-import { unset } from 'lodash';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, LogMeta, LogRecord, Layout } from '@kbn/logging';
+import { Ecs, LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -42,17 +41,6 @@ export class JsonLayout implements Layout {
     };
   }
 
-  private static mergeLogMeta(log: Ecs, meta: LogMeta): Ecs {
-    // Paths which cannot be overridden via `meta`.
-    const RESERVED_PATHS = ['ecs', '@timestamp', 'message', 'log.level', 'log.logger'];
-
-    for (const path of RESERVED_PATHS) {
-      unset(meta, path);
-    }
-
-    return merge(log, meta);
-  }
-
   public format(record: LogRecord): string {
     const log: Ecs = {
       ecs: { version: '1.9.0' },
@@ -67,7 +55,8 @@ export class JsonLayout implements Layout {
         pid: record.pid,
       },
     };
-    const output = record.meta ? JsonLayout.mergeLogMeta(log, record.meta) : log;
+    const output = record.meta ? merge({ ...record.meta }, log) : log;
+
     return JSON.stringify(output);
   }
 }
