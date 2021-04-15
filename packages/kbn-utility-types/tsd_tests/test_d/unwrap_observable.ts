@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { UnwrapObservable, ObservableLike } from '../index';
+import { UnwrapObservable, ObservableLike } from '../../index';
 
 type STRING = UnwrapObservable<ObservableLike<string>>;
 

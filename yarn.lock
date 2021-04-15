@@ -2740,7 +2740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:packages/kbn-tinymath":
+"@kbn/tinymath@link:bazel-bin/packages/kbn-tinymath/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2752,7 +2752,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types@link:packages/kbn-utility-types":
+"@kbn/utility-types@link:bazel-bin/packages/kbn-utility-types/npm_module":
   version "0.0.0"
   uid ""
 
