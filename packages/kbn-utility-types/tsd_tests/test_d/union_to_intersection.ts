@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { expectType } from 'tsd';
-import { PublicContract } from '../index';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { expectAssignable } from 'tsd';
+import { UnionToIntersection } from '../../index';
 
-class Test {
-  public str: string = '';
-  // @ts-ignore
-  private num: number = 0;
-}
+type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 
-type CONTRACT = PublicContract<Test>;
-
-expectType<CONTRACT>({
-  str: 'foo',
+expectAssignable<INTERSECTED>({
+  foo: 'bar',
+  baz: 'qux',
 });
