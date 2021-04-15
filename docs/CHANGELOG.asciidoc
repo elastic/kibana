@@ -114,6 +114,7 @@ Operations::
 * Fixes issues preventing the SysV service from starting Kibana {kibana-pull}95018[#95018]
 * Tolerate log entries for which fields retrieval fails {kibana-pull}94972[#94972]
 * Fixes positioning of space name and avatar in selector dropdown {kibana-pull}94169[#94169]
+* Updates Node.js from version 14.16.0 to 14.16.1 {kibana-pull}96382[#96382]
 Security::
 * Improves role management error handling for partially authorized users {kibana-pull}96468[#96468]
 
