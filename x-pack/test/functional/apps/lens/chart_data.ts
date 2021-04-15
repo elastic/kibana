@@ -42,14 +42,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { x: '78.83.247.30', y: 17246 },
       { x: '226.82.228.233', y: 15687 },
       { x: '93.28.27.24', y: 15614.33 },
-      { x: '__other__', y: 5722.78 },
+      { x: '__other__', y: 5722.77 },
     ];
 
     function assertMatchesExpectedData(state: DebugState) {
       expect(
         state.bars![0].bars.map((bar) => ({
           x: bar.x,
-          y: Math.round(bar.y * 100) / 100,
+          y: Math.floor(bar.y * 100) / 100,
         }))
       ).to.eql(expectedData);
     }
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(terms.map((term) => (term === 'Other' ? '__other__' : term))).to.eql(
         expectedData.map(({ x }) => x)
       );
-      expect(values.map((value) => Math.round(100 * Number(value.replace(',', ''))) / 100)).to.eql(
+      expect(values.map((value) => Math.floor(100 * Number(value.replace(',', ''))) / 100)).to.eql(
         expectedData.map(({ y }) => y)
       );
     });
