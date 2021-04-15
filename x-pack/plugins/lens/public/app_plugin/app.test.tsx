@@ -1269,6 +1269,26 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the query if saved query is selected', () => {
+      const { component } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: 'abc:def', language: 'lucene' },
+          },
+        });
+      });
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { query: 'abc:def', language: 'lucene' },
+        }),
+        {}
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>

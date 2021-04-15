@@ -671,6 +671,7 @@ export function App({
               setState((s) => ({
                 ...s,
                 savedQuery: { ...savedQuery }, // Shallow query for reference issues
+                query: savedQuery.attributes.query,
               }));
             }}
             onClearSavedQuery={() => {
