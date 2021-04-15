@@ -6445,6 +6445,34 @@
         }
       }
     },
+    "cloud_provider": {
+      "properties": {
+        "name": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The name of the cloud provider"
+          }
+        },
+        "vm_type": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The VM instance type"
+          }
+        },
+        "region": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The cloud provider region"
+          }
+        },
+        "zone": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The availability zone within the region"
+          }
+        }
+      }
+    },
     "core": {
       "properties": {
         "config": {
@@ -7769,6 +7797,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "discover:maxDocFieldsDisplayed": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "defaultColumns": {
           "type": "array",
           "items": {
@@ -8108,6 +8142,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -8127,12 +8167,6 @@
           }
         },
         "observability:enableAlertingExperience": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -9273,6 +9307,53 @@
                 "type": "long",
                 "_meta": {
                   "description": "The value of the event"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "usage_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "domainId": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Domain name of the metric (ie plugin name)."
+                }
+              },
+              "counterName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the counter that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
                 }
               }
             }

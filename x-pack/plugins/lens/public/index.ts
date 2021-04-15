@@ -33,6 +33,7 @@ export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
   IndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
   FiltersIndexPatternColumn,

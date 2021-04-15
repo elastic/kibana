@@ -9,9 +9,9 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
-  IndexPatternColumn,
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
@@ -41,23 +41,28 @@ export interface ReportDefinition {
   required?: boolean;
   custom?: boolean;
   defaultValue?: string;
-  options?: Array<{ field: string; label: string; description?: string }>;
+  options?: Array<{
+    field: string;
+    label: string;
+    description?: string;
+    columnType?: 'range' | 'operation';
+  }>;
 }
 
 export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<IndexPatternColumn>;
+  yAxisColumn: Partial<FieldBasedIndexPatternColumn>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested: string }>;
+  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
-  hasMetricType: boolean;
+  hasOperationType: boolean;
   palette?: PaletteOutput;
 }
 
@@ -70,7 +75,7 @@ export interface SeriesUrl {
   filters?: UrlFilter[];
   seriesType?: SeriesType;
   reportType: ReportViewTypeId;
-  metric?: OperationType;
+  operationType?: OperationType;
   dataType?: AppDataType;
   reportDefinitions?: Record<string, string>;
 }
@@ -86,7 +91,7 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
