@@ -1,0 +1,13 @@
+- name: stat /var/lib/kibana
+  become: yes
+  register: kibana_data_directory
+  stat:
+    path: /var/lib/kibana
+
+- name: /var/lib/kibana 2750 kibana:kibana
+  assert:
+    that:
+      - kibana_log_directory.stat.exists
+      - kibana_log_directory.stat.mode == "2750"
+      - kibana_log_directory.stat.pw_name == "kibana"
+      - kibana_log_directory.stat.gr_name == "kibana"
