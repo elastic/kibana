@@ -231,7 +231,7 @@ export const SearchExamplesApp = ({
           text: mountReactNode(message),
         },
         {
-          toastLifeTimeMs: 30000,
+          toastLifeTimeMs: 300000,
         }
       );
     } catch (e) {
