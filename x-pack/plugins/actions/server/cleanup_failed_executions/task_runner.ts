@@ -11,13 +11,15 @@ import { RunContext, TaskInstance, asInterval } from '../../../task_manager/serv
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { SpacesPluginStart } from '../../../spaces/server';
+import { cleanupTasks } from './cleanup_tasks';
 
 export interface TaskRunnerOpts {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
   coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>;
   config: ActionsConfig['cleanupFailedExecutionsTask'];
+  kibanaIndex: string;
+  taskManagerIndex: string;
 }
 
 export function taskRunner({
@@ -25,6 +27,8 @@ export function taskRunner({
   actionTypeRegistry,
   coreStartServices,
   config,
+  kibanaIndex,
+  taskManagerIndex,
 }: TaskRunnerOpts) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -53,41 +57,25 @@ export function taskRunner({
           sortField: 'runAt',
           sortOrder: 'asc',
         });
+
         logger.debug(
           `Removing ${result.saved_objects.length} of ${result.total} failed execution task(s)`
         );
-
-        if (result.saved_objects.length > 0) {
-          // Remove accumulated action task params
-          await esClient.bulk({
-            body: result.saved_objects.map((savedObject) => {
-              const { spaceId, actionTaskParamsId } = JSON.parse(
-                (savedObject.attributes.params as unknown) as string
-              );
-              const namespace = spaceIdToNamespace(spaces, spaceId);
-              const rawId = savedObjectsSerializer.generateRawId(
-                namespace,
-                'action_task_params',
-                actionTaskParamsId
-              );
-              // TODO: .kibana is configurable
-              return { delete: { _index: '.kibana', _id: rawId } };
-            }),
-          });
-
-          // Remove accumulated tasks
-          await esClient.bulk({
-            body: result.saved_objects.map((savedObject) => {
-              const rawId = savedObjectsSerializer.generateRawId(undefined, 'task', savedObject.id);
-              // TODO: .kibana_task_manager is configurable
-              return { delete: { _index: '.kibana_task_manager', _id: rawId } };
-            }),
-          });
-        }
-
+        const success = await cleanupTasks({
+          logger,
+          esClient,
+          spaces,
+          kibanaIndex,
+          taskManagerIndex,
+          savedObjectsSerializer,
+          tasks: result.saved_objects,
+        });
         logger.debug(
-          `Finished cleanup of failed executions by removing ${result.saved_objects.length} task(s)`
+          `Finished cleanup of failed executions by removing ${
+            result.saved_objects.length
+          } task(s)${!success ?? ' with some failures'}`
         );
+
         return {
           state: {
             runs: state.runs + 1,
@@ -101,7 +89,3 @@ export function taskRunner({
     };
   };
 }
-
-const spaceIdToNamespace = (spaces?: SpacesPluginStart, spaceId?: string) => {
-  return spaces && spaceId ? spaces.spacesService.spaceIdToNamespace(spaceId) : undefined;
-};

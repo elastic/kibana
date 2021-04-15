@@ -36,6 +36,8 @@ describe('registerTaskDefinition', () => {
     coreStartServices,
     actionTypeRegistry,
     config,
+    kibanaIndex: '.kibana',
+    taskManagerIndex: '.kibana_task_manager',
   };
 
   beforeEach(() => {

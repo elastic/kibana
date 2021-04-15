@@ -256,6 +256,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
         coreStartServices: core.getStartServices(),
         config: this.actionsConfig.cleanupFailedExecutionsTask,
+        kibanaIndex: this.kibanaIndexConfig.kibana.index,
+        taskManagerIndex: plugins.taskManager.index,
       });
     }
 
