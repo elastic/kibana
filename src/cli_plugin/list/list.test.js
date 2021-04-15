@@ -92,5 +92,14 @@ describe('kibana cli', function () {
         `"Unable to read kibana.json file for plugin invalid-plugin"`
       );
     });
+
+    it('show message if no plugins are installed', function () {
+      list(pluginDir, logger);
+      expect(logger.messages).toMatchInlineSnapshot(`
+        Array [
+          "log: No plugins installed.",
+        ]
+      `);
+    });
   });
 });
