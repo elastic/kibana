@@ -186,7 +186,6 @@ describe('#asScoped', () => {
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
       event: { action: 'ACTION' },
       kibana: { space_id: 'default', session_id: 'SESSION_ID' },
-      message: 'MESSAGE',
       trace: { id: 'REQUEST_ID' },
       user: { name: 'jdoe', roles: ['admin'] },
     });
