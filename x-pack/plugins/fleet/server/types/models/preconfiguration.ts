@@ -8,7 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+import {
+  PRECONFIGURATION_LATEST_KEYWORD,
+  DEFAULT_AGENT_POLICY,
+  DEFAULT_FLEET_SERVER_AGENT_POLICY,
+  DEFAULT_PACKAGES_NAMES,
+} from '../../constants';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -36,7 +41,13 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
-  })
+  }),
+  {
+    defaultValue: DEFAULT_PACKAGES_NAMES.map((name) => ({
+      name,
+      version: PRECONFIGURATION_LATEST_KEYWORD,
+    })),
+  }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
@@ -77,5 +88,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
         ),
       })
     ),
-  })
+  }),
+  {
+    defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
+  }
 );

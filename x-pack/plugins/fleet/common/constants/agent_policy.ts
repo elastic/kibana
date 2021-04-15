@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import { i18n } from '@kbn/i18n';
 
 import { defaultPackages } from './epm';
 
@@ -16,33 +16,48 @@ export const agentPolicyStatuses = {
   Inactive: 'inactive',
 } as const;
 
-export const DEFAULT_AGENT_POLICY: Omit<
-  AgentPolicy,
-  'id' | 'updated_at' | 'updated_by' | 'revision'
-> = {
+export const DEFAULT_AGENT_POLICY = {
   name: 'Default policy',
   namespace: 'default',
   description: 'Default agent policy created by Kibana',
   status: agentPolicyStatuses.Active,
-  package_policies: [],
+  package_policies: [
+    {
+      name: i18n.translate('xpack.fleet.agentPolicies.defaultAgentPolicySystemIntegrationName', {
+        defaultMessage: 'System',
+      }),
+      package: {
+        name: defaultPackages.System,
+      },
+    },
+  ],
   is_default: true,
   is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  id: 'default-agent-policy',
 };
 
-export const DEFAULT_FLEET_SERVER_AGENT_POLICY: Omit<
-  AgentPolicy,
-  'id' | 'updated_at' | 'updated_by' | 'revision'
-> = {
+export const DEFAULT_FLEET_SERVER_AGENT_POLICY = {
   name: 'Default Fleet Server policy',
   namespace: 'default',
   description: 'Default Fleet Server agent policy created by Kibana',
   status: agentPolicyStatuses.Active,
-  package_policies: [],
+  package_policies: [
+    {
+      name: i18n.translate(
+        'xpack.fleet.agentPolicies.defaultAgentPolicyFleetServerIntegrationName',
+        {
+          defaultMessage: 'Fleet Server',
+        }
+      ),
+      package: {
+        name: defaultPackages.FleetServer,
+      },
+    },
+  ],
   is_default: false,
   is_default_fleet_server: true,
   is_managed: false,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  id: 'default-fleet-server-agent-policy',
 };
-
-export const DEFAULT_AGENT_POLICIES_PACKAGES = [defaultPackages.System];

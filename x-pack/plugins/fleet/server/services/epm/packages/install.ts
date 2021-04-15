@@ -11,7 +11,6 @@ import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } fro
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
-import { defaultPackages } from '../../../../common';
 import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
   IngestManagerError,
@@ -34,44 +33,10 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import {
-  isRequiredPackage,
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
+import { isRequiredPackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
-
-export async function ensureInstalledDefaultPackages(
-  savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-): Promise<Installation[]> {
-  const installations = [];
-  const bulkResponse = await bulkInstallPackages({
-    savedObjectsClient,
-    packagesToInstall: Object.values(defaultPackages),
-    esClient,
-  });
-
-  for (const resp of bulkResponse) {
-    if (isBulkInstallError(resp)) {
-      throw resp.error;
-    } else {
-      installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
-    }
-  }
-
-  const retrievedInstallations = await Promise.all(installations);
-  return retrievedInstallations.map((installation, index) => {
-    if (!installation) {
-      throw new Error(`could not get installation ${bulkResponse[index].name}`);
-    }
-    return installation;
-  });
-}
 
 async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;

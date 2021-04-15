@@ -16,7 +16,6 @@ import type {
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
-  DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
@@ -37,7 +36,6 @@ import {
   dataTypes,
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
-  DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -108,39 +106,6 @@ class AgentPolicyService {
     }
 
     return (await this.get(soClient, id)) as AgentPolicy;
-  }
-
-  public async ensureDefaultAgentPolicy(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
-  ): Promise<{
-    created: boolean;
-    policy: AgentPolicy;
-  }> {
-    const searchParams = {
-      searchFields: ['is_default'],
-      search: 'true',
-    };
-    return await this.ensureAgentPolicy(soClient, esClient, DEFAULT_AGENT_POLICY, searchParams);
-  }
-
-  public async ensureDefaultFleetServerAgentPolicy(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
-  ): Promise<{
-    created: boolean;
-    policy: AgentPolicy;
-  }> {
-    const searchParams = {
-      searchFields: ['is_default_fleet_server'],
-      search: 'true',
-    };
-    return await this.ensureAgentPolicy(
-      soClient,
-      esClient,
-      DEFAULT_FLEET_SERVER_AGENT_POLICY,
-      searchParams
-    );
   }
 
   public async ensurePreconfiguredAgentPolicy(
@@ -553,11 +518,12 @@ class AgentPolicyService {
       throw new AgentPolicyDeletionError(`Cannot delete managed policy ${id}`);
     }
 
-    const {
-      policy: { id: defaultAgentPolicyId },
-    } = await this.ensureDefaultAgentPolicy(soClient, esClient);
-    if (id === defaultAgentPolicyId) {
+    if (agentPolicy.is_default) {
       throw new Error('The default agent policy cannot be deleted');
+    }
+
+    if (agentPolicy.is_default_fleet_server) {
+      throw new Error('The default fleet server agent policy cannot be deleted');
     }
 
     const { total } = await getAgentsByKuery(esClient, {

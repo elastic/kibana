@@ -83,7 +83,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
-            if (setupResponse.data.preconfigurationError) {
+            if (setupResponse.data?.preconfigurationError) {
               notifications.toasts.addError(setupResponse.data.preconfigurationError, {
                 title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
                   defaultMessage: 'Configuration error',

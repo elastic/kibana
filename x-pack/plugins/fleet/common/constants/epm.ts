@@ -9,16 +9,16 @@ export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
 
-export const FLEET_SERVER_PACKAGE = 'fleet_server';
-
 export const requiredPackages = {
   System: 'system',
   Endpoint: 'endpoint',
   ElasticAgent: 'elastic_agent',
+  FleetServer: 'fleet_server',
 } as const;
 
 // these are currently identical. we can separate if they later diverge
 export const defaultPackages = requiredPackages;
+export const DEFAULT_PACKAGES_NAMES = Object.values(defaultPackages);
 
 export const agentAssetTypes = {
   Input: 'input',

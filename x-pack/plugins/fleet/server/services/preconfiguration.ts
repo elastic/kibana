@@ -28,7 +28,7 @@ import { escapeSearchQueryPhrase } from './saved_object';
 
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
-import { ensureInstalledPackage } from './epm/packages/install';
+import { ensureInstalledPackage, ensurePackagesCompletedInstall } from './epm/packages/install';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -71,6 +71,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
     )
   );
+
+  // Keeping this outside of the Promise.all because it introduces a race condition.
+  // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
+  // On the next call to the /setup API, if there is a upgrade available for one of the required packages a race condition
+  // will occur between upgrading the package and reinstalling the previously failed package.
+  // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
+  // packages that are stuck in the installing state.
+  await ensurePackagesCompletedInstall(soClient, esClient);
 
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
