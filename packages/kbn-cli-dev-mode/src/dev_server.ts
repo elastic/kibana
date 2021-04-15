@@ -215,8 +215,8 @@ export class DevServer {
         // handle graceful shutdown requests
         const triggerGracefulShutdown$ = gracefulShutdown$.pipe(
           mergeMap(() => {
-            // signal to the process that it should exit
-            proc.kill('SIGINT');
+            // no need to signal to the process that it should exit. execa already does that for us.
+            // proc.kill('SIGINT');
 
             // if the timer fires before exit$ we will send SIGINT
             return Rx.timer(this.gracefulTimeout).pipe(
