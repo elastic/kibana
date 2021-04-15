@@ -54,13 +54,7 @@
               "lineNumber": 55
             },
             "signature": [
-              {
-                "pluginId": "inspector",
-                "scope": "public",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-public.InspectorViewRegistry",
-                "text": "InspectorViewRegistry"
-              },
+              "InspectorViewRegistry",
               " | undefined"
             ]
           },
@@ -74,6 +68,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -123,18 +118,13 @@
                 "text": "InspectorViewDescription"
               },
               ") => void; __LEGACY: { views: ",
-              {
-                "pluginId": "inspector",
-                "scope": "public",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-public.InspectorViewRegistry",
-                "text": "InspectorViewRegistry"
-              },
+              "InspectorViewRegistry",
               "; }; }"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -211,6 +201,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -304,13 +295,7 @@
             "label": "start",
             "signature": [
               "(name: string, params?: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.RequestParams",
-                "text": "RequestParams"
-              },
+              "RequestParams",
               ") => ",
               {
                 "pluginId": "inspector",
@@ -325,6 +310,7 @@
             ],
             "children": [
               {
+                "id": "def-public.RequestAdapter.start.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -340,17 +326,12 @@
                 }
               },
               {
+                "id": "def-public.RequestAdapter.start.$2",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.RequestParams",
-                    "text": "RequestParams"
-                  }
+                  "RequestParams"
                 ],
                 "description": [],
                 "source": {
@@ -396,6 +377,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestAdapter.resetRequest.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -422,13 +404,7 @@
             "label": "getRequests",
             "signature": [
               "() => ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Request",
-                "text": "Request"
-              },
+              "Request",
               "[]"
             ],
             "description": [],
@@ -466,17 +442,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.Unnamed.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Request",
-                    "text": "Request"
-                  }
+                  "Request"
                 ],
                 "description": [],
                 "source": {
@@ -485,6 +456,7 @@
                 }
               },
               {
+                "id": "def-public.RequestResponder.Unnamed.$2",
                 "type": "Function",
                 "label": "onChange",
                 "isRequired": true,
@@ -522,6 +494,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.json.$1",
                 "type": "Uncategorized",
                 "label": "reqJson",
                 "isRequired": true,
@@ -567,6 +540,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.stats.$1",
                 "type": "Object",
                 "label": "stats",
                 "isRequired": true,
@@ -607,18 +581,13 @@
                 "text": "RequestStatus"
               },
               ", response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.finish.$1",
                 "type": "Enum",
                 "label": "status",
                 "isRequired": true,
@@ -638,17 +607,12 @@
                 }
               },
               {
+                "id": "def-public.RequestResponder.finish.$2",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
@@ -670,29 +634,18 @@
             "label": "ok",
             "signature": [
               "(response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.ok.$1",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
@@ -714,29 +667,18 @@
             "label": "error",
             "signature": [
               "(response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.error.$1",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
@@ -1196,13 +1138,7 @@
           },
           "signature": [
             "{ views: ",
-            {
-              "pluginId": "inspector",
-              "scope": "public",
-              "docId": "kibInspectorPluginApi",
-              "section": "def-public.InspectorViewRegistry",
-              "text": "InspectorViewRegistry"
-            },
+            "InspectorViewRegistry",
             "; }"
           ]
         }
@@ -1350,13 +1286,7 @@
             "label": "start",
             "signature": [
               "(name: string, params?: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.RequestParams",
-                "text": "RequestParams"
-              },
+              "RequestParams",
               ") => ",
               {
                 "pluginId": "inspector",
@@ -1371,6 +1301,7 @@
             ],
             "children": [
               {
+                "id": "def-common.RequestAdapter.start.$1",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1386,17 +1317,12 @@
                 }
               },
               {
+                "id": "def-common.RequestAdapter.start.$2",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.RequestParams",
-                    "text": "RequestParams"
-                  }
+                  "RequestParams"
                 ],
                 "description": [],
                 "source": {
@@ -1442,6 +1368,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestAdapter.resetRequest.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1468,13 +1395,7 @@
             "label": "getRequests",
             "signature": [
               "() => ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Request",
-                "text": "Request"
-              },
+              "Request",
               "[]"
             ],
             "description": [],
@@ -1512,17 +1433,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.Unnamed.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Request",
-                    "text": "Request"
-                  }
+                  "Request"
                 ],
                 "description": [],
                 "source": {
@@ -1531,6 +1447,7 @@
                 }
               },
               {
+                "id": "def-common.RequestResponder.Unnamed.$2",
                 "type": "Function",
                 "label": "onChange",
                 "isRequired": true,
@@ -1568,6 +1485,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.json.$1",
                 "type": "Uncategorized",
                 "label": "reqJson",
                 "isRequired": true,
@@ -1613,6 +1531,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.stats.$1",
                 "type": "Object",
                 "label": "stats",
                 "isRequired": true,
@@ -1653,18 +1572,13 @@
                 "text": "RequestStatus"
               },
               ", response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.finish.$1",
                 "type": "Enum",
                 "label": "status",
                 "isRequired": true,
@@ -1684,17 +1598,12 @@
                 }
               },
               {
+                "id": "def-common.RequestResponder.finish.$2",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
@@ -1716,29 +1625,18 @@
             "label": "ok",
             "signature": [
               "(response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.ok.$1",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
@@ -1760,29 +1658,18 @@
             "label": "error",
             "signature": [
               "(response: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Response",
-                "text": "Response"
-              },
+              "Response",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.error.$1",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Response",
-                    "text": "Response"
-                  }
+                  "Response"
                 ],
                 "description": [],
                 "source": {
