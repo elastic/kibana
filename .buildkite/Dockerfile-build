@@ -1,4 +1,4 @@
 ARG BASE_IMAGE=kibana-bk-ci
 FROM ${BASE_IMAGE}
 
-RUN .buildkite/scripts/default-build.sh
+RUN .buildkite/scripts/build_kibana_inside_docker.sh

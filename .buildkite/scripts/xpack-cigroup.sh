@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source "$(dirname "${0}")/env.sh"
+# source "$(dirname "${0}")/env.sh"
 
 export JOB=kibana-default-ciGroup${CI_GROUP}
 

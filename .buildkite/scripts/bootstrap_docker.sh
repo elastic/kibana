@@ -4,8 +4,6 @@ set -euo pipefail
 
 export DOCKER_BUILDKIT=1
 
-gcloud auth configure-docker us-central1-docker.pkg.dev,gcr.io,us.gcr.io --quiet # TODO remove
-
 # docker build -t "us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT" -f .buildkite/Dockerfile . --progress plain
 # docker push "us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT"
 

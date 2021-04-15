@@ -25,16 +25,25 @@ steps:
           # mount-checkout: false
     parallelism: 2
     timeout_in_minutes: 120
-  - command: |
-      export DOCKER_BUILDKIT=1 && \
-      gcloud auth configure-docker us-central1-docker.pkg.dev,gcr.io,us.gcr.io --quiet && \
-      docker build -t us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .buildkite/Dockerfile-build --build-arg BASE_IMAGE=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:$BUILDKITE_COMMIT . --progress plain && \
-      docker push us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT
+  - command: .buildkite/scripts/build_kibana_docker.sh
     agents:
       queue: bootstrap
     key: default-build
   - command: 'CI_GROUP=1 .buildkite/scripts/xpack-cigroup.sh'
     label: 'Default CI Group 1'
+    agents:
+      queue: ci-group
+    artifact_paths: target/junit/**/*.xml
+    plugins:
+      - docker#v3.8.0:
+          image: 'us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/default-build:$BUILDKITE_COMMIT'
+          propagate-environment: true
+          volumes:
+            - './.git:/var/lib/kibana/workspace/kibana/.git'
+          # mount-checkout: false
+    depends_on: default-build
+  - command: 'CI_GROUP=2 .buildkite/scripts/xpack-cigroup.sh'
+    label: 'Default CI Group 2'
     agents:
       queue: ci-group
     artifact_paths: target/junit/**/*.xml
