@@ -23437,7 +23437,6 @@
     "xpack.uptime.synthetics.waterfall.resource.externalLink": "在新选项卡中打开资源",
     "xpack.uptime.synthetics.waterfall.searchBox.placeholder": "筛选网络请求",
     "xpack.uptime.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel": "资源匹配筛选",
-    "xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed": "已下载字节 (压缩) ",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate": "失效日期",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate": "有效起始日期",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer": "颁发者",
