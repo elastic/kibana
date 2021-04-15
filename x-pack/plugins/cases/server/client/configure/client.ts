@@ -43,8 +43,8 @@ interface ConfigurationGetMappings {
  * Defines the internal helper functions.
  */
 export interface InternalConfigureSubClient {
-  getFields(args: ConfigurationGetFields): Promise<GetFieldsResponse>;
-  getMappings(args: ConfigurationGetMappings): Promise<ConnectorMappingsAttributes[]>;
+  getFields(params: ConfigurationGetFields): Promise<GetFieldsResponse>;
+  getMappings(params: ConfigurationGetMappings): Promise<ConnectorMappingsAttributes[]>;
 }
 
 /**
@@ -62,21 +62,13 @@ export interface ConfigureSubClient {
  * configurations.
  */
 export const createInternalConfigurationSubClient = (
-  args: CasesClientArgs,
+  clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): InternalConfigureSubClient => {
-  const { savedObjectsClient, connectorMappingsService, logger, actionsClient } = args;
-
   const configureSubClient: InternalConfigureSubClient = {
-    getFields: (fields: ConfigurationGetFields) => getFields({ ...fields, actionsClient }),
+    getFields: (params: ConfigurationGetFields) => getFields(params, clientArgs),
     getMappings: (params: ConfigurationGetMappings) =>
-      getMappings({
-        ...params,
-        savedObjectsClient,
-        connectorMappingsService,
-        casesClientInternal,
-        logger,
-      }),
+      getMappings(params, clientArgs, casesClientInternal),
   };
 
   return Object.freeze(configureSubClient);

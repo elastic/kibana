@@ -6,12 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   CasesFindResponse,
   CasesFindRequest,
@@ -23,38 +21,25 @@ import {
 } from '../../../common/api';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CaseService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
-import { Authorization } from '../../authorization/authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { AuthorizationFilter, Operations } from '../../authorization';
-import { AuditLogger } from '../../../../security/server';
 import { createAuditMsg, transformCases } from '../../common';
-
-interface FindParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseService;
-  logger: Logger;
-  auth: PublicMethodsOf<Authorization>;
-  options: CasesFindRequest;
-  auditLogger?: AuditLogger;
-}
+import { CasesClientArgs } from '..';
 
 /**
  * Retrieves a case and optionally its comments and sub case comments.
  */
-export const find = async ({
-  savedObjectsClient,
-  caseService,
-  logger,
-  auth,
-  auditLogger,
-  options,
-}: FindParams): Promise<CasesFindResponse> => {
+export const find = async (
+  params: CasesFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<CasesFindResponse> => {
+  const { savedObjectsClient, caseService, authorization: auth, auditLogger, logger } = clientArgs;
+
   try {
     const queryParams = pipe(
-      excess(CasesFindRequestRt).decode(options),
+      excess(CasesFindRequestRt).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -142,7 +127,7 @@ export const find = async ({
     );
   } catch (error) {
     throw createCaseError({
-      message: `Failed to find cases: ${JSON.stringify(options)}: ${error}`,
+      message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,
       error,
       logger,
     });

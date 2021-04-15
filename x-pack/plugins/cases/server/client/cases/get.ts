@@ -6,34 +6,28 @@
  */
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import { CaseResponseRt, CaseResponse, ESCaseAttributes, User, UsersRt } from '../../../common/api';
-import { CaseService } from '../../services';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 
 interface GetParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseService;
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
-  logger: Logger;
 }
 
 /**
  * Retrieves a case and optionally its comments and sub case comments.
  */
-export const get = async ({
-  savedObjectsClient,
-  caseService,
-  id,
-  logger,
-  includeComments = false,
-  includeSubCaseComments = false,
-}: GetParams): Promise<CaseResponse> => {
+export const get = async (
+  { id, includeComments, includeSubCaseComments }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<CaseResponse> => {
+  const { savedObjectsClient, caseService, logger } = clientArgs;
+
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
       throw Boom.badRequest(

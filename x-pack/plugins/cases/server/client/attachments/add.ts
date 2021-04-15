@@ -286,15 +286,13 @@ async function getCombinedCase({
 interface AddCommentArgs {
   caseId: string;
   comment: CommentRequest;
-  casesClientInternal: CasesClientInternal;
 }
 
-export const addComment = async ({
-  caseId,
-  comment,
-  casesClientInternal,
-  ...rest
-}: AddCommentArgs & CasesClientArgs): Promise<CaseResponse> => {
+export const addComment = async (
+  { caseId, comment }: AddCommentArgs,
+  clientArgs: CasesClientArgs,
+  casesClientInternal: CasesClientInternal
+): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -307,7 +305,7 @@ export const addComment = async ({
     attachmentService,
     user,
     logger,
-  } = rest;
+  } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
     if (!ENABLE_CASE_CONNECTOR) {
