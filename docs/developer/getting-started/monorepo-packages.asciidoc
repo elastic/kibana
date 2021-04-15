@@ -65,4 +65,5 @@ yarn kbn watch-bazel
 - @kbn/apm-utils
 - @kbn/config-schema
 - @kbn/tinymath
+- @kbn/utility-types
 

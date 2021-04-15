@@ -932,6 +932,7 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
 //
 // @public
 export interface NavigateToAppOptions {
+    openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
     state?: unknown;
