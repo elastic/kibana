@@ -485,7 +485,8 @@ export const getMlJobMetrics = async (
 };
 
 export const getDetectionRuleMetrics = async (
-  index: string,
+  kibanaIndex: string,
+  signalsIndex: string,
   esClient: ElasticsearchClient,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionRuleAdoption> => {
@@ -494,7 +495,7 @@ export const getDetectionRuleMetrics = async (
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: [],
     ignoreUnavailable: true,
-    index,
+    index: kibanaIndex,
     size: 10_000,
   };
 
@@ -505,7 +506,7 @@ export const getDetectionRuleMetrics = async (
 
     // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
     ({ body: detectionAlertsResp } = await esClient.search({
-      index: '.siem-signals-pjhampton-default', // TODO:PH pass in siem-sigs index
+      index: signalsIndex,
       size: 0,
       body: {
         aggs: {
