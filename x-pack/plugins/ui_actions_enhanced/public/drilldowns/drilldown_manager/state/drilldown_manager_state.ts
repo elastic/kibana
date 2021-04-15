@@ -179,6 +179,7 @@ export class DrilldownManagerState {
    * Change the screen of Drilldown Manager.
    */
   public setRoute(route: string[]): void {
+    if (route[0] === 'manage') this.deps.closeAfterCreate = false;
     this.route$.next(route);
   }
 
