@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const filterEmptyQueries = (queries: string[]) => {
-  return queries.filter((query) => query.length);
+export const filterEmptyValues = (values: string[]) => {
+  return values.filter((value) => value.length);
 };
