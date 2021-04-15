@@ -29,6 +29,7 @@ export class AlertingBuiltinsPlugin
       name: 'stack-alerts',
       fieldMap: {
         'kibana.rac.alert.value': { type: 'float' },
+        'kibana.rac.alert.threshold': { type: 'float' },
       },
     });
 

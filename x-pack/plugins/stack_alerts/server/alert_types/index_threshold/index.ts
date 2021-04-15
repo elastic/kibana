@@ -56,7 +56,7 @@ export function register(registerParams: RegisterAlertTypesParams) {
         const {
           rule,
           params,
-          services: { alertWithThreshold, metricWithThreshold, logger, scopedClusterClient },
+          services: { writeRuleAlert, writeRuleMetric, logger, scopedClusterClient },
         } = options;
 
         const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -111,10 +111,11 @@ export function register(registerParams: RegisterAlertTypesParams) {
           // This would be considered "extra documents [which] are typically immutable and provide
           // extra details for the Alert"
           // This will show up in the alerts-as-data index as event.kind: "metric"
-          metricWithThreshold({
+          writeRuleMetric({
             id: instanceId,
             fields: {
               'kibana.rac.alert.value': value,
+              'kibana.rac.alert.threshold': params.threshold[0],
             },
           });
 
@@ -134,10 +135,11 @@ export function register(registerParams: RegisterAlertTypesParams) {
             conditions: humanFn,
           };
           const actionContext = addMessages(rule.name, baseContext, params);
-          alertWithThreshold({
+          writeRuleAlert({
             id: instanceId,
             fields: {
               'kibana.rac.alert.value': value,
+              'kibana.rac.alert.threshold': params.threshold[0],
             },
           }).scheduleActions(IndexThreshold.RuleTypeActionGroupId, actionContext);
           logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);

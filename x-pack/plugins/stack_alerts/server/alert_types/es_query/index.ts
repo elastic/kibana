@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { RegisterAlertTypesParams } from '..';
-import { createLifecycleRuleType } from '../../types';
+import { createThresholdRuleType } from '../../types';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import * as EsQuery from './alert_type';
@@ -25,7 +25,7 @@ import { buildSortedEventsQuery } from '../../../common/build_sorted_events_quer
 export function register(registerParams: RegisterAlertTypesParams) {
   const { registry } = registerParams;
   registry.registerType(
-    createLifecycleRuleType({
+    createThresholdRuleType({
       id: EsQuery.ID,
       name: EsQuery.RuleTypeName,
       actionGroups: [{ id: EsQuery.RuleTypeActionGroupId, name: EsQuery.RuleTypeActionGroupName }],
@@ -59,7 +59,13 @@ export function register(registerParams: RegisterAlertTypesParams) {
           rule,
           params,
           state,
-          services: { alertInstanceFactory, logger, scopedClusterClient },
+          services: {
+            writeRuleAlert,
+            writeRuleMetric,
+            writeRuleEvents,
+            logger,
+            scopedClusterClient,
+          },
         } = options;
         const previousTimestamp =
           state && state.latestTimestamp ? (state.latestTimestamp as string) : undefined;
@@ -125,9 +131,24 @@ export function register(registerParams: RegisterAlertTypesParams) {
         );
 
         const { body: searchResult } = await esClient.search(query);
+        const numMatches =
+          searchResult.hits.hits.length > 0
+            ? (searchResult.hits.total as estypes.TotalHits).value
+            : 0;
 
-        if (searchResult.hits.hits.length > 0) {
-          const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
+        // According to the issue description for https://github.com/elastic/kibana/issues/93728
+        // This would be considered "extra documents [which] are typically immutable and provide
+        // extra details for the Alert"
+        // This will show up in the alerts-as-data index as event.kind: "metric"
+        writeRuleMetric({
+          id: EsQuery.ConditionMetAlertInstanceId,
+          fields: {
+            'kibana.rac.alert.value': numMatches,
+            'kibana.rac.alert.threshold': params.threshold[0],
+          },
+        });
+
+        if (numMatches > 0) {
           logger.debug(
             `alert ${EsQuery.ID}:${rule.uuid} "${rule.name}" query has ${numMatches} matches`
           );
@@ -154,11 +175,24 @@ export function register(registerParams: RegisterAlertTypesParams) {
             };
 
             const actionContext = addMessages(rule.name, baseContext, params);
-            const alertInstance = alertInstanceFactory(EsQuery.ConditionMetAlertInstanceId);
-            alertInstance
+            writeRuleAlert({
+              id: EsQuery.ConditionMetAlertInstanceId,
+              fields: {
+                'kibana.rac.alert.value': numMatches,
+                'kibana.rac.alert.threshold': params.threshold[0],
+              },
+            })
               // store the params we would need to recreate the query that led to this alert instance
               .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
               .scheduleActions(EsQuery.RuleTypeActionGroupId, actionContext);
+
+            // This will show up in the alerts-as-data index as event.kind: "event"
+            // and contain a copy of the source document, with basic alerts-as-data fields appended
+            writeRuleEvents({
+              events: searchResult.hits.hits,
+              id: EsQuery.ConditionMetAlertInstanceId,
+              fields: {},
+            });
 
             // update the timestamp based on the current search results
             const firstValidTimefieldSort = getValidTimefieldSort(

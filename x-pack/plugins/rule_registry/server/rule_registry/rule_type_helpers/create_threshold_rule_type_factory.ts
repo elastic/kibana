@@ -5,33 +5,36 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { omit } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
-import v4 from 'uuid/v4';
+import { flatten } from 'lodash';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
 import { DefaultFieldMap } from '../defaults/field_map';
 import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
-import { PrepopulatedRuleEventFields } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
-
-type UserDefinedAlertFields<TFieldMap extends DefaultFieldMap> = Omit<
-  OutputOfFieldMap<TFieldMap>,
-  PrepopulatedRuleEventFields | 'kibana.rac.alert.id' | 'kibana.rac.alert.uuid' | '@timestamp'
->;
+import {
+  generateEventsFromAlerts,
+  UserDefinedAlertFields,
+} from './lib/generate_events_from_alerts';
 
 type ThresholdAlertService<
   TFieldMap extends DefaultFieldMap,
   TActionVariable extends ActionVariable
-> = (alert: {
+> = (data: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
 }) => AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>;
 
-type ThresholdMetricService<TFieldMap extends DefaultFieldMap> = (alert: {
+type ThresholdMetricService<TFieldMap extends DefaultFieldMap> = (data: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
+}) => void;
+
+type ThresholdEventsService<TFieldMap extends DefaultFieldMap> = (data: {
+  id: string;
+  fields: UserDefinedAlertFields<TFieldMap>;
+  events: any[];
 }) => void;
 
 type CreateThresholdRuleType<TFieldMap extends DefaultFieldMap> = <
@@ -43,8 +46,9 @@ type CreateThresholdRuleType<TFieldMap extends DefaultFieldMap> = <
     TRuleParams,
     TActionVariable,
     {
-      alertWithThreshold: ThresholdAlertService<TFieldMap, TActionVariable>;
-      metricWithThreshold: ThresholdMetricService<TFieldMap>;
+      writeRuleAlert: ThresholdAlertService<TFieldMap, TActionVariable>;
+      writeRuleMetric: ThresholdMetricService<TFieldMap>;
+      writeRuleEvents: ThresholdEventsService<TFieldMap>;
     }
   >
 ) => RuleType<TFieldMap, TRuleParams, TActionVariable>;
@@ -96,6 +100,11 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
+        const currentEvents: Record<
+          string,
+          Array<UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }>
+        > = {};
+
         const timestamp = options.startedAt.toISOString();
 
         const nextWrappedState = await type.executor({
@@ -103,143 +112,56 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           state: state.wrapped,
           services: {
             ...options.services,
-            alertWithThreshold: ({ id, fields }) => {
-              currentAlerts[id] = {
-                ...fields,
-                'kibana.rac.alert.id': id,
-              };
+            writeRuleAlert: ({ id, fields }) => {
+              // currentAlerts[id] = {
+              //   ...fields,
+              //   'kibana.rac.alert.id': id,
+              // };
               return alertInstanceFactory(id);
             },
-            metricWithThreshold: ({ id, fields }) => {
+            writeRuleMetric: ({ id, fields }) => {
               currentMetrics[id] = {
                 ...fields,
                 'kibana.rac.alert.id': id,
               };
             },
+            writeRuleEvents: ({ id, fields, events }) => {
+              currentEvents[id] = (events || []).map((event) => ({
+                ...event._source,
+                ...fields,
+                'kibana.rac.alert.id': `${id}-${event._id}`,
+              }));
+            },
           },
         });
 
-        const currentAlertIds = Object.keys(currentAlerts);
-        const trackedAlertIds = Object.keys(state.trackedAlerts);
-        const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
-
-        const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
-
-        const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-          (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
-        );
-
-        logger.info(
-          `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
-        );
-
-        const alertsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {
-          ...currentAlerts,
-        };
-
-        const metricsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {
-          ...currentMetrics,
-        };
-
-        if (scopedRuleRegistryClient && trackedAlertStatesOfRecovered.length) {
-          const { events } = await scopedRuleRegistryClient.search({
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        'rule.uuid': rule.uuid,
-                      },
-                    },
-                    {
-                      terms: {
-                        'kibana.rac.alert.uuid': trackedAlertStatesOfRecovered.map(
-                          (trackedAlertState) => trackedAlertState.alertUuid
-                        ),
-                      },
-                    },
-                  ],
-                },
-              },
-              size: trackedAlertStatesOfRecovered.length,
-              collapse: {
-                field: 'kibana.rac.alert.uuid',
-              },
-              _source: false,
-              fields: ['*'],
-              sort: {
-                '@timestamp': 'desc' as const,
-              },
+        const { eventsToIndex: alertsToIndex, alertsToTrack } = await generateEventsFromAlerts({
+          logger,
+          ruleUuid: rule.uuid,
+          startedAt: options.startedAt,
+          scopedRuleRegistryClient,
+          currentAlerts,
+          trackedAlerts: state.trackedAlerts,
+          lifecycleEventMap: {
+            'event.kind': 'alert',
+            new: {
+              'event.action': 'new',
             },
-          });
-
-          logger.info(`trackedStateEvents: ${JSON.stringify(events)}`);
-
-          events.forEach((event) => {
-            const alertId = event['kibana.rac.alert.id']!;
-            alertsDataMap[alertId] = omit(event, 'kibana.rac.alert.value');
-          });
-        }
-
-        const alertsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = allAlertIds.map(
-          (alertId) => {
-            const alertData = alertsDataMap[alertId];
-
-            if (!alertData) {
-              logger.warn(`Could not find alert data for ${alertId}`);
-            }
-
-            const event: OutputOfFieldMap<DefaultFieldMap> = {
-              ...alertData,
-              '@timestamp': timestamp,
-              'event.kind': 'alert',
-              'kibana.rac.alert.id': alertId,
-            };
-
-            const isNew = !state.trackedAlerts[alertId];
-            const isRecovered = !currentAlerts[alertId];
-            const isActiveButNotNew = !isNew && !isRecovered;
-            const isActive = !isRecovered;
-
-            const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-              alertUuid: v4(),
-              started: timestamp,
-            };
-
-            event['kibana.rac.alert.start'] = started;
-            event['kibana.rac.alert.uuid'] = alertUuid;
-
-            if (isNew) {
-              event['event.action'] = 'new';
-            }
-
-            if (isRecovered) {
-              event['kibana.rac.alert.end'] = timestamp;
-              event['event.action'] = 'recovered';
-              event['kibana.rac.alert.status'] = 'recovered';
-            }
-
-            if (isActiveButNotNew) {
-              event['event.action'] = 'active';
-            }
-
-            if (isActive) {
-              event['kibana.rac.alert.status'] = 'active';
-            }
-
-            event['kibana.rac.alert.duration.us'] =
-              (options.startedAt.getTime() - new Date(event['kibana.rac.alert.start']!).getTime()) *
-              1000;
-
-            return event;
-          }
-        );
+            recovered: {
+              'event.action': 'recovered',
+              'kibana.rac.alert.status': 'recovered',
+            },
+            active: {
+              'event.action': 'active',
+              'kibana.rac.alert.status': 'active',
+            },
+          },
+        });
 
         const metricsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = Object.keys(
           currentMetrics
         ).map((alertId) => {
-          const alertData = metricsDataMap[alertId];
+          const alertData = currentMetrics[alertId];
 
           if (!alertData) {
             logger.warn(`Could not find alert data for ${alertId}`);
@@ -253,28 +175,31 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           };
         });
 
-        const eventsToIndex = [...alertsToIndex, ...metricsToIndex];
+        const eventsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = flatten(
+          Object.keys(currentEvents).map((alertId) => {
+            const alertData = currentEvents[alertId];
 
-        if (eventsToIndex.length && scopedRuleRegistryClient) {
-          await scopedRuleRegistryClient.bulkIndex(eventsToIndex);
-        }
+            if (!alertData) {
+              logger.warn(`Could not find alert data for ${alertId}`);
+            }
 
-        const nextTrackedAlerts = Object.fromEntries(
-          alertsToIndex
-            .filter((event) => event['kibana.rac.alert.status'] !== 'recovered')
-            .map((event) => {
-              const alertId = event['kibana.rac.alert.id']!;
-              const alertUuid = event['kibana.rac.alert.uuid']!;
-              const started = new Date(event['kibana.rac.alert.start']!).toISOString();
-              return [alertId, { alertId, alertUuid, started }];
-            })
+            return alertData.map((data) => ({
+              ...data,
+              '@timestamp': options.startedAt.toISOString(),
+              'event.kind': 'event',
+            }));
+          })
         );
 
-        logger.info(`nextTrackedAlerts ${JSON.stringify(nextTrackedAlerts)}`);
+        const toIndex = [...alertsToIndex, ...metricsToIndex, ...eventsToIndex];
+
+        if (toIndex.length && scopedRuleRegistryClient) {
+          await scopedRuleRegistryClient.bulkIndex(toIndex);
+        }
 
         return {
           wrapped: nextWrappedState,
-          trackedAlerts: nextTrackedAlerts,
+          trackedAlerts: alertsToTrack,
         };
       },
     };
