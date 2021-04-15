@@ -78,7 +78,7 @@ export function Filtering({
               <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                  <EuiFlexItem  grow={true}>
+                  <EuiFlexItem grow={true}>
                     <EuiLink
                       className="lnsFiltersOperation__popoverButton"
                       data-test-subj="indexPattern-filters-existingFilterTrigger"

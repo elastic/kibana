@@ -155,6 +155,7 @@ export function LayerPanels(
                 defaultMessage: 'Add layer',
               })}
               fill
+              color="text"
               onClick={() => {
                 const id = generateId();
                 dispatch({
