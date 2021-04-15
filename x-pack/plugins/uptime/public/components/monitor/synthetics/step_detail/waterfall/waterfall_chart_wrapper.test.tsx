@@ -136,6 +136,7 @@ describe('WaterfallChartWrapper', () => {
     );
 
     expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
@@ -168,6 +169,7 @@ describe('WaterfallChartWrapper', () => {
     );
 
     expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
