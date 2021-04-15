@@ -211,7 +211,9 @@ export class DrilldownManagerState {
         factory: actionFactory,
         placeTriggers: this.deps.triggers,
         placeContext: this.deps.placeContext || {},
-        name: !!oldDrilldownState ? oldDrilldownState.name$.getValue() : '',
+        name: !!oldDrilldownState
+          ? oldDrilldownState.name$.getValue()
+          : actionFactory.getDisplayName(this.getActionFactoryContext()),
         triggers: [],
         config: actionFactory.createConfig(context),
       });
