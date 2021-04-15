@@ -45,6 +45,7 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
+  FullAgentPolicyOutputPermissions,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
@@ -58,6 +59,22 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+const DEFAULT_PERMISSIONS = {
+  cluster: ['monitor'],
+  indices: [
+    {
+      names: [
+        'logs-*',
+        'metrics-*',
+        'traces-*',
+        'synthetics-*',
+        '.logs-endpoint.diagnostic.collection-*',
+      ],
+      privileges: ['auto_configure', 'create_doc'],
+    },
+  ],
+};
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -745,30 +762,28 @@ class AgentPolicyService {
           }),
     };
 
+    const hasTightPermissions = appContextService.getConfig()?.agents.agentPolicyTightPermissions;
+    let permissions: FullAgentPolicyOutputPermissions;
+
+    if (hasTightPermissions) {
+      permissions = {
+        _fallback: DEFAULT_PERMISSIONS,
+      };
+    } else {
+      permissions = {
+        _fallback: DEFAULT_PERMISSIONS,
+      };
+    }
+
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
-    >((permissions, outputName) => {
+    >((outputPermissions, outputName) => {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
-        permissions[outputName] = {};
-        permissions[outputName]._fallback = {
-          cluster: ['monitor'],
-          indices: [
-            {
-              names: [
-                'logs-*',
-                'metrics-*',
-                'traces-*',
-                '.logs-endpoint.diagnostic.collection-*',
-                'synthetics-*',
-              ],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
-        };
+        outputPermissions[outputName] = permissions;
       }
-      return permissions;
+      return outputPermissions;
     }, {});
 
     // only add settings if not in standalone
