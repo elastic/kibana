@@ -59,7 +59,6 @@ import {
   registerSetupRoutes,
   registerAgentAPIRoutes,
   registerEnrollmentApiKeyRoutes,
-  registerInstallScriptRoutes,
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
@@ -276,21 +275,8 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
-        if (!isESOCanEncrypt) {
-          if (this.logger) {
-            this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-            );
-          }
-        } else {
-          registerAgentAPIRoutes(routerSuperuserOnly, config);
-          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
-          registerInstallScriptRoutes({
-            router: routerSuperuserOnly,
-            basePath: core.http.basePath,
-          });
-        }
+        registerAgentAPIRoutes(routerSuperuserOnly, config);
+        registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
       }
     }
   }

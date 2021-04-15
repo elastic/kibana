@@ -51,7 +51,6 @@ import {
   AgentPolicyDeletionError,
   IngestManagerError,
 } from '../errors';
-import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -766,15 +765,6 @@ class AgentPolicyService {
       if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
         fullAgentPolicy.fleet = {
           hosts: settings.fleet_server_hosts,
-        };
-      } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-      else {
-        if (!settings.kibana_urls || !settings.kibana_urls.length)
-          throw new Error('kibana_urls is missing');
-
-        fullAgentPolicy.fleet = {
-          hosts: settings.kibana_urls,
-          kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
         };
       }
     }
