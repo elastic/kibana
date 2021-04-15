@@ -77,26 +77,22 @@ export function createPersistenceRuleTypeFactory(): CreatePersistenceRuleType<De
                 },
                 ignore_unavailable: true,
               });
-              // console.log('FOUND EVENT');
-              // console.log(JSON.stringify(body.hits.hits[0]));
               return body.hits.hits
                 .map((event) => event._source!)
                 .map((event) => {
-                  // console.log(JSON.stringify(event));
                   const alertUuid = event['kibana.rac.alert.uuid'];
                   const isAlert = alertUuid != null;
                   return {
                     ...event,
-                    event: {
-                      action: event['event.action'],
-                      kind: 'signal',
-                    },
+                    'event.kind': 'signal',
                     'kibana.rac.alert.id': '???',
                     'kibana.rac.alert.uuid': v4(),
                     'kibana.rac.alert.ancestors': isAlert
                       ? (event['kibana.rac.alert.ancestors'] ?? []).concat([alertUuid!])
                       : [],
-                    'kibana.rac.alert.depth': isAlert ? event['kibana.rac.alert.depth']! + 1 : 0,
+                    'kibana.rac.alert.depth': isAlert
+                      ? (event['kibana.rac.alert.depth'] ?? 0) + 1
+                      : 0,
                     '@timestamp': timestamp,
                   };
                 });
