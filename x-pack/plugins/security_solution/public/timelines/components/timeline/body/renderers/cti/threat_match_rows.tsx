@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import { get } from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
 import { Fields } from '../../../../../../../common/search_strategy';
@@ -26,13 +27,11 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) 
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
       <SpacedContainer>
         {indicators.map((indicator, index) => (
-          <ThreatMatchRow
-            // index should be replaced with matched.id when it is available
-            key={`threat-match-row-${eventId}-${index}`}
-            data={indicator}
-            eventId={eventId}
-            timelineId={timelineId}
-          />
+          // index should be replaced with matched.id when it is available
+          <Fragment key={`threat-match-row-${eventId}-${index}`}>
+            <ThreatMatchRow data={indicator} eventId={eventId} timelineId={timelineId} />
+            {index < indicators.length - 1 && <EuiHorizontalRule margin="s" size="half" />}
+          </Fragment>
         ))}
       </SpacedContainer>
     </RowRendererContainer>
