@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker']);
-  const retry = getService('retry');
   const toasts = getService('toasts');
 
   describe('Search session example', () => {
