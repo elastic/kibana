@@ -44,18 +44,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      // await logTypes('BEFORE empty kibana');
       await esArchiver.load('empty_kibana');
-      // await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      // await logTypes('AFTER empty kibana');
-
       await kibanaServer.importExport.load(
         'discover',
         { space: undefined },
         // @ts-ignore
         logTypes('### Discover Test')
       );
-      // await logTypes('AFTER empty kibnana and load');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
