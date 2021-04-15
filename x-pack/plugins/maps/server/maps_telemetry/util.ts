@@ -195,24 +195,32 @@ export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
   [key in SCALING_TYPES]?: ClusterCountStats;
 };
 
+function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | null {
+  if (
+    !layerDescriptor.sourceDescriptor ||
+    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
+    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
+  ) {
+    return null;
+  }
+
+  return (layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType;
+}
+
 function getScalingOptionsPerMap(
   layerDescriptors: LayerDescriptor[]
 ): TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP {
   const counts: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP = {};
   layerDescriptors.forEach((layerDescriptor: LayerDescriptor) => {
-    if (
-      !layerDescriptor.sourceDescriptor ||
-      layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
-      !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
-    ) {
+    const scalingOption = getScalingOption(layerDescriptor);
+    if (!scalingOption) {
       return;
     }
 
-    const searchSourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
-    if (!counts[searchSourceDescriptor.scalingType]) {
-      counts[searchSourceDescriptor.scalingType] = 1;
+    if (!counts[scalingOption]) {
+      counts[scalingOption] = 1;
     } else {
-      (counts[searchSourceDescriptor.scalingType] as number) += 1;
+      (counts[scalingOption] as number) += 1;
     }
   });
   return counts;
