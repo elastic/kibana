@@ -73,6 +73,11 @@ export interface PublicDrilldownManagerProps {
    * drilldown creation flow.
    */
   templates?: DrilldownTemplate[];
+
+  /**
+   * Whether to close the drilldown flyout after a drilldown was created
+   */
+  closeAfterCreate?: boolean;
 }
 
 /**

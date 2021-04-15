@@ -282,7 +282,11 @@ export class DrilldownManagerState {
         text: toastDrilldownCreated.text,
       });
       this.drilldownStateByFactoryId.delete(drilldownState.factory.id);
-      this.setRoute(['manage']);
+      if (this.deps.closeAfterCreate) {
+        this.deps.onClose();
+      } else {
+        this.setRoute(['manage']);
+      }
     } catch (error) {
       toastService.addError(error, {
         title: toastDrilldownsCRUDError,
