@@ -11,6 +11,7 @@ import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/pub
 import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
+  FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,
   IncompleteColumn,

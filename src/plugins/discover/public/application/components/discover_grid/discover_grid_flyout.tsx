@@ -122,7 +122,7 @@ export function DiscoverGridFlyout({
                 iconType="document"
                 flush="left"
                 href={services.addBasePath(
-                  `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
                     hit._id as string
                   )}`
                 )}

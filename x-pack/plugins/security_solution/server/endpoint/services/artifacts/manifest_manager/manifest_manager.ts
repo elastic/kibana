@@ -22,6 +22,7 @@ import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
+  getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
   isCompressed,
@@ -34,6 +35,7 @@ import {
 } from '../../../schemas/artifacts';
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -81,6 +83,7 @@ export interface ManifestManagerContext {
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -99,11 +102,9 @@ export class ManifestManager {
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
+  protected experimentalFeatures: ExperimentalFeatures;
 
-  constructor(
-    context: ManifestManagerContext,
-    private readonly isFleetServerEnabled: boolean = false
-  ) {
+  constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -111,6 +112,7 @@ export class ManifestManager {
     this.logger = context.logger;
     this.cache = context.cache;
     this.schemaVersion = 'v1';
+    this.experimentalFeatures = context.experimentalFeatures;
   }
 
   /**
@@ -196,6 +198,41 @@ export class ManifestManager {
     );
 
     return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of endpoint event filters (one per supported OS) based on the current state of the
+   * Event Filters list
+   * @protected
+   */
+  protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildEventFiltersForOs(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
+    );
   }
 
   /**
@@ -286,7 +323,7 @@ export class ManifestManager {
           semanticVersion: manifestSo.attributes.semanticVersion,
           soVersion: manifestSo.version,
         },
-        this.isFleetServerEnabled
+        this.experimentalFeatures.fleetServerEnabled
       );
 
       for (const entry of manifestSo.attributes.artifacts) {
@@ -327,12 +364,16 @@ export class ManifestManager {
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(
       this.schemaVersion,
-      this.isFleetServerEnabled
+      this.experimentalFeatures.fleetServerEnabled
     )
   ): Promise<Manifest> {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
+      // If Endpoint Event Filtering feature is ON, then add in the exceptions for them
+      ...(this.experimentalFeatures.eventFilteringEnabled
+        ? [this.buildEventFiltersArtifacts()]
+        : []),
     ]);
 
     const manifest = new Manifest(
@@ -341,7 +382,7 @@ export class ManifestManager {
         semanticVersion: baselineManifest.getSemanticVersion(),
         soVersion: baselineManifest.getSavedObjectVersion(),
       },
-      this.isFleetServerEnabled
+      this.experimentalFeatures.fleetServerEnabled
     );
 
     for (const result of results) {
