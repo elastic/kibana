@@ -5,6 +5,18 @@ Get started building your own plugins, or contributing directly to the {kib} rep
 
 [discrete]
 [[get-kibana-code]]
+=== Developing on Windows
+
+In order to support Windows development we currently require you to use one of the following:
+
+- https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
+- https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
+
+Before running the steps listed below, please make sure you have installed Git bash or WSL and that 
+you are running the mentioned commands through one of them.
+
+[discrete]
+[[get-kibana-code]]
 === Get the code
 
 https://help.github.com/en/github/getting-started-with-github/fork-a-repo[Fork], then https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork[clone] the {kib-repo}[{kib} repo] and change directory into it:
