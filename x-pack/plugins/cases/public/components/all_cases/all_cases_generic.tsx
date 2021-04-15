@@ -11,7 +11,6 @@ import {
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
-  EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { isEmpty, memoize } from 'lodash/fp';
