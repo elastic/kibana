@@ -52,7 +52,7 @@ export async function unenrollAgent(
     return forceUnenrollAgent(soClient, esClient, agentId);
   }
   const now = new Date().toISOString();
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: now,
     type: 'UNENROLL',
@@ -106,7 +106,6 @@ export async function unenrollAgents(
   } else {
     // Create unenroll action for each agent
     await bulkCreateAgentActions(
-      soClient,
       esClient,
       agentsToUpdate.map((agent) => ({
         agent_id: agent.id,
