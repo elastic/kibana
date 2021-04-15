@@ -159,6 +159,21 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [handleExistingCaseClick, handleNewCaseClick]
   );
 
+  const AllCasesSelectorModal = useCallback(
+    () =>
+      isCaseModalOpen
+        ? cases.getAllCasesSelectorModal({
+            createCaseNavigation: {
+              href: formatUrl(getCreateCaseUrl()),
+              onClick: goToCreateCase,
+            },
+            onRowClick,
+            userCanCrud: userPermissions?.crud ?? false,
+          })
+        : null,
+    [cases, formatUrl, goToCreateCase, isCaseModalOpen, onRowClick, userPermissions?.crud]
+  );
+
   return (
     <>
       <EuiPopover
@@ -171,15 +186,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      {isCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
-          createCaseNavigation: {
-            href: formatUrl(getCreateCaseUrl()),
-            onClick: goToCreateCase,
-          },
-          onRowClick,
-          userCanCrud: userPermissions?.crud ?? false,
-        })}
+      <AllCasesSelectorModal />
     </>
   );
 };

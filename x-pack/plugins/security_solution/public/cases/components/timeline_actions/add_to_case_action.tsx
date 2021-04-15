@@ -167,6 +167,42 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     [ariaLabel, isDisabled, openPopover, tooltipContext]
   );
 
+  const AllCasesSelectorModal = useCallback(
+    () =>
+      isAllCaseModalOpen
+        ? cases.getAllCasesSelectorModal({
+            alertData: {
+              alertId: eventId,
+              index: eventIndex ?? '',
+              rule: {
+                id: rule?.id != null ? rule.id[0] : null,
+                name: rule?.name != null ? rule.name[0] : null,
+              },
+            },
+            createCaseNavigation: {
+              href: formatUrl(getCreateCaseUrl()),
+              onClick: goToCreateCase,
+            },
+            disabledStatuses: [CaseStatuses.closed],
+            onRowClick: onCaseClicked,
+            updateCase: onCaseSuccess,
+            userCanCrud: userPermissions?.crud ?? false,
+          })
+        : null,
+    [
+      cases,
+      eventId,
+      eventIndex,
+      formatUrl,
+      goToCreateCase,
+      isAllCaseModalOpen,
+      onCaseClicked,
+      onCaseSuccess,
+      rule,
+      userPermissions?.crud,
+    ]
+  );
+
   return (
     <>
       <ActionIconItem>
@@ -185,25 +221,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onSuccess={onCaseSuccess} />
       )}
-      {isAllCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
-          alertData: {
-            alertId: eventId,
-            index: eventIndex ?? '',
-            rule: {
-              id: rule?.id != null ? rule.id[0] : null,
-              name: rule?.name != null ? rule.name[0] : null,
-            },
-          },
-          createCaseNavigation: {
-            href: formatUrl(getCreateCaseUrl()),
-            onClick: goToCreateCase,
-          },
-          disabledStatuses: [CaseStatuses.closed],
-          onRowClick: onCaseClicked,
-          updateCase: onCaseSuccess,
-          userCanCrud: userPermissions?.crud ?? false,
-        })}
+      <AllCasesSelectorModal />
     </>
   );
 };

@@ -9,11 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { AllCasesSelectorModal } from '.';
-import { TestProviders } from '../../common/mock';
-import { getAllCasesLazy as getAllCases } from '../../methods';
+import { TestProviders } from '../../../common/mock';
+import { AllCasesGeneric } from '../all_cases_generic';
 
-jest.mock('../../methods');
-const getAllCasesMock = getAllCases as jest.Mock;
+jest.mock('../../../methods');
+jest.mock('../all_cases_generic');
 const onRowClick = jest.fn();
 const createCaseNavigation = { href: '', onClick: jest.fn() };
 const defaultProps = {
@@ -26,7 +26,6 @@ const updateCase = jest.fn();
 describe('AllCasesSelectorModal', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    getAllCasesMock.mockReturnValue(<></>);
   });
 
   it('renders', () => {
@@ -69,8 +68,8 @@ describe('AllCasesSelectorModal', () => {
         <AllCasesSelectorModal {...fullProps} />
       </TestProviders>
     );
-
-    expect(getAllCasesMock.mock.calls[0][0]).toEqual(
+    // @ts-ignore idk what this mock style is but it works ¯\_(ツ)_/¯
+    expect(AllCasesGeneric.type.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         alertData: fullProps.alertData,
         createCaseNavigation,

@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../../cases/common';
 import {
   getCaseDetailsUrl,
   getConfigureCasesUrl,

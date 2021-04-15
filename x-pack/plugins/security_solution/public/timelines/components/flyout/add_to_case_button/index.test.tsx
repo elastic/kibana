@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AddToCaseButton } from '.';
+import { waitFor } from '@testing-library/react';
 jest.mock('../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../common/components/link_to');
   return {
@@ -44,46 +45,40 @@ describe('AddToCaseButton', () => {
   });
 
   it('navigates to the correct path without id', async () => {
-    useKibanaMock().services.cases.useAllCasesSelectorModal = jest
-      .fn()
-      .mockImplementation(({ onRowClick }) => {
+    const here = jest.fn();
+    useKibanaMock().services.cases.getAllCasesSelectorModal = here.mockImplementation(
+      ({ onRowClick }) => {
         onRowClick();
-
-        return {
-          modal: <>{'test'}</>,
-          openModal: jest.fn(),
-          isModalOpen: true,
-          closeModal: jest.fn(),
-        };
-      });
+        return <></>;
+      }
+    );
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
+    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
   });
 
   it('navigates to the correct path with id', async () => {
-    useKibanaMock().services.cases.useAllCasesSelectorModal = jest
+    useKibanaMock().services.cases.getAllCasesSelectorModal = jest
       .fn()
       .mockImplementation(({ onRowClick }) => {
         onRowClick({ id: 'case-id' });
-        return {
-          modal: <>{'test'}</>,
-          openModal: jest.fn(),
-          isModalOpen: true,
-          closeModal: jest.fn(),
-        };
+        return <></>;
       });
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
+    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/case-id' });
   });

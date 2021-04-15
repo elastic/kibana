@@ -48,7 +48,6 @@ describe('AddToCaseAction', () => {
   const mockDispatchToaster = jest.fn();
   const mockNavigateToApp = jest.fn();
   const mockCreateCase = jest.fn();
-  const mockUseCasesModal = jest.fn();
   const mockAllCasesModal = jest.fn();
 
   beforeEach(() => {
@@ -60,12 +59,7 @@ describe('AddToCaseAction', () => {
       getConfigureCases: jest.fn(),
       getRecentCases: jest.fn(),
       getCreateCase: mockCreateCase,
-      useAllCasesSelectorModal: mockUseCasesModal.mockImplementation(() => ({
-        modal: <>{'test'}</>,
-        openModal: mockAllCasesModal,
-        isModalOpen: true,
-        closeModal: jest.fn(),
-      })),
+      getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
     };
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
     (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
@@ -118,7 +112,7 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: 'rule-name' },
@@ -140,8 +134,8 @@ describe('AddToCaseAction', () => {
     );
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+    wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
+    expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: null },
