@@ -810,10 +810,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     /**
      * Here we test the functionality of timestamp overrides. If the rule specifies a timestamp override,
-     * then the documents will be queried and sorted using the timestamp overrid field.
-     * If no timestamp override field exists, the search will default to using `@timestamp` field
+     * then the documents will be queried and sorted using the timestamp override field.
+     * If no timestamp override field exists in the indices but one was provided to the rule,
+     * the rule's query will additionally search for events using the `@timestamp` field
      */
-    describe('Signals generated from events with timestamp override fields', () => {
+    describe('Signals generated from events with timestamp override field', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
         await esArchiver.load('security_solution/timestamp_override');
@@ -834,6 +835,43 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
         return signalsOrderedByEventId;
       };
+
+      describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
+        beforeEach(async () => {
+          await esArchiver.load('auditbeat/hosts');
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload('auditbeat/hosts');
+        });
+
+        /**
+         * This represents our worst case scenario where this field is not mapped on any index
+         * We want to check that our logic continues to function within the constraints of search after
+         * Elasticsearch returns java's long.MAX_VALUE for unmapped date fields
+         * Javascript does not support numbers this large, but without passing in a number of this size
+         * The search_after will continue to return the same results and not iterate to the next set
+         * So to circumvent this limitation of javascript we return the stringified version of Java's
+         * Long.MAX_VALUE so that search_after does not enter into an infinite loop.
+         *
+         * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+         */
+        it('should generate 200 signals when timestamp override does not exist', async () => {
+          const rule: QueryCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            timestamp_override: 'event.fakeingested',
+            max_signals: 200,
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await waitForSignalsToBePresent(supertest, 200, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, [id], 200);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+
+          expect(signals.length).equal(200);
+        });
+      });
 
       it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
         const rule: QueryCreateSchema = {

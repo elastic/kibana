@@ -851,3 +851,23 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
 export const hasSafeSortIds = (sortIds: SortResults) => {
   return sortIds?.every((sortId) => sortId != null && sortId < Number.MAX_SAFE_INTEGER);
 };
+
+/**
+ * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
+ * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
+ * unmapped in the provided index
+ *
+ * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+ *
+ * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
+ * @param sortIds SortResults | undefined
+ * @returns SortResults
+ */
+export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
+};

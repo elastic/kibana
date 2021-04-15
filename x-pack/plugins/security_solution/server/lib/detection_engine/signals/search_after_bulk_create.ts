@@ -16,9 +16,9 @@ import {
   createSearchResultReturnType,
   createSearchAfterReturnTypeFromResponse,
   createTotalHitsFromSearchResult,
-  hasSafeSortIds,
   mergeReturns,
   mergeSearchResults,
+  getSafeSortIds,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
@@ -98,8 +98,10 @@ export const searchAfterAndBulkCreate = async ({
             }),
           ]);
 
-          const lastSortIds = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
-          if (lastSortIds != null && lastSortIds.length !== 0 && hasSafeSortIds(lastSortIds)) {
+          const lastSortIds = getSafeSortIds(
+            searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
+          );
+          if (lastSortIds != null && lastSortIds.length !== 0) {
             sortIds = lastSortIds;
             hasSortId = true;
           } else {

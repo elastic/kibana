@@ -161,7 +161,7 @@ export const buildEventsSearchQuery = ({
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: searchAfterSortIds.filter((sortId) => !isEmpty(sortId?.toString())),
+        search_after: searchAfterSortIds,
       },
     };
   }
