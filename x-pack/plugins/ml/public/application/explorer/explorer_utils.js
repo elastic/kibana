@@ -641,65 +641,6 @@ export async function loadAnomaliesTableData(
   });
 }
 
-// track the request to be able to ignore out of date requests
-// and avoid race conditions ending up with the wrong charts.
-let requestCount = 0;
-export async function loadDataForCharts(
-  mlResultsService,
-  jobIds,
-  earliestMs,
-  latestMs,
-  influencers = [],
-  selectedCells,
-  influencersFilterQuery,
-  // choose whether or not to keep track of the request that could be out of date
-  // in Anomaly Explorer this is being used to ignore any request that are out of date
-  // but in embeddables, we might have multiple requests coming from multiple different panels
-  takeLatestOnly = true
-) {
-  return new Promise((resolve) => {
-    // Just skip doing the request when this function
-    // is called without the minimum required data.
-    if (
-      selectedCells === undefined &&
-      influencers.length === 0 &&
-      influencersFilterQuery === undefined
-    ) {
-      resolve([]);
-    }
-
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
-
-    // Load the top anomalies (by record_score) which will be displayed in the charts.
-    mlResultsService
-      .getRecordsForInfluencer(
-        jobIds,
-        influencers,
-        0,
-        earliestMs,
-        latestMs,
-        500,
-        influencersFilterQuery
-      )
-      .then((resp) => {
-        // Ignore this response if it's returned by an out of date promise
-        if (takeLatestOnly && newRequestCount < requestCount) {
-          resolve([]);
-        }
-
-        if (
-          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-          influencersFilterQuery !== undefined
-        ) {
-          resolve(resp.records);
-        }
-
-        resolve([]);
-      });
-  });
-}
-
 export async function loadTopInfluencers(
   mlResultsService,
   selectedJobIds,

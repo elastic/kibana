@@ -29,6 +29,7 @@ import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 export interface ExplorerState {
   allAnnotations: AnnotationsTable;
   annotations: AnnotationsTable;
+  anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
@@ -75,6 +76,7 @@ export function getExplorerDefaultState(): ExplorerState {
       annotationsData: [],
       aggregations: {},
     },
+    anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,

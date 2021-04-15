@@ -107,7 +107,11 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
-  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
+  renderParameterTemplates?(
+    params: Params,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
@@ -137,4 +141,9 @@ export interface ProxySettings {
   proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
   proxyRejectUnauthorizedCertificates: boolean;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
 }

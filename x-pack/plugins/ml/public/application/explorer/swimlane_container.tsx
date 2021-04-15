@@ -377,7 +377,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', overflow: 'hidden' }}
+          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
         >
