@@ -117,12 +117,6 @@ jest.mock('./package_policy', () => ({
   },
 }));
 
-jest.mock('./agents/setup', () => ({
-  isAgentsSetup() {
-    return false;
-  },
-}));
-
 describe('policy preconfiguration', () => {
   beforeEach(() => {
     mockInstalledPackages.clear();
