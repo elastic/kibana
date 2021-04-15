@@ -19,6 +19,7 @@ import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties/index';
+import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
@@ -44,7 +45,7 @@ export const NodeContextPopover = ({
   openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
+  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -58,11 +59,17 @@ export const NodeContextPopover = ({
       return {
         ...m,
         content: (
-          <TabContent node={node} nodeType={nodeType} currentTime={currentTime} options={options} />
+          <TabContent
+            onClose={onClose}
+            node={node}
+            nodeType={nodeType}
+            currentTime={currentTime}
+            options={options}
+          />
         ),
       };
     });
-  }, [tabConfigs, node, nodeType, currentTime, options]);
+  }, [tabConfigs, node, nodeType, currentTime, onClose, options]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
