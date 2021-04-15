@@ -356,13 +356,19 @@ async function getValidationCheckMessages(
           }
         );
         messages.push(lowFieldCountWarningMessage);
-      } else if (analyzedFields.length < 2) {
+      } else if (
+        analysisType !== ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION &&
+        analyzedFields.length < 2
+      ) {
         lowFieldCountWarningMessage.text = i18n.translate(
           'xpack.ml.models.dfaValidation.messages.lowFieldCountWarningText',
           {
             defaultMessage:
               '{analysisType} requires at least two fields to be included in the analysis.',
-            values: { analysisType: analysisType.toUpperCase() },
+            values: {
+              analysisType:
+                analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ? 'Regression' : 'Classification',
+            },
           }
         );
         messages.push(lowFieldCountWarningMessage);
