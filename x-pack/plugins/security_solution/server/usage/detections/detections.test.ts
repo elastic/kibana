@@ -113,7 +113,13 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns zeroed counts if calls are empty', async () => {
-      const result = await fetchDetectionsMetrics('', esClientMock, mlMock, savedObjectsClientMock);
+      const result = await fetchDetectionsMetrics(
+        '',
+        '',
+        esClientMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -181,7 +187,13 @@ describe('Detections Usage and Metrics', () => {
         jobs: null,
         jobStats: null,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
-      const result = await fetchDetectionsMetrics('', esClientMock, mlMock, savedObjectsClientMock);
+      const result = await fetchDetectionsMetrics(
+        '',
+        '',
+        esClientMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -203,7 +215,13 @@ describe('Detections Usage and Metrics', () => {
         datafeedStats: mockDatafeedStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
-      const result = await fetchDetectionsMetrics('', esClientMock, mlMock, savedObjectsClientMock);
+      const result = await fetchDetectionsMetrics(
+        '',
+        '',
+        esClientMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
