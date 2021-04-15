@@ -17,13 +17,12 @@ import './open_options_popover.scss';
 
 let isOpen = false;
 
-export function openOptionsPopover({
-  I18nContext,
-  anchorElement,
-}: {
-  I18nContext: I18nStart['Context'];
+interface OptionsPopoverProps {
+  onClose: () => void;
   anchorElement: HTMLElement;
-}) {
+}
+
+export function OptionsPopover(props: OptionsPopoverProps) {
   const {
     core: { uiSettings },
     addBasePath,
@@ -38,6 +37,32 @@ export function openOptionsPopover({
         defaultMessage: 'Switch to legacy table',
       });
 
+  return (
+    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
+      <div className="dscOptionsPopover">
+        <EuiLink href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}>
+          {linkText}
+        </EuiLink>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          <FormattedMessage
+            id="discover.topNav.openOptionsPopover.description"
+            defaultMessage="The new data grid layout includes better data sorting, drag-and-drop columns, and a full
+                screen view. Enable this option if you prefer to fall back to the legacy table."
+          />
+        </EuiText>
+      </div>
+    </EuiWrappingPopover>
+  );
+}
+
+export function openOptionsPopover({
+  I18nContext,
+  anchorElement,
+}: {
+  I18nContext: I18nStart['Context'];
+  anchorElement: HTMLElement;
+}) {
   if (isOpen) {
     return;
   }
@@ -54,21 +79,7 @@ export function openOptionsPopover({
 
   const element = (
     <I18nContext>
-      <EuiWrappingPopover ownFocus button={anchorElement} closePopover={onClose} isOpen>
-        <div className="dscOptionsPopover">
-          <EuiLink href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}>
-            {linkText}
-          </EuiLink>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s">
-            <FormattedMessage
-              id="discover.topNav.openOptionsPopover.description"
-              defaultMessage="The new data grid layout includes better data sorting, drag-and-drop columns, and a full
-                screen view. Enable this option if you prefer to fall back to the legacy table."
-            />
-          </EuiText>
-        </div>
-      </EuiWrappingPopover>
+      <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
     </I18nContext>
   );
   ReactDOM.render(element, container);
