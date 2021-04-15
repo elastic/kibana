@@ -31,6 +31,7 @@ const eventFilterInitForm: CaseReducer<EventFilterInitForm> = (state, action) =>
     form: {
       ...state.form,
       entry: action.payload.entry,
+      hasNameError: !action.payload.entry.name,
       submissionResourceState: {
         type: 'UninitialisedResourceState',
       },
@@ -44,8 +45,14 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
     form: {
       ...state.form,
       entry: action.payload.entry,
-      hasError:
-        action.payload.hasError !== undefined ? action.payload.hasError : state.form.hasError,
+      hasItemsError:
+        action.payload.hasItemsError !== undefined
+          ? action.payload.hasItemsError
+          : state.form.hasItemsError,
+      hasNameError:
+        action.payload.hasNameError !== undefined
+          ? action.payload.hasNameError
+          : state.form.hasNameError,
     },
   };
 };

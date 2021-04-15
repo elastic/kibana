@@ -21,7 +21,8 @@ export type EventFilterInitForm = Action<'eventFilterInitForm'> & {
 export type EventFilterChangeForm = Action<'eventFilterChangeForm'> & {
   payload: {
     entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
-    hasError?: boolean;
+    hasNameError?: boolean;
+    hasItemsError?: boolean;
   };
 };
 

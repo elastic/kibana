@@ -19,7 +19,7 @@ export const getFormEntry = (
 };
 
 export const getFormHasError = (state: EventFilterListPageState): boolean => {
-  return state.form.hasError;
+  return state.form.hasItemsError || state.form.hasNameError;
 };
 
 export const getFormSubmissionIsLoadingStatus = (state: EventFilterListPageState): boolean => {

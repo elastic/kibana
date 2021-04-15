@@ -66,19 +66,17 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
     );
 
     const [hasNameError, setHasNameError] = useState(!exception || !exception.name);
-    const [hasItemsError, setHasItemsError] = useState(false);
     const [comment, setComment] = useState<string>('');
 
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
         if (isEmpty(arg.exceptionItems)) return;
-        setHasItemsError(arg.errorExists);
         dispatch({
           type: 'eventFilterChangeForm',
-          payload: { entry: arg.exceptionItems[0], hasError: hasNameError || hasItemsError },
+          payload: { entry: arg.exceptionItems[0], hasItemsError: arg.errorExists },
         });
       },
-      [dispatch, hasItemsError, hasNameError]
+      [dispatch]
     );
 
     const handleOnChangeName = useCallback(
@@ -89,11 +87,11 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
           type: 'eventFilterChangeForm',
           payload: {
             entry: { ...exception, name: e.target.value.toString() },
-            hasError: hasNameError || hasItemsError,
+            hasNameError: !e.target.value,
           },
         });
       },
-      [dispatch, exception, hasItemsError, hasNameError]
+      [dispatch, exception]
     );
 
     const handleOnChangeComment = useCallback(
@@ -131,14 +129,14 @@ export const EventFilteringForm: React.FC<EventFilteringFormProps> = memo(
           listTypeSpecificIndexPatternFilter={filterIndexPatterns}
         />
       ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [data, handleOnBuilderChange, http, indexPatterns, exception?.entries]
+      [data, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
     const nameInputMemo = useMemo(
       () => (
         <EuiFormRow label={NAME_LABEL} fullWidth isInvalid={hasNameError} error={NAME_ERROR}>
           <EuiFieldText
+            id="eventFilterFormInputName"
             placeholder={NAME_PLACEHOLDER}
             defaultValue={exception?.name ?? ''}
             onChange={handleOnChangeName}
