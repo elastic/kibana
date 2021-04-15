@@ -98,7 +98,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'latencyValue',
+      field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { serviceNodeName, latency }) => {
@@ -120,7 +120,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'throughputValue',
+      field: 'throughput',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
@@ -146,7 +146,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'errorRateValue',
+      field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Error rate' }
@@ -172,7 +172,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'cpuUsageValue',
+      field: 'cpuUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
@@ -198,7 +198,7 @@ export function getColumns({
       sortable: true,
     },
     {
-      field: 'memoryUsageValue',
+      field: 'memoryUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
