@@ -7,21 +7,13 @@
 
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
-// import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import {
   DataVisualizerFileBasedAppState,
   DataVisualizerIndexBasedAppState,
 } from '../../../../../../../common/types/ml_url_generator';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-
-interface ListingPageUrlState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-}
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
 // Can be removed when https://github.com/elastic/eui/issues/4011 is addressed in EUI
