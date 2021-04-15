@@ -35,7 +35,7 @@ const myFormData = {
 }
 ```
 
-**Note:** Have a [look at the examples](../examples/dynamic_fields.md) on how to use `<UseArray />`.
+**Note:** Have a <DocLink id="formLibExampleDynamicFields" text="look at the examples" /> on how to use `<UseArray />`.
 
 This component accepts the following props (the only required prop is the `path`).
 
@@ -60,14 +60,14 @@ Those items are not fields yet, they are objects that you will receive back in t
 
 **Type:** `FieldConfig['validations']`
 
-Array of validations to run whenever an item is added or removed. This is [the same `validations` configuration](use_field.md#validations) that you define on the field config. The `value` that you receive is the `items` passed down to the child function (see below).
+Array of validations to run whenever an item is added or removed. This is <DocLink id="formLibCoreUseField" section="validations" text="the same `validations` configuration" /> that you define on the field config. The `value` that you receive is the `items` passed down to the child function (see below).
 
 ### readDefaultValueOnForm
 
 **Type:** `boolean`
 **Default:** true
 
-Flag to indicate if you want to read the array value from [the form `defaultValue` object](use_form_hook.md#defaultvalue).
+Flag to indicate if you want to read the array value from <DocLink id="formLibCoreUseForm" section="defaultvalue" text="the form `defaultValue` object" />.
 
 ### children
 

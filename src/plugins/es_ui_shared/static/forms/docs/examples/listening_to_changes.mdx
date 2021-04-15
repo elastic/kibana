@@ -11,7 +11,7 @@ date: 2021-04-14
 
 ### Access the form data from the root component
 
-You can access the form data by using the `useFormData()` hook. This hook has an optional `form` option that you must provide if you need to access the data in the root component.
+You can access the form data by using the <DocLink id="formLibCoreUseFormData" text="useFormData()"/> hook. This hook has an optional `form` option that you only have to provide if you need to access the data in the **root** component.
 
 ```js
 // From the root component (where the "form" is declared)
@@ -88,7 +88,7 @@ export const ReactToSpecificFields = () => {
 
 ## Using the `onChange` handler
 
-Sometimes the good old `onChange` handler is all you need to react to a form field value change (instead of reading the form data and add a `useEffect` to react to it).
+Sometimes the good old `onChange` handler is all you need to react to a form field value change (instead of reading the form data and adding a `useEffect` to react to it).
 
 ```js
 export const OnChangeHandler = () => {

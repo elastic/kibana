@@ -68,7 +68,7 @@ Those helper components have been set to a default state that cover most of our 
 
 ## `Field` 
 
-There is a special `<Field />` component that you can use if you prefer. If you use this component, it will check [the field `type` configuration](../core/use_field.md#type) and map to the corresponding component in the list above. If the type does not match any known component, a `<TextField />` component is rendered.
+There is a special `<Field />` component that you can use if you prefer. If you use this component, it will check <DocLink id="formLibCoreUseField" section="type" text="the field `type` configuration" /> and map to the corresponding component in the list above. If the type does not match any known component, a `<TextField />` component is rendered.
 
 It is recommended to use the available `FIELD_TYPES` constant to indicate the type of a field in the `FieldConfig`.
 
@@ -102,7 +102,7 @@ export const MyFormComponent = () => {
 };
 ```
 
-The above example can be simplified one step further with [the `getUseField` helper](../core/use_field#getusefield).
+The above example can be simplified one step further with <DocLink id="formLibCoreUseField" section="getusefield" text="the `getUseField` helper" />.
 
 ```js
 const schema: FormSchema = {

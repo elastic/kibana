@@ -7,11 +7,11 @@ tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-It is important to understand the different state of the form data as this will help understanding other concepts likes the `serializers` and `deserializers`.
+It is important to understand the different state of the form data as this will help understanding other concepts likes the <DocLink id="formLibExampleSerializersDeserializers" text="serializers & deserializers"/>.
 
 ## "Raw" data state
 
-As you have probably noticed when declaring a field with the `<UseField />` component we don't give it a "_name_" but a "_path_". This gives us a lot of flexibility to declare the final shape of the outputted data of our form, as a path can be any valid [`lodash.set()` path](https://lodash.com/docs/#set).
+As you have probably noticed when declaring a field with the <DocLink id="formLibCoreUseField" text="<UseField />"/> component we don't give it a "_name_" but a "_path_". This gives us a lot of flexibility to declare the final shape of the outputted data of our form, as a path can be any valid [`lodash.set()` path](https://lodash.com/docs/#set).
 
 For example
 

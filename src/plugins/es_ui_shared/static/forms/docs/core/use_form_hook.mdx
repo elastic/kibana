@@ -9,7 +9,7 @@ date: 2021-04-14
 
 **Returns:** [`FormHook`](form_hook.md)
 
-Use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optional).
+Use the `useForm` hook to declare a new form object. As we have seen in the <DocLink id="formLibCoreFundamentals" text="fundamentals"/>, you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optional).
 
 ## Configuration
 
@@ -50,7 +50,7 @@ const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
 
 The `defaultValue` is an object that you provide to give the initial value for your fields. 
 
-**Note:** There are multiple places where you can define the default value of a field, [read the difference between them here](default_value.md).
+**Note:** There are multiple places where you can define the default value of a field, <DocLink id="formLibCoreDefaultValue" text="read the difference between them"/>.
 
 ```js
 const fetchedData = { firstName: 'John' };
@@ -104,7 +104,7 @@ export const MyComponent = () => {
 
 ### deserializer
 
-When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values ([read more about the "In" state here](in_out_raw_state.md#in-data-state)).  
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values (<DocLink id="formLibCoreInOutRawState" section="in-data-state" text="read more about the 'In' state here"/>).  
 **Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
 
 ```js
@@ -151,7 +151,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
 
 ### serializer
 
-Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  [Read more about the "Out" state here](in_out_raw_state.md#out-data-state).  
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example). <DocLink id="formLibCoreInOutRawState" section="out-data-state" text="Read more about the 'Out' state here"/>.  
 **Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
 
 If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console

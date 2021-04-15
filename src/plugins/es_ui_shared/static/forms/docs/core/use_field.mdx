@@ -41,7 +41,7 @@ The field path. It can be any valid [`lodash.set()` path](https://lodash.com/doc
 
 An optional default value for the field. This will be the initial value of the field. The component is not controlled so updating this prop does not have any effect on the field.
 
-**Note:** You can define the field `defaultValue` in different places, [read their differences here](default_value.md).
+**Note:** You can define the field `defaultValue` in different places (<DocLink id="formLibCoreDefaultValue" text="see their differences here" />).
 
 ### config
 
@@ -49,7 +49,7 @@ An optional default value for the field. This will be the initial value of the f
 
 The field configuration.
 
-**Note**: In some cases it makes more sense to declare all your form fields configuration inside a [form schema](use_form_hook.md#schema) that you pass to the form. This will unclutter your JSX.
+**Note**: In some cases it makes more sense to declare all your form fields configuration inside a <DocLink id="formLibCoreUseForm" section="schema" text="form schema" /> that you pass to the form. This will unclutter your JSX.
 
 ```js
 // It is a good habit to keep the configuration outside the component
@@ -83,7 +83,7 @@ A label for the field.
 
 A second label for the field.
 
-When `<UseField />` is paired with one of [the helper components](../helpers/components) that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
+When `<UseField />` is paired with one of <DocLink id="formLibHelpersComponents" text="the helper components" /> that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
 
 #### helpText
 
@@ -124,7 +124,7 @@ export const MyFormComponent = () => {
 };
 ```
 
-The above example could be written a bit simpler with a form schema and [the `getUseField` helper](#getusefield).
+The above example could be written a bit simpler with a form schema and <DocLink id="formLibCoreUseField" section="getusefield" text="the getUseField() helper" />.
 
 ```js
 import { Form, getUseField, Field, FIELD_TYPES } from '<path-to-form-lib>';
@@ -160,7 +160,7 @@ export const MyFormComponent = () => {
 
 An array of validation to run against the field value. Although it would be possible to have a single validation that does multiple checks, it often makes the code clearer to have single purpose validation that return a single error if there is one.
 
-If any of the validation fails, the other validations don't run unless [the `exitOnFail` parameter](#exitonfail) (`false` by default) is set to `true`.
+If any of the validation fails, the other validations don't run unless <DocLink id="formLibCoreUseField" section="exitonfail" text="the `exitOnFail` parameter" /> (`false` by default) is set to `true`.
 
 **Note:** There are already many reusable field validators. Check if there isn't already one for your use case before writing your own.
 
@@ -189,7 +189,7 @@ This function receives a data argument with the following properties:
 
 **Type:** `string`
 
-A specific type for the validation. [Read more about typed validation](../examples/validation#typed-validation) in the examples.
+A specific type for the validation. <DocLink id="formLibExampleValidation" section="validating-arrays-of-items" text="See an example of typed validation when validating an array of items" />.
 
 ##### isBlocking
 
@@ -311,7 +311,7 @@ const field2Config = {
 
 **Type:** `number`
 
-The minimum time to update the `isChanging` field state. [Read more about this setting](use_form_hook.md#valuechangedebouncetime) in the `useFormHook()`.
+The minimum time to update the `isChanging` field state. <DocLink id="formLibCoreUseForm" section="valuechangedebouncetime" text="Read more about this setting here"/>.
 
 ### component
 
@@ -319,7 +319,7 @@ The minimum time to update the `isChanging` field state. [Read more about this s
 
 The component to render. This component will receive the `field` hook object as props plus any other props that you pass in `componentProps` (see below).
 
-**Note:** You can see examples on how this prop is used in [the "Style fields" page](../examples/style_fields.md#using-the-component-prop).
+**Note:** You can see examples on how this prop is used in <DocLink id="formLibExampleStyleFields" section="using-the-component-prop" text="the `Style fields` example page" />.
 
 ### componentProps
 
@@ -332,21 +332,19 @@ If you provide a `component` you can pass here any prop you want to forward to t
 **Type:** `boolean`
 **Default:** true
 
-By default if you don't provide a `defaultValue` prop to `<UseField />`, it will try to read the default value on [the form `defaultValue` object](use_form_hook.md#defaultvalue). If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
+By default if you don't provide a `defaultValue` prop to `<UseField />`, it will try to read the default value on <DocLink id="formLibCoreUseForm" section="defaultvalue" text="the form `defaultValue` object" />. If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as <DocLink id="formLibExampleDynamicFields" text="you can see in the examples" />.
 
 ### onChange
 
 **Type:** `(value:T) => void`
 
-With this handler you can listen to the field value changes. [See the example](../examples/react_to_changes.md#using-the-onchange-handler) in the "React to changes" page.
+With this handler you can listen to the field value changes. <DocLink id="formLibExampleListeningToChanges" section="using-the-onchange-handler" text="See the example" /> in the "React to changes" page.
 
 ### children
 
 **Type:** `(field: FieldHook<T>) => JSX.Element`
 
-The (optional) children of `<UseField />` is a function child which receives the field hook. You are then responsible to return a JSX element from that function.  
-
-The docs for the [FieldHook are right here](field_hook.md).
+The (optional) children of `<UseField />` is a function child which receives the <DocLink id="formLibCoreFieldHook" text="field hook" />. You are then responsible to return a JSX element from that function.
 
 ## `getUseField()`
 
