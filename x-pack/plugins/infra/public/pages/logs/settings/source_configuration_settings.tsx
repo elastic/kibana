@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useTrackPageview } from '../../../../../observability/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
@@ -32,6 +33,13 @@ import { useLogSourceConfigurationFormState } from './source_configuration_form_
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const shouldAllowEdit = uiCapabilities?.logs?.configureSource === true;
+
+  useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration' });
+  useTrackPageview({
+    app: 'infra_logs',
+    path: 'log_source_configuration',
+    delay: 15000,
+  });
 
   const {
     sourceConfiguration: source,
