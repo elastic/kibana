@@ -211,9 +211,11 @@ export class DrilldownManagerState {
         factory: actionFactory,
         placeTriggers: this.deps.triggers,
         placeContext: this.deps.placeContext || {},
-        name: !!oldDrilldownState
-          ? oldDrilldownState.name$.getValue()
-          : actionFactory.getDisplayName(this.getActionFactoryContext()),
+        name: this.pickName(
+          !!oldDrilldownState
+            ? oldDrilldownState.name$.getValue()
+            : actionFactory.getDisplayName(this.getActionFactoryContext())
+        ),
         triggers: [],
         config: actionFactory.createConfig(context),
       });
@@ -360,7 +362,8 @@ export class DrilldownManagerState {
   }
 
   /**
-   * Picks a unique name for the cloned drilldown.
+   * Picks a unique name for the cloned drilldown. Adds "(copy)", "(copy 1)",
+   * "(copy 2)", etc. if drilldown with such name already exists.
    */
   private pickName(name: string): string {
     if (this.hasDrilldownWithName(name)) {
