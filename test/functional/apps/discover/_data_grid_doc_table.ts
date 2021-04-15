@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
     'doc_table:legacy': false,
   };
+  const testSubjects = getService('testSubjects');
 
   describe('discover data grid doc table', function describeIndexTests() {
     before(async function () {
@@ -99,6 +100,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           expect(surroundingActionEl).to.be.ok();
           expect(singleActionEl).to.be.ok();
+          await dataGrid.closeFlyout();
+        });
+      });
+
+      it('should show allow adding columns from the detail panel', async function () {
+        await retry.try(async function () {
+          await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+
+          // add columns
+          const fields = ['_id', '_index', 'agent'];
+          for (const field of fields) {
+            await testSubjects.click(`toggleColumnButton_${field}`);
+          }
+
+          const headerWithFields = await dataGrid.getHeaderFields();
+          expect(headerWithFields.join(' ')).to.contain(fields.join(' '));
+
+          // remove columns
+          for (const field of fields) {
+            await testSubjects.click(`toggleColumnButton_${field}`);
+          }
+
+          const headerWithoutFields = await dataGrid.getHeaderFields();
+          expect(headerWithoutFields.join(' ')).not.to.contain(fields.join(' '));
+
           await dataGrid.closeFlyout();
         });
       });
