@@ -11,11 +11,17 @@
 // - an actual SourceType (which does not say enough about how it looks on a map)
 // - an actual LayerType (which is too coarse and does not say much about what kind of data)
 import {
+  EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../common/descriptor_types';
 import { LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import {
+  DEFAULT_EMS_DARKMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+} from '../../../../../src/plugins/maps_ems/common';
 
 export enum TELEMETRY_LAYER_TYPE {
   ES_DOCS = 'ES_DOCS',
@@ -43,6 +49,17 @@ interface ClusterCountStats {
 
 export type TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {
   [key in TELEMETRY_LAYER_TYPE]?: ClusterCountStats;
+};
+
+export enum TELEMETRY_EMS_BASEMAP_TYPES {
+  ROADMAP_DESATURATED = 'DESATURATED',
+  ROADMAP = 'ROADMAP',
+  AUTO = 'AUTO',
+  DARK = 'DARK',
+}
+
+export type TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER = {
+  [key in TELEMETRY_EMS_BASEMAP_TYPES]?: ClusterCountStats;
 };
 
 export function getTelemetryLayerType(
@@ -218,5 +235,39 @@ export function getTermJoinsPerCluster(
       layerDescriptor.joins.length
       ? 'TERM'
       : null;
+  });
+}
+
+export function getBaseMapsPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER {
+  return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
+    if (
+      !layerDescriptor.sourceDescriptor ||
+      layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.EMS_TMS
+    ) {
+      return null;
+    }
+
+    const descriptor = layerDescriptor.sourceDescriptor as EMSTMSSourceDescriptor;
+
+    if (descriptor.isAutoSelect) {
+      return TELEMETRY_EMS_BASEMAP_TYPES.AUTO;
+    }
+
+    // This needs to be hardcoded.
+    if (descriptor.id === DEFAULT_EMS_ROADMAP_ID) {
+      return TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP;
+    }
+
+    if (descriptor.id === DEFAULT_EMS_ROADMAP_DESATURATED_ID) {
+      return TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED;
+    }
+
+    if (descriptor.id === DEFAULT_EMS_DARKMAP_ID) {
+      return TELEMETRY_EMS_BASEMAP_TYPES.DARK;
+    }
+
+    return TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP;
   });
 }

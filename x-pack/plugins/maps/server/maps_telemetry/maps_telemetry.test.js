@@ -77,6 +77,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
     expect(result.layerTypes).toEqual({});
     expect(result.scalingOptions).toEqual({});
     expect(result.joins).toEqual({});
+    expect(result.basemaps).toEqual({});
     expect(result.attributesPerMap).toEqual({
       dataSourcesCount: {
         avg: 0,
@@ -145,6 +146,14 @@ describe('buildMapsSavedObjectsTelemetry', () => {
         max: 1,
         min: 1,
         total: 1,
+      },
+    });
+    expect(result.basemaps).toEqual({
+      ROADMAP: {
+        avg: 0.6,
+        max: 1,
+        min: 1,
+        total: 3,
       },
     });
     expect(result.attributesPerMap).toEqual({

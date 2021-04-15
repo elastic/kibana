@@ -26,9 +26,11 @@ import { getIndexPatternsService, getInternalRepository } from '../kibana_server
 import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
 import {
+  getBaseMapsPerCluster,
   getScalingOptionsPerCluster,
   getTelemetryLayerTypesPerCluster,
   getTermJoinsPerCluster,
+  TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER,
   TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
   TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
   TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
@@ -63,6 +65,7 @@ export interface LayersStatsUsage {
   layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
   scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
   joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
+  basemaps: TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -260,6 +263,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
   const scalingOptions = getScalingOptionsPerCluster(layerLists);
   const joins = getTermJoinsPerCluster(layerLists);
+  const basemaps = getBaseMapsPerCluster(layerLists);
 
   return {
     // Total count of maps
@@ -269,6 +273,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
     layerTypes: telemetryLayerTypeCounts,
     scalingOptions,
     joins,
+    basemaps,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

@@ -8,7 +8,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 import { MapsConfigType } from '../../../config';
-import { TELEMETRY_LAYER_TYPE } from '../util';
+import { TELEMETRY_EMS_BASEMAP_TYPES, TELEMETRY_LAYER_TYPE } from '../util';
 import { SCALING_TYPES } from '../../../common';
 
 export function registerMapsUsageCollector(
@@ -60,6 +60,15 @@ export function registerMapsUsageCollector(
         [SCALING_TYPES.LIMIT]: clusterStats,
         [SCALING_TYPES.CLUSTERS]: clusterStats,
         [SCALING_TYPES.MVT]: clusterStats,
+      },
+      joins: {
+        TERM: clusterStats,
+      },
+      basemaps: {
+        [TELEMETRY_EMS_BASEMAP_TYPES.AUTO]: clusterStats,
+        [TELEMETRY_EMS_BASEMAP_TYPES.DARK]: clusterStats,
+        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP]: clusterStats,
+        [TELEMETRY_EMS_BASEMAP_TYPES.ROADMAP_DESATURATED]: clusterStats,
       },
       attributesPerMap: {
         dataSourcesCount: {
