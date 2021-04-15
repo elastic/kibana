@@ -68,6 +68,7 @@ export const mlExecutor = async ({
     jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
   ) {
     const errorMessage = buildRuleMessage(
+      'Machine learning job(s) are not started:',
       ...jobSummaries.map((job) =>
         [
           `job id: "${job.id}"`,

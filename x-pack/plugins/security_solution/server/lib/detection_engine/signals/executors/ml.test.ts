@@ -76,7 +76,7 @@ describe('ml_executor', () => {
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
 
-  it('should throw an error if Machine learning job summary was null', async () => {
+  it('should record a partial failure if Machine learning job summary was null', async () => {
     jobsSummaryMock.mockResolvedValue([]);
     await mlExecutor({
       rule: mlSO,
@@ -90,14 +90,14 @@ describe('ml_executor', () => {
       listClient: getListClientMock(),
     });
     expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job is not started');
-    expect(ruleStatusService.error).toHaveBeenCalled();
-    expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-      'Machine learning job is not started'
+    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+    expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
     );
   });
 
-  it('should log an error if Machine learning job was not started', async () => {
+  it('should record a partial failure if Machine learning job was not started', async () => {
     jobsSummaryMock.mockResolvedValue([
       {
         id: 'some_job_id',
@@ -118,10 +118,10 @@ describe('ml_executor', () => {
       listClient: getListClientMock(),
     });
     expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job is not started');
-    expect(ruleStatusService.error).toHaveBeenCalled();
-    expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-      'Machine learning job is not started'
+    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+    expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
     );
   });
 });
