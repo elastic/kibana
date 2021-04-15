@@ -38,33 +38,47 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
 
   const overviewListItems = [
     {
-      title: 'Status',
+      title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
+        defaultMessage: 'Status',
+      }),
       description: alert.active ? 'Active' : 'Recovered',
     },
     {
-      title: 'Severity',
+      title: i18n.translate('xpack.observability.alertsFlyout.severityLabel', {
+        defaultMessage: 'Severity',
+      }),
       description: <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />,
     },
     {
-      title: 'Triggered',
+      title: i18n.translate('xpack.observability.alertsFlyout.triggeredLabel', {
+        defaultMessage: 'Triggered',
+      }),
       description: (
         <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
       ),
     },
     {
-      title: 'Duration',
+      title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
+        defaultMessage: 'Duration',
+      }),
       description: asDuration(alert['kibana.rac.alert.duration.us'], { extended: true }),
     },
     {
-      title: 'Expected value',
+      title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
+        defaultMessage: 'Expected value',
+      }),
       description: alert['kibana.observability.evaluation.threshold'] ?? '-',
     },
     {
-      title: 'Actual value',
+      title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
+        defaultMessage: 'Actual value',
+      }),
       description: alert['kibana.observability.evaluation.value'] ?? '-',
     },
     {
-      title: 'Rule type',
+      title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
+        defaultMessage: 'Rule type',
+      }),
       description: alert['rule.category'] ?? '-',
     },
   ];

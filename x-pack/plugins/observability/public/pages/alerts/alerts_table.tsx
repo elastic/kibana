@@ -11,17 +11,16 @@ import {
   EuiBasicTableColumn,
   EuiBasicTableProps,
   EuiButton,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { AlertsFlyout } from './alerts_flyout';
 import type { TopAlert } from './';
+import { AlertsFlyout } from './alerts_flyout';
 import { SeverityBadge } from './severity_badge';
 
 type AlertsTableProps = Omit<
@@ -40,7 +39,9 @@ export function AlertsTable(props: AlertsTableProps) {
       render: (alert) =>
         alert.link ? (
           <EuiButton href={prepend(alert.link)} size="s">
-            View in app
+            {i18n.translate('xpack.observability.alertsTable.viewInAppButtonLabel', {
+              defaultMessage: 'View in app',
+            })}
           </EuiButton>
         ) : (
           <></>
@@ -52,38 +53,45 @@ export function AlertsTable(props: AlertsTableProps) {
   const columns: Array<EuiBasicTableColumn<TopAlert>> = [
     {
       field: 'active',
-      name: 'Status',
+      name: i18n.translate('xpack.observability.alertsTable.statusColumnDescription', {
+        defaultMessage: 'Status',
+      }),
       align: 'center',
-      render: (_, { active }) => {
+      render: (_, alert) => {
+        const { active } = alert;
+
         return active ? (
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.alertsTable.status.active', {
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusActiveDescription', {
               defaultMessage: 'Active',
             })}
-          >
-            <EuiIcon type="alert" color="danger" />
-          </EuiToolTip>
+            color="danger"
+            type="alert"
+          />
         ) : (
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.alertsTable.status.recovered', {
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusRecoveredDescription', {
               defaultMessage: 'Recovered',
             })}
-          >
-            <EuiIcon type="check" />
-          </EuiToolTip>
+            type="check"
+          />
         );
       },
     },
     {
       field: 'start',
-      name: 'Triggered',
+      name: i18n.translate('xpack.observability.alertsTable.triggeredColumnDescription', {
+        defaultMessage: 'Triggered',
+      }),
       render: (_, item) => {
         return <TimestampTooltip time={new Date(item.start).getTime()} timeUnit="milliseconds" />;
       },
     },
     {
       field: 'duration',
-      name: 'Duration',
+      name: i18n.translate('xpack.observability.alertsTable.durationColumnDescription', {
+        defaultMessage: 'Duration',
+      }),
       render: (_, alert) => {
         const { active } = alert;
         return active
@@ -93,14 +101,18 @@ export function AlertsTable(props: AlertsTableProps) {
     },
     {
       field: 'severity',
-      name: 'Severity',
+      name: i18n.translate('xpack.observability.alertsTable.severityColumnDescription', {
+        defaultMessage: 'Severity',
+      }),
       render: (_, alert) => {
         return <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />;
       },
     },
     {
       field: 'reason',
-      name: 'Reason',
+      name: i18n.translate('xpack.observability.alertsTable.reasonColumnDescription', {
+        defaultMessage: 'Reason',
+      }),
       dataType: 'string',
       render: (_, item) => {
         return <EuiLink onClick={() => setFlyoutAlert(item)}>{item.reason}</EuiLink>;
@@ -108,7 +120,9 @@ export function AlertsTable(props: AlertsTableProps) {
     },
     {
       actions,
-      name: 'Actions',
+      name: i18n.translate('xpack.observability.alertsTable.actionsColumnDescription', {
+        defaultMessage: 'Actions',
+      }),
     },
   ];
 
