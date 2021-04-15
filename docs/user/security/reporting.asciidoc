@@ -16,20 +16,30 @@ For more information, see
 ////
 
 [[reporting-app-users]]
-Access to reporting features is limited to privileged users. In versions 7.12 and below, you can grant the privilege
-by assigning users the `reporting_user` role in Elasticsearch. In 7.13 and above, you can configure Reporting to use
-<<kibana-privileges, {kib} privileges>> instead. It is recommended that Reporting is configured to
-use the new method of Kibana privileges by adding `xpack.reporting.roles.enabled: false` in your kibana.yml. By
-turning off the Elasticsearch built-in roles and using Kibana privileges, you can define custom roles that grant
-users access to reporting features, on a per-space basis and per-application basis.
+Access to reporting features is limited to privileged users. In older versions of Kibana, you could only grant
+users the privilege by assigning them the `reporting_user` role in Elasticsearch. In 7.13 and above, you have
+the option to create your own roles that grant access to reporting features using <<kibana-privileges, {kib} privileges>> instead.
+
+It is recommended that you set `xpack.reporting.roles.enabled: false` in your kibana.yml to begin using Kibana
+privileges. This will allow users to only see Reporting widgets in applications when they have privilege to use
+them. 
+
+[NOTE]
+============================================================================
+The default value of `xpack.reporting.roles.enabled` is `true` for 7.x versions of Kibana. To migrate users to the
+new method of securing access to Reporting, you must explicitly set `xpack.reporting.roles.enabled: false` in
+`kibana.yml`. In the next major version of Kibana, having this set to `false` will be the only valid configuration.
+============================================================================
+
+This document discusses how to create a role that grants access to reporting features using the new method of
+Kibana application privileges. 
 
 [float]
 [[reporting-roles-management-ui]]
-=== If you are using the `native` realm
+=== Creating the role in the `native` realm
 
-To assign roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>.
-This example shows how to use *Roles* page to create a user who has a custom role 
-that grants reporting feature privileges in Kibana applications.
+To create roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>. This example shows how to use
+*Roles* page to create a role that grants reporting feature privileges in Kibana applications.
 
 . Open the main menu, then click *Stack Management > Roles*.
 
@@ -120,6 +130,35 @@ reporting_user:
   - "cn=Bill Murray,dc=example,dc=com"
 --------------------------------------------------------------------------------
 
+[float]
+=== With a custom index
+
+If you are using Reporting with a custom index,
+the `xpack.reporting.index` setting should begin 
+with `.reporting-*`. The default {kib} system user has
+`all` privileges against the `.reporting-*` pattern of indices.
+
+[source,js]
+xpack.reporting.index: '.reporting-custom-index'
+
+If you use a different pattern for the `xpack.reporting.index` setting,
+you must create a custom `kibana_system` user with appropriate access to the index, similar
+to the following:
+
+. Open the main menu, then click *Stack Management > Roles*.
+. Click *Create role*, then name the role `custom-reporting-user`.
+. Specify the custom index and assign it the `all` index privilege.
+. Open the main menu, then click *Stack Management > Users* and create a new user with
+the `kibana_system` role and the `custom-reporting-user` role.
+. Configure {kib} to use the new account:
+[source,js]
+elasticsearch.username: 'custom_kibana_system'
+
+[NOTE]
+============================================================================
+Setting a custom index for Reporting will be unsupported in the next major version of Kibana.
+============================================================================
+
 [role="xpack"]
 [[securing-reporting]]
 === Secure the reporting endpoints
@@ -167,28 +206,3 @@ includes a watch that submits requests as the built-in `elastic` user:
 
 For more information about configuring watches, see
 {ref}/how-watcher-works.html[How {watcher} works].
-
-[float]
-==== When using a custom index
-
-If you are using Reporting with a custom index,
-the `xpack.reporting.index` setting should begin 
-with `.reporting-*`. The default {kib} system user has
-`all` privileges against the `.reporting-*` pattern of indices.
-
-[source,js]
-xpack.reporting.index: '.reporting-custom-index'
-
-If you use a different pattern for the `xpack.reporting.index` setting,
-you must create a custom role with appropriate access to the index, similar
-to the following:
-
-. Open the main menu, then click *Stack Management > Roles*.
-. Click *Create role*, then name the role `custom-reporting-user`.
-. Specify the custom index and assign it the `all` index privilege.
-. Open the main menu, then click *Stack Management > Users* and create a new user with
-the `kibana_system` role and the `custom-reporting-user` role.
-. Configure {kib} to use the new account:
-[source,js]
-elasticsearch.username: 'custom_kibana_system'
-
