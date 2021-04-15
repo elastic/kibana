@@ -24,16 +24,16 @@ export interface GetSpaceResult extends Space {
 }
 
 export interface GetShareableReferencesResponse {
-  /** The count of references that are not tags */
+  /** The count of references that are not tags. */
   relativesCount: number;
-  /** The count of references that are tags */
+  /** The count of references that are tags. */
   tagsCount: number;
-  /** The spaces that are selected (all objects are in these spaces) */
+  /** The spaces that are selected (all objects are in these spaces). */
   selectedSpaces: string[];
-  /** The spaces that are partially selected (some -- but not all -- objects are in these spaces) */
+  /** The spaces that are partially selected (some -- but not all -- objects are in these spaces). */
   partiallySelectedSpaces: string[];
-  /** The spaces that are unknown */
+  /** The spaces that are unknown to the current user. */
   unknownSpacesCount: number;
-  /** The references that were found, with additional context -- including the input objects */
+  /** The references that were found, with additional context -- including the input objects. */
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
 }

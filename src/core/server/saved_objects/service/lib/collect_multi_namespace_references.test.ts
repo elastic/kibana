@@ -199,34 +199,10 @@ describe('collectMultiNamespaceReferences', () => {
       mockMgetResults({ found: true, references: [{ type, id: `id-${i + 1}` }] });
     }
 
-    const result = await collectMultiNamespaceReferences(params);
-    expect(params.client.mget).toHaveBeenCalledTimes(20);
-    expect(result.objects).toHaveLength(21);
-    expect(result.objects).toEqual(
-      expect.arrayContaining([
-        { type, id: 'id-1', spaces: SPACES, inboundReferences: [] },
-        {
-          type,
-          id: 'id-2',
-          spaces: SPACES,
-          inboundReferences: [{ type, id: 'id-1', name: 'ref-name' }],
-        },
-        // this assertion is for `arrayContaining`, no need to define objects 3-19...
-        {
-          type,
-          id: 'id-20',
-          spaces: SPACES,
-          inboundReferences: [{ type, id: 'id-19', name: 'ref-name' }],
-        },
-        {
-          type,
-          id: 'id-21',
-          spaces: [], // since we hit the circuit-breaker, we know there is a reference to object 21 but we do not know if it exists
-          inboundReferences: [{ type, id: 'id-20', name: 'ref-name' }],
-          // we do not include `isMissing: true` because we never attempted to fetch this reference
-        },
-      ])
+    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
+      /Exceeded maximum reference graph depth/
     );
+    expect(params.client.mget).toHaveBeenCalledTimes(20);
   });
 
   it('handles multiple inbound references', async () => {
@@ -479,7 +455,7 @@ describe('collectMultiNamespaceReferences', () => {
       );
 
       await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
-        'Failed to retrieve legacy URL aliases'
+        'Failed to retrieve legacy URL aliases: Oh no!'
       );
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       expect(client.search).not.toHaveBeenCalled();
@@ -495,7 +471,7 @@ describe('collectMultiNamespaceReferences', () => {
       );
 
       await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
-        'Failed to retrieve legacy URL aliases'
+        'Failed to retrieve legacy URL aliases: Oh no!'
       );
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -510,7 +486,9 @@ describe('collectMultiNamespaceReferences', () => {
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Oh no!'))
       );
 
-      await collectMultiNamespaceReferences(params); // does not throw because the search completed successfully
+      await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
+        'Failed to retrieve legacy URL aliases: Oh no!'
+      );
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.closePointInTime).toHaveBeenCalledTimes(1);

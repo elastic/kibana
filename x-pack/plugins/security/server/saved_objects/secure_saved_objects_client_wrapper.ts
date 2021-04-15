@@ -123,7 +123,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const namespaces = [optionsWithId.namespace, ...(optionsWithId.initialNamespaces || [])];
     try {
       const args = { type, attributes, options: optionsWithId };
-      await this.ensureAuthorized(type, 'create', namespaces, { args });
+      await this.legacyEnsureAuthorized(type, 'create', namespaces, { args });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -152,7 +152,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const args = { objects, options };
     const types = this.getUniqueObjectTypes(objects);
-    await this.ensureAuthorized(types, 'bulk_create', options.namespace, {
+    await this.legacyEnsureAuthorized(types, 'bulk_create', options.namespace, {
       args,
       auditAction: 'checkConflicts',
     });
@@ -175,7 +175,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
     try {
       const args = { objects: objectsWithId, options };
-      await this.ensureAuthorized(
+      await this.legacyEnsureAuthorized(
         this.getUniqueObjectTypes(objectsWithId),
         'bulk_create',
         namespaces,
@@ -212,7 +212,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     try {
       const args = { type, id, options };
-      await this.ensureAuthorized(type, 'delete', options.namespace, { args });
+      await this.legacyEnsureAuthorized(type, 'delete', options.namespace, { args });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -251,7 +251,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     const args = { options };
-    const { status, typeMap } = await this.ensureAuthorized(
+    const { status, typeMap } = await this.legacyEnsureAuthorized(
       options.type,
       'find',
       options.namespaces,
@@ -299,7 +299,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { objects, options };
-      await this.ensureAuthorized(
+      await this.legacyEnsureAuthorized(
         this.getUniqueObjectTypes(objects),
         'bulk_get',
         options.namespace,
@@ -339,7 +339,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     try {
       const args = { type, id, options };
-      await this.ensureAuthorized(type, 'get', options.namespace, { args });
+      await this.legacyEnsureAuthorized(type, 'get', options.namespace, { args });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -370,7 +370,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { type, id, options };
-      await this.ensureAuthorized(type, 'get', options.namespace, { args, auditAction: 'resolve' });
+      await this.legacyEnsureAuthorized(type, 'get', options.namespace, {
+        args,
+        auditAction: 'resolve',
+      });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -407,7 +410,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { type, id, attributes, options };
-      await this.ensureAuthorized(type, 'update', options.namespace, { args });
+      await this.legacyEnsureAuthorized(type, 'update', options.namespace, { args });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -440,7 +443,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     try {
       const args = { type, id, namespaces, options };
       // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
-      await this.ensureAuthorized(type, 'share_to_space', namespaces, {
+      await this.legacyEnsureAuthorized(type, 'share_to_space', namespaces, {
         args,
         auditAction: 'addToNamespacesCreate',
       });
@@ -449,7 +452,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
       // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
       // will result in a 404 error.
-      await this.ensureAuthorized(type, 'share_to_space', namespace, {
+      await this.legacyEnsureAuthorized(type, 'share_to_space', namespace, {
         args,
         auditAction: 'addToNamespacesUpdate',
       });
@@ -486,7 +489,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     try {
       const args = { type, id, namespaces, options };
       // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
-      await this.ensureAuthorized(type, 'share_to_space', namespaces, {
+      await this.legacyEnsureAuthorized(type, 'share_to_space', namespaces, {
         args,
         auditAction: 'deleteFromNamespaces',
       });
@@ -526,9 +529,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const namespaces = [options?.namespace, ...objectNamespaces];
     try {
       const args = { objects, options };
-      await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
-        args,
-      });
+      await this.legacyEnsureAuthorized(
+        this.getUniqueObjectTypes(objects),
+        'bulk_update',
+        namespaces,
+        {
+          args,
+        }
+      );
     } catch (error) {
       objects.forEach(({ type, id }) =>
         this.auditLogger.log(
@@ -562,7 +570,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { type, id, options };
-      await this.ensureAuthorized(type, 'delete', options.namespace, {
+      await this.legacyEnsureAuthorized(type, 'delete', options.namespace, {
         args,
         auditAction: 'removeReferences',
       });
@@ -594,7 +602,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { type, options };
-      await this.ensureAuthorized(type, 'open_point_in_time', options?.namespace, {
+      await this.legacyEnsureAuthorized(type, 'open_point_in_time', options?.namespace, {
         args,
         // Partial authorization is acceptable in this case because this method is only designed
         // to be used with `find`, which already allows for partial authorization.
@@ -669,7 +677,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       )
     );
 
-    const { typeActionMap } = await this.ensureAuthorizedV2<'bulk_get' | 'share_to_space'>(
+    const { typeActionMap } = await this.ensureAuthorized<'bulk_get' | 'share_to_space'>(
       uniqueTypes,
       options.purpose === 'updateObjectsSpaces' ? ['bulk_get', 'share_to_space'] : ['bulk_get'],
       uniqueSpaces,
@@ -772,7 +780,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     });
 
     const uniqueTypes = this.getUniqueObjectTypes(objects);
-    const { typeActionMap } = await this.ensureAuthorizedV2<'bulk_get' | 'share_to_space'>(
+    const { typeActionMap } = await this.ensureAuthorized<'bulk_get' | 'share_to_space'>(
       uniqueTypes,
       ['bulk_get', 'share_to_space'],
       Array.from(allSpacesSet),
@@ -784,13 +792,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       const spaces = this.getUniqueSpaces(currentSpaceId, ...spacesToAdd, ...spacesToRemove);
       this.ensureAuthorizedInAllSpaces(objects, 'share_to_space', typeActionMap, spaces);
     } catch (error) {
+      const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
+      const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
       objects.forEach(({ type, id }) =>
         this.auditLogger.log(
           savedObjectEvent({
             action: SavedObjectAction.UPDATE_OBJECTS_SPACES,
             savedObject: { type, id },
-            ...(spacesToAdd.length && { addToSpaces: spacesToAdd }),
-            ...(spacesToRemove.length && { deleteFromSpaces: spacesToRemove }),
+            addToSpaces,
+            deleteFromSpaces,
             error,
           })
         )
@@ -802,7 +812,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       objectsToUpdate,
       spacesToAdd,
       spacesToRemove,
-      { namespace } // Intentionally omit `includeReferences`, as we've already resolved references above.
+      { namespace }
     );
     // Now that we have updated the objects' spaces, redact any spaces that the user is not authorized to see from the response.
     const redactedObjects = response.objects.map((obj) => {
@@ -825,7 +835,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
   }
 
-  private async ensureAuthorized(
+  private async legacyEnsureAuthorized(
     typeOrTypes: string | string[],
     action: string,
     namespaceOrNamespaces: undefined | string | Array<undefined | string>,
@@ -906,8 +916,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
   }
 
-  /** Unlike `ensureAuthorized`, this accepts multiple actions, and it does not utilize legacy audit logging */
-  private async ensureAuthorizedV2<T extends string>(
+  /** Unlike `legacyEnsureAuthorized`, this accepts multiple actions, and it does not utilize legacy audit logging */
+  private async ensureAuthorized<T extends string>(
     types: string[],
     actions: string[],
     namespaces: string[],
@@ -964,7 +974,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   /**
-   * If `ensureAuthorizedV2` was called with `requireFullAuthorization: false`, this can be used with the result to ensure that a given
+   * If `ensureAuthorized` was called with `requireFullAuthorization: false`, this can be used with the result to ensure that a given
    * array of objects are authorized in the required space(s).
    */
   private ensureAuthorizedInAllSpaces<T extends string>(

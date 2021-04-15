@@ -6,34 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { getRootFields, includedFields, ROOT_FIELDS } from './included_fields';
+import { getRootFields, includedFields } from './included_fields';
 
 describe('getRootFields', () => {
   it('returns copy of root fields', () => {
     const fields = getRootFields();
-    expect(fields).toEqual(ROOT_FIELDS);
-    expect(fields).not.toBe(ROOT_FIELDS);
+    expect(fields).toMatchInlineSnapshot(`
+      Array [
+        "namespace",
+        "namespaces",
+        "type",
+        "references",
+        "migrationVersion",
+        "coreMigrationVersion",
+        "updated_at",
+        "originId",
+      ]
+    `);
   });
 });
 
 describe('includedFields', () => {
+  const rootFields = getRootFields();
+
   it('returns undefined if fields are not provided', () => {
     expect(includedFields()).toBe(undefined);
   });
 
   it('accepts type and field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toEqual(['config.foo', ...ROOT_FIELDS, 'foo']);
+    expect(fields).toEqual(['config.foo', ...rootFields, 'foo']);
   });
 
   it('accepts type as array and field as string', () => {
     const fields = includedFields(['config', 'secret'], 'foo');
-    expect(fields).toEqual(['config.foo', 'secret.foo', ...ROOT_FIELDS, 'foo']);
+    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields, 'foo']);
   });
 
   it('accepts type as string and field as array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
-    expect(fields).toEqual(['config.foo', 'config.bar', ...ROOT_FIELDS, 'foo', 'bar']);
+    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields, 'foo', 'bar']);
   });
 
   it('accepts type as array and field as array', () => {
@@ -43,7 +55,7 @@ describe('includedFields', () => {
       'config.bar',
       'secret.foo',
       'secret.bar',
-      ...ROOT_FIELDS,
+      ...rootFields,
       'foo',
       'bar',
     ]);
@@ -51,6 +63,6 @@ describe('includedFields', () => {
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toEqual(['*.foo', ...ROOT_FIELDS, 'foo']);
+    expect(fields).toEqual(['*.foo', ...rootFields, 'foo']);
   });
 });

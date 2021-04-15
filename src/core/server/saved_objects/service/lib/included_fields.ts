@@ -10,7 +10,7 @@ function toArray(value: string | string[]): string[] {
   return typeof value === 'string' ? [value] : value;
 }
 
-export const ROOT_FIELDS = [
+const ROOT_FIELDS = [
   'namespace',
   'namespaces',
   'type',

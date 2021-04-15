@@ -17,6 +17,16 @@ import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_ut
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**
+ * When we collect an object's outbound references, we will only go a maximium of this many levels deep before we throw an error.
+ */
+const MAX_REFERENCE_GRAPH_DEPTH = 20;
+
+/**
+ * When we search for an object's matching aliases, we use a point-in-time which will only stay alive this long.
+ */
+const PIT_KEEP_ALIVE = '1m';
+
+/**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
  * `namespaceType: 'multi'` or `namespaceType: 'multi-isolated'` option).
  *
@@ -137,22 +147,28 @@ export async function collectMultiNamespaceReferences({
       _index: getIndexForType(type),
       _source: rootFields, // Optimized to only retrieve root fields (ignoring type-specific fields)
     }));
-  const objectFilter = ({ type }: SavedObjectsCollectMultiNamespaceReferencesObject) =>
+  const validObjectTypesFilter = ({ type }: SavedObjectsCollectMultiNamespaceReferencesObject) =>
     allowedTypes.includes(type) &&
     (purpose === 'updateObjectsSpaces'
       ? registry.isShareable(type)
       : registry.isMultiNamespace(type)) &&
     !typesToExclude.includes(type);
 
-  let bulkGetObjects = objects.filter(objectFilter);
+  let bulkGetObjects = objects.filter(validObjectTypesFilter);
   let count = 0; // this is a circuit-breaker to ensure we don't hog too many resources; we should never have an object graph this deep
-  while (bulkGetObjects.length && count++ < 20) {
+  while (bulkGetObjects.length) {
+    if (count >= MAX_REFERENCE_GRAPH_DEPTH) {
+      throw new Error(
+        `Exceeded maximum reference graph depth of ${MAX_REFERENCE_GRAPH_DEPTH} objects!`
+      );
+    }
     const bulkGetResponse = await client.mget(
       { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
       { ignore: [404] }
     );
     const newObjectsToGet = new Set<string>();
     for (let i = 0; i < bulkGetObjects.length; i++) {
+      // For every element in bulkGetObjects, there should be a matching element in bulkGetResponse.body.docs
       const { type, id } = bulkGetObjects[i];
       const objectKey = `${type}:${id}`;
       const doc = bulkGetResponse.body.docs[i];
@@ -165,7 +181,7 @@ export async function collectMultiNamespaceReferences({
       const object = getSavedObjectFromSource(registry, type, id, doc);
       objectMap.set(objectKey, object);
       for (const reference of object.references) {
-        if (!objectFilter(reference)) {
+        if (!validObjectTypesFilter(reference)) {
           continue;
         }
         const referenceKey = `${reference.type}:${reference.id}`;
@@ -179,6 +195,7 @@ export async function collectMultiNamespaceReferences({
       }
     }
     bulkGetObjects = Array.from(newObjectsToGet).map((key) => parseKey(key));
+    count++;
   }
 
   const objectsWithContext = Array.from(
@@ -213,8 +230,6 @@ export async function collectMultiNamespaceReferences({
   };
 }
 
-const PIT_KEEP_ALIVE = '1m';
-
 async function checkLegacyUrlAliases(
   client: RepositoryEsClient,
   serializer: SavedObjectsSerializer,
@@ -228,7 +243,8 @@ async function checkLegacyUrlAliases(
   }
   let pitId: string | undefined;
   const index = getIndexForType(LEGACY_URL_ALIAS_TYPE);
-  let returnValue: Map<string, Set<string>> | null = null;
+  const aliasesMap = new Map<string, Set<string>>();
+  let error: Error | undefined;
   try {
     const { body } = await client.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
     pitId = body.id;
@@ -236,7 +252,6 @@ async function checkLegacyUrlAliases(
     const query = createAliasQuery(filteredObjects);
     let lastResultsCount = 0;
     let from = 0;
-    const aliasesMap = new Map<string, Set<string>>();
     do {
       const results = await client.search<SavedObjectsRawDocSource>({
         // don't specify index, since we are using the pit
@@ -262,23 +277,24 @@ async function checkLegacyUrlAliases(
       lastResultsCount = hits.length;
       from += lastResultsCount;
     } while (lastResultsCount >= perPage); // end the loop when there are fewer hits than our perPage size
-    returnValue = aliasesMap;
   } catch (e) {
-    // do nothing
+    error = e;
   }
 
   if (pitId) {
     try {
       await client.closePointInTime({ body: { id: pitId } });
     } catch (e) {
-      // do nothing
+      if (!error) {
+        error = e;
+      }
     }
   }
 
-  if (!returnValue) {
-    throw new Error('Failed to retrieve legacy URL aliases');
+  if (error) {
+    throw new Error(`Failed to retrieve legacy URL aliases: ${error.message}`);
   }
-  return returnValue;
+  return aliasesMap;
 }
 
 function createAliasQuery(objects: SavedObjectReferenceWithContext[]): QueryContainer {
