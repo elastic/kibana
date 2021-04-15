@@ -52,6 +52,10 @@ export async function bulkCreateAgentActions(
     };
   });
 
+  if (actions.length === 0) {
+    return actions;
+  }
+
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
     body: actions.flatMap((action) => {
