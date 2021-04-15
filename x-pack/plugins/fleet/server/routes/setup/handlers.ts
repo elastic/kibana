@@ -8,38 +8,30 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { outputService, appContextService } from '../../services';
+import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager, setupFleet } from '../../services/setup';
-import type { PostFleetSetupRequestSchema } from '../../types';
+import { setupFleet, setupIngestManager } from '../../services/setup';
+import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { PostFleetSetupRequestSchema } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   try {
-    const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
-    const isProductionMode = appContextService.getIsProductionMode();
-    const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
-    const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
+    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
     const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
-    if (!isAdminUserSetup) {
-      missingRequirements.push('fleet_admin_user');
-    }
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
-    if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
-      missingRequirements.push('tls_required');
-    }
-
     if (!canEncrypt) {
       missingRequirements.push('encrypted_saved_object_encryption_key_required');
+    }
+    if (!isFleetServerSetup) {
+      missingRequirements.push('fleet_server');
     }
 
     const body: GetFleetStatusResponse = {
@@ -55,18 +47,12 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const createFleetSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PostFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
+export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body = await setupIngestManager(soClient, esClient);
-    await setupFleet(soClient, esClient, {
-      forceRecreate: request.body?.forceRecreate ?? false,
-    });
+    const body: PostIngestSetupResponse = { isInitialized: true };
+    await setupIngestManager(soClient, esClient);
 
     return response.ok({
       body,
@@ -76,12 +62,19 @@ export const createFleetSetupHandler: RequestHandler<
   }
 };
 
-export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-
+// TODO should be removed as part https://github.com/elastic/kibana/issues/94303
+export const fleetAgentSetupHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostFleetSetupRequestSchema.body>
+> = async (context, request, response) => {
   try {
-    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
+    const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const body: PostIngestSetupResponse = { isInitialized: true };
+    await setupIngestManager(soClient, esClient);
+    await setupFleet(soClient, esClient, { forceRecreate: request.body?.forceRecreate === true });
+
     return response.ok({
       body,
     });

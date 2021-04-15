@@ -96,7 +96,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
@@ -243,8 +243,9 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
-        if (input.timeRange) {
+      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
+        // for openInNewTab, we set the time range in url via getEditPath below
+        if (input.timeRange && !openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
@@ -252,7 +253,8 @@ export class LensPlugin {
           core.application.currentAppId$
         );
         transfer.navigateToEditor('lens', {
-          path: getEditPath(undefined),
+          openInNewTab,
+          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
           state: {
             originatingApp: '',
             valueInput: input,
