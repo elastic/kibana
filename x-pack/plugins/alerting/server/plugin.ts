@@ -377,7 +377,7 @@ export class AlertingPlugin {
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
         areApiKeysEnabled: async () => {
-          const [_, { security }] = await core.getStartServices();
+          const [, { security }] = await core.getStartServices();
           return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
         },
       };
