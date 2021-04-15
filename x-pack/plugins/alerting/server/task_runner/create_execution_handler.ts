@@ -7,10 +7,7 @@
 
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import {
-  PluginStartContract as ActionsPluginStartContract,
-  asSavedObjectExecutionSource,
-} from '../../../actions/server';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
@@ -159,16 +156,28 @@ export function createExecutionHandler<
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      await actionsClient.enqueueExecution({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey: apiKey ?? null,
-        source: asSavedObjectExecutionSource({
-          id: alertId,
-          type: 'alert',
-        }),
+      await actionsClient.executeEphemeralTask({
+        taskType: `actions:${action.actionTypeId}`,
+        params: {
+          ...action.params,
+          taskParams: {
+            actionId: action.id,
+            apiKey,
+            params: action.params,
+          },
+        },
+        state: {},
       });
+      // await actionsClient.enqueueExecution({
+      //   id: action.id,
+      //   params: action.params,
+      //   spaceId,
+      //   apiKey: apiKey ?? null,
+      //   source: asSavedObjectExecutionSource({
+      //     id: alertId,
+      //     type: 'alert',
+      //   }),
+      // });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
