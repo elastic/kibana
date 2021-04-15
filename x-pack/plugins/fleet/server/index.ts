@@ -57,6 +57,7 @@ export const config: PluginConfigDescriptor = {
           hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
         })
       ),
+      agentPolicyTightPermissions: schema.boolean({ defaultValue: false }),
     }),
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,

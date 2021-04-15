@@ -18,6 +18,7 @@ export const createConfigurationMock = (): FleetConfigType => {
         host: '',
         ca_sha256: '',
       },
+      agentPolicyTightPermissions: false,
     },
   };
 };
