@@ -38,7 +38,7 @@ RUN yarn config set yarn-offline-mirror "/var/lib/kibana/yarn-offline-cache"
 # RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
 RUN yarn install
 
-COPY  --chown=kibana:kibana . .
+COPY --chown=kibana:kibana . .
 
 ENV BUILD_TS_REFS_DISABLE=true
 RUN yarn kbn bootstrap --no-cache

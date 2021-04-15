@@ -1,4 +1,6 @@
 ARG BASE_IMAGE=kibana-bk-ci
+ARG GIT_COMMIT=NONE
 FROM ${BASE_IMAGE}
 
+ENV GIT_COMMIT=$GIT_COMMIT
 RUN .buildkite/scripts/build_kibana_inside_docker.sh
