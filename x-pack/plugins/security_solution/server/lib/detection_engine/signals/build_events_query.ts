@@ -72,7 +72,7 @@ export const buildEventsSearchQuery = ({
                   bool: {
                     must_not: {
                       exists: {
-                        field: 'event.ingested',
+                        field: timestampOverride,
                       },
                     },
                   },
