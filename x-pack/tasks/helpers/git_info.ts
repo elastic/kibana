@@ -13,7 +13,7 @@ import simpleGit from 'simple-git';
 const gitDir = path.resolve(__dirname, '..', '..');
 
 export async function gitInfo() {
-  if (!fs.existsSync(gitDir)) {
+  if (!fs.existsSync(path.join(gitDir, '.git'))) {
     return {
       number: 1,
       sha: process.env.GIT_COMMIT,
