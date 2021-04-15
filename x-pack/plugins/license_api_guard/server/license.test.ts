@@ -43,15 +43,15 @@ describe('License API guard', () => {
 
     const route = jest.fn();
     const guardedRoute = license.guardApiRoute(route);
-    const customError = jest.fn();
+    const forbidden = jest.fn();
     const responseMock = httpServerMock.createResponseFactory();
-    responseMock.customError = customError;
+    responseMock.forbidden = forbidden;
     guardedRoute({} as RequestHandlerContext, {} as KibanaRequest, responseMock);
 
     return {
       errorResponse:
-        customError.mock.calls.length > 0
-          ? customError.mock.calls[customError.mock.calls.length - 1][0]
+        forbidden.mock.calls.length > 0
+          ? forbidden.mock.calls[forbidden.mock.calls.length - 1][0]
           : undefined,
       logMesssage:
         logger.warn.mock.calls.length > 0
@@ -86,14 +86,15 @@ describe('License API guard', () => {
     },
   ].forEach(({ licenseState, expectedMessage }) => {
     describe(`${licenseState} license`, () => {
-      it('replies with 403 and message and logs the message', () => {
+      it('replies with and logs the error message', () => {
         const { errorResponse, logMesssage, route } = testRoute({ licenseState });
 
+        // We depend on the call to `response.forbidden()` to generate the 403 status code,
+        // so we can't assert for it here.
         expect(errorResponse).toEqual({
           body: {
             message: expectedMessage,
           },
-          statusCode: 403,
         });
 
         expect(logMesssage).toBe(expectedMessage);

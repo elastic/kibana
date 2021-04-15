@@ -96,11 +96,10 @@ export class License {
         const licenseErrorMessage = this.getLicenseErrorMessage(this.licenseCheckState);
         this.logger?.warn(licenseErrorMessage);
 
-        return response.customError({
+        return response.forbidden({
           body: {
             message: licenseErrorMessage,
           },
-          statusCode: 403,
         });
       }
 
@@ -108,7 +107,6 @@ export class License {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   public get isEsSecurityEnabled() {
     return this._isEsSecurityEnabled;
   }
