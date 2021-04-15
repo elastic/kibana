@@ -112,7 +112,9 @@ export const MiddleTruncatedText = ({
             </StyledButton>
           ) : (
             <InnerContainer aria-hidden={true}>
-              <FirstChunk>{chunks.first}</FirstChunk>
+              <FirstChunk>
+                {index}. {chunks.first}
+              </FirstChunk>
               <LastChunk>{chunks.last}</LastChunk>
             </InnerContainer>
           )}
