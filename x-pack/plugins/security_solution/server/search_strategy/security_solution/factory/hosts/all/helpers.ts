@@ -14,8 +14,7 @@ import {
   HostsEdges,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const HOSTS_FIELDS: readonly string[] = [
   '_id',
