@@ -8,27 +8,12 @@
 import React, { useState } from 'react';
 
 import { useDebounce } from 'react-use';
-import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
-
-export interface FieldValueSuggestionsProps {
-  value?: string;
-  label: string;
-  indexPattern: IndexPattern;
-  sourceField: string;
-  onChange: (val?: string) => void;
-  filters: ESFilter[];
-  anchorPosition?: PopoverAnchorPosition;
-  time?: { from: string; to: string };
-  forceOpen?: boolean;
-  button?: JSX.Element;
-  width?: number;
-}
+import { FieldValueSuggestionsProps } from './types';
 
 export function FieldValueSuggestions({
+  fullWidth,
   sourceField,
   label,
   indexPattern,
@@ -39,6 +24,7 @@ export function FieldValueSuggestions({
   width,
   forceOpen,
   anchorPosition,
+  singleSelection,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
@@ -56,6 +42,8 @@ export function FieldValueSuggestions({
 
   return (
     <FieldValueSelection
+      fullWidth={fullWidth}
+      singleSelection={singleSelection}
       values={values as string[]}
       label={label}
       onChange={onSelectionChange}
