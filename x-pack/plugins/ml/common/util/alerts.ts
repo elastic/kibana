@@ -8,20 +8,31 @@
 import { CombinedJobWithStats } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
 import { isDefined } from '../types/guards';
+import { parseInterval } from './parse_interval';
+
+const narrowBucketLength = 60;
 
 /**
  * Resolved the lookback interval for the rule
  * using the formula max(2m, 2 * bucket_span) + query_delay + 1s
  */
 export function getLookbackInterval(jobs: CombinedJobWithStats[]): number {
-  const narrowBucketLength = 60;
-
-  const bucketSpanInSeconds = Math.round(
+  const bucketSpanInSeconds = Math.ceil(
     resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span)) ?? 0
   );
-  const queryDelayInSeconds = Math.round(
+  const queryDelayInSeconds = Math.ceil(
     resolveMaxTimeInterval(jobs.map((v) => v.datafeed_config.query_delay).filter(isDefined)) ?? 0
   );
 
   return Math.max(2 * narrowBucketLength, 2 * bucketSpanInSeconds) + queryDelayInSeconds + 1;
+}
+
+export function getTopNBuckets(job: CombinedJobWithStats): number {
+  const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+
+  if (bucketSpan === null) {
+    throw new Error('Unable to resolve a bucket span length');
+  }
+
+  return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
 }

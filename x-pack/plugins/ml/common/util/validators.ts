@@ -86,6 +86,10 @@ export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
 
 export function timeIntervalInputValidator() {
   return (value: string) => {
+    if (value === '') {
+      return null;
+    }
+
     const r = parseInterval(value);
     if (r === null) {
       return {

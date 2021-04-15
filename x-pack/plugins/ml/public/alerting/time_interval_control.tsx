@@ -9,7 +9,7 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import React, { FC, ReactNode, useMemo } from 'react';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 import { composeValidators } from '../../common';
-import { requiredValidator, timeIntervalInputValidator } from '../../common/util/validators';
+import { timeIntervalInputValidator } from '../../common/util/validators';
 
 interface TimeIntervalControlProps {
   label: string | ReactNode;
@@ -18,10 +18,7 @@ interface TimeIntervalControlProps {
 }
 
 export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({ value, onChange, label }) => {
-  const validators = useMemo(
-    () => composeValidators(requiredValidator(), timeIntervalInputValidator()),
-    []
-  );
+  const validators = useMemo(() => composeValidators(timeIntervalInputValidator()), []);
 
   const validationErrors = useMemo(() => validators(value), [value]);
 
