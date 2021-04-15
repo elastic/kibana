@@ -108,7 +108,7 @@ export const HotPhase: FunctionComponent = () => {
                   <EuiSpacer size="s" />
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                    defaultMessage="Rollover when an index is 30 days old or the primary shard reaches 50 gigabytes."
+                    defaultMessage="Roll over when an index is 30 days old or any primary shard reaches 50 gigabytes."
                   />
                 </>
               )}

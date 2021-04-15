@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import { NumericField, SelectField, useFormData } from '../../../../../../../shared_imports';
+import { NumericField, SelectField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
 import { ROLLOVER_FORM_PATHS } from '../../../../constants';
-
-import { FieldDeprecationWarning } from '../../../../components';
 
 import { maxSizeStoredUnits } from '../constants';
 
@@ -23,7 +20,7 @@ const i18nTexts = {
     'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeDeprecationMessage',
     {
       defaultMessage:
-        'Maximum index size is deprecated and will be removed in future versions of the Elastic stack. Please use maximum primary shard size instead.',
+        'Maximum index size is deprecated and will be removed in a future version. Use maximum primary shard size instead.',
     }
   ),
   maxSizeUnit: {
@@ -34,46 +31,36 @@ const i18nTexts = {
 };
 
 export const MaxIndexSizeField: FunctionComponent = () => {
-  const [formData] = useFormData({ watch: ROLLOVER_FORM_PATHS.maxSize });
-  const showDeprecationWarning = !!get(formData, ROLLOVER_FORM_PATHS.maxSize);
   return (
-    <FieldDeprecationWarning
-      message={i18nTexts.deprecationMessage}
-      isShowing={false}
-      data-test-subj="maxIndexSizeFieldDeprecationWarning-hot"
-    >
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ maxWidth: 188 }}>
-          <UseField
-            path={ROLLOVER_FORM_PATHS.maxSize}
-            component={NumericField}
-            componentProps={{
-              euiFieldProps: {
-                prepend: showDeprecationWarning ? (
-                  <EuiIconTip type="alert" color="warning" content="not ok" />
-                ) : undefined,
-                'data-test-subj': 'hot-selectedMaxSizeStored',
-                min: 1,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: 188 }}>
-          <UseField
-            key="_meta.hot.customRollover.maxStorageSizeUnit"
-            path="_meta.hot.customRollover.maxStorageSizeUnit"
-            component={SelectField}
-            componentProps={{
-              'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
-              hasEmptyLabelSpace: true,
-              euiFieldProps: {
-                options: maxSizeStoredUnits,
-                'aria-label': i18nTexts.maxSizeUnit.ariaLabel,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </FieldDeprecationWarning>
+    <EuiFlexGroup>
+      <EuiFlexItem style={{ maxWidth: 188 }}>
+        <UseField
+          path={ROLLOVER_FORM_PATHS.maxSize}
+          component={NumericField}
+          componentProps={{
+            euiFieldProps: {
+              'data-test-subj': 'hot-selectedMaxSizeStored',
+              prepend: <EuiIconTip type="alert" content={i18nTexts.deprecationMessage} />,
+              min: 1,
+            },
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ maxWidth: 188 }}>
+        <UseField
+          key="_meta.hot.customRollover.maxStorageSizeUnit"
+          path="_meta.hot.customRollover.maxStorageSizeUnit"
+          component={SelectField}
+          componentProps={{
+            'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
+            hasEmptyLabelSpace: true,
+            euiFieldProps: {
+              options: maxSizeStoredUnits,
+              'aria-label': i18nTexts.maxSizeUnit.ariaLabel,
+            },
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
