@@ -97,14 +97,19 @@ export async function ensureInstalledDefaultPackages(
   });
 }
 
-export async function isPackageVersionInstalled(options: {
+async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion?: string;
 }): Promise<Installation | false> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
   const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
-  if (installedPackage && (!pkgVersion || installedPackage.version === pkgVersion)) {
+  if (
+    installedPackage &&
+    (!pkgVersion ||
+      installedPackage.version === pkgVersion ||
+      semverLt(pkgVersion, installedPackage.version))
+  ) {
     return installedPackage;
   }
   return false;
@@ -115,10 +120,9 @@ export async function ensureInstalledPackage(options: {
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
-  force?: boolean;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion, force } = options;
-  const installedPackage = await isPackageVersionInstalled({
+  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+  const installedPackage = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
     pkgName,
     pkgVersion,
@@ -137,7 +141,7 @@ export async function ensureInstalledPackage(options: {
       savedObjectsClient,
       pkgkey,
       esClient,
-      force,
+      force: true, // Always force outdated packages to be installed if a later version isn't installed
     });
   } else {
     await installLatestPackage({
