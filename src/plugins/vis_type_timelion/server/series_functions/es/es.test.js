@@ -330,10 +330,10 @@ describe('es', () => {
 
     describe('config.split', () => {
       test('adds terms aggs, in order, under the filters agg', () => {
-        config.split = ['beer:5', 'wine:10'];
+        config.split = ['beer:5', 'wine:10', ':lemo:nade::15'];
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        const aggs = request.params.body.aggs.q.aggs;
+        let aggs = request.params.body.aggs.q.aggs;
 
         expect(aggs.beer.meta.type).toEqual('split');
         expect(aggs.beer.terms.field).toEqual('beer');
@@ -342,6 +342,12 @@ describe('es', () => {
         expect(aggs.beer.aggs.wine.meta.type).toEqual('split');
         expect(aggs.beer.aggs.wine.terms.field).toEqual('wine');
         expect(aggs.beer.aggs.wine.terms.size).toEqual(10);
+
+        aggs = aggs.beer.aggs.wine.aggs;
+        expect(aggs).toHaveProperty(':lemo:nade:');
+        expect(aggs[':lemo:nade:'].meta.type).toEqual('split');
+        expect(aggs[':lemo:nade:'].terms.field).toEqual(':lemo:nade:');
+        expect(aggs[':lemo:nade:'].terms.size).toEqual(15);
       });
 
       test('adds scripted terms aggs, in order, under the filters agg', () => {
