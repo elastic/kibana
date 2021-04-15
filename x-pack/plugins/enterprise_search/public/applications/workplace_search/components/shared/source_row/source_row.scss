@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { CurationQueries } from './curation_queries';
+.source-row--error,
+.source-row--error:hover {
+  color: $euiColorDanger;
+  background: rgba($euiColorDanger, .1);
+
+  .euiLink {
+    color: $euiColorDanger;
+  }
+}
