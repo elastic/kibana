@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REQUIRED_INDICATOR_MATCH_FIELDS } from '../../../../../../common/cti/constants';
+import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
@@ -232,8 +232,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.established',
   'zeek.ssl.resumed',
   'zeek.ssl.version',
-  // TODO in the future, our alerts timeline fields should be derived from the
-  // fields required by enabled row renderers and other functionality; for now we unconditionally
-  // add the superset of fields.
-  ...REQUIRED_INDICATOR_MATCH_FIELDS,
+  ...CTI_ROW_RENDERER_FIELDS,
 ];
