@@ -476,7 +476,7 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForAlertsToPopulate = async () => {
+export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
@@ -485,7 +485,7 @@ export const waitForAlertsToPopulate = async () => {
         .invoke('text')
         .then((countText) => {
           const alertCount = parseInt(countText, 10) || 0;
-          return alertCount > 0;
+          return alertCount >= alertCountThreshold;
         });
     },
     { interval: 500, timeout: 12000 }
