@@ -26,6 +26,8 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
+  GetSubCase = 'getSubCase',
+  FindSubCases = 'findSubCases',
 }
 
 // TODO: comments
@@ -48,10 +50,19 @@ export interface OperationDetails {
 }
 
 /**
+ * Describes an entity with the necessary fields to identify if the user is authorized to interact with the saved object
+ * returned from some find query.
+ */
+export interface OwnerEntity {
+  owner: string;
+  id: string;
+}
+
+/**
  * Defines the helper methods and necessary information for authorizing the find API's request.
  */
 export interface AuthorizationFilter {
   filter?: KueryNode;
-  ensureSavedObjectIsAuthorized: (owner: string) => void;
+  ensureAuthorizedForSavedObjects: (entities: OwnerEntity[]) => void;
   logSuccessfulAuthorization: () => void;
 }

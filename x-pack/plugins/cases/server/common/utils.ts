@@ -416,6 +416,14 @@ export const countAlertsForID = ({
   return groupTotalAlertsByID({ comments }).get(id);
 };
 
+export interface CreateAuditMsgParams {
+  operation: OperationDetails;
+  savedObjectID?: string;
+  outcome?: EventOutcome;
+  error?: Error;
+}
+
+// TODO: probably should move this to client/utils
 /**
  * Creates an AuditEvent describing the state of a request.
  */
@@ -424,12 +432,7 @@ export function createAuditMsg({
   outcome,
   error,
   savedObjectID,
-}: {
-  operation: OperationDetails;
-  savedObjectID?: string;
-  outcome?: EventOutcome;
-  error?: Error;
-}): AuditEvent {
+}: CreateAuditMsgParams): AuditEvent {
   const doc =
     savedObjectID != null
       ? `${operation.savedObjectType} [id=${savedObjectID}]`

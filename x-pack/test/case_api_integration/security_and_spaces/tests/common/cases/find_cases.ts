@@ -192,10 +192,10 @@ export default ({ getService }: FtrProviderContext): void => {
         let collection: CreateSubCaseResp;
         let actionID: string;
         before(async () => {
-          actionID = await createCaseAction(supertest);
+          actionID = await createCaseAction({ supertest });
         });
         after(async () => {
-          await deleteCaseAction(supertest, actionID);
+          await deleteCaseAction({ supertest, id: actionID });
         });
         beforeEach(async () => {
           // create a collection with a sub case that is marked as open

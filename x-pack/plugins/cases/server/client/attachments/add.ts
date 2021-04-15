@@ -54,6 +54,7 @@ async function getSubCase({
   createdAt,
   userActionService,
   user,
+  owner,
 }: {
   caseService: CaseService;
   savedObjectsClient: SavedObjectsClientContract;
@@ -61,6 +62,7 @@ async function getSubCase({
   createdAt: string;
   userActionService: CaseUserActionService;
   user: User;
+  owner: string;
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
@@ -88,6 +90,7 @@ async function getSubCase({
     createdAt,
     caseId,
     createdBy: user,
+    owner,
   });
   await userActionService.bulkCreate({
     soClient: savedObjectsClient,
@@ -167,6 +170,7 @@ const addGeneratedAlerts = async ({
       createdAt: createdDate,
       userActionService,
       user: userDetails,
+      owner: caseInfo.attributes.owner,
     });
 
     const commentableCase = new CommentableCase({

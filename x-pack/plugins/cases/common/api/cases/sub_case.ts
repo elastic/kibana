@@ -26,6 +26,7 @@ export const SubCaseAttributesRt = rt.intersection([
     created_by: rt.union([UserRT, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
+    owner: rt.string,
   }),
 ]);
 

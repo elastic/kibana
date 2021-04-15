@@ -46,10 +46,10 @@ export default ({ getService }: FtrProviderContext): void => {
     describe.skip('sub cases', () => {
       let actionID: string;
       before(async () => {
-        actionID = await createCaseAction(supertest);
+        actionID = await createCaseAction({ supertest });
       });
       after(async () => {
-        await deleteCaseAction(supertest, actionID);
+        await deleteCaseAction({ supertest, id: actionID });
       });
       it('should get a sub case comment', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });

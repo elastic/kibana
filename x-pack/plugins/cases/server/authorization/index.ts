@@ -6,7 +6,7 @@
  */
 
 import { EventType } from '../../../security/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -81,5 +81,22 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  // sub case operations
+  [ReadOperations.GetSubCase]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetSubCase,
+    action: 'get-sub-case',
+    verbs: accessVerbs,
+    docType: 'sub case',
+    savedObjectType: SUB_CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindSubCases]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.FindSubCases,
+    action: 'find-sub-cases',
+    verbs: accessVerbs,
+    docType: 'sub cases',
+    savedObjectType: SUB_CASE_SAVED_OBJECT,
   },
 };

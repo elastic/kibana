@@ -110,6 +110,7 @@ interface CreateSubCaseArgs extends ClientArgs {
   createdAt: string;
   caseId: string;
   createdBy: User;
+  owner: string;
 }
 
 interface PatchCase {
@@ -175,9 +176,11 @@ type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
 const transformNewSubCase = ({
   createdAt,
   createdBy,
+  owner,
 }: {
   createdAt: string;
   createdBy: User;
+  owner: string;
 }): SubCaseAttributes => {
   return {
     closed_at: null,
@@ -187,6 +190,7 @@ const transformNewSubCase = ({
     status: CaseStatuses.open,
     updated_at: null,
     updated_by: null,
+    owner,
   };
 };
 
@@ -562,12 +566,13 @@ export class CaseService {
     createdAt,
     caseId,
     createdBy,
+    owner,
   }: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new sub case`);
       return soClient.create<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
-        transformNewSubCase({ createdAt, createdBy }),
+        transformNewSubCase({ createdAt, createdBy, owner }),
         {
           references: [
             {

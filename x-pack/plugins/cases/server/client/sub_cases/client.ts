@@ -18,13 +18,20 @@ import {
   SubCasesResponse,
 } from '../../../common/api';
 import { CasesClientArgs, CasesClientInternal } from '..';
-import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
+import {
+  countAlertsForID,
+  createAuditMsg,
+  flattenSubCaseSavedObject,
+  transformSubCases,
+} from '../../common';
 import { createCaseError } from '../../common/error';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
+import { Operations } from '../../authorization';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 interface FindArgs {
   caseID: string;
@@ -132,12 +139,22 @@ async function find(
   clientArgs: CasesClientArgs
 ): Promise<SubCasesFindResponse> {
   try {
-    const { savedObjectsClient: soClient, caseService } = clientArgs;
+    const { savedObjectsClient: soClient, caseService, authorization } = clientArgs;
+
+    const {
+      filter: authorizationFilter,
+      ensureAuthorizedForSavedObjects,
+      logSuccessfulAuthorization,
+    } = await authorization.getFindAuthorizationFilter({
+      savedObjectType: SUB_CASE_SAVED_OBJECT,
+      operation: Operations.findSubCases,
+    });
 
     const ids = [caseID];
     const { subCase: subCaseQueryOptions } = constructQueryOptions({
       status: queryParams.status,
       sortByField: queryParams.sortField,
+      authorizationFilter,
     });
 
     const subCases = await caseService.findSubCasesGroupByCase({
@@ -149,14 +166,21 @@ async function find(
         perPage: defaultPerPage,
         ...queryParams,
         ...subCaseQueryOptions,
+        fields: queryParams.fields
+          ? includeFieldsRequiredForAuthentication(queryParams.fields)
+          : queryParams.fields,
       },
     });
 
+    ensureAuthorizedForSavedObjects([...subCases.subCasesMap.values()].flat());
+
+    // TODO: do we need to do additional authorization checks here?
     const [open, inProgress, closed] = await Promise.all([
       ...caseStatuses.map((status) => {
         const { subCase: statusQueryOptions } = constructQueryOptions({
           status,
           sortByField: queryParams.sortField,
+          authorizationFilter,
         });
         return caseService.findSubCaseStatusStats({
           soClient,
@@ -165,6 +189,8 @@ async function find(
         });
       }),
     ]);
+
+    logSuccessfulAuthorization();
 
     return SubCasesFindResponseRt.encode(
       transformSubCases({
@@ -191,11 +217,17 @@ async function get(
   clientArgs: CasesClientArgs
 ): Promise<SubCaseResponse> {
   try {
-    const { savedObjectsClient: soClient, caseService } = clientArgs;
+    const { savedObjectsClient: soClient, caseService, authorization, auditLogger } = clientArgs;
 
     const subCase = await caseService.getSubCase({
       soClient,
       id,
+    });
+
+    await authorization.ensureAuthorized({
+      owner: subCase.attributes.owner,
+      operation: Operations.getSubCase,
+      savedObjectID: subCase.id,
     });
 
     if (!includeComments) {

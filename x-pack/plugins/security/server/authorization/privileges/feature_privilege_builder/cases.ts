@@ -12,7 +12,7 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 // if you add a value here you'll likely also need to make changes here:
 // x-pack/plugins/cases/server/authorization/index.ts
-const readOperations: string[] = ['getCase', 'findCases'];
+const readOperations: string[] = ['getCase', 'findCases', 'getSubCases', 'findSubCases'];
 const writeOperations: string[] = ['createCase', 'deleteCase', 'updateCase'];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 

@@ -50,10 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe.skip('patch_sub_cases', () => {
       let actionID: string;
       before(async () => {
-        actionID = await createCaseAction(supertest);
+        actionID = await createCaseAction({ supertest });
       });
       after(async () => {
-        await deleteCaseAction(supertest, actionID);
+        await deleteCaseAction({ supertest, id: actionID });
       });
       beforeEach(async () => {
         await esArchiver.load('cases/signals/default');

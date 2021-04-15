@@ -154,6 +154,8 @@ export const createSubCase = async (args: {
   caseID?: string;
   caseInfo?: CasePostRequest;
   actionID?: string;
+  space?: string;
+  user?: User;
 }): Promise<CreateSubCaseResp> => {
   return createSubCaseComment({ ...args, forceNewSubCase: true });
 };
@@ -161,27 +163,56 @@ export const createSubCase = async (args: {
 /**
  * Add case as a connector
  */
-export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromised.Test>) => {
-  const { body: createdAction } = await supertest
-    .post('/api/actions/connector')
+export const createCaseAction = async ({
+  supertest,
+  user,
+  space,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  user?: User;
+  space?: string;
+}) => {
+  const req = supertest
+    .post(`${getSpaceUrlPrefix(space)}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'A case connector',
       connector_type_id: '.case',
       config: {},
-    })
-    .expect(200);
+    });
+
+  const { body: createdAction } = await supertestAuth(req, user).expect(200);
   return createdAction.id;
 };
 
 /**
  * Remove a connector
  */
-export const deleteCaseAction = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  id: string
-) => {
-  await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
+export const deleteCaseAction = async ({
+  supertest,
+  id,
+  space,
+  user,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  id: string;
+  user?: User;
+  space?: string;
+}) => {
+  const req = supertest
+    .delete(`${getSpaceUrlPrefix(space)}/api/actions/connector/${id}`)
+    .set('kbn-xsrf', 'foo');
+  await supertestAuth(req, user);
+};
+
+/**
+ * Optionally authenticates if a user is supplied.
+ */
+const supertestAuth = (supertestInstance: supertestAsPromised.Test, user?: User) => {
+  if (user) {
+    return supertestInstance.auth(user.username, user.password);
+  }
+  return supertestInstance;
 };
 
 /**
@@ -196,6 +227,8 @@ export const createSubCaseComment = async ({
   // if true it will close any open sub cases and force a new sub case to be opened
   forceNewSubCase = false,
   actionID,
+  space,
+  user,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   comment?: ContextTypeGeneratedAlertType;
@@ -203,11 +236,14 @@ export const createSubCaseComment = async ({
   caseInfo?: CasePostRequest;
   forceNewSubCase?: boolean;
   actionID?: string;
+  space?: string;
+  user?: User;
 }): Promise<CreateSubCaseResp> => {
   let actionIDToUse: string;
 
   if (actionID === undefined) {
-    actionIDToUse = await createCaseAction(supertest);
+    // TODO: update with user and space
+    actionIDToUse = await createCaseAction({ supertest, user, space });
   } else {
     actionIDToUse = actionID;
   }
@@ -215,9 +251,12 @@ export const createSubCaseComment = async ({
   let collectionID: string;
 
   if (!caseID) {
-    collectionID = (
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseInfo).expect(200)
-    ).body.id;
+    const req = supertest
+      .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
+      .set('kbn-xsrf', 'true')
+      .send(caseInfo);
+    const { body } = await supertestAuth(req, user).expect(200);
+    collectionID = body.id;
   } else {
     collectionID = caseID;
   }
@@ -225,27 +264,26 @@ export const createSubCaseComment = async ({
   let closedSubCases: SubCasesResponse | undefined;
   if (forceNewSubCase) {
     const { body: subCasesResp }: { body: SubCasesFindResponse } = await supertest
-      .get(`${getSubCasesUrl(collectionID)}/_find`)
+      .get(`${getSpaceUrlPrefix(space)}${getSubCasesUrl(collectionID)}/_find`)
       .expect(200);
 
     const nonClosed = subCasesResp.subCases.filter(
       (subCase) => subCase.status !== CaseStatuses.closed
     );
     if (nonClosed.length > 0) {
+      const req = supertest
+        .patch(`${getSpaceUrlPrefix(space)}${SUB_CASES_PATCH_DEL_URL}`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          subCases: nonClosed.map((subCase) => ({
+            id: subCase.id,
+            version: subCase.version,
+            status: CaseStatuses.closed,
+          })),
+        });
+
       // mark the sub case as closed so a new sub case will be created on the next comment
-      closedSubCases = (
-        await supertest
-          .patch(SUB_CASES_PATCH_DEL_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            subCases: nonClosed.map((subCase) => ({
-              id: subCase.id,
-              version: subCase.version,
-              status: CaseStatuses.closed,
-            })),
-          })
-          .expect(200)
-      ).body;
+      closedSubCases = (await supertestAuth(req, user).expect(200)).body;
     }
   }
 
@@ -527,7 +565,7 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const getSpaceUrlPrefix = (spaceId: string) => {
+export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
@@ -577,8 +615,12 @@ export const findCasesAsUser = async ({
   return res;
 };
 
+interface OwnerEntity {
+  owner: string;
+}
+
 export const ensureSavedObjectIsAuthorized = (
-  cases: CaseResponse[],
+  cases: OwnerEntity[],
   numberOfExpectedCases: number,
   owners: string[]
 ) => {

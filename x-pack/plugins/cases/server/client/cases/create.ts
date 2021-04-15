@@ -89,12 +89,12 @@ export const create = async ({
 
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
-    try {
-      await auth.ensureAuthorized(query.owner, Operations.createCase);
-    } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error, savedObjectID }));
-      throw error;
-    }
+
+    await auth.ensureAuthorized({
+      owner: query.owner,
+      operation: Operations.createCase,
+      savedObjectID,
+    });
 
     // log that we're attempting to create a case
     auditLogger?.log(

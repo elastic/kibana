@@ -40,10 +40,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe.skip('delete_sub_cases', () => {
       let actionID: string;
       before(async () => {
-        actionID = await createCaseAction(supertest);
+        actionID = await createCaseAction({ supertest });
       });
       after(async () => {
-        await deleteCaseAction(supertest, actionID);
+        await deleteCaseAction({ supertest, id: actionID });
       });
       afterEach(async () => {
         await deleteAllCaseItems(es);
