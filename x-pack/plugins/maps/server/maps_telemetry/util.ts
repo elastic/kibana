@@ -118,6 +118,10 @@ export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
   [key in SCALING_TYPES]?: ClusterCountStats;
 };
 
+export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
+  TERM?: ClusterCountStats;
+}
+
 function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | null {
   if (
     !layerDescriptor.sourceDescriptor ||
@@ -203,4 +207,16 @@ export function getTelemetryLayerTypesPerCluster(
   layerLists: LayerDescriptor[][]
 ): TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, getTelemetryLayerType);
+}
+
+export function getTermJoinsPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
+  return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
+    return layerDescriptor.type === LAYER_TYPE.VECTOR &&
+      layerDescriptor.joins &&
+      layerDescriptor.joins.length
+      ? 'TERM'
+      : null;
+  });
 }

@@ -28,8 +28,10 @@ import { injectReferences } from '././../../common/migrations/references';
 import {
   getScalingOptionsPerCluster,
   getTelemetryLayerTypesPerCluster,
+  getTermJoinsPerCluster,
   TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
   TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
+  TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
 } from './util';
 
 interface Settings {
@@ -60,6 +62,7 @@ export interface LayersStatsUsage {
   timeCaptured: string;
   layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
   scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
+  joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -256,6 +259,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
 
   const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
   const scalingOptions = getScalingOptionsPerCluster(layerLists);
+  const joins = getTermJoinsPerCluster(layerLists);
 
   return {
     // Total count of maps
@@ -264,6 +268,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
     timeCaptured: new Date().toISOString(),
     layerTypes: telemetryLayerTypeCounts,
     scalingOptions,
+    joins,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
