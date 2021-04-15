@@ -42,4 +42,6 @@ export type OverviewTestSubjects =
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
   | 'upgradeAssistantDeprecationToggle'
+  | 'updateLoggingError'
+  | 'fetchLoggingError'
   | 'upgradeStatusError';

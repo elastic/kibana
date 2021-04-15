@@ -17,11 +17,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
-  EuiLink,
-  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
@@ -41,21 +38,6 @@ const i18nTexts = {
         nextMajor,
       },
     }),
-  getDeprecationLoggingLabel: (href: string) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Log deprecated actions. {learnMore}"
-      values={{
-        learnMore: (
-          <EuiLink href={href} target="_blank">
-            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
-              defaultMessage: 'Learn more.',
-            })}
-          </EuiLink>
-        ),
-      }}
-    />
-  ),
   docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
     defaultMessage: 'Documentation',
   }),
@@ -119,14 +101,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
                 <EuiSpacer />
 
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
+                <DeprecationLoggingToggle />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
