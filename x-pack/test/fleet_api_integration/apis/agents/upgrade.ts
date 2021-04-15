@@ -167,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
-          force: true,
+          revoke: true,
         });
         await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
@@ -331,7 +331,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
-          force: true,
+          revoke: true,
         });
         await es.update({
           id: 'agent1',

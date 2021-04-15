@@ -8,6 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
+import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
 export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -37,7 +38,7 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
       'user_agent.device.name',
     ],
     filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, [TRANSACTION_DURATION]: 'Latency' },
     reportDefinitions: [
       {
         field: 'service.name',
