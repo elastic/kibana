@@ -504,7 +504,17 @@ export class SearchSource {
     const filterSourceFields = (fieldName: string) => {
       return (
         fieldName &&
-        !sourceFiltersValues.some((sourceFilter) => fieldName.match(`^${sourceFilter}`)) &&
+        !sourceFiltersValues.some((sourceFilter) => {
+          let regexPattern = `^${sourceFilter}`;
+          if (sourceFilter.endsWith('-*')) {
+            regexPattern = `^(${sourceFilter.substring(0, sourceFilter.length - 2)})-*`;
+          } else if (sourceFilter.endsWith('*')) {
+            regexPattern = `^(${sourceFilter.substring(0, sourceFilter.length - 1)})*`;
+          } else if (sourceFilter.startsWith('*')) {
+            regexPattern = `^${sourceFilter.substring(1, sourceFilter.length)}`;
+          }
+          return fieldName.match(regexPattern);
+        }) &&
         !metaFields.includes(fieldName)
       );
     };
