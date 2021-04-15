@@ -6,12 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { expectAssignable } from 'tsd';
-import { UnionToIntersection } from '../index';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { expectType } from 'tsd';
+import { MethodKeysOf } from '../../index';
 
-type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
+class Test {
+  public name: string = '';
+  getName() {
+    return this.name;
+  }
+  // @ts-ignore
+  private getDoubleName() {
+    return this.name.repeat(2);
+  }
+}
 
-expectAssignable<INTERSECTED>({
-  foo: 'bar',
-  baz: 'qux',
-});
+expectType<MethodKeysOf<Test>>('getName');
