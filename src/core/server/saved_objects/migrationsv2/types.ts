@@ -157,6 +157,30 @@ export type CreateReindexTempState = PostInitState & {
   readonly sourceIndex: Option.Some<string>;
 };
 
+export interface ReindexSourceToTempOpenPit extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
+  readonly sourceIndex: Option.Some<string>;
+}
+
+export interface ReindexSourceToTempRead extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
+
+export interface ReindexSourceToTempClosePit extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
+  readonly sourceIndexPitId: string;
+}
+
+export interface ReindexSourceToTempIndex extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
+
 export type ReindexSourceToTempState = PostInitState & {
   /** Reindex documents from the source index into the target index */
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
@@ -301,8 +325,12 @@ export type State =
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempState
-  | ReindexSourceToTempWaitForTaskState
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndex
+  // | ReindexSourceToTempState
+  // | ReindexSourceToTempWaitForTaskState
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -323,3 +351,5 @@ export type AllControlStates = State['controlState'];
  * 'FATAL' and 'DONE').
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
+
+export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;

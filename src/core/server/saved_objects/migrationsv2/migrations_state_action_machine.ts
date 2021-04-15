@@ -183,9 +183,13 @@ export async function migrationStateActionMachine({
         );
       }
 
-      throw new Error(
+      const newError = new Error(
         `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
       );
+
+      // restore error stack to point to a source of the problem.
+      newError.stack = `[${e.stack}]`;
+      throw newError;
     }
   }
 }
