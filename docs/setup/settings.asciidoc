@@ -25,12 +25,12 @@ which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
 | `cpu.cgroup.path.override:`
- | deprecated:[7.10.0,"This setting will no longer be supported as of 8.0."]
+ | deprecated:[7.10.0,"In 8.0 and later, this setting will no longer be supported."]
  This setting has been renamed to
  <<ops-cGroupOverrides-cpuPath,`ops.cGroupOverrides.cpuPath`>>.
 
 | `cpuacct.cgroup.path.override:`
- | deprecated:[7.10.0,"This setting will no longer be supported as of 8.0."]
+ | deprecated:[7.10.0,"In 8.0 and later, this setting will no longer be supported."]
  This setting has been renamed to
  <<ops-cGroupOverrides-cpuAcctPath, `ops.cGroupOverrides.cpuAcctPath`>>.
 
@@ -512,7 +512,7 @@ server.securityResponseHeaders:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
-`null`. Set this to `null` to disable it. *Default:* `max-age=31536000` (1 year)
+`null`. To disable, set to `null`. *Default:* `max-age=31536000` (1 year)
 
 a| [[server-securityResponseHeaders-xContentTypeOptions]]
 ----
@@ -520,8 +520,8 @@ server.securityResponseHeaders:
   xContentTypeOptions:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options[`X-Content-Type-Options`] header is
-used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are `nosniff` or `null`. Set
-this to `null` to disable it. *Default:* `"nosniff"`
+used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To
+disable, set to `null`. *Default:* `"nosniff"`
 
 a| [[server-securityResponseHeaders-referrerPolicy]]
 ----
@@ -531,7 +531,7 @@ server.securityResponseHeaders:
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
-`unsafe-url`, or `null`. Set this to `null` to disable it. *Default:* `"no-referrer-when-downgrade"`
+`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
 
 a| [[server-securityResponseHeaders-permissionsPolicy]]
 ----
@@ -539,8 +539,8 @@ server.securityResponseHeaders:
   permissionsPolicy:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header is used in all
-responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`. Set this to
-`null` to disable it. *Default:* `"camera=(), microphone=()"` (disables the camera and microphone APIs in the browser)
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`. To disable,
+set to `null`. *Default:* `"camera=(), microphone=()"` (disables the camera and microphone APIs in the browser)
 
 a| [[server-securityResponseHeaders-disableEmbedding]]
 ----
@@ -548,10 +548,10 @@ server.securityResponseHeaders:
   disableEmbedding:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers will be configured to disable embedding
-{kib} in other webpages using iframes. Set this to `true` to use secure headers that disable embedding; this will add the
-`frame-ancestors: 'self'` directive to the `Content-Security-Policy` response header (if you are using the default CSP rules), and it will
-add the `X-Frame-Options: SAMEORIGIN` response header as well. *Default:* `false`
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
+{kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
+'self'` directive to the `Content-Security-Policy` response header (if you are using the default CSP rules), and adds the `X-Frame-Options:
+SAMEORIGIN` response header. *Default:* `false`
 
 | `server.customResponseHeaders:` {ess-icon}
  | Header names and values to
@@ -566,7 +566,7 @@ back end server. To allow remote users to connect, set the value to the IP addre
 the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
 |[[server-maxPayloadBytes]] `server.maxPayloadBytes:`
- | deprecated:[7.13.0,"This setting will no longer be supported as of 8.0."]
+ | deprecated:[7.13.0,"In 8.0 and later, this setting will no longer be supported."]
  This setting has been renamed to <<server-maxPayload,`server.maxPayload`>>.
 
 |[[server-maxPayload]] `server.maxPayload:`
