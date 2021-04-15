@@ -47,7 +47,7 @@ describe('Discover flyout', function () {
     const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base#/doc/the-index-pattern-id/i?id=1"`);
+    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-index-pattern-id/i?id=1"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });
@@ -60,7 +60,7 @@ describe('Discover flyout', function () {
     const actions = findTestSubject(component, 'docTableRowAction');
     expect(actions.length).toBe(2);
     expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"/base#/doc/index-pattern-with-timefield-id/i?id=1"`
+      `"/base/app/discover#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
       `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`

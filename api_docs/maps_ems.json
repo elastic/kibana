@@ -228,6 +228,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IServiceSettings.getEMSHotLink.$1",
                 "type": "Object",
                 "label": "layer",
                 "isRequired": true,
@@ -320,6 +321,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IServiceSettings.getUrlForRegionLayer.$1",
                 "type": "Object",
                 "label": "layer",
                 "isRequired": true,
@@ -356,14 +358,14 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IServiceSettings.setQueryParams.params",
+                "id": "def-public.IServiceSettings.setQueryParams.$1.params",
                 "type": "Object",
                 "label": "params",
                 "tags": [],
                 "description": [],
                 "children": [
                   {
-                    "id": "def-public.IServiceSettings.setQueryParams.params.Unnamed",
+                    "id": "def-public.IServiceSettings.setQueryParams.$1.params.Unnamed",
                     "type": "Any",
                     "label": "Unnamed",
                     "tags": [],
@@ -391,38 +393,6 @@
             }
           },
           {
-            "id": "def-public.IServiceSettings.enableZoomMessage",
-            "type": "Function",
-            "label": "enableZoomMessage",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-              "lineNumber": 49
-            }
-          },
-          {
-            "id": "def-public.IServiceSettings.disableZoomMessage",
-            "type": "Function",
-            "label": "disableZoomMessage",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-              "lineNumber": 50
-            }
-          },
-          {
             "id": "def-public.IServiceSettings.getAttributesForTMSLayer",
             "type": "Function",
             "label": "getAttributesForTMSLayer",
@@ -440,6 +410,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$1",
                 "type": "Object",
                 "label": "tmsServiceConfig",
                 "isRequired": true,
@@ -455,10 +426,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-                  "lineNumber": 52
+                  "lineNumber": 50
                 }
               },
               {
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$2",
                 "type": "boolean",
                 "label": "isDesaturated",
                 "isRequired": true,
@@ -468,10 +440,11 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-                  "lineNumber": 53
+                  "lineNumber": 51
                 }
               },
               {
+                "id": "def-public.IServiceSettings.getAttributesForTMSLayer.$3",
                 "type": "boolean",
                 "label": "isDarkMode",
                 "isRequired": true,
@@ -481,7 +454,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-                  "lineNumber": 54
+                  "lineNumber": 52
                 }
               }
             ],
@@ -489,7 +462,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
-              "lineNumber": 51
+              "lineNumber": 49
             }
           }
         ],
@@ -902,6 +875,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.MapsEmsPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -947,6 +921,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.MapsEmsPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
