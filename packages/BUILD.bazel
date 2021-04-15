@@ -7,5 +7,6 @@ filegroup(
       "//packages/kbn-apm-utils:build",
       "//packages/kbn-config-schema:build",
       "//packages/kbn-tinymath:build",
+      "//packages/kbn-utility-types:build",
   ],
 )

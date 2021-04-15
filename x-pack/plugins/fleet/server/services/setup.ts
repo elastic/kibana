@@ -24,8 +24,7 @@ import {
   ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-
-import { generateEnrollmentAPIKey } from './api_keys';
+import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
@@ -55,7 +54,6 @@ async function createSetupSideEffects(
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
-    updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -174,23 +172,46 @@ async function createSetupSideEffects(
     }
   }
 
-  await ensureAgentActionPolicyChangeExists(soClient);
+  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+
+  await ensureAgentActionPolicyChangeExists(soClient, esClient);
 
   return { isInitialized: true, preconfigurationError };
 }
 
-async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
-  try {
-    await esClient.security.getRole({ name: FLEET_ENROLL_ROLE });
-  } catch (e) {
-    if (e.statusCode === 404) {
-      return;
-    }
-
-    throw e;
+export async function ensureDefaultEnrollmentAPIKeysExists(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options?: { forceRecreate?: boolean }
+) {
+  const security = appContextService.getSecurity();
+  if (!security) {
+    return;
   }
 
-  return putFleetRole(esClient);
+  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
+    return;
+  }
+
+  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  await Promise.all(
+    agentPolicies.map(async (agentPolicy) => {
+      const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicy.id);
+
+      if (hasKey) {
+        return;
+      }
+
+      return generateEnrollmentAPIKey(soClient, esClient, {
+        name: `Default`,
+        agentPolicyId: agentPolicy.id,
+        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
+      });
+    })
+  );
 }
 
 async function putFleetRole(esClient: ElasticsearchClient) {
@@ -208,6 +229,7 @@ async function putFleetRole(esClient: ElasticsearchClient) {
   });
 }
 
+// TODO Deprecated should be removed as part of https://github.com/elastic/kibana/issues/94303
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -234,8 +256,6 @@ export async function setupFleet(
     },
   });
 
-  outputService.invalidateCache();
-
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);
   if (!defaultOutputId) {
@@ -245,31 +265,12 @@ export async function setupFleet(
       })
     );
   }
-
   await outputService.updateOutput(soClient, defaultOutputId, {
     fleet_enroll_username: FLEET_ENROLL_USERNAME,
     fleet_enroll_password: password,
   });
 
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-  });
-
-  await Promise.all(
-    agentPolicies.map((agentPolicy) => {
-      return generateEnrollmentAPIKey(soClient, esClient, {
-        name: `Default`,
-        agentPolicyId: agentPolicy.id,
-        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
-      });
-    })
-  );
-
-  await Promise.all(
-    agentPolicies.map((agentPolicy) =>
-      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
-    )
-  );
+  outputService.invalidateCache();
 }
 
 function generateRandomPassword() {
