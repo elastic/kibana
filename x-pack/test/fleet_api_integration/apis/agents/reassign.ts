@@ -19,11 +19,14 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('fleet/empty_fleet_server');
     });
     beforeEach(async () => {
+      await esArchiver.unload('fleet/empty_fleet_server');
       await esArchiver.load('fleet/agents');
+      await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
     setupFleetAndAgents(providerContext);
     afterEach(async () => {
       await esArchiver.unload('fleet/agents');
+      await esArchiver.load('fleet/empty_fleet_server');
     });
     after(async () => {
       await esArchiver.unload('fleet/empty_fleet_server');
@@ -179,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: 'fleet-agents.active: true',
+            agents: 'active: true',
             policy_id: 'policy2',
           })
           .expect(200);

@@ -138,6 +138,18 @@ export const setup = async (arg?: {
 
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
+  const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxPrimaryShardSize.select').simulate('change', {
+          target: { value: units },
+        });
+      }
+    });
+    component.update();
+  };
+
   const setMaxSize = async (value: string, units?: string) => {
     await act(async () => {
       find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
@@ -320,10 +332,8 @@ export const setup = async (arg?: {
   };
 
   /*
-   * For new we rely on a setTimeout to ensure that error messages have time to populate
-   * the form object before we look at the form object. See:
-   * x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/form_errors_context.tsx
-   * for where this logic lives.
+   * We rely on a setTimeout (dedounce) to display error messages under the form fields.
+   * This handler runs all the timers so we can assert for errors in our tests.
    */
   const runTimers = () => {
     act(() => {
@@ -353,6 +363,7 @@ export const setup = async (arg?: {
         setMaxSize,
         setMaxDocs,
         setMaxAge,
+        setMaxPrimaryShardSize,
         toggleRollover,
         toggleDefaultRollover,
         hasRolloverSettingRequiredCallout,
