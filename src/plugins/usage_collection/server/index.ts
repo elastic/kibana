@@ -18,6 +18,19 @@ export type {
   UsageCollectorOptions,
   CollectorFetchContext,
 } from './collector';
+
+export type {
+  UsageCountersSavedObject,
+  UsageCountersSavedObjectAttributes,
+  IncrementCounterParams,
+} from './usage_counters';
+
+export {
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  serializeCounterKey,
+  UsageCounter,
+} from './usage_counters';
+
 export type { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
