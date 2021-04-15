@@ -28,7 +28,6 @@ describe('registerTaskDefinition', () => {
     enabled: true,
     interval: schema.duration().validate('5m'),
     pageSize: 100,
-    concurrency: 5,
   };
 
   beforeEach(() => {
@@ -37,7 +36,12 @@ describe('registerTaskDefinition', () => {
   });
 
   it('should call registerTaskDefinitions with proper parameters', () => {
-    registerTaskDefinition(logger, coreStartServices, taskManager, actionTypeRegistry, config);
+    registerTaskDefinition(taskManager, {
+      logger,
+      coreStartServices,
+      actionTypeRegistry,
+      config,
+    });
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -54,7 +58,12 @@ describe('registerTaskDefinition', () => {
   });
 
   it('should call taskRunner with proper parameters', () => {
-    registerTaskDefinition(logger, coreStartServices, taskManager, actionTypeRegistry, config);
+    registerTaskDefinition(taskManager, {
+      logger,
+      coreStartServices,
+      actionTypeRegistry,
+      config,
+    });
     const { taskRunner } = jest.requireMock('./task_runner');
     expect(taskRunner).toHaveBeenCalledWith(logger, actionTypeRegistry, coreStartServices, config);
   });

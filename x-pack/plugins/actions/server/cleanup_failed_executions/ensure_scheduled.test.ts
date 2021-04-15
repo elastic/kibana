@@ -19,7 +19,6 @@ describe('ensureScheduled', () => {
     enabled: true,
     interval: schema.duration().validate('5m'),
     pageSize: 100,
-    concurrency: 5,
   };
 
   beforeEach(() => jest.resetAllMocks());

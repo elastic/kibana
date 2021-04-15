@@ -413,6 +413,11 @@ describe('create()', () => {
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration('60s'),
+      cleanupFailedExecutionsTask: {
+        enabled: true,
+        interval: schema.duration().validate('15s'),
+        pageSize: 100,
+      },
     });
 
     const localActionTypeRegistryParams = {
