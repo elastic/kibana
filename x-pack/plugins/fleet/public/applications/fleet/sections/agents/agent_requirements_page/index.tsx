@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export const filterEmptyQueries = (queries: string[]) => {
-  return queries.filter((query) => query.length);
-};
+export { MissingESRequirementsPage } from './es_requirements_page';
+export { FleetServerRequirementPage } from './fleet_server_requirement_page';

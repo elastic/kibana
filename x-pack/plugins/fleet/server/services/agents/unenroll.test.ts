@@ -46,13 +46,42 @@ describe('unenrollAgent (singular)', () => {
     expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
   });
 
-  it('cannot unenroll from managed policy', async () => {
+  it('cannot unenroll from managed policy by default', async () => {
     const { soClient, esClient } = createClientMock();
     await expect(unenrollAgent(soClient, esClient, agentInManagedDoc._id)).rejects.toThrowError(
       AgentUnenrollmentError
     );
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
+  });
+
+  it('cannot unenroll from managed policy with revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await expect(
+      unenrollAgent(soClient, esClient, agentInManagedDoc._id, { revoke: true })
+    ).rejects.toThrowError(AgentUnenrollmentError);
+    // does not call ES update
+    expect(esClient.update).toBeCalledTimes(0);
+  });
+
+  it('can unenroll from managed policy with force=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await unenrollAgent(soClient, esClient, agentInManagedDoc._id, { force: true });
+    // calls ES update with correct values
+    expect(esClient.update).toBeCalledTimes(1);
+    const calledWith = esClient.update.mock.calls[0];
+    expect(calledWith[0]?.id).toBe(agentInManagedDoc._id);
+    expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
+  });
+
+  it('can unenroll from managed policy with force=true and revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await unenrollAgent(soClient, esClient, agentInManagedDoc._id, { force: true, revoke: true });
+    // calls ES update with correct values
+    expect(esClient.update).toBeCalledTimes(1);
+    const calledWith = esClient.update.mock.calls[0];
+    expect(calledWith[0]?.id).toBe(agentInManagedDoc._id);
+    expect(calledWith[0]?.body).toHaveProperty('doc.unenrolled_at');
   });
 });
 
@@ -68,13 +97,12 @@ describe('unenrollAgents (plural)', () => {
       .filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
     const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
-    expect(ids).toHaveLength(2);
     expect(ids).toEqual(idsToUnenroll);
     for (const doc of docs) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
-  it('cannot unenroll from a managed policy', async () => {
+  it('cannot unenroll from a managed policy by default', async () => {
     const { soClient, esClient } = createClientMock();
 
     const idsToUnenroll = [
@@ -91,10 +119,114 @@ describe('unenrollAgents (plural)', () => {
       .filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
     const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
-    expect(ids).toHaveLength(onlyUnmanaged.length);
     expect(ids).toEqual(onlyUnmanaged);
     for (const doc of docs) {
       expect(doc).toHaveProperty('unenrollment_started_at');
+    }
+  });
+
+  it('cannot unenroll from a managed policy with revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+
+    const idsToUnenroll = [
+      agentInUnmanagedDoc._id,
+      agentInManagedDoc._id,
+      agentInUnmanagedDoc2._id,
+    ];
+
+    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+    });
+
+    expect(unenrolledResponse.items).toMatchObject([
+      {
+        id: 'agent-in-unmanaged-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-managed-policy',
+        success: false,
+      },
+      {
+        id: 'agent-in-unmanaged-policy2',
+        success: true,
+      },
+    ]);
+
+    // calls ES update with correct values
+    const onlyUnmanaged = [agentInUnmanagedDoc._id, agentInUnmanagedDoc2._id];
+    const calledWith = esClient.bulk.mock.calls[0][0];
+    const ids = calledWith?.body
+      .filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(onlyUnmanaged);
+    for (const doc of docs) {
+      expect(doc).toHaveProperty('unenrolled_at');
+    }
+  });
+
+  it('can unenroll from managed policy with force=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    const idsToUnenroll = [
+      agentInUnmanagedDoc._id,
+      agentInManagedDoc._id,
+      agentInUnmanagedDoc2._id,
+    ];
+    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
+
+    // calls ES update with correct values
+    const calledWith = esClient.bulk.mock.calls[1][0];
+    const ids = calledWith?.body
+      .filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(idsToUnenroll);
+    for (const doc of docs) {
+      expect(doc).toHaveProperty('unenrollment_started_at');
+    }
+  });
+
+  it('can unenroll from managed policy with force=true and revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+
+    const idsToUnenroll = [
+      agentInUnmanagedDoc._id,
+      agentInManagedDoc._id,
+      agentInUnmanagedDoc2._id,
+    ];
+
+    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+      force: true,
+    });
+
+    expect(unenrolledResponse.items).toMatchObject([
+      {
+        id: 'agent-in-unmanaged-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-managed-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-unmanaged-policy2',
+        success: true,
+      },
+    ]);
+
+    // calls ES update with correct values
+    const calledWith = esClient.bulk.mock.calls[0][0];
+    const ids = calledWith?.body
+      .filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(idsToUnenroll);
+    for (const doc of docs) {
+      expect(doc).toHaveProperty('unenrolled_at');
     }
   });
 });
