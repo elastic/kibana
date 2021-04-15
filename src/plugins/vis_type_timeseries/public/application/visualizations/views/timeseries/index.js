@@ -32,6 +32,8 @@ import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
 import { emptyLabel } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
+import { renderEndzoneTooltip } from '../../../../../../charts/public';
+import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -54,7 +56,6 @@ export const TimeSeries = ({
   legend,
   legendPosition,
   tooltipMode,
-  xAxisLabel,
   series,
   yAxis,
   onBrush,
@@ -62,6 +63,8 @@ export const TimeSeries = ({
   annotations,
   syncColors,
   palettesService,
+  interval,
+  shouldDropLastBucket,
 }) => {
   const chartRef = useRef();
   // const [palettesRegistry, setPalettesRegistry] = useState(null);
@@ -81,6 +84,17 @@ export const TimeSeries = ({
   }, []);
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
+  const seriesData = series.length && series[0].data;
+  const tooltipHeaderFormatter =
+    shouldDropLastBucket && seriesData?.length
+      ? renderEndzoneTooltip(
+          interval,
+          seriesData[0][0],
+          seriesData[seriesData.length - 1][0],
+          tooltipFormatter
+        )
+      : tooltipFormatter;
+
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
@@ -150,7 +164,7 @@ export const TimeSeries = ({
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: tooltipFormatter,
+          headerFormatter: tooltipHeaderFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
       />
@@ -281,7 +295,7 @@ export const TimeSeries = ({
       <Axis
         id="bottom"
         position={Position.Bottom}
-        title={xAxisLabel}
+        title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={{
           ...GRID_LINE_CONFIG,
@@ -303,10 +317,11 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
-  xAxisLabel: PropTypes.string,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
+  interval: PropTypes.number,
+  shouldDropLastBucket: PropTypes.bool,
 };
