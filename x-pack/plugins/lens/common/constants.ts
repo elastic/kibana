@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
 
 export const PLUGIN_ID = 'lens';
@@ -19,11 +20,13 @@ export function getBasePath() {
   return `#/`;
 }
 
+const GLOBAL_RISON_STATE_PARAM = '_g';
+
 export function getEditPath(id: string | undefined, timeRange?: TimeRange) {
   let timeParam = '';
 
   if (timeRange) {
-    timeParam = `?_g=(time:(from:${timeRange.from},to:${timeRange.to}))`;
+    timeParam = `?${GLOBAL_RISON_STATE_PARAM}=${rison.encode({ time: timeRange })}`;
   }
 
   return id
