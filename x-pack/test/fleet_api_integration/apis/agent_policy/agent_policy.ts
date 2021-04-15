@@ -328,7 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.unload('fleet/empty_fleet_server');
       });
       let managedPolicy: any | undefined;
-      it('should prevent managed policies being deleted', async () => {
+      it('should prevent hosted policies being deleted', async () => {
         const {
           body: { item: createdPolicy },
         } = await supertest
@@ -347,10 +347,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ agentPolicyId: managedPolicy.id })
           .expect(400);
 
-        expect(body.message).to.contain('Cannot delete managed policy');
+        expect(body.message).to.contain('Cannot delete hosted policy');
       });
 
-      it('should allow unmanaged policies being deleted', async () => {
+      it('should allow regular policies being deleted', async () => {
         const {
           body: { item: unmanagedPolicy },
         } = await supertest

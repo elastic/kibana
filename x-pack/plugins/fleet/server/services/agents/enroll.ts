@@ -30,7 +30,7 @@ export async function enroll(
 
   const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, false);
   if (agentPolicy?.is_managed) {
-    throw new IngestManagerError(`Cannot enroll in managed policy ${agentPolicyId}`);
+    throw new IngestManagerError(`Cannot enroll in hosted policy ${agentPolicyId}`);
   }
 
   const esClient = appContextService.getInternalUserESClient();

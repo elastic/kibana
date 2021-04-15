@@ -29,7 +29,7 @@ async function unenrollAgentIsAllowed(
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new AgentUnenrollmentError(
-      `Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`
+      `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
   }
 

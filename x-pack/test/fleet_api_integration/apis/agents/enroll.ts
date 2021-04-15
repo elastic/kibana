@@ -59,8 +59,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should not allow enrolling in a managed policy', async () => {
-      // update existing policy to managed
+    it('should not allow enrolling in a hosted policy', async () => {
+      // update existing policy to hosted
       await supertestWithAuth
         .put(`/api/fleet/agent_policies/policy1`)
         .set('kbn-xsrf', 'xxxx')
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      // try to enroll in managed policy
+      // try to enroll in hosted policy
       const { body } = await supertest
         .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
@@ -90,9 +90,9 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(400);
 
-      expect(body.message).to.contain('Cannot enroll in managed policy');
+      expect(body.message).to.contain('Cannot enroll in hosted policy');
 
-      // restore to original (unmanaged)
+      // restore to original (regular)
       await supertestWithAuth
         .put(`/api/fleet/agent_policies/policy1`)
         .set('kbn-xsrf', 'xxxx')

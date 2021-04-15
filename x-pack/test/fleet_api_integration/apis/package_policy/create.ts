@@ -46,8 +46,8 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
     });
 
-    it('can only add to managed agent policies using the force parameter', async function () {
-      // get a managed policy
+    it('can only add to hosted agent policies using the force parameter', async function () {
+      // get a hosted policy
       const {
         body: { item: managedPolicy },
       } = await supertest
@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
           is_managed: true,
         });
 
-      // try to add an integration to the managed policy
+      // try to add an integration to the hosted policy
       const { body: responseWithoutForce } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -80,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
 
       expect(responseWithoutForce.statusCode).to.be(400);
-      expect(responseWithoutForce.message).to.contain('Cannot add integrations to managed policy');
+      expect(responseWithoutForce.message).to.contain('Cannot add integrations to hosted policy');
 
       // try same request with `force: true`
       const { body: responseWithForce } = await supertest
