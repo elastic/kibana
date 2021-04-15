@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'NAME',
             description: 'DESCRIPTION',
             logIndices: {
-              type: 'indexPattern',
+              type: 'index_pattern',
               indexPatternId: 'kip-id',
             },
             fields: {
