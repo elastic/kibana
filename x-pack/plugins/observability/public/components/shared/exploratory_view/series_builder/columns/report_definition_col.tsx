@@ -12,6 +12,8 @@ import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { DataSeries } from '../../types';
+import { SeriesChartTypesSelect } from './chart_types';
+import { OperationTypeSelect } from './operation_type_select';
 
 export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   const { indexPattern } = useIndexPatternContext();
@@ -20,7 +22,14 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
 
   const { reportDefinitions: rtd = {} } = series;
 
-  const { reportDefinitions, labels, filters } = dataViewSeries;
+  const {
+    reportDefinitions,
+    labels,
+    filters,
+    defaultSeriesType,
+    hasOperationType,
+    yAxisColumn,
+  } = dataViewSeries;
 
   const onChange = (field: string, value?: string) => {
     if (!value) {
@@ -91,6 +100,17 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
             )}
           </EuiFlexItem>
         ))}
+      <EuiFlexItem style={{ width: 200 }}>
+        <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
+      </EuiFlexItem>
+      {hasOperationType && (
+        <EuiFlexItem style={{ width: 200 }}>
+          <OperationTypeSelect
+            seriesId={NEW_SERIES_KEY}
+            defaultOperationType={yAxisColumn.operationType}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

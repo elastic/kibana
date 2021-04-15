@@ -81,7 +81,7 @@ export async function acknowledgeAgentActions(
 
   const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
   if (isAgentUnenrolled) {
-    await forceUnenrollAgent(soClient, esClient, agent.id);
+    await forceUnenrollAgent(soClient, esClient, agent);
   }
 
   const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
