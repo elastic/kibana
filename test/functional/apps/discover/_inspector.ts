@@ -69,7 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await logEsInfo();
 
-      // await kibanaServer.importExport.load('discover');
       await kibanaServer.importExport.load(
         'discover',
         { space: undefined },

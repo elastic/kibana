@@ -37,19 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('test large strings', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
-      // await esArchiver.load('empty_kibana');
-      // try {
-      //   await esArchiver.load('hamlet_kibana');
-      // } catch (e) {
-      //   log.debug(`! hamlet_kibana: ${inspect(e,             {
-      //       compact: false,
-      //       depth: 99,
-      //       breakLength: 80,
-      //       sorted: true,
-      //     }
-      //   )}`)
-      //   throw e;
-      // }
 
       await kibanaServer.importExport.load(
         'testlargestring',
