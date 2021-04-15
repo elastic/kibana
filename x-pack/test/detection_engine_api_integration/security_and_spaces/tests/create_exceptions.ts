@@ -28,8 +28,6 @@ import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common'
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  LIST_ITEM_URL,
-  LIST_URL,
 } from '../../../../plugins/lists/common/constants';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
@@ -58,7 +56,6 @@ import {
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
-import { getCreateMinimalListSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_schema.mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
