@@ -176,7 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       core,
       endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
-      signalIndex: config.signalsIndex,
+      signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });

@@ -290,7 +290,7 @@ export const registerCollector: RegisterCollector = ({
         },
       },
     },
-    isReady: () => kibanaIndex.length > 0 && signalsIndex > 0,
+    isReady: () => kibanaIndex.length > 0 && signalsIndex.length > 0,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
