@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
+
+const txtDismiss = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.cloningNotification.dismiss',
+  {
+    defaultMessage: 'Dismiss',
+    description: 'Dismiss button in cloning notification callout.',
+  }
+);
 
 const txtBody = (count: number) =>
   i18n.translate(
@@ -26,9 +34,19 @@ export interface CloningNotificationProps {
 }
 
 export const CloningNotification: React.FC<CloningNotificationProps> = ({ count = 1 }) => {
+  const [dismissed, setDismissed] = React.useState(false);
+
+  if (dismissed) return null;
+
+  const title = (
+    <>
+      {txtBody(count)} <EuiLink onClick={() => setDismissed(true)}>{txtDismiss}</EuiLink>
+    </>
+  );
+
   return (
     <>
-      <EuiCallOut title={txtBody(count)} color="success" size="s" iconType="check" />
+      <EuiCallOut title={title} color="success" size="s" iconType="check" />
       <EuiSpacer />
     </>
   );
