@@ -826,22 +826,15 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('security_solution/timestamp_override');
       });
 
-      const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, 3, [id, id, id]);
-        const signalsResponse = await getSignalsByIds(supertest, [id, id, id], 3);
-        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
-        return signalsOrderedByEventId;
-      };
-
       describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
         beforeEach(async () => {
+          await createSignalsIndex(supertest);
           await esArchiver.load('auditbeat/hosts');
         });
 
         afterEach(async () => {
+          await deleteSignalsIndex(supertest);
+          await deleteAllAlerts(supertest);
           await esArchiver.unload('auditbeat/hosts');
         });
 
@@ -870,18 +863,8 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
 
           expect(signals.length).equal(200);
+          await deleteSignalsIndex(supertest);
         });
-      });
-
-      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['myfa*']),
-          timestamp_override: 'event.ingested',
-        };
-
-        const signals = await executeRuleAndGetSignals(rule);
-
-        expect(signals.length).equal(3);
       });
 
       it('should generate 2 signals with @timestamp', async () => {
@@ -889,11 +872,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, undefined, [id, id]);
+        await waitForSignalsToBePresent(supertest, 2, [id, id]);
         const signalsResponse = await getSignalsByIds(supertest, [id]);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
-        expect(signals.length).equal(2);
+        expect(signalsOrderedByEventId.length).equal(2);
+        await deleteSignalsIndex(supertest);
       });
 
       it('should generate 2 signals when timestamp override does not exist', async () => {
@@ -903,11 +888,30 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-        await waitForSignalsToBePresent(supertest, undefined, [id]);
-
-        const signalsResponse = await getSignalsByIds(supertest, [id]);
+        await waitForSignalsToBePresent(supertest, 2, [id, id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id, id]);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        expect(signals.length).equal(2);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+        expect(signalsOrderedByEventId.length).equal(2);
+        await deleteSignalsIndex(supertest);
+      });
+
+      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfa*']),
+          timestamp_override: 'event.ingested',
+        };
+
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 3, [id, id, id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id, id, id], 3);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+        expect(signalsOrderedByEventId.length).equal(3);
+        await deleteSignalsIndex(supertest);
       });
     });
   });
