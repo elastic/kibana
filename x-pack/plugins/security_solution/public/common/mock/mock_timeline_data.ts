@@ -1094,18 +1094,17 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: 'BuBP4W0BOpWiDweSoYSg',
       timestamp: '2019-10-18T23:59:15.091Z',
-      // TODO use more realistic data
       threat: {
         indicator: [
           {
             matched: {
-              atomic: ['laptop.local'],
-              field: ['host.name'],
-              type: ['domain'],
+              atomic: ['192.168.1.1'],
+              field: ['source.ip'],
+              type: ['ip'],
             },
             event: {
-              dataset: ['threatintel.abuseurl'],
-              reference: ['https://urlhaus.abuse.ch/url/1055419/'],
+              dataset: ['threatintel.example_dataset'],
+              reference: ['https://example.com'],
             },
             provider: ['indicator_provider'],
           },
