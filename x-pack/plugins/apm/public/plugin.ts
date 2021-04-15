@@ -8,6 +8,7 @@
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  FormatterRuleRegistry,
   HasDataParams,
   ObservabilityPublicSetup,
 } from '../../observability/public';
@@ -40,8 +41,11 @@ import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 import { MapsStartApi } from '../../maps/public';
+import { apmRuleRegistrySettings } from '../common/rules';
 
-export type ApmPluginSetup = void;
+export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
+export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
+
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -52,7 +56,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPublicSetup;
+  observability: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -156,6 +160,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      ctor: FormatterRuleRegistry,
+    });
+
+    registerApmAlerts(apmRuleRegistry);
+
     core.application.register({
       id: 'ux',
       title: 'User Experience',
@@ -196,9 +207,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         );
       },
     });
+
+    return {
+      ruleRegistry: apmRuleRegistry,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-    registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
   }
 }
