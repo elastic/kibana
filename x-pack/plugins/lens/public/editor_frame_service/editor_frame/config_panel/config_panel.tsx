@@ -154,6 +154,7 @@ export function LayerPanels(
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
+              fill
               onClick={() => {
                 const id = generateId();
                 dispatch({
