@@ -21,6 +21,7 @@ import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/pl
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { LensPublicStart } from '../../lens/public';
+import { ConfigSchema } from '.';
 
 export interface ObservabilityPublicSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -49,7 +50,9 @@ export class Plugin
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.initializerContext = initializerContext;
+  }
 
   public setup(
     core: CoreSetup<ObservabilityPublicPluginsStart>,
@@ -57,13 +60,14 @@ export class Plugin
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+    const config = this.initializerContext.config.get();
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, startPlugins] = await core.getStartServices();
 
-      return renderApp(coreStart, startPlugins, params);
+      return renderApp(coreStart, startPlugins, params, config);
     };
     const updater$ = this.appUpdater$;
 
@@ -78,7 +82,7 @@ export class Plugin
       updater$,
     });
 
-    if (core.uiSettings.get('observability:enableAlertingExperience')) {
+    if (config.enableAlertingExperience) {
       core.application.register({
         id: 'observability-alerts',
         title: 'Alerts',

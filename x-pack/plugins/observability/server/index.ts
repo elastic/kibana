@@ -13,12 +13,16 @@ import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations
 import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
 
 export const config = {
+  exposeToBrowser: {
+    enableAlertingExperience: true,
+  },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     annotations: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
+    enableAlertingExperience: schema.boolean({ defaultValue: false }),
   }),
 };
 
