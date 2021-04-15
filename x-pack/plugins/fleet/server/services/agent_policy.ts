@@ -54,7 +54,7 @@ import {
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
 import { getPackageInfo } from './epm/packages';
-import { createAgentPolicyAction, getAgentsByKuery } from './agents';
+import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -609,35 +609,6 @@ class AgentPolicyService {
     }
 
     await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
-
-    return this.createFleetPolicyChangeActionSO(soClient, esClient, agentPolicyId);
-  }
-
-  public async createFleetPolicyChangeActionSO(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ) {
-    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy || !policy.revision) {
-      return;
-    }
-    const packages = policy.inputs.reduce<string[]>((acc, input) => {
-      const packageName = input.meta?.package?.name;
-      if (packageName && acc.indexOf(packageName) < 0) {
-        acc.push(packageName);
-      }
-      return acc;
-    }, []);
-
-    await createAgentPolicyAction(soClient, esClient, {
-      type: 'POLICY_CHANGE',
-      data: { policy },
-      ack_data: { packages },
-      created_at: new Date().toISOString(),
-      policy_id: policy.id,
-      policy_revision: policy.revision,
-    });
   }
 
   public async createFleetPolicyChangeFleetServer(

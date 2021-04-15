@@ -51,7 +51,7 @@ export async function sendUpgradeAgentAction({
     );
   }
 
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: now,
     data,
@@ -167,7 +167,6 @@ export async function sendUpgradeAgentsActions(
   };
 
   await bulkCreateAgentActions(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,

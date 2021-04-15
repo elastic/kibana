@@ -52,14 +52,12 @@ import {
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
-  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
   registerPackagePolicyRoutes,
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
   registerAgentAPIRoutes,
-  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
   registerOutputRoutes,
@@ -86,7 +84,6 @@ import {
   getAgentsByKuery,
   getAgentById,
 } from './services/agents';
-import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
@@ -289,17 +286,12 @@ export class FleetPlugin
             );
           }
         } else {
-          // we currently only use this global interceptor if fleet is enabled
-          // since it would run this func on *every* req (other plugins, CSS, etc)
-          registerLimitedConcurrencyRoutes(core, config);
           registerAgentAPIRoutes(routerSuperuserOnly, config);
           registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
             router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
-          // Do not enforce superuser role for Elastic Agent routes
-          registerElasticAgentRoutes(router, config);
         }
       }
     }
@@ -322,7 +314,6 @@ export class FleetPlugin
       logger: this.logger,
     });
     licenseService.start(this.licensing$);
-    agentCheckinState.start();
 
     const fleetServerSetup = startFleetServerSetup();
 
@@ -366,6 +357,5 @@ export class FleetPlugin
   public async stop() {
     appContextService.stop();
     licenseService.stop();
-    agentCheckinState.stop();
   }
 }

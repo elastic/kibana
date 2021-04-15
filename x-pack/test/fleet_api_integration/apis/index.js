@@ -20,11 +20,7 @@ export default function ({ loadTestFile }) {
     // Agents
     loadTestFile(require.resolve('./agents/delete'));
     loadTestFile(require.resolve('./agents/list'));
-    loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/unenroll'));
-    loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/acks'));
-    loadTestFile(require.resolve('./agents/complete_flow'));
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
