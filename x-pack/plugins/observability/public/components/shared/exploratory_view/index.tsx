@@ -49,7 +49,7 @@ export function ExploratoryViewPage() {
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
     >
-      <IndexPatternContextProvider indexPattern={null!}>
+      <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView />
         </UrlStorageContextProvider>
