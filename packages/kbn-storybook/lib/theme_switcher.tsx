@@ -9,6 +9,7 @@
 import React from 'react';
 import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
 import { useGlobals } from '@storybook/api';
+import { Link } from '@storybook/components/dist/tooltip/TooltipLinkList';
 
 export function ThemeSwitcher(props: any) {
   const [globals, updateGlobals] = useGlobals();
@@ -18,7 +19,7 @@ export function ThemeSwitcher(props: any) {
     updateGlobals({ euiTheme: 'v8.light' });
   }
 
-  const links = [
+  const links: Link[] = [
     {
       id: 'v8.light',
       title: 'Amsterdam: Light',
@@ -31,7 +32,7 @@ export function ThemeSwitcher(props: any) {
     { id: 'v7.dark', title: 'Dark' },
   ].map((link) => ({
     ...link,
-    onClick: (_event: any, item: any) => {
+    onClick: (_event, item) => {
       updateGlobals({ euiTheme: item.id });
     },
     active: selectedTheme === link.id,

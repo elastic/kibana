@@ -7,11 +7,13 @@
  */
 
 const webpackConfig = require('./target/webpack.config').default;
+const { withEuiTheme } = require('./target/lib/decorators/with_eui_theme');
 
 module.exports = {
   managerEntries: (entry = []) => {
     return [...entry, require.resolve('./target/lib/register')];
   },
+  decorators: [withEuiTheme],
   webpackFinal: (config) => {
     return webpackConfig({ config });
   },
