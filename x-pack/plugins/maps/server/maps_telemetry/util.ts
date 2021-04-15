@@ -118,6 +118,22 @@ export function getTelemetryLayerType(
   return null;
 }
 
+export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
+  [key in SCALING_TYPES]?: ClusterCountStats;
+};
+
+function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | null {
+  if (
+    !layerDescriptor.sourceDescriptor ||
+    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
+    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
+  ) {
+    return null;
+  }
+
+  return (layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType;
+}
+
 export function getTelemetyLayerTypesPerMap(
   layerDescriptors: LayerDescriptor[]
 ): TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP {
@@ -188,31 +204,13 @@ export function getTelemetryLayerTypesPerCluster(
   return clusterCounts;
 }
 
-type TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP = {
-  [key in SCALING_TYPES]?: number;
-};
-export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
-  [key in SCALING_TYPES]?: ClusterCountStats;
-};
-
-function getScalingOption(layerDescriptor: LayerDescriptor): SCALING_TYPES | null {
-  if (
-    !layerDescriptor.sourceDescriptor ||
-    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
-    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
-  ) {
-    return null;
-  }
-
-  return (layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType;
-}
-
-function getScalingOptionsPerMap(
-  layerDescriptors: LayerDescriptor[]
-): TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP {
-  const counts: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP = {};
+export function getCountsByMap<K extends string>(
+  layerDescriptors: LayerDescriptor[],
+  mapToKey: (layerDescriptor: LayerDescriptor) => string | null
+): { [key: string]: number } {
+  const counts: { [key: string]: number } = {};
   layerDescriptors.forEach((layerDescriptor: LayerDescriptor) => {
-    const scalingOption = getScalingOption(layerDescriptor);
+    const scalingOption = mapToKey(layerDescriptor);
     if (!scalingOption) {
       return;
     }
@@ -226,41 +224,46 @@ function getScalingOptionsPerMap(
   return counts;
 }
 
-export function getScalingOptionsPerCluster(
-  layerLists: LayerDescriptor[][]
-): TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER {
-  const counts: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP[] = layerLists.map(getScalingOptionsPerMap);
-  const clusterCounts: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {};
+export function getCountsByCluster(
+  layerLists: LayerDescriptor[][],
+  mapToKey: (layerDescriptor: LayerDescriptor) => string | null
+): { [key: string]: ClusterCountStats } {
+  const counts = layerLists.map((layerDescriptors: LayerDescriptor[]) => {
+    return getCountsByMap(layerDescriptors, mapToKey);
+  });
+  const clusterCounts: { [key: string]: ClusterCountStats } = {};
 
-  counts.forEach((count: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP) => {
+  counts.forEach((count) => {
     for (const key in count) {
       if (!count.hasOwnProperty(key)) {
         continue;
       }
 
-      const scalingOption = key as SCALING_TYPES;
-      if (!clusterCounts[scalingOption]) {
-        clusterCounts[scalingOption] = {
-          min: count[scalingOption] as number,
-          max: count[scalingOption] as number,
-          total: count[scalingOption] as number,
-          avg: count[scalingOption] as number,
+      if (!clusterCounts[key]) {
+        clusterCounts[key] = {
+          min: count[key] as number,
+          max: count[key] as number,
+          total: count[key] as number,
+          avg: count[key] as number,
         };
       } else {
-        (clusterCounts[scalingOption] as ClusterCountStats).min = Math.min(
-          count[scalingOption] as number,
-          (clusterCounts[scalingOption] as ClusterCountStats).min
+        (clusterCounts[key] as ClusterCountStats).min = Math.min(
+          count[key] as number,
+          (clusterCounts[key] as ClusterCountStats).min
         );
-        (clusterCounts[scalingOption] as ClusterCountStats).max = Math.max(
-          count[scalingOption] as number,
-          (clusterCounts[scalingOption] as ClusterCountStats).max
+        (clusterCounts[key] as ClusterCountStats).max = Math.max(
+          count[key] as number,
+          (clusterCounts[key] as ClusterCountStats).max
         );
-        (clusterCounts[scalingOption] as ClusterCountStats).total =
-          (count[scalingOption] as number) +
-          (clusterCounts[scalingOption] as ClusterCountStats).total;
+        (clusterCounts[key] as ClusterCountStats).total =
+          (count[key] as number) + (clusterCounts[key] as ClusterCountStats).total;
       }
     }
   });
 
   return clusterCounts;
+}
+
+export function getScalingOptionsPerCluster(layerLists: LayerDescriptor[][]) {
+  return getCountsByCluster(layerLists, getScalingOption);
 }
