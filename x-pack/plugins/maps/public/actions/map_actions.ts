@@ -42,9 +42,7 @@ import {
   TRACK_MAP_SETTINGS,
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
-  UPDATE_EDIT_MODE,
   UPDATE_MAP_SETTING,
-  SET_VECTOR_LAYER_INDEX_NAME,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
@@ -322,19 +320,5 @@ export function updateDrawState(drawState: DrawState | null) {
       type: UPDATE_DRAW_STATE,
       drawState,
     });
-  };
-}
-
-export function updateEditMode(isActive: boolean) {
-  return {
-    type: UPDATE_EDIT_MODE,
-    isActive,
-  };
-}
-
-export function setVectorLayerIndexName(indexName: string) {
-  return {
-    type: SET_VECTOR_LAYER_INDEX_NAME,
-    indexName,
   };
 }

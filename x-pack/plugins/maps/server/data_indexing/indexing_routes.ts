@@ -11,8 +11,8 @@ import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
   INDEX_SOURCE_API_PATH,
-  GIS_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
+  INDEX_FEATURE_PATH,
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
@@ -70,7 +70,7 @@ export function initIndexingRoutes({
 
   router.post(
     {
-      path: `/${GIS_API_PATH}/feature`,
+      path: INDEX_FEATURE_PATH,
       validate: {
         body: schema.object({
           index: schema.string(),

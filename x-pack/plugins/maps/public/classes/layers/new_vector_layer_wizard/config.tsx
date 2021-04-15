@@ -10,7 +10,7 @@ import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { NewVectorLayerEditor } from './index';
 import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
-import { CREATE_DRAWN_FEATURES_INDEX_STEP_ID, ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID } from './wizard';
+import { ADD_VECTOR_DRAWING_LAYER } from './wizard';
 import { getFileUpload } from '../../../kibana_services';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
@@ -32,15 +32,9 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   icon: DocumentsLayerIcon,
   prerequisiteSteps: [
     {
-      id: CREATE_DRAWN_FEATURES_INDEX_STEP_ID,
-      label: i18n.translate('xpack.maps.newVectorLayerWizard.indexFeatures', {
-        defaultMessage: 'Index features',
-      }),
-    },
-    {
-      id: ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID,
-      label: i18n.translate('xpack.maps.newVectorLayerWizard.indexingFeatures', {
-        defaultMessage: 'Indexing features',
+      id: ADD_VECTOR_DRAWING_LAYER,
+      label: i18n.translate('xpack.maps.newVectorLayerWizard.indexNewLayer', {
+        defaultMessage: 'Index new layer',
       }),
     },
   ],

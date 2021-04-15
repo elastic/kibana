@@ -45,9 +45,6 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-  UPDATE_EDIT_MODE,
-  SET_VECTOR_LAYER_INDEX_NAME,
-  CLEAR_DRAWING_DATA,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -97,31 +94,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawState: action.drawState,
-        },
-      };
-    case UPDATE_EDIT_MODE:
-      return {
-        ...state,
-        mapStatToIndex: {
-          ...state.mapState,
-          editModeActive: action.isActive,
-        },
-      };
-    case SET_VECTOR_LAYER_INDEX_NAME:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          vectorLayerIndexName: action.indexName,
-        },
-      };
-    case CLEAR_DRAWING_DATA:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          drawState: undefined,
-          editModeActive: false,
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:

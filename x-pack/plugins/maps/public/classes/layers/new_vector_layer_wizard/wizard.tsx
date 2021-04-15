@@ -7,7 +7,6 @@
 
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFormRow,
@@ -20,38 +19,28 @@ import {
   getExistingIndexPatternNames,
   checkIndexPatternValid,
   createNewIndexAndPattern,
-  // @ts-expect-error
 } from './utils/indexing_service';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { IndexEntryDescription } from './index_entry_description';
+import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
 
-export const CREATE_DRAWN_FEATURES_INDEX_STEP_ID = 'CREATE_DRAWN_FEATURES_INDEX_STEP_ID';
-export const ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID = 'ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID';
-
-export interface NewVectorLayerProps extends RenderWizardArguments {
-  indexName: string;
-  setEditModeActive: () => void;
-  setEditModeInActive: () => void;
-  setIndexName: (indexName: string) => void;
-  clearDrawingData: () => void;
-  addNewLayer: (layerDescriptor: LayerDescriptor) => void;
-}
+export const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 interface State {
   indexName: string;
   indexError: string;
-  indexNames: string[];
+  currentIndexNames: string[];
   indexingTriggered: boolean;
   indexPatternId: string;
 }
 
-export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> {
+export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
   state: State = {
     indexName: '',
     indexError: '',
-    indexNames: [],
+    currentIndexNames: [],
     indexingTriggered: false,
     indexPatternId: '',
   };
@@ -59,32 +48,31 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
   private _isMounted = false;
 
   async componentDidMount() {
-    this.props.setEditModeActive();
     this._isMounted = true;
-    this._loadIndexNames();
+    this._loadcurrentIndexNames();
   }
 
   async componentDidUpdate() {
-    const { indexName, enableNextBtn, disableNextBtn, currentStepId } = this.props;
-    if (indexName) {
+    const { enableNextBtn, disableNextBtn } = this.props;
+    if (this.state.indexName && !this.state.indexError) {
       enableNextBtn();
     } else {
       disableNextBtn();
     }
-    if (!this.state.indexingTriggered && currentStepId === ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID) {
+    if (this.props.currentStepId === ADD_LAYER_STEP_ID && !this.state.indexingTriggered) {
       this.setState({ indexingTriggered: true });
-      await this._addFeaturesToNewIndex();
-      this.props.clearDrawingData();
+      await this._createNewIndex();
+      this.props.advanceToNextStep();
     }
   }
 
   componentWillUnmount() {
-    this.props.setEditModeInActive();
     this._isMounted = false;
   }
 
-  _addFeaturesToNewIndex = async () => {
-    const { indexPatternId } = await createNewIndexAndPattern(this.props.indexName);
+  _createNewIndex = async () => {
+    const { indexPatternId } = await createNewIndexAndPattern(this.state.indexName);
+    // Creates empty layer
     const sourceDescriptor = ESSearchSource.createDescriptor({
       indexPatternId,
       geoField: 'coordinates',
@@ -94,21 +82,21 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
       { sourceDescriptor },
       this.props.mapColors
     );
-    await this.props.addNewLayer(layerDescriptor);
+    this.props.previewLayers([layerDescriptor]);
   };
 
-  _loadIndexNames = async () => {
+  _loadcurrentIndexNames = async () => {
     const indexNameList = await getExistingIndexNames();
     const indexPatternList = await getExistingIndexPatternNames();
     if (this._isMounted) {
       this.setState({
-        indexNames: [...indexNameList, ...indexPatternList],
+        currentIndexNames: [...indexNameList, ...indexPatternList],
       });
     }
   };
 
-  _onIndexNameChange = (indexName: string) => {
-    if (this.state.indexNames.includes(indexName)) {
+  _onIndexNameChange = () => {
+    if (this.state.currentIndexNames.includes(this.state.indexName)) {
       this.setState({
         indexError: i18n.translate(
           'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
@@ -117,8 +105,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
           }
         ),
       });
-      this.props.setIndexName('');
-    } else if (!checkIndexPatternValid(indexName)) {
+    } else if (!checkIndexPatternValid(this.state.indexName)) {
       this.setState({
         indexError: i18n.translate(
           'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
@@ -127,16 +114,13 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
           }
         ),
       });
-      this.props.setIndexName('');
     } else {
       this.setState({ indexError: '' });
-      this.props.setIndexName(indexName);
     }
   };
 
   _onIndexNameChangeEvent = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ indexName: event.target.value });
-    this._onIndexNameChange(event.target.value);
+    this.setState({ indexName: event.target.value }, this._onIndexNameChange);
   };
 
   render() {
@@ -188,71 +172,7 @@ export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> 
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.maps.layers.newVectorLayerWizard.indexSettings.indexNameGuidelines',
-              {
-                defaultMessage: 'Index name guidelines',
-              }
-            )}
-            size="s"
-          >
-            <ul style={{ marginBottom: 0 }}>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.mustBeNewIndex',
-                  {
-                    defaultMessage: 'Must be a new index',
-                  }
-                )}
-              </li>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.lowercaseOnly',
-                  {
-                    defaultMessage: 'Lowercase only',
-                  }
-                )}
-              </li>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotInclude',
-                  {
-                    defaultMessage:
-                      'Cannot include \\\\, /, *, ?, ", <, >, |, \
-                  " " (space character), , (comma), #',
-                  }
-                )}
-              </li>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotStartWith',
-                  {
-                    defaultMessage: 'Cannot start with -, _, +',
-                  }
-                )}
-              </li>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.cannotBe',
-                  {
-                    defaultMessage: 'Cannot be . or ..',
-                  }
-                )}
-              </li>
-              <li>
-                {i18n.translate(
-                  'xpack.maps.layers.newVectorLayerWizard.indexSettings.guidelines.length',
-                  {
-                    defaultMessage:
-                      'Cannot be longer than 255 bytes (note it is bytes, \
-                  so multi-byte characters will count towards the 255 \
-                  limit faster)',
-                  }
-                )}
-              </li>
-            </ul>
-          </EuiCallOut>
+          {IndexEntryDescription()}
         </>
       </EuiPanel>
     );

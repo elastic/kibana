@@ -186,11 +186,6 @@ export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
 
-export const getEditModeActive = ({ map }: MapStoreState): boolean => map.mapState.editModeActive;
-
-export const getVectorLayerIndexName = ({ map }: MapStoreState): string =>
-  map.mapState.vectorLayerIndexName;
-
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');

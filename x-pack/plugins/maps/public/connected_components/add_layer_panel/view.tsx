@@ -21,7 +21,7 @@ import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers/layer_wizard_registry';
 
-const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
+export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
@@ -33,7 +33,6 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
-  isDrawingLayer: boolean;
 }
 
 interface State {
@@ -128,7 +127,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isStepLoading;
-    if (this.state.currentStep.id === ADD_LAYER_STEP_ID && !this.props.isDrawingLayer) {
+    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
     } else {

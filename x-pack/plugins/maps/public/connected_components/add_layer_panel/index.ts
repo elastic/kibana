@@ -20,7 +20,6 @@ import {
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import {
-  getEditModeActive,
   hasPreviewLayers,
   isLoadingPreviewLayers,
 } from '../../selectors/map_selectors';
@@ -29,7 +28,6 @@ function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
     isLoadingPreviewLayers: isLoadingPreviewLayers(state),
-    isDrawingLayer: getEditModeActive(state),
   };
 }
 
