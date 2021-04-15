@@ -119,7 +119,7 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
   isLoading: false,
   isReadOnly: false,
   logIndices: {
-    type: 'indexName' as const,
+    type: 'index_name' as const,
     indexName: 'logs-*',
   },
   fields: {

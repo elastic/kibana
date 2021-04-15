@@ -32,7 +32,7 @@ export const IndexPatternConfigurationPanel: React.FC<{
     (indexPatternId: string | undefined) => {
       if (indexPatternId != null) {
         indexPatternFormElement.updateValue(() => ({
-          type: 'indexPattern',
+          type: 'index_pattern',
           indexPatternId,
         }));
       } else {

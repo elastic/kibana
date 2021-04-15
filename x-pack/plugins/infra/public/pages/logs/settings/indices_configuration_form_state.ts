@@ -7,7 +7,11 @@
 
 import { useMemo } from 'react';
 import { useUiTracker } from '../../../../../observability/public';
-import { LogIndexNameReference, LogIndexPatternReference } from '../../../../common/log_sources';
+import {
+  LogIndexNameReference,
+  logIndexNameReferenceRT,
+  LogIndexPatternReference,
+} from '../../../../common/log_sources';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useCompositeFormElement, useFormElement } from './form_elements';
 import {
@@ -29,7 +33,7 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
       () => async (logIndices) => {
         if (logIndices == null) {
           return validateStringNotEmpty('log index pattern', '');
-        } else if (logIndices.type === 'indexName') {
+        } else if (logIndexNameReferenceRT.is(logIndices)) {
           return validateStringNotEmpty('log indices', logIndices.indexName);
         } else {
           const emptyStringErrors = validateStringNotEmpty(

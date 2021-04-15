@@ -113,7 +113,7 @@ export const IndexNamesConfigurationPanel: React.FC<{
 
 const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
   (value) => ({
-    type: 'indexName',
+    type: 'index_name',
     indexName: value,
   }),
   ({ indexName }) => indexName
