@@ -42,15 +42,9 @@ export const uploadLayerWizardConfig: LayerWizard = {
       }),
     },
     {
-      id: UPLOAD_STEPS.CONFIGURE_DOCUMENT_LAYER,
+      id: UPLOAD_STEPS.ADD_DOCUMENT_LAYER,
       label: i18n.translate('xpack.maps.fileUploadWizard.configureDocumentLayerLabel', {
         defaultMessage: 'Add as document layer',
-      }),
-    },
-    {
-      id: UPLOAD_STEPS.ADD_DOCUMENT_LAYER,
-      label: i18n.translate('xpack.maps.fileUploadWizard.addDocumentLayerLabel', {
-        defaultMessage: 'Adding document layer',
       }),
     },
   ],

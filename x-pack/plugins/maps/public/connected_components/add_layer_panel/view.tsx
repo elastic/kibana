@@ -68,14 +68,13 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
-    const layerSteps = layerWizard.prerequisiteSteps
-      ? layerWizard.prerequisiteSteps
-      : [
-          {
-            id: ADD_LAYER_STEP_ID,
-            label: ADD_LAYER_STEP_LABEL,
-          },
-        ];
+    const layerSteps = [
+      ...(layerWizard.prerequisiteSteps ? layerWizard.prerequisiteSteps : []),
+      {
+        id: ADD_LAYER_STEP_ID,
+        label: ADD_LAYER_STEP_LABEL,
+      },
+    ];
     this.setState({
       ...INITIAL_STATE,
       layerWizard,
@@ -169,6 +168,9 @@ export class AddLayerPanel extends Component<Props, State> {
           previewLayers={this._previewLayers}
           showBackButton={!this.state.isStepLoading}
           currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
+          isOnFinalStep={
+            this.state.currentStep ? this.state.currentStep.id === ADD_LAYER_STEP_ID : false
+          }
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}

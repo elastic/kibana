@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
@@ -21,7 +22,6 @@ import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 export enum UPLOAD_STEPS {
   CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',
   UPLOAD = 'UPLOAD',
-  CONFIGURE_DOCUMENT_LAYER = 'CONFIGURE_DOCUMENT_LAYER',
   ADD_DOCUMENT_LAYER = 'ADD_DOCUMENT_LAYER',
 }
 
@@ -66,7 +66,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
 
     if (
-      this.props.currentStepId === UPLOAD_STEPS.ADD_DOCUMENT_LAYER &&
+      this.props.isOnFinalStep &&
       this.state.indexingStage === INDEXING_STAGE.SUCCESS &&
       this.state.results
     ) {
@@ -74,7 +74,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
   }
 
-  _addDocumentLayer(results: FileUploadGeoResults) {
+  _addDocumentLayer = _.once((results: FileUploadGeoResults) => {
     const esSearchSourceConfig = {
       indexPatternId: results.indexPatternId,
       geoField: results.geoFieldName,
@@ -89,7 +89,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
     ]);
     this.props.advanceToNextStep();
-  }
+  });
 
   async _loadFileUploadComponent() {
     const fileUploadComponent = await getFileUpload().getFileUploadComponent();
