@@ -8,10 +8,10 @@
 import React, { useState, useCallback } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../common';
-import { CasesNavigation } from '../links';
-import * as i18n from '../../common/translations';
-import { getAllCasesLazy as getAllCases } from '../../methods';
+import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../common';
+import { CasesNavigation } from '../../links';
+import * as i18n from '../../../common/translations';
+import { AllCasesGeneric } from '../all_cases_generic';
 
 export interface AllCasesSelectorModalProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
@@ -52,15 +52,15 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
         <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {getAllCases({
-          alertData,
-          createCaseNavigation,
-          disabledStatuses,
-          isSelector: true,
-          onRowClick: onClick,
-          userCanCrud,
-          updateCase,
-        })}
+        <AllCasesGeneric
+          alertData={alertData}
+          createCaseNavigation={createCaseNavigation}
+          disabledStatuses={disabledStatuses}
+          isSelector={true}
+          onRowClick={onClick}
+          userCanCrud={userCanCrud}
+          updateCase={updateCase}
+        />
       </EuiModalBody>
     </Modal>
   ) : null;

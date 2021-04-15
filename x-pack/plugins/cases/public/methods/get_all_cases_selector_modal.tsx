@@ -7,10 +7,10 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCasesSelectorModalProps } from '../components/all_cases_selector_modal';
+import { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
 
 export const getAllCasesSelectorModalLazy = (props: AllCasesSelectorModalProps) => {
-  const AllCasesSelectorModalLazy = lazy(() => import('../components/all_cases_selector_modal'));
+  const AllCasesSelectorModalLazy = lazy(() => import('../components/all_cases/selector_modal'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy {...props} />

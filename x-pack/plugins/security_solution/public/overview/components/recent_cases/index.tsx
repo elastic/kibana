@@ -51,6 +51,11 @@ const RecentCasesComponent = () => {
     },
     createCaseNavigation: {
       href: formatUrl(getCreateCaseUrl()),
+      onClick: () => {
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCreateCaseUrl(),
+        });
+      },
     },
     maxCasesToShow: MAX_CASES_TO_SHOW,
   });
