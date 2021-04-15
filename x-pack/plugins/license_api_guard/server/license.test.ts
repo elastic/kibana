@@ -7,8 +7,7 @@
 
 import { of } from 'rxjs';
 import type { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServerMock } from 'src/core/server/http/http_server.mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import { License } from './license';
 import { LicenseCheckState, licensingMock } from './shared_imports';
