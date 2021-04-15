@@ -8,14 +8,10 @@
     "declarationMap": true
   },
   "include": [
-    "__packages_do_not_import__/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "static/**/*"
+    "server/**/*"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" }
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../../../src/core/tsconfig.json" }
   ]
 }

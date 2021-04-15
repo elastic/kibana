@@ -19,7 +19,10 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
 } from '../../common';
-import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_LATEST_KEYWORD,
+} from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 
@@ -64,8 +67,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await Promise.all(
-    packages.map(({ name, version, force }) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version, force)
+    packages.map(({ name, version }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
     )
   );
 
@@ -202,15 +205,14 @@ async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
-  pkgVersion: string,
-  force?: boolean
+  pkgVersion: string
 ) {
+  const isLatest = pkgVersion === PRECONFIGURATION_LATEST_KEYWORD;
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,
     esClient,
-    pkgVersion,
-    force,
+    pkgVersion: isLatest ? undefined : pkgVersion,
   });
 }
 
