@@ -53,6 +53,7 @@ describe('search settings routes', () => {
     boosts,
     result_fields: resultFields,
     search_fields: searchFields,
+    precision: 2,
   };
 
   beforeEach(() => {

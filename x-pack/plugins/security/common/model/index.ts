@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ApiKey, ApiKeyToInvalidate } from './api_key';
+export { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
 export { User, EditUser, getUserDisplayName } from './user';
 export { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
 export { AuthenticationProvider, shouldProviderUseLoginForm } from './authentication_provider';

@@ -13,11 +13,13 @@ import {
 } from '../../../common/http_api/log_sources';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 export const initLogSourceStatusRoutes = ({
   framework,
   sourceStatus,
   fields,
+  sources,
 }: InfraBackendLibs) => {
   framework.registerRoute(
     {
@@ -31,16 +33,24 @@ export const initLogSourceStatusRoutes = ({
       const { sourceId } = request.params;
 
       try {
-        const logIndexStatus = await sourceStatus.getLogIndexStatus(requestContext, sourceId);
-        const logIndexFields =
-          logIndexStatus !== 'missing'
-            ? await fields.getFields(requestContext, sourceId, 'LOGS')
-            : [];
+        const sourceConfiguration = await sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
+
+        const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+          sourceConfiguration.configuration,
+          await framework.getIndexPatternsServiceWithRequestContext(requestContext)
+        );
+
+        const logIndexStatus = await sourceStatus.getLogIndexStatus(
+          requestContext,
+          resolvedLogSourceConfiguration
+        );
 
         return response.ok({
           body: getLogSourceStatusSuccessResponsePayloadRT.encode({
             data: {
-              logIndexFields,
               logIndexStatus,
             },
           }),

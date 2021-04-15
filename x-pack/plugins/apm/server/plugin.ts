@@ -42,6 +42,9 @@ import {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+import { apmRuleRegistrySettings } from '../common/rules';
+
+export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
 
 export class APMPlugin
   implements
@@ -71,15 +74,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
 
     core.uiSettings.register(uiSettings);
-
-    if (plugins.actions && plugins.alerting) {
-      registerApmAlerts({
-        alerting: plugins.alerting,
-        actions: plugins.actions,
-        ml: plugins.ml,
-        config$: mergedConfig$,
-      });
-    }
 
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
@@ -157,6 +151,17 @@ export class APMPlugin
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
 
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create(
+      apmRuleRegistrySettings
+    );
+
+    registerApmAlerts({
+      registry: apmRuleRegistry,
+      ml: plugins.ml,
+      config$: mergedConfig$,
+      logger: this.logger!.get('rule'),
+    });
+
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,
@@ -186,6 +191,7 @@ export class APMPlugin
           },
         });
       },
+      ruleRegistry: apmRuleRegistry,
     };
   }
 

@@ -21,9 +21,9 @@ import {
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../../../shared/loading';
 
+import { getEngineBreadcrumbs } from '../engine';
 import { LogRetentionCallout, LogRetentionTooltip, LogRetentionOptions } from '../log_retention';
 
 import { ApiLogFlyout } from './api_log';
@@ -32,10 +32,7 @@ import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
 import { ApiLogsLogic } from './';
 
-interface Props {
-  engineBreadcrumb: BreadcrumbTrail;
-}
-export const ApiLogs: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const ApiLogs: React.FC = () => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
   const { fetchApiLogs, pollForApiLogs } = useActions(ApiLogsLogic);
 
@@ -51,7 +48,7 @@ export const ApiLogs: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   return (
     <>
-      <SetPageChrome trail={[...engineBreadcrumb, API_LOGS_TITLE]} />
+      <SetPageChrome trail={getEngineBreadcrumbs([API_LOGS_TITLE])} />
       <EuiPageHeader pageTitle={API_LOGS_TITLE} />
 
       <FlashMessages />

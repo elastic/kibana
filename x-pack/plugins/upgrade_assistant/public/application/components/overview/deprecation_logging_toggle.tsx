@@ -13,8 +13,35 @@ import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../app_context';
 import { ResponseError } from '../../lib/api';
 
+const i18nTexts = {
+  toggleErrorLabel: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
+    {
+      defaultMessage: 'Could not load logging state',
+    }
+  ),
+  toggleLabel: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
+    {
+      defaultMessage: 'Enable deprecation logging',
+    }
+  ),
+  enabledMessage: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledToastMessage',
+    {
+      defaultMessage: 'Log deprecated actions.',
+    }
+  ),
+  disabledMessage: i18n.translate(
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledToastMessage',
+    {
+      defaultMessage: 'Do not log deprecated actions.',
+    }
+  ),
+};
+
 export const DeprecationLoggingToggle: React.FunctionComponent = () => {
-  const { api } = useAppContext();
+  const { api, notifications } = useAppContext();
 
   const [isEnabled, setIsEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,27 +71,10 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
 
   const renderLoggingState = () => {
     if (error) {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
-        {
-          defaultMessage: 'Could not load logging state',
-        }
-      );
-    } else if (isEnabled) {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
-        {
-          defaultMessage: 'On',
-        }
-      );
-    } else {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledLabel',
-        {
-          defaultMessage: 'Off',
-        }
-      );
+      return i18nTexts.toggleErrorLabel;
     }
+
+    return i18nTexts.toggleLabel;
   };
 
   const toggleLogging = async () => {
@@ -82,6 +92,9 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
       setError(updateError);
     } else if (data) {
       setIsEnabled(data.isEnabled);
+      notifications.toasts.addSuccess(
+        data.isEnabled ? i18nTexts.enabledMessage : i18nTexts.disabledMessage
+      );
     }
   };
 
