@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Tutorial: Create a dashboard of panels with ecommerce sales data
+== Tutorial: Time series analysis with Lens
 
 You collected sales data from your store, and you want to visualize and analyze the data on a dashboard. 
 To create dashboard panels of the data, open the *Lens* visualization builder, then  
@@ -38,6 +38,79 @@ Open the *Lens* editor, then make sure the correct fields appear.
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
 . Make sure the *kibana_sample_data_ecommerce_* index appears.
+
+[discrete]
+[[add-a-data-layer]]
+==== Add a second chart type or index pattern to your existing chart
+
+You can add multiple metrics to a single chart type, but if you want to overlay
+multiple chart types or index patterns, use *layers*. When building layered charts
+it is important to match the data on the horizontal axis so that it uses the same
+scale. To add a line chart layer on top of your area chart:
+
+. In the editor, click *+*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_2.png[Add new layer button]
+
+. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_3.png[Change layer type]
++
+The chart type for the visualization changes to *Mixed XY*.
+
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+
+.. Drag and drop *timestamp* to the *Horizontal axis* field.
+
+.. Drag and drop *clientip* to the *Vertical axis* field.
+
+. Change the *timestamp* interval to match the layers.
+
+.. Click *timestamp* in the line chart layer.
+
+.. Select *Customize time interval*.
+
+.. Change the *Minimum interval* to `1 days`, then click *Close*.
+
+. In the editor, click *Unique count of clientip*. In the *Display name* field, enter `Unique visitors`.
+
+The new metric is automatically assigned a color. To choose a specific metric color:
+
+. In the *Series color* field, enter *#CA8EAE*, then click *Close*.
+
+There is a significant difference between the *timestamp per day* and *Unique visitors* data, which makes the *Unique visitors* data difficult to read. To improve the readability, 
+display the *Unique visitors* data along a second y-axis, then change the formatting. When functions contain multiple formats, separate axes are created by default. 
+
+. In the editor, click *Unique visitors* in the line chart layer.
+
+. For *Axis side*, click *Right*, then click *Close*.
+
+[float]
+[[change-the-visualization-type]]
+==== Change the visualization type
+
+. In the editor, click *Average of bytes* in the area chart layer. 
+
+. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_4.png[Multiaxis chart]
+
+[discrete]
+[[lens-legend-position]]
+==== Change the legend position
+
+The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
+
+. From the *Legend* dropdown, select the top position.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_5.png[legend position]
+
+. Click *Save and return*.
+
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]

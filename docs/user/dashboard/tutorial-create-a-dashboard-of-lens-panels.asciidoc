@@ -1,10 +1,10 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Tutorial: Create a dashboard of panels with web server data
+== Tutorial: Build your first dashboard
 
-You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
-create the visualization panels that best display the data.
-
-When you've completed the tutorial, you'll have a dashboard that provides you with a complete overview of your web server data.
+Learn the most common ways to build a dashboard from your own data.
+The tutorial will use sample data from the perspective of an analyst looking
+at website logs, but this type of dashboard works on any type of data.
+Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
@@ -13,20 +13,28 @@ image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
 [[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
-To create visualizations of the data from the web server, add the data set, then create the dashboard.
+If you are working with your own data, you should already have an <<index-patterns, index pattern>>.
+To install the sample logs that contain fake website traffic:
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
 
+Then create a new dashboard:
+
 . Open the main menu, click *Dashboard*.
 
 . Click *Create dashboard*.
+
+. Set the <<set-time-filter,time filter>> to *Last 90 days*.
+
+You don't need to save the dashboard while it's in draft mode.
 
 [float]
 [[open-and-set-up-lens]]
 === Open and set up Lens
 
+*Lens* is the visualization builder recommended for most users.
 With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as
 *Lens* uses heuristics to apply the fields and create a visualization for you.
 
@@ -37,15 +45,19 @@ With *Lens*, you identify the data fields you want to visualize, drag and drop t
 [role="screenshot"]
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
-. Make sure the *kibana_sample_data_logs* index appears.
+. Make sure the *kibana_sample_data_logs* index appears. You may need to select
+a different index pattern from the menu.
 
 [discrete]
 [[view-the-number-of-website-visitors]]
-=== View the number of website visitors
+=== View the unique count of a field
 
-To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
+The simplest visualization in Lens is the Metric. It lets you display a big
+number using an {es} aggregation function. Use "unique count", also known
+as cardinality, to get an approximate count of the unique values in your field.
 
-. Set the <<set-time-filter,time filter>> to *Last 90 days*.
+To determine how many users have visited your website within the last 90 days, build
+a metric visualization on the IP address field:
 
 . From the *Chart Type* dropdown, select *Metric*.
 +
@@ -66,154 +78,123 @@ image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 [role="screenshot"]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
-. Click *Save and return*.
+. Click *Save and return*. You will return to the dashboard, where you can customize
+the layout and size of the newly added panel.
+
+[discrete]
+[[mixed-multiaxis]]
+=== View a metric over time
+
+The logs sample data has a default time field named `timestamp`, which *Lens* uses to
+simplify chart building. To see bytes over time, drag and drop *bytes* from the field list
+to the visualization builder. If your data has multiple time fields, drag and drop your
+specific time field to replace the default.
+
+*Lens* chooses a date interval automatically. To zoom in on the data you want to view,
+click and drag your cursor across the bars. 
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
+
+If you want more control over the time interval, customize it:
+
+. In the editor, click *timestamp*.
+
+. Select *Customize time interval*.
+
+. Change the *Minimum interval* to `1 days`, then click *Close*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_1.png[Customize time interval]
+
+Bar charts are not always the best way to display metrics. You can switch the chart
+type at any time. Open the chart switcher and choose *Area* now.
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
-=== View the distribution of visitors by operating system
+=== View the unique count broken down by another field
 
-To determine the operating systems you should continue to support, and the importance of mobile traffic from iOS devices, 
-create a donut chart that displays the top operating systems that your visitors used to access your website within the last 90 days.
+Dashboards will combine multiple panels to give you a bigger picture summary
+of your data. A common technique is to break down the most frequent values
+as a percentage. If you want to break down by each exactly matching value,
+such as to see the most frequent operating systems, use the *top values* function and
+choose a chart type that displays in percentages:
 
-. Open *Lens*, then set the <<set-time-filter,time filter>> to *Last 90 days*.
+. Open *Lens* and select *Donut* from the *Chart Type* dropdown.
 
-. From the *Chart Type* dropdown, select *Donut*.
+. Drag and drop *clientip* to the *Size by* field.
 
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-.. Drag and drop *clientip* to the *Size by* field.
-
-.. Drag and drop *machine.os.keyword* to the *Slice by* field.
+. Drag and drop *machine.os.keyword* to the *Slice by* field.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os.keyword fields]
 
-. Change the color palette. 
+*Lens* chooses a default color palette and adds a visual indicator to the dimension that controls
+the color. To change the color:
 
-.. In the editor, click *Top values of machine.os.keyword*. 
+. In the editor, click on *Top values of machine.os.keyword*, which has a color indicator. 
 
-.. From the *Color palette* dropdown, select *Compatibility*.
+. From the *Color palette* dropdown, select *Compatibility*.
 
-.. Click *Close*.
+. Click *Close*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
 . Click *Save and return*.
 
-[discrete]
-[[mixed-multiaxis]]
-=== View the average of bytes transfer per day
-
-To prevent potential server failures, and optimize the cost of website maintenance, create an area chart that displays the average of bytes transfer. To compare 
-the data to the number of visitors to your website, add a line chart layer.  
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop *bytes* to the visualization builder.
-
-. To zoom in on the data you want to view, click and drag your cursor across the bars. 
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
-
-. Change the *timestamp* interval.
-
-.. In the editor, click *timestamp*.
-
-.. Select *Customize time interval*.
-
-.. Change the *Minimum interval* to `1 days`, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_1.png[Customize time interval]
-
-. From the *Chart Type* dropdown, select *Area*.
+Because *top values* uses exact matches, there is no deduplication of similar values like "win 7" and "win 8".
+The following tutorials will explain how to break down using more customizable groups.
 
 [discrete]
-[[add-a-data-layer]]
-==== Add the line chart layer
+[[custom-ranges]]
+=== Compare a metric on a subset to the whole
 
-To compare the average of bytes transfer to the number of users that visit your website, add a line chart layer.
+To compare a subset to the whole you need to have non-overlapping data. You can build this type of
+comparison using *ranges* for numeric data or *filters* for any data type. Filters can include ranges,
+but ranges are simpler to use.
 
-. In the editor, click *+*.
+To determine if your users transfer more small files versus large files, create a pie chart that displays the percentage of each size: 
+
+. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor.
+
+. Click *Median of bytes* and then select *Sum* instead. Then *Close*.
+
+. From the *Available fields* list, drag and drop *bytes* to *Break down by* in the editor, then specify the file size ranges.
+
+.. Click *bytes*.
+
+.. Click *Create custom ranges*, enter the following, then press Return:
+
+* *Ranges* &mdash; `0` -> `10240`
+
+* *Label* &mdash; `Below 10KB`
+
+.. Click *Add range*, enter the following, then press Return:
+
+* *Ranges* &mdash; `10240` -> `+∞`
+
+* *Label* &mdash; `Above 10KB`
 +
 [role="screenshot"]
-image::images/lens_end_to_end_3_2.png[Add new layer button]
+image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 
-. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
+.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
+
+. From the *Chart Type* dropdown, select *Pie*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_3_3.png[Change layer type]
-+
-The chart type for the visualization changes to *Mixed XY*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-.. Drag and drop *timestamp* to the *Horizontal axis* field.
-
-.. Drag and drop *clientip* to the *Vertical axis* field.
-
-. Change the *timestamp* interval.
-
-.. In the editor, click *timestamp* in the line chart layer.
-
-.. Select *Customize time interval*.
-
-.. Change the *Minimum interval* to `1 days`, then click *Close*.
-
-. Change the *Unique count of clientip* label and color.
-
-.. In the editor, click *Unique count of clientip*.
-
-.. In the *Display name* field, enter `Unique visitors` in the line chart layer.
-
-.. In the *Series color* field, enter *#CA8EAE*, then click *Close*.
-
-[discrete]
-[[configure-the-multiaxis-chart]]
-==== Configure the y-axes
-
-There is a significant difference between the *timestamp per day* and *Unique visitors* data, which makes the *Unique visitors* data difficult to read. To improve the readability, 
-display the *Unique visitors* data along a second y-axis, then change the formatting. When functions contain multiple formats, separate axes are created by default. 
-
-. In the editor, click *Unique visitors* in the line chart layer.
-
-. For *Axis side*, click *Right*, then click *Close*.
-
-[float]
-[[change-the-visualization-type]]
-==== Change the visualization type
-
-. In the editor, click *Average of bytes* in the area chart layer. 
-
-. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_4.png[Multiaxis chart]
-
-[discrete]
-[[lens-legend-position]]
-==== Change the legend position
-
-The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
-
-. From the *Legend* dropdown, select the top position.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_5.png[legend position]
+image::images/lens_end_to_end_6_2.png[Files size distribution]
 
 . Click *Save and return*.
 
 [discrete]
 [[percentage-stacked-area]]
-=== View the health of your website 
+=== Create a time series chart with a break down
 
-To detect unusual traffic, bad website links, and server errors, create a percentage stacked area chart that displays the associated response codes.
+HTTP status codes have specific meanings based on their range. To show the percentage of errors over time:
 
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+. From the *Available fields* list, drag and drop the data fields to the dimension:
 
 .. Drag and drop *Records* to the *Vertical axis* field.
 
@@ -226,11 +207,7 @@ To detect unusual traffic, bad website links, and server errors, create a percen
 [role="screenshot"]
 image::images/lens_end_to_end_4_3.png[Turn off axis name]
 
-[discrete]
-[[add-the-response-code-filters]]
-==== Add the response code filters
-
-For each response code that you want to display, create a filter. 
+For each response code that you want to break down, create a filter. 
 
 . In the editor, click the *Drop a field or click to add* field for *Break down by*.
 
@@ -277,27 +254,24 @@ image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
 
 [discrete]
 [[histogram]]
-=== View the traffic for your website by the hour 
+=== View the numeric distribution in a histogram
 
-To find the best time to shut down your website for maintenance, create a histogram that displays the traffic for your website by the hour.
+Use the *ranges* function in *Lens* to see a numeric distribution. For logs data, this might
+be used to find the best time to shut down your website for maintenance. You can do this by looking
+at the count of records or the sum of total bytes within each histogram interval.
+To create a numeric histogram showing total traffic per hour:
 
-. Open *Lens*.
+. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor.
 
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
+. Click *Median of bytes* and choose the *Sum* function instead.
 
-.. Click *Average of bytes*.
+. In the *Display name* field, enter `Transferred bytes`.
 
-.. From *Select a function*, click *Sum*.
+. From the *Value format* dropdown, select `Bytes (1024)`, then click *Close*.
 
-.. In the *Display name* field, enter `Transferred bytes`.
+. From the *Available fields* list, drag and drop *hour_of_day* to *Horizontal axis* in the editor.
 
-.. From the *Value format* dropdown, select `Bytes (1024)`, then click *Close*.
-
-. From the *Available fields* list, drag and drop *hour_of_day* to *Horizontal axis* in the editor, then configure the options.
-
-.. Click *hour_of_day*.
-
-.. Click and slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
+. Click *hour_of_day*, and then slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_5_2.png[Create custom ranges]
@@ -305,55 +279,12 @@ image::images/lens_end_to_end_5_2.png[Create custom ranges]
 . Click *Save and return*.
 
 [discrete]
-[[custom-ranges]]
-=== View the percent of small versus large transferred files 
- 
-To determine if your users transfer more small files versus large files, create a pie chart that displays the percentage of each size. 
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
-
-.. Click *Average of bytes*.
-
-.. From *Select a function*, click *Sum*, then click *Close*.
-
-. From the *Available fields* list, drag and drop *bytes* to *Break down by* in the editor, then specify the file size ranges.
-
-.. Click *bytes*.
-
-.. Click *Create custom ranges*, enter the following, then press Return:
-
-* *Ranges* &mdash; `0` -> `10240`
-
-* *Label* &mdash; `Below 10KB`
-
-.. Click *Add range*, enter the following, then press Return:
-
-* *Ranges* &mdash; `10240` -> `+∞`
-
-* *Label* &mdash; `Above 10KB`
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
-
-.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
-
-. From the *Chart Type* dropdown, select *Pie*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_2.png[Files size distribution]
-
-. Click *Save and return*.
-
-[discrete]
 [[treemap]]
-=== View the top sources of website traffic
+=== Create a multi-level break down
 
-To determine how users find out about your website and where your users are located, create a treemap that displays the percentage of users that 
-enter your website from specific social media websites, and the top countries where users are located.  
-
-. Open *Lens*.
+*Lens* supports multi-level breakdowns in the data table and proportion charts. For example,
+to create a chart which breaks down the traffic sources and user geography, use the *filters*
+function and *top values* function:
 
 . From the *Chart Type* dropdown, select *Treemap*.
 
@@ -383,13 +314,7 @@ enter your website from specific social media websites, and the top countries wh
 
 .. Click *Close*.
 
-[discrete]
-[[add-the-countries]]
-==== Add the geographic data
-
-To determine the top countries where users are located, add the geographic data.
-
-Compare the top sources of website traffic data to the top three countries. 
+Then add the next break down by geography:
 
 . From the *Available fields* list, drag and drop *geo.src* to the visualization builder. 
 
