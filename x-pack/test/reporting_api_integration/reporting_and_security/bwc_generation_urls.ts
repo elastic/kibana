@@ -5,9 +5,19 @@
  * 2.0.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
+import pathNode from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
-import * as GenerationUrls from '../generation_urls';
-import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
+import * as GenerationUrls from '../services/generation_urls';
+
+const OSS_KIBANA_ARCHIVE_PATH = pathNode.resolve(
+  REPO_ROOT,
+  'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+);
+const OSS_DATA_ARCHIVE_PATH = pathNode.resolve(
+  REPO_ROOT,
+  'test/functional/fixtures/es_archiver/dashboard/current/data'
+);
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
