@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { PublicKeys } from '../index';
+import { PublicContract } from '../../index';
 
 class Test {
   public str: string = '';
@@ -15,6 +16,8 @@ class Test {
   private num: number = 0;
 }
 
-type KEYS = PublicKeys<Test>;
+type CONTRACT = PublicContract<Test>;
 
-expectType<KEYS>('str');
+expectType<CONTRACT>({
+  str: 'foo',
+});
