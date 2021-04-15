@@ -6,15 +6,25 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASES_URL, CASE_TAGS_URL } from '../../../../../../../plugins/cases/common/constants';
-import { postCaseReq } from '../../../../../common/lib/mock';
-import { deleteCasesByESQuery } from '../../../../../common/lib/utils';
+import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/utils';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import {
+  secOnly,
+  obsOnly,
+  globalRead,
+  superUser,
+  secOnlyRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
+} from '../../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
   describe('get_tags', () => {
@@ -23,20 +33,82 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return case tags', async () => {
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, tags: ['unique'] })
-        .expect(200);
+      await createCase(supertest, getPostCaseRequest());
+      await createCase(supertest, getPostCaseRequest({ tags: ['unique'] }));
 
-      const { body } = await supertest
-        .get(CASE_TAGS_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const tags = await getTags(supertest);
+      expect(tags).to.eql(['defacement', 'unique']);
+    });
 
-      expect(body).to.eql(['defacement', 'unique']);
+    describe('rbac', () => {
+      it('User: security solution only - should read the correct tags', async () => {
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
+
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
+          200,
+          {
+            user: obsOnly,
+            space: 'space1',
+          }
+        );
+
+        for (const scenario of [
+          {
+            user: globalRead,
+            expectedTags: ['sec', 'obs'],
+          },
+          {
+            user: superUser,
+            expectedTags: ['sec', 'obs'],
+          },
+          { user: secOnlyRead, expectedTags: ['sec'] },
+          { user: obsOnlyRead, expectedTags: ['obs'] },
+          {
+            user: obsSecRead,
+            expectedTags: ['sec', 'obs'],
+          },
+        ]) {
+          const tags = await getTags(supertestWithoutAuth, 200, {
+            user: scenario.user,
+            space: 'space1',
+          });
+
+          expect(tags).to.eql(scenario.expectedTags);
+        }
+      });
+
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should NOT get all tags`, async () => {
+          // super user creates a case at the appropriate space
+          await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+            200,
+            {
+              user: superUser,
+              space: scenario.space,
+            }
+          );
+
+          // user should not be able to get all tags at the appropriate space
+          await getTags(supertestWithoutAuth, 403, { user: scenario.user, space: scenario.space });
+        });
+      }
     });
   });
 };

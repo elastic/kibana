@@ -8,10 +8,11 @@ import Boom from '@hapi/boom';
 
 import { SavedObject } from 'kibana/server';
 import { CaseResponseRt, CaseResponse, ESCaseAttributes, User, UsersRt } from '../../../common/api';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common';
+import { countAlertsForID, createAuditMsg, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
+import { AuthorizationFilter, Operations } from '../../authorization';
 
 interface GetParams {
   id: string;
@@ -95,10 +96,23 @@ export async function getTags({
   savedObjectsClient: soClient,
   caseService,
   logger,
+  authorization: auth,
+  auditLogger,
 }: CasesClientArgs): Promise<string[]> {
   try {
+    let authFindHelpers: AuthorizationFilter;
+    try {
+      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+    } catch (error) {
+      auditLogger?.log(createAuditMsg({ operation: Operations.getTags, error }));
+      throw error;
+    }
+
+    const { filter: authorizationFilter } = authFindHelpers;
+
     return await caseService.getTags({
       soClient,
+      filter: authorizationFilter,
     });
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });

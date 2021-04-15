@@ -82,4 +82,12 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetTags]: {
+    type: EventType.ACCESS,
+    name: ReadOperations.GetCase,
+    action: 'get-tags',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };

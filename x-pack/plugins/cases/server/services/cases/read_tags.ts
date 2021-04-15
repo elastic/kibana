@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
+import { KueryNode } from '../../../../../../src/plugins/data/common';
 import { CaseAttributes } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 
@@ -30,30 +32,36 @@ export const convertTagsToSet = (tagObjects: Array<SavedObject<CaseAttributes>>)
 // Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 export const readTags = async ({
   soClient,
+  filter,
 }: {
   soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
   perPage?: number;
 }): Promise<string[]> => {
-  const tags = await readRawTags({ soClient });
+  const tags = await readRawTags({ soClient, filter });
   return tags;
 };
 
 export const readRawTags = async ({
   soClient,
+  filter,
 }: {
   soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
 }): Promise<string[]> => {
   const firstTags = await soClient.find({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,
     perPage: 1,
+    filter: cloneDeep(filter),
   });
   const tags = await soClient.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,
     perPage: firstTags.total,
+    filter: cloneDeep(filter),
   });
 
   return Array.from(convertTagsToSet(tags.saved_objects));

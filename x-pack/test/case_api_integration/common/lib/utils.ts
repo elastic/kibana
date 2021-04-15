@@ -17,6 +17,7 @@ import {
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
   CASE_STATUS_URL,
+  CASE_TAGS_URL,
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../plugins/cases/common/constants';
 import {
@@ -527,7 +528,7 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const getSpaceUrlPrefix = (spaceId: string) => {
+export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
@@ -589,14 +590,18 @@ export const ensureSavedObjectIsAuthorized = (
 export const createCase = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   params: CasePostRequest,
-  expectedHttpCode: number = 200
+  expectedHttpCode: number = 200,
+  auth?: { user: User; space: string }
 ): Promise<CaseResponse> => {
-  const { body: theCase } = await supertest
-    .post(CASES_URL)
-    .set('kbn-xsrf', 'true')
-    .send(params)
-    .expect(expectedHttpCode);
+  const superTestInstance = supertest
+    .post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
+    .set('kbn-xsrf', 'true');
 
+  if (auth != null) {
+    superTestInstance.auth(auth.user.username, auth.user.password);
+  }
+
+  const { body: theCase } = await superTestInstance.send(params).expect(expectedHttpCode);
   return theCase;
 };
 
@@ -841,17 +846,22 @@ export const findCases = async (
   return res;
 };
 
-export const pushCase = async (
+export const getTags = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  connectorId: string,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse> => {
-  const { body: res } = await supertest
-    .post(`${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+  expectedHttpCode = 200,
+  auth?: { user: User; space: string }
+): Promise<CasesFindResponse> => {
+  const superTestInstance = supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASE_TAGS_URL}`)
     .set('kbn-xsrf', 'true')
-    .send({})
+    .query({ sortOrder: 'asc' })
+    .send()
     .expect(expectedHttpCode);
 
+  if (auth != null) {
+    superTestInstance.auth(auth.user.username, auth.user.password);
+  }
+
+  const { body: res } = await superTestInstance.send().expect(expectedHttpCode);
   return res;
 };

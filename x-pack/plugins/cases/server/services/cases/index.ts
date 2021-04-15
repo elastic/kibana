@@ -172,6 +172,11 @@ interface CasesMapWithPageInfo {
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
 
+interface GetTagsArgs {
+  soClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
 const transformNewSubCase = ({
   createdAt,
   createdBy,
@@ -915,10 +920,10 @@ export class CaseService {
       throw error;
     }
   }
-  public async getTags({ soClient }: ClientArgs) {
+  public async getTags({ soClient, filter }: GetTagsArgs) {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      return await readTags({ soClient });
+      return await readTags({ soClient, filter });
     } catch (error) {
       this.log.error(`Error on GET cases: ${error}`);
       throw error;
