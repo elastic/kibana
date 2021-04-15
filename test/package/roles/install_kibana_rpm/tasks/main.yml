@@ -7,14 +7,20 @@
       - freetype
     state: latest
 
-- name: install kibana from local file
+- name: find rpm package
+  find:
+    paths: /packages/
+    patterns: kibana-*-x86_64.rpm
+  register: kibana_rpm
+
+- name: install
   become: yes
   yum:
-    name: /packages/kibana-{{ kibana_version }}-x86_64.rpm
+    name: "{{ kibana_rpm.files[0].path }}"
     state: present
     disable_gpg_check: yes
 
-- name: copy kibana configuration
+- name: copy configuration
   become: yes
   template:
     src: templates/kibana.yml
