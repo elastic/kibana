@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
+import { RouteDeps } from '../types';
+import { wrapError } from '../utils';
 
-import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { CASE_STATUS_URL } from '../../../../common/constants';
 
 export function initGetCasesStatusApi({ router, logger }: RouteDeps) {
   router.get(

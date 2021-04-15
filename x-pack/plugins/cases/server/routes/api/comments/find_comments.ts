@@ -14,10 +14,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectFindOptionsRt, throwErrors } from '../../../../../common/api';
-import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { SavedObjectFindOptionsRt, throwErrors } from '../../../../common/api';
+import { RouteDeps } from '../types';
+import { escapeHatch, wrapError } from '../utils';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,

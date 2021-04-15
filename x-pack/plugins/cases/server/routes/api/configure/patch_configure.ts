@@ -10,13 +10,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CasesConfigureRequestRt, throwErrors } from '../../../../../common/api';
-import { RouteDeps } from '../../types';
-import { wrapError, escapeHatch } from '../../utils';
-import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { CasesConfigurePatchRt, throwErrors } from '../../../../common/api';
+import { RouteDeps } from '../types';
+import { wrapError, escapeHatch } from '../utils';
+import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 
-export function initPostCaseConfigure({ router, logger }: RouteDeps) {
-  router.post(
+export function initPatchCaseConfigure({ router, logger }: RouteDeps) {
+  router.patch(
     {
       path: CASE_CONFIGURE_URL,
       validate: {
@@ -26,17 +26,17 @@ export function initPostCaseConfigure({ router, logger }: RouteDeps) {
     async (context, request, response) => {
       try {
         const query = pipe(
-          CasesConfigureRequestRt.decode(request.body),
+          CasesConfigurePatchRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const client = await context.cases.getCasesClient();
 
         return response.ok({
-          body: await client.configure.create(query),
+          body: await client.configure.update(query),
         });
       } catch (error) {
-        logger.error(`Failed to post case configure in route: ${error}`);
+        logger.error(`Failed to get patch configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

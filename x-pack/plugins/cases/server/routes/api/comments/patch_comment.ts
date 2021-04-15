@@ -11,10 +11,10 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CommentPatchRequestRt, throwErrors } from '../../../../../common/api';
+import { RouteDeps } from '../types';
+import { escapeHatch, wrapError } from '../utils';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { CommentPatchRequestRt, throwErrors } from '../../../../common/api';
 
 export function initPatchCommentApi({ router, logger }: RouteDeps) {
   router.patch(

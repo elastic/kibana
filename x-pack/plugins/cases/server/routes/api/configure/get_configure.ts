@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
+import { RouteDeps } from '../types';
+import { wrapError } from '../utils';
+import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
-
-/*
- * Be aware that this api will only return 20 connectors
- */
-export function initCaseConfigureGetActionConnector({ router, logger }: RouteDeps) {
+export function initGetCaseConfigure({ router, logger }: RouteDeps) {
   router.get(
     {
-      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+      path: CASE_CONFIGURE_URL,
       validate: false,
     },
     async (context, request, response) => {
       try {
         const client = await context.cases.getCasesClient();
 
-        return response.ok({ body: await client.configure.getConnectors() });
+        return response.ok({
+          body: await client.configure.get(),
+        });
       } catch (error) {
-        logger.error(`Failed to get connectors in route: ${error}`);
+        logger.error(`Failed to get case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
