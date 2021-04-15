@@ -6,13 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
-import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
-import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
