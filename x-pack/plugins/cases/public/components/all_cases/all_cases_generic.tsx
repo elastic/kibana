@@ -231,10 +231,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       [data, queryParams]
     );
 
-    const sorting: EuiTableSortingType<Case> = {
-      sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
-    };
-
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
         onSelectionChange: setSelectedCases,
@@ -276,12 +272,17 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       [isSelector, alertData, onRowClick, postComment, updateCase]
     );
 
-    return (
-      <>
-        {!isEmpty(actionsErrors) && (
+    const CaseCallOutCb = useCallback(
+      () =>
+        !isEmpty(actionsErrors) ? (
           <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
-        )}
-        {configureCasesNavigation != null && (
+        ) : null,
+      [actionsErrors]
+    );
+
+    const CasesTableHeaderCb = useCallback(
+      () =>
+        configureCasesNavigation != null ? (
           <CasesTableHeader
             actionsErrors={actionsErrors}
             createCaseNavigation={createCaseNavigation}
@@ -289,10 +290,100 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             refresh={refresh}
             userCanCrud={userCanCrud}
           />
-        )}
-        {(isCasesLoading || isLoading || isCommentsUpdating) && !isDataEmpty && (
+        ) : null,
+      [actionsErrors, configureCasesNavigation, createCaseNavigation, refresh, userCanCrud]
+    );
+
+    const ProgressLoaderCb = useCallback(
+      () =>
+        (isCasesLoading || isLoading || isCommentsUpdating) && !isDataEmpty ? (
           <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
-        )}
+        ) : null,
+      [isCasesLoading, isCommentsUpdating, isDataEmpty, isLoading]
+    );
+    const CasesTableCb = useCallback(
+      () =>
+        isCasesLoading && isDataEmpty ? (
+          <Div>
+            <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
+          </Div>
+        ) : (
+          <Div>
+            <CasesTableUtilityBar
+              data={data}
+              enableBulkActions={showActions}
+              filterOptions={filterOptions}
+              handleIsLoading={handleIsLoading}
+              selectedCases={selectedCases}
+              refreshCases={refreshCases}
+            />
+            <BasicTable
+              columns={columns}
+              data-test-subj="cases-table"
+              isSelectable={showActions}
+              itemId="id"
+              items={data.cases}
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              loading={isCommentsUpdating}
+              noItemsMessage={
+                <EuiEmptyPrompt
+                  title={<h3>{i18n.NO_CASES}</h3>}
+                  titleSize="xs"
+                  body={i18n.NO_CASES_BODY}
+                  actions={
+                    <LinkButton
+                      isDisabled={!userCanCrud}
+                      fill
+                      size="s"
+                      onClick={goToCreateCase}
+                      href={createCaseNavigation.href}
+                      iconType="plusInCircle"
+                      data-test-subj="cases-table-add-case"
+                    >
+                      {i18n.ADD_NEW_CASE}
+                    </LinkButton>
+                  }
+                />
+              }
+              onChange={tableOnChangeCallback}
+              pagination={pagination}
+              rowProps={tableRowProps}
+              selection={showActions ? euiBasicTableSelectionProps : undefined}
+              sorting={{
+                sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
+              }}
+              className={classnames({ isSelector })}
+            />
+          </Div>
+        ),
+      [
+        columns,
+        createCaseNavigation.href,
+        data,
+        euiBasicTableSelectionProps,
+        filterOptions,
+        goToCreateCase,
+        isCasesLoading,
+        isCommentsUpdating,
+        isDataEmpty,
+        isSelector,
+        itemIdToExpandedRowMap,
+        pagination,
+        queryParams.sortField,
+        queryParams.sortOrder,
+        refreshCases,
+        selectedCases,
+        showActions,
+        tableOnChangeCallback,
+        tableRowProps,
+        userCanCrud,
+      ]
+    );
+    return (
+      <>
+        <CaseCallOutCb />
+        <CasesTableHeaderCb />
+        <ProgressLoaderCb />
         <TableWrap data-test-subj="table-wrap" loading={!isSelector ? isCasesLoading : undefined}>
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
@@ -308,57 +399,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             setFilterRefetch={setFilterRefetch}
             disabledStatuses={disabledStatuses}
           />
-          {isCasesLoading && isDataEmpty ? (
-            <Div>
-              <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
-            </Div>
-          ) : (
-            <Div>
-              <CasesTableUtilityBar
-                data={data}
-                enableBulkActions={showActions}
-                filterOptions={filterOptions}
-                handleIsLoading={handleIsLoading}
-                selectedCases={selectedCases}
-                refreshCases={refreshCases}
-              />
-              <BasicTable
-                columns={columns}
-                data-test-subj="cases-table"
-                isSelectable={showActions}
-                itemId="id"
-                items={data.cases}
-                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-                loading={isCommentsUpdating}
-                noItemsMessage={
-                  <EuiEmptyPrompt
-                    title={<h3>{i18n.NO_CASES}</h3>}
-                    titleSize="xs"
-                    body={i18n.NO_CASES_BODY}
-                    actions={
-                      <LinkButton
-                        isDisabled={!userCanCrud}
-                        fill
-                        size="s"
-                        onClick={goToCreateCase}
-                        href={createCaseNavigation.href}
-                        iconType="plusInCircle"
-                        data-test-subj="cases-table-add-case"
-                      >
-                        {i18n.ADD_NEW_CASE}
-                      </LinkButton>
-                    }
-                  />
-                }
-                onChange={tableOnChangeCallback}
-                pagination={pagination}
-                rowProps={tableRowProps}
-                selection={showActions ? euiBasicTableSelectionProps : undefined}
-                sorting={sorting}
-                className={classnames({ isSelector })}
-              />
-            </Div>
-          )}
+          <CasesTableCb />
         </TableWrap>
       </>
     );
