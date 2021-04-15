@@ -54,6 +54,13 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
         defaultMessage="At least one form field is in an invalid state."
       />
     );
+  } else if (error.type === 'missing_timestamp_field') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.missingTimestampFieldErrorMessage"
+        defaultMessage="The index pattern must be time-based."
+      />
+    );
   } else if (error.type === 'missing_message_field') {
     return (
       <FormattedMessage
