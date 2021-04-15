@@ -11,6 +11,7 @@ export { registerManagementUsageCollector } from './management';
 export { registerApplicationUsageCollector } from './application_usage';
 export { registerKibanaUsageCollector } from './kibana';
 export { registerOpsStatsCollector } from './ops_stats';
+export { registerCloudProviderUsageCollector } from './cloud';
 export { registerCspCollector } from './csp';
 export { registerCoreUsageCollector } from './core';
 export { registerLocalizationUsageCollector } from './localization';
@@ -19,3 +20,7 @@ export {
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
 } from './ui_counters';
+export {
+  registerUsageCountersRollups,
+  registerUsageCountersUsageCollector,
+} from './usage_counters';

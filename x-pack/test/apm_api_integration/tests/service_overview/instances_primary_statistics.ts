@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiSupertest = createApmApiSupertest(getService('supertest'));
@@ -31,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
-                latencyAggregationType: 'avg',
+                latencyAggregationType: LatencyAggregationType.avg,
                 start,
                 end,
                 transactionType: 'request',
@@ -61,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
-                latencyAggregationType: 'avg',
+                latencyAggregationType: LatencyAggregationType.avg,
                 start,
                 end,
                 transactionType: 'request',
@@ -130,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               path: { serviceName: 'opbeans-ruby' },
               query: {
-                latencyAggregationType: 'avg',
+                latencyAggregationType: LatencyAggregationType.avg,
                 start,
                 end,
                 transactionType: 'request',
