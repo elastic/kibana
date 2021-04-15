@@ -12,7 +12,7 @@ import {
   EntriesArray,
   ExceptionListItemSchema,
 } from '../shared_imports';
-import { Type, JobStatus } from './schemas/common/schemas';
+import { Type, JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -53,6 +53,13 @@ export const normalizeThresholdField = (
     : isEmpty(thresholdField)
     ? []
     : [thresholdField!];
+};
+
+export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
+  return {
+    ...threshold,
+    field: normalizeThresholdField(threshold.field),
+  };
 };
 
 export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>

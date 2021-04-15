@@ -24,7 +24,7 @@ const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 export function DashboardPanelActionsProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const PageObjects = getPageObjects(['header', 'common', 'dashboard']);
   const inspector = getService('inspector');
 
   return new (class DashboardPanelActions {
@@ -147,6 +147,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.openContextMenu();
       }
       await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.dashboard.waitForRenderComplete();
     }
 
     async openCopyToModalByTitle(title?: string) {
