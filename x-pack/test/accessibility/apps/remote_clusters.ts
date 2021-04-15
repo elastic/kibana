@@ -29,16 +29,17 @@ interface Payload {
   };
 }
 
-const getEmptyPayload = () => ({
-  persistent: {
-    cluster: {
-      remote: {},
+const getEmptyPayload = () =>
+  ({
+    persistent: {
+      cluster: {
+        remote: {},
+      },
     },
-  },
-});
+  } as Payload);
 
 const getPayloadClusterProxyMode = (name: string): Payload => {
-  const payload = getEmptyPayload() as Payload;
+  const payload = getEmptyPayload();
   payload.persistent.cluster.remote[name] = {
     mode: 'proxy',
     proxy_address: '127.0.0.1:9302',
@@ -48,7 +49,7 @@ const getPayloadClusterProxyMode = (name: string): Payload => {
 };
 
 const getPayloadClusterSniffMode = (name: string): Payload => {
-  const payload = getEmptyPayload() as Payload;
+  const payload = getEmptyPayload();
   payload.persistent.cluster.remote[name] = {
     mode: 'sniff',
     seeds: ['127.0.0.1:9301'],
@@ -57,7 +58,7 @@ const getPayloadClusterSniffMode = (name: string): Payload => {
 };
 
 const getDeleteClusterPayload = (name: string): Payload => {
-  const payload = getEmptyPayload() as Payload;
+  const payload = getEmptyPayload();
   payload.persistent.cluster.remote[name] = {
     skip_unavailable: null,
     mode: null,
