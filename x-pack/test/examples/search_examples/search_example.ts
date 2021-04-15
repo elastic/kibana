@@ -28,9 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Jan 1, 2016 @ 00:00:00.000'
       );
       await testSubjects.click('searchSourceWithOther');
-      await retry.waitFor('search notification shown', async () => {
-        return (await toasts.getToastCount()) > 0;
-      });
+
+      const toast = await toasts.getToastElement(1);
+      expect(toast).not.to.be(undefined);
 
       await testSubjects.click('responseTab');
       const codeBlock = await testSubjects.find('responseCodeBlock');
