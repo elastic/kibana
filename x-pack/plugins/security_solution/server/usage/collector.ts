@@ -33,7 +33,7 @@ export const registerCollector: RegisterCollector = ({
   core,
   endpointAppContext,
   kibanaIndex,
-  signalIndex,
+  signalsIndex,
   ml,
   usageCollection,
 }) => {
@@ -290,13 +290,13 @@ export const registerCollector: RegisterCollector = ({
         },
       },
     },
-    isReady: () => kibanaIndex.length > 0,
+    isReady: () => kibanaIndex.length > 0 && signalsIndex > 0,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
-        fetchDetectionsMetrics(kibanaIndex, signalIndex, esClient, ml, savedObjectsClient),
+        fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
 
