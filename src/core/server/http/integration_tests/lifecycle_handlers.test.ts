@@ -7,7 +7,6 @@
  */
 
 import supertest from 'supertest';
-import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 
