@@ -23,6 +23,4 @@ export function list(pluginDir, logger) {
       }
     }
   });
-
-  logger.log(''); //intentional blank line for aesthetics
 }
