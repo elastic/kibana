@@ -35,6 +35,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ScopedHistory.Unnamed.$1",
                 "type": "Object",
                 "label": "parentHistory",
                 "isRequired": true,
@@ -49,6 +50,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.Unnamed.$2",
                 "type": "string",
                 "label": "basePath",
                 "isRequired": true,
@@ -74,6 +76,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.createSubHistory.$1",
                 "type": "string",
                 "label": "basePath",
                 "isRequired": true,
@@ -160,6 +163,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.push.$1",
                 "type": "CompoundType",
                 "label": "pathOrLocation",
                 "isRequired": true,
@@ -175,6 +179,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.push.$2",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": false,
@@ -209,6 +214,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.replace.$1",
                 "type": "CompoundType",
                 "label": "pathOrLocation",
                 "isRequired": true,
@@ -224,6 +230,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.replace.$2",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": false,
@@ -258,6 +265,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.go.$1",
                 "type": "number",
                 "label": "n",
                 "isRequired": true,
@@ -326,6 +334,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.block.$1",
                 "type": "CompoundType",
                 "label": "prompt",
                 "isRequired": false,
@@ -363,6 +372,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.listen.$1",
                 "type": "Function",
                 "label": "listener",
                 "isRequired": true,
@@ -406,6 +416,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.createHref.$1",
                 "type": "Object",
                 "label": "location",
                 "isRequired": true,
@@ -420,7 +431,7 @@
                 }
               },
               {
-                "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }",
+                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
                 "type": "Object",
                 "label": "{ prependBasePath = true }",
                 "tags": [],
@@ -428,7 +439,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
                     "type": "CompoundType",
                     "label": "prependBasePath",
                     "description": [],
@@ -531,13 +542,7 @@
               "lineNumber": 95
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              },
+              "AppCategory",
               " | undefined"
             ]
           },
@@ -706,13 +711,7 @@
             },
             "signature": [
               "Partial<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               "> | undefined"
             ]
           },
@@ -963,6 +962,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationSetup.register.$1",
                 "type": "Object",
                 "label": "app",
                 "isRequired": true,
@@ -1014,6 +1014,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationSetup.registerAppUpdater.$1",
                 "type": "Object",
                 "label": "appUpdater$",
                 "isRequired": true,
@@ -1069,7 +1070,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 695
+              "lineNumber": 700
             },
             "signature": [
               "Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>"
@@ -1085,7 +1086,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 704
+              "lineNumber": 709
             },
             "signature": [
               "Observable",
@@ -1120,6 +1121,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.navigateToApp.$1",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -1129,10 +1131,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
+                  "lineNumber": 717
                 }
               },
               {
+                "id": "def-public.ApplicationStart.navigateToApp.$2",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1151,7 +1154,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
+                  "lineNumber": 717
                 }
               }
             ],
@@ -1159,7 +1162,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 712
+              "lineNumber": 717
             }
           },
           {
@@ -1174,6 +1177,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.navigateToUrl.$1",
                 "type": "string",
                 "label": "url",
                 "isRequired": true,
@@ -1185,7 +1189,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 750
+                  "lineNumber": 755
                 }
               }
             ],
@@ -1193,7 +1197,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 750
+              "lineNumber": 755
             }
           },
           {
@@ -1208,6 +1212,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.getUrlForApp.$1",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -1217,11 +1222,11 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
+                  "lineNumber": 769
                 }
               },
               {
-                "id": "def-public.ApplicationStart.getUrlForApp.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -1229,13 +1234,13 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
                     "type": "string",
                     "label": "path",
                     "description": [],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
+                      "lineNumber": 769
                     },
                     "signature": [
                       "string | undefined"
@@ -1243,13 +1248,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
                     "type": "CompoundType",
                     "label": "absolute",
                     "description": [],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
+                      "lineNumber": 769
                     },
                     "signature": [
                       "boolean | undefined"
@@ -1258,7 +1263,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
+                  "lineNumber": 769
                 }
               }
             ],
@@ -1266,7 +1271,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 764
+              "lineNumber": 769
             }
           },
           {
@@ -1279,7 +1284,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 769
+              "lineNumber": 774
             },
             "signature": [
               "Observable",
@@ -1289,7 +1294,7 @@
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 691
+          "lineNumber": 696
         },
         "initialIsOpen": false
       },
@@ -1532,6 +1537,22 @@
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 687
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.NavigateToAppOptions.openInNewTab",
+            "type": "CompoundType",
+            "label": "openInNewTab",
+            "description": [
+              "\nif true, will open the app in new tab, will share session information via window.open if base"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 692
             },
             "signature": [
               "boolean | undefined"
