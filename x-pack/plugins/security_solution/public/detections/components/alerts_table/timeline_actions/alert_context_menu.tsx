@@ -48,7 +48,7 @@ import { ExceptionListType } from '../../../../../common/shared_imports';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFilteringModal } from '../../../../management/pages/event_filter/view/components/event_filtering_modal';
+import { EventFilteringModal } from '../../../../management/pages/event_filter/view/components/modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;

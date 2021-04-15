@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { Ecs } from '../../../../../../../common/ecs';
-import { EventFilteringForm } from '../event_filtering_form';
+import { EventFilterForm } from '../form';
 import { useEventFilterSelector } from '../../hooks';
 import {
   getFormHasError,
@@ -28,6 +28,8 @@ import {
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
+
+import { EventFilterNotification } from '../notification';
 
 export interface EventFilteringModalProps {
   data: Ecs;
@@ -114,7 +116,7 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
     const modalBodyMemo = useMemo(
       () => (
         <ModalBodySection className="builder-section">
-          <EventFilteringForm />
+          <EventFilterForm />
         </ModalBodySection>
       ),
       []
@@ -135,9 +137,10 @@ export const EventFilteringModal: React.FC<EventFilteringModalProps> = memo(
           </EuiButtonEmpty>
           {confirmButtonMemo}
         </EuiModalFooter>
+        <EventFilterNotification />
       </Modal>
     );
   }
 );
 
-EventFilteringModal.displayName = 'EventFilteringModal';
+EventFilteringModal.displayName = 'EventFilterModal';

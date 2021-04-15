@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFilteringForm } from '.';
-import { RenderResult, act, render, waitFor } from '@testing-library/react';
+import { EventFilterForm } from '.';
+import { RenderResult, act, render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
@@ -78,7 +78,7 @@ describe('Event filtering form', () => {
       </Provider>
     );
 
-    return render(<EventFilteringForm />, { wrapper: Wrapper });
+    return render(<EventFilterForm />, { wrapper: Wrapper });
   };
 
   const renderComponentWithdata = () => {

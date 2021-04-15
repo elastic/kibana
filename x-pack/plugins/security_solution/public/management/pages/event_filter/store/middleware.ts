@@ -29,13 +29,7 @@ const eventFilterCreate = async (
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
-    // Adds event.kind == event by default
-    sanitizedEntry.entries.push({
-      field: 'event.kind',
-      operator: 'included',
-      type: 'match',
-      value: 'event',
-    });
+
     const exception = await eventFilterService.addEventFilter(sanitizedEntry);
     store.dispatch({
       type: 'eventFilterFormStateChanged',
