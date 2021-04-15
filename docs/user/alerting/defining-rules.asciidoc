@@ -112,4 +112,4 @@ Actions are not required on rules. You can run a rule without actions to underst
 [float]
 === Manage rules
 
-To modify a rule after it was created, including muting or disabling it, use the <<managing-alerts-and-actions, rule listing in the Management UI>>.
+To modify a rule after it was created, including muting or disabling it, use the <<alert-management, rule listing in the Management UI>>.
