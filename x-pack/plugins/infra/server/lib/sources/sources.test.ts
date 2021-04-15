@@ -86,7 +86,7 @@ describe('the InfraSources lib', () => {
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
-          logIndices: { type: 'indexPattern', indexPatternId: 'LOG_ALIAS' },
+          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
           fields: {
             container: 'CONTAINER',
             host: 'HOST',
