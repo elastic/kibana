@@ -150,7 +150,7 @@ export interface IHTTPAdvancedFields {
 export interface ITCPAdvancedFields {
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string[];
+  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string;
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
 }
 

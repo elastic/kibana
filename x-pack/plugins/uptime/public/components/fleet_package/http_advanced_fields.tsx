@@ -12,7 +12,6 @@ import {
   EuiAccordion,
   EuiCode,
   EuiFieldText,
-  EuiFieldPassword,
   EuiFormRow,
   EuiSelect,
   EuiDescribedFormGroup,
@@ -111,9 +110,8 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
         >
-          <EuiFieldPassword
+          <EuiFieldText
             value={fields[ConfigKeys.PASSWORD]}
-            type="dual"
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,

@@ -202,7 +202,7 @@ export const TLSFields: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.helpText"
-            defaultMessage="Custom certificate authorities."
+            defaultMessage="PEM formatted custom certificate authorities."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -244,7 +244,7 @@ export const TLSFields: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.helpText"
-            defaultMessage="Certificate for TLS client authentication."
+            defaultMessage="PEM formatted certificate for TLS client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -286,7 +286,7 @@ export const TLSFields: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
-            defaultMessage="Certificate key for TLS client authentication."
+            defaultMessage="PEM formatted certificate key for TLS client authentication."
           />
         }
         labelAppend={<OptionalLabel />}

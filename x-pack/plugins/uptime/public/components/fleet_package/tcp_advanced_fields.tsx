@@ -21,7 +21,6 @@ import { useTCPAdvancedFieldsContext } from './contexts';
 import { ConfigKeys } from './types';
 
 import { OptionalLabel } from './optional_label';
-import { ComboBox } from './combo_box';
 
 export const TCPAdvancedFields = () => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
@@ -157,12 +156,12 @@ export const TCPAdvancedFields = () => {
             />
           }
         >
-          <ComboBox
-            selectedOptions={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
+          <EuiFieldText
+            value={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
             onChange={useCallback(
-              (value) =>
+              (event) =>
                 handleInputChange({
-                  value,
+                  value: event.target.value,
                   configKey: ConfigKeys.RESPONSE_RECEIVE_CHECK,
                 }),
               [handleInputChange]

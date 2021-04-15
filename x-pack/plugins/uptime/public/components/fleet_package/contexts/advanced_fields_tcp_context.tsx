@@ -22,7 +22,7 @@ interface ITCPAdvancedFieldsContextProvider {
 export const initialValues = {
   [ConfigKeys.PROXY_URL]: '',
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
+  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: '',
   [ConfigKeys.REQUEST_SEND_CHECK]: '',
 };
 

@@ -192,6 +192,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             'check.receive': {
+              value: '',
               type: 'yaml',
             },
             'ssl.certificate_authorities': {

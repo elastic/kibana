@@ -69,7 +69,6 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
               case ConfigKeys.TAGS:
               case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
               case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
-              case ConfigKeys.RESPONSE_RECEIVE_CHECK:
               case ConfigKeys.RESPONSE_STATUS_CHECK:
               case ConfigKeys.RESPONSE_HEADERS_CHECK:
               case ConfigKeys.REQUEST_HEADERS_CHECK:

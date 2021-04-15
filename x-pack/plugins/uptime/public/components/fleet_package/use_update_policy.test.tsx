@@ -473,7 +473,7 @@ describe('useBarChartsHooks', () => {
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_RECEIVE_CHECK]
         .value
-    ).toEqual(null);
+    ).toEqual(tcpConfig[ConfigKeys.RESPONSE_RECEIVE_CHECK]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.REQUEST_SEND_CHECK]
         .value
