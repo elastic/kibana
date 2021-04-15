@@ -127,7 +127,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isStepLoading;
-    if (this.state.currentStep.id === ADD_LAYER_STEP_ID && !this.props.isDrawingLayer) {
+    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
     } else {

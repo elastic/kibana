@@ -7,18 +7,19 @@
 
 import { http as httpService } from './http_service';
 import { getSavedObjectsClient } from '../../../../kibana_services';
+import { INDEX_FEATURE_PATH, INDEX_SOURCE_API_PATH } from '../../../../../common';
 
 export const getExistingIndexNames = async () => {
   const indexes = await httpService({
     url: `/api/index_management/indices`,
     method: 'GET',
   });
-  return indexes ? indexes.map(({ name }) => name) : [];
+  return indexes ? indexes.map(({ name }: { name: string }) => name) : [];
 };
 
-export const createNewIndexAndPattern = async (indexName) => {
+export const createNewIndexAndPattern = async (indexName: string) => {
   return await httpService({
-    url: `/api/maps/docSource`,
+    url: `/${INDEX_SOURCE_API_PATH}`,
     method: 'POST',
     data: {
       index: indexName,
@@ -34,9 +35,9 @@ export const createNewIndexAndPattern = async (indexName) => {
   });
 };
 
-export const addFeatureToIndex = async (indexName, geometry) => {
+export const addFeatureToIndex = async (indexName: string, geometry: unknown) => {
   return await httpService({
-    url: `/api/maps/feature`,
+    url: `/${INDEX_FEATURE_PATH}`,
     method: 'POST',
     data: {
       index: indexName,
@@ -58,7 +59,7 @@ export const getExistingIndexPatternNames = async () => {
   return indexPatterns ? indexPatterns.map(({ name }) => name) : [];
 };
 
-export function checkIndexPatternValid(name) {
+export function checkIndexPatternValid(name: string) {
   const byteLength = encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
   const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   const indexPatternInvalid =
