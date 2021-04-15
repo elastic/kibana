@@ -14,6 +14,8 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 
+jest.mock('./agent_policy_update');
+
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
 

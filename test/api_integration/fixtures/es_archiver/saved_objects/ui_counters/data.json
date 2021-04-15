@@ -77,7 +77,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "uiCounter:09042021:count:myApp:some_app_event",
+    "id": "usage-counters:uiCounter:09042021:count:myApp:some_app_event",
     "source": {
       "usage-counters": {
         "count": 2,
@@ -95,7 +95,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "anotherDomainId:09042021:count:some_event_name",
+    "id": "usage-counters:anotherDomainId:09042021:count:some_event_name",
     "source": {
       "usage-counters": {
         "count": 2,
