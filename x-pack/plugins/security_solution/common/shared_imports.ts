@@ -46,7 +46,6 @@ export {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   osType,
-  OsType,
   osTypeArray,
   OsTypeArray,
   buildExceptionFilter,

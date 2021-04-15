@@ -13,7 +13,7 @@ import { AutocompleteStart } from 'src/plugins/data/public';
 
 import { ExceptionListType } from '../../../../common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from './types';
 import { BuilderAndBadgeComponent } from './and_badge';

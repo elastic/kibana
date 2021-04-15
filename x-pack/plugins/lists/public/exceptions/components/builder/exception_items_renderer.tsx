@@ -30,7 +30,7 @@ import {
   exceptionListItemSchema,
 } from '../../../../common';
 import { AndOrBadge } from '../and_or_badge';
-import { OsType, OsTypeArray } from '../../../../shared_imports';
+import { OsType, OsTypeArray } from '../../../../common/schemas';
 
 import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';

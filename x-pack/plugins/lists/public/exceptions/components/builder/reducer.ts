@@ -6,7 +6,7 @@
  */
 
 import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../common';
-import { OsType } from '../../../../shared_imports';
+import { OsType } from '../../../../common/schemas';
 
 import { ExceptionsBuilderExceptionItem } from './types';
 import { getDefaultEmptyEntry } from './helpers';

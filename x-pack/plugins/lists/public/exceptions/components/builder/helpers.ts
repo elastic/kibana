@@ -37,9 +37,7 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
-// import exceptionableFields from '../exceptionable_fields.json';
-// import exceptionableLinuxFields from '../exceptionable_linux_fields.json';
-import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import {
   BuilderEntry,
