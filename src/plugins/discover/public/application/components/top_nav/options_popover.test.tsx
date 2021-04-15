@@ -30,7 +30,7 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 
-import { OptionsPopover } from './open_options_popover';
+import { OptionsPopover } from './options_popover';
 
 test('should contain a link with the correct text if datagrid is selected', () => {
   const element = document.createElement('div');
