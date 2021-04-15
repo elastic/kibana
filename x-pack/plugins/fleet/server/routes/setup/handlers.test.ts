@@ -45,7 +45,9 @@ describe('FleetSetupHandler', () => {
   });
 
   it('POST /setup succeeds w/200 and body of resolved value', async () => {
-    mockSetupIngestManager.mockImplementation(() => Promise.resolve({ isIntialized: true }));
+    mockSetupIngestManager.mockImplementation(() =>
+      Promise.resolve({ isInitialized: true, preconfigurationError: undefined })
+    );
     await FleetSetupHandler(context, request, response);
 
     const expectedBody: PostIngestSetupResponse = { isInitialized: true };
