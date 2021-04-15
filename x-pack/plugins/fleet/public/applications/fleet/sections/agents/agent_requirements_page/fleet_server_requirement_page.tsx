@@ -28,7 +28,13 @@ export const ContentWrapper = styled(EuiFlexGroup)`
 
 function renderOnPremInstructions() {
   return (
-    <EuiPanel grow={false} hasShadow={false} hasBorder={true} className="eui-textCenter">
+    <EuiPanel
+      paddingSize="none"
+      grow={false}
+      hasShadow={false}
+      hasBorder={true}
+      className="eui-textCenter"
+    >
       <EuiEmptyPrompt
         title={
           <h2>
@@ -67,7 +73,13 @@ function renderOnPremInstructions() {
 
 function renderCloudInstructions(deploymentUrl: string) {
   return (
-    <EuiPanel grow={false} hasShadow={false} hasBorder={true} className="eui-textCenter">
+    <EuiPanel
+      paddingSize="none"
+      grow={false}
+      hasShadow={false}
+      hasBorder={true}
+      className="eui-textCenter"
+    >
       <EuiEmptyPrompt
         title={
           <h2>

@@ -225,7 +225,7 @@ class AgentPolicyService {
       options
     );
 
-    if (!agentPolicy.is_default || !agentPolicy.is_default_fleet_server) {
+    if (!agentPolicy.is_default && !agentPolicy.is_default_fleet_server) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
     }
 
@@ -602,9 +602,9 @@ class AgentPolicyService {
     agentPolicyId: string
   ) {
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutput = await outputService.getDefaultOutput(soClient);
+    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
 
-    if (!defaultOutput) {
+    if (!defaultOutputId) {
       return;
     }
 
@@ -678,6 +678,7 @@ class AgentPolicyService {
             policy_id: agentPolicyId,
           },
         },
+        size: 1,
         sort: [{ revision_idx: { order: 'desc' } }],
       },
     });
