@@ -192,8 +192,4 @@ describe('normalizeMachineLearningJobIds', () => {
       'other_ml_job_id',
     ]);
   });
-
-  it('preserves undefined', () => {
-    expect(normalizeMachineLearningJobIds(undefined)).toEqual(undefined);
-  });
 });

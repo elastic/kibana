@@ -170,7 +170,9 @@ export const patchRules = async ({
       version: calculatedVersion,
       exceptionsList,
       anomalyThreshold,
-      machineLearningJobId: normalizeMachineLearningJobIds(machineLearningJobId),
+      machineLearningJobId: machineLearningJobId
+        ? normalizeMachineLearningJobIds(machineLearningJobId)
+        : undefined,
     }
   );
 
