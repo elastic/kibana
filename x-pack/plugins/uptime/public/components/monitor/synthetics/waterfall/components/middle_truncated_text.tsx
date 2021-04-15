@@ -99,7 +99,7 @@ export const MiddleTruncatedText = ({
           {onClick ? (
             <StyledButton
               onClick={onClick}
-              data-test-subj="middleTruncatedTextButton"
+              data-test-subj={`middleTruncatedTextButton${index}`}
               buttonRef={setButtonRef}
             >
               <InnerContainer>
