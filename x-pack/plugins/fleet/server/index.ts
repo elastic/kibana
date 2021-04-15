@@ -15,6 +15,8 @@ import {
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
 
+import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+
 import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
@@ -77,6 +79,8 @@ export const config: PluginConfigDescriptor = {
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
     }),
+    packages: schema.maybe(PreconfiguredPackagesSchema),
+    agentPolicies: schema.maybe(PreconfiguredAgentPoliciesSchema),
   }),
 };
 

@@ -12,7 +12,7 @@ import { useUrlStorage } from './use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';
-import { useIndexPatternContext } from './use_default_index_pattern';
+import { useAppIndexPatternContext } from './use_app_index_pattern';
 
 interface Props {
   seriesId: string;
@@ -43,7 +43,7 @@ export const useLensAttributes = ({
 
   const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   return useMemo(() => {
     if (!indexPattern || !reportType) {
