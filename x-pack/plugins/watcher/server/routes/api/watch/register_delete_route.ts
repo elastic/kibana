@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -15,36 +14,36 @@ const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-function deleteWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.deleteWatch', {
-    id: watchId,
-  });
+function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
+  return dataClient.asCurrentUser.watcher
+    .deleteWatch({
+      id: watchId,
+    })
+    .then(({ body }) => body);
 }
 
-export function registerDeleteRoute(deps: RouteDependencies) {
-  deps.router.delete(
+export function registerDeleteRoute({
+  router,
+  lib: { handleEsError },
+  getLicenseStatus,
+}: RouteDependencies) {
+  router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {
         return response.ok({
-          body: await deleteWatch(ctx.watcher!.client, watchId),
+          body: await deleteWatch(ctx.core.elasticsearch.client, watchId),
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
-        }
-
-        // Case: default
-        throw e;
+        // TODO: Figure out if this covers us sufficiently given that previous logic returned a body with "Watch with id = ${watchId} not found" previously
+        return handleEsError({ error: e, response });
       }
     })
   );

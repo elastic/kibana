@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
-function fetchWatches(dataClient: ILegacyScopedClusterClient) {
+function fetchWatches(dataClient: IScopedClusterClient) {
   const params = {
     index: INDEX_NAMES.WATCHES,
     scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
@@ -25,20 +24,24 @@ function fetchWatches(dataClient: ILegacyScopedClusterClient) {
     ignore: [404],
   };
 
-  return dataClient
-    .callAsCurrentUser('search', params)
-    .then((response: any) => fetchAllFromScroll(response, dataClient));
+  return dataClient.asCurrentUser
+    .search(params)
+    .then(({ body: response }) => fetchAllFromScroll(response, dataClient));
 }
 
-export function registerListRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerListRoute({
+  router,
+  lib: { handleEsError },
+  getLicenseStatus,
+}: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
       try {
-        const hits = await fetchWatches(ctx.watcher!.client);
+        const hits = await fetchWatches(ctx.core.elasticsearch.client);
         const watches = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchJson = get(hit, '_source');
@@ -60,22 +63,11 @@ export function registerListRoute(deps: RouteDependencies) {
 
         return response.ok({
           body: {
-            watches: watches.map((watch: any) => watch.downstreamJson),
+            watches: watches.map((watch) => watch.downstreamJson),
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: e.message,
-            },
-          });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

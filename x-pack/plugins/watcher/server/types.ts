@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { ILegacyScopedClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
+
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -22,30 +25,14 @@ export interface ServerShim {
 }
 
 export interface RouteDependencies {
-  router: WatcherRouter;
+  router: IRouter;
   getLicenseStatus: () => LicenseStatus;
+  lib: {
+    handleEsError: typeof handleEsError;
+  };
 }
 
 export interface LicenseStatus {
   hasRequired: boolean;
   message?: string;
 }
-
-/**
- * @internal
- */
-export interface WatcherContext {
-  client: ILegacyScopedClusterClient;
-}
-
-/**
- * @internal
- */
-export interface WatcherRequestHandlerContext extends RequestHandlerContext {
-  watcher: WatcherContext;
-}
-
-/**
- * @internal
- */
-export type WatcherRouter = IRouter<WatcherRequestHandlerContext>;

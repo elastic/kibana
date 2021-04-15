@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'kibana/server';
-import type { RouteDependencies, WatcherRequestHandlerContext } from '../../types';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+} from 'kibana/server';
 
-export const licensePreRoutingFactory = <P, Q, B, Context extends WatcherRequestHandlerContext>(
-  { getLicenseStatus }: RouteDependencies,
-  handler: RequestHandler<P, Q, B, Context>
+import type { RouteDependencies } from '../../types';
+
+export const licensePreRoutingFactory = <P, Q, B, Context extends RequestHandlerContext>(
+  getLicenseStatus: RouteDependencies['getLicenseStatus'],
+  handler: RequestHandler<P, Q, B>
 ) => {
   return function licenseCheck(
     ctx: Context,

@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../shared_imports';
+import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -17,7 +16,7 @@ const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),
 });
 
-function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) {
+function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
   const params = {
     index: indexes,
     fields: ['*'],
@@ -26,38 +25,31 @@ function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) 
     ignore: 404,
   };
 
-  return dataClient.callAsCurrentUser('fieldCaps', params);
+  return dataClient.asCurrentUser.fieldCaps(params);
 }
 
-export function registerListFieldsRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerListFieldsRoute({
+  router,
+  lib: { handleEsError },
+  getLicenseStatus,
+}: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/fields',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
       const { indexes } = request.body;
 
       try {
-        const fieldsResponse = await fetchFields(ctx.watcher!.client, indexes);
-        const json = fieldsResponse.status === 404 ? { fields: [] } : fieldsResponse;
+        const fieldsResponse = await fetchFields(ctx.core.elasticsearch.client, indexes);
+        const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
         const fields = Fields.fromUpstreamJson(json);
         return response.ok({ body: fields.downstreamJson });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: e.message,
-            },
-          });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

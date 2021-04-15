@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -21,7 +20,7 @@ const bodySchema = schema.object({
   options: schema.object({}, { unknowns: 'allow' }),
 });
 
-function fetchVisualizeData(dataClient: ILegacyScopedClusterClient, index: any, body: any) {
+function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
   const params = {
     index,
     body,
@@ -30,24 +29,28 @@ function fetchVisualizeData(dataClient: ILegacyScopedClusterClient, index: any, 
     ignore: [404],
   };
 
-  return dataClient.callAsCurrentUser('search', params);
+  return dataClient.asCurrentUser.search(params).then(({ body: result }) => result);
 }
 
-export function registerVisualizeRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerVisualizeRoute({
+  router,
+  lib: { handleEsError },
+  getLicenseStatus,
+}: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/watch/visualize',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
       const body = watch.getVisualizeQuery(options);
 
       try {
-        const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
+        const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 
         return response.ok({
@@ -56,13 +59,7 @@ export function registerVisualizeRoute(deps: RouteDependencies) {
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

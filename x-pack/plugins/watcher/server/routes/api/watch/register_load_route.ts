@@ -6,9 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -18,25 +17,31 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.getWatch', {
-    id: watchId,
-  });
+function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
+  return dataClient.asCurrentUser.watcher
+    .getWatch({
+      id: watchId,
+    })
+    .then(({ body }) => body);
 }
 
-export function registerLoadRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerLoadRoute({
+  router,
+  lib: { handleEsError },
+  getLicenseStatus,
+}: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/watch/{id}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
       const id = request.params.id;
 
       try {
-        const hit = await fetchWatch(ctx.watcher!.client, id);
+        const hit = await fetchWatch(ctx.core.elasticsearch.client, id);
         const watchJson = get(hit, 'watch');
         const watchStatusJson = get(hit, 'status');
         const json = {
@@ -54,14 +59,8 @@ export function registerLoadRoute(deps: RouteDependencies) {
           body: { watch: watch.downstreamJson },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${id} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
-        }
-
-        // Case: default
-        throw e;
+        // TODO: Figure out if this covers us sufficiently given that previous logic returned a body with "Watch with id = ${watchId} not found" previously
+        return handleEsError({ error: e, response });
       }
     })
   );
