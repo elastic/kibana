@@ -79,11 +79,13 @@ export interface Props {
     filters,
     query,
     timeFilters,
+    searchSessionId,
   }: {
     filters?: Filter[];
     query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
+    searchSessionId?: string;
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
@@ -195,7 +197,7 @@ export class MapApp extends React.Component<Props, State> {
       this._onQueryChange({ time: globalState.time });
     }
 
-    if (changes.refreshInterval) {
+    if (changes.refreshInterval && globalState.refreshInterval) {
       this._onRefreshConfigChange({
         isPaused: globalState.refreshInterval.pause,
         interval: globalState.refreshInterval.value,

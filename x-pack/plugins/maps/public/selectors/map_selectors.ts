@@ -45,7 +45,6 @@ import {
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';

@@ -47,7 +47,6 @@ export interface Props {
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   renderTooltipContent?: RenderToolTipContent;
-  triggerRefreshTimer: () => void;
   title?: string;
   description?: string;
   settings: MapSettings;

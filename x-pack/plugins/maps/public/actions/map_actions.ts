@@ -40,7 +40,6 @@ import {
   SET_QUERY,
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
-  TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
@@ -270,23 +269,6 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
-    });
-
-    if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch(autoFitToBounds());
-    } else {
-      await dispatch(syncDataForAllLayers());
-    }
-  };
-}
-
-export function triggerRefreshTimer() {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    dispatch({
-      type: TRIGGER_REFRESH_TIMER,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {

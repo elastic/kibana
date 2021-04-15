@@ -14,7 +14,6 @@ import {
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
@@ -33,7 +32,6 @@ export type MapContext = {
   timeFilters?: TimeRange;
   query?: MapQuery;
   filters: Filter[];
-  refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   searchSessionId?: string;

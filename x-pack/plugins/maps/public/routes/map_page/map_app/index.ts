@@ -22,7 +22,6 @@ import { setQuery, enableFullScreen, openMapSettings } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../../reducers/store';
-import { MapRefreshConfig } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {

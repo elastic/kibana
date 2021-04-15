@@ -26,7 +26,6 @@ import {
   SET_LAYER_STYLE_META,
   SET_JOINS,
   UPDATE_SOURCE_PROP,
-  TRIGGER_REFRESH_TIMER,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
   SET_GOTO,
@@ -224,14 +223,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           filters,
           searchSessionId,
           searchSessionMapBuffer,
-        },
-      };
-    case TRIGGER_REFRESH_TIMER:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          refreshTimerLastTriggeredAt: new Date().toISOString(),
         },
       };
     case SET_SELECTED_LAYER:
