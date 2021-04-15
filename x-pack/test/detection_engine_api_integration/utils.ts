@@ -1118,7 +1118,7 @@ export const installPrePackagedRules = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: QueryCreateSchema,
+  rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[]
 ): Promise<FullResponseSchema> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1152,7 +1152,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: QueryCreateSchema = {
+  const ruleWithException: CreateRulesSchema = {
     ...rule,
     enabled: false,
     exceptions_list: [
