@@ -27,6 +27,16 @@ export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
+  public readonly savedObjectMetaData = {
+    type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    name: this.getDisplayName(),
+    getIconForSavedObject: () => 'empty',
+    getTooltipForSavedObject: () =>
+      i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+        defaultMessage: 'View anomaly detection results in a timeline.',
+      }),
+  };
+
   public readonly grouping = [
     {
       id: PLUGIN_ID,
