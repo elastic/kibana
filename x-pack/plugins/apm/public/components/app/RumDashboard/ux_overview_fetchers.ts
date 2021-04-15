@@ -38,18 +38,20 @@ export const fetchUxOverviewDate = async ({
   };
 };
 
-export async function hasRumData({
-  absoluteTime,
-}: HasDataParams): Promise<UXHasDataResponse> {
+export async function hasRumData(
+  params: HasDataParams
+): Promise<UXHasDataResponse> {
   return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_rum_data',
     signal: null,
     params: {
-      query: {
-        start: new Date(absoluteTime.start).toISOString(),
-        end: new Date(absoluteTime.end).toISOString(),
-        uiFilters: '',
-      },
+      query: params?.absoluteTime
+        ? {
+            start: new Date(params.absoluteTime.start).toISOString(),
+            end: new Date(params.absoluteTime.end).toISOString(),
+            uiFilters: '',
+          }
+        : undefined,
     },
   });
 }
