@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiLink, EuiText, EuiWrappingPopover } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiText, EuiWrappingPopover, EuiCode } from '@elastic/eui';
 import { getServices } from '../../../kibana_services';
 import './open_options_popover.scss';
 
@@ -31,26 +31,36 @@ export function OptionsPopover(props: OptionsPopoverProps) {
 
   const linkText = isLegacy
     ? i18n.translate('discover.openOptionsPopover.switchToDataGridText', {
-        defaultMessage: 'Switch to data grid',
+        defaultMessage: 'Go to Advanced Settings',
       })
     : i18n.translate('discover.openOptionsPopover.switchToLegacyText', {
-        defaultMessage: 'Switch to legacy table',
+        defaultMessage: 'Go to Advanced Settings',
       });
 
   return (
     <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
       <div className="dscOptionsPopover">
-        <EuiLink href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}>
-          {linkText}
-        </EuiLink>
+        <EuiText color="subdued" size="s">
+          <p>
+            <strong>Current view mode:</strong> <EuiCode>Data grid</EuiCode>
+          </p>
+        </EuiText>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="discover.topNav.openOptionsPopover.description"
             defaultMessage="The new data grid layout includes better data sorting, drag-and-drop columns, and a full
-                screen view. Enable this option if you prefer to fall back to the legacy table."
+                screen view. Toggle between data grid and legacy mode in Advanced Settings."
           />
         </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          iconType="tableDensityNormal"
+          fullWidth
+          href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}
+        >
+          {linkText}
+        </EuiButton>
       </div>
     </EuiWrappingPopover>
   );
