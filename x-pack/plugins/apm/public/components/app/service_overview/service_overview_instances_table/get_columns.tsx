@@ -236,7 +236,7 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonEmpty
-                style={{ height: px(22) }}
+                style={{ height: px(24) }}
                 onClick={() =>
                   toggleRowActionMenu(instanceItem.serviceNodeName)
                 }

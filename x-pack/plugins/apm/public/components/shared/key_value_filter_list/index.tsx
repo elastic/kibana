@@ -14,7 +14,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../style/variables';
@@ -97,7 +99,15 @@ export function KeyValueFilterList({
                     }}
                     data-test-subj={`filter_by_${key}`}
                   >
-                    <EuiIcon type="filter" color="black" size="m" />
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'xpack.apm.keyValueFilterList.actionFilterLabel',
+                        { defaultMessage: 'Filter by value' }
+                      )}
+                    >
+                      <EuiIcon type="filter" color="black" size="m" />
+                    </EuiToolTip>
                   </EuiButtonEmpty>
                   <EuiText size="s">{value}</EuiText>
                 </ValueContainer>
