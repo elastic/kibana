@@ -33,16 +33,16 @@ export interface ThreatMatchRowProps {
 }
 
 export const ThreatMatchRow = ({
+  contextId,
   data,
   eventId,
-  timelineId,
 }: {
+  contextId: string;
   data: Fields;
   eventId: string;
-  timelineId: string;
 }) => {
   const props = {
-    contextId: `threat-match-row-${timelineId}-${eventId}`,
+    contextId,
     eventId,
     indicatorDataset: get(data, EVENT_DATASET)[0] as string | undefined,
     indicatorReference: get(data, EVENT_REFERENCE)[0] as string | undefined,

@@ -26,12 +26,15 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) 
   return (
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
       <SpacedContainer>
-        {indicators.map((indicator, index) => (
-          <Fragment key={`threat-match-row-${eventId}-${index}`}>
-            <ThreatMatchRow data={indicator} eventId={eventId} timelineId={timelineId} />
-            {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
-          </Fragment>
-        ))}
+        {indicators.map((indicator, index) => {
+          const contextId = `threat-match-row-${timelineId}-${eventId}-${index}`;
+          return (
+            <Fragment key={contextId}>
+              <ThreatMatchRow contextId={contextId} data={indicator} eventId={eventId} />
+              {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
+            </Fragment>
+          );
+        })}
       </SpacedContainer>
     </RowRendererContainer>
   );
