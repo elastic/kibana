@@ -74,7 +74,7 @@ export type {
   DomainDeprecationDetails,
 } from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type {
   AppCategory,
   UiSettingsParams,
