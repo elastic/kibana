@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../common';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
@@ -32,6 +32,6 @@ export function filterFields(
   return {
     filteredFields: items,
     visibleFieldsCount: items.length,
-    visibleMetricsCount: items.filter((d) => d.type === ML_JOB_FIELD_TYPES.NUMBER).length,
+    visibleMetricsCount: items.filter((d) => d.type === JOB_FIELD_TYPES.NUMBER).length,
   };
 }

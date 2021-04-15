@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlJobFieldType } from '../../../../../common';
+import { JobFieldType } from '../../../../../common';
 
 export interface Percentile {
   percent: number;
@@ -62,7 +62,7 @@ export interface FieldVisStats {
 // The internal representation of the configuration used to build the visuals
 // which display the field information.
 export interface FieldVisConfig {
-  type: MlJobFieldType;
+  type: JobFieldType;
   fieldName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;
@@ -73,7 +73,7 @@ export interface FieldVisConfig {
 }
 
 export interface FileBasedFieldVisConfig {
-  type: MlJobFieldType;
+  type: JobFieldType;
   fieldName?: string;
   stats?: FieldVisStats;
   format?: string;

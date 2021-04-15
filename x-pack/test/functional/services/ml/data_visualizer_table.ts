@@ -309,7 +309,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
     public async assertExamplesList(fieldName: string, expectedExamplesCount: number) {
       const examplesList = await testSubjects.find(
-        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
+        this.detailsSelector(fieldName, 'fieldDataExamplesList')
       );
       const examplesListItems = await examplesList.findAllByTagName('li');
       expect(examplesListItems).to.have.length(

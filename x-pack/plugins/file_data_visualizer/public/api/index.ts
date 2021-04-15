@@ -27,7 +27,7 @@ export async function analyzeFile(
   });
 }
 
-export async function getFileDatavisualizerComponent(): Promise<typeof FileDataVisualizer> {
+export async function getFileDataVisualizerComponent(): Promise<typeof FileDataVisualizer> {
   const fileUploadModules = await lazyLoadFileUploadModules();
   return fileUploadModules.FileDataVisualizer;
 }

@@ -14,18 +14,18 @@ import type {
   FileBasedUnknownFieldVisConfig,
 } from '../stats_table/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
-import { ML_JOB_FIELD_TYPES } from '../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../common';
 
 const ML_JOB_FIELD_TYPES_OPTIONS = {
-  [ML_JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
-  [ML_JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
-  [ML_JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
-  [ML_JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
-  [ML_JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
-  [ML_JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
-  [ML_JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
-  [ML_JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
-  [ML_JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
+  [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
+  [JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
+  [JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
+  [JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
+  [JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
+  [JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
+  [JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
+  [JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
+  [JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
 };
 
 interface Props {

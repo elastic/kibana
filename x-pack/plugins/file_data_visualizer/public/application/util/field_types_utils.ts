@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_JOB_FIELD_TYPES } from '../../../common';
+import { JOB_FIELD_TYPES } from '../../../common';
 
 import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
@@ -18,25 +18,25 @@ export function kbnTypeToMLJobType(field: IFieldType) {
   let type;
   switch (field.type) {
     case KBN_FIELD_TYPES.STRING:
-      type = field.aggregatable ? ML_JOB_FIELD_TYPES.KEYWORD : ML_JOB_FIELD_TYPES.TEXT;
+      type = field.aggregatable ? JOB_FIELD_TYPES.KEYWORD : JOB_FIELD_TYPES.TEXT;
       break;
     case KBN_FIELD_TYPES.NUMBER:
-      type = ML_JOB_FIELD_TYPES.NUMBER;
+      type = JOB_FIELD_TYPES.NUMBER;
       break;
     case KBN_FIELD_TYPES.DATE:
-      type = ML_JOB_FIELD_TYPES.DATE;
+      type = JOB_FIELD_TYPES.DATE;
       break;
     case KBN_FIELD_TYPES.IP:
-      type = ML_JOB_FIELD_TYPES.IP;
+      type = JOB_FIELD_TYPES.IP;
       break;
     case KBN_FIELD_TYPES.BOOLEAN:
-      type = ML_JOB_FIELD_TYPES.BOOLEAN;
+      type = JOB_FIELD_TYPES.BOOLEAN;
       break;
     case KBN_FIELD_TYPES.GEO_POINT:
-      type = ML_JOB_FIELD_TYPES.GEO_POINT;
+      type = JOB_FIELD_TYPES.GEO_POINT;
       break;
     case KBN_FIELD_TYPES.GEO_SHAPE:
-      type = ML_JOB_FIELD_TYPES.GEO_SHAPE;
+      type = JOB_FIELD_TYPES.GEO_SHAPE;
       break;
 
     default:
@@ -77,8 +77,8 @@ export const mlJobTypeAriaLabels = {
 };
 
 export const getMLJobTypeAriaLabel = (type: string) => {
-  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(
-    (k) => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
+  const requestedFieldType = Object.keys(JOB_FIELD_TYPES).find(
+    (k) => JOB_FIELD_TYPES[k as keyof typeof JOB_FIELD_TYPES] === type
   );
   if (requestedFieldType === undefined) {
     return null;

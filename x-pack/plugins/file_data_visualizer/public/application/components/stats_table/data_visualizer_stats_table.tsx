@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { ML_JOB_FIELD_TYPES, MlJobFieldType, DataVisualizerTableState } from '../../../../common';
+import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../common';
 import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
@@ -146,7 +146,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.fileDataVisualizer.datavisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
-        render: (fieldType: MlJobFieldType) => {
+        render: (fieldType: JobFieldType) => {
           return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
         },
         width: '75px',
@@ -224,13 +224,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
           if (
-            (item.type === ML_JOB_FIELD_TYPES.KEYWORD || item.type === ML_JOB_FIELD_TYPES.IP) &&
+            (item.type === JOB_FIELD_TYPES.KEYWORD || item.type === JOB_FIELD_TYPES.IP) &&
             item.stats?.topValues !== undefined
           ) {
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === ML_JOB_FIELD_TYPES.NUMBER) {
+          if (item.type === JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               return <IndexBasedNumberContentPreview config={item} />;
             } else {
@@ -238,7 +238,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             }
           }
 
-          if (item.type === ML_JOB_FIELD_TYPES.BOOLEAN) {
+          if (item.type === JOB_FIELD_TYPES.BOOLEAN) {
             return <BooleanContentPreview config={item} />;
           }
 

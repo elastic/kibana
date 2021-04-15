@@ -8,24 +8,7 @@
 import { Feature, Point } from 'geojson';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { DEFAULT_GEO_REGEX } from './geo_point_content';
-
-// TODO - copied from maps, fix import link, resolve circular dependency
-export enum SOURCE_TYPES {
-  EMS_TMS = 'EMS_TMS',
-  EMS_FILE = 'EMS_FILE',
-  ES_GEO_GRID = 'ES_GEO_GRID',
-  ES_GEO_LINE = 'ES_GEO_LINE',
-  ES_SEARCH = 'ES_SEARCH',
-  ES_PEW_PEW = 'ES_PEW_PEW',
-  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
-  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
-  WMS = 'WMS',
-  KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
-  GEOJSON_FILE = 'GEOJSON_FILE',
-  MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
-  TABLE_SOURCE = 'TABLE_SOURCE',
-}
+import { SOURCE_TYPES } from '../../../../../../maps/common/constants';
 
 export const convertWKTGeoToLonLat = (
   value: string | number
