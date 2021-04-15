@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(configuration.name).to.be('NAME');
         expect(origin).to.be('stored');
         expect(configuration.logIndices).to.eql({
-          type: 'indexPattern',
+          type: 'index_pattern',
           indexPatternId: 'kip-id',
         });
         expect(configuration.fields.timestamp).to.be('TIMESTAMP');
