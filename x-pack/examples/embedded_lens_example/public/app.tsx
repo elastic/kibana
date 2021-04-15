@@ -156,6 +156,7 @@ export const App = (props: {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      aria-label="Open lens in new tab"
                       isDisabled={!props.plugins.lens.canUseEditor()}
                       onClick={() => {
                         props.plugins.lens.navigateToPrefilledEditor(
