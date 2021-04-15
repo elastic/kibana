@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { LogIndexPatternReference } from '../../../../common/log_sources';
+import { useLinkProps } from '../../../hooks/use_link_props';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
@@ -44,10 +45,7 @@ export const IndexPatternConfigurationPanel: React.FC<{
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <FormattedMessage
-        id="xpack.infra.logSourceConfiguration.logIndexPatternHelpText"
-        defaultMessage="Helpful text explaining the cross-app advantages of Kibana index patterns and linking to the management screen."
-      />
+      <IndexPatternInlineHelpMessage />
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
@@ -89,3 +87,27 @@ export const IndexPatternConfigurationPanel: React.FC<{
     </>
   );
 };
+
+const IndexPatternInlineHelpMessage = React.memo(() => {
+  const indexPatternManagementLinkProps = useLinkProps({
+    app: 'management',
+    pathname: '/kibana/indexPatterns',
+  });
+
+  return (
+    <FormattedMessage
+      id="xpack.infra.logSourceConfiguration.logIndexPatternHelpText"
+      defaultMessage="Kibana index patterns are shared among apps in the Kibana space and can be managed via the {indexPatternsManagementLink}."
+      values={{
+        indexPatternsManagementLink: (
+          <EuiLink {...indexPatternManagementLinkProps}>
+            <FormattedMessage
+              id="xpack.infra.logSourceConfiguration.indexPatternManagementLinkText"
+              defaultMessage="index patterns management screen"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+});
