@@ -117,8 +117,7 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
-    // (undocumented)
-    get result(): Observable<Output | ExpressionValueError>;
+    readonly result: Observable<Output | ExpressionValueError>;
     start(input?: Input): Observable<Output | ExpressionValueError>;
     readonly state: ExecutionContainer<Output | ExpressionValueError>;
 }

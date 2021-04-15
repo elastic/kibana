@@ -7,9 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isPromise } from '@kbn/std';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { combineLatest, defer, from, of, race, throwError, Observable, ReplaySubject } from 'rxjs';
-import { catchError, finalize, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import {
+  combineLatest,
+  defer,
+  from,
+  isObservable,
+  of,
+  race,
+  throwError,
+  Observable,
+  ReplaySubject,
+} from 'rxjs';
+import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
@@ -126,7 +137,7 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  private result$: Observable<Output | ExpressionValueError>;
+  public readonly result: Observable<Output | ExpressionValueError>;
 
   /**
    * Keeping track of any child executions
@@ -146,10 +157,6 @@ export class Execution<
   > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
-
-  public get result(): Observable<Output | ExpressionValueError> {
-    return this.result$.pipe(take(1));
-  }
 
   public get inspectorAdapters(): InspectorAdapters {
     return this.context.inspectorAdapters;
@@ -193,7 +200,7 @@ export class Execution<
       ...(execution.params as any).extraContext,
     };
 
-    this.result$ = this.input$.pipe(
+    this.result = this.input$.pipe(
       switchMap((input) => this.race(this.invokeChain(this.state.get().ast.chain, input))),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
@@ -234,7 +241,21 @@ export class Execution<
     this.hasStarted = true;
     this.input = input;
     this.state.transitions.start();
-    this.input$.next(input);
+
+    if (isObservable<Input>(input)) {
+      // `input$` should never complete
+      input.subscribe(
+        (value) => this.input$.next(value),
+        (error) => this.input$.error(error)
+      );
+    } else if (isPromise(input)) {
+      input.then(
+        (value) => this.input$.next(value),
+        (error) => this.input$.error(error)
+      );
+    } else {
+      this.input$.next(input);
+    }
 
     return this.result;
   }
@@ -321,7 +342,7 @@ export class Execution<
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
       switchMap((normalizedInput) => this.race(of(fn.fn(normalizedInput, args, this.context)))),
       switchMap((fnResult: any) =>
-        fnResult?.subscribe ? fnResult : from(fnResult?.then ? fnResult : [fnResult])
+        isObservable(fnResult) ? fnResult : from(isPromise(fnResult) ? fnResult : [fnResult])
       ),
       map((output) => {
         // Validate that the function returned the type it said it would.
