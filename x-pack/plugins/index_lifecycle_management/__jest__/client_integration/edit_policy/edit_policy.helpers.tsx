@@ -138,6 +138,18 @@ export const setup = async (arg?: {
 
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
+  const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+    await act(async () => {
+      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
+      if (units) {
+        find('hot-selectedMaxPrimaryShardSize.select').simulate('change', {
+          target: { value: units },
+        });
+      }
+    });
+    component.update();
+  };
+
   const setMaxSize = async (value: string, units?: string) => {
     await act(async () => {
       find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
@@ -351,6 +363,7 @@ export const setup = async (arg?: {
         setMaxSize,
         setMaxDocs,
         setMaxAge,
+        setMaxPrimaryShardSize,
         toggleRollover,
         toggleDefaultRollover,
         hasRolloverSettingRequiredCallout,
