@@ -83,7 +83,7 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
     for (const rootError of rootErrors) {
       if (rootError.context) {
         errorMessages.push(
-          i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
+          i18n.translate('xpack.lens.editorFrame.expressionFailureMessageWithContext', {
             defaultMessage: 'Request error: {type}, {reason} in {context}',
             values: {
               reason: rootError.reason,
