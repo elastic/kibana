@@ -1,5 +1,5 @@
 [role="xpack"]
-[[alert-management]]
+[[managing-alerts-and-actions]]
 == Managing rules
 
 
