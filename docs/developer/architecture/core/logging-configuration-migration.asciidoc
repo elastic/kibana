@@ -3,11 +3,19 @@
 
 Compatibility with the legacy logging system is assured until the end of the `v7` version. 
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
-root appenders, make sure that it contains `default` appender to provide backward compatibility.
+root appenders, make sure that it contains `default` appender if you wish
+to provide backward compatibility with `v7`.
 
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required. If you define an appender for a logger, 
-the log messages aren't handled by the `root` logger anymore and are not forwarded to the legacy logging service.
+WARNING: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats
+if you still have the `default` appender set in the `root` context.
+Removing the `default` will get rid of the duplicate entries, however,
+it means you will no longer be receiving logs in the legacy format.
+This may break your existing integrations if you are ingesting the Kibana
+logs somewhere and relying on the legacy format. In particular, if you use
+the https://www.elastic.co/guide/en/beats/filebeat/7.x/filebeat-module-kibana.html[Filebeat Kibana module]
+to ingest your Kibana logs, it is recommended that you do *not* remove
+the `default` appender before `v8`, as logs will no longer be indexed
+with the same fields.
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]

@@ -5,12 +5,20 @@
 ++++
 
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
-All log messages handled by `root` context (default) are forwarded to the legacy logging service.
+All log messages handled by the `root` context's `default` appender are forwarded to the legacy logging service.
 The logging configuration is validated against the predefined schema and if there are
 any issues with it, {kib} will fail to start with the detailed error message.
 
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required.
+WARNING: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats
+if you still have the `default` appender set in the `root` context.
+Removing the `default` will get rid of the duplicate entries, however,
+it means you will no longer be receiving logs in the legacy format.
+This may break your existing integrations if you are ingesting the Kibana
+logs somewhere and relying on the legacy format. In particular, if you use
+the https://www.elastic.co/guide/en/beats/filebeat/7.x/filebeat-module-kibana.html[Filebeat Kibana module]
+to ingest your Kibana logs, it is recommended that you do *not* remove
+the `default` appender before `v8`, as logs will no longer be indexed
+with the same fields.
 
 Here are some configuration examples for the most common logging use cases:
 
@@ -36,7 +44,7 @@ logging:
 ==== Log in json format
 
 Log the default log format to json layout instead of pattern (the default).
-With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself
+With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/1.9/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself
 
 [source,yaml]
 ----
