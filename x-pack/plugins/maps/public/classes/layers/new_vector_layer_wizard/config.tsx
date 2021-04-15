@@ -16,7 +16,7 @@ import { getFileUpload } from '../../../kibana_services';
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
-    defaultMessage: 'Draw points & shapes and save in Elasticsearch',
+    defaultMessage: 'Draw points, lines, and polygons to Elasticsearch',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
