@@ -27,7 +27,7 @@ import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 
 export interface ExplorerState {
-  allAnnotations: AnnotationsTable;
+  overallAnnotations: AnnotationsTable;
   annotations: AnnotationsTable;
   anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
@@ -66,7 +66,7 @@ function getDefaultIndexPattern() {
 
 export function getExplorerDefaultState(): ExplorerState {
   return {
-    allAnnotations: {
+    overallAnnotations: {
       error: undefined,
       annotationsData: [],
       aggregations: {},

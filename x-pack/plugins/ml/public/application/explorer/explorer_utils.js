@@ -385,7 +385,7 @@ export function getViewBySwimlaneOptions({
   };
 }
 
-export function loadAllAnnotations(selectedJobs, interval, bounds) {
+export function loadOverallAnnotations(selectedJobs, interval, bounds) {
   const jobIds = selectedJobs.map((d) => d.id);
   const timeRange = getSelectionTimeRange(undefined, interval, bounds);
 

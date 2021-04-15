@@ -8,6 +8,7 @@
 import React, { FC, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
+import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
@@ -49,6 +50,33 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 
       const xScale = scaleTime().domain([domain.min, domain.max]).range([startingXPos, endingXPos]);
 
+      // Add Annotation y axis label
+      svg
+        .append('text')
+        .attr('class', 'zoom-info-text')
+        .text(
+          i18n.translate('xpack.ml.explorer.swimlaneAnnotationLabel', {
+            defaultMessage: 'Annotations',
+          })
+        )
+        // @todo: figure out a better way to align this
+        .attr('x', Y_AXIS_LABEL_WIDTH / 2 + 24)
+        .attr('y', ANNOTATION_HEIGHT)
+        .style('fill', '#6a717d')
+        .style('font-size', '12px');
+
+      // Add border
+      svg
+        .append('rect')
+        .attr('x', startingXPos)
+        .attr('y', 0)
+        .attr('height', ANNOTATION_HEIGHT)
+        .attr('width', endingXPos - startingXPos)
+        .style('stroke', '#cccccc')
+        .style('fill', 'none')
+        .style('stroke-width', 1);
+
+      // Add annotation marker
       annotationsData.forEach((d) => {
         const annotationWidth = d.end_timestamp ? xScale(d.end_timestamp) - xScale(d.timestamp) : 0;
         svg

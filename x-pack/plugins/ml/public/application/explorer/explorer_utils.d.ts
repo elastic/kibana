@@ -110,7 +110,7 @@ declare interface SwimlaneBounds {
   latest: number;
 }
 
-export declare const loadAllAnnotations: (
+export declare const loadOverallAnnotations: (
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds

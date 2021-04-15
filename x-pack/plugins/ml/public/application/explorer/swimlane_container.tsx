@@ -133,6 +133,7 @@ export interface SwimlaneProps {
   filterActive?: boolean;
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
+  showLegend?: boolean;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
   selection?: AppStateSelectedCells;
@@ -177,6 +178,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   timeBuckets,
   maskAll,
   showTimeline = true,
+  showLegend = true,
   annotationsData,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -394,7 +396,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   <Chart className={'mlSwimLaneContainer'}>
                     <Settings
                       onElementClick={onElementClick}
-                      showLegend
+                      showLegend={showLegend}
                       legendPosition={Position.Top}
                       xDomain={{
                         min: swimlaneData.earliest * 1000,

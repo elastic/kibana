@@ -23,7 +23,7 @@ import {
   loadAnomaliesTableData,
   loadFilteredTopInfluencers,
   loadTopInfluencers,
-  loadAllAnnotations,
+  loadOverallAnnotations,
   AppStateSelectedCells,
   ExplorerJob,
 } from '../explorer_utils';
@@ -56,7 +56,9 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-const memoizedLoadAllAnnotations = memoize<typeof loadAllAnnotations>(loadAllAnnotations);
+const memoizedLoadOverallAnnotations = memoize<typeof loadOverallAnnotations>(
+  loadOverallAnnotations
+);
 
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
@@ -157,7 +159,12 @@ const loadExplorerDataProvider = (
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
     return forkJoin({
-      allAnnotations: memoizedLoadAllAnnotations(lastRefresh, selectedJobs, interval, bounds),
+      overallAnnotations: memoizedLoadOverallAnnotations(
+        lastRefresh,
+        selectedJobs,
+        interval,
+        bounds
+      ),
       annotationsData: memoizedLoadAnnotationsTableData(
         lastRefresh,
         selectedCells,
@@ -220,7 +227,7 @@ const loadExplorerDataProvider = (
       tap(explorerService.setChartsDataLoading),
       mergeMap(
         ({
-          allAnnotations,
+          overallAnnotations,
           anomalyChartRecords,
           influencers,
           overallState,
@@ -278,7 +285,7 @@ const loadExplorerDataProvider = (
             }),
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
               return {
-                allAnnotations,
+                overallAnnotations,
                 annotations: annotationsData,
                 influencers: filteredTopInfluencers as any,
                 loading: false,
