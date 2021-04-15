@@ -11,6 +11,7 @@ import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import { hostname } from 'os';
 import url from 'url';
 
+import type { Duration } from 'moment';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
@@ -31,6 +32,7 @@ const configSchema = schema.object(
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
       })
     ),
+    gracefulShutdownTimeout: schema.duration({ defaultValue: '30s' }),
     cors: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),
@@ -182,6 +184,7 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public gracefulShutdownTimeout: Duration;
 
   /**
    * @internal
@@ -217,6 +220,7 @@ export class HttpConfig implements IHttpConfig {
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
+    this.gracefulShutdownTimeout = rawHttpConfig.gracefulShutdownTimeout;
   }
 }
 

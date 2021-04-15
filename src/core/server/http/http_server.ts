@@ -17,6 +17,9 @@ import {
   getRequestId,
 } from '@kbn/server-http-tools';
 
+import type { Duration } from 'moment';
+import type { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
@@ -87,7 +90,11 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
-  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
+  constructor(
+    private readonly logger: LoggerFactory,
+    private readonly name: string,
+    private readonly gracefulShutdownTimeout$: Observable<Duration>
+  ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -118,6 +125,7 @@ export class HttpServer {
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupRequestStateAssignment(config);
+    this.setupGracefulShutdownHandlers();
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -221,10 +229,16 @@ export class HttpServer {
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+
+      const gracefulShutdownTimeout = await this.gracefulShutdownTimeout$.pipe(take(1)).toPromise();
+      await this.server.stop({ timeout: gracefulShutdownTimeout.asMilliseconds() });
+
+      this.log.debug(`http server stopped`);
+
+      // Removing the listener after stopping so we don't leave any pending requests unhandled
       if (this.handleServerResponseEvent) {
         this.server.events.removeListener('response', this.handleServerResponseEvent);
       }
-      await this.server.stop();
     }
   }
 
@@ -244,6 +258,18 @@ export class HttpServer {
     if (authRequired === false) {
       return false;
     }
+  }
+
+  private setupGracefulShutdownHandlers() {
+    this.registerOnPreRouting((request, response, toolkit) => {
+      if (this.stopped) {
+        return response.customError({
+          statusCode: 503,
+          body: { message: 'Kibana is shutting down and not accepting new incoming requests' },
+        });
+      }
+      return toolkit.next();
+    });
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {

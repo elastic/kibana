@@ -26,6 +26,8 @@ import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { of } from 'rxjs';
+import moment from 'moment';
 
 const cookieOptions = {
   name: 'sid',
@@ -65,6 +67,7 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    gracefulShutdownTimeout: moment.duration(100, 'ms'),
   } as any;
 
   configWithSSL = {
@@ -79,7 +82,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests');
+  server = new HttpServer(loggingService, 'tests', of(config.gracefulShutdownTimeout));
 });
 
 afterEach(async () => {
@@ -1429,5 +1432,73 @@ describe('setup contract', () => {
         registerAuth((req, res) => res.unauthorized());
       }).not.toThrow();
     });
+  });
+});
+
+describe('Graceful shutdown', () => {
+  test('it should wait until the ongoing requests are resolved and reject any new ones', async () => {
+    const gracefulShutdownTimeout = config.gracefulShutdownTimeout.asMilliseconds();
+
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.number() }) },
+        options: { body: { accepts: 'application/json' } },
+      },
+      async (context, req, res) => {
+        // It takes to resolve the same period of the gracefulShutdownTimeout.
+        // Since we'll trigger the stop a few ms after, it should have time to finish
+        await new Promise((resolve) => setTimeout(resolve, gracefulShutdownTimeout));
+        return res.ok({ body: req.route });
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+
+    const makeRequest = () => supertest(innerServer.listener).post('/').send({ test: 1 });
+
+    const [firstResponse, , secondResponse] = await Promise.all([
+      // Trigger a request that should succeed
+      makeRequest().expect(200, {
+        method: 'post',
+        path: '/',
+        options: {
+          authRequired: true,
+          xsrfRequired: true,
+          tags: [],
+          timeout: {
+            payload: 10000,
+          },
+          body: {
+            parse: true, // hapi populates the default
+            maxBytes: 1024, // hapi populates the default
+            accepts: ['application/json'],
+            output: 'data',
+          },
+        },
+      }),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, gracefulShutdownTimeout / 3));
+        return server.stop();
+      })(),
+      // Trigger a new request while shutting down (should be rejected)
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, (2 * gracefulShutdownTimeout) / 3));
+        return makeRequest().expect(503, {
+          statusCode: 503,
+          error: 'Service Unavailable',
+          message: 'Kibana is shutting down and not accepting new incoming requests',
+        });
+      })(),
+    ]);
+
+    // hapi automatically sends the header `connection: 'close'` when shutting down
+    expect(firstResponse.header.connection).toBe('close');
+    expect(secondResponse.header.connection).toBe('close');
   });
 });

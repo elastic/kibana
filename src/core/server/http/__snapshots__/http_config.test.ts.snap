@@ -52,6 +52,7 @@ Object {
     "enabled": false,
   },
   "customResponseHeaders": Object {},
+  "gracefulShutdownTimeout": "PT30S",
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
