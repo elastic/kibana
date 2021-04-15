@@ -39,7 +39,7 @@ const hostedAgentPolicySO = {
 } as SavedObject<AgentPolicy>;
 
 describe('reassignAgent (singular)', () => {
-  it('can reassign from regular policy to regular', async () => {
+  it('can reassign from regular agent policy to regular', async () => {
     const { soClient, esClient } = createClientsMock();
     await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
@@ -50,7 +50,7 @@ describe('reassignAgent (singular)', () => {
     expect(calledWith[0]?.body?.doc).toHaveProperty('policy_id', regularAgentPolicySO.id);
   });
 
-  it('cannot reassign from regular policy to hosted', async () => {
+  it('cannot reassign from regular agent policy to hosted', async () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
       reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
@@ -60,7 +60,7 @@ describe('reassignAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(0);
   });
 
-  it('cannot reassign from hosted policy', async () => {
+  it('cannot reassign from hosted agent policy', async () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
       reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)

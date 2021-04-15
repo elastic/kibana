@@ -35,7 +35,7 @@ const hostedAgentPolicySO = {
 } as SavedObject<AgentPolicy>;
 
 describe('unenrollAgent (singular)', () => {
-  it('can unenroll from regular policy', async () => {
+  it('can unenroll from regular agent policy', async () => {
     const { soClient, esClient } = createClientMock();
     await unenrollAgent(soClient, esClient, agentInRegularDoc._id);
 
@@ -46,7 +46,7 @@ describe('unenrollAgent (singular)', () => {
     expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
   });
 
-  it('cannot unenroll from hosted policy by default', async () => {
+  it('cannot unenroll from hosted agent policy by default', async () => {
     const { soClient, esClient } = createClientMock();
     await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
       AgentUnenrollmentError
@@ -55,7 +55,7 @@ describe('unenrollAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(0);
   });
 
-  it('cannot unenroll from hosted policy with revoke=true', async () => {
+  it('cannot unenroll from hosted agent policy with revoke=true', async () => {
     const { soClient, esClient } = createClientMock();
     await expect(
       unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
@@ -64,7 +64,7 @@ describe('unenrollAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(0);
   });
 
-  it('can unenroll from hosted policy with force=true', async () => {
+  it('can unenroll from hosted agent policy with force=true', async () => {
     const { soClient, esClient } = createClientMock();
     await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true });
     // calls ES update with correct values
@@ -74,7 +74,7 @@ describe('unenrollAgent (singular)', () => {
     expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
   });
 
-  it('can unenroll from hosted policy with force=true and revoke=true', async () => {
+  it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
     const { soClient, esClient } = createClientMock();
     await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true, revoke: true });
     // calls ES update with correct values
@@ -86,7 +86,7 @@ describe('unenrollAgent (singular)', () => {
 });
 
 describe('unenrollAgents (plural)', () => {
-  it('can unenroll from an regular policy', async () => {
+  it('can unenroll from an regular agent policy', async () => {
     const { soClient, esClient } = createClientMock();
     const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
@@ -102,7 +102,7 @@ describe('unenrollAgents (plural)', () => {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
-  it('cannot unenroll from a hosted policy by default', async () => {
+  it('cannot unenroll from a hosted agent policy by default', async () => {
     const { soClient, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
@@ -121,7 +121,7 @@ describe('unenrollAgents (plural)', () => {
     }
   });
 
-  it('cannot unenroll from a hosted policy with revoke=true', async () => {
+  it('cannot unenroll from a hosted agent policy with revoke=true', async () => {
     const { soClient, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
@@ -159,7 +159,7 @@ describe('unenrollAgents (plural)', () => {
     }
   });
 
-  it('can unenroll from hosted policy with force=true', async () => {
+  it('can unenroll from hosted agent policy with force=true', async () => {
     const { soClient, esClient } = createClientMock();
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
@@ -176,7 +176,7 @@ describe('unenrollAgents (plural)', () => {
     }
   });
 
-  it('can unenroll from hosted policy with force=true and revoke=true', async () => {
+  it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
     const { soClient, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];

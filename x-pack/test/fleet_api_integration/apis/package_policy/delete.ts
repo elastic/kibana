@@ -110,7 +110,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(Array.isArray(results));
       expect(results.length).to.be(1);
       expect(results[0].success).to.be(false);
-      expect(results[0].body.message).to.contain('Cannot remove integrations of hosted policy');
+      expect(results[0].body.message).to.contain(
+        'Cannot remove integrations of hosted agent policy'
+      );
 
       // same, but with force
       const { body: resultsWithForce } = await supertest

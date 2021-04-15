@@ -47,7 +47,7 @@ export async function sendUpgradeAgentAction({
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new IngestManagerError(
-      `Cannot upgrade agent ${agentId} in hosted policy ${agentPolicy.id}`
+      `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
 
@@ -142,7 +142,9 @@ export async function sendUpgradeAgentsActions(
       }
 
       if (!options.force && isHostedAgent(agent)) {
-        throw new IngestManagerError(`Cannot upgrade agent in hosted policy ${agent.policy_id}`);
+        throw new IngestManagerError(
+          `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
+        );
       }
       return agent;
     })

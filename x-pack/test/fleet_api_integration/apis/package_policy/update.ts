@@ -46,7 +46,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test hosted policy',
+          name: 'Test hosted agent policy',
           namespace: 'default',
           is_managed: true,
         });

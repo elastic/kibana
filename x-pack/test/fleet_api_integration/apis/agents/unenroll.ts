@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/empty_fleet_server');
     });
 
-    it('/agents/{agent_id}/unenroll should fail for hosted policy', async () => {
+    it('/agents/{agent_id}/unenroll should fail for hosted agent policy', async () => {
       // set policy to hosted
       await supertest
         .put(`/api/fleet/agent_policies/policy1`)
@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(400);
     });
 
-    it('/agents/{agent_id}/unenroll should allow from regular policy', async () => {
+    it('/agents/{agent_id}/unenroll should allow from regular agent policy', async () => {
       // set policy to regular
       await supertest
         .put(`/api/fleet/agent_policies/policy1`)
@@ -117,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(outputAPIKeys[0].invalidated).eql(true);
     });
 
-    it('/agents/bulk_unenroll should not allow unenroll from hosted policy', async () => {
+    it('/agents/bulk_unenroll should not allow unenroll from hosted agent policy', async () => {
       // set policy to hosted
       await supertest
         .put(`/api/fleet/agent_policies/policy1`)
@@ -158,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(agent2data.body.item.active).to.eql(true);
     });
 
-    it('/agents/bulk_unenroll should allow to unenroll multiple agents by id from an regular policy', async () => {
+    it('/agents/bulk_unenroll should allow to unenroll multiple agents by id from an regular agent policy', async () => {
       // set policy to regular
       await supertest
         .put(`/api/fleet/agent_policies/policy1`)

@@ -477,7 +477,7 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot update integrations of hosted policy ${id}`);
+      throw new IngestManagerError(`Cannot update integrations of hosted agent policy ${id}`);
     }
 
     return await this._update(
@@ -508,7 +508,7 @@ class AgentPolicyService {
     }
 
     if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(`Cannot remove integrations of hosted policy ${id}`);
+      throw new IngestManagerError(`Cannot remove integrations of hosted agent policy ${id}`);
     }
 
     return await this._update(
@@ -551,7 +551,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.is_managed) {
-      throw new AgentPolicyDeletionError(`Cannot delete hosted policy ${id}`);
+      throw new AgentPolicyDeletionError(`Cannot delete hosted agent policy ${id}`);
     }
 
     const {

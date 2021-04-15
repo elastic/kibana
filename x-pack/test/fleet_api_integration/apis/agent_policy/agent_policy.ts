@@ -327,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload('fleet/empty_fleet_server');
       });
-      let managedPolicy: any | undefined;
+      let hostedPolicy: any | undefined;
       it('should prevent hosted policies being deleted', async () => {
         const {
           body: { item: createdPolicy },
@@ -335,16 +335,16 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Managed policy',
+            name: 'Hosted policy',
             namespace: 'default',
             is_managed: true,
           })
           .expect(200);
-        managedPolicy = createdPolicy;
+        hostedPolicy = createdPolicy;
         const { body } = await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxx')
-          .send({ agentPolicyId: managedPolicy.id })
+          .send({ agentPolicyId: hostedPolicy.id })
           .expect(400);
 
         expect(body.message).to.contain('Cannot delete hosted policy');
@@ -352,12 +352,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow regular policies being deleted', async () => {
         const {
-          body: { item: unmanagedPolicy },
+          body: { item: regularPolicy },
         } = await supertest
-          .put(`/api/fleet/agent_policies/${managedPolicy.id}`)
+          .put(`/api/fleet/agent_policies/${hostedPolicy.id}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Unmanaged policy',
+            name: 'Regular policy',
             namespace: 'default',
             is_managed: false,
           })
@@ -366,11 +366,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxx')
-          .send({ agentPolicyId: unmanagedPolicy.id });
+          .send({ agentPolicyId: regularPolicy.id });
 
         expect(body).to.eql({
-          id: unmanagedPolicy.id,
-          name: 'Unmanaged policy',
+          id: regularPolicy.id,
+          name: 'Regular policy',
         });
       });
     });

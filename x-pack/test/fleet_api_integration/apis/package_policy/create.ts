@@ -49,12 +49,12 @@ export default function (providerContext: FtrProviderContext) {
     it('can only add to hosted agent policies using the force parameter', async function () {
       // get a hosted policy
       const {
-        body: { item: managedPolicy },
+        body: { item: hostedPolicy },
       } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Managed policy from ${Date.now()}`,
+          name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
           is_managed: true,
         });
@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          policy_id: managedPolicy.id,
+          policy_id: hostedPolicy.id,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          policy_id: managedPolicy.id,
+          policy_id: hostedPolicy.id,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // delete policy we just made
       await supertest.post(`/api/fleet/agent_policies/delete`).set('kbn-xsrf', 'xxxx').send({
-        agentPolicyId: managedPolicy.id,
+        agentPolicyId: hostedPolicy.id,
       });
     });
 

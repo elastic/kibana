@@ -210,7 +210,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('agent agent1 is not upgradeable');
       });
 
-      it('enrolled in a hosted policy should respond 400 to upgrade and not update the agent SOs', async () => {
+      it('enrolled in a hosted agent policy should respond 400 to upgrade and not update the agent SOs', async () => {
         // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
@@ -229,13 +229,15 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in hosted policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({ version: kibanaVersion })
           .expect(400);
-        expect(body.message).to.contain('Cannot upgrade agent agent1 in hosted policy policy1');
+        expect(body.message).to.contain(
+          'Cannot upgrade agent agent1 in hosted agent policy policy1'
+        );
 
         const agent1data = await supertest.get(`/api/fleet/agents/agent1`);
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
@@ -543,7 +545,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('enrolled in a hosted policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
+      it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
         // move agent2 to policy2 to keep it regular
         await supertest.put(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
           policy_id: 'policy2',
@@ -580,7 +582,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in hosted policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
@@ -591,7 +593,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.eql({
-          agent1: { success: false, error: 'Cannot upgrade agent in hosted policy policy1' },
+          agent1: { success: false, error: 'Cannot upgrade agent in hosted agent policy policy1' },
           agent2: { success: true },
         });
 
@@ -604,7 +606,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
 
-      it('enrolled in a hosted policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
+      it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
         // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
@@ -637,7 +639,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in hosted policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')

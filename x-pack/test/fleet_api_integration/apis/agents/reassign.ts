@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
 
-      it('can reassign from regular policy to regular', async () => {
+      it('can reassign from regular agent policy to regular', async () => {
         // policy2 is not hosted
         // reassign succeeds
         await supertest
@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('cannot reassign from regular policy to hosted', async () => {
+      it('cannot reassign from regular agent policy to hosted', async () => {
         // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
