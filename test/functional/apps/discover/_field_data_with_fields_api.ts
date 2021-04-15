@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(Docheader).to.contain('Document');
       });
 
-      it.skip('a bad syntax query should show an error message', async function () {
+      it('a bad syntax query should show an error message', async function () {
         const expectedError =
           'Expected ":", "<", "<=", ">", ">=", AND, OR, end of input, ' +
           'whitespace but "(" found.';
