@@ -20,7 +20,7 @@ const sortedThreatSummaryFields = [
   'last_seen',
 ];
 
-export const useThreatIntel = (
+export const useThreatIntelTabs = (
   data: TimelineEventsDetailsItem[] = [],
   isAlert: boolean,
   eventId: string,
@@ -72,7 +72,6 @@ export const useThreatIntel = (
                     eventId,
                     fieldName: `${INDICATOR_DESTINATION_PATH}.${field}`,
                   },
-                  index,
                 };
           }
         });

@@ -18,7 +18,7 @@ import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { useThreatIntel } from '../../hooks/use_threat_intel';
+import { useThreatIntelTabs } from '../../hooks/use_threat_intel_tabs';
 
 interface EventViewTab {
   id: EventViewId;
@@ -88,7 +88,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
     [setSelectedTabId]
   );
-  const { isThreatPresent, threatCount, threatSummaryRows, threatDetailsRows } = useThreatIntel(
+  const { isThreatPresent, threatCount, threatSummaryRows, threatDetailsRows } = useThreatIntelTabs(
     data,
     isAlert,
     id,

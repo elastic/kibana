@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiTitle,
   euiPaletteGray,
+  EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -28,15 +29,17 @@ const StyledNoEnrichmentContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  h2 {
-    padding: 5% 10% 0%;
-  }
+`;
+
+const StyledEuiIcon = styled(EuiIcon)`
+  margin: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 const StyledSpan = styled.span`
   color: ${euiPaletteGray(5)[2]};
   line-height: 1.8em;
-  padding: 5% 10%;
+  text-align: center;
+  padding: ${({ theme }) => `${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.xl}`};
 `;
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
@@ -75,6 +78,7 @@ const ThreatDetailsViewComponent: React.FC<{
   !threatDetailsRows[0] || threatDetailsRows[0].length === 0 ? (
     <StyledNoEnrichmentContainer data-test-subj="empty-threat-details-view">
       <EuiSpacer size="xxl" />
+      <StyledEuiIcon type="faceHappy" size="xl" color="plain" />
       <EuiTitle size="m">
         <h2>{i18n.NO_ENRICHMENT_FOUND}</h2>
       </EuiTitle>

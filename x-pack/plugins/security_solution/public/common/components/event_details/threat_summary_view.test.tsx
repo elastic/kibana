@@ -21,7 +21,6 @@ const props = {
   threatSummaryRows: [
     {
       title: 'matched.field',
-      index: 0,
       description: {
         contextId: 'test-context-id',
         eventId: 'test-event-id',
@@ -31,7 +30,6 @@ const props = {
     },
     {
       title: 'matched.type',
-      index: 1,
       description: {
         contextId: 'test-context-id',
         eventId: 'test-event-id',
