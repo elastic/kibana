@@ -857,7 +857,6 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with timestamp override field', async () => {
       beforeEach(async () => {
-        // await esArchiver.unload('security_solution/timestamp_override');
         await deleteSignalsIndex(supertest);
         await createSignalsIndex(supertest);
         await esArchiver.load('security_solution/timestamp_override_1');

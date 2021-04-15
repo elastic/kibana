@@ -46,8 +46,6 @@ export const searchAfterAndBulkCreate = async ({
   // sortId tells us where to start our next consecutive search_after query
   let sortIds: SortResults | undefined;
   let hasSortId = true; // default to true so we execute the search on initial run
-  // let backupSortId: string | undefined;
-  // let hasBackupSortId = ruleParams.timestampOverride ? true : false;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
@@ -188,7 +186,6 @@ export const searchAfterAndBulkCreate = async ({
           sendAlertTelemetryEvents(logger, eventsTelemetry, filteredEvents, buildRuleMessage);
         }
 
-        // if (!hasSortId && !hasBackupSortId) {
         if (!hasSortId) {
           logger.debug(buildRuleMessage('ran out of sort ids to sort on'));
           break;
