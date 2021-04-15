@@ -30,7 +30,7 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) 
           // index should be replaced with matched.id when it is available
           <Fragment key={`threat-match-row-${eventId}-${index}`}>
             <ThreatMatchRow data={indicator} eventId={eventId} timelineId={timelineId} />
-            {index < indicators.length - 1 && <EuiHorizontalRule margin="s" size="half" />}
+            {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
           </Fragment>
         ))}
       </SpacedContainer>
