@@ -24,8 +24,7 @@ import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
 import { DefaultIndexPatternContext } from '../../../contexts/default_index_context';
-
-const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
+import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
 
 interface IndexPatternSelectProps {
   value: IndexPatternValue;
@@ -105,7 +104,9 @@ export const IndexPatternSelect = ({
 
       setFetchedIndex(
         value
-          ? await fetchIndexPattern(value, indexPatterns)
+          ? await fetchIndexPattern(value, indexPatterns, {
+              fetchKibabaIndexForStringIndexes: true,
+            })
           : {
               indexPattern: undefined,
               indexPatternString: undefined,
