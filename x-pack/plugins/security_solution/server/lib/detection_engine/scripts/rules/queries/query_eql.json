@@ -7,9 +7,9 @@
   ],
   "rule_id": "rule-id-eql",
   "enabled": false,
-  "index": ["auditbeat-*"],
+  "index": [".ds-logs-endpoint.events.process-default-000001"],
   "interval": "30s",
-  "query": "config_change where true",
+  "query": "sequence [process where process.name = \"mimikatz.exe\"] [process where process.name = \"explorer.exe\"]",
   "output_index": ".siem-signals-default",
   "meta": {
     "anything_you_want_ui_related_or_otherwise": {
@@ -22,7 +22,7 @@
   "max_signals": 100,
   "tags": ["tag 1", "tag 2", "any tag you want"],
   "to": "now",
-  "from": "1900-01-01T00:00:00.000Z",
+  "from": "now-300m",
   "severity": "high",
   "type": "eql",
   "language": "eql",
@@ -65,6 +65,5 @@
   "timeline_id": "timeline_id",
   "timeline_title": "timeline_title",
   "note": "# note markdown",
-  "version": 1,
-  "event_category_override": "auditd.message_type"
+  "version": 1
 }
