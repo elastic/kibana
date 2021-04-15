@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../functional/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['dashboard', 'common', 'reporting']);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('Reporting', () => {
+  describe('Reporting', function () {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.loadIfNeeded('packaging');
     });
