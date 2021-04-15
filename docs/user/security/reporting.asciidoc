@@ -69,7 +69,7 @@ image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 . Save your new role.
 
 . Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user 
-your new `custom_reporting_user` role, .
+your new `custom_reporting_user` role.
 
 [float]
 [[reporting-roles-user-api]]
