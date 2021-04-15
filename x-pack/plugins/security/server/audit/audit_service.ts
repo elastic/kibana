@@ -234,6 +234,13 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     ],
   }));
 
+/**
+ * Evaluates the list of provided ignore rules, and filters out events only
+ * if *all* rules match the event.
+ *
+ * For event fields that can contain an array of multiple values, every value
+ * must be matched by an ignore rule for the event to be excluded.
+ */
 export function filterEvent(
   event: AuditEvent,
   ignoreFilters: ConfigType['audit']['ignore_filters']

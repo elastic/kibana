@@ -346,21 +346,25 @@ describe('#createLoggingConfig', () => {
 });
 
 describe('#filterEvent', () => {
-  const event: AuditEvent = {
-    message: 'this is my audit message',
-    event: {
-      action: 'http_request',
-      category: ['web'],
-      type: ['access'],
-      outcome: 'success',
-    },
-    user: {
-      name: 'jdoe',
-    },
-    kibana: {
-      space_id: 'default',
-    },
-  };
+  let event: AuditEvent;
+
+  beforeEach(() => {
+    event = {
+      message: 'this is my audit message',
+      event: {
+        action: 'http_request',
+        category: ['web'],
+        type: ['access'],
+        outcome: 'success',
+      },
+      user: {
+        name: 'jdoe',
+      },
+      kibana: {
+        space_id: 'default',
+      },
+    };
+  });
 
   test('keeps event when ignore filters are undefined or empty', () => {
     expect(filterEvent(event, undefined)).toBeTruthy();
@@ -418,6 +422,66 @@ describe('#filterEvent', () => {
     ).toBeTruthy();
   });
 
+  test('keeps event when one item per category does not match', () => {
+    event = {
+      message: 'this is my audit message',
+      event: {
+        action: 'http_request',
+        category: ['authentication', 'web'],
+        type: ['access'],
+        outcome: 'success',
+      },
+      user: {
+        name: 'jdoe',
+      },
+      kibana: {
+        space_id: 'default',
+      },
+    };
+
+    expect(
+      filterEvent(event, [
+        {
+          actions: ['http_request'],
+          categories: ['web', 'NO_MATCH'],
+          types: ['access'],
+          outcomes: ['success'],
+          spaces: ['default'],
+        },
+      ])
+    ).toBeTruthy();
+  });
+
+  test('keeps event when one item per type does not match', () => {
+    event = {
+      message: 'this is my audit message',
+      event: {
+        action: 'http_request',
+        category: ['web'],
+        type: ['access', 'user'],
+        outcome: 'success',
+      },
+      user: {
+        name: 'jdoe',
+      },
+      kibana: {
+        space_id: 'default',
+      },
+    };
+
+    expect(
+      filterEvent(event, [
+        {
+          actions: ['http_request'],
+          categories: ['web'],
+          types: ['access', 'NO_MATCH'],
+          outcomes: ['success'],
+          spaces: ['default'],
+        },
+      ])
+    ).toBeTruthy();
+  });
+
   test('filters out event when all criteria in a single rule match', () => {
     expect(
       filterEvent(event, [
@@ -432,6 +496,66 @@ describe('#filterEvent', () => {
           actions: ['http_request'],
           categories: ['web'],
           types: ['access'],
+          outcomes: ['success'],
+          spaces: ['default'],
+        },
+      ])
+    ).toBeFalsy();
+  });
+
+  test('filters out event when all categories match', () => {
+    event = {
+      message: 'this is my audit message',
+      event: {
+        action: 'http_request',
+        category: ['authentication', 'web'],
+        type: ['access'],
+        outcome: 'success',
+      },
+      user: {
+        name: 'jdoe',
+      },
+      kibana: {
+        space_id: 'default',
+      },
+    };
+
+    expect(
+      filterEvent(event, [
+        {
+          actions: ['http_request'],
+          categories: ['authentication', 'web'],
+          types: ['access'],
+          outcomes: ['success'],
+          spaces: ['default'],
+        },
+      ])
+    ).toBeFalsy();
+  });
+
+  test('filters out event when all types match', () => {
+    event = {
+      message: 'this is my audit message',
+      event: {
+        action: 'http_request',
+        category: ['web'],
+        type: ['access', 'user'],
+        outcome: 'success',
+      },
+      user: {
+        name: 'jdoe',
+      },
+      kibana: {
+        space_id: 'default',
+      },
+    };
+
+    expect(
+      filterEvent(event, [
+        {
+          actions: ['http_request'],
+          categories: ['web'],
+          types: ['access', 'user'],
           outcomes: ['success'],
           spaces: ['default'],
         },
