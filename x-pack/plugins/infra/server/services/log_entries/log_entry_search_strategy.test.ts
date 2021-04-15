@@ -18,12 +18,14 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { getIndexPatternsMock } from './mocks';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import { InfraSource } from '../../../common/source_configuration/source_configuration';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -197,13 +199,16 @@ describe('LogEntry search strategy', () => {
   });
 });
 
-const createSourceConfigurationMock = () => ({
+const createSourceConfigurationMock = (): InfraSource => ({
   id: 'SOURCE_ID',
   origin: 'stored' as const,
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'some-test-id',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
@@ -256,4 +261,5 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
+  indexPatterns: getIndexPatternsMock(),
 });

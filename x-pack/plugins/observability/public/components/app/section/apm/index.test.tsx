@@ -14,7 +14,7 @@ import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../../../../plugin';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -41,6 +41,10 @@ describe('APMSection', () => {
       } as unknown) as CoreStart,
       appMountParameters: {} as AppMountParameters,
       config: { enableAlertingExperience: true },
+      observabilityRuleRegistry: ({
+        registerType: jest.fn(),
+        getTypeByRuleId: jest.fn(),
+      } as unknown) as ObservabilityRuleRegistry,
       plugins: ({
         data: {
           query: {
