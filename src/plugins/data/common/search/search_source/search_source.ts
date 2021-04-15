@@ -510,7 +510,7 @@ export class SearchSource {
             regexPattern = `^(${sourceFilter.substring(0, sourceFilter.length - 2)})-*`;
           } else if (sourceFilter.endsWith('*')) {
             regexPattern = `^(${sourceFilter.substring(0, sourceFilter.length - 1)})*`;
-          } else if (sourceFilter.startsWith('*')) {
+          } else if (sourceFilter.startsWith('*') && sourceFilter.length > 1) {
             regexPattern = `^${sourceFilter.substring(1, sourceFilter.length)}`;
           }
           return fieldName.match(regexPattern);
