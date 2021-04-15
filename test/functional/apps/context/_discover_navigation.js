@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
       const alert = await browser.getAlert();
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/doc');
-      retry.waitFor('doc view beeing rendered', async () => {
+      retry.waitFor('doc view being rendered', async () => {
         return await PageObjects.discover.isShowingDocViewer();
       });
     });
