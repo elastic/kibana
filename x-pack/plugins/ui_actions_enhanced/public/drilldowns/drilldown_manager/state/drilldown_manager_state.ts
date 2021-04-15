@@ -372,10 +372,10 @@ export class DrilldownManagerState {
    */
   private pickName(name: string): string {
     if (this.hasDrilldownWithName(name)) {
-      const matches = name.match(/(.*) (\(copy [^\)]+\))/);
+      const matches = name.match(/(.*) (\(copy[^\)]*\))/);
       if (matches) name = matches[1];
-      for (let i = 1; i < 100; i++) {
-        const proposedName = `${name} (copy ${i})`;
+      for (let i = 0; i < 100; i++) {
+        const proposedName = !i ? `${name} (copy)` : `${name} (copy ${i})`;
         const exists = this.hasDrilldownWithName(proposedName);
         if (!exists) return proposedName;
       }
