@@ -96,7 +96,7 @@ export function PageViewsTrend() {
             href={exploratoryViewLink}
           >
             <FormattedMessage
-              id={'xpack.apm.csm.pageViews.analyze'}
+              id="xpack.apm.csm.pageViews.analyze"
               defaultMessage="Analyze"
             />
           </EuiButton>

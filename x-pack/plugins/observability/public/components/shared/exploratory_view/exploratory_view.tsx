@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiProgress, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
