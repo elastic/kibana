@@ -26,9 +26,11 @@ import { getIndexPatternsService, getInternalRepository } from '../kibana_server
 import { MapsConfigType } from '../../config';
 import { injectReferences } from '././../../common/migrations/references';
 import {
+  getScalingOptionsPerCluster,
   getTelemetryLayerTypesPerCluster,
   TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
-} from './layer_type_util';
+  TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
+} from './util';
 
 interface Settings {
   showMapVisualizationTypes: boolean;
@@ -57,6 +59,7 @@ export interface LayersStatsUsage {
   mapsTotalCount: number;
   timeCaptured: string;
   layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
+  scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -252,6 +255,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const layersCountSum = _.sum(layersCount);
 
   const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
+  const scalingOptions = getScalingOptionsPerCluster(layerLists);
 
   return {
     // Total count of maps
@@ -259,6 +263,7 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
     // Time of capture
     timeCaptured: new Date().toISOString(),
     layerTypes: telemetryLayerTypeCounts,
+    scalingOptions,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

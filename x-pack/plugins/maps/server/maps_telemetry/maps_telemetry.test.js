@@ -75,6 +75,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
     const result = buildMapsSavedObjectsTelemetry([]);
 
     expect(result.layerTypes).toEqual({});
+    expect(result.scalingOptions).toEqual({});
     expect(result.attributesPerMap).toEqual({
       dataSourcesCount: {
         avg: 0,
@@ -124,6 +125,14 @@ describe('buildMapsSavedObjectsTelemetry', () => {
       },
       ES_DOCS: {
         avg: 0.2,
+        max: 1,
+        min: 1,
+        total: 1,
+      },
+    });
+    expect(result.scalingOptions).toEqual({
+      LIMIT: {
+        avg: 1,
         max: 1,
         min: 1,
         total: 1,

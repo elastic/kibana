@@ -8,7 +8,8 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 import { MapsConfigType } from '../../../config';
-import { TELEMETRY_LAYER_TYPE } from '../layer_type_util';
+import { TELEMETRY_LAYER_TYPE } from '../util';
+import { SCALING_TYPES } from '../../../common';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -18,7 +19,7 @@ export function registerMapsUsageCollector(
     return;
   }
 
-  const layerTypeCounts = {
+  const clusterStats = {
     min: { type: 'long' },
     max: { type: 'long' },
     avg: { type: 'float' },
@@ -40,20 +41,25 @@ export function registerMapsUsageCollector(
       mapsTotalCount: { type: 'long' },
       timeCaptured: { type: 'date' },
       layerTypes: {
-        [TELEMETRY_LAYER_TYPE.EMS_BASEMAP]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.EMS_REGION]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_TOP_HITS]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_DOCS]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.ES_TRACKS]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.KBN_REGION]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.UX_TMS_MVT]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]: layerTypeCounts,
-        [TELEMETRY_LAYER_TYPE.UX_WMS]: layerTypeCounts,
+        [TELEMETRY_LAYER_TYPE.EMS_BASEMAP]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.EMS_REGION]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_CLUSTERS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_GRIDS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_AGG_HEATMAP]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_TOP_HITS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_DOCS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_POINT_TO_POINT]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.ES_TRACKS]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.KBN_REGION]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.UX_TMS_MVT]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.UX_TMS_RASTER]: clusterStats,
+        [TELEMETRY_LAYER_TYPE.UX_WMS]: clusterStats,
+      },
+      scalingOptions: {
+        [SCALING_TYPES.LIMIT]: clusterStats,
+        [SCALING_TYPES.CLUSTERS]: clusterStats,
+        [SCALING_TYPES.MVT]: clusterStats,
       },
       attributesPerMap: {
         dataSourcesCount: {

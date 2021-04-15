@@ -34,19 +34,19 @@ export enum TELEMETRY_LAYER_TYPE {
   UX_WMS = 'UX_WMS',
 }
 
-export type TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP = {
-  [key in TELEMETRY_LAYER_TYPE]?: number;
-};
-
-interface ClusterCounts {
+interface ClusterCountStats {
   min: number;
   max: number;
   total: number;
   avg: number;
 }
 
+type TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP = {
+  [key in TELEMETRY_LAYER_TYPE]?: number;
+};
+
 export type TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {
-  [key in TELEMETRY_LAYER_TYPE]?: ClusterCounts;
+  [key in TELEMETRY_LAYER_TYPE]?: ClusterCountStats;
 };
 
 export function getTelemetryLayerType(
@@ -146,7 +146,6 @@ export function getTelemetryLayerTypesPerCluster(
   const counts: TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP[] = layerLists.map(getTelemetyLayerTypesPerMap);
 
   const clusterCounts: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER = {};
-
   counts.forEach((count: TELEMETRY_LAYER_TYPE_COUNTS_PER_MAP) => {
     for (const key in count) {
       if (!count.hasOwnProperty(key)) {
@@ -162,17 +161,17 @@ export function getTelemetryLayerTypesPerCluster(
           avg: count[telemetryLayerType] as number,
         };
       } else {
-        (clusterCounts[telemetryLayerType] as ClusterCounts).min = Math.min(
+        (clusterCounts[telemetryLayerType] as ClusterCountStats).min = Math.min(
           count[telemetryLayerType] as number,
-          (clusterCounts[telemetryLayerType] as ClusterCounts).min
+          (clusterCounts[telemetryLayerType] as ClusterCountStats).min
         );
-        (clusterCounts[telemetryLayerType] as ClusterCounts).max = Math.max(
+        (clusterCounts[telemetryLayerType] as ClusterCountStats).max = Math.max(
           count[telemetryLayerType] as number,
-          (clusterCounts[telemetryLayerType] as ClusterCounts).max
+          (clusterCounts[telemetryLayerType] as ClusterCountStats).max
         );
-        (clusterCounts[telemetryLayerType] as ClusterCounts).total =
+        (clusterCounts[telemetryLayerType] as ClusterCountStats).total =
           (count[telemetryLayerType] as number) +
-          (clusterCounts[telemetryLayerType] as ClusterCounts).total;
+          (clusterCounts[telemetryLayerType] as ClusterCountStats).total;
       }
     }
   });
@@ -182,9 +181,78 @@ export function getTelemetryLayerTypesPerCluster(
       continue;
     }
 
-    (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCounts).avg =
-      (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCounts).total / layerLists.length;
+    (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCountStats).avg =
+      (clusterCounts[key as TELEMETRY_LAYER_TYPE] as ClusterCountStats).total / layerLists.length;
   }
+
+  return clusterCounts;
+}
+
+type TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP = {
+  [key in SCALING_TYPES]?: number;
+};
+export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
+  [key in SCALING_TYPES]?: ClusterCountStats;
+};
+
+function getScalingOptionsPerMap(
+  layerDescriptors: LayerDescriptor[]
+): TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP {
+  const counts: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP = {};
+  layerDescriptors.forEach((layerDescriptor: LayerDescriptor) => {
+    if (
+      !layerDescriptor.sourceDescriptor ||
+      layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
+      !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
+    ) {
+      return;
+    }
+
+    const searchSourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+    if (!counts[searchSourceDescriptor.scalingType]) {
+      counts[searchSourceDescriptor.scalingType] = 1;
+    } else {
+      (counts[searchSourceDescriptor.scalingType] as number) += 1;
+    }
+  });
+  return counts;
+}
+
+export function getScalingOptionsPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER {
+  const counts: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP[] = layerLists.map(getScalingOptionsPerMap);
+  const clusterCounts: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {};
+
+  counts.forEach((count: TELEMETRY_SCALING_OPTION_COUNTS_PER_MAP) => {
+    for (const key in count) {
+      if (!count.hasOwnProperty(key)) {
+        continue;
+      }
+
+      const scalingOption = key as SCALING_TYPES;
+      if (!clusterCounts[scalingOption]) {
+        clusterCounts[scalingOption] = {
+          min: count[scalingOption] as number,
+          max: count[scalingOption] as number,
+          total: count[scalingOption] as number,
+          avg: count[scalingOption] as number,
+        };
+      } else {
+        (clusterCounts[scalingOption] as ClusterCountStats).min = Math.min(
+          count[scalingOption] as number,
+          (clusterCounts[scalingOption] as ClusterCountStats).min
+        );
+        (clusterCounts[scalingOption] as ClusterCountStats).max = Math.max(
+          count[scalingOption] as number,
+          (clusterCounts[scalingOption] as ClusterCountStats).max
+        );
+        (clusterCounts[scalingOption] as ClusterCountStats).total =
+          (count[scalingOption] as number) +
+          (clusterCounts[scalingOption] as ClusterCountStats).total;
+      }
+    }
+  });
 
   return clusterCounts;
 }
