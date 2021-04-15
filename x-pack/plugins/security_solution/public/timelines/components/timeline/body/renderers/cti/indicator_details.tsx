@@ -16,6 +16,7 @@ import {
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
+import { FormattedFieldValue } from '../formatted_field';
 import { HorizontalSpacer } from './helpers';
 
 interface IndicatorDetailsProps {
@@ -102,11 +103,11 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           <HorizontalSpacer>{':'}</HorizontalSpacer>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DraggableBadge
+          <FormattedFieldValue
             contextId={contextId}
             data-test-subj="threat-match-indicator-details-indicator-reference"
             eventId={eventId}
-            field={INDICATOR_REFERENCE}
+            fieldName={INDICATOR_REFERENCE}
             value={indicatorReference}
           />
         </EuiFlexItem>
