@@ -204,7 +204,6 @@ const NETWORK_EVENTS = {
       status: 206,
       mimeType: 'video/mp4',
       requestSentTime: 241114127.474,
-      requestStartTime: 241114129.214,
       loadEndTime: 241116573.402,
       timings: {
         total: 2445.928000001004,
@@ -226,7 +225,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'image/gif',
       requestSentTime: 241114749.202,
-      requestStartTime: 241114750.426,
       loadEndTime: 241114805.541,
       timings: {
         queueing: 1.2240000069141388,
@@ -248,7 +246,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/json',
       requestSentTime: 241114268.04299998,
-      requestStartTime: 241114270.184,
       loadEndTime: 241114665.609,
       timings: {
         total: 397.5659999996424,
@@ -270,7 +267,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/javascript',
       requestSentTime: 241114303.84899998,
-      requestStartTime: 241114306.416,
       loadEndTime: 241114370.361,
       timings: {
         send: 1.357000001007691,
@@ -292,7 +288,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/javascript',
       requestSentTime: 241114305.939,
-      requestStartTime: 241114310.393,
       loadEndTime: 241114938.264,
       timings: {
         wait: 51.61500000394881,

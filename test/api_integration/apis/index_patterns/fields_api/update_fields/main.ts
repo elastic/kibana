@@ -430,7 +430,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('can set field "format" on an existing field', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const title = indexPattern.title;
+        await supertest.delete(`/api/index_patterns/index_pattern/${indexPattern.id}`);
         const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
           index_pattern: {
             title,
