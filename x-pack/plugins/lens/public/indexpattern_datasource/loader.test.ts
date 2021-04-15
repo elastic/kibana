@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler, HttpFetchError } from 'kibana/public';
+import { HttpHandler } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -17,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { HttpFetchError } from '../../../../../src/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
