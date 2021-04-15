@@ -7289,7 +7289,6 @@
     "xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle": "状态",
     "xpack.crossClusterReplication.homeBreadcrumbTitle": "跨集群复制",
     "xpack.crossClusterReplication.indexMgmtBadge.followerLabel": "Follower",
-    "xpack.crossClusterReplication.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.crossClusterReplication.pauseAutoFollowPatternsLabel": "暂停{total, plural, other {复制}}",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText": "取消",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText": "暂停复制",
