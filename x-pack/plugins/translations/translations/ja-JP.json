@@ -23075,7 +23075,6 @@
     "xpack.uptime.synthetics.waterfall.resource.externalLink": "新しいタブでリソースを開く",
     "xpack.uptime.synthetics.waterfall.searchBox.placeholder": "ネットワーク要求をフィルター",
     "xpack.uptime.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel": "リソースがフィルターと一致します",
-    "xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed": "ダウンロードバイト数 (圧縮) ",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate": "有効期限：",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate": "有効期間の開始",
     "xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer": "発行者",
