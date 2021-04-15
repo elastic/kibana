@@ -9,20 +9,11 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 
-const txtTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.cloningNotification.title',
-  {
-    defaultMessage: 'Cloned',
-    description: 'Title of notification show when one or more drilldowns were cloned.',
-  }
-);
-
 const txtBody = (count: number) =>
   i18n.translate(
     'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.cloningNotification.body',
     {
-      defaultMessage:
-        'You have successfully, cloned {count, number} {count, plural, one {drilldown} other {drilldowns}}.',
+      defaultMessage: '{count, number} {count, plural, one {drilldown} other {drilldowns}} cloned.',
       description: 'Title of notification show when one or more drilldowns were cloned.',
       values: {
         count,
@@ -37,9 +28,7 @@ export interface CloningNotificationProps {
 export const CloningNotification: React.FC<CloningNotificationProps> = ({ count = 1 }) => {
   return (
     <>
-      <EuiCallOut title={txtTitle} color="success" iconType="check">
-        <p>{txtBody(count)}</p>
-      </EuiCallOut>
+      <EuiCallOut title={txtBody(count)} color="success" size="s" iconType="check" />
       <EuiSpacer />
     </>
   );
