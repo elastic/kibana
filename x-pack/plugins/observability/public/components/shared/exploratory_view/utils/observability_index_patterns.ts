@@ -14,36 +14,35 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
-import { FieldFormat, FieldFormatParams } from '../types';
+import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
+import { apmFieldFormats } from '../configurations/apm/field_formats';
 
-const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
-  rum: rumFieldFormats,
-  apm: null,
-  logs: null,
-  metrics: null,
+const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
+  infra_logs: null,
+  infra_metrics: null,
+  ux: rumFieldFormats,
+  apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
 };
 
-function getFieldFormatsForApp(app: DataType) {
+function getFieldFormatsForApp(app: AppDataType) {
   return appFieldFormats[app];
 }
 
-export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
-
-export const indexPatternList: Record<DataType, string> = {
+export const indexPatternList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
-  rum: 'rum_static_index_pattern_id',
-  logs: 'logs_static_index_pattern_id',
-  metrics: 'metrics_static_index_pattern_id',
+  ux: 'rum_static_index_pattern_id',
+  infra_logs: 'infra_logs_static_index_pattern_id',
+  infra_metrics: 'infra_metrics_static_index_pattern_id',
 };
 
-const appToPatternMap: Record<DataType, string> = {
+const appToPatternMap: Record<AppDataType, string> = {
   synthetics: '(synthetics-data-view)*,heartbeat-*,synthetics-*',
   apm: 'apm-*',
-  rum: '(rum-data-view)*,apm-*',
-  logs: 'logs-*,filebeat-*',
-  metrics: 'metrics-*,metricbeat-*',
+  ux: '(rum-data-view)*,apm-*',
+  infra_logs: 'logs-*,filebeat-*',
+  infra_metrics: 'metrics-*,metricbeat-*',
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
@@ -66,7 +65,7 @@ export class ObservabilityIndexPatterns {
     this.data = data;
   }
 
-  async createIndexPattern(app: DataType) {
+  async createIndexPattern(app: AppDataType) {
     if (!this.data) {
       throw new Error('data is not defined');
     }
@@ -81,7 +80,7 @@ export class ObservabilityIndexPatterns {
     });
   }
   // we want to make sure field formats remain same
-  async validateFieldFormats(app: DataType, indexPattern: IndexPattern) {
+  async validateFieldFormats(app: AppDataType, indexPattern: IndexPattern) {
     const defaultFieldFormats = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
@@ -99,7 +98,7 @@ export class ObservabilityIndexPatterns {
     }
   }
 
-  getFieldFormats(app: DataType) {
+  getFieldFormats(app: AppDataType) {
     const fieldFormatMap: IndexPatternSpec['fieldFormats'] = {};
 
     (appFieldFormats?.[app] ?? []).forEach(({ field, format }) => {
@@ -109,7 +108,7 @@ export class ObservabilityIndexPatterns {
     return fieldFormatMap;
   }
 
-  async getIndexPattern(app: DataType): Promise<IndexPattern | undefined> {
+  async getIndexPattern(app: AppDataType): Promise<IndexPattern | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
