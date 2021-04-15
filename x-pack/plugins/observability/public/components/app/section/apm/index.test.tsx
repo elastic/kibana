@@ -40,6 +40,7 @@ describe('APMSection', () => {
         http: { basePath: { prepend: jest.fn() } },
       } as unknown) as CoreStart,
       appMountParameters: {} as AppMountParameters,
+      config: { enableAlertingExperience: true },
       plugins: ({
         data: {
           query: {

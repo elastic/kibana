@@ -44,6 +44,7 @@ const withCore = makeDecorator({
             appMountParameters: ({
               setHeaderActionMenu: () => {},
             } as unknown) as AppMountParameters,
+            config: { enableAlertingExperience: true },
             core: options as CoreStart,
             plugins: ({
               data: {

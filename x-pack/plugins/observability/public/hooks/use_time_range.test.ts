@@ -23,6 +23,7 @@ describe('useTimeRange', () => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       core: {} as CoreStart,
       appMountParameters: {} as AppMountParameters,
+      config: { enableAlertingExperience: true },
       plugins: ({
         data: {
           query: {
@@ -63,6 +64,7 @@ describe('useTimeRange', () => {
         jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
           core: {} as CoreStart,
           appMountParameters: {} as AppMountParameters,
+          config: { enableAlertingExperience: true },
           plugins: ({
             data: {
               query: {

@@ -30,6 +30,8 @@ export const core = ({
   },
 } as unknown) as CoreStart;
 
+const config = { enableAlertingExperience: true };
+
 const plugins = ({
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
 } as unknown) as ObservabilityPublicPluginsStart;
@@ -38,7 +40,7 @@ export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core }}>
-        <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
+        <PluginContext.Provider value={{ appMountParameters, config, core, plugins }}>
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </PluginContext.Provider>
       </KibanaContextProvider>

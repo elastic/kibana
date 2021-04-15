@@ -44,6 +44,7 @@ describe('renderApp', () => {
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
     } as unknown) as CoreStart;
+    const config = { enableAlertingExperience: true };
     const params = ({
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
@@ -51,7 +52,7 @@ describe('renderApp', () => {
     } as unknown) as AppMountParameters;
 
     expect(() => {
-      const unmount = renderApp(core, plugins, params);
+      const unmount = renderApp(core, plugins, params, config);
       unmount();
     }).not.toThrowError();
   });
