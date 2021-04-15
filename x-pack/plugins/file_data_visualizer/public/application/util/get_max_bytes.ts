@@ -7,6 +7,8 @@
 
 import { getPluginsStart } from '../../kibana_services';
 
+// expose the fileUpload plugin's getMaxBytesFormatted for use in ML
+// so ML doesn't need to depend on the fileUpload plugin for this one function
 export function getMaxBytesFormatted() {
   return getPluginsStart().fileUpload.getMaxBytesFormatted();
 }
