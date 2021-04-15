@@ -19,10 +19,7 @@ import {
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
-import {
-  hasPreviewLayers,
-  isLoadingPreviewLayers,
-} from '../../selectors/map_selectors';
+import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
