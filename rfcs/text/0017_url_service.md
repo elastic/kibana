@@ -52,6 +52,12 @@ and in addition will implement the following improvements:
    be constructed from URL generators, which will also allow us to automatically
    migrate the short URLs if the parameters of the underlying URL generator
    change and be able to store location state in every short URL.
+3. Make the short url service easier to use. (It was previously undocumented,
+   and no server side plugin APIs existed, which meant consumers had to use
+   REST APIs which is discouraged. Merging the two services will help achieve
+   this goal by simplifying the APIs.)
+4. Support short urls being deleted (previously not possible).
+5. Support short urls being migrated (previously not possible). 
 
 See more detailed explanation and other small improvements in the "Motivation"
 section below.
