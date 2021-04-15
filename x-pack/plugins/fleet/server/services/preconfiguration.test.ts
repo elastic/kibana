@@ -10,7 +10,11 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+
+jest.mock('./agent_policy_update');
 
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
@@ -27,30 +31,31 @@ const mockDefaultOutput: Output = {
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
-    const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
-    if (attributes) {
-      return {
-        saved_objects: [
-          {
-            id: `mocked-${attributes.preconfiguration_id}`,
-            attributes,
-            type: type as string,
-            score: 1,
-            references: [],
-          },
-        ],
-        total: 1,
-        page: 1,
-        per_page: 1,
-      };
-    } else {
-      return {
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 0,
-      };
+    if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
+      const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
+      if (attributes) {
+        return {
+          saved_objects: [
+            {
+              id: `mocked-${attributes.preconfiguration_id}`,
+              attributes,
+              type: type as string,
+              score: 1,
+              references: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        };
+      }
     }
+    return {
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+    };
   });
   soClient.create.mockImplementation(async (type, policy) => {
     const attributes = policy as AgentPolicy;

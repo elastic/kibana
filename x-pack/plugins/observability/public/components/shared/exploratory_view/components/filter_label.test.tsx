@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockIndexPattern, render } from '../rtl_helpers';
+import { mockAppIndexPattern, mockIndexPattern, render } from '../rtl_helpers';
 import { buildFilterLabel, FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 
 describe('FilterLabel', function () {
+  mockAppIndexPattern();
+
   const invertFilter = jest.fn();
   jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
     invertFilter,

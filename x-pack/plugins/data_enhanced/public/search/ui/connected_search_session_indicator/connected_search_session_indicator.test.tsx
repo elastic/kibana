@@ -60,7 +60,6 @@ test("shouldn't show indicator in case no active search session", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
     application,
-    timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
@@ -89,7 +88,6 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
     application,
-    timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
@@ -120,7 +118,6 @@ test('should show indicator in case there is an active search session', async ()
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application,
-    timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
@@ -146,7 +143,6 @@ test('should be disabled in case uiConfig says so ', async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application,
-    timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
@@ -171,7 +167,6 @@ test('should be disabled in case not enough permissions', async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$, hasAccess: () => false },
     application,
-    timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
     basePath,
@@ -191,38 +186,6 @@ test('should be disabled in case not enough permissions', async () => {
   expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
 });
 
-test('should be disabled during auto-refresh', async () => {
-  const state$ = new BehaviorSubject(SearchSessionState.Loading);
-
-  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
-    sessionService: { ...sessionService, state$ },
-    application,
-    timeFilter,
-    storage,
-    disableSaveAfterSessionCompletesTimeout,
-    usageCollector,
-    basePath,
-  });
-
-  render(
-    <Container>
-      <SearchSessionIndicator />
-    </Container>
-  );
-
-  await waitFor(() => screen.getByTestId('searchSessionIndicator'));
-
-  await userEvent.click(screen.getByLabelText('Search session loading'));
-
-  expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
-
-  act(() => {
-    refreshInterval$.next({ value: 0, pause: false });
-  });
-
-  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
-});
-
 describe('Completed inactivity', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -236,7 +199,6 @@ describe('Completed inactivity', () => {
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
       application,
-      timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
@@ -298,7 +260,6 @@ describe('tour steps', () => {
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
         application,
-        timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
@@ -340,7 +301,6 @@ describe('tour steps', () => {
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
         application,
-        timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
@@ -376,7 +336,6 @@ describe('tour steps', () => {
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
       application,
-      timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
@@ -404,7 +363,6 @@ describe('tour steps', () => {
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
       application,
-      timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,

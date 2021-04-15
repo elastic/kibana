@@ -7,7 +7,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -17,17 +21,23 @@ import {
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
+import type {
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+} from '../../../../src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
-import { LensPublicStart } from '../../lens/public';
+import type { LensPublicStart } from '../../lens/public';
+import { createCallObservabilityApi } from './services/call_observability_api';
+import { observabilityRuleRegistrySettings } from '../common/observability_rule_registry';
+import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 
-export interface ObservabilityPublicSetup {
-  dashboard: { register: typeof registerDataHandler };
-}
+export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
+export type ObservabilityRuleRegistry = ObservabilityPublicSetup['ruleRegistry'];
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  ruleRegistry: RuleRegistryPublicPluginSetupContract;
   home?: HomePublicPluginSetup;
 }
 
@@ -52,22 +62,36 @@ export class Plugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<ObservabilityPublicPluginsStart>,
-    plugins: ObservabilityPublicPluginsSetup
+    coreSetup: CoreSetup<ObservabilityPublicPluginsStart>,
+    pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+
+    createCallObservabilityApi(coreSetup.http);
+
+    const observabilityRuleRegistry = pluginsSetup.ruleRegistry.registry.create({
+      ...observabilityRuleRegistrySettings,
+      ctor: FormatterRuleRegistry,
+    });
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, startPlugins] = await core.getStartServices();
+      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-      return renderApp(coreStart, startPlugins, params);
+      return renderApp({
+        core: coreStart,
+        plugins: pluginsStart,
+        appMountParameters: params,
+        observabilityRuleRegistry,
+      });
     };
+
     const updater$ = this.appUpdater$;
 
-    core.application.register({
+    coreSetup.application.register({
       id: 'observability-overview',
       title: 'Overview',
       appRoute: '/app/observability',
@@ -78,8 +102,8 @@ export class Plugin
       updater$,
     });
 
-    if (core.uiSettings.get('observability:enableAlertingExperience')) {
-      core.application.register({
+    if (coreSetup.uiSettings.get('observability:enableAlertingExperience')) {
+      coreSetup.application.register({
         id: 'observability-alerts',
         title: 'Alerts',
         appRoute: '/app/observability/alerts',
@@ -90,7 +114,7 @@ export class Plugin
         updater$,
       });
 
-      core.application.register({
+      coreSetup.application.register({
         id: 'observability-cases',
         title: 'Cases',
         appRoute: '/app/observability/cases',
@@ -102,8 +126,8 @@ export class Plugin
       });
     }
 
-    if (plugins.home) {
-      plugins.home.featureCatalogue.registerSolution({
+    if (pluginsSetup.home) {
+      pluginsSetup.home.featureCatalogue.registerSolution({
         id: 'observability',
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
@@ -134,6 +158,7 @@ export class Plugin
 
     return {
       dashboard: { register: registerDataHandler },
+      ruleRegistry: observabilityRuleRegistry,
     };
   }
   public start({ application }: CoreStart) {

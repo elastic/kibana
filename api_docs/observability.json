@@ -13,6 +13,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.ActionMenu.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -52,6 +53,56 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.createExploratoryViewUrl",
+        "type": "Function",
+        "label": "createExploratoryViewUrl",
+        "signature": [
+          "(allSeries: Record<string, ",
+          "SeriesUrl",
+          ">, baseHref: string) => string"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.createExploratoryViewUrl.$1",
+            "type": "Object",
+            "label": "allSeries",
+            "isRequired": true,
+            "signature": [
+              "Record<string, ",
+              "SeriesUrl",
+              ">"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 36
+            }
+          },
+          {
+            "id": "def-public.createExploratoryViewUrl.$2",
+            "type": "string",
+            "label": "baseHref",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 36
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+          "lineNumber": 36
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FieldValueSuggestions",
         "type": "Function",
         "label": "FieldValueSuggestions",
@@ -63,17 +114,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.FieldValueSuggestions.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.FieldValueSuggestionsProps",
-                "text": "FieldValueSuggestionsProps"
-              }
+              "FieldValueSuggestionsProps"
             ],
             "description": [],
             "source": {
@@ -100,7 +146,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}",
+            "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo",
             "type": "Object",
             "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "tags": [],
@@ -108,7 +154,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.traceId",
                 "type": "string",
                 "label": "traceId",
                 "description": [],
@@ -119,7 +165,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.rangeFrom",
                 "type": "string",
                 "label": "rangeFrom",
                 "description": [],
@@ -130,7 +176,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
+                "id": "def-public.getApmTraceUrl.$1.traceIdrangeFromrangeTo.rangeTo",
                 "type": "string",
                 "label": "rangeTo",
                 "description": [],
@@ -166,17 +212,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getCoreVitalsComponent.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.CoreVitalProps",
-                "text": "CoreVitalProps"
-              }
+              "CoreVitalProps"
             ],
             "description": [],
             "source": {
@@ -205,17 +246,12 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.HeaderMenuPortal.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.HeaderMenuPortalProps",
-                "text": "HeaderMenuPortalProps"
-              }
+              "HeaderMenuPortalProps"
             ],
             "description": [],
             "source": {
@@ -260,6 +296,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SectionLink.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -295,6 +332,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SectionLinks.$1",
             "type": "CompoundType",
             "label": "{ children, ...props }",
             "isRequired": true,
@@ -347,7 +385,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionSubtitle.{-children }",
+            "id": "def-public.SectionSubtitle.$1.children",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -355,7 +393,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionSubtitle.{-children }.children",
+                "id": "def-public.SectionSubtitle.$1.children.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -392,7 +430,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionTitle.{-children }",
+            "id": "def-public.SectionTitle.$1.children",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -400,7 +438,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionTitle.{-children }.children",
+                "id": "def-public.SectionTitle.$1.children.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -465,6 +503,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useFetcher.$1",
             "type": "Function",
             "label": "fn",
             "isRequired": true,
@@ -478,6 +517,7 @@
             }
           },
           {
+            "id": "def-public.useFetcher.$2",
             "type": "Array",
             "label": "fnDeps",
             "isRequired": true,
@@ -491,7 +531,7 @@
             }
           },
           {
-            "id": "def-public.useFetcher.options",
+            "id": "def-public.useFetcher.$3.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -499,7 +539,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useFetcher.options.preservePreviousData",
+                "id": "def-public.useFetcher.$3.options.preservePreviousData",
                 "type": "CompoundType",
                 "label": "preservePreviousData",
                 "description": [],
@@ -568,6 +608,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useTrackMetric.$1",
             "type": "CompoundType",
             "label": "{ app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }",
             "isRequired": true,
@@ -587,6 +628,7 @@
             }
           },
           {
+            "id": "def-public.useTrackMetric.$2",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -618,6 +660,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useTrackPageview.$1",
             "type": "CompoundType",
             "label": "{ path, ...rest }",
             "isRequired": true,
@@ -631,6 +674,7 @@
             }
           },
           {
+            "id": "def-public.useTrackPageview.$2",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -657,7 +701,7 @@
         "type": "Function",
         "label": "useUiTracker",
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -670,7 +714,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}",
+            "id": "def-public.useUiTracker.$1.appdefaultApp",
             "type": "Object",
             "label": "{\n  app: defaultApp,\n}",
             "tags": [],
@@ -678,7 +722,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.app",
+                "id": "def-public.useUiTracker.$1.appdefaultApp.app",
                 "type": "CompoundType",
                 "label": "app",
                 "description": [],
@@ -687,7 +731,7 @@
                   "lineNumber": 40
                 },
                 "signature": [
-                  "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ]
               }
             ],
@@ -739,7 +783,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 91
+              "lineNumber": 111
             },
             "signature": [
               "{ services: ",
@@ -769,7 +813,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 95
+              "lineNumber": 115
             },
             "signature": [
               "{ transactions: ",
@@ -786,7 +830,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 90
+          "lineNumber": 110
         },
         "initialIsOpen": false
       },
@@ -805,27 +849,27 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 17
+              "lineNumber": 16
             }
           },
           {
             "tags": [],
             "id": "def-public.Coordinates.y",
-            "type": "number",
+            "type": "CompoundType",
             "label": "y",
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 18
+              "lineNumber": 17
             },
             "signature": [
-              "number | undefined"
+              "number | null | undefined"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "initialIsOpen": false
       },
@@ -854,7 +898,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 57
+              "lineNumber": 56
             },
             "signature": [
               {
@@ -883,7 +927,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 58
+              "lineNumber": 57
             },
             "signature": [
               {
@@ -899,7 +943,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 54
+          "lineNumber": 53
         },
         "initialIsOpen": false
       },
@@ -918,7 +962,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 26
+              "lineNumber": 25
             },
             "signature": [
               "{ start: number; end: number; }"
@@ -932,7 +976,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 27
+              "lineNumber": 26
             },
             "signature": [
               "{ start: string; end: string; }"
@@ -946,7 +990,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 28
+              "lineNumber": 27
             }
           },
           {
@@ -957,7 +1001,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 29
+              "lineNumber": 28
             },
             "signature": [
               "string | undefined"
@@ -966,7 +1010,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 25
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
@@ -985,13 +1029,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 62
+              "lineNumber": 61
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 61
+          "lineNumber": 60
         },
         "initialIsOpen": false
       },
@@ -1010,7 +1054,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 33
+              "lineNumber": 32
             },
             "signature": [
               "{ start: number; end: number; }"
@@ -1019,7 +1063,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 32
+          "lineNumber": 31
         },
         "initialIsOpen": false
       },
@@ -1055,7 +1099,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 66
+              "lineNumber": 65
             },
             "signature": [
               "Record<string, ",
@@ -1077,7 +1121,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 67
+              "lineNumber": 66
             },
             "signature": [
               "Record<string, ",
@@ -1094,7 +1138,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 65
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -1124,46 +1168,216 @@
         "children": [
           {
             "tags": [],
-            "id": "def-public.MetricsFetchDataResponse.stats",
-            "type": "Object",
-            "label": "stats",
+            "id": "def-public.MetricsFetchDataResponse.sort",
+            "type": "Function",
+            "label": "sort",
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 71
+              "lineNumber": 94
             },
             "signature": [
-              "{ hosts: ",
+              "(by: string, direction: string) => Promise<",
               {
                 "pluginId": "observability",
                 "scope": "public",
                 "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Stat",
-                "text": "Stat"
+                "section": "def-public.MetricsFetchDataResponse",
+                "text": "MetricsFetchDataResponse"
               },
-              "; cpu: ",
+              ">"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataResponse.series",
+            "type": "Array",
+            "label": "series",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 95
+            },
+            "signature": [
               {
                 "pluginId": "observability",
                 "scope": "public",
                 "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Stat",
-                "text": "Stat"
+                "section": "def-public.MetricsFetchDataSeries",
+                "text": "MetricsFetchDataSeries"
               },
-              "; memory: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Stat",
-                "text": "Stat"
-              },
-              "; }"
+              "[]"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 70
+          "lineNumber": 93
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.MetricsFetchDataSeries",
+        "type": "Interface",
+        "label": "MetricsFetchDataSeries",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 73
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.name",
+            "type": "CompoundType",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 74
+            },
+            "signature": [
+              "string | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.platform",
+            "type": "CompoundType",
+            "label": "platform",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 75
+            },
+            "signature": [
+              "string | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.provider",
+            "type": "CompoundType",
+            "label": "provider",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 76
+            },
+            "signature": [
+              "string | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.cpu",
+            "type": "CompoundType",
+            "label": "cpu",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 77
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.iowait",
+            "type": "CompoundType",
+            "label": "iowait",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 78
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.load",
+            "type": "CompoundType",
+            "label": "load",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 79
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.uptime",
+            "type": "CompoundType",
+            "label": "uptime",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 80
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.rx",
+            "type": "CompoundType",
+            "label": "rx",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 81
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.tx",
+            "type": "CompoundType",
+            "label": "tx",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 82
+            },
+            "signature": [
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.MetricsFetchDataSeries.timeseries",
+            "type": "Array",
+            "label": "timeseries",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 83
+            },
+            "signature": [
+              "{ timestamp: number; cpu: number | null; iowait: number | null; load: number | null; rx: number | null; tx: number | null; }[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 72
         },
         "initialIsOpen": false
       },
@@ -1182,7 +1396,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 105
+              "lineNumber": 125
             },
             "signature": [
               {
@@ -1202,7 +1416,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 106
+              "lineNumber": 126
             },
             "signature": [
               {
@@ -1222,7 +1436,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 107
+              "lineNumber": 127
             },
             "signature": [
               {
@@ -1242,7 +1456,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 108
+              "lineNumber": 128
             },
             "signature": [
               {
@@ -1262,7 +1476,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 109
+              "lineNumber": 129
             },
             "signature": [
               {
@@ -1277,7 +1491,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 104
+          "lineNumber": 124
         },
         "initialIsOpen": false
       },
@@ -1296,7 +1510,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 113
+              "lineNumber": 133
             }
           },
           {
@@ -1307,7 +1521,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 114
+              "lineNumber": 134
             }
           },
           {
@@ -1318,7 +1532,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 115
+              "lineNumber": 135
             }
           },
           {
@@ -1329,7 +1543,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 116
+              "lineNumber": 136
             }
           },
           {
@@ -1340,7 +1554,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 117
+              "lineNumber": 137
             },
             "signature": [
               {
@@ -1355,7 +1569,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 112
+          "lineNumber": 132
         },
         "initialIsOpen": false
       },
@@ -1504,7 +1718,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 22
+              "lineNumber": 21
             },
             "signature": [
               {
@@ -1520,7 +1734,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 21
+          "lineNumber": 20
         },
         "initialIsOpen": false
       },
@@ -1539,7 +1753,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 12
+              "lineNumber": 11
             },
             "signature": [
               "\"number\" | \"percent\" | \"bytesPerSecond\""
@@ -1553,13 +1767,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 13
+              "lineNumber": 12
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
         "initialIsOpen": false
       },
@@ -1595,7 +1809,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 79
+              "lineNumber": 99
             },
             "signature": [
               "{ monitors: ",
@@ -1633,7 +1847,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 84
+              "lineNumber": 104
             },
             "signature": [
               "{ up: ",
@@ -1658,7 +1872,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 78
+          "lineNumber": 98
         },
         "initialIsOpen": false
       },
@@ -1694,7 +1908,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 101
+              "lineNumber": 121
             },
             "signature": [
               {
@@ -1709,7 +1923,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 100
+          "lineNumber": 120
         },
         "initialIsOpen": false
       },
@@ -1728,7 +1942,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             }
           },
           {
@@ -1739,7 +1953,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "signature": [
               "string | number | undefined"
@@ -1748,7 +1962,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 36
+          "lineNumber": 35
         },
         "initialIsOpen": false
       },
@@ -1949,6 +2163,21 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
+        "id": "def-public.enableInspectEsQueries",
+        "type": "string",
+        "label": "enableInspectEsQueries",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FetchData",
         "type": "Type",
         "label": "FetchData",
@@ -1956,7 +2185,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 41
+          "lineNumber": 40
         },
         "signature": [
           "(fetchDataParams: ",
@@ -1979,7 +2208,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 45
+          "lineNumber": 44
         },
         "signature": [
           "(params: ",
@@ -2003,6 +2232,21 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.NumberOrNull",
+        "type": "Type",
+        "label": "NumberOrNull",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 70
+        },
+        "signature": [
+          "null | number"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ObservabilityFetchDataPlugins",
         "type": "Type",
         "label": "ObservabilityFetchDataPlugins",
@@ -2010,10 +2254,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 49
+          "lineNumber": 48
         },
         "signature": [
-          "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"ux\""
+          "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"ux\""
         ],
         "initialIsOpen": false
       },
@@ -2037,6 +2281,21 @@
           "DisambiguateSet",
           "<Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>), React.HTMLAttributes<HTMLSpanElement>> & React.HTMLAttributes<HTMLSpanElement>) | (",
           "DisambiguateSet"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.StringOrNull",
+        "type": "Type",
+        "label": "StringOrNull",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 69
+        },
+        "signature": [
+          "null | string"
         ],
         "initialIsOpen": false
       },
@@ -2099,13 +2358,7 @@
           },
           "signature": [
             "{ register: typeof ",
-            {
-              "pluginId": "observability",
-              "scope": "public",
-              "docId": "kibObservabilityPluginApi",
-              "section": "def-public.registerDataHandler",
-              "text": "registerDataHandler"
-            },
+            "registerDataHandler",
             "; }"
           ]
         }
@@ -2177,6 +2430,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.WrappedElasticsearchClientError.Unnamed.$1",
                 "type": "Object",
                 "label": "originalError",
                 "isRequired": true,
@@ -2234,7 +2488,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}",
+            "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger",
             "type": "Object",
             "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "tags": [],
@@ -2242,7 +2496,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.index",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.index",
                 "type": "string",
                 "label": "index",
                 "description": [],
@@ -2253,7 +2507,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.mappings",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.mappings",
                 "type": "CompoundType",
                 "label": "mappings",
                 "description": [],
@@ -2273,7 +2527,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.client",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.client",
                 "type": "CompoundType",
                 "label": "client",
                 "description": [],
@@ -2293,7 +2547,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.logger",
+                "id": "def-server.createOrUpdateIndex.$1.indexmappingsclientlogger.logger",
                 "type": "Object",
                 "label": "logger",
                 "description": [],
@@ -2332,6 +2586,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.unwrapEsResponse.$1",
             "type": "Uncategorized",
             "label": "responsePromise",
             "isRequired": true,
@@ -2420,30 +2675,32 @@
     "objects": [],
     "setup": {
       "id": "def-server.ObservabilityPluginSetup",
-      "type": "Interface",
+      "type": "Type",
       "label": "ObservabilityPluginSetup",
-      "description": [],
       "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.ObservabilityPluginSetup.getScopedAnnotationsClient",
-          "type": "Function",
-          "label": "getScopedAnnotationsClient",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/observability/server/plugin.ts",
-            "lineNumber": 23
-          },
-          "signature": [
-            "LazyScopedAnnotationsClientFactory"
-          ]
-        }
-      ],
+      "description": [],
       "source": {
         "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 22
+        "lineNumber": 20
       },
+      "signature": [
+        "{ getScopedAnnotationsClient: (requestContext: ",
+        "ObservabilityRequestHandlerContext",
+        ", request: ",
+        {
+          "pluginId": "core",
+          "scope": "server",
+          "docId": "kibCorePluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
+        "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
+        "Annotation",
+        "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
+        "GetResponse",
+        "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
+        "DeleteResponse"
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     }
