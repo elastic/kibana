@@ -79,8 +79,10 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<void, void, SetupDependencies, ",
-          "StartDependencies",
+          "<void, void, ",
+          "DataEnhancedSetupDependencies",
+          ", ",
+          "DataEnhancedStartDependencies",
           ">"
         ],
         "children": [
@@ -94,6 +96,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -110,7 +113,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 48
+                  "lineNumber": 33
                 }
               }
             ],
@@ -118,7 +121,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 33
             }
           },
           {
@@ -135,18 +138,15 @@
                 "text": "CoreSetup"
               },
               "<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              },
-              ", unknown>, deps: SetupDependencies) => void"
+              "DataEnhancedStartDependencies",
+              ", unknown>, deps: ",
+              "DataEnhancedSetupDependencies",
+              ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -159,32 +159,27 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStart",
-                    "text": "DataPluginStart"
-                  },
+                  "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               },
               {
+                "id": "def-server.EnhancedDataServerPlugin.setup.$2",
                 "type": "Object",
                 "label": "deps",
                 "isRequired": true,
                 "signature": [
-                  "SetupDependencies"
+                  "DataEnhancedSetupDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 53
+                  "lineNumber": 38
                 }
               }
             ],
@@ -192,7 +187,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 38
             }
           },
           {
@@ -209,18 +204,13 @@
                 "text": "CoreStart"
               },
               ", { taskManager }: ",
-              {
-                "pluginId": "dataEnhanced",
-                "scope": "server",
-                "docId": "kibDataEnhancedPluginApi",
-                "section": "def-server.StartDependencies",
-                "text": "StartDependencies"
-              },
+              "DataEnhancedStartDependencies",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.EnhancedDataServerPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -236,26 +226,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               },
               {
+                "id": "def-server.EnhancedDataServerPlugin.start.$2",
                 "type": "Object",
                 "label": "{ taskManager }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "dataEnhanced",
-                    "scope": "server",
-                    "docId": "kibDataEnhancedPluginApi",
-                    "section": "def-server.StartDependencies",
-                    "text": "StartDependencies"
-                  }
+                  "DataEnhancedStartDependencies"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 95
+                  "lineNumber": 80
                 }
               }
             ],
@@ -263,7 +248,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 80
             }
           },
           {
@@ -279,13 +264,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 101
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 42
+          "lineNumber": 27
         },
         "initialIsOpen": false
       }
@@ -335,6 +320,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.pollSearch.$1",
             "type": "Function",
             "label": "search",
             "isRequired": true,
@@ -348,6 +334,7 @@
             }
           },
           {
+            "id": "def-common.pollSearch.$2",
             "type": "Function",
             "label": "cancel",
             "isRequired": false,
@@ -361,6 +348,7 @@
             }
           },
           {
+            "id": "def-common.pollSearch.$3",
             "type": "Object",
             "label": "{ pollInterval = 1000, abortSignal }",
             "isRequired": true,
@@ -532,7 +520,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 73
+              "lineNumber": 80
             }
           },
           {
@@ -545,7 +533,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 77
+              "lineNumber": 84
             }
           },
           {
@@ -558,7 +546,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 81
+              "lineNumber": 88
             }
           },
           {
@@ -571,7 +559,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 85
+              "lineNumber": 92
             },
             "signature": [
               "string | undefined"
@@ -580,7 +568,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/session/types.ts",
-          "lineNumber": 69
+          "lineNumber": 76
         },
         "initialIsOpen": false
       },
@@ -675,6 +663,22 @@
           },
           {
             "tags": [],
+            "id": "def-common.SearchSessionSavedObjectAttributes.completed",
+            "type": "CompoundType",
+            "label": "completed",
+            "description": [
+              "\nTime of transition into completed state,\n\nCan be \"null\" in case already completed session\ntransitioned into in-progress session"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "string | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.status",
             "type": "Enum",
             "label": "status",
@@ -683,7 +687,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 37
+              "lineNumber": 44
             },
             "signature": [
               {
@@ -705,7 +709,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 41
+              "lineNumber": 48
             },
             "signature": [
               "string | undefined"
@@ -721,7 +725,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 46
+              "lineNumber": 53
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -737,7 +741,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 51
+              "lineNumber": 58
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -753,7 +757,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 55
+              "lineNumber": 62
             },
             "signature": [
               "Record<string, ",
@@ -777,7 +781,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 60
+              "lineNumber": 67
             }
           },
           {
@@ -790,7 +794,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 64
+              "lineNumber": 71
             },
             "signature": [
               "string | undefined"
@@ -804,7 +808,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 65
+              "lineNumber": 72
             },
             "signature": [
               "string | undefined"
@@ -818,7 +822,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/session/types.ts",
-              "lineNumber": 66
+              "lineNumber": 73
             },
             "signature": [
               "string | undefined"
