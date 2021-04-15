@@ -4,7 +4,7 @@
 Get started building your own plugins, or contributing directly to the {kib} repo.
 
 [discrete]
-[[get-kibana-code]]
+[[developing-on-windows]]
 === Developing on Windows
 
 In order to support Windows development we currently require you to use one of the following:
