@@ -16,6 +16,7 @@ import { ChartTooltipService } from '../components/chart_tooltip';
 const ANNOTATION_HEIGHT = 12;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
+export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
 
 interface SwimlaneAnnotationContainerProps {
   chartWidth: number;
@@ -53,16 +54,16 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       // Add Annotation y axis label
       svg
         .append('text')
-        .attr('class', 'zoom-info-text')
+        .attr('text-anchor', 'end')
+        .attr('class', 'swimlaneAnnotationLabel')
         .text(
           i18n.translate('xpack.ml.explorer.swimlaneAnnotationLabel', {
             defaultMessage: 'Annotations',
           })
         )
-        // @todo: figure out a better way to align this
-        .attr('x', Y_AXIS_LABEL_WIDTH / 2 + 24)
+        .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_HEIGHT)
-        .style('fill', '#6a717d')
+        .style('fill', Y_AXIS_LABEL_FONT_COLOR)
         .style('font-size', '12px');
 
       // Add border

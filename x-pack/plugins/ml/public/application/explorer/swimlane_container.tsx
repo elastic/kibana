@@ -49,6 +49,7 @@ import {
   SwimlaneAnnotationContainer,
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
+  Y_AXIS_LABEL_FONT_COLOR,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
 
@@ -306,11 +307,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         visible: true,
         width: Y_AXIS_LABEL_WIDTH,
         // eui color subdued
-        fill: `#6a717d`,
+        fill: Y_AXIS_LABEL_FONT_COLOR,
         padding: Y_AXIS_LABEL_PADDING,
         formatter: (laneLabel: string) => {
           return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
         },
+        fontSize: 12,
       },
       xAxisLabel: {
         visible: true,
@@ -321,6 +323,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           const scaledDateFormat = timeBuckets.getScaledDateFormat();
           return moment(v).format(scaledDateFormat);
         },
+        fontSize: 12,
       },
       brushMask: {
         fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
