@@ -52,7 +52,7 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { getOriginalRequestErrorMessage } from '../../error_helper';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
@@ -563,14 +563,14 @@ export const InnerVisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+          const visibleErrorMessages = getOriginalRequestErrorMessages(error) || [errorMessage];
 
           return (
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiEmptyPrompt
                   actions={
-                    visibleErrorMessage ? (
+                    visibleErrorMessages.length ? (
                       <EuiButtonEmpty
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
@@ -594,9 +594,11 @@ export const InnerVisualizationWrapper = ({
                         />
                       </p>
 
-                      {localState.expandError ? (
-                        <p className="eui-textBreakWord">{visibleErrorMessage}</p>
-                      ) : null}
+                      {localState.expandError
+                        ? visibleErrorMessages.map((visibleErrorMessage) => (
+                            <p className="eui-textBreakWord">{visibleErrorMessage}</p>
+                          ))
+                        : null}
                     </>
                   }
                   iconColor="danger"
