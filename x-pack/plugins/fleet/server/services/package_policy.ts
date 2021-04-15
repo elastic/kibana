@@ -23,6 +23,7 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
@@ -60,7 +61,13 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean; force?: boolean }
+    options?: {
+      id?: string;
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force?: boolean;
+      skipEnsureInstalled?: boolean;
+    }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
@@ -90,18 +97,25 @@ class PackagePolicyService {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const [, pkgInfo] = await Promise.all([
-        ensureInstalledPackage({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          esClient,
-        }),
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
-        }),
-      ]);
+      const pkgInfoPromise = getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packagePolicy.package.version,
+      });
+
+      let pkgInfo;
+      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
+      else {
+        const [, packageInfo] = await Promise.all([
+          ensureInstalledPackage({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            esClient,
+          }),
+          pkgInfoPromise,
+        ]);
+        pkgInfo = packageInfo;
+      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
@@ -332,6 +346,8 @@ class PackagePolicyService {
     let inputs = restOfPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
+
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
 
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
@@ -587,6 +603,42 @@ async function _compilePackageStream(
   stream.compiled_stream = yaml;
 
   return { ...stream };
+}
+
+function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+  const resultInputs = [...newInputs];
+
+  for (const input of resultInputs) {
+    const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (input.vars && oldInput?.vars) {
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+    }
+    if (input.streams && oldInput?.streams) {
+      for (const stream of input.streams) {
+        const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (stream.vars && oldStream?.vars) {
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+        }
+      }
+    }
+  }
+
+  return resultInputs;
+}
+
+function _enforceFrozenVars(
+  oldVars: Record<string, PackagePolicyConfigRecordEntry>,
+  newVars: Record<string, PackagePolicyConfigRecordEntry>
+) {
+  const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (val.frozen) {
+      resultVars[key] = val;
+    } else {
+      resultVars[key] = newVars[key];
+    }
+  }
+  return resultVars;
 }
 
 export type PackagePolicyServiceInterface = PackagePolicyService;
