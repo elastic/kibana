@@ -14,7 +14,7 @@ const title = i18n.translate('xpack.monitoring.apm.instance.panels.title', {
 });
 
 export function ApmServerInstance(props) {
-  const { metrics } = props;
+  const { metrics, config } = props;
   const seriesToShow = [
     metrics.apm_requests,
     metrics.apm_responses_valid,
@@ -26,6 +26,10 @@ export function ApmServerInstance(props) {
     metrics.apm_output_events_rate_failure,
     metrics.apm_transformations,
   ];
+
+  if (config.container) {
+    seriesToShow.push(metrics.apm_memory);
+  }
 
   const stats = props.summary;
   const metricProps = { ...props, title, seriesToShow, stats };

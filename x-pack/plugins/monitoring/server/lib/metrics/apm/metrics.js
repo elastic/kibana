@@ -615,31 +615,37 @@ export const metrics = {
       defaultMessage: 'HTTP Requests received by agent configuration managemen',
     }),
   }),
-  apm_cgroup_memory: new QuotaMetric({
-    app: 'apm',
-    ...ApmMetric.getMetricFields(),
-    fieldSource: 'beats_stats.metrics.beat.cgroup',
-    usageField: 'memory.mem.usage.bytes',
-    periodsField: 'memory.stats.periods',
-    quotaField: 'memory.cfs.quota.us',
-    field: '',
-    title: i18n.translate('xpack.monitoring.metrics.apmInstance.memoryUtilizationTitle', {
-      defaultMessage: 'Memory Utilization',
+  apm_cgroup_memory_usage: new ApmMetric({
+    field: 'beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes',
+    label: i18n.translate('xpack.monitoring.metrics.apmInstance.memory.memoryUsageLabel', {
+      defaultMessage: 'Memory Utilization (cgroup)',
     }),
-    label: i18n.translate(
-      'xpack.monitoring.metrics.apmInstance.memoryUtilization.cgroupMemoryUtilizationLabel',
-      {
-        defaultMessage: 'Cgroup Memory Utilization',
-      }
-    ),
+    title: instanceMemoryTitle,
     description: i18n.translate(
-      'xpack.monitoring.metrics.apmInstance.memoryUtilization.cgroupMemoryUtilizationDescription',
+      'xpack.monitoring.metrics.apmInstance.memory.memoryUsageDescription',
       {
-        defaultMessage:
-          'Memory Usage time compared to the memory quota shown in percentage. If memory quotas are not set, then no data will be shown.',
+        defaultMessage: 'Memory usage of the container',
       }
     ),
     format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B',
+  }),
+
+  apm_cgroup_memory_limit: new ApmMetric({
+    field: 'beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes',
+    label: i18n.translate('xpack.monitoring.metrics.apmInstance.memory.memoryLimitLabel', {
+      defaultMessage: 'Memory Limit',
+    }),
+    title: instanceMemoryTitle,
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.memory.memoryLimitDescription',
+      {
+        defaultMessage: 'Memory limit of the container',
+      }
+    ),
+    format: LARGE_BYTES,
+    metricAgg: 'max',
     units: 'B',
   }),
 };

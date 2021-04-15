@@ -15,7 +15,13 @@ export const metricSet = [
     name: 'apm_os_load',
   },
   {
-    keys: ['apm_mem_alloc', 'apm_mem_rss', 'apm_mem_gc_next'],
+    keys: [
+      'apm_mem_alloc',
+      'apm_mem_rss',
+      'apm_mem_gc_next',
+      'apm_cgroup_memory_usage',
+      'apm_cgroup_memory_limit',
+    ],
     name: 'apm_memory',
   },
   {

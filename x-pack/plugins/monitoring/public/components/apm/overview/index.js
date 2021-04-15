@@ -14,7 +14,7 @@ const title = i18n.translate('xpack.monitoring.apm.overview.panels.title', {
 });
 
 export function ApmOverview(props) {
-  const { metrics } = props;
+  const { metrics, config } = props;
   const seriesToShow = [
     metrics.apm_responses_valid,
     metrics.apm_responses_errors,
@@ -23,6 +23,10 @@ export function ApmOverview(props) {
     metrics.apm_requests,
     metrics.apm_transformations,
   ];
+
+  if (config.container) {
+    seriesToShow.push(metrics.apm_memory);
+  }
 
   const metricProps = { ...props, title, seriesToShow };
   return <ApmMetrics {...metricProps} />;
