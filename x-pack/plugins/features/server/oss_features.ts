@@ -113,7 +113,7 @@ export const buildOSSFeatures = ({
             },
           ],
         },
-        ...(includeReporting ? [reportingFeatures.generateCsvDiscover] : []),
+        ...(includeReporting ? [reportingFeatures.discoverReporting] : []),
       ],
     },
     {
@@ -176,7 +176,7 @@ export const buildOSSFeatures = ({
             },
           ],
         },
-        ...(includeReporting ? [reportingFeatures.generateScreenshotVisualize] : []),
+        ...(includeReporting ? [reportingFeatures.visualizeReporting] : []),
       ],
     },
     {
@@ -291,9 +291,7 @@ export const buildOSSFeatures = ({
             },
           ],
         },
-        ...(includeReporting
-          ? [reportingFeatures.downloadCsvDashboard, reportingFeatures.generateScreenshotDashboard]
-          : []),
+        ...(includeReporting ? [reportingFeatures.dashboardReporting] : []),
       ],
     },
     {
@@ -484,17 +482,18 @@ const timelionFeature: KibanaFeatureConfig = {
   },
 };
 
+const reportingPrivilegeGroupName = i18n.translate(
+  'xpack.features.ossFeatures.reporting.reportingTitle',
+  {
+    defaultMessage: 'Reporting',
+  }
+);
+
 const reportingFeatures: {
-  [Property in
-    | 'generateCsvDiscover'
-    | 'downloadCsvDashboard'
-    | 'generateScreenshotDashboard'
-    | 'generateScreenshotVisualize']: SubFeatureConfig;
+  [Property in 'discoverReporting' | 'dashboardReporting' | 'visualizeReporting']: SubFeatureConfig;
 } = {
-  generateCsvDiscover: {
-    name: i18n.translate('xpack.features.ossFeatures.reporting.discoverGenerateCSVFeatureName', {
-      defaultMessage: 'CSV Reports',
-    }),
+  discoverReporting: {
+    name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
         groupType: 'independent',
@@ -514,36 +513,8 @@ const reportingFeatures: {
       },
     ],
   },
-  downloadCsvDashboard: {
-    name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSVFeatureName', {
-      defaultMessage: 'Download Saved Search CSV',
-    }),
-    privilegeGroups: [
-      {
-        groupType: 'independent',
-        privileges: [
-          {
-            id: 'download_csv_report',
-            name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Download CSV reports from saved searches',
-            }),
-            includeIn: 'all',
-            savedObject: { all: [], read: [] },
-            management: { insightsAndAlerting: ['reporting'] },
-            api: ['downloadCsv'],
-            ui: ['downloadCsv'],
-          },
-        ],
-      },
-    ],
-  },
-  generateScreenshotDashboard: {
-    name: i18n.translate(
-      'xpack.features.ossFeatures.reporting.dashboardGenerateScreenshotFeatureName',
-      {
-        defaultMessage: 'PDF / PNG Reports',
-      }
-    ),
+  dashboardReporting: {
+    name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
         groupType: 'independent',
@@ -563,17 +534,23 @@ const reportingFeatures: {
             api: ['generateReport'],
             ui: ['generateScreenshot'],
           },
+          {
+            id: 'download_csv_report',
+            name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
+              defaultMessage: 'Download CSV reports from Saved Search panels',
+            }),
+            includeIn: 'all',
+            savedObject: { all: [], read: [] },
+            management: { insightsAndAlerting: ['reporting'] },
+            api: ['downloadCsv'],
+            ui: ['downloadCsv'],
+          },
         ],
       },
     ],
   },
-  generateScreenshotVisualize: {
-    name: i18n.translate(
-      'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshotFeatureName',
-      {
-        defaultMessage: 'Reporting',
-      }
-    ),
+  visualizeReporting: {
+    name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
         groupType: 'independent',

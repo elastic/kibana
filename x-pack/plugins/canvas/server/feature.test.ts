@@ -157,7 +157,7 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
       },
       "subFeatures": Array [
         Object {
-          "name": "PDF Reports",
+          "name": "Reporting",
           "privilegeGroups": Array [
             Object {
               "groupType": "independent",

@@ -52,7 +52,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
         ? [
             {
               name: i18n.translate('xpack.canvas.features.reporting.pdfFeatureName', {
-                defaultMessage: 'PDF Reports',
+                defaultMessage: 'Reporting',
               }),
               privilegeGroups: [
                 {
