@@ -20,7 +20,7 @@ import { getNodes } from './lib/get_nodes';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework } = libs;
+  const { framework, handleEsError } = libs;
 
   framework.registerRoute(
     {
@@ -43,23 +43,27 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       const compositeSize = libs.configuration.inventory.compositeSize;
       const logQueryFields = await libs.getLogQueryFields(
         snapshotRequest.sourceId,
-        requestContext.core.savedObjects.client
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
       );
 
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
 
-      const snapshotResponse = await getNodes(
-        client,
-        snapshotRequest,
-        source,
-        logQueryFields,
-        compositeSize
-      );
-
-      return response.ok({
-        body: SnapshotNodeResponseRT.encode(snapshotResponse),
-      });
+      try {
+        const snapshotResponse = await getNodes(
+          client,
+          snapshotRequest,
+          source,
+          logQueryFields,
+          compositeSize
+        );
+        return response.ok({
+          body: SnapshotNodeResponseRT.encode(snapshotResponse),
+        });
+      } catch (err) {
+        return handleEsError({ error: err, response });
+      }
     }
   );
 };

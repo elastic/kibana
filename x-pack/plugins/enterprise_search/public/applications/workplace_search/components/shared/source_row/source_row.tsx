@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +31,8 @@ import {
 } from '../../../routes';
 import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
+
+import './source_row.scss';
 
 const CREDENTIALS_INVALID_ERROR_REASON = 'credentials_invalid';
 
@@ -65,6 +69,8 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const showFix =
     isOrganization && hasError && allowsReauth && errorReason === CREDENTIALS_INVALID_ERROR_REASON;
 
+  const rowClass = classNames({ 'source-row--error': hasError });
+
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
@@ -89,7 +95,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   );
 
   return (
-    <EuiTableRow data-test-subj="GroupsRow">
+    <EuiTableRow data-test-subj="GroupsRow" className={rowClass}>
       <EuiTableRowCell>
         <EuiFlexGroup
           justifyContent="flexStart"

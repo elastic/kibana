@@ -21,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
     beforeEach(async () => {
       await esArchiver.unload('fleet/empty_fleet_server');
       await esArchiver.load('fleet/agents');
+      await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
     setupFleetAndAgents(providerContext);
     afterEach(async () => {
@@ -181,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: 'fleet-agents.active: true',
+            agents: 'active: true',
             policy_id: 'policy2',
           })
           .expect(200);
