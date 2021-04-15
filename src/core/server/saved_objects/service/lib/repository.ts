@@ -1903,10 +1903,7 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const {
-      body,
-      statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
+    const { body, statusCode } = await this.client.openPointInTime(
       // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
       esOptions,
       {
