@@ -6,14 +6,14 @@
  */
 import v4 from 'uuid/v4';
 import { Logger } from 'src/core/server';
-import { DefaultFieldMap } from '../../defaults/field_map';
-import { OutputOfFieldMap } from '../../field_map/runtime_type_from_fieldmap';
+import { Mutable } from 'utility-types';
+import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../../common';
 import {
   PrepopulatedRuleEventFields,
   ScopedRuleRegistryClient,
 } from '../../create_scoped_rule_registry_client/types';
 
-export type UserDefinedAlertFields<TFieldMap extends DefaultFieldMap> = Omit<
+export type UserDefinedAlertFields<TFieldMap extends BaseRuleFieldMap> = Omit<
   OutputOfFieldMap<TFieldMap>,
   PrepopulatedRuleEventFields | 'kibana.rac.alert.id' | 'kibana.rac.alert.uuid' | '@timestamp'
 >;
@@ -46,9 +46,9 @@ async function rehydrateRecoveredAlerts({
     alertUuid: string;
     started: string;
   }>;
-  scopedRuleRegistryClient?: ScopedRuleRegistryClient<DefaultFieldMap>;
-}): Promise<Record<string, UserDefinedAlertFields<DefaultFieldMap>>> {
-  const recoveredAlertsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {};
+  scopedRuleRegistryClient?: ScopedRuleRegistryClient<BaseRuleFieldMap>;
+}): Promise<Record<string, UserDefinedAlertFields<BaseRuleFieldMap>>> {
+  const recoveredAlertsDataMap: Record<string, UserDefinedAlertFields<BaseRuleFieldMap>> = {};
 
   // if there are "recovered" alerts, query for the last active state of this alert grouping
   if (scopedRuleRegistryClient && recoveredAlerts && recoveredAlerts.length) {
@@ -105,10 +105,10 @@ export async function generateEventsFromAlerts({
   logger: Logger;
   ruleUuid: string;
   startedAt: Date;
-  scopedRuleRegistryClient?: ScopedRuleRegistryClient<DefaultFieldMap>;
+  scopedRuleRegistryClient?: ScopedRuleRegistryClient<BaseRuleFieldMap>;
   currentAlerts: Record<
     string,
-    UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
+    UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }
   >;
   trackedAlerts: Record<
     string,
@@ -120,7 +120,7 @@ export async function generateEventsFromAlerts({
   >;
   lifecycleEventMap?: LifecycleEventMap;
 }): Promise<{
-  eventsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>>;
+  eventsToIndex: Array<OutputOfFieldMap<BaseRuleFieldMap>>;
   alertsToTrack: Record<
     string,
     {
@@ -155,19 +155,19 @@ export async function generateEventsFromAlerts({
     `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${recoveredAlerts.length} recovered)`
   );
 
-  const alertsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {
+  const alertsDataMap: Record<string, UserDefinedAlertFields<BaseRuleFieldMap>> = {
     ...currentAlerts,
     ...(await rehydrateRecoveredAlerts({ ruleUuid, recoveredAlerts, scopedRuleRegistryClient })),
   };
 
-  const eventsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = allAlertIds.map((alertId) => {
+  const eventsToIndex: Array<OutputOfFieldMap<BaseRuleFieldMap>> = allAlertIds.map((alertId) => {
     const alertData = alertsDataMap[alertId];
 
     if (!alertData) {
       logger.warn(`Could not find alert data for ${alertId}`);
     }
 
-    const event: OutputOfFieldMap<DefaultFieldMap> = {
+    const event: Mutable<OutputOfFieldMap<BaseRuleFieldMap>> = {
       ...alertData,
       '@timestamp': startedAt.toISOString(),
       'event.kind': lifecycleEventMapToUse['event.kind'],

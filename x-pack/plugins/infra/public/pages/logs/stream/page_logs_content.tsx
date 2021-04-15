@@ -35,7 +35,7 @@ import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath'
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { sourceConfiguration, sourceId } = useLogSourceContext();
+  const { resolvedSourceConfiguration, sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     surroundingLogsId,
@@ -218,7 +218,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <ScrollableLogTextStreamView
           columnConfigurations={
-            (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
+            (resolvedSourceConfiguration && resolvedSourceConfiguration.columns) || []
           }
           hasMoreAfterEnd={hasMoreAfterEnd}
           hasMoreBeforeStart={hasMoreBeforeStart}

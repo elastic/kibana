@@ -9,7 +9,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
-import { DefaultFieldMap } from '../defaults/field_map';
+import { BaseRuleFieldMap } from '../../../common';
 import { RuleRegistry } from '..';
 import {
   generateEventsFromAlerts,
@@ -17,14 +17,14 @@ import {
 } from './lib/generate_events_from_alerts';
 
 type LifecycleAlertService<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TActionVariable extends ActionVariable
 > = (alert: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
 }) => AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>;
 
-type CreateLifecycleRuleType<TFieldMap extends DefaultFieldMap> = <
+type CreateLifecycleRuleType<TFieldMap extends BaseRuleFieldMap> = <
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable
 >(
@@ -48,12 +48,12 @@ const wrappedStateRt = t.type({
 });
 
 export function createLifecycleRuleTypeFactory<
-  TRuleRegistry extends RuleRegistry<DefaultFieldMap>
+  TRuleRegistry extends RuleRegistry<BaseRuleFieldMap>
 >(): TRuleRegistry extends RuleRegistry<infer TFieldMap>
   ? CreateLifecycleRuleType<TFieldMap>
   : never;
 
-export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<DefaultFieldMap> {
+export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRuleFieldMap> {
   return (type) => {
     return {
       ...type,
@@ -75,7 +75,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
 
         const currentAlerts: Record<
           string,
-          UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
+          UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
         const nextWrappedState = await type.executor({

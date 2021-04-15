@@ -10,8 +10,7 @@ import { flatten } from 'lodash';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
 import { RuleParams, RuleType } from '../../types';
-import { DefaultFieldMap } from '../defaults/field_map';
-import { OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
+import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../common';
 import { RuleRegistry } from '..';
 import {
   generateEventsFromAlerts,
@@ -19,25 +18,25 @@ import {
 } from './lib/generate_events_from_alerts';
 
 type ThresholdAlertService<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TActionVariable extends ActionVariable
 > = (data: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
 }) => AlertInstance<AlertInstanceState, { [key in TActionVariable['name']]: any }, string>;
 
-type ThresholdMetricService<TFieldMap extends DefaultFieldMap> = (data: {
+type ThresholdMetricService<TFieldMap extends BaseRuleFieldMap> = (data: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
 }) => void;
 
-type ThresholdEventsService<TFieldMap extends DefaultFieldMap> = (data: {
+type ThresholdEventsService<TFieldMap extends BaseRuleFieldMap> = (data: {
   id: string;
   fields: UserDefinedAlertFields<TFieldMap>;
   events: any[];
 }) => void;
 
-type CreateThresholdRuleType<TFieldMap extends DefaultFieldMap> = <
+type CreateThresholdRuleType<TFieldMap extends BaseRuleFieldMap> = <
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable
 >(
@@ -65,12 +64,12 @@ const wrappedStateRt = t.type({
 });
 
 export function createThresholdRuleTypeFactory<
-  TRuleRegistry extends RuleRegistry<DefaultFieldMap>
+  TRuleRegistry extends RuleRegistry<BaseRuleFieldMap>
 >(): TRuleRegistry extends RuleRegistry<infer TFieldMap>
   ? CreateThresholdRuleType<TFieldMap>
   : never;
 
-export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<DefaultFieldMap> {
+export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<BaseRuleFieldMap> {
   return (type) => {
     return {
       ...type,
@@ -92,17 +91,17 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
 
         const currentAlerts: Record<
           string,
-          UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
+          UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
         const currentMetrics: Record<
           string,
-          UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
+          UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
         const currentEvents: Record<
           string,
-          Array<UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }>
+          Array<UserDefinedAlertFields<BaseRuleFieldMap> & { 'kibana.rac.alert.id': string }>
         > = {};
 
         const timestamp = options.startedAt.toISOString();
@@ -113,10 +112,10 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           services: {
             ...options.services,
             writeRuleAlert: ({ id, fields }) => {
-              // currentAlerts[id] = {
-              //   ...fields,
-              //   'kibana.rac.alert.id': id,
-              // };
+              currentAlerts[id] = {
+                ...fields,
+                'kibana.rac.alert.id': id,
+              };
               return alertInstanceFactory(id);
             },
             writeRuleMetric: ({ id, fields }) => {
@@ -158,7 +157,7 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           },
         });
 
-        const metricsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = Object.keys(
+        const metricsToIndex: Array<OutputOfFieldMap<BaseRuleFieldMap>> = Object.keys(
           currentMetrics
         ).map((alertId) => {
           const alertData = currentMetrics[alertId];
@@ -175,7 +174,7 @@ export function createThresholdRuleTypeFactory(): CreateThresholdRuleType<Defaul
           };
         });
 
-        const eventsToIndex: Array<OutputOfFieldMap<DefaultFieldMap>> = flatten(
+        const eventsToIndex: Array<OutputOfFieldMap<BaseRuleFieldMap>> = flatten(
           Object.keys(currentEvents).map((alertId) => {
             const alertData = currentEvents[alertId];
 
