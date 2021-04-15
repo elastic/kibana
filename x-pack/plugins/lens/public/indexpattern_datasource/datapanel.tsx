@@ -230,6 +230,7 @@ export function IndexPatternDataPanel({
           onUpdateIndexPattern={onUpdateIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
         />
@@ -271,6 +272,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatternRefs,
   indexPatterns,
   existenceFetchFailed,
+  existenceFetchTimeout,
   query,
   dateRange,
   filters,
@@ -297,6 +299,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -314,7 +317,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     (type) => type in fieldTypeNames
   );
 
-  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
+  const fieldInfoUnavailable =
+    existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
 
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
@@ -792,6 +796,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
+            existenceFetchTimeout={existenceFetchTimeout}
             existFieldsInIndex={!!allFields.length}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}

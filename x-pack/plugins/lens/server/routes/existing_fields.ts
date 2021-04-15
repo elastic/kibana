@@ -195,6 +195,7 @@ async function fetchIndexPatternStats({
       body: {
         size: SAMPLE_SIZE,
         query,
+        // Sorted queries are usually able to skip entire shards that don't match
         sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
         fields: ['*'],
         _source: false,
@@ -213,15 +214,15 @@ async function fetchIndexPatternStats({
           };
           return acc;
         }, {} as Record<string, estypes.ScriptField>),
-        // Small improvement because we don't need to load timings
+        // Small improvement because there is overhead in counting
         track_total_hits: false,
-        // Per-shard timeout, must be lower than overall
-        timeout: '500ms',
+        // Per-shard timeout, must be lower than overall. Shards return partial results on timeout
+        timeout: '4500ms',
       },
     },
     {
       // Global request timeout. Will cancel the request if exceeded. Overrides the elasticsearch.requestTimeout
-      requestTimeout: '5s',
+      requestTimeout: '5000ms',
       // Fails fast instead of retrying- default is to retry
       maxRetries: 0,
     }

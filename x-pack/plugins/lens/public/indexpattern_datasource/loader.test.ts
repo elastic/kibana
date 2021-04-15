@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler, HttpFetchError } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -877,6 +877,7 @@ describe('loader', () => {
         foo: 'bar',
         isFirstExistenceFetch: false,
         existenceFetchFailed: false,
+        existenceFetchTimeout: false,
         existingFields: {
           '1': { ip1_field_1: true, ip1_field_2: true },
           '2': { ip2_field_1: true, ip2_field_2: true },
@@ -957,6 +958,49 @@ describe('loader', () => {
       }) as IndexPatternPrivateState;
 
       expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existenceFetchTimeout).toEqual(false);
+      expect(newState.existingFields['1']).toEqual({
+        field1: true,
+        field2: true,
+      });
+    });
+
+    it('should set all fields to available and existence error flag if the request times out', async () => {
+      const setState = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(new HttpFetchError('timeout', 'name', {}, { status: 408 }));
+        });
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: '1',
+            title: '1',
+            hasRestrictions: false,
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(false);
+      expect(newState.existenceFetchTimeout).toEqual(true);
       expect(newState.existingFields['1']).toEqual({
         field1: true,
         field2: true,
