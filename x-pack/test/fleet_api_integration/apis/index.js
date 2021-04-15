@@ -14,9 +14,6 @@ export default function ({ loadTestFile }) {
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
 
-    // Agent setup
-    loadTestFile(require.resolve('./agents_setup'));
-
     // Agents
     loadTestFile(require.resolve('./agents/delete'));
     loadTestFile(require.resolve('./agents/list'));
