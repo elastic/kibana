@@ -6,32 +6,29 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
   data-test-subj="visNoResult"
 >
   <div
-    class="item top"
-  />
-  <div
-    class="item"
+    class="euiEmptyPrompt"
+    data-test-subj="visualization-error"
   >
+    <span
+      color="default"
+      data-euiicon-type="visualizeApp"
+    />
     <div
-      class="euiText euiText--extraSmall"
+      class="euiSpacer euiSpacer--s"
+    />
+    <span
+      class="euiTextColor euiTextColor--subdued"
     >
       <div
-        class="euiTextColor euiTextColor--subdued"
+        class="euiText euiText--medium"
       >
-        <span
-          color="subdued"
-          data-euiicon-type="visualizeApp"
-        />
         <div
-          class="euiSpacer euiSpacer--s"
-        />
-        <p>
+          class="euiText euiText--extraSmall"
+        >
           No results found
-        </p>
+        </div>
       </div>
-    </div>
+    </span>
   </div>
-  <div
-    class="item bottom"
-  />
 </div>
 `;

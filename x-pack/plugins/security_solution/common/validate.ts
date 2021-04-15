@@ -27,7 +27,7 @@ export const validate = <T extends t.Mixed>(
 };
 
 export const validateNonExact = <T extends t.Mixed>(
-  obj: object,
+  obj: unknown,
   schema: T
 ): [t.TypeOf<T> | null, string | null] => {
   const decoded = schema.decode(obj);
