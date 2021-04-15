@@ -19,6 +19,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -355,6 +356,19 @@ const getSavedObjectTypes = (
         media_type: { type: 'keyword' },
         data_utf8: { type: 'text', index: false },
         data_base64: { type: 'binary' },
+      },
+    },
+  },
+  [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
+    name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        preconfiguration_id: { type: 'keyword' },
       },
     },
   },

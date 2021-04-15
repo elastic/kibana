@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 
 interface VisualizationNoResultsProps {
@@ -22,9 +22,9 @@ export class VisualizationError extends React.Component<VisualizationNoResultsPr
         iconColor="danger"
         data-test-subj="visualization-error"
         body={
-          <p>
+          <EuiText size="xs">
             {typeof this.props.error === 'string' ? this.props.error : this.props.error.message}
-          </p>
+          </EuiText>
         }
       />
     );
