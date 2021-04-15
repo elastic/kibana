@@ -119,7 +119,7 @@ export const KibanaDeprecationList: FunctionComponent<Props> = ({
           .slice(currentPage * DEPRECATIONS_PER_PAGE, (currentPage + 1) * DEPRECATIONS_PER_PAGE)
           .sort(sortByLevelDesc)
           .map((deprecation, index) => [
-            <div key={`kibana-deprecation-${index}`}>
+            <div key={`kibana-deprecation-${index}`} data-test-subj="kibanaDeprecationItem">
               <KibanaDeprecationAccordion
                 {...{
                   key: expandState.expandNumber,

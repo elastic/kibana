@@ -21,7 +21,7 @@ const i18nTexts = {
   loadingError: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorMessage',
     {
-      defaultMessage: 'An error occurred while retrieving Kibana deprecations.',
+      defaultMessage: 'Could not retrieve Kibana deprecations.',
     }
   ),
 };
