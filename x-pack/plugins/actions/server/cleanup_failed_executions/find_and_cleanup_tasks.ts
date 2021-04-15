@@ -13,7 +13,7 @@ import { cleanupTasks, CleanupTasksResult } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
-interface FindAndCleanupTasksOpts {
+export interface FindAndCleanupTasksOpts {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
   coreStartServices: Promise<[CoreStart, ActionsPluginsStart, unknown]>;

@@ -13,7 +13,7 @@ import {
 } from 'kibana/server';
 import { TaskInstance } from '../../../task_manager/server';
 import { SpacesPluginStart } from '../../../spaces/server';
-import { extractBulkResponseDeleteFailures, spaceIdToNamespace } from './lib';
+import { bulkDelete, extractBulkResponseDeleteFailures, spaceIdToNamespace } from './lib';
 
 export interface CleanupTasksOpts {
   logger: Logger;
@@ -46,34 +46,36 @@ export async function cleanupTasks({
   kibanaIndex,
   taskManagerIndex,
 }: CleanupTasksOpts): Promise<CleanupTasksResult> {
-  if (tasks.length === 0) {
-    logger.debug('No tasks to cleanup');
-    return { success: true, successCount: 0, failureCount: 0 };
-  }
-
   const deserializedTasks = tasks.map((task) => ({
     ...task,
     attributes: {
       ...task.attributes,
-      params: typeof task.attributes.params === 'string' ? JSON.parse(task.attributes.params) : {},
+      params:
+        typeof task.attributes.params === 'string'
+          ? JSON.parse(task.attributes.params)
+          : task.attributes.params || {},
     },
   }));
 
   // Remove accumulated action task params
-  const actionTaskParamBulkDeleteResult = await esClient.bulk({
-    body: deserializedTasks.map((task) => {
-      const { spaceId, actionTaskParamsId } = task.attributes.params;
-      const namespace = spaceIdToNamespace(spaces, spaceId);
-      const rawId = savedObjectsSerializer.generateRawId(
-        namespace,
-        'action_task_params',
-        actionTaskParamsId
-      );
-      return { delete: { _index: kibanaIndex, _id: rawId } };
-    }),
+  const actionTaskParamIdsToDelete = deserializedTasks.map((task) => {
+    const { spaceId, actionTaskParamsId } = task.attributes.params;
+    const namespace = spaceIdToNamespace(spaces, spaceId);
+    return savedObjectsSerializer.generateRawId(
+      namespace,
+      'action_task_params',
+      actionTaskParamsId
+    );
   });
-  const failedActionTaskParams = extractBulkResponseDeleteFailures(actionTaskParamBulkDeleteResult);
-  if (failedActionTaskParams.length) {
+  const actionTaskParamBulkDeleteResult = await bulkDelete(
+    esClient,
+    kibanaIndex,
+    actionTaskParamIdsToDelete
+  );
+  const failedActionTaskParams = actionTaskParamBulkDeleteResult
+    ? extractBulkResponseDeleteFailures(actionTaskParamBulkDeleteResult)
+    : [];
+  if (failedActionTaskParams?.length) {
     logger.debug(
       `Failed to delete the following action_task_params [${JSON.stringify(
         failedActionTaskParams
@@ -82,32 +84,33 @@ export async function cleanupTasks({
   }
 
   // Remove accumulated tasks
-  const taskBulkDeleteResult = await esClient.bulk({
-    body: deserializedTasks
-      .map((task) => {
-        const { spaceId, actionTaskParamsId } = task.attributes.params;
-        const namespace = spaceIdToNamespace(spaces, spaceId);
-        const rawId = savedObjectsSerializer.generateRawId(
-          namespace,
-          'action_task_params',
-          actionTaskParamsId
-        );
-        // Avoid removing tasks that failed to remove linked objects
-        if (failedActionTaskParams.find((item) => item._id === rawId)) {
-          return null;
-        }
-        const rawTaskId = savedObjectsSerializer.generateRawId(undefined, 'task', task.id);
-        return { delete: { _index: taskManagerIndex, _id: rawTaskId } };
-      })
-      .filter((item) => !!item),
-  });
-  const failedTasks = extractBulkResponseDeleteFailures(taskBulkDeleteResult);
-  if (failedTasks.length) {
+  const taskIdsToDelete = deserializedTasks
+    .map((task) => {
+      const { spaceId, actionTaskParamsId } = task.attributes.params;
+      const namespace = spaceIdToNamespace(spaces, spaceId);
+      const rawId = savedObjectsSerializer.generateRawId(
+        namespace,
+        'action_task_params',
+        actionTaskParamsId
+      );
+      // Avoid removing tasks that failed to remove linked objects
+      if (failedActionTaskParams?.find((item) => item._id === rawId)) {
+        return null;
+      }
+      const rawTaskId = savedObjectsSerializer.generateRawId(undefined, 'task', task.id);
+      return rawTaskId;
+    })
+    .filter((id) => !!id) as string[];
+  const taskBulkDeleteResult = await bulkDelete(esClient, taskManagerIndex, taskIdsToDelete);
+  const failedTasks = taskBulkDeleteResult
+    ? extractBulkResponseDeleteFailures(taskBulkDeleteResult)
+    : [];
+  if (failedTasks?.length) {
     logger.debug(`Failed to delete the following tasks [${JSON.stringify(failedTasks)}]`);
   }
 
   return {
-    success: failedActionTaskParams.length === 0 && failedTasks.length === 0,
+    success: failedActionTaskParams?.length === 0 && failedTasks.length === 0,
     successCount: tasks.length - failedActionTaskParams.length - failedTasks.length,
     failureCount: failedActionTaskParams.length + failedTasks.length,
   };
