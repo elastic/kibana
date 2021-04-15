@@ -23,7 +23,7 @@ describe('infra source configuration migration function for 7.13.0', () => {
     expect(migratedConfiguration).toStrictEqual(
       createTestSourceConfiguration({
         logIndices: {
-          type: 'indexName',
+          type: 'index_name',
           indexName: 'filebeat-*',
         },
       })
