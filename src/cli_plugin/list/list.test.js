@@ -64,7 +64,6 @@ describe('kibana cli', function () {
           "log: plugin1@5.0.0-alpha2",
           "log: plugin2@3.2.1",
           "log: plugin3@1.2.3",
-          "log: ",
         ]
       `);
     });
