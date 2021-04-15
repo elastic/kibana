@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { expectAssignable } from 'tsd';
-import { UnwrapPromise } from '../index';
-
-type STRING = UnwrapPromise<Promise<string>>;
-type TUPLE = UnwrapPromise<Promise<[number, number]>>;
-
-expectAssignable<STRING>('adf');
-expectAssignable<TUPLE>([1, 2]);
+// This is just an empty mock file to provide a workaround to run tsd correctly isolated
