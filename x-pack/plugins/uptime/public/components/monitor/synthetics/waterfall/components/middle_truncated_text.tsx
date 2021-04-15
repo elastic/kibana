@@ -8,10 +8,11 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface Props {
+  index: number;
   ariaLabel: string;
   text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -32,6 +33,11 @@ const InnerContainer = styled.span`
   overflow: hidden;
   display: flex;
   align-items: center;
+`;
+
+const IndexNumber = styled(EuiText)`
+  margin-right: 5px;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 const FirstChunk = styled.span`
@@ -71,7 +77,14 @@ export const getChunks = (text: string = '') => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, url }: Props) => {
+export const MiddleTruncatedText = ({
+  index,
+  ariaLabel,
+  text,
+  onClick,
+  setButtonRef,
+  url,
+}: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
@@ -90,6 +103,9 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
               buttonRef={setButtonRef}
             >
               <InnerContainer>
+                <IndexNumber color="subdued" size="s">
+                  {index + '.'}
+                </IndexNumber>
                 <FirstChunk>{chunks.first}</FirstChunk>
                 <LastChunk>{chunks.last}</LastChunk>
               </InnerContainer>

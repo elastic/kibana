@@ -42,7 +42,8 @@ export const WaterfallSidebarItem = ({
     return is400 || is500 || isSpecific300;
   };
 
-  const text = `${offsetIndex}. ${item.url}`;
+  const text = item.url;
+
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
       ? `${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} `
@@ -56,6 +57,7 @@ export const WaterfallSidebarItem = ({
     >
       {!status || !isErrorStatusCode(status) ? (
         <MiddleTruncatedText
+          index={offsetIndex}
           text={text}
           url={url}
           ariaLabel={ariaLabel}
@@ -66,6 +68,7 @@ export const WaterfallSidebarItem = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <MiddleTruncatedText
+              index={offsetIndex}
               text={text}
               url={url}
               ariaLabel={ariaLabel}
