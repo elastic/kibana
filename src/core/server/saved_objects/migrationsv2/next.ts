@@ -67,7 +67,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.readWithPit(
         client,
         state.sourceIndexPitId,
-        state.unusedTypesToExclude,
+        state.unusedTypesQuery,
         state.batchSize,
         state.lastHitSortValue
       ),
@@ -126,7 +126,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.sourceIndex.value,
         state.preMigrationScript,
         false,
-        state.unusedTypesToExclude
+        state.unusedTypesQuery
       ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),

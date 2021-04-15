@@ -436,14 +436,20 @@ describe('migration actions', () => {
         ]
       `);
     });
-    it('resolves right and excludes all unusedTypesToExclude documents', async () => {
+    it('resolves right and excludes all documents not matching the unusedTypesQuery', async () => {
       const res = (await reindex(
         client,
         'existing_index_with_docs',
         'reindex_target_excluded_docs',
         Option.none,
         false,
-        Option.some(['f_agent_event', 'another_unused_type'])
+        Option.of({
+          bool: {
+            must_not: ['f_agent_event', 'another_unused_type'].map((type) => ({
+              term: { type },
+            })),
+          },
+        })
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -841,7 +847,7 @@ describe('migration actions', () => {
       const docsResponse = (await readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.some([]),
+        Option.none,
         1000,
         undefined
       )()) as Either.Right<ReadWithPit>;
@@ -858,7 +864,7 @@ describe('migration actions', () => {
       const docsResponse = (await readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.some([]),
+        Option.none,
         3,
         undefined
       )()) as Either.Right<ReadWithPit>;
@@ -875,7 +881,22 @@ describe('migration actions', () => {
       const docsResponse = (await readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.some(['f_agent_event', 'another_unused_type']),
+        Option.some({
+          bool: {
+            must_not: [
+              {
+                term: {
+                  type: 'f_agent_event',
+                },
+              },
+              {
+                term: {
+                  type: 'another_unused_type',
+                },
+              },
+            ],
+          },
+        }),
         1000,
         undefined
       )()) as Either.Right<ReadWithPit>;
@@ -891,7 +912,7 @@ describe('migration actions', () => {
     });
 
     it('rejects if PIT does not exist', async () => {
-      const readWithPitTask = readWithPit(client, 'no_such_pit', Option.some([]), 1000, undefined);
+      const readWithPitTask = readWithPit(client, 'no_such_pit', Option.none, 1000, undefined);
       await expect(readWithPitTask()).rejects.toThrow('illegal_argument_exception');
     });
   });

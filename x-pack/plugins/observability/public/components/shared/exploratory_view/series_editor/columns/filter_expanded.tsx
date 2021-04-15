@@ -13,7 +13,8 @@ import {
   EuiLoadingSpinner,
   EuiFilterGroup,
 } from '@elastic/eui';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
+import styled from 'styled-components';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
@@ -23,12 +24,13 @@ interface Props {
   seriesId: string;
   label: string;
   field: string;
+  isNegated?: boolean;
   goBack: () => void;
   nestedField?: string;
 }
 
-export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: Props) {
-  const { indexPattern } = useIndexPatternContext();
+export function FilterExpanded({ seriesId, field, label, goBack, nestedField, isNegated }: Props) {
+  const { indexPattern } = useAppIndexPatternContext();
 
   const [value, setValue] = useState('');
 
@@ -37,9 +39,10 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
   const { series } = useUrlStorage(seriesId);
 
   const { values, loading } = useValuesList({
+    query: value,
+    indexPattern,
     sourceField: field,
     time: series.time,
-    indexPattern,
   });
 
   const filters = series?.filters ?? [];
@@ -51,7 +54,7 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
   );
 
   return (
-    <>
+    <Wrapper>
       <EuiButtonEmpty iconType="arrowLeft" color="text" onClick={() => goBack()}>
         {label}
       </EuiButtonEmpty>
@@ -71,16 +74,18 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
       {displayValues.map((opt) => (
         <Fragment key={opt}>
           <EuiFilterGroup fullWidth={true} color="primary">
-            <FilterValueButton
-              field={field}
-              value={opt}
-              allSelectedValues={currFilter?.notValues}
-              negate={true}
-              nestedField={nestedField}
-              seriesId={seriesId}
-              isNestedOpen={isOpen}
-              setIsNestedOpen={setIsOpen}
-            />
+            {isNegated !== false && (
+              <FilterValueButton
+                field={field}
+                value={opt}
+                allSelectedValues={currFilter?.notValues}
+                negate={true}
+                nestedField={nestedField}
+                seriesId={seriesId}
+                isNestedOpen={isOpen}
+                setIsNestedOpen={setIsOpen}
+              />
+            )}
             <FilterValueButton
               field={field}
               value={opt}
@@ -95,6 +100,10 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
           <EuiSpacer size="s" />
         </Fragment>
       ))}
-    </>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  max-width: 400px;
+`;

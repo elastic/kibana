@@ -14,7 +14,6 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
-import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
@@ -462,7 +461,7 @@ export const readWithPit = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesToExclude: Option.Option<string[]>,
+  unusedTypesQuery: Option.Option<estypes.QueryContainer>,
   batchSize: number,
   searchAfter?: number[]
 ): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> => () => {
@@ -477,14 +476,10 @@ export const readWithPit = (
         size: batchSize,
         search_after: searchAfter,
         // Exclude saved object types
-        query: Option.fold<string[], QueryContainer | undefined>(
+        query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
           () => undefined,
-          (types) => ({
-            bool: {
-              must_not: types.map((type) => ({ term: { type } })),
-            },
-          })
-        )(unusedTypesToExclude),
+          (query) => query
+        )(unusedTypesQuery),
       },
     })
     .then((response) => {
@@ -573,7 +568,7 @@ export const reindex = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesToExclude: Option.Option<string[]>
+  unusedTypesQuery: Option.Option<estypes.QueryContainer>
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -588,14 +583,10 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<string[], QueryContainer | undefined>(
+          query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
             () => undefined,
-            (types) => ({
-              bool: {
-                must_not: types.map((type) => ({ term: { type } })),
-              },
-            })
-          )(unusedTypesToExclude),
+            (query) => query
+          )(unusedTypesQuery),
         },
         dest: {
           index: targetIndex,
