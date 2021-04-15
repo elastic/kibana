@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JOB_PARAMS_ECOM_MARKDOWN } from '../fixtures';
+import { JOB_PARAMS_ECOM_MARKDOWN } from '../../reporting_api_integration/services/fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

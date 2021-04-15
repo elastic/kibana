@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../fixtures';
+import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

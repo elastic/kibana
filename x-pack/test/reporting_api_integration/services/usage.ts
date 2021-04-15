@@ -6,10 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
-import { services as xpackServices } from '../functional/services';
-import { services as apiIntegrationServices } from '../api_integration/services';
-import { FtrProviderContext } from './ftr_provider_context';
+import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 interface PDFAppCounts {
   app: {
@@ -38,15 +36,10 @@ interface UsageStats {
   reporting: ReportingUsageStats;
 }
 
-function removeWhitespace(str: string) {
-  return str.replace(/\s/g, '');
-}
-
-export function ReportingAPIProvider({ getService }: FtrProviderContext) {
+export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
-  const retry = getService('retry');
+  const supertest = getService('supertest');
 
   return {
     async waitForJobToFinish(downloadReportPath: string) {
@@ -74,29 +67,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       });
 
       expect(statusCode).to.be(200);
-    },
-
-    async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
-      await Promise.all(
-        jobPaths.map(async (path) => {
-          await this.waitForJobToFinish(path);
-        })
-      );
-    },
-
-    async postJob(apiPath: string): Promise<string> {
-      log.debug(`ReportingAPI.postJob(${apiPath})`);
-      const { body } = await supertest
-        .post(removeWhitespace(apiPath))
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-      return body.path;
-    },
-
-    async postJobJSON(apiPath: string, jobJSON: object = {}): Promise<string> {
-      log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
-      const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
-      return body.path;
     },
 
     /**
@@ -135,16 +105,12 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       };
     },
 
-    async deleteAllReports() {
-      log.debug('ReportingAPI.deleteAllReports');
-
-      // ignores 409 errs and keeps retrying
-      await retry.tryForTime(5000, async () => {
-        await esSupertest
-          .post('/.reporting*/_delete_by_query')
-          .send({ query: { match_all: {} } })
-          .expect(200);
-      });
+    async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
+      await Promise.all(
+        jobPaths.map(async (path) => {
+          await this.waitForJobToFinish(path);
+        })
+      );
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
@@ -180,10 +146,3 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
   };
 }
-
-export const services = {
-  ...xpackServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
-  usageAPI: apiIntegrationServices.usageAPI,
-  reportingAPI: ReportingAPIProvider,
-};
