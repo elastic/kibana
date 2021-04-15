@@ -38,12 +38,11 @@ import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
-import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
 
 import { ResultSettings } from '../result_settings';
 
-import { EngineLogic } from './';
+import { EngineLogic, getEngineBreadcrumbs } from './';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -85,43 +84,41 @@ export const EngineRouter: React.FC = () => {
   const isLoadingNewEngine = engineName !== engineNameFromUrl;
   if (isLoadingNewEngine || dataLoading) return <Loading />;
 
-  const engineBreadcrumb = [ENGINES_TITLE, engineName];
-
   return (
     <Switch>
       {canViewEngineAnalytics && (
         <Route path={ENGINE_ANALYTICS_PATH}>
-          <AnalyticsRouter engineBreadcrumb={engineBreadcrumb} />
+          <AnalyticsRouter />
         </Route>
       )}
       <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
-        <DocumentDetail engineBreadcrumb={engineBreadcrumb} />
+        <DocumentDetail />
       </Route>
       <Route path={ENGINE_DOCUMENTS_PATH}>
-        <Documents engineBreadcrumb={engineBreadcrumb} />
+        <Documents />
       </Route>
       {canManageEngineCurations && (
         <Route path={ENGINE_CURATIONS_PATH}>
-          <CurationsRouter engineBreadcrumb={engineBreadcrumb} />
+          <CurationsRouter />
         </Route>
       )}
       {canManageEngineRelevanceTuning && (
         <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
-          <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />
+          <RelevanceTuning />
         </Route>
       )}
       {canManageEngineResultSettings && (
         <Route path={ENGINE_RESULT_SETTINGS_PATH}>
-          <ResultSettings engineBreadcrumb={engineBreadcrumb} />
+          <ResultSettings />
         </Route>
       )}
       {canViewEngineApiLogs && (
         <Route path={ENGINE_API_LOGS_PATH}>
-          <ApiLogs engineBreadcrumb={engineBreadcrumb} />
+          <ApiLogs />
         </Route>
       )}
       <Route>
-        <SetPageChrome trail={[...engineBreadcrumb]} />
+        <SetPageChrome trail={getEngineBreadcrumbs()} />
         <EngineOverview />
       </Route>
     </Switch>

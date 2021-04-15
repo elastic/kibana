@@ -42,6 +42,15 @@ import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
+import {
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -825,3 +834,15 @@ export const getThresholdTermsHash = (
     )
     .digest('hex');
 };
+
+export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
+  params.type === 'threshold';
+export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
+  params.type === 'query';
+export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
+  params.type === 'saved_query';
+export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
+  params.type === 'threat_match';
+export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
+  params.type === 'machine_learning';
