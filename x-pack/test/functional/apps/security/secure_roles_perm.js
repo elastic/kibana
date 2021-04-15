@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.missingOrFail('users');
     });
 
-    it('Kibana User navigating to Discover does sees the generate CSV button', async function () {
+    it('Kibana User navigating to Discover sees the generate CSV button', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       log.debug('click Top Nav Share button');
