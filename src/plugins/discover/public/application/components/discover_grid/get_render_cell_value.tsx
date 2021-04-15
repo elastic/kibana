@@ -26,7 +26,8 @@ export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
-  useNewFieldsApi: boolean
+  useNewFieldsApi: boolean,
+  maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
@@ -77,6 +78,9 @@ export const getRenderCellValueFn = (
     const sourcePairs: Array<[string, string]> = [];
     Object.entries(innerColumns).forEach(([key, values]) => {
       const subField = indexPattern.getFieldByName(key);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
         : { convert: (v: string, ...rest: unknown[]) => String(v) };
@@ -90,12 +94,12 @@ export const getRenderCellValueFn = (
         )
         .join(', ');
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, formatted]);
+      pairs.push([displayKey ? displayKey : key, formatted]);
     });
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
@@ -130,12 +134,15 @@ export const getRenderCellValueFn = (
 
     Object.entries(formatted).forEach(([key, val]) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([key, val as string]);
+      const displayKey = indexPattern.fields.getByName
+        ? indexPattern.fields.getByName(key)?.displayName
+        : undefined;
+      pairs.push([displayKey ? displayKey : key, val as string]);
     });
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
