@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazyLoadFileUploadModules } from '../lazy_load_bundle';
+import { lazyLoadModules } from '../lazy_load_bundle';
 import { FileDataVisualizer } from '../application';
 import { FindFileStructureResponse } from '../../common';
 
@@ -17,7 +17,7 @@ export async function analyzeFile(
   file: string,
   params: Record<string, string> = {}
 ): Promise<FindFileStructureResponse> {
-  const { getHttp } = await lazyLoadFileUploadModules();
+  const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
   return await getHttp().fetch<FindFileStructureResponse>({
     path: `/internal/file_data_visualizer/analyze_file`,
@@ -28,6 +28,6 @@ export async function analyzeFile(
 }
 
 export async function getFileDataVisualizerComponent(): Promise<typeof FileDataVisualizer> {
-  const fileUploadModules = await lazyLoadFileUploadModules();
-  return fileUploadModules.FileDataVisualizer;
+  const modules = await lazyLoadModules();
+  return modules.FileDataVisualizer;
 }

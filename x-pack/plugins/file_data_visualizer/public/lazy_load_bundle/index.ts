@@ -10,15 +10,15 @@ import { FileDataVisualizer } from '../application';
 import { analyzeFile } from '../api';
 import { getCoreStart } from '../kibana_services';
 
-let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
+let loadModulesPromise: Promise<LazyLoadedModules>;
 
-interface LazyLoadedFileUploadModules {
+interface LazyLoadedModules {
   analyzeFile: typeof analyzeFile;
   FileDataVisualizer: typeof FileDataVisualizer;
   getHttp: () => HttpSetup;
 }
 
-export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
+export async function lazyLoadModules(): Promise<LazyLoadedModules> {
   if (typeof loadModulesPromise !== 'undefined') {
     return loadModulesPromise;
   }
