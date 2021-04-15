@@ -36,10 +36,10 @@ Kibana application privileges.
 
 [float]
 [[reporting-roles-management-ui]]
-=== Creating the role in the `native` realm
+=== Create the role in the `native` realm
 
-To create roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>. This example shows how to use
-*Roles* page to create a role that grants reporting feature privileges in Kibana applications.
+To create roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>. This example shows how to
+create a role that grants reporting feature privileges in {kib} applications.
 
 . Open the main menu, then click *Stack Management > Roles*.
 
@@ -55,13 +55,13 @@ For more information, see {ref}/security-privileges.html[Security privileges].
 [role="screenshot"]
 image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
 
-. Add space privileges that include permission to use Reporting for the necessary Kibana applications.
+. Add space privileges for the {kib} applications that allow access to the reporting options.
 +
-To allow users to CSV create reports in Discover, or PDF reports in Canvas,
-Visualize editor and Dashboard, click the "Add Kibana privilege" button expand
-the menu for each application, and grant the role the privileges to generate
-reports by choosing "All" privileges for all features, or "Customize" to grant
-the role the privilege to generate reports for only certain applications.
+To allow users to create CSV reports in *Discover*, or PDF reports in *Canvas*,
+*Visualize Library*, and *Dashboard*, click  *Add Kibana privilege* for each application,
+then select the privileges to generate
+reports. For example, select *All* privileges for all features, or *Customize* to grant
+the privilege to generate reports for only specific applications.
 +
 [role="screenshot"]
 image::user/security/images/reporting-custom-role.png["Reporting custom role"]
@@ -69,15 +69,15 @@ image::user/security/images/reporting-custom-role.png["Reporting custom role"]
 . Save your new role.
 
 . Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user 
-your new custom role, `custom_reporting_user`.
+your new `custom_reporting_user` role, .
 
 [float]
 [[reporting-roles-user-api]]
 ==== With the user API
 This example uses the {ref}/security-api-put-role.html[role API] to create a role that
-grants the privilege to generate reports in Canvas, Discover, Visualize Editor, and Dashboard.
-This role is meant to be granted to users in combination with other roles that grant access
-read to the necessary data in Elasticsearch, and at least "read" access in the applications
+grants the privilege to generate reports in *Canvas*, *Discover*, *Visualize Library*, and *Dashboard*.
+This role is meant to be granted to users in combination with other roles that grant read access
+to the data in {es}, and at least read access in the applications
 where they'll generate reports.
 
 [source, sh]
@@ -105,11 +105,11 @@ POST /_security/role/custom_reporting_user
 ---------------------------------------------------------------
 // CONSOLE
 
-<1> Grants access to generate PNG and PDF reports in the Dashboard application
-<2> Grants access to download CSV files from saved search panels in the Dashboard application
-<3> Grants access to generate CSV reports from saved searches in Discover
-<4> Grants access to generate PDF reports in Canvas
-<5> Grants access to generate PNG and PDF reports in the Visualize editor
+<1> Grants access to generate PNG and PDF reports in *Dashboard*.
+<2> Grants access to download CSV files from saved search panels in *Dashboard*.
+<3> Grants access to generate CSV reports from saved searches in *Discover*.
+<4> Grants access to generate PDF reports in *Canvas*.
+<5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
 [float]
 === If you are using an external identity provider
@@ -133,7 +133,7 @@ reporting_user:
 [float]
 === With a custom index
 
-If you are using Reporting with a custom index,
+If you are using a custom index,
 the `xpack.reporting.index` setting should begin 
 with `.reporting-*`. The default {kib} system user has
 `all` privileges against the `.reporting-*` pattern of indices.
