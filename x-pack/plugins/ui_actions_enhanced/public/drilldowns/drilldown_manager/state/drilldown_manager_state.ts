@@ -393,7 +393,7 @@ export class DrilldownManagerState {
     this.setActionFactory(actionFactory);
     const drilldownState = this.getDrilldownState();
     if (drilldownState) {
-      drilldownState.setName(template.name);
+      drilldownState.setName(this.pickName(template.name));
       drilldownState.setTriggers(template.triggers);
       drilldownState.setConfig(template.config as SerializableState);
     }
@@ -409,7 +409,7 @@ export class DrilldownManagerState {
     this.setActionFactory(actionFactory);
     const drilldownState = this.getDrilldownState();
     if (drilldownState) {
-      drilldownState.setName(event.action.name);
+      drilldownState.setName(this.pickName(event.action.name));
       drilldownState.setTriggers(event.triggers);
       drilldownState.setConfig(event.action.config);
     }
