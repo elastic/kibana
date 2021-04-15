@@ -14,13 +14,13 @@ for when the client needs to check the license, but doesn't need to pull data fr
 server for any reason, i.e., when adding a new watch.
 */
 
-export function registerRefreshRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerRefreshRoute({ router, getLicenseStatus }: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/license/refresh',
       validate: false,
     },
-    licensePreRoutingFactory(deps, (ctx, request, response) => {
+    licensePreRoutingFactory(getLicenseStatus, (ctx, request, response) => {
       return response.ok({ body: { success: true } });
     })
   );
