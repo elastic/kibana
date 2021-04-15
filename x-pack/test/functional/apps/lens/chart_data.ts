@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { x: '0.209.80.244', y: 6169.9 },
       { x: '0.228.1.71', y: 7092.8 },
       { x: '0.254.91.215', y: 3835.58 },
-      { x: '__other__', y: 5727.24 },
+      { x: 'Other', y: 5727.24 },
     ];
 
     function assertMatchesExpectedData(state: DebugState) {
@@ -91,9 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );
-      expect(terms.map((term) => (term === 'Other' ? '__other__' : term))).to.eql(
-        expectedData.map(({ x }) => x)
-      );
+      expect(terms).to.eql(expectedData.map(({ x }) => x));
       expect(values.map((value) => Math.round(100 * Number(value.replace(',', ''))) / 100)).to.eql(
         expectedData.map(({ y }) => y)
       );
