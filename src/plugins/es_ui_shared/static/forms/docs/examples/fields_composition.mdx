@@ -1,7 +1,10 @@
 ---
-id: fields_composition
-title: Field composition
-sidebar_label: Field composition
+id: formLibExampleFieldsComposition
+slug: /form-lib/examples/fields-composition
+title: Fields composition
+summary: Be DRY and compose your form
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
 ---
 
 If you need to swap your form fields according to one field value (e.g. the "model" has changed), you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
