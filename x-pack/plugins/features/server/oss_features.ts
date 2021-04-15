@@ -571,7 +571,7 @@ const reportingFeatures: {
     name: i18n.translate(
       'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshotFeatureName',
       {
-        defaultMessage: 'PDF / PNG Reports',
+        defaultMessage: 'Reporting',
       }
     ),
     privilegeGroups: [
