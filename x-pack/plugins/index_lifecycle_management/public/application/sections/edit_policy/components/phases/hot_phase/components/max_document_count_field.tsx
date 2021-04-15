@@ -14,7 +14,7 @@ import { ROLLOVER_FORM_PATHS } from '../../../../constants';
 
 export const MaxDocumentCountField: FunctionComponent = () => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <UseField
           path={ROLLOVER_FORM_PATHS.maxDocs}
