@@ -26,7 +26,6 @@ function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: 
       {
         index,
         body,
-        ignore_unavailable: true,
         allow_no_indices: true,
       },
       { ignore: [404] }
