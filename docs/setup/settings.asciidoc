@@ -511,40 +511,8 @@ server.securityResponseHeaders:
   strictTransportSecurity:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
-header is used in all responses to the client from the {kib} server. Set this to `null` to disable it. *Default:* enabled
-
-a|
-----
-server.securityResponseHeaders:
-  strictTransportSecurity.maxAge:
-----
-| Specifies the `max-age` directive of the
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`] response header. This is
-rounded down to the nearest second. *Default:* `'1Y'` (31536000 seconds)
-
-2+a|
-[TIP]
-============
-Use a string of `<count>[s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '120d', '1Y').
-============
-
-a|
-----
-server.securityResponseHeaders:
-  strictTransportSecurity.includeSubDomains:
-----
-| Specifies the `includeSubDomains` directive of the
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`] response header. If
-enabled, the directive is included in the header. *Default:* `false`
-
-a|
-----
-server.securityResponseHeaders:
-  strictTransportSecurity.preload:
-----
-| Specifies the `preload` directive of the
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`] response header. If
-enabled, the directive is included in the header. *Default:* `false`
+header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
+`null`. Set this to `null` to disable it. *Default:* `max-age=31536000` (1 year)
 
 a| [[server-securityResponseHeaders-xContentTypeOptions]]
 ----

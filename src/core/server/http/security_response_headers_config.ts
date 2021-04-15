@@ -8,16 +8,12 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-const strictTransportSecuritySchema = schema.object({
-  // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-  maxAge: schema.duration({ defaultValue: '1Y' }),
-  includeSubDomains: schema.boolean({ defaultValue: false }),
-  preload: schema.boolean({ defaultValue: false }),
-});
-
 export const securityResponseHeadersSchema = schema.object({
-  strictTransportSecurity: schema.oneOf([strictTransportSecuritySchema, schema.literal(null)], {
-    defaultValue: strictTransportSecuritySchema.validate({}),
+  strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
+    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    defaultValue: 'max-age=31536000', // 1 year in seconds
+    // Note: we do not use the 'includeSubDomains' directive by default because it could break installations where Kibana is served on the
+    // same domain as another (non-HTTPS) website
   }),
   xContentTypeOptions: schema.oneOf([schema.literal('nosniff'), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
@@ -57,15 +53,7 @@ export function parseRawSecurityResponseHeadersConfig(
   const { disableEmbedding } = raw;
 
   if (raw.strictTransportSecurity) {
-    const { maxAge, includeSubDomains, preload } = raw.strictTransportSecurity;
-    const directives = [`max-age=${Math.floor(maxAge.asSeconds())}`];
-    if (includeSubDomains) {
-      directives.push('includeSubDomains');
-    }
-    if (preload) {
-      directives.push('preload');
-    }
-    securityResponseHeaders['Strict-Transport-Security'] = directives.join('; ');
+    securityResponseHeaders['Strict-Transport-Security'] = raw.strictTransportSecurity;
   }
   if (raw.xContentTypeOptions) {
     securityResponseHeaders['X-Content-Type-Options'] = raw.xContentTypeOptions;

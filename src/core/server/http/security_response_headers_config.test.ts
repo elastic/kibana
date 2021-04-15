@@ -28,25 +28,11 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
 
   describe('strictTransportSecurity', () => {
     it('a custom value results in the expected Strict-Transport-Security header', () => {
-      const config = schema.validate({
-        strictTransportSecurity: { maxAge: '1M', includeSubDomains: true, preload: true },
-      });
+      const strictTransportSecurity = 'max-age=10000; includeSubDomains';
+      const config = schema.validate({ strictTransportSecurity });
       const result = parse(config);
-      expect(result.securityResponseHeaders['Strict-Transport-Security']).toMatchInlineSnapshot(
-        `"max-age=2592000; includeSubDomains; preload"`
-      );
-    });
-
-    it('a custom maxAge is rounded down to the nearest second', () => {
-      const config1 = schema.validate({ strictTransportSecurity: { maxAge: '999ms' } });
-      const result1 = parse(config1);
-      expect(result1.securityResponseHeaders['Strict-Transport-Security']).toMatchInlineSnapshot(
-        `"max-age=0"`
-      );
-      const config2 = schema.validate({ strictTransportSecurity: { maxAge: '1999ms' } });
-      const result2 = parse(config2);
-      expect(result2.securityResponseHeaders['Strict-Transport-Security']).toMatchInlineSnapshot(
-        `"max-age=1"`
+      expect(result.securityResponseHeaders['Strict-Transport-Security']).toEqual(
+        strictTransportSecurity
       );
     });
 

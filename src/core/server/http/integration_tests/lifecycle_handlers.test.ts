@@ -56,7 +56,7 @@ describe('core lifecycle handlers', () => {
           name: kibanaName,
           securityResponseHeaders: {
             // reflects default config
-            strictTransportSecurity: { maxAge: moment.duration(1, 'year') },
+            strictTransportSecurity: 'max-age=31536000',
             xContentTypeOptions: 'nosniff',
             referrerPolicy: 'strict-origin-when-cross-origin',
             permissionsPolicy: 'camera=(), microphone=()',

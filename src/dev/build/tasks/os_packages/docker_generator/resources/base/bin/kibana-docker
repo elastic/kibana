@@ -117,9 +117,6 @@ kibana_vars=(
     server.cors
     server.cors.origin
     server.securityResponseHeaders.strictTransportSecurity
-    server.securityResponseHeaders.strictTransportSecurity.maxAge
-    server.securityResponseHeaders.strictTransportSecurity.includeSubDomains
-    server.securityResponseHeaders.strictTransportSecurity.preload
     server.securityResponseHeaders.xContentTypeOptions
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.permissionsPolicy

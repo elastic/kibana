@@ -68,11 +68,7 @@ Object {
     "disableEmbedding": false,
     "permissionsPolicy": "camera=(), microphone=()",
     "referrerPolicy": "no-referrer-when-downgrade",
-    "strictTransportSecurity": Object {
-      "includeSubDomains": false,
-      "maxAge": "P1Y",
-      "preload": false,
-    },
+    "strictTransportSecurity": "max-age=31536000",
     "xContentTypeOptions": "nosniff",
   },
   "socketTimeout": 120000,
