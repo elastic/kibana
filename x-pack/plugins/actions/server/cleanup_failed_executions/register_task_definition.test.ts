@@ -13,6 +13,7 @@ import { registerTaskDefinition } from './register_task_definition';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { loggingSystemMock, coreMock } from '../../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { TaskRunnerOpts } from './task_runner';
 
 jest.mock('./task_runner', () => ({ taskRunner: jest.fn() }));
 
@@ -30,18 +31,20 @@ describe('registerTaskDefinition', () => {
     pageSize: 100,
   };
 
+  const taskRunnerOpts: TaskRunnerOpts = {
+    logger,
+    coreStartServices,
+    actionTypeRegistry,
+    config,
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.requireMock('./task_runner').taskRunner.mockReturnValue(jest.fn());
   });
 
   it('should call registerTaskDefinitions with proper parameters', () => {
-    registerTaskDefinition(taskManager, {
-      logger,
-      coreStartServices,
-      actionTypeRegistry,
-      config,
-    });
+    registerTaskDefinition(taskManager, taskRunnerOpts);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -58,13 +61,8 @@ describe('registerTaskDefinition', () => {
   });
 
   it('should call taskRunner with proper parameters', () => {
-    registerTaskDefinition(taskManager, {
-      logger,
-      coreStartServices,
-      actionTypeRegistry,
-      config,
-    });
+    registerTaskDefinition(taskManager, taskRunnerOpts);
     const { taskRunner } = jest.requireMock('./task_runner');
-    expect(taskRunner).toHaveBeenCalledWith(logger, actionTypeRegistry, coreStartServices, config);
+    expect(taskRunner).toHaveBeenCalledWith(taskRunnerOpts);
   });
 });

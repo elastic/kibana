@@ -23,6 +23,11 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "enabled": true,
+          "interval": "PT15S",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -58,6 +63,11 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "cleanupFailedExecutionsTask": Object {
+          "enabled": true,
+          "interval": "PT15S",
+          "pageSize": 100,
+        },
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
