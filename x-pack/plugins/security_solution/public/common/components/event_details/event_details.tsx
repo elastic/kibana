@@ -57,7 +57,8 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     display: flex;
     flex: 1;
     flex-direction: column;
-    overflow: scroll;
+    overflow: hidden;
+    overflow-y: auto;
     ::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 7px;
