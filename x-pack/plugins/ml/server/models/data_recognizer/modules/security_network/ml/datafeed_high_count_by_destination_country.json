@@ -1,0 +1,25 @@
+{
+  "job_id": "high_count_by_destination_country",
+  "indices": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        },
+        {
+          "exists": {
+            "field": "destination.geo.country_name"
+          }
+        }
+      ]
+    }
+  }
+}

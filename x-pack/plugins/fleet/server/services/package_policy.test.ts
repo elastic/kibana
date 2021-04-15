@@ -11,10 +11,10 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 
-import type { SavedObjectsUpdateResponse } from 'src/core/server';
+import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
-import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 import type { ExternalCallback } from '..';
 
@@ -65,6 +65,26 @@ jest.mock('./epm/packages', () => {
 jest.mock('./epm/registry', () => {
   return {
     fetchInfo: () => ({}),
+  };
+});
+
+jest.mock('./agent_policy', () => {
+  return {
+    agentPolicyService: {
+      get: async (soClient: SavedObjectsClient, id: string) => {
+        const agentPolicySO = await soClient.get<AgentPolicySOAttributes>(
+          'ingest-agent-policies',
+          id
+        );
+        if (!agentPolicySO) {
+          return null;
+        }
+        const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
+        agentPolicy.package_policies = [];
+        return agentPolicy;
+      },
+      bumpRevision: () => {},
+    },
   };
 });
 
@@ -346,8 +366,8 @@ describe('Package policy service', () => {
       });
       savedObjectsClient.update.mockImplementation(
         async (
-          type: string,
-          id: string
+          _type: string,
+          _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
           throw savedObjectsClient.errors.createConflictError('abc', '123');
         }
@@ -361,6 +381,131 @@ describe('Package policy service', () => {
           createPackagePolicyMock()
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');
+    });
+
+    it('should only update input vars that are not frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
   });
 

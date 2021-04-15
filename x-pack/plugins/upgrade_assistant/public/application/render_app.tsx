@@ -8,11 +8,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AppDependencies, RootComponent } from './app';
-import { ApiService } from './lib/api';
 
 interface BootDependencies extends AppDependencies {
   element: HTMLElement;
-  api: ApiService;
 }
 
 export const renderApp = (deps: BootDependencies) => {
