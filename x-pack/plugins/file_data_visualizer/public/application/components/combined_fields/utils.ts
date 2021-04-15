@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
-import { FindFileStructureResponse, IngestPipeline, Mappings } from '../../../../common';
+import {
+  FindFileStructureResponse,
+  IngestPipeline,
+  Mappings,
+} from '../../../../../file_upload/common';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];
 const COMMON_LON_NAMES = ['longitude', 'long', 'lon'];

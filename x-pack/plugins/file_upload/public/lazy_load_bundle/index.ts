@@ -32,7 +32,7 @@ interface LazyLoadedFileUploadModules {
   getHttp: () => HttpStart;
 }
 
-export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
+export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
   if (typeof loadModulesPromise !== 'undefined') {
     return loadModulesPromise;
   }

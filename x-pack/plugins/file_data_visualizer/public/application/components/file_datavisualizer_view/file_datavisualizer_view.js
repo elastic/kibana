@@ -20,7 +20,6 @@ import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import { DEFAULT_LINES_TO_SAMPLE, readFile, createUrlOverrides, processResults } from '../utils';
-import { analyzeFile } from '../../../api';
 
 import { MODE } from './constants';
 
@@ -127,7 +126,7 @@ export class FileDataVisualizerView extends Component {
 
   async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      const resp = await analyzeFile(fileContents, overrides);
+      const resp = await this.props.fileUpload.analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 

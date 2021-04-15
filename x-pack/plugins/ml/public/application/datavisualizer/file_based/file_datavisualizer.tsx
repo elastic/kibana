@@ -21,8 +21,8 @@ export const FileDataVisualizerPage: FC = () => {
 
   useEffect(() => {
     if (fileDataVisualizer !== undefined) {
-      const { getFileDatavisualizerComponent } = fileDataVisualizer;
-      getFileDatavisualizerComponent().then(setFileDataVisualizer);
+      const { getFileDataVisualizerComponent } = fileDataVisualizer;
+      getFileDataVisualizerComponent().then(setFileDataVisualizer);
     }
   }, []);
 

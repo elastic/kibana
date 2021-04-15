@@ -6,4 +6,3 @@
  */
 
 export { FileDataVisualizer } from '../../application';
-export { analyzeFile } from '../../api';

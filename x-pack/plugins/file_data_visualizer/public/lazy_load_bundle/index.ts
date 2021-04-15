@@ -7,13 +7,11 @@
 
 import { HttpSetup } from 'src/core/public';
 import { FileDataVisualizer } from '../application';
-import { analyzeFile } from '../api';
 import { getCoreStart } from '../kibana_services';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
 interface LazyLoadedModules {
-  analyzeFile: typeof analyzeFile;
   FileDataVisualizer: typeof FileDataVisualizer;
   getHttp: () => HttpSetup;
 }

@@ -6,22 +6,20 @@
  */
 
 import React from 'react';
-import { FileUploadComponentProps, lazyLoadFileUploadModules } from '../lazy_load_bundle';
+import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import { HasImportPermission } from '../../common';
+import type { HasImportPermission, FindFileStructureResponse } from '../../common';
+import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 
 export interface FileUploadStartApi {
-  getFileUploadComponent(): Promise<React.ComponentType<FileUploadComponentProps>>;
-  importerFactory(format: string, options: ImportFactoryOptions): Promise<IImporter | undefined>;
-  getMaxBytes(): number;
-  getMaxBytesFormatted(): string;
-  hasImportPermission(params: HasImportPermissionParams): Promise<boolean>;
-  checkIndexExists(index: string, params: Record<string, string>): Promise<boolean>;
-  getTimeFieldRange(
-    index: string,
-    query: any,
-    timeFieldName?: string
-  ): Promise<GetTimeFieldRangeResponse>;
+  getFileUploadComponent(): ReturnType<typeof getFileUploadComponent>;
+  importerFactory: typeof importerFactory;
+  getMaxBytes: typeof getMaxBytes;
+  getMaxBytesFormatted: typeof getMaxBytesFormatted;
+  hasImportPermission: typeof hasImportPermission;
+  checkIndexExists: typeof checkIndexExists;
+  getTimeFieldRange: typeof getTimeFieldRange;
+  analyzeFile: typeof analyzeFile;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -33,7 +31,7 @@ export interface GetTimeFieldRangeResponse {
 export async function getFileUploadComponent(): Promise<
   React.ComponentType<FileUploadComponentProps>
 > {
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   return fileUploadModules.JsonUploadAndParse;
 }
 
@@ -41,7 +39,7 @@ export async function importerFactory(
   format: string,
   options: ImportFactoryOptions
 ): Promise<IImporter | undefined> {
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   return fileUploadModules.importerFactory(format, options);
 }
 
@@ -51,8 +49,22 @@ interface HasImportPermissionParams {
   indexName?: string;
 }
 
+export async function analyzeFile(
+  file: string,
+  params: Record<string, string> = {}
+): Promise<FindFileStructureResponse> {
+  const { getHttp } = await lazyLoadModules();
+  const body = JSON.stringify(file);
+  return await getHttp().fetch<FindFileStructureResponse>({
+    path: `/internal/file_data_visualizer/analyze_file`,
+    method: 'POST',
+    body,
+    query: params,
+  });
+}
+
 export async function hasImportPermission(params: HasImportPermissionParams): Promise<boolean> {
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   try {
     const resp = await fileUploadModules.getHttp().fetch<HasImportPermission>({
       path: `/internal/file_upload/has_import_permission`,
@@ -70,7 +82,7 @@ export async function checkIndexExists(
   params: Record<string, string> = {}
 ): Promise<boolean> {
   const body = JSON.stringify({ index });
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   return await fileUploadModules.getHttp().fetch<any>({
     path: `/internal/file_upload/index_exists`,
     method: 'POST',
@@ -82,7 +94,7 @@ export async function checkIndexExists(
 export async function getTimeFieldRange(index: string, query: any, timeFieldName?: string) {
   const body = JSON.stringify({ index, timeFieldName, query });
 
-  const fileUploadModules = await lazyLoadFileUploadModules();
+  const fileUploadModules = await lazyLoadModules();
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
     method: 'POST',

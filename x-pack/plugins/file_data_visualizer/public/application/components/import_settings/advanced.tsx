@@ -20,7 +20,7 @@ import {
 
 import { CombinedField, CombinedFieldsForm } from '../combined_fields';
 import { MLJobEditor, ML_EDITOR_MODE } from '../ml_job_editor';
-import { FindFileStructureResponse } from '../../../../common';
+import { FindFileStructureResponse } from '../../../../../file_upload/common';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {

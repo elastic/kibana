@@ -9,13 +9,10 @@ import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../src/plugins/discover/public';
-import { FindFileStructureResponse } from '../../../../common';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from 'src/plugins/discover/public';
+import { FindFileStructureResponse } from '../../../../../file_upload/common';
 import type { FileUploadPluginStart } from '../../../../../file_upload/public';
+import { useFileDataVisualizerKibana } from '../../kibana_context';
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];

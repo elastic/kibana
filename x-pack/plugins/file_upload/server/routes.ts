@@ -18,9 +18,10 @@ import {
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
+import { analyzeFile } from './analyze_file';
 
 import { updateTelemetry } from './telemetry';
-import { importFileBodySchema, importFileQuerySchema } from './schemas';
+import { importFileBodySchema, importFileQuerySchema, analyzeFileQuerySchema } from './schemas';
 import { CheckPrivilegesPayload } from '../../security/server';
 import { StartDeps } from './types';
 
@@ -85,6 +86,44 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       } catch (e) {
         logger.warn(`Unable to check import permission, error: ${e.message}`);
         return response.ok({ body: { hasImportPermission: false } });
+      }
+    }
+  );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/analyze_file Analyze file data
+   * @apiName AnalyzeFile
+   * @apiDescription Performs analysis of the file data.
+   *
+   * @apiSchema (query) analyzeFileQuerySchema
+   */
+  router.post(
+    {
+      path: '/internal/file_data_visualizer/analyze_file',
+      validate: {
+        body: schema.any(),
+        query: analyzeFileQuerySchema,
+      },
+      options: {
+        body: {
+          accepts: ['text/*', 'application/json'],
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const result = await analyzeFile(
+          context.core.elasticsearch.client,
+          request.body,
+          request.query
+        );
+        return response.ok({ body: result });
+      } catch (e) {
+        return response.customError(wrapError(e));
       }
     }
   );

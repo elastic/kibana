@@ -8,10 +8,10 @@
 import { CoreStart } from 'kibana/public';
 import type { EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { setStartServices } from './kibana_services';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
