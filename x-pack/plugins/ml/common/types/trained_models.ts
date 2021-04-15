@@ -45,6 +45,14 @@ export interface TrainedModelStat {
   };
 }
 
+export interface Hyperparameter {
+  name: string;
+  value: number;
+  absolute_importance: number;
+  relative_importance: number;
+  supplied: boolean;
+}
+
 export interface TrainedModelConfigResponse {
   description: string;
   created_by: string;
@@ -59,6 +67,7 @@ export interface TrainedModelConfigResponse {
         input: any;
         total_feature_importance?: TotalFeatureImportance[];
         feature_importance_baseline?: FeatureImportanceBaseline;
+        hyperparameters?: Hyperparameter[];
       }
     | Record<string, any>;
   model_id: string;

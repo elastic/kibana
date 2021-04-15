@@ -21,6 +21,7 @@ import { ChartData } from '../../../../common/types/field_histograms';
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 
 import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
+import { Hyperparameter } from '../../../../common/types/trained_models';
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
@@ -78,6 +79,7 @@ export interface UseIndexDataReturnType
     | 'toggleChartVisibility'
     | 'visibleColumns'
     | 'baseline'
+    | 'hyperparameters'
     | 'predictionFieldName'
     | 'resultsField'
   > {
@@ -116,6 +118,7 @@ export interface UseDataGridReturnType {
   toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
   baseline?: FeatureImportanceBaseline;
+  hyperparameters?: Hyperparameter[];
   predictionFieldName?: string;
   resultsField?: string;
 }

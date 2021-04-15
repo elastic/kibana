@@ -9,8 +9,7 @@ import React, { FC } from 'react';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { UseIndexDataReturnType } from '../../../../../components/data_grid';
 
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
@@ -19,40 +18,25 @@ import { DataFrameTaskStateType } from '../../../analytics_management/components
 
 import { ExpandableSectionResults } from '../expandable_section';
 
-import { useExplorationResults } from './use_exploration_results';
-
 interface Props {
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
   needsDestIndexPattern: boolean;
+  resultsTableData: UseIndexDataReturnType;
   searchQuery: ResultsSearchQuery;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
-    const {
-      services: {
-        mlServices: { mlApiServices },
-      },
-    } = useMlKibana();
-
-    const classificationData = useExplorationResults(
-      indexPattern,
-      jobConfig,
-      searchQuery,
-      getToastNotifications(),
-      mlApiServices
-    );
-
-    if (jobConfig === undefined || classificationData === undefined) {
+  ({ resultsTableData, indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
+    if (jobConfig === undefined || resultsTableData === undefined) {
       return null;
     }
 
     return (
       <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
         <ExpandableSectionResults
-          indexData={classificationData}
+          indexData={resultsTableData}
           indexPattern={indexPattern}
           jobConfig={jobConfig}
           needsDestIndexPattern={needsDestIndexPattern}

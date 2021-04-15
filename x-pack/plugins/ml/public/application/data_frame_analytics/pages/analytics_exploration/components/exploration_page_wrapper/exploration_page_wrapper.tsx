@@ -12,7 +12,9 @@ import { i18n } from '@kbn/i18n';
 
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
 
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import {
   defaultSearchQuery,
@@ -32,6 +34,8 @@ import { LoadingPanel } from '../loading_panel';
 import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { useExplorationResults } from '../exploration_results_table/use_exploration_results';
+import { HyperparametersSummaryPanel } from '../hyperparameters/hyperparameters_summary';
 
 function getFilters(resultsField: string) {
   return {
@@ -80,6 +84,12 @@ export const ExplorationPageWrapper: FC<Props> = ({
   FeatureImportanceSummaryPanel,
 }) => {
   const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const {
     indexPattern,
     indexPatternErrorMessage,
     isInitialized,
@@ -119,6 +129,14 @@ export const ExplorationPageWrapper: FC<Props> = ({
     jobConfig?.analyzed_fields.includes,
     jobConfig?.analyzed_fields.excludes,
     resultsField
+  );
+
+  const classificationData = useExplorationResults(
+    indexPattern,
+    jobConfig,
+    searchQuery,
+    getToastNotifications(),
+    mlApiServices
   );
 
   if (indexPatternErrorMessage !== undefined) {
@@ -203,6 +221,14 @@ export const ExplorationPageWrapper: FC<Props> = ({
             />
           </>
         )}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        classificationData !== undefined &&
+        classificationData.hyperparameters !== undefined && (
+          <>
+            <HyperparametersSummaryPanel hyperparameters={classificationData.hyperparameters} />{' '}
+          </>
+        )}
 
       <EuiSpacer size="m" />
 
@@ -238,6 +264,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
             jobStatus={jobStatus}
             needsDestIndexPattern={needsDestIndexPattern}
             searchQuery={searchQuery}
+            resultsTableData={classificationData}
           />
         )}
     </>

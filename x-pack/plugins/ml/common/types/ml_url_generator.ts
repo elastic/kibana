@@ -247,6 +247,7 @@ export type ExpandablePanels =
   | 'analysis'
   | 'evaluation'
   | 'feature_importance'
+  | 'hyperparameter_importance'
   | 'results'
   | 'splom';
 

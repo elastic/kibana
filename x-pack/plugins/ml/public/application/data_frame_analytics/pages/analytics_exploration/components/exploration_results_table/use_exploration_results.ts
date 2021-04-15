@@ -38,6 +38,7 @@ import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import { Hyperparameter } from '../../../../../../../common/types/trained_models';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
@@ -48,6 +49,7 @@ export const useExplorationResults = (
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
+  const [hyperparameters, setHyperparameters] = useState<Hyperparameter[] | undefined>();
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
@@ -140,7 +142,7 @@ export const useExplorationResults = (
       ) {
         const jobId = jobConfig.id;
         const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
-          include: 'feature_importance_baseline',
+          include: 'feature_importance_baseline,hyperparameters',
         });
         const inferenceModel = inferenceModels.find(
           (model) => model.metadata?.analytics_config?.id === jobId
@@ -148,6 +150,9 @@ export const useExplorationResults = (
 
         if (inferenceModel?.metadata?.feature_importance_baseline !== undefined) {
           setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
+        }
+        if (inferenceModel?.metadata?.hyperparameters !== undefined) {
+          setHyperparameters(inferenceModel?.metadata?.hyperparameters);
         }
       }
     } catch (e) {
@@ -181,6 +186,7 @@ export const useExplorationResults = (
     ...dataGrid,
     renderCellValue,
     baseline,
+    hyperparameters,
     predictionFieldName,
     resultsField,
   };
