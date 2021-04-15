@@ -39,7 +39,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   );
 
   if (aliasResult.statusCode !== 404) {
-    const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
+    const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult.body);
     return indicesFromAliasResponse.slice(0, limit);
   }
 
