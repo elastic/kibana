@@ -15,7 +15,7 @@ interface Props {
   series: DataSeries;
 }
 
-export function ActionsCol({ series }: Props) {
+export function ChartOptions({ series }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="center">
       <EuiFlexItem grow={false}>
