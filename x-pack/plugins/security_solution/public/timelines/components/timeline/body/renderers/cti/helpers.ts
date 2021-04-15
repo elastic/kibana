@@ -24,5 +24,5 @@ export const hasThreatMatchValue = (data: Ecs): boolean =>
   );
 
 export const HorizontalSpacer = styled.div`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
