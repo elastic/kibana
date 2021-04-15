@@ -197,7 +197,7 @@ export function DiscoverGridFlyout({
               onAddColumn(columnName);
               services.toastNotifications.addSuccess(
                 i18n.translate('discover.grid.flyout.toastColumnAdded', {
-                  defaultMessage: `Column  '{columnName}' was added`,
+                  defaultMessage: `Column '{columnName}' was added`,
                   values: { columnName },
                 })
               );
