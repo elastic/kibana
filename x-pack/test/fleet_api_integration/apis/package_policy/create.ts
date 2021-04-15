@@ -80,7 +80,9 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
 
       expect(responseWithoutForce.statusCode).to.be(400);
-      expect(responseWithoutForce.message).to.contain('Cannot add integrations to hosted policy');
+      expect(responseWithoutForce.message).to.contain(
+        'Cannot add integrations to hosted agent policy'
+      );
 
       // try same request with `force: true`
       const { body: responseWithForce } = await supertest

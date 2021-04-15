@@ -347,7 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ agentPolicyId: hostedPolicy.id })
           .expect(400);
 
-        expect(body.message).to.contain('Cannot delete hosted policy');
+        expect(body.message).to.contain('Cannot delete hosted agent policy');
       });
 
       it('should allow regular policies being deleted', async () => {
