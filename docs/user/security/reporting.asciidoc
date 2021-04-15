@@ -91,12 +91,12 @@ POST /_security/role/custom_reporting_user
       base: [],
       feature: {
         dashboard: [
-          'generate_screenshot_report', <1>
-          'download_csv_dashboard_panel' <2>
+          'generate_report', <1>
+          'download_csv_report' <2>
         ],
-        discover: ['generate_csv_report'], <3>
-        canvas: ['generate_screenshot_report'], <4>
-        visualize: ['generate_screenshot_report'], <5>
+        discover: ['generate_report'], <3>
+        canvas: ['generate_report'], <4>
+        visualize: ['generate_report'], <5>
       },
       spaces: ['*'],
     }

@@ -59,7 +59,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
                   groupType: 'independent' as 'independent',
                   privileges: [
                     {
-                      id: 'generate_screenshot_report',
+                      id: 'generate_report',
                       name: i18n.translate('xpack.canvas.features.reporting.pdf', {
                         defaultMessage: 'Generate PDF Reports',
                       }),

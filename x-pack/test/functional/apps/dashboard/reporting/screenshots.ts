@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all', 'generate_screenshot_report'] },
+            feature: { dashboard: ['minimal_all', 'generate_report'] },
           },
         ],
       });

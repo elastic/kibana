@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_read', 'generate_screenshot_report'] },
+            feature: { dashboard: ['minimal_read', 'generate_report'] },
           },
         ],
       });

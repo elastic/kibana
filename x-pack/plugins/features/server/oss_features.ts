@@ -500,7 +500,7 @@ const reportingFeatures: {
         groupType: 'independent',
         privileges: [
           {
-            id: 'generate_csv_report',
+            id: 'generate_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.discoverGenerateCSV', {
               defaultMessage: 'Generate CSV reports',
             }),
@@ -523,7 +523,7 @@ const reportingFeatures: {
         groupType: 'independent',
         privileges: [
           {
-            id: 'download_csv_dashboard_panel',
+            id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
               defaultMessage: 'Download CSV reports from saved searches',
             }),
@@ -549,7 +549,7 @@ const reportingFeatures: {
         groupType: 'independent',
         privileges: [
           {
-            id: 'generate_screenshot_report',
+            id: 'generate_report',
             name: i18n.translate(
               'xpack.features.ossFeatures.reporting.dashboardGenerateScreenshot',
               {
@@ -579,7 +579,7 @@ const reportingFeatures: {
         groupType: 'independent',
         privileges: [
           {
-            id: 'generate_screenshot_report',
+            id: 'generate_report',
             name: i18n.translate(
               'xpack.features.ossFeatures.reporting.visualizeGenerateScreenshot',
               {

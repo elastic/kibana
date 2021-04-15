@@ -166,7 +166,7 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
                   "api": Array [
                     "generateReport",
                   ],
-                  "id": "generate_screenshot_report",
+                  "id": "generate_report",
                   "includeIn": "all",
                   "management": Object {
                     "insightsAndAlerting": Array [

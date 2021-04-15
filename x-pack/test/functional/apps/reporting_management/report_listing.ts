@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           {
             spaces: ['*'],
             base: [],
-            feature: { canvas: ['minimal_read', 'generate_screenshot_report'] },
+            feature: { canvas: ['minimal_read', 'generate_report'] },
           },
         ],
       });

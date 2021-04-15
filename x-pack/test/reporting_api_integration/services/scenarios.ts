@@ -76,14 +76,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
         {
           base: [],
           feature: {
-            dashboard: [
-              'minimal_read',
-              'download_csv_dashboard_panel',
-              'generate_screenshot_report',
-            ],
-            discover: ['minimal_read', 'generate_csv_report'],
-            canvas: ['minimal_read', 'generate_screenshot_report'],
-            visualize: ['minimal_read', 'generate_screenshot_report'],
+            dashboard: ['minimal_read', 'download_csv_report', 'generate_report'],
+            discover: ['minimal_read', 'generate_report'],
+            canvas: ['minimal_read', 'generate_report'],
+            visualize: ['minimal_read', 'generate_report'],
           },
           spaces: ['*'],
         },
