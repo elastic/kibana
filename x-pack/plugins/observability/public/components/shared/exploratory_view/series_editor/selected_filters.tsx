@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
-import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
@@ -37,7 +37,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
 
   const { removeFilter } = useSeriesFilters({ seriesId });
 
-  const { indexPattern } = useIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext();
 
   return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
     <EuiFlexItem>
@@ -45,7 +45,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
         {filters.map(({ field, values, notValues }) => (
           <Fragment key={field}>
             {(values ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false}>
+              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
                   seriesId={seriesId}
                   field={field}
@@ -57,7 +57,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
               </EuiFlexItem>
             ))}
             {(notValues ?? []).map((val) => (
-              <EuiFlexItem key={field + val} grow={false}>
+              <EuiFlexItem key={field + val} grow={false} style={{ maxWidth: 300 }}>
                 <FilterLabel
                   seriesId={seriesId}
                   field={field}
