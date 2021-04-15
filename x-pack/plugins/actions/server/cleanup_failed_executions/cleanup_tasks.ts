@@ -15,7 +15,7 @@ import { TaskInstance } from '../../../task_manager/server';
 import { SpacesPluginStart } from '../../../spaces/server';
 import { extractBulkResponseDeleteFailures, spaceIdToNamespace } from './lib';
 
-interface CleanupTasksOpts {
+export interface CleanupTasksOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   tasks: Array<SavedObjectsFindResult<TaskInstance>>;
@@ -25,13 +25,17 @@ interface CleanupTasksOpts {
   taskManagerIndex: string;
 }
 
+export interface CleanupTasksResult {
+  success: boolean;
+  successCount: number;
+  failureCount: number;
+}
+
 /**
  * Cleanup tasks
  *
  * This function receives action execution tasks that are in a failed state, removes
  * the linked "action_task_params" object first and then if successful, the task manager's task.
- *
- * Returns true/false based on if the removal was completely successful.
  */
 export async function cleanupTasks({
   logger,
@@ -41,10 +45,10 @@ export async function cleanupTasks({
   savedObjectsSerializer,
   kibanaIndex,
   taskManagerIndex,
-}: CleanupTasksOpts): Promise<boolean> {
+}: CleanupTasksOpts): Promise<CleanupTasksResult> {
   if (tasks.length === 0) {
     logger.debug('No tasks to cleanup');
-    return true;
+    return { success: true, successCount: 0, failureCount: 0 };
   }
 
   const deserializedTasks = tasks.map((task) => ({
@@ -88,6 +92,7 @@ export async function cleanupTasks({
           'action_task_params',
           actionTaskParamsId
         );
+        // Avoid removing tasks that failed to remove linked objects
         if (failedActionTaskParams.find((item) => item._id === rawId)) {
           return null;
         }
@@ -101,5 +106,9 @@ export async function cleanupTasks({
     logger.debug(`Failed to delete the following tasks [${JSON.stringify(failedTasks)}]`);
   }
 
-  return failedActionTaskParams.length === 0 && failedTasks.length === 0;
+  return {
+    success: failedActionTaskParams.length === 0 && failedTasks.length === 0,
+    successCount: tasks.length - failedActionTaskParams.length - failedTasks.length,
+    failureCount: failedActionTaskParams.length + failedTasks.length,
+  };
 }
