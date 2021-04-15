@@ -41,6 +41,7 @@ export const config: PluginConfigDescriptor = {
     unused('agents.agentPolicyRolloutRateLimitRequestPerInterval'),
     unused('agents.pollingRequestTimeout'),
     unused('agents.tlsCheckDisabled'),
+    unused('agents.fleetServerEnabled'),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -48,7 +49,6 @@ export const config: PluginConfigDescriptor = {
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-      fleetServerEnabled: schema.boolean({ defaultValue: false }),
       elasticsearch: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
