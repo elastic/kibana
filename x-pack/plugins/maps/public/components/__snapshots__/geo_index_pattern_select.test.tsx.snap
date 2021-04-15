@@ -42,7 +42,7 @@ exports[`should render no index pattern warning when there are no matching index
         href="abc//app/management/kibana/indexPatterns"
       >
         <FormattedMessage
-          defaultMessage="create an index pattern."
+          defaultMessage="Create an index pattern."
           id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
           values={Object {}}
         />
