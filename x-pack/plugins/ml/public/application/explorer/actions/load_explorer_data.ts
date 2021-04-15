@@ -169,7 +169,7 @@ const loadExplorerDataProvider = (
         lastRefresh,
         selectedCells,
         selectedJobs,
-        interval,
+        swimlaneBucketInterval.asSeconds(),
         bounds
       ),
       anomalyChartRecords: anomalyExplorerChartsService.loadDataForCharts$(

@@ -369,11 +369,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
-  const xDomain = {
-    min: swimlaneData.earliest * 1000,
-    max: swimlaneData.latest * 1000,
-    minInterval: swimlaneData.interval * 1000,
-  };
+  const xDomain = swimlaneData
+    ? {
+        min: swimlaneData.earliest * 1000,
+        max: swimlaneData.latest * 1000,
+        minInterval: swimlaneData.interval * 1000,
+      }
+    : undefined;
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
@@ -466,18 +468,21 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   />
                 )}
               </div>
-              {swimlaneType === SWIMLANE_TYPE.OVERALL && showSwimlane && !isLoading && (
-                <MlTooltipComponent>
-                  {(tooltipService) => (
-                    <SwimlaneAnnotationContainer
-                      chartWidth={chartWidth}
-                      domain={xDomain}
-                      annotationsData={annotationsData}
-                      tooltipService={tooltipService}
-                    />
-                  )}
-                </MlTooltipComponent>
-              )}
+              {swimlaneType === SWIMLANE_TYPE.OVERALL &&
+                showSwimlane &&
+                xDomain !== undefined &&
+                !isLoading && (
+                  <MlTooltipComponent>
+                    {(tooltipService) => (
+                      <SwimlaneAnnotationContainer
+                        chartWidth={chartWidth}
+                        domain={xDomain}
+                        annotationsData={annotationsData}
+                        tooltipService={tooltipService}
+                      />
+                    )}
+                  </MlTooltipComponent>
+                )}
             </>
           </EuiFlexItem>
 
