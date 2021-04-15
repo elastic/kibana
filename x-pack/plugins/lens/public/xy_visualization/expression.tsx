@@ -639,7 +639,6 @@ export function XYChart({
                   // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
                   (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
                 ) {
-                  // if (record && !isPrimitive(record)) {
                   newRow[column.id] = formatFactory(column.meta.params).convert(record);
                 }
               }
