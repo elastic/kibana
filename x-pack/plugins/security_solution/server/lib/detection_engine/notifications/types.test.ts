@@ -6,9 +6,10 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getNotificationResult, getResult } from '../routes/__mocks__/request_responses';
+import { getNotificationResult, getAlertMock } from '../routes/__mocks__/request_responses';
 import { isAlertTypes, isNotificationAlertExecutor } from './types';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('types', () => {
   it('isAlertTypes should return true if is RuleNotificationAlertType type', () => {
@@ -16,7 +17,7 @@ describe('types', () => {
   });
 
   it('isAlertTypes should return false if is not RuleNotificationAlertType', () => {
-    expect(isAlertTypes([getResult()])).toEqual(false);
+    expect(isAlertTypes([getAlertMock(getQueryRuleParams())])).toEqual(false);
   });
 
   it('isNotificationAlertExecutor should return true it passed object is NotificationAlertTypeDefinition type', () => {
