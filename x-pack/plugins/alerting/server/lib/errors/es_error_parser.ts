@@ -6,23 +6,12 @@
  */
 
 // import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { ElasticsearchError } from './';
+import { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
 
-interface ErrorObject {
-  caused_by?: {
-    reason?: string;
-    caused_by?: {};
-  };
-  failed_shards?: Array<{
-    reason?: {
-      caused_by?: {
-        reason?: string;
-      };
-    };
-  }>;
-}
-
-const getEsCause = (obj: ErrorObject = {}, causes: string[] = []): string[] => {
+const getEsCause = (
+  obj: ElasticsearchErrorCausedByObject = {},
+  causes: string[] = []
+): string[] => {
   const updated = [...causes];
 
   if (obj.caused_by) {
@@ -49,7 +38,7 @@ export const getEsErrorMessage = (error: ElasticsearchError) => {
   let message = error?.message;
   const apiError = error?.error?.meta?.body?.error ?? error?.meta?.body?.error;
   if (apiError) {
-    message += `, caused by: "${getEsCause(apiError as ErrorObject)}"`;
+    message += `, caused by: "${getEsCause(apiError as ElasticsearchErrorCausedByObject)}"`;
   }
   return message;
 };

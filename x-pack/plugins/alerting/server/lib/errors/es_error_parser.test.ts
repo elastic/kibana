@@ -42,5 +42,71 @@ describe('ES error parser', () => {
         },
       })
     ).toStrictEqual(', caused by: "reason2"');
+
+    expect(
+      getEsErrorMessage({
+        name: '',
+        message: '',
+        meta: {
+          body: {
+            error: {
+              caused_by: {
+                reason: 'reason3',
+                caused_by: {
+                  reason: 'reason4',
+                },
+              },
+            },
+          },
+        },
+      })
+    ).toStrictEqual(', caused by: "reason3,reason4"');
+
+    expect(
+      getEsErrorMessage({
+        name: '',
+        message: '',
+        meta: {
+          body: {
+            error: {
+              failed_shards: [
+                {
+                  reason: {
+                    caused_by: {
+                      reason: 'reason4',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toStrictEqual(', caused by: "reason4"');
+
+    expect(
+      getEsErrorMessage({
+        name: '',
+        message: '',
+        meta: {
+          body: {
+            error: {
+              failed_shards: [
+                {
+                  reason: {
+                    caused_by: {
+                      reason: 'reason5',
+                      caused_by: {
+                        reason: 'reason6',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toStrictEqual(', caused by: "reason5,reason6"');
   });
 });

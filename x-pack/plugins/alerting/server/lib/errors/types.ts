@@ -10,15 +10,19 @@ export interface ErrorThatHandlesItsOwnResponse extends Error {
   sendResponse(res: KibanaResponseFactory): IKibanaResponse;
 }
 
-interface ElasticsearchErrorCausedBy {
-  caused_by?: {
-    reason?: string;
-  };
+export interface ElasticsearchErrorCausedByObject {
+  reason?: string;
+  caused_by?: ElasticsearchErrorCausedByObject;
+  failed_shards?: Array<{
+    reason?: {
+      caused_by?: ElasticsearchErrorCausedByObject;
+    };
+  }>;
 }
 
 interface ElasticsearchErrorMeta {
   body?: {
-    error?: ElasticsearchErrorCausedBy;
+    error?: ElasticsearchErrorCausedByObject;
   };
 }
 
