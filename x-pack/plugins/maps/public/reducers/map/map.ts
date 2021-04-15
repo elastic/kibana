@@ -26,7 +26,6 @@ import {
   SET_LAYER_STYLE_META,
   SET_JOINS,
   UPDATE_SOURCE_PROP,
-  SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
@@ -73,7 +72,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     timeFilters: undefined,
     query: undefined,
     filters: [],
-    refreshConfig: undefined,
     refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
   },
@@ -226,18 +224,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           filters,
           searchSessionId,
           searchSessionMapBuffer,
-        },
-      };
-    case SET_REFRESH_CONFIG:
-      const { isPaused, interval } = action;
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          refreshConfig: {
-            isPaused,
-            interval,
-          },
         },
       };
     case TRIGGER_REFRESH_TIMER:

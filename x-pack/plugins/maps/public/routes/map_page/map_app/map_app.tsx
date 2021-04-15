@@ -8,6 +8,7 @@
 import React from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
@@ -17,6 +18,8 @@ import {
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
+  getSearchService,
+  getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
 import {
@@ -36,11 +39,12 @@ import {
   SavedQuery,
   QueryStateChange,
   QueryState,
+  waitUntilNextSessionCompletes$,
 } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
+import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { getExistingMapPath } from '../../../../common/constants';
@@ -52,6 +56,11 @@ import {
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
+
+interface MapRefreshConfig {
+  isPaused: boolean;
+  interval: number;
+}
 
 export interface Props {
   savedMap: SavedMap;
@@ -65,7 +74,7 @@ export interface Props {
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   nextIndexPatternIds: string[];
-  dispatchSetQuery: ({
+  setQuery: ({
     forceRefresh,
     filters,
     query,
@@ -77,8 +86,6 @@ export interface Props {
     forceRefresh?: boolean;
   }) => void;
   timeFilters: TimeRange;
-  refreshConfig: MapRefreshConfig;
-  setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
   query: MapQuery | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -88,9 +95,12 @@ export interface State {
   initialized: boolean;
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;
+  isRefreshPaused: boolean;
+  refreshInterval: number;
 }
 
 export class MapApp extends React.Component<Props, State> {
+  _autoRefreshSubscription: Subscription | null = null;
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
@@ -103,11 +113,25 @@ export class MapApp extends React.Component<Props, State> {
     this.state = {
       indexPatterns: [],
       initialized: false,
+      isRefreshPaused: true,
+      refreshInterval: 0,
     };
   }
 
   componentDidMount() {
     this._isMounted = true;
+
+    this._autoRefreshSubscription = getTimeFilter()
+      .getAutoRefreshFetch$()
+      .pipe(
+        tap(() => {
+          this.props.setQuery({ searchSessionId: getSearchService().session.start() });
+        }),
+        switchMap((done) =>
+          waitUntilNextSessionCompletes$(getSearchService().session).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     this._globalSyncUnsubscribe = startGlobalStateSyncing();
     this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
@@ -138,6 +162,9 @@ export class MapApp extends React.Component<Props, State> {
   componentWillUnmount() {
     this._isMounted = false;
 
+    if (this._autoRefreshSubscription) {
+      this._autoRefreshSubscription.unsubscribe();
+    }
     if (this._globalSyncUnsubscribe) {
       this._globalSyncUnsubscribe();
     }
@@ -164,7 +191,16 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
-    this._onQueryChange({ time: globalState.time });
+    if (changes.time) {
+      this._onQueryChange({ time: globalState.time });
+    }
+
+    if (changes.refreshInterval) {
+      this._onRefreshConfigChange({
+        isPaused: globalState.refreshInterval.pause,
+        interval: globalState.refreshInterval.value,
+      });
+    }
   };
 
   async _updateIndexPatterns() {
@@ -199,7 +235,7 @@ export class MapApp extends React.Component<Props, State> {
       filterManager.setFilters(filters);
     }
 
-    this.props.dispatchSetQuery({
+    this.props.setQuery({
       forceRefresh,
       filters: filterManager.getFilters(),
       query,
@@ -265,14 +301,16 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  // mapRefreshConfig: MapRefreshConfig
-  _onRefreshConfigChange(mapRefreshConfig: MapRefreshConfig) {
-    this.props.setRefreshConfig(mapRefreshConfig);
+  _onRefreshConfigChange({ isPaused, interval }: MapRefreshConfig) {
+    this.setState({
+      isRefreshPaused: isPaused,
+      refreshInterval: interval,
+    });
     updateGlobalState(
       {
         refreshInterval: {
-          pause: mapRefreshConfig.isPaused,
-          value: mapRefreshConfig.interval,
+          pause: isPaused,
+          value: interval,
         },
       },
       !this.state.initialized
@@ -371,8 +409,8 @@ export class MapApp extends React.Component<Props, State> {
         onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
         dateRangeTo={this.props.timeFilters.to}
-        isRefreshPaused={this.props.refreshConfig.isPaused}
-        refreshInterval={this.props.refreshConfig.interval}
+        isRefreshPaused={this.state.isRefreshPaused}
+        refreshInterval={this.state.refreshInterval}
         onRefreshChange={({
           isPaused,
           refreshInterval,

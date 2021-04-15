@@ -38,7 +38,6 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_REFRESH_CONFIG,
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   TRIGGER_REFRESH_TIMER,
@@ -48,13 +47,7 @@ import {
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import {
-  DrawState,
-  MapCenter,
-  MapCenterAndZoom,
-  MapExtent,
-  MapRefreshConfig,
-} from '../../common/descriptor_types';
+import { DrawState, MapCenter, MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
@@ -257,7 +250,7 @@ export function setQuery({
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
-      searchSessionId,
+      searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
     };
 
@@ -284,14 +277,6 @@ export function setQuery({
     } else {
       await dispatch(syncDataForAllLayers());
     }
-  };
-}
-
-export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
-  return {
-    type: SET_REFRESH_CONFIG,
-    isPaused,
-    interval,
   };
 }
 

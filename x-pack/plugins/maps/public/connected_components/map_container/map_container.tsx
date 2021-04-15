@@ -30,7 +30,6 @@ import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
-import { MapRefreshConfig } from '../../../common/descriptor_types';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
@@ -47,7 +46,6 @@ export interface Props {
   isFullScreen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
-  refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
   triggerRefreshTimer: () => void;
   title?: string;
@@ -65,9 +63,6 @@ export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
   private _prevIndexPatternIds: string[] = [];
-  private _refreshTimerId: number | null = null;
-  private _prevIsPaused: boolean | null = null;
-  private _prevInterval: number | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -77,12 +72,10 @@ export class MapContainer extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._setRefreshTimer();
     registerLayerWizards();
   }
 
   componentDidUpdate() {
-    this._setRefreshTimer();
     if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
@@ -95,7 +88,6 @@ export class MapContainer extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._clearRefreshTimer();
     this.props.cancelAllInFlightRequests();
   }
 
@@ -146,33 +138,6 @@ export class MapContainer extends Component<Props, State> {
     }
 
     this.setState({ geoFields });
-  };
-
-  _setRefreshTimer = () => {
-    const { isPaused, interval } = this.props.refreshConfig;
-
-    if (this._prevIsPaused === isPaused && this._prevInterval === interval) {
-      // refreshConfig is the same, nothing to do
-      return;
-    }
-
-    this._prevIsPaused = isPaused;
-    this._prevInterval = interval;
-
-    this._clearRefreshTimer();
-
-    if (!isPaused && interval > 0) {
-      this._refreshTimerId = window.setInterval(() => {
-        this.props.triggerRefreshTimer();
-      }, interval);
-    }
-  };
-
-  _clearRefreshTimer = () => {
-    if (this._refreshTimerId) {
-      window.clearInterval(this._refreshTimerId);
-      this._refreshTimerId = null;
-    }
   };
 
   // Mapbox does not provide any feedback when rendering is complete.
