@@ -17,7 +17,6 @@
     "maps"
   ],
   "requiredBundles": [
-    "esUiShared",
     "kibanaReact",
     "maps"
   ],

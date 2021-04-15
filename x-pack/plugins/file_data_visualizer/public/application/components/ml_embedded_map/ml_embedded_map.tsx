@@ -8,12 +8,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  ViewMode,
-} from 'src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
 import {
@@ -23,6 +17,12 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../maps/public/embeddable';
 import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '../../../../../maps/public';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+  ViewMode,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
 
 export function MlEmbeddedMapComponent({
