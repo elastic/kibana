@@ -73,6 +73,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.Unnamed.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -134,6 +135,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -162,6 +164,7 @@
                 }
               },
               {
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$2",
                 "type": "Object",
                 "label": "{ uiActions, share }",
                 "isRequired": true,
@@ -214,6 +217,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.start.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -233,6 +237,7 @@
                 }
               },
               {
+                "id": "def-public.DiscoverEnhancedPlugin.start.$2",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -362,29 +367,18 @@
             "label": "isCompatible",
             "signature": [
               "(context: ",
-              {
-                "pluginId": "discoverEnhanced",
-                "scope": "public",
-                "docId": "kibDiscoverEnhancedPluginApi",
-                "section": "def-public.ExploreDataChartActionContext",
-                "text": "ExploreDataChartActionContext"
-              },
+              "ExploreDataChartActionContext",
               ") => Promise<boolean>"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-public.ExploreDataChartAction.isCompatible.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "discoverEnhanced",
-                    "scope": "public",
-                    "docId": "kibDiscoverEnhancedPluginApi",
-                    "section": "def-public.ExploreDataChartActionContext",
-                    "text": "ExploreDataChartActionContext"
-                  }
+                  "ExploreDataChartActionContext"
                 ],
                 "description": [],
                 "source": {
@@ -405,17 +399,12 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExploreDataChartAction.getUrl.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "discoverEnhanced",
-                    "scope": "public",
-                    "docId": "kibDiscoverEnhancedPluginApi",
-                    "section": "def-public.ExploreDataChartActionContext",
-                    "text": "ExploreDataChartActionContext"
-                  }
+                  "ExploreDataChartActionContext"
                 ],
                 "description": [],
                 "source": {
@@ -426,13 +415,7 @@
             ],
             "signature": [
               "(context: ",
-              {
-                "pluginId": "discoverEnhanced",
-                "scope": "public",
-                "docId": "kibDiscoverEnhancedPluginApi",
-                "section": "def-public.ExploreDataChartActionContext",
-                "text": "ExploreDataChartActionContext"
-              },
+              "ExploreDataChartActionContext",
               ") => Promise<",
               {
                 "pluginId": "share",
@@ -535,6 +518,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExploreDataContextMenuAction.getUrl.$1",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -748,13 +732,7 @@
             },
             "signature": [
               "{ dashboardConfig: ",
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.DashboardConfig",
-                "text": "DashboardConfig"
-              },
+              "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
             ]
           },

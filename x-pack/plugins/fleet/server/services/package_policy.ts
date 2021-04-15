@@ -23,6 +23,7 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
@@ -346,6 +347,8 @@ class PackagePolicyService {
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
+
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -600,6 +603,42 @@ async function _compilePackageStream(
   stream.compiled_stream = yaml;
 
   return { ...stream };
+}
+
+function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+  const resultInputs = [...newInputs];
+
+  for (const input of resultInputs) {
+    const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (input.vars && oldInput?.vars) {
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+    }
+    if (input.streams && oldInput?.streams) {
+      for (const stream of input.streams) {
+        const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (stream.vars && oldStream?.vars) {
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+        }
+      }
+    }
+  }
+
+  return resultInputs;
+}
+
+function _enforceFrozenVars(
+  oldVars: Record<string, PackagePolicyConfigRecordEntry>,
+  newVars: Record<string, PackagePolicyConfigRecordEntry>
+) {
+  const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (val.frozen) {
+      resultVars[key] = val;
+    } else {
+      resultVars[key] = newVars[key];
+    }
+  }
+  return resultVars;
 }
 
 export type PackagePolicyServiceInterface = PackagePolicyService;
