@@ -99,11 +99,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        await retry.waitFor('doc table to contain the right search result', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
-        });
+        await retry.waitForWithTimeout(
+          'doc table to contain the right search result',
+          1000,
+          async () => {
+            const rowData = await PageObjects.discover.getDocTableField(1);
+            log.debug(`The first timestamp value in doc table: ${rowData}`);
+            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+          }
+        );
       });
 
       it('should modify the time range when the histogram is brushed', async function () {

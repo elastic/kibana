@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
         });
 
-        const field = await PageObjects.discover.getDocTableField(1, 2);
+        const field = await PageObjects.discover.getDocTableField(1, 3);
         expect(field).to.include.string('relatedContent.url');
 
         const marks = await PageObjects.discover.getMarks();

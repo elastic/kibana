@@ -192,8 +192,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getDocTableIndex(index: number) {
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
-      // Remove first control column
-      return result.slice(1).join(' ');
+      // Remove control columns
+      return result.slice(2).join(' ');
     }
 
     public async getDocTableIndexLegacy(index: number) {
@@ -201,7 +201,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number, cellIdx: number = 1) {
+    public async getDocTableField(index: number, cellIdx: number = 2) {
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
       return result[cellIdx];
