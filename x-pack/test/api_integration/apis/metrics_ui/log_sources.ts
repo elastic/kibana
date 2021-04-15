@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(configuration.name).to.be('Default');
         expect(origin).to.be('stored');
         expect(configuration.logIndices).eql({
-          type: 'indexName',
+          type: 'index_name',
           indexName: 'logs-*,filebeat-*,kibana_sample_data_logs*',
         });
         expect(configuration.fields.timestamp).to.be('@timestamp');
