@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
 
@@ -26,14 +28,13 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     name: schema.string(),
     version: schema.string({
       validate: (value) => {
-        if (!semverValid(value)) {
+        if (value !== PRECONFIGURATION_LATEST_KEYWORD && !semverValid(value)) {
           return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
-            defaultMessage: 'must be a valid semver',
+            defaultMessage: 'must be a valid semver, or the keyword `latest`',
           });
         }
       },
     }),
-    force: schema.maybe(schema.boolean()),
   })
 );
 
