@@ -19,9 +19,10 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/plugin_api_perf/plugins" \
   --scan-dir "$XPACK_DIR/test/licensing_plugin/plugins" \
   --scan-dir "$XPACK_DIR/test/usage_collection/plugins" \
-  --verbose
+  --verbose \
+  --no-cache
 
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
-node scripts/build --debug --no-oss
+node scripts/build --debug --no-oss --no-cache
