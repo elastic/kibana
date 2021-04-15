@@ -77,6 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
             status: 'stopped',
             progress: '100',
           },
+          runtimeEditorContent:
+            '{"lowercase_central_air":{"type":"keyword","script":"emit(params._source.CentralAir.toLowerCase())"}}',
         },
       },
     ];
@@ -125,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
           await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent([
-            '{"lowercase_central_air":{"type":"keyword","script":"emit(params._source.CentralAir.toLowerCase())"}}',
+            testData.expected.runtimeEditorContent,
           ]);
 
           await ml.testExecution.logTestStep('does not display the dependent variable input');

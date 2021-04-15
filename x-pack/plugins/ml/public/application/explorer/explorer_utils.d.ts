@@ -109,6 +109,12 @@ declare interface SwimlaneBounds {
   latest: number;
 }
 
+export declare const loadAllAnnotations: (
+  selectedJobs: ExplorerJob[],
+  interval: number,
+  bounds: TimeRangeBounds
+) => Promise<AnnotationsTable>;
+
 export declare const loadAnnotationsTableData: (
   selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
