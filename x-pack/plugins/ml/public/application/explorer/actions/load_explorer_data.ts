@@ -220,6 +220,7 @@ const loadExplorerDataProvider = (
       tap(explorerService.setChartsDataLoading),
       mergeMap(
         ({
+          allAnnotations,
           anomalyChartRecords,
           influencers,
           overallState,
