@@ -53,13 +53,13 @@ const i18nTexts = {
     }
   ),
   loadingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.loadingText',
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.loadingLabel',
     {
       defaultMessage: 'Loading logging state…',
     }
   ),
   updatingLabel: i18n.translate(
-    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.loadingText',
+    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.updatingLabel',
     {
       defaultMessage: 'Updating logging state…',
     }
