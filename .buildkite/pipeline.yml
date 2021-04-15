@@ -8,6 +8,7 @@ steps:
   #       --cache-to type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache \
   #       --cache-from type=registry,ref=us-central1-docker.pkg.dev/elastic-kibana-184716/kibana-buildkite-docker/buildkite/ci/base:cache
   - command: .buildkite/scripts/bootstrap_docker.sh
+    label: Create bootstrapped docker image
     agents:
       queue: bootstrap
   - wait
@@ -26,6 +27,7 @@ steps:
     parallelism: 2
     timeout_in_minutes: 120
   - command: .buildkite/scripts/build_kibana_docker.sh
+    label: Create docker image with Kibana distribution
     agents:
       queue: bootstrap
     key: default-build
