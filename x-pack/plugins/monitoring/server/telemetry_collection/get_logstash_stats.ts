@@ -147,8 +147,6 @@ export function processStatsResults(
       }
       clusterStats.collection_types![thisCollectionType] =
         (clusterStats.collection_types![thisCollectionType] || 0) + 1;
-
-      const theseEphemeralIds: string[] = [];
       const pipelines = logstashStats.pipelines || [];
 
       pipelines.forEach((pipeline) => {
@@ -162,10 +160,10 @@ export function processStatsResults(
 
         const ephemeralId = pipeline.ephemeral_id;
         if (ephemeralId !== undefined) {
-          theseEphemeralIds.push(ephemeralId);
+          allEphemeralIds[clusterUuid] = allEphemeralIds[clusterUuid] || [];
+          allEphemeralIds[clusterUuid].push(ephemeralId);
         }
       });
-      allEphemeralIds[clusterUuid] = theseEphemeralIds;
     }
   });
 }
