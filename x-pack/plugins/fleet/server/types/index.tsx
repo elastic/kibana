@@ -74,9 +74,6 @@ export {
   InstallType,
   InstallSource,
   InstallResult,
-  // Agent Request types
-  PostAgentEnrollRequest,
-  PostAgentCheckinRequest,
   DataType,
   dataTypes,
   // Fleet Server types

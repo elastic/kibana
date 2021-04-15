@@ -16,13 +16,14 @@ import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { SetupPlugins } from '../../../../plugin';
+import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
-import { MachineLearningRuleAttributes } from '../types';
+import { AlertAttributes } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
@@ -36,7 +37,7 @@ export const mlExecutor = async ({
   refresh,
   buildRuleMessage,
 }: {
-  rule: SavedObject<MachineLearningRuleAttributes>;
+  rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -105,23 +106,13 @@ export const mlExecutor = async ({
     createdItemsCount,
     createdItems,
   } = await bulkCreateMlSignals({
-    actions: rule.attributes.actions,
-    throttle: rule.attributes.throttle,
     someResult: filteredAnomalyResults,
-    ruleParams,
+    ruleSO: rule,
     services,
     logger,
     id: rule.id,
     signalsIndex: ruleParams.outputIndex,
-    name: rule.attributes.name,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    updatedAt: rule.updated_at ?? '',
-    interval: rule.attributes.schedule.interval,
-    enabled: rule.attributes.enabled,
     refresh,
-    tags: rule.attributes.tags,
     buildRuleMessage,
   });
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }

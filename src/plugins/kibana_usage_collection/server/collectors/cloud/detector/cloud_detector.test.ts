@@ -69,16 +69,16 @@ describe('CloudDetector', () => {
       expect(detector.getCloudDetails()).toEqual({ name: 'good-match' });
     });
 
-    it('returns undefined if none match', async () => {
+    it('returns null if none match', async () => {
       const services = ([cloudService1, cloudService2] as unknown) as CloudService[];
 
       const detector1 = new CloudDetector({ cloudServices: services });
       await detector1.detectCloudService();
-      expect(detector1.getCloudDetails()).toBeUndefined();
+      expect(detector1.getCloudDetails()).toBeNull();
 
       const detector2 = new CloudDetector({ cloudServices: [] });
       await detector2.detectCloudService();
-      expect(detector2.getCloudDetails()).toBeUndefined();
+      expect(detector2.getCloudDetails()).toBeNull();
     });
 
     // this is already tested above, but this just tests it explicitly
@@ -87,7 +87,7 @@ describe('CloudDetector', () => {
       const detector = new CloudDetector({ cloudServices: services });
 
       await detector.detectCloudService();
-      expect(detector.getCloudDetails()).toBeUndefined();
+      expect(detector.getCloudDetails()).toBeNull();
     });
   });
 });
