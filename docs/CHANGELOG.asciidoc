@@ -68,6 +68,8 @@ Before you upgrade, review the <<breaking-changes-7.12.0,breaking changes>>, the
 [float]
 [[enhancement-v7.12.1]]
 === Enhancement
+Design::
+* Customize Panel Submit {kibana-pull}95704[#95704]
 Management::
 * Adds generated copy for all processors {kibana-pull}95507[#95507]
 
@@ -79,14 +81,14 @@ Dashboard::
 * Allows By Value Flow Without Visualize Save Permissions {kibana-pull}95951[#95951]
 * Fixes adding columns from doc viewer table tab {kibana-pull}95748[#95748]
 * Adds Discrete Library Option to Save Modal {kibana-pull}94589[#94589]
-Design::
-* Customize Panel Submit {kibana-pull}95704[#95704]
 Elastic Security::
 For the Elastic Security 7.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
 * Data Frame Analytics creation: ensure job config validity persists when switching from/to form/editor {kibana-pull}94654[#94654]
 * Data Frame Analytics results: Ensure outlier detection results view displays feature influence correctly {kibana-pull}94493[#94493]
 * Fixes Index data visualizer not removing query string with loaded saved search {kibana-pull}94245[#94245]
+* Data Frame Analytics: Fix scatterplot matrix boilerplate visibility with no fields selected {kibana-pull}96590[#96590]
+* Data Frame Analytics: Don't allow user to pick an index pattern or saved search based on CCS {kibana-pull}96555[#96555]
 Management::
 * Transforms: Wizard displays warning callout for source preview when used with CCS against clusters below 7.10 {kibana-pull}96297[#96297]
 * Fixes updating deleting sessions from non-default space {kibana-pull}96123[#96123]
@@ -106,8 +108,6 @@ Monitoring::
 Operations::
 * Improves performance of data stream API {kibana-pull}97058[#97058]
 * Migrations v2 ignore fleet agent events {kibana-pull}96690[#96690]
-* Data Frame Analytics: Fix scatterplot matrix boilerplate visibility with no fields selected {kibana-pull}96590[#96590]
-* Data Frame Analytics: Don't allow user to pick an index pattern or saved search based on CCS {kibana-pull}96555[#96555]
 * Resolves regression where Elastic Endgame rules would warn about unmapped timestamp override field {kibana-pull}96394[#96394]
 * Updates query for ping histogram {kibana-pull}95495[#95495]
 * Migrations v2: Retry tasks that timeout {kibana-pull}95305[#95305]
