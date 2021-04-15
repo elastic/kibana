@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexNameReference } from '../../../../common/log_sources';
 import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
@@ -29,6 +30,13 @@ export const IndexNamesConfigurationPanel: React.FC<{
   indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
   onSwitchToIndexPatternReference: () => void;
 }> = ({ isLoading, isReadOnly, indexNamesFormElement, onSwitchToIndexPatternReference }) => {
+  useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_name' });
+  useTrackPageview({
+    app: 'infra_logs',
+    path: 'log_source_configuration_index_name',
+    delay: 15000,
+  });
+
   return (
     <>
       <EuiTitle size="s">

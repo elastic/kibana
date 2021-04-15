@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useUiTracker } from '../../../../../observability/public';
 import {
   logIndexNameReferenceRT,
   LogIndexPatternReference,
@@ -32,9 +33,14 @@ export const IndicesConfigurationPanel = React.memo<{
     tiebreakerFieldFormElement,
     timestampFieldFormElement,
   }) => {
+    const trackSwitchToIndexPatternReference = useUiTracker({ app: 'infra_logs' });
+
     const switchToIndexPatternReference = useCallback(() => {
       indicesFormElement.updateValue(() => undefined);
-    }, [indicesFormElement]);
+      trackSwitchToIndexPatternReference({
+        metric: 'configuration_switch_to_index_pattern_reference',
+      });
+    }, [indicesFormElement, trackSwitchToIndexPatternReference]);
 
     if (isIndexPatternFormElement(indicesFormElement)) {
       return (

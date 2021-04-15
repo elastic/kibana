@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useUiTracker } from '../../../../../observability/public';
 import { LogIndexNameReference, LogIndexPatternReference } from '../../../../common/log_sources';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useCompositeFormElement, useFormElement } from './form_elements';
@@ -19,6 +20,8 @@ export type LogIndicesFormState = LogIndexNameReference | LogIndexPatternReferen
 
 export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
   const indexPatternService = useKibanaIndexPatternService();
+
+  const trackIndexPatternValidationError = useUiTracker({ app: 'infra_logs' });
 
   const logIndicesFormElement = useFormElement<LogIndicesFormState, FormValidationError>({
     initialValue,
@@ -38,10 +41,24 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
             return emptyStringErrors;
           }
 
-          return validateIndexPattern(await indexPatternService.get(logIndices.indexPatternId));
+          const indexPatternErrors = validateIndexPattern(
+            await indexPatternService.get(logIndices.indexPatternId)
+          );
+
+          if (indexPatternErrors.length > 0) {
+            trackIndexPatternValidationError({
+              metric: 'configuration_index_pattern_validation_failed',
+            });
+          } else {
+            trackIndexPatternValidationError({
+              metric: 'configuration_index_pattern_validation_succeeded',
+            });
+          }
+
+          return indexPatternErrors;
         }
       },
-      [indexPatternService]
+      [indexPatternService, trackIndexPatternValidationError]
     ),
   });
 

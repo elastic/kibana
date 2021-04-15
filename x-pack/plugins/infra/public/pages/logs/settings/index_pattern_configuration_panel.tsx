@@ -8,6 +8,7 @@
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
+import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexPatternReference } from '../../../../common/log_sources';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { FormElement } from './form_elements';
@@ -20,6 +21,13 @@ export const IndexPatternConfigurationPanel: React.FC<{
   isReadOnly: boolean;
   indexPatternFormElement: FormElement<LogIndexPatternReference | undefined, FormValidationError>;
 }> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
+  useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_pattern' });
+  useTrackPageview({
+    app: 'infra_logs',
+    path: 'log_source_configuration_index_pattern',
+    delay: 15000,
+  });
+
   const changeIndexPatternId = useCallback(
     (indexPatternId: string | undefined) => {
       if (indexPatternId != null) {
