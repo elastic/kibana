@@ -184,6 +184,7 @@ export function IndexPatternDataPanel({
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
+          state.indexPatterns,
         ]}
       />
 
