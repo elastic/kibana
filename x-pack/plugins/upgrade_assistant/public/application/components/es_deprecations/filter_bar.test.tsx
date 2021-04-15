@@ -17,7 +17,7 @@ const defaultProps = {
     { level: LevelFilterOption.critical },
     { level: LevelFilterOption.critical },
   ] as DeprecationInfo[],
-  currentFilter: LevelFilterOption.critical,
+  currentFilter: LevelFilterOption.all,
   onFilterChange: jest.fn(),
 };
 
@@ -28,7 +28,7 @@ describe('FilterBar', () => {
 
   test('clicking button calls onFilterChange', () => {
     const wrapper = mount(<FilterBar {...defaultProps} />);
-    wrapper.find('button.euiFilterButton-hasActiveFilters').simulate('click');
+    wrapper.find('button[data-test-subj="criticalLevelFilter"]').simulate('click');
     expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
     expect(defaultProps.onFilterChange.mock.calls[0][0]).toEqual(LevelFilterOption.critical);
   });

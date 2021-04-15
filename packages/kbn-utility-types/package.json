@@ -9,10 +9,6 @@
     "devOnly": false
   },
   "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "../../node_modules/.bin/tsc",
-    "kbn:watch": "../../node_modules/.bin/tsc --watch",
-    "test": "../../node_modules/.bin/tsd",
-    "clean": "../../node_modules/.bin/del target"
+    "test": "../../node_modules/.bin/tsd tsd_tests"
   }
 }
