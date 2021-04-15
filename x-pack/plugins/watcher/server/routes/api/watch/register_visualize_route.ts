@@ -21,15 +21,17 @@ const bodySchema = schema.object({
 });
 
 function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
-  const params = {
-    index,
-    body,
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
-  };
-
-  return dataClient.asCurrentUser.search(params).then(({ body: result }) => result);
+  return dataClient.asCurrentUser
+    .search(
+      {
+        index,
+        body,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      },
+      { ignore: [404] }
+    )
+    .then(({ body: result }) => result);
 }
 
 export function registerVisualizeRoute({

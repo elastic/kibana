@@ -29,33 +29,39 @@ function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
 }
 
 async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
-  const aliasResult = await dataClient.asCurrentUser.indices.getAlias({
-    index: pattern,
-    ignore_unavailable: true,
-  });
+  const aliasResult = await dataClient.asCurrentUser.indices.getAlias(
+    {
+      index: pattern,
+    },
+    {
+      ignore: [404],
+    }
+  );
 
   if (aliasResult.statusCode !== 404) {
     const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
     return indicesFromAliasResponse.slice(0, limit);
   }
 
-  const params = {
-    index: pattern,
-    ignore: [404],
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: limit,
+  const response = await dataClient.asCurrentUser.search(
+    {
+      index: pattern,
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: limit,
+            },
           },
         },
       },
     },
-  };
-
-  const response = await dataClient.asCurrentUser.search(params);
+    {
+      ignore: [404],
+    }
+  );
   if (response.statusCode === 404 || !response.body.aggregations) {
     return [];
   }

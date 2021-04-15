@@ -17,15 +17,14 @@ const bodySchema = schema.object({
 });
 
 function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
-  const params = {
-    index: indexes,
-    fields: ['*'],
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: 404,
-  };
-
-  return dataClient.asCurrentUser.fieldCaps(params);
+  return dataClient.asCurrentUser.fieldCaps(
+    {
+      index: indexes,
+      fields: ['*'],
+      allow_no_indices: true,
+    },
+    { ignore: [404] }
+  );
 }
 
 export function registerListFieldsRoute({

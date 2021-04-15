@@ -15,17 +15,17 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
 import { Watch } from '../../../models/watch/index';
 
 function fetchWatches(dataClient: IScopedClusterClient) {
-  const params = {
-    index: INDEX_NAMES.WATCHES,
-    scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-    body: {
-      size: ES_SCROLL_SETTINGS.PAGE_SIZE,
-    },
-    ignore: [404],
-  };
-
   return dataClient.asCurrentUser
-    .search(params)
+    .search(
+      {
+        index: INDEX_NAMES.WATCHES,
+        scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
+        body: {
+          size: ES_SCROLL_SETTINGS.PAGE_SIZE,
+        },
+      },
+      { ignore: [404] }
+    )
     .then(({ body: response }) => fetchAllFromScroll(response, dataClient));
 }
 
