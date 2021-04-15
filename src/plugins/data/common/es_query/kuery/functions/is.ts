@@ -95,8 +95,8 @@ export function toElasticsearchQuery(
     });
   }
 
-  if (isExistsQuery && fields && fields.length === indexPattern?.fields.length) {
-    // Special case for wildcards where all fields share the same prefix
+  // Special case for wildcards where there are no fields or all fields share the same prefix
+  if (isExistsQuery && (!fields?.length || fields?.length === indexPattern?.fields.length)) {
     return { match_all: {} };
   }
 

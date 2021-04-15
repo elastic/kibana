@@ -83,6 +83,16 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
+      test('should return an ES match_all query for * queries without an index pattern', () => {
+        const expected = {
+          match_all: {},
+        };
+        const node = nodeTypes.function.buildNode('is', '*', '*');
+        const result = is.toElasticsearchQuery(node);
+
+        expect(result).toEqual(expected);
+      });
+
       test('should return an ES multi_match query using default_field when fieldName is null', () => {
         const expected = {
           multi_match: {
