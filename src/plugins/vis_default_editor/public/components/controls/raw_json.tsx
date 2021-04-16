@@ -55,16 +55,16 @@ function RawJsonParamEditor({
     (newValue: string) => {
       setValue(newValue);
       // validation for value
+      let isJsonValid = true;
       try {
         if (newValue) {
           JSON.parse(newValue);
         }
-        setFieldValidity(true);
-        setValidity(true);
       } catch (e) {
-        setFieldValidity(false);
-        setValidity(false);
+        isJsonValid = false;
       }
+      setFieldValidity(isJsonValid);
+      setValidity(isJsonValid);
     },
     [setValidity, setFieldValidity, setValue]
   );
@@ -92,9 +92,10 @@ function RawJsonParamEditor({
           }}
           width="100%"
           height="250px"
-          value={value || '{}'}
+          value={value}
           onChange={onChange}
           options={{
+            renderValidationDecorations: value ? 'on' : 'off',
             lineNumbers: 'on',
             fontSize: 14,
             minimap: {
