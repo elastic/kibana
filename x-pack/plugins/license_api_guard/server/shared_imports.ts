@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+export type { ILicense, LicenseType, LicenseCheckState } from '../../licensing/common/types';
+
+export type { LicensingPluginStart } from '../../licensing/server';
+
+export { licensingMock } from '../../licensing/server/mocks';
