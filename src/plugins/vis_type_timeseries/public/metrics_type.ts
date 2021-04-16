@@ -10,10 +10,15 @@ import { i18n } from '@kbn/i18n';
 
 import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
-import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
+import {
+  fetchIndexPattern,
+  extractIndexPatternValues,
+  isStringTypeIndexPattern,
+} from '../common/index_patterns_utils';
+import { PanelSchema } from '../common/types';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -79,20 +84,19 @@ export const metricsVisDefinition = {
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
-    const indexPatternValue = params.index_pattern;
+    const extractedIndexes = extractIndexPatternValues(params as PanelSchema, null);
+    const usedIndexPatterns = [];
 
-    if (indexPatternValue) {
-      if (isStringTypeIndexPattern(indexPatternValue)) {
-        return await indexPatterns.find(indexPatternValue);
-      }
+    for (const i of extractedIndexes) {
+      if (i && !isStringTypeIndexPattern(i)) {
+        const kibanaIndex = await fetchIndexPattern(i, indexPatterns);
 
-      if (indexPatternValue.id) {
-        return [await indexPatterns.get(indexPatternValue.id)];
+        if (kibanaIndex.indexPattern) {
+          usedIndexPatterns.push(kibanaIndex.indexPattern);
+        }
       }
     }
 
-    const defaultIndex = await indexPatterns.getDefault();
-
-    return defaultIndex ? [defaultIndex] : [];
+    return usedIndexPatterns;
   },
 };
