@@ -143,8 +143,12 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   threshold: {
     field: ['host.name'],
     value: 50,
-    cardinality_field: ['process.name'],
-    cardinality_value: 2,
+    cardinality: [
+      {
+        field: 'process.name',
+        value: 2,
+      },
+    ],
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
@@ -181,7 +185,7 @@ export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
 export const mockDefineStepRule = (): DefineStepRule => ({
   ruleType: 'query',
   anomalyThreshold: 50,
-  machineLearningJobId: '',
+  machineLearningJobId: [],
   index: ['filebeat-'],
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
@@ -192,10 +196,12 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   },
   threatIndex: [],
   threshold: {
-    field: [''],
+    field: [],
     value: '100',
-    cardinality_field: [''],
-    cardinality_value: '2',
+    cardinality: {
+      field: ['process.name'],
+      value: '2',
+    },
   },
 });
 

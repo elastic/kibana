@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { isValidNamespace } from '../../../common';
 
 export const NamespaceSchema = schema.string({
@@ -77,6 +78,7 @@ const PackagePolicyBaseSchema = {
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

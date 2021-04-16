@@ -57,7 +57,7 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-
+import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -68,7 +68,7 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 
-export {
+export type {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
@@ -77,38 +77,41 @@ export {
 };
 
 export { bootstrap } from './bootstrap';
-export {
+export type {
   Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
 } from './capabilities';
-export {
+export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
   ConfigDeprecationProvider,
-  ConfigDeprecationLogger,
   ConfigDeprecationFactory,
+  AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
 } from './config';
-export {
+export type {
   IContextContainer,
   IContextProvider,
   HandlerFunction,
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export { CoreId } from './core_context';
-export { CspConfig, ICspConfig } from './csp';
-export {
+export type { CoreId } from './core_context';
+
+export { CspConfig } from './csp';
+export type { ICspConfig } from './csp';
+
+export { ElasticsearchConfig } from './elasticsearch';
+export type {
   LegacyClusterClient,
   ILegacyClusterClient,
   ILegacyCustomClusterClient,
   LegacyScopedClusterClient,
   ILegacyScopedClusterClient,
-  ElasticsearchConfig,
   LegacyElasticsearchClientConfig,
   LegacyElasticsearchError,
   LegacyElasticsearchErrorHelpers,
@@ -128,13 +131,23 @@ export {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  Explanation,
   GetResponse,
   DeleteDocumentResponse,
 } from './elasticsearch';
-export * from './elasticsearch/legacy/api_types';
-export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
-export {
+
+export type {
+  LegacyCallAPIOptions,
+  AssistantAPIClientParams,
+  MIGRATION_ASSISTANCE_INDEX_ACTION,
+  MIGRATION_DEPRECATION_LEVEL,
+  AssistanceAPIResponse,
+  DeprecationAPIClientParams,
+  DeprecationInfo,
+  IndexSettingsDeprecationInfo,
+  DeprecationAPIResponse,
+} from './elasticsearch/legacy/api_types';
+export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export type {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
@@ -161,7 +174,6 @@ export {
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
-  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
@@ -188,7 +200,6 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
-  kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
@@ -197,7 +208,6 @@ export {
   RouteConfigOptions,
   RouteConfigOptionsBody,
   RouteContentType,
-  validBodyOutput,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidationFunction,
@@ -213,15 +223,17 @@ export {
   SafeRouteMethod,
 } from './http';
 
-export {
+export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+
+export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
 } from './http_resources';
 
-export { IRenderOptions } from './rendering';
-export {
+export type { IRenderOptions } from './rendering';
+export type {
   Logger,
   LoggerFactory,
   LogMeta,
@@ -233,7 +245,7 @@ export {
   AppenderConfigType,
 } from './logging';
 
-export {
+export type {
   DiscoveredPlugin,
   Plugin,
   AsyncPlugin,
@@ -247,6 +259,14 @@ export {
 } from './plugins';
 
 export {
+  SavedObjectsClient,
+  SavedObjectsErrorHelpers,
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+  SavedObjectsUtils,
+} from './saved_objects';
+
+export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -255,7 +275,6 @@ export {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
@@ -263,8 +282,10 @@ export {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
-  SavedObjectsErrorHelpers,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
@@ -289,7 +310,6 @@ export {
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsResolveResponse,
-  SavedObjectsSerializer,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
@@ -312,14 +332,12 @@ export {
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
-  SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
   SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsUtils,
   SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
@@ -338,7 +356,7 @@ export {
   SavedObjectsImportWarning,
 } from './saved_objects';
 
-export {
+export type {
   IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -353,7 +371,7 @@ export {
   StringValidationRegexString,
 } from './ui_settings';
 
-export {
+export type {
   OpsMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
@@ -362,12 +380,18 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from './i18n';
+export type {
+  DeprecationsDetails,
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+  DeprecationsServiceSetup,
+} from './deprecations';
 
-export { AppCategory } from '../types';
+export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
-export {
+export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
@@ -382,17 +406,10 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
+export { ServiceStatusLevels } from './status';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
-export {
-  CoreStatus,
-  ServiceStatus,
-  ServiceStatusLevel,
-  ServiceStatusLevels,
-  StatusServiceSetup,
-} from './status';
-
-export { CoreUsageDataStart } from './core_usage_data';
+export type { CoreUsageDataStart } from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -468,6 +485,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -507,7 +526,7 @@ export interface CoreStart {
   coreUsageData: CoreUsageDataStart;
 }
 
-export {
+export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,

@@ -95,8 +95,8 @@ export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
-  filterByMapBounds?: boolean;
-  tooltipProperties?: string[];
+  filterByMapBounds: boolean;
+  tooltipProperties: string[];
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -174,6 +174,8 @@ export type InlineFieldDescriptor = {
 export type GeojsonFileSourceDescriptor = {
   __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
+  areResultsTrimmed: boolean;
+  tooltipContent: string | null;
   name: string;
   type: string;
 };

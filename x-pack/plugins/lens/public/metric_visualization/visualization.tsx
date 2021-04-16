@@ -52,6 +52,10 @@ export const metricVisualization: Visualization<MetricState> = {
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
+      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+        defaultMessage: 'Tabular and single value',
+      }),
+      sortPriority: 1,
     },
   ],
 

@@ -24,6 +24,8 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
+import { isPopulatedObject } from '../../../../../../../common/shared_imports';
+
 export interface ErrorMessage {
   query: string;
   message: string;
@@ -70,10 +72,10 @@ export interface StepDefineExposedState {
   isRuntimeMappingsEditorEnabled: boolean;
 }
 
-export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
-  return typeof arg === 'object' && arg.hasOwnProperty('pivot');
+export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {
+  return isPopulatedObject(arg, ['pivot']);
 }
 
-export function isLatestPartialRequest(arg: any): arg is { latest: LatestFunctionConfig } {
-  return typeof arg === 'object' && arg.hasOwnProperty('latest');
+export function isLatestPartialRequest(arg: unknown): arg is { latest: LatestFunctionConfig } {
+  return isPopulatedObject(arg, ['latest']);
 }

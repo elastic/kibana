@@ -9,7 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { SavedObjectAttributes } from '../../../../core/public';
+import { extractSearchSourceReferences } from '../../../data/public';
+import { SavedObjectReference } from '../../../../core/public';
+
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
@@ -36,6 +40,12 @@ import {
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import {
+  extractControlsReferences,
+  extractTimeSeriesReferences,
+  injectTimeSeriesReferences,
+  injectControlsReferences,
+} from '../saved_visualizations/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
@@ -48,7 +58,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard' | 'savedObjectsClient'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
   >;
 }
 
@@ -235,5 +245,48 @@ export class VisualizeEmbeddableFactory
         overlays,
       }
     );
+  }
+
+  public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
+    const state = (_state as unknown) as VisualizeInput;
+
+    const { type, params } = state.savedVis ?? {};
+
+    if (type && params) {
+      injectControlsReferences(type, params, references);
+      injectTimeSeriesReferences(type, params, references);
+    }
+
+    return _state;
+  }
+
+  public extract(_state: EmbeddableStateWithType) {
+    const state = (_state as unknown) as VisualizeInput;
+    const references = [];
+
+    if (state.savedVis?.data.searchSource) {
+      const [, searchSourceReferences] = extractSearchSourceReferences(
+        state.savedVis.data.searchSource
+      );
+
+      references.push(...searchSourceReferences);
+    }
+
+    if (state.savedVis?.data.savedSearchId) {
+      references.push({
+        name: 'search_0',
+        type: 'search',
+        id: String(state.savedVis.data.savedSearchId),
+      });
+    }
+
+    const { type, params } = state.savedVis ?? {};
+
+    if (type && params) {
+      extractControlsReferences(type, params, references, `control_${state.id}`);
+      extractTimeSeriesReferences(type, params, references, `metrics_${state.id}`);
+    }
+
+    return { state: _state, references };
   }
 }

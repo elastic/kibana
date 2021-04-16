@@ -25,6 +25,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
 
   return (
     <EuiConfirmModal
+      data-test-subj="transformStartModal"
       title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
       onCancel={closeModal}
       onConfirm={startAndCloseModal}

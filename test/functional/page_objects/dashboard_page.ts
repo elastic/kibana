@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * @default true
      */
     waitDialogIsClosed?: boolean;
+    exitFromEditMode?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -376,7 +377,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async saveDashboard(
       dashboardName: string,
-      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
     ) {
       await retry.try(async () => {
         await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
@@ -393,6 +394,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForSaveModalToClose();
 
+      const isInViewMode = await testSubjects.exists('dashboardEditMode');
+      if (saveOptions.exitFromEditMode && !isInViewMode) {
+        await this.clickCancelOutOfEditMode();
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       return message;
     }
 
@@ -404,6 +411,16 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async clickSave() {
       log.debug('DashboardPage.clickSave');
       await testSubjects.click('confirmSaveSavedObjectButton');
+    }
+
+    public async clickMarkdownQuickButton() {
+      log.debug('Click markdown quick button');
+      await testSubjects.click('dashboardMarkdownQuickButton');
+    }
+
+    public async clickInputControlsQuickButton() {
+      log.debug('Click input controls quick button');
+      await testSubjects.click('dashboardInputControlsQuickButton');
     }
 
     /**

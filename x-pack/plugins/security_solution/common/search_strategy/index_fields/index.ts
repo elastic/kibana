@@ -71,6 +71,12 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+  subType?: {
+    [key: string]: unknown;
+    nested?: {
+      path: string;
+    };
+  };
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

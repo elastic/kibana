@@ -11,7 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
@@ -111,7 +111,12 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   useEffect(() => {
     if (splitField !== null) {
       chartLoader
-        .loadFieldExampleValues(splitField, jobCreator.runtimeMappings)
+        .loadFieldExampleValues(
+          splitField,
+          jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          jobCreator.datafeedConfig.indices_options
+        )
         .then(setFieldValues)
         .catch((error) => {
           getToastNotificationService().displayErrorToast(error);
@@ -140,7 +145,9 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
-          jobCreator.runtimeMappings
+          jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
       } catch (error) {

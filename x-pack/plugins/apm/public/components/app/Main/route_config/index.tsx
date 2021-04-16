@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import { getServiceNodeName } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
@@ -112,6 +111,12 @@ function ServiceDetailsTransactions(
   props: RouteComponentProps<{ serviceName: string }>
 ) {
   return <ServiceDetails {...props} tab="transactions" />;
+}
+
+function ServiceDetailsProfiling(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  return <ServiceDetails {...props} tab="profiling" />;
 }
 
 function SettingsAgentConfiguration(props: RouteComponentProps<{}>) {
@@ -288,15 +293,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
     component: withApmServiceContext(ServiceNodeMetrics),
-    breadcrumb: ({ match }) => {
-      const { serviceNodeName } = match.params;
-
-      if (serviceNodeName === SERVICE_NODE_NAME_MISSING) {
-        return UNIDENTIFIED_SERVICE_NODES_LABEL;
-      }
-
-      return serviceNodeName || '';
-    },
+    breadcrumb: ({ match }) => getServiceNodeName(match.params.serviceNodeName),
   },
   {
     exact: true,
@@ -306,6 +303,14 @@ export const routes: APMRouteDefinition[] = [
       const query = toQuery(location.search);
       return query.transactionName as string;
     },
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/profiling',
+    component: withApmServiceContext(ServiceDetailsProfiling),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceProfilingTitle', {
+      defaultMessage: 'Profiling',
+    }),
   },
   {
     exact: true,

@@ -23,8 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89478
-  describe('import objects', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/95660
+  // FLAKY: https://github.com/elastic/kibana/issues/95706
+  describe.skip('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
         await esArchiver.load('management');

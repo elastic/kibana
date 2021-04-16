@@ -63,6 +63,17 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     };
   }
 
+  let useProxy = !!proxySettings;
+
+  if (host) {
+    if (proxySettings?.proxyBypassHosts && proxySettings?.proxyBypassHosts?.has(host)) {
+      useProxy = false;
+    }
+    if (proxySettings?.proxyOnlyHosts && !proxySettings?.proxyOnlyHosts?.has(host)) {
+      useProxy = false;
+    }
+  }
+
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
@@ -73,17 +84,20 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.port = port;
     transportConfig.secure = !!secure;
 
-    if (proxySettings) {
+    if (proxySettings && useProxy) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
         rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
       };
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
-    } else if (!transportConfig.secure) {
-      transportConfig.tls = {
-        rejectUnauthorized,
-      };
+    } else if (!transportConfig.secure && user == null && password == null) {
+      // special case - if secure:false && user:null && password:null set
+      // rejectUnauthorized false, because simple/test servers that don't even
+      // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
+      transportConfig.tls = { rejectUnauthorized: false };
+    } else {
+      transportConfig.tls = { rejectUnauthorized };
     }
   }
 

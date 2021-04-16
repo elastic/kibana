@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
-import {
+import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
   GetPackagesRequest,
@@ -17,7 +16,9 @@ import {
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
-import { GetStatsResponse } from '../../../../../common';
+import type { GetStatsResponse } from '../../../../../common';
+
+import { useRequest, sendRequest } from './use_request';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({

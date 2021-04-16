@@ -18,10 +18,15 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
+import {
+  DataGrid,
+  RowCountRelation,
+  UseIndexDataReturnType,
+} from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import {
@@ -59,6 +64,7 @@ const getResultsSectionHeaderItems = (
   status: INDEX_STATUS,
   tableItems: Array<Record<string, any>>,
   rowCount: number,
+  rowCountRelation: RowCountRelation,
   colorRange?: ReturnType<typeof useColorRange>
 ): ExpandableSectionProps['headerItems'] => {
   return columnsWithCharts.length > 0 && (tableItems.length > 0 || status === INDEX_STATUS.LOADED)
@@ -71,7 +77,7 @@ const getResultsSectionHeaderItems = (
               defaultMessage="Total docs"
             />
           ),
-          value: rowCount,
+          value: `${rowCountRelation === ES_CLIENT_TOTAL_HITS_RELATION.GTE ? '>' : ''}${rowCount}`,
         },
         ...(colorRange !== undefined
           ? [
@@ -120,6 +126,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     status,
     tableItems,
     indexData.rowCount,
+    indexData.rowCountRelation,
     colorRange
   );
   const analysisType =

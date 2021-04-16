@@ -23,8 +23,9 @@ export function AnnotationsContextProvider({
   children: React.ReactNode;
 }) {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams } = useUrlParams();
-  const { environment, start, end } = urlParams;
+  const {
+    urlParams: { environment, start, end },
+  } = useUrlParams();
 
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {
@@ -36,15 +37,15 @@ export function AnnotationsContextProvider({
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
-              environment,
             },
           },
         });
       }
     },
-    [start, end, environment, serviceName]
+    [environment, start, end, serviceName]
   );
 
   return <AnnotationsContext.Provider value={data} children={children} />;

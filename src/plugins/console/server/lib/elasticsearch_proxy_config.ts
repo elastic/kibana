@@ -14,7 +14,7 @@ import url from 'url';
 import { ESConfigForProxy } from '../types';
 
 const createAgent = (legacyConfig: ESConfigForProxy) => {
-  const target = url.parse(_.head(legacyConfig.hosts) as any);
+  const target = url.parse(_.head(legacyConfig.hosts)!);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
   const agentOptions: https.AgentOptions = {};
@@ -28,7 +28,7 @@ const createAgent = (legacyConfig: ESConfigForProxy) => {
       agentOptions.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      agentOptions.checkServerIdentity = _.noop as any;
+      agentOptions.checkServerIdentity = (_.noop as unknown) as https.AgentOptions['checkServerIdentity'];
       break;
     case 'full':
       agentOptions.rejectUnauthorized = true;

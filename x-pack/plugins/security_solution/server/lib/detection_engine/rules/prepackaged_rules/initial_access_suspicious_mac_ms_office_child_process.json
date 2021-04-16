@@ -8,7 +8,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious macOS MS Office Child Process",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name:(\"Microsoft Word\", \"Microsoft PowerPoint\", \"Microsoft Excel\") and\n process.name:\n (\n   \"bash\", \n   \"dash\", \n   \"sh\", \n   \"tcsh\", \n   \"csh\", \n   \"zsh\", \n   \"ksh\", \n   \"fish\", \n   \"python*\", \n   \"perl*\", \n   \"php*\", \n   \"osascript\",\n   \"pwsh\", \n   \"curl\", \n   \"wget\", \n   \"cp\", \n   \"mv\", \n   \"base64\", \n   \"launchctl\"\n )\n",
   "references": [
@@ -22,7 +22,7 @@
     "Host",
     "macOS",
     "Threat Detection",
-    "Execution"
+    "Initial Access"
   ],
   "threat": [
     {

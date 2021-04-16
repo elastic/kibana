@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONTENT_TYPE_CSV, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
+import { CONTENT_TYPE_CSV } from '../../../common/constants';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
 import { createGenerateCsv } from './generate_csv';
@@ -18,7 +18,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
   return async function runTask(jobId, job, cancellationToken) {
     const elasticsearch = reporting.getElasticsearchService();
-    const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED, 'execute-job', jobId]);
+    const logger = parentLogger.clone([jobId]);
     const generateCsv = createGenerateCsv(logger);
 
     const encryptionKey = config.get('encryptionKey');

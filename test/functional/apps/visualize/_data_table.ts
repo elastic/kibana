@@ -267,16 +267,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await retry.try(async () => {
-          await PageObjects.visChart.filterOnTableCell(1, 3);
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          const data = await PageObjects.visChart.getTableVisContent();
-          expect(data).to.be.eql([
-            ['png', '1,373'],
-            ['gif', '918'],
-            ['Other', '445'],
-          ]);
-        });
+        await PageObjects.visChart.filterOnTableCell(1, 3);
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const data = await PageObjects.visChart.getTableVisContent();
+        expect(data).to.be.eql([
+          ['png', '1,373'],
+          ['gif', '918'],
+          ['Other', '445'],
+        ]);
       });
     });
 
@@ -381,6 +379,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('Split table');
+        // split by column to make all tables rows visible
+        await PageObjects.visEditor.clickSplitDirection('Columns');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('extension.raw');
         await PageObjects.visEditor.setSize(2);

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import { AnomalyRecordDoc } from '../types/anomalies';
+import type { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;
@@ -27,10 +27,18 @@ export enum ENTITY_FIELD_TYPE {
   PARTITON = 'partition',
 }
 
+export const ENTITY_FIELD_OPERATIONS = {
+  ADD: '+',
+  REMOVE: '-',
+} as const;
+
+export type EntityFieldOperation = typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+
 export interface EntityField {
   fieldName: string;
   fieldValue: string | number | undefined;
   fieldType?: ENTITY_FIELD_TYPE;
+  operation?: EntityFieldOperation;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

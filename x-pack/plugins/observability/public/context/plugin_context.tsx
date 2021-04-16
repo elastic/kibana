@@ -7,12 +7,13 @@
 
 import { createContext } from 'react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../plugin';
 
 export interface PluginContextValue {
   appMountParameters: AppMountParameters;
   core: CoreStart;
-  plugins: ObservabilityPluginSetupDeps;
+  plugins: ObservabilityPublicPluginsStart;
+  observabilityRuleRegistry: ObservabilityRuleRegistry;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

@@ -9,7 +9,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
@@ -21,6 +21,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/update_rules_notifications');
@@ -28,16 +29,16 @@ jest.mock('../../rules/update_rules_notifications');
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
+    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
+    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
 
     updateRulesRoute(server.router, ml);

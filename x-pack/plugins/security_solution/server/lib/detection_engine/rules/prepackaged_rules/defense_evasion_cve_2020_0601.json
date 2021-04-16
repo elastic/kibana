@@ -8,7 +8,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Windows CryptoAPI Spoofing Vulnerability (CVE-2020-0601 - CurveBall)",
   "query": "event.provider:\"Microsoft-Windows-Audit-CVE\" and message:\"[CVE-2020-0601]\"",
   "risk_score": 21,

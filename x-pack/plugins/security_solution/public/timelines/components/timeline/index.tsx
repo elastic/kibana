@@ -14,6 +14,8 @@ import styled from 'styled-components';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
+import { RowRenderer } from './body/renderers/row_renderer';
+import { CellValueElementProps } from './cell_rendering';
 import { isTab } from '../../../common/components/accessibility/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -26,6 +28,7 @@ import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -35,10 +38,12 @@ const TimelineTemplateBadge = styled.div`
 `;
 
 export interface Props {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: TimelineId;
 }
 
-const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
+const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
@@ -49,7 +54,11 @@ const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
 
-const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({
+  renderCellValue,
+  rowRenderers,
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -60,7 +69,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-  const { timelineFullScreen } = useTimelineFullScreen();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -78,9 +87,17 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   }, []);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
-    containerElement.current
-      ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
-      ?.focus();
+    const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
+      EXIT_FULL_SCREEN_CLASS_NAME
+    );
+
+    if (exitFullScreenButton != null) {
+      exitFullScreenButton.focus();
+    } else {
+      containerElement.current
+        ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
+        ?.focus();
+    }
   }, [containerElement]);
 
   const onSkipFocusAfterEventsTable = useCallback(() => {
@@ -115,15 +132,19 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <FlyoutHeaderPanel timelineId={timelineId} />
       <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeaderPanel timelineId={timelineId} />
         <FlyoutHeader timelineId={timelineId} />
       </HideShowContainer>
 
       <TabsContent
         graphEventId={graphEventId}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
+        setTimelineFullScreen={setTimelineFullScreen}
         timelineId={timelineId}
         timelineType={timelineType}
+        timelineFullScreen={timelineFullScreen}
       />
     </TimelineContainer>
   );

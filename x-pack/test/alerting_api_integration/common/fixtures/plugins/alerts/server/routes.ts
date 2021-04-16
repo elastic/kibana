@@ -11,14 +11,19 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  Logger,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
-import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
+import { RawAlert } from '../../../../../../../plugins/alerting/server/types';
+import {
+  ConcreteTaskInstance,
+  TaskInstance,
+} from '../../../../../../../plugins/task_manager/server';
 import { FixtureStartDeps } from './plugin';
+import { retryIfConflicts } from './lib/retry_if_conflicts';
 
-export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
+export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { logger: Logger }) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -81,28 +86,35 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
         throw new Error('Failed to grant an API Key');
       }
 
-      const result = await savedObjectsWithAlerts.update<RawAlert>(
-        'alert',
-        id,
-        {
-          ...(
-            await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
-              'alert',
-              id,
-              {
-                namespace,
-              }
-            )
-          ).attributes,
-          apiKey: Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
-            'base64'
-          ),
-          apiKeyOwner: user.username,
-        },
-        {
-          namespace,
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/${id}/replace_api_key`,
+        async () => {
+          return await savedObjectsWithAlerts.update<RawAlert>(
+            'alert',
+            id,
+            {
+              ...(
+                await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
+                  'alert',
+                  id,
+                  {
+                    namespace,
+                  }
+                )
+              ).attributes,
+              apiKey: Buffer.from(
+                `${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`
+              ).toString('base64'),
+              apiKeyOwner: user.username,
+            },
+            {
+              namespace,
+            }
+          );
         }
       );
+
       return res.ok({ body: result });
     }
   );
@@ -144,11 +156,17 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
         includedHiddenTypes: ['alert'],
       });
       const savedAlert = await savedObjectsWithAlerts.get<RawAlert>(type, id);
-      const result = await savedObjectsWithAlerts.update(
-        type,
-        id,
-        { ...savedAlert.attributes, ...attributes },
-        options
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/saved_object/${type}/${id}`,
+        async () => {
+          return await savedObjectsWithAlerts.update(
+            type,
+            id,
+            { ...savedAlert.attributes, ...attributes },
+            options
+          );
+        }
       );
       return res.ok({ body: result });
     }
@@ -179,10 +197,56 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
         includedHiddenTypes: ['task', 'alert'],
       });
       const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
-      const result = await savedObjectsWithTasksAndAlerts.update<TaskInstance>(
-        'task',
-        alert.attributes.scheduledTaskId!,
-        { runAt }
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/${id}/reschedule_task`,
+        async () => {
+          return await savedObjectsWithTasksAndAlerts.update<TaskInstance>(
+            'task',
+            alert.attributes.scheduledTaskId!,
+            { runAt }
+          );
+        }
+      );
+      return res.ok({ body: result });
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/alerts_fixture/{id}/reset_task_status',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          status: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const [{ savedObjects }] = await core.getStartServices();
+      const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+        includedHiddenTypes: ['task', 'alert'],
+      });
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/{id}/reset_task_status`,
+        async () => {
+          return await savedObjectsWithTasksAndAlerts.update<ConcreteTaskInstance>(
+            'task',
+            alert.attributes.scheduledTaskId!,
+            { status }
+          );
+        }
       );
       return res.ok({ body: result });
     }

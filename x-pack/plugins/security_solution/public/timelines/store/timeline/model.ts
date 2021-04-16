@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
@@ -43,6 +43,7 @@ export interface ColumnHeaderOptions {
   label?: string;
   linkField?: string;
   placeholder?: string;
+  subType?: IFieldSubType;
   type?: string;
   width: number;
 }
@@ -50,6 +51,7 @@ export interface ColumnHeaderOptions {
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
+  prevActiveTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
   /** Timeline saved object owner */
@@ -141,6 +143,7 @@ export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
     | 'activeTab'
+    | 'prevActiveTab'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'

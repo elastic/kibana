@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import '../../../../common/mock/formatted_relative';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -18,7 +16,6 @@ import { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
 describe('NotePreviews', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
   let note1updated: number;
   let note2updated: number;
@@ -34,11 +31,7 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
     hasNotes[0].notes!.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -48,11 +41,7 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
     hasNotes[0].notes!.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -99,11 +88,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find('.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
@@ -130,11 +115,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
@@ -160,11 +141,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });

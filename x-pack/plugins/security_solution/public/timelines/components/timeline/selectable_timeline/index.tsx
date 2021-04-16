@@ -222,7 +222,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       windowProps: {
         onScroll: ({ scrollOffset }) =>
           handleOnScroll(
-            timelines.filter((t) => !hideUntitled || t.title !== '').length,
+            (timelines ?? []).filter((t) => !hideUntitled || t.title !== '').length,
             timelineCount,
             scrollOffset
           ),
@@ -254,7 +254,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     <EuiSelectable
       data-test-subj="selectable-input"
       height={POPOVER_HEIGHT}
-      isLoading={loading && timelines.length === 0}
+      isLoading={loading && timelines == null}
       listProps={listProps}
       renderOption={renderTimelineOption}
       onChange={handleTimelineChange}
@@ -262,7 +262,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       searchProps={searchProps}
       singleSelection={true}
       options={getSelectableOptions({
-        timelines,
+        timelines: timelines ?? [],
         onlyFavorites,
         searchTimelineValue,
         timelineType,

@@ -72,7 +72,7 @@ const { TopNavMenu } = navigationStartMock.ui;
 
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
-    mount: jest.fn((el, props) => {}),
+    mount: jest.fn(async (el, props) => {}),
     unmount: jest.fn(() => {}),
   };
 }
@@ -83,6 +83,7 @@ function createMockSearchService() {
     session: {
       start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
       clear: jest.fn(),
+      getSessionId: jest.fn(() => `sessionId-${sessionIdCounter}`),
     },
   };
 }
@@ -154,11 +155,7 @@ function createMockTimefilter() {
     getBounds: jest.fn(() => timeFilter),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
-    getAutoRefreshFetch$: () => ({
-      subscribe: ({ next }: { next: () => void }) => {
-        return next;
-      },
-    }),
+    getAutoRefreshFetch$: () => new Observable(),
   };
 }
 

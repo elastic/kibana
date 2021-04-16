@@ -7,21 +7,22 @@
 
 const path = require('path');
 
-const xpackRoot = path.resolve(__dirname, '../../../..');
-const kibanaRoot = path.resolve(xpackRoot, '..');
-
+const kibanaRoot = path.resolve(__dirname, '../../../../..');
 const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
+const tsconfigTplTest = path.resolve(__dirname, './test-tsconfig.json');
 
 const filesToIgnore = [
-  path.resolve(xpackRoot, 'tsconfig.json'),
   path.resolve(kibanaRoot, 'tsconfig.json'),
   path.resolve(kibanaRoot, 'tsconfig.base.json'),
   path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'x-pack/plugins/observability', 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'x-pack/plugins/rule_registry', 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'x-pack/test', 'tsconfig.json'),
 ];
 
 module.exports = {
-  xpackRoot,
   kibanaRoot,
   tsconfigTpl,
+  tsconfigTplTest,
   filesToIgnore,
 };

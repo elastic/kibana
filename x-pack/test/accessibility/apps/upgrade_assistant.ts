@@ -13,32 +13,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Upgrade Assistant Home', () => {
+  describe('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('Overview Tab', async () => {
-      await retry.waitFor('Upgrade Assistant overview tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantOverviewTabDetail');
+    it('Coming soon prompt', async () => {
+      await retry.waitFor('Upgrade Assistant coming soon prompt to be visible', async () => {
+        return testSubjects.exists('comingSoonPrompt');
       });
       await a11y.testAppSnapshot();
     });
 
-    it('Cluster Tab', async () => {
-      await testSubjects.click('upgradeAssistantClusterTab');
-      await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantClusterTabDetail');
+    // These tests will be skipped until the last minor of the next major release
+    describe.skip('Upgrade Assistant content', () => {
+      it('Overview page', async () => {
+        await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
+          return testSubjects.exists('overviewPageContent');
+        });
+        await a11y.testAppSnapshot();
       });
-      await a11y.testAppSnapshot();
-    });
 
-    it('Indices Tab', async () => {
-      await testSubjects.click('upgradeAssistantIndicesTab');
-      await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantIndexTabDetail');
+      it('Elasticsearch cluster tab', async () => {
+        await testSubjects.click('esDeprecationsLink');
+        await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
+          return testSubjects.exists('clusterTabContent');
+        });
+        await a11y.testAppSnapshot();
       });
-      await a11y.testAppSnapshot();
+
+      it('Elasticsearch indices tab', async () => {
+        await testSubjects.click('upgradeAssistantIndicesTab');
+        await retry.waitFor('Upgrade Assistant Indices tab to be visible', async () => {
+          return testSubjects.exists('indexTabContent');
+        });
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }

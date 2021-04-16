@@ -16,7 +16,6 @@ import {
   Logger,
   IContextProvider,
   ElasticsearchServiceStart,
-  ILegacyClusterClient,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
@@ -31,7 +30,7 @@ import { SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 
-import { ActionsConfig } from './config';
+import { ActionsConfig, getValidatedConfig } from './config';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -50,15 +49,7 @@ import {
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
-import {
-  createActionRoute,
-  deleteActionRoute,
-  getAllActionRoute,
-  getActionRoute,
-  updateActionRoute,
-  listActionTypesRoute,
-  executeActionRoute,
-} from './routes';
+import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
@@ -77,6 +68,9 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
+import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
+import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
+import { AlertHistoryEsIndexConnectorId } from '../common';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -107,6 +101,7 @@ export interface PluginStartContract {
   preconfiguredActions: PreConfiguredAction[];
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
+    actionId: string,
     params: Params,
     variables: Record<string, unknown>
   ): Params;
@@ -150,8 +145,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.actionsConfig = initContext.config.get<ActionsConfig>();
     this.logger = initContext.logger.get('actions');
+    this.actionsConfig = getValidatedConfig(this.logger, initContext.config.get<ActionsConfig>());
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
@@ -187,12 +182,22 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      this.preconfiguredActions.push(getAlertHistoryEsIndex());
+    }
+
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
-      this.preconfiguredActions.push({
-        ...this.actionsConfig.preconfigured[preconfiguredId],
-        id: preconfiguredId,
-        isPreconfigured: true,
-      });
+      if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
+        this.preconfiguredActions.push({
+          ...this.actionsConfig.preconfigured[preconfiguredId],
+          id: preconfiguredId,
+          isPreconfigured: true,
+        });
+      } else {
+        this.logger.warn(
+          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+        );
+      }
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
@@ -219,6 +224,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
+        this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
@@ -237,14 +243,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Routes
-    const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    createActionRoute(router, this.licenseState);
-    deleteActionRoute(router, this.licenseState);
-    getActionRoute(router, this.licenseState);
-    getAllActionRoute(router, this.licenseState);
-    updateActionRoute(router, this.licenseState);
-    listActionTypesRoute(router, this.licenseState);
-    executeActionRoute(router, this.licenseState);
+    defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
     return {
       registerType: <
@@ -302,7 +301,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         defaultKibanaIndex: kibanaIndex,
-        scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
+        scopedClusterClient: core.elasticsearch.client.asScoped(request),
         preconfiguredActions,
         request,
         authorization: instantiateAuthorization(
@@ -371,6 +370,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      createAlertHistoryIndexTemplate({
+        client: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
@@ -421,12 +427,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
     return (request) => ({
-      callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: getScopedClient(request),
       scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
-      getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
-        return clusterClient.asScoped(request);
-      },
     });
   }
 
@@ -459,7 +461,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             }),
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient: context.core.elasticsearch.legacy.client,
+            scopedClusterClient: context.core.elasticsearch.client,
             preconfiguredActions,
             request,
             authorization: instantiateAuthorization(request),
@@ -488,12 +490,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
+  actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables) as Params;
+    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
   } else {
     return renderMustacheObject(params, variables);
   }

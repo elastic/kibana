@@ -5,29 +5,53 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { Loading, Error } from '../../components';
 import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
+import { WithoutHeaderLayout } from '../../layouts';
+
 import { AgentListPage } from './agent_list_page';
-import { SetupPage } from './setup_page';
+import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { EnrollmentTokenListPage } from './enrollment_token_list_page';
 import { ListLayout } from './components/list_layout';
-import { WithoutHeaderLayout } from '../../layouts';
+
+const REFRESH_INTERVAL_MS = 30000;
 
 export const FleetApp: React.FunctionComponent = () => {
   useBreadcrumbs('fleet');
+
   const { agents } = useConfig();
   const capabilities = useCapabilities();
 
   const fleetStatus = useFleetStatus();
 
+  useEffect(() => {
+    if (
+      !agents.enabled ||
+      fleetStatus.isLoading ||
+      !fleetStatus.missingRequirements ||
+      !fleetStatus.missingRequirements.includes('fleet_server')
+    ) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      fleetStatus.refresh();
+    }, REFRESH_INTERVAL_MS);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fleetStatus, agents.enabled]);
+
   if (!agents.enabled) return null;
-  if (fleetStatus.isLoading) {
+  if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
     return <Loading />;
   }
 
@@ -47,13 +71,16 @@ export const FleetApp: React.FunctionComponent = () => {
     );
   }
 
-  if (fleetStatus.isReady === false) {
-    return (
-      <SetupPage
-        missingRequirements={fleetStatus.missingRequirements || []}
-        refresh={fleetStatus.refresh}
-      />
-    );
+  const hasOnlyFleetServerMissingRequirement =
+    fleetStatus?.missingRequirements?.length === 1 &&
+    fleetStatus.missingRequirements[0] === 'fleet_server';
+
+  if (
+    !hasOnlyFleetServerMissingRequirement &&
+    fleetStatus.missingRequirements &&
+    fleetStatus.missingRequirements.length > 0
+  ) {
+    return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
   if (!capabilities.read) {
     return <NoAccessPage />;
@@ -72,7 +99,11 @@ export const FleetApp: React.FunctionComponent = () => {
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
           <ListLayout>
-            <AgentListPage />
+            {hasOnlyFleetServerMissingRequirement ? (
+              <FleetServerRequirementPage />
+            ) : (
+              <AgentListPage />
+            )}
           </ListLayout>
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>

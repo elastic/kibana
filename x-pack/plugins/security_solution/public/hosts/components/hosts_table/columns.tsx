@@ -24,6 +24,7 @@ import {
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
+import { Maybe } from '../../../../common/search_strategy';
 
 export const getHostsColumns = (): HostsTableColumns => [
   {
@@ -76,9 +77,13 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (lastSeen) => {
-      if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
+    render: (lastSeen: Maybe<string | string[]> | undefined) => {
+      if (lastSeen != null && lastSeen.length > 0) {
+        return (
+          <FormattedRelativePreferenceDate
+            value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}
+          />
+        );
       }
       return getEmptyTagValue();
     },

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   DATE_NOW,
   LIST_ID,
@@ -34,9 +36,12 @@ describe('get_list_item_by_values', () => {
   test('Returns a an empty array if the ES query is also empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
-    const callCluster = getCallClusterMock(data);
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
     const listItem = await getListItemByValues({
-      callCluster,
+      esClient,
       listId: LIST_ID,
       listItemIndex: LIST_ITEM_INDEX,
       type: TYPE,
@@ -48,9 +53,12 @@ describe('get_list_item_by_values', () => {
 
   test('Returns transformed list item if the data exists within ES', async () => {
     const data = getSearchListItemMock();
-    const callCluster = getCallClusterMock(data);
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
     const listItem = await getListItemByValues({
-      callCluster,
+      esClient,
       listId: LIST_ID,
       listItemIndex: LIST_ITEM_INDEX,
       type: TYPE,

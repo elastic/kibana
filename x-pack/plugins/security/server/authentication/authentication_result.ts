@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AuthHeaders } from '../../../../../src/core/server';
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthHeaders } from 'src/core/server';
+
+import type { AuthenticatedUser } from '../../common/model';
 
 /**
  * Represents status that `AuthenticationResult` can be in.

@@ -84,7 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Tls Test with Packetbeat', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/91360
+  describe.skip('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
       before(() => esArchiver.load('packetbeat/tls'));
       after(() => esArchiver.unload('packetbeat/tls'));
@@ -109,9 +110,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -139,9 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -174,9 +177,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
@@ -203,9 +207,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);

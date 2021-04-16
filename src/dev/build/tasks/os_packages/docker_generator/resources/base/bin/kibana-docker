@@ -159,14 +159,22 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
+    xpack.actions.preconfiguredAlertHistoryEsIndex
     xpack.actions.preconfigured
     xpack.actions.proxyHeaders
     xpack.actions.proxyRejectUnauthorizedCertificates
     xpack.actions.proxyUrl
+    xpack.actions.proxyBypassHosts
+    xpack.actions.proxyOnlyHosts
     xpack.actions.rejectUnauthorized
+    xpack.actions.maxResponseContentLength
+    xpack.actions.responseTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.healthCheck.interval
+    xpack.alerting.invalidateApiKeysTask.interval
+    xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
@@ -192,6 +200,8 @@ kibana_vars=(
     xpack.fleet.agents.elasticsearch.host
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
+    xpack.fleet.agentPolicies
+    xpack.fleet.packages
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
     xpack.graph.enabled
@@ -260,6 +270,20 @@ kibana_vars=(
     xpack.rollup.enabled
     xpack.searchprofiler.enabled
     xpack.security.audit.enabled
+    xpack.security.audit.appender.type
+    xpack.security.audit.appender.layout.type
+    xpack.security.audit.appender.layout.highlight
+    xpack.security.audit.appender.layout.pattern
+    xpack.security.audit.appender.legacyLoggingConfig
+    xpack.security.audit.appender.fileName
+    xpack.security.audit.appender.policy.type
+    xpack.security.audit.appender.policy.interval
+    xpack.security.audit.appender.policy.modulate
+    xpack.security.audit.appender.policy.size
+    xpack.security.audit.appender.strategy.type
+    xpack.security.audit.appender.strategy.max
+    xpack.security.audit.appender.strategy.pattern
+    xpack.security.audit.ignore_filters
     xpack.security.authc.oidc.realm
     xpack.security.authc.providers
     xpack.security.authc.saml.maxRedirectURLSize

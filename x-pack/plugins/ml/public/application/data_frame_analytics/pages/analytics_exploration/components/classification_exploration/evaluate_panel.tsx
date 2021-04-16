@@ -13,6 +13,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -32,14 +34,17 @@ import { DataFrameTaskStateType } from '../../../analytics_management/components
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
+import { EvaluateStat } from './evaluate_stat';
 
 import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
 
 import {
   getColumnData,
+  getTrailingControlColumns,
+  ConfusionMatrixColumn,
+  ConfusionMatrixColumnData,
   ACTUAL_CLASS_ID,
   MAX_COLUMNS,
-  getTrailingControlColumns,
 } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
@@ -94,10 +99,10 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     services: { docLinks },
   } = useMlKibana();
 
-  const [columns, setColumns] = useState<any>([]);
-  const [columnsData, setColumnsData] = useState<any>([]);
+  const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
+  const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<any>([]);
+  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
@@ -108,10 +113,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const isTraining = isTrainingFilter(searchQuery, resultsField);
 
   const {
+    avgRecall,
     confusionMatrixData,
     docsCount,
     error: errorConfusionMatrix,
     isLoading: isLoadingConfusionMatrix,
+    overallAccuracy,
   } = useConfusionMatrix(jobConfig, searchQuery);
 
   useEffect(() => {
@@ -144,8 +151,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           const gridItem = columnData[rowIndex];
 
           if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            // @ts-ignore
-            const count = gridItem[colId];
+            const count = gridItem.predicted_classes_count[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -160,7 +166,11 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     classificationClasses,
     error: errorRocCurve,
     isLoading: isLoadingRocCurve,
-  } = useRocCurve(jobConfig, searchQuery, visibleColumns);
+  } = useRocCurve(
+    jobConfig,
+    searchQuery,
+    columns.map((d) => d.id)
+  );
 
   const renderCellValue = ({
     rowIndex,
@@ -169,17 +179,20 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   }: {
     rowIndex: number;
     columnId: string;
-    setCellProps: any;
+    setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
   }) => {
-    const cellValue = columnsData[rowIndex][columnId];
+    const cellValue =
+      columnId === ACTUAL_CLASS_ID
+        ? columnsData[rowIndex][columnId]
+        : columnsData[rowIndex].predicted_classes_count[columnId];
     const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
-    let accuracy: number | string = '0%';
+    let accuracy: string = '0%';
 
-    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
-      accuracy = cellValue / actualCount;
+    if (columnId !== ACTUAL_CLASS_ID && actualCount && typeof cellValue === 'number') {
+      let accuracyNumber: number = cellValue / actualCount;
       // round to 2 decimal places without converting to string;
-      accuracy = Math.round(accuracy * 100) / 100;
-      accuracy = `${Math.round(accuracy * 100)}%`;
+      accuracyNumber = Math.round(accuracyNumber * 100) / 100;
+      accuracy = `${Math.round(accuracyNumber * 100)}%`;
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
@@ -299,7 +312,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                         <EuiText size="xs" color="subdued">
                           <FormattedMessage
                             id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
-                            defaultMessage="Actual label"
+                            defaultMessage="Actual class"
                           />
                         </EuiText>
                       </div>
@@ -310,7 +323,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               <EuiText size="xs" color="subdued">
                                 <FormattedMessage
                                   id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
-                                  defaultMessage="Predicted label"
+                                  defaultMessage="Predicted class"
                                 />
                               </EuiText>
                             </div>
@@ -358,8 +371,52 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 )}
               </>
             ) : null}
+            {/* Accuracy and Recall */}
+            <EuiSpacer size="xl" />
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem grow={false}>
+                <EvaluateStat
+                  dataTestSubj={'mlDFAEvaluateSectionOverallAccuracyStat'}
+                  title={overallAccuracy}
+                  isLoading={isLoadingConfusionMatrix}
+                  description={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat',
+                    {
+                      defaultMessage: 'Overall accuracy',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip',
+                    {
+                      defaultMessage:
+                        'The ratio of the number of correct class predictions to the total number of predictions.',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EvaluateStat
+                  dataTestSubj={'mlDFAEvaluateSectionAvgRecallStat'}
+                  title={avgRecall}
+                  isLoading={isLoadingConfusionMatrix}
+                  description={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat',
+                    {
+                      defaultMessage: 'Mean recall',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip',
+                    {
+                      defaultMessage:
+                        'Mean recall shows how many of the data points that are actual class members were identified correctly as class members.',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {/* AUC ROC Chart */}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="none">
               <EuiTitle size="xxs">
                 <span>

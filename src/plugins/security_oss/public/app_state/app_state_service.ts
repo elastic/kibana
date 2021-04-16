@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
-import { AppState } from '../../common';
+import type { CoreStart } from 'src/core/public';
+
+import type { AppState } from '../../common';
 
 const DEFAULT_APP_STATE = Object.freeze({
   insecureClusterAlert: { displayAlert: false },

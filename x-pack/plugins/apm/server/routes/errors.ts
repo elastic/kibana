@@ -6,14 +6,15 @@
  */
 
 import * as t from 'io-ts';
-import { createRoute } from './create_route';
+import { createApmServerRoute } from './create_apm_server_route';
 import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { environmentRt, uiFiltersRt, rangeRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
-export const errorsRoute = createRoute({
+const errorsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/errors',
   params: t.type({
     path: t.type({
@@ -25,47 +26,57 @@ export const errorsRoute = createRoute({
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { params } = context;
+  handler: async (resources) => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { environment, sortField, sortDirection } = params.query;
+    const { environment, kuery, sortField, sortDirection } = params.query;
 
-    return getErrorGroups({
+    const errorGroups = await getErrorGroups({
       environment,
+      kuery,
       serviceName,
       sortField,
       sortDirection,
       setup,
     });
+
+    return { errorGroups };
   },
 });
 
-export const errorGroupsRoute = createRoute({
+const errorGroupsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
       groupId: t.string,
     }),
-    query: t.intersection([environmentRt, uiFiltersRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName, groupId } = context.params.path;
-    const { environment } = context.params.query;
+  handler: async (resources) => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+    const { serviceName, groupId } = params.path;
+    const { environment, kuery } = params.query;
 
-    return getErrorGroupSample({ environment, serviceName, groupId, setup });
+    return getErrorGroupSample({
+      environment,
+      groupId,
+      kuery,
+      serviceName,
+      setup,
+    });
   },
 });
 
-export const errorDistributionRoute = createRoute({
+const errorDistributionRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
   params: t.type({
     path: t.type({
@@ -76,16 +87,27 @@ export const errorDistributionRoute = createRoute({
         groupId: t.string,
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { params } = context;
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, groupId } = params.query;
-    return getErrorDistribution({ environment, serviceName, groupId, setup });
+    const { environment, kuery, groupId } = params.query;
+    return getErrorDistribution({
+      environment,
+      kuery,
+      serviceName,
+      groupId,
+      setup,
+    });
   },
 });
+
+export const errorsRouteRepository = createApmServerRouteRepository()
+  .add(errorsRoute)
+  .add(errorGroupsRoute)
+  .add(errorDistributionRoute);

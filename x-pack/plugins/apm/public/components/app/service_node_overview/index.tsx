@@ -8,8 +8,10 @@ import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../common/service_nodes';
 import {
   asDynamicBytes,
   asInteger,
@@ -35,10 +37,11 @@ interface ServiceNodeOverviewProps {
 }
 
 function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
-  const { uiFilters, urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const {
+    urlParams: { kuery, start, end },
+  } = useUrlParams();
 
-  const { data: items = [] } = useFetcher(
+  const { data } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return undefined;
@@ -50,16 +53,17 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
             serviceName,
           },
           query: {
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     },
-    [serviceName, start, end, uiFilters]
+    [kuery, serviceName, start, end]
   );
 
+  const items = data?.serviceNodes ?? [];
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
       name: (
@@ -81,7 +85,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
         const { displayedName, tooltip } =
           name === SERVICE_NODE_NAME_MISSING
             ? {
-                displayedName: UNIDENTIFIED_SERVICE_NODES_LABEL,
+                displayedName: getServiceNodeName(name),
                 tooltip: i18n.translate(
                   'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
                   {

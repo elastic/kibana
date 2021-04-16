@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick, findTestSubject } from '@kbn/test/jest';
-import { ShareToSpaceForm } from './share_to_space_form';
+import type { EuiCheckableCardProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCheckableCard,
-  EuiCheckableCardProps,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiSelectable,
 } from '@elastic/eui';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { SelectableSpacesControl } from './selectable_spaces_control';
+import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
-import { NoSpacesAvailable } from './no_spaces_available';
-import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-import { ShareModeControl } from './share_mode_control';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { getSpacesContextWrapper } from '../../spaces_context';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { NoSpacesAvailable } from './no_spaces_available';
+import { SelectableSpacesControl } from './selectable_spaces_control';
+import { ShareModeControl } from './share_mode_control';
+import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
+import { ShareToSpaceForm } from './share_to_space_form';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -101,11 +103,11 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
-  const SpacesContext = getSpacesContextWrapper({
+  const SpacesContext = await getSpacesContextProviderWrapper({
     getStartServices,
     spacesManager: mockSpacesManager,
   });
-  const ShareToSpaceFlyout = getShareToSpaceFlyoutComponent();
+  const ShareToSpaceFlyout = await getShareToSpaceFlyoutComponent();
   // the internal flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper
@@ -195,7 +197,7 @@ describe('ShareToSpaceFlyout', () => {
       });
 
       expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(0);
+      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(0);
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
       expect(onClose).toHaveBeenCalledTimes(0);
     });
@@ -215,10 +217,10 @@ describe('ShareToSpaceFlyout', () => {
       await act(async () => {
         copyButton.simulate('click');
         await nextTick();
-        wrapper.update();
       });
+      wrapper.update();
 
-      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(1);
+      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(1);
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });

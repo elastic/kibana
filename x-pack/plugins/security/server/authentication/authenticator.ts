@@ -6,12 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  KibanaRequest,
-  LoggerFactory,
-  IBasePath,
-  IClusterClient,
-} from '../../../../../src/core/server';
+import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+
+import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
@@ -21,30 +18,32 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { SessionValue, Session } from '../session_management';
-
-import {
-  AnonymousAuthenticationProvider,
+import type { Session, SessionValue } from '../session_management';
+import { AuthenticationResult } from './authentication_result';
+import { canRedirectRequest } from './can_redirect_request';
+import { DeauthenticationResult } from './deauthentication_result';
+import { HTTPAuthorizationHeader } from './http_authentication';
+import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,
-  SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
-  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
 } from './providers';
-import { AuthenticationResult } from './authentication_result';
-import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { canRedirectRequest } from './can_redirect_request';
-import { HTTPAuthorizationHeader } from './http_authentication';
 
 /**
  * The shape of the login attempt.
@@ -397,7 +396,7 @@ export class Authenticator {
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
@@ -523,7 +522,7 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       return null;
     }
 
@@ -557,7 +556,7 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       return null;
     }
 
@@ -571,7 +570,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
-        await this.session.clear(request);
+        await this.invalidateSessionValue(request);
       }
       return null;
     }
@@ -609,17 +608,17 @@ export class Authenticator {
       this.logger.debug(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     }
 
@@ -650,6 +649,14 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
+  }
+
+  /**
+   * Invalidates session value associated with the specified request.
+   * @param request Request instance.
+   */
+  private async invalidateSessionValue(request: KibanaRequest) {
+    await this.session.invalidate(request, { match: 'current' });
   }
 
   /**

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Sudoers File Modification",
   "query": "event.category:file and event.type:change and file.path:(/etc/sudoers* or /private/etc/sudoers*)",
   "risk_score": 47,

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Role, isRoleReserved } from '../../../../common/model';
+
+import type { Role } from '../../../../common/model';
+import { isRoleReserved } from '../../../../common/model';
 
 interface Props {
   role: Role;

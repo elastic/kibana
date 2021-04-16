@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -20,7 +20,8 @@ import { joinByKey } from '../../../../../common/utils/join_by_key';
 import {
   environmentQuery,
   rangeQuery,
-} from '../../../../../common/utils/queries';
+  kqlQuery,
+} from '../../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -50,6 +51,7 @@ function getHistogramAggOptions({
 
 export async function getBuckets({
   environment,
+  kuery,
   serviceName,
   transactionName,
   transactionType,
@@ -61,6 +63,7 @@ export async function getBuckets({
   searchAggregatedTransactions,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -74,7 +77,7 @@ export async function getBuckets({
   return withApmSpan(
     'get_latency_distribution_buckets_with_samples',
     async () => {
-      const { start, end, esFilter, apmEventClient } = setup;
+      const { start, end, apmEventClient } = setup;
 
       const commonFilters = [
         { term: { [SERVICE_NAME]: serviceName } },
@@ -82,8 +85,8 @@ export async function getBuckets({
         { term: { [TRANSACTION_NAME]: transactionName } },
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...esFilter,
-      ];
+        ...kqlQuery(kuery),
+      ] as QueryContainer[];
 
       async function getSamplesForDistributionBuckets() {
         const response = await withApmSpan(
@@ -103,7 +106,7 @@ export async function getBuckets({
                     should: [
                       { term: { [TRACE_ID]: traceId } },
                       { term: { [TRANSACTION_ID]: transactionId } },
-                    ],
+                    ] as QueryContainer[],
                   },
                 },
                 aggs: {
@@ -115,14 +118,11 @@ export async function getBuckets({
                     }),
                     aggs: {
                       samples: {
-                        top_metrics: {
-                          metrics: [
-                            { field: TRANSACTION_ID },
-                            { field: TRACE_ID },
-                          ] as const,
+                        top_hits: {
+                          _source: [TRANSACTION_ID, TRACE_ID],
                           size: 10,
                           sort: {
-                            _score: 'desc',
+                            _score: 'desc' as const,
                           },
                         },
                       },
@@ -135,11 +135,12 @@ export async function getBuckets({
 
         return (
           response.aggregations?.distribution.buckets.map((bucket) => {
+            const samples = bucket.samples.hits.hits;
             return {
               key: bucket.key,
-              samples: bucket.samples.top.map((sample) => ({
-                traceId: sample.metrics[TRACE_ID] as string,
-                transactionId: sample.metrics[TRANSACTION_ID] as string,
+              samples: samples.map(({ _source: sample }) => ({
+                traceId: sample.trace.id,
+                transactionId: sample.transaction.id,
               })),
             };
           }) ?? []

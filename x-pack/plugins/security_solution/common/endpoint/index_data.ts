@@ -7,7 +7,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-import { KbnClient } from '@kbn/dev-utils';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
@@ -310,7 +311,7 @@ const fleetEnrollAgentForHost = async (
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       method: 'GET',
       query: {
-        kuery: `fleet-enrollment-api-keys.policy_id:"${agentPolicyId}"`,
+        kuery: `policy_id:"${agentPolicyId}"`,
       },
     })
     .then((apiKeysResponse) => {

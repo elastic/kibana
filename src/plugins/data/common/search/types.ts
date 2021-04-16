@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IndexPattern } from '..';
+import type { RequestResponder } from '../../../inspector/common';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -118,4 +119,15 @@ export interface ISearchOptions {
    */
 
   indexPattern?: IndexPattern;
+
+  requestResponder?: RequestResponder;
 }
+
+/**
+ * Same as `ISearchOptions`, but contains only serializable fields, which can
+ * be sent over the network.
+ */
+export type ISearchOptionsSerializable = Pick<
+  ISearchOptions,
+  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore'
+>;

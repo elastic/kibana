@@ -62,7 +62,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
             gutterSize="s"
           >
             <EuiFlexItem grow={false}>
-              <SourceIcon serviceType={serviceType} name={addedSourceName} />
+              <SourceIcon serviceType={serviceType} name={addedSourceName} size="xxl" />
             </EuiFlexItem>
             <EuiFlexItem>
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.heading', {

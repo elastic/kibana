@@ -16,8 +16,6 @@ export function createDiscoverDirective(reactDirective: any) {
     ['histogramData', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['minimumVisibleRows', { watchDepth: 'reference' }],
-    ['onSkipBottomButtonClick', { watchDepth: 'reference' }],
     ['opts', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
     ['resultState', { watchDepth: 'reference' }],
@@ -26,10 +24,10 @@ export function createDiscoverDirective(reactDirective: any) {
     ['searchSource', { watchDepth: 'reference' }],
     ['showSaveQuery', { watchDepth: 'reference' }],
     ['state', { watchDepth: 'reference' }],
-    ['timeRange', { watchDepth: 'reference' }],
     ['topNavMenu', { watchDepth: 'reference' }],
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
     ['unmappedFieldsConfig', { watchDepth: 'value' }],
+    ['refreshAppState', { watchDepth: 'reference' }],
   ]);
 }

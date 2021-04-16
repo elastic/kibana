@@ -24,9 +24,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+
 import { dataTypes } from '../../../../../../common';
-import { NewAgentPolicy, AgentPolicy } from '../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
+
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 interface ValidationResults {
@@ -142,6 +144,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         isInvalid={Boolean(touchedFields[name] && validation[name])}
       >
         <EuiFieldText
+          disabled={agentPolicy.is_managed === true}
           fullWidth
           value={agentPolicy[name]}
           onChange={(e) => updateAgentPolicy({ [name]: e.target.value })}
@@ -281,7 +284,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiDescribedFormGroup>
-      {isEditing && 'id' in agentPolicy ? (
+      {isEditing && 'id' in agentPolicy && agentPolicy.is_managed !== true ? (
         <EuiDescribedFormGroup
           title={
             <h4>

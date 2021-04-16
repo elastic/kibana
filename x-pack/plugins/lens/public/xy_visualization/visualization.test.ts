@@ -62,7 +62,7 @@ describe('xy_visualization', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(LensIconChartBar);
-      expect(desc.label).toEqual('Bar');
+      expect(desc.label).toEqual('Bar vertical');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -70,23 +70,23 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed H. bar');
+      expect(desc.label).toEqual('Mixed bar horizontal');
     });
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('H. Bar');
+      expect(desc.label).toEqual('Bar horizontal');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Stacked area'
+        'Area stacked'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'H. Stacked bar'
+        'Bar horizontal stacked'
       );
     });
   });
@@ -587,6 +587,23 @@ describe('xy_visualization', () => {
   });
 
   describe('#getErrorMessages', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        label: 'MyOperation',
+      } as Operation);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+    });
+
     it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
         xyVisualization.getErrorMessages({
@@ -772,6 +789,32 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Missing Vertical axis.',
           longMessage: 'Layer 1 requires a field for the Vertical axis.',
+        },
+      ]);
+    });
+
+    it('should return an error when accessor type is of the wrong type', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'], // just use a single accessor to avoid too much noise
+              },
+            ],
+          },
+          frame.datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Vertical axis.',
+          longMessage:
+            'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
         },
       ]);
     });

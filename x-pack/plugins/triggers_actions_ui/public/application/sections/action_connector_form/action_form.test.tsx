@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+} from '../../../../../alerting/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({

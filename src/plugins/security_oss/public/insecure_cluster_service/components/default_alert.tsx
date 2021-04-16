@@ -14,11 +14,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { MountPoint } from 'kibana/public';
 import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import type { MountPoint } from 'src/core/public';
 
 export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
   defaultMessage: 'Your data is not secure',

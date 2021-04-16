@@ -33,6 +33,7 @@ export async function runDockerGenerator(
     image: boolean;
     ubi?: boolean;
     ironbank?: boolean;
+    dockerBuildDate?: string;
   }
 ) {
   // UBI var config
@@ -53,7 +54,7 @@ export async function runDockerGenerator(
   const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const dockerBuildDate = new Date().toISOString();
+  const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo(
     'build',
@@ -82,6 +83,16 @@ export async function runDockerGenerator(
     architecture: flags.architecture,
     revision: config.getBuildSha(),
   };
+
+  type HostArchitectureToDocker = Record<string, string>;
+  const hostTarget: HostArchitectureToDocker = {
+    x64: 'x64',
+    arm64: 'aarch64',
+  };
+  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
+  if (flags.architecture && !buildArchitectureSupported) {
+    return;
+  }
 
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
@@ -132,13 +143,7 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-  type HostArchitectureToDocker = Record<string, string>;
-  const hostTarget: HostArchitectureToDocker = {
-    x64: 'x64',
-    arm64: 'aarch64',
-  };
-  const buildImage = hostTarget[process.arch] === flags.architecture && flags.image;
-  if (buildImage) {
+  if (flags.image) {
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',

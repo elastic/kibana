@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -15,7 +16,7 @@ import {
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeQuery } from '../../../common/utils/queries';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -75,7 +76,7 @@ export async function getTraceItems(
               filter: [
                 { term: { [TRACE_ID]: traceId } },
                 ...rangeQuery(start, end),
-              ],
+              ] as QueryContainer[],
               should: {
                 exists: { field: PARENT_ID },
               },

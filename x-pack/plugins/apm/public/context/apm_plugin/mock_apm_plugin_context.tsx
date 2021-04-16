@@ -81,6 +81,7 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  profilingEnabled: false,
 };
 
 const mockPlugin = {
@@ -115,8 +116,8 @@ export function MockApmPluginContextWrapper({
   children?: React.ReactNode;
   value?: ApmPluginContextValue;
 }) {
-  if (value.core?.http) {
-    createCallApmApi(value.core?.http);
+  if (value.core) {
+    createCallApmApi(value.core);
   }
   return (
     <ApmPluginContext.Provider

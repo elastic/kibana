@@ -10,7 +10,7 @@ import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { GetAuthHeaders } from './auth_headers_storage';
-import { RequestHandler, IRouter } from './router';
+import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
@@ -27,7 +27,7 @@ import type { PluginOpaqueId, RequestHandlerContext } from '..';
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
+export type RequestHandlerContextContainer = IContextContainer;
 
 /**
  * Context provider for request handler.

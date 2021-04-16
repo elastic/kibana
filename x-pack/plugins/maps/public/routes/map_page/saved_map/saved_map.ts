@@ -42,7 +42,7 @@ import {
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { copyPersistentState } from '../../../reducers/util';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';

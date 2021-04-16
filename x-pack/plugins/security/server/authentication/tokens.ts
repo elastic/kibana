@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationInfo } from '../elasticsearch';
 import { getErrorStatusCode } from '../errors';
 
@@ -59,16 +60,22 @@ export class Tokens {
         refresh_token: refreshToken,
         authentication: authenticationInfo,
       } = (
-        await this.options.client.security.getToken<{
-          access_token: string;
-          refresh_token: string;
-          authentication: AuthenticationInfo;
-        }>({ body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken } })
+        await this.options.client.security.getToken({
+          body: {
+            grant_type: 'refresh_token',
+            refresh_token: existingRefreshToken,
+          },
+        })
       ).body;
 
       this.logger.debug('Access token has been successfully refreshed.');
 
-      return { accessToken, refreshToken, authenticationInfo };
+      return {
+        accessToken,
+        refreshToken,
+        // @ts-expect-error @elastic/elasticsearch decalred GetUserAccessTokenResponse.authentication: string
+        authenticationInfo: authenticationInfo as AuthenticationInfo,
+      };
     } catch (err) {
       this.logger.debug(`Failed to refresh access token: ${err.message}`);
 

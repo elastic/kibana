@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 export function defineEnabledApiKeysRoutes({
   router,

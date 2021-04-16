@@ -91,6 +91,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
               .catch((err: Error) => {
                 services.notify.error(err, {
                   title: strings.getExportPDFErrorTitle(workpad.name),
+                  'data-test-subj': 'queueReportError',
                 });
               });
           case 'json':

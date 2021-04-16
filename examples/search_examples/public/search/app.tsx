@@ -145,7 +145,8 @@ export const SearchExamplesApp = ({
             setResponse(res.rawResponse);
             setTimeTook(res.rawResponse.took);
             const avgResult: number | undefined = res.rawResponse.aggregations
-              ? res.rawResponse.aggregations[1].value
+              ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+                res.rawResponse.aggregations[1].value
               : undefined;
             const message = (
               <EuiText>
@@ -190,7 +191,8 @@ export const SearchExamplesApp = ({
         .setField('index', indexPattern)
         .setField('filter', filters)
         .setField('query', query)
-        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*']);
+        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*'])
+        .setField('trackTotalHits', 100);
 
       if (selectedNumericField) {
         searchSource.setField('aggs', () => {
@@ -202,8 +204,8 @@ export const SearchExamplesApp = ({
         });
       }
 
-      setRequest(await searchSource.getSearchRequestBody());
-      const res = await searchSource.fetch();
+      setRequest(searchSource.getSearchRequestBody());
+      const res = await searchSource.fetch$().toPromise();
       setResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;

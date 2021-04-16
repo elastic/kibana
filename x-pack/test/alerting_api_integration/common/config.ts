@@ -20,6 +20,7 @@ interface CreateTestConfigOptions {
   enableActionsProxy: boolean;
   rejectUnauthorized?: boolean;
   publicBaseUrl?: boolean;
+  preconfiguredAlertHistoryEsIndex?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -47,6 +48,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     disabledPlugins = [],
     ssl = false,
     rejectUnauthorized = true,
+    preconfiguredAlertHistoryEsIndex = false,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -68,12 +70,24 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
 
     const proxyPort =
       process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
+
+    // If testing with proxy, also test proxyOnlyHosts for this proxy;
+    // all the actions are assumed to be acccessing localhost anyway.
+    // If not testing with proxy, set a bogus proxy up, and set the bypass
+    // flag for all our localhost actions to bypass it.  Currently,
+    // security_and_spaces uses enableActionsProxy: true, and spaces_only
+    // uses enableActionsProxy: false.
+    const proxyHosts = ['localhost', 'some.non.existent.com'];
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
           '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
-      : [];
+      : [
+          `--xpack.actions.proxyUrl=http://elastic.co`,
+          `--xpack.actions.proxyBypassHosts=${JSON.stringify(proxyHosts)}`,
+        ];
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -101,12 +115,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.alerts.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           ...actionsProxyUrl,
 
           '--xpack.eventLog.logEntries=true',
+          `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
               actionTypeId: '.slack',

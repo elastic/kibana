@@ -46,6 +46,15 @@ describe('get_data_telemetry', () => {
       ).toStrictEqual([]);
     });
 
+    test('should not include Async Search indices', () => {
+      expect(
+        buildDataTelemetryPayload([
+          { name: '.async_search', docCount: 0 },
+          { name: '.async-search', docCount: 0 },
+        ])
+      ).toStrictEqual([]);
+    });
+
     test('matches some indices and puts them in their own category', () => {
       expect(
         buildDataTelemetryPayload([
@@ -265,7 +274,7 @@ function mockEsClient(
   indexStats: any = {}
 ) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  // @ts-ignore
+  // @ts-expect-error
   esClient.indices.getMapping.mockImplementationOnce(async () => {
     const body = Object.fromEntries(
       indicesMappings.map((index) => [
@@ -294,7 +303,7 @@ function mockEsClient(
     );
     return { body };
   });
-  // @ts-ignore
+  // @ts-expect-error
   esClient.indices.stats.mockImplementationOnce(async () => {
     return { body: indexStats };
   });

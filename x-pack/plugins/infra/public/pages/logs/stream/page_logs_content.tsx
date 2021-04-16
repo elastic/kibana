@@ -35,7 +35,7 @@ import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath'
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { sourceConfiguration, sourceId } = useLogSourceContext();
+  const { resolvedSourceConfiguration, sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     surroundingLogsId,
@@ -60,6 +60,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     startDateExpression,
     endDateExpression,
     updateDateRange,
+    lastCompleteDateRangeExpressionUpdate,
   } = useContext(LogPositionState.Context);
   const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
 
@@ -81,16 +82,16 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const prevStartTimestamp = usePrevious(startTimestamp);
   const prevEndTimestamp = usePrevious(endTimestamp);
   const prevFilterQuery = usePrevious(filterQuery);
+  const prevLastCompleteDateRangeExpressionUpdate = usePrevious(
+    lastCompleteDateRangeExpressionUpdate
+  );
 
   // Refetch entries if...
   useEffect(() => {
     const isFirstLoad = !prevStartTimestamp || !prevEndTimestamp;
 
-    const newDateRangeDoesNotOverlap =
-      (prevStartTimestamp != null &&
-        startTimestamp != null &&
-        prevStartTimestamp < startTimestamp) ||
-      (prevEndTimestamp != null && endTimestamp != null && prevEndTimestamp > endTimestamp);
+    const completeDateRangeExpressionHasChanged =
+      lastCompleteDateRangeExpressionUpdate !== prevLastCompleteDateRangeExpressionUpdate;
 
     const isCenterPointOutsideLoadedRange =
       targetPosition != null &&
@@ -101,7 +102,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
     if (
       isFirstLoad ||
-      newDateRangeDoesNotOverlap ||
+      completeDateRangeExpressionHasChanged ||
       isCenterPointOutsideLoadedRange ||
       hasQueryChanged
     ) {
@@ -124,6 +125,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     bottomCursor,
     filterQuery,
     prevFilterQuery,
+    lastCompleteDateRangeExpressionUpdate,
+    prevLastCompleteDateRangeExpressionUpdate,
   ]);
 
   const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
@@ -215,7 +218,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <ScrollableLogTextStreamView
           columnConfigurations={
-            (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
+            (resolvedSourceConfiguration && resolvedSourceConfiguration.columns) || []
           }
           hasMoreAfterEnd={hasMoreAfterEnd}
           hasMoreBeforeStart={hasMoreBeforeStart}

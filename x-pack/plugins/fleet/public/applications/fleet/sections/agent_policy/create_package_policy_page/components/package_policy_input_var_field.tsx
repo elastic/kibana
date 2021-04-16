@@ -15,8 +15,11 @@ import {
   EuiComboBox,
   EuiText,
   EuiCodeEditor,
+  EuiTextArea,
+  EuiFieldPassword,
 } from '@elastic/eui';
-import { RegistryVarsEntry } from '../../../../types';
+
+import type { RegistryVarsEntry } from '../../../../types';
 
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
@@ -27,7 +30,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   onChange: (newValue: any) => void;
   errors?: string[] | null;
   forceShowErrors?: boolean;
-}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+  frozen?: boolean;
+}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors, frozen }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
@@ -48,51 +52,72 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             onChange(newVals.map((val) => val.label));
           }}
           onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
         />
       );
     }
-    if (type === 'yaml') {
-      return (
-        <EuiCodeEditor
-          width="100%"
-          mode="yaml"
-          theme="textmate"
-          setOptions={{
-            minLines: 10,
-            maxLines: 30,
-            tabSize: 2,
-            showGutter: false,
-          }}
-          value={value}
-          onChange={(newVal) => onChange(newVal)}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
+    switch (type) {
+      case 'yaml':
+        return frozen ? (
+          <EuiTextArea
+            className="ace_editor"
+            disabled
+            value={value}
+            style={{ height: '175px', padding: '4px', whiteSpace: 'pre', resize: 'none' }}
+          />
+        ) : (
+          <EuiCodeEditor
+            width="100%"
+            mode="yaml"
+            theme="textmate"
+            setOptions={{
+              minLines: 10,
+              maxLines: 30,
+              tabSize: 2,
+              showGutter: false,
+            }}
+            value={value}
+            onChange={(newVal) => onChange(newVal)}
+            onBlur={() => setIsDirty(true)}
+          />
+        );
+      case 'bool':
+        return (
+          <EuiSwitch
+            label={fieldLabel}
+            checked={value}
+            showLabel={false}
+            onChange={(e) => onChange(e.target.checked)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
+      case 'password':
+        return (
+          <EuiFieldPassword
+            type="dual"
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
     }
-    if (type === 'bool') {
-      return (
-        <EuiSwitch
-          label={fieldLabel}
-          checked={value}
-          showLabel={false}
-          onChange={(e) => onChange(e.target.checked)}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
-    }
-
-    return (
-      <EuiFieldText
-        isInvalid={isInvalid}
-        value={value === undefined ? '' : value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => setIsDirty(true)}
-      />
-    );
-  }, [isInvalid, multi, onChange, type, value, fieldLabel]);
+  }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen]);
 
   // Boolean cannot be optional by default set to false
-  const isOptional = type !== 'bool' && !required;
+  const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
   return (
     <EuiFormRow

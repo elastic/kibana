@@ -324,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
+                    name: '1:panel_1',
                     type: 'visualization',
                   },
                 ],
@@ -384,7 +384,7 @@ export default function ({ getService }: FtrProviderContext) {
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
+                    name: '1:panel_1',
                     type: 'visualization',
                   },
                 ],
@@ -449,7 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
+                    name: '1:panel_1',
                     type: 'visualization',
                   },
                 ],
@@ -553,7 +553,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Can't export more than 10001 objects`,
+                message: `Can't export more than 10001 objects. If your server has enough memory, this limit can be increased by adjusting the \"savedObjects.maxImportExportSize\" setting.`,
               });
             });
           await supertest

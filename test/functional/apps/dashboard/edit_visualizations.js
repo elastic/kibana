@@ -15,15 +15,12 @@ export default function ({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   const originalMarkdownText = 'Original markdown text';
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await testSubjects.click('dashboardAddNewPanelButton');
-    await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-    await PageObjects.visualize.clickMarkdownWidget();
+    await PageObjects.dashboard.clickMarkdownQuickButton();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
     if (title) {
@@ -98,6 +95,24 @@ export default function ({ getService, getPageObjects }) {
 
       // Create markdown by value.
       await createMarkdownVis();
+
+      // Edit then save and return
+      await editMarkdownVis();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appsMenu.clickLink('Visualize Library');
+      await PageObjects.common.clickConfirmOnModal();
+      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+    });
+
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      // Create markdown by reference.
+      await createMarkdownVis('by reference');
 
       // Edit then save and return
       await editMarkdownVis();

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
 export const EDIT_CONNECTOR_ARIA = i18n.translate(
-  'xpack.securitySolution.case.editConnector.editConnectorLinkAria',
+  'xpack.securitySolution.cases.editConnector.editConnectorLinkAria',
   {
     defaultMessage: 'click to edit connector',
   }

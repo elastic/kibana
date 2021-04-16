@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Explorer Child Process",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\"\n",
   "risk_score": 47,
@@ -21,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Initial Access"
   ],
   "threat": [
     {

@@ -13,11 +13,12 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { evaluateCondition } from './evaluate_condition';
+import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -27,9 +28,11 @@ interface InventoryMetricThresholdParams {
 }
 
 interface PreviewInventoryMetricThresholdAlertParams {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   params: InventoryMetricThresholdParams;
   source: InfraSource;
+  logQueryFields: LogQueryFields;
+  compositeSize: number;
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
@@ -40,9 +43,11 @@ interface PreviewInventoryMetricThresholdAlertParams {
 export const previewInventoryMetricThresholdAlert: (
   params: PreviewInventoryMetricThresholdAlertParams
 ) => Promise<PreviewResult[]> = async ({
-  callCluster,
+  esClient,
   params,
   source,
+  logQueryFields,
+  compositeSize,
   lookback,
   alertInterval,
   alertThrottle,
@@ -67,8 +72,17 @@ export const previewInventoryMetricThresholdAlert: (
 
   try {
     const results = await Promise.all(
-      criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
+      criteria.map((condition) =>
+        evaluateCondition({
+          condition,
+          nodeType,
+          source,
+          logQueryFields,
+          esClient,
+          compositeSize,
+          filterQuery,
+          lookbackSize,
+        })
       )
     );
 

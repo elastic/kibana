@@ -23,9 +23,13 @@ export interface SavedObjectSetup {
 }
 
 export interface SavedObjectsStart {
+  /** @deprecated */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
+  /** @deprecated */
   settings: {
+    /** @deprecated */
     getPerPage: () => number;
+    /** @deprecated */
     getListingLimit: () => number;
   };
 }

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
-import { StartServicesAccessor, FatalErrorsSetup, Capabilities } from 'src/core/public';
-import {
+import type { Subscription } from 'rxjs';
+
+import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type {
   ManagementApp,
-  ManagementSetup,
   ManagementSection,
-} from '../../../../../src/plugins/management/public';
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticationServiceSetup } from '../authentication';
-import { PluginStartDependencies } from '../plugin';
+  ManagementSetup,
+} from 'src/plugins/management/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { PluginStartDependencies } from '../plugin';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
@@ -45,7 +47,7 @@ export class ManagementService {
     this.securitySection.registerApp(
       rolesManagementApp.create({ fatalErrors, license, getStartServices })
     );
-    this.securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 

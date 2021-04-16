@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SortOptions } from '../../../../../typings/elasticsearch/aggregations';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -22,12 +21,14 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export function getErrorGroups({
   environment,
+  kuery,
   serviceName,
   sortField,
   sortDirection = 'desc',
   setup,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -41,11 +42,12 @@ export function getErrorGroups({
 
     const projection = getErrorGroupsProjection({
       environment,
+      kuery,
       setup,
       serviceName,
     });
 
-    const order: SortOptions = sortByLatestOccurrence
+    const order = sortByLatestOccurrence
       ? {
           max_timestamp: sortDirection,
         }

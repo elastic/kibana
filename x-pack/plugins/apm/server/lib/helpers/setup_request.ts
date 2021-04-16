@@ -10,14 +10,12 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import { UIFilters } from '../../../typings/ui_filters';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
   getApmIndices,
 } from '../settings/apm_indices/get_apm_indices';
-import { getEsFilter } from './convert_ui_filters/get_es_filter';
 import {
   APMEventClient,
   createApmEventClient,
@@ -38,7 +36,6 @@ export interface Setup {
   config: APMConfig;
   indices: ApmIndicesConfig;
   uiFilters: UIFilters;
-  esFilter: ESFilter[];
 }
 
 export interface SetupTimeRange {
@@ -47,8 +44,8 @@ export interface SetupTimeRange {
 }
 
 interface SetupRequestParams {
-  query?: {
-    _debug?: boolean;
+  query: {
+    _inspect?: boolean;
 
     /**
      * Timestamp in ms since epoch
@@ -67,13 +64,19 @@ type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: number } } ? { start: number } : {}) &
   (TParams extends { query: { end: number } } ? { end: number } : {});
 
-export async function setupRequest<TParams extends SetupRequestParams>(
-  context: APMRequestHandlerContext<TParams>,
-  request: KibanaRequest
-): Promise<InferSetup<TParams>> {
+export async function setupRequest<TParams extends SetupRequestParams>({
+  context,
+  params,
+  core,
+  plugins,
+  request,
+  config,
+  logger,
+}: APMRouteHandlerResources & {
+  params: TParams;
+}): Promise<InferSetup<TParams>> {
   return withApmSpan('setup_request', async () => {
-    const { config, logger } = context;
-    const { query } = context.params;
+    const { query } = params;
 
     const [indices, includeFrozen] = await Promise.all([
       getApmIndices({
@@ -91,7 +94,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
-        debug: context.params.query._debug,
+        debug: query._inspect,
         request,
         indices,
         options: { includeFrozen },
@@ -99,18 +102,18 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       internalClient: createInternalESClient({
         context,
         request,
+        debug: query._inspect,
       }),
       ml:
-        context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        plugins.ml && isActivePlatinumLicense(context.licensing.license)
           ? getMlSetup(
-              context.plugins.ml,
+              plugins.ml.setup,
               context.core.savedObjects.client,
               request
             )
           : undefined,
       config,
       uiFilters,
-      esFilter: getEsFilter(uiFilters),
     };
 
     return {
@@ -122,8 +125,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
 }
 
 function getMlSetup(
-  ml: Required<APMRequestHandlerContext['plugins']>['ml'],
-  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  ml: Required<APMRouteHandlerResources['plugins']>['ml']['setup'],
+  savedObjectsClient: APMRouteHandlerResources['context']['core']['savedObjects']['client'],
   request: KibanaRequest
 ) {
   return {

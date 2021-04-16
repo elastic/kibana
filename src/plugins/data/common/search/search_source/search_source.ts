@@ -59,10 +59,9 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith } from 'lodash';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
-import { isObject } from 'rxjs/internal-compatibility';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -74,6 +73,7 @@ import type {
   SearchSourceFields,
 } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -257,6 +257,9 @@ export class SearchSource {
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
     return defer(() => this.requestIsStarting(options)).pipe(
+      tap(() => {
+        options.requestResponder?.stats(getRequestInspectorStats(this));
+      }),
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
@@ -272,7 +275,17 @@ export class SearchSource {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
         if ((response as any).error) {
           throw new RequestFailure(null, response);
+        } else {
+          options.requestResponder?.stats(getResponseInspectorStats(response, this));
+          options.requestResponder?.ok({ json: response });
         }
+      }),
+      catchError((e) => {
+        options.requestResponder?.error({ json: e });
+        throw e;
+      }),
+      finalize(() => {
+        options.requestResponder?.json(this.getSearchRequestBody());
       })
     );
   }
@@ -299,9 +312,8 @@ export class SearchSource {
   /**
    * Returns body contents of the search request, often referred as query DSL.
    */
-  async getSearchRequestBody() {
-    const searchRequest = await this.flatten();
-    return searchRequest.body;
+  getSearchRequestBody() {
+    return this.flatten().body;
   }
 
   /**
@@ -429,6 +441,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':

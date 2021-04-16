@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -20,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -27,7 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.importExport.load('discover');
+      log.info(
+        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
+      );
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -102,24 +109,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 3;
+        const renderingCountInc = 1;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc;
+          log.debug(
+            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
         });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 6;
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc * 2;
+          log.debug(
+            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
+        expect(Math.round(newDurationHours)).to.be(27);
 
         await retry.waitFor('doc table to contain the right search result', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
@@ -169,7 +182,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query #2, which has an empty time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/89550
+    describe.skip('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 

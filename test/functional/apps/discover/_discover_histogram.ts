@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
@@ -97,15 +98,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(false);
       await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
-      await testSubjects.click('discoverChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
-      await PageObjects.discover.clickResetSavedSearchButton();
+
+      await PageObjects.discover.clickNewSearchButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+      await testSubjects.click('discoverChartToggle');
+      await retry.waitFor(`Discover histogram to be displayed`, async () => {
+        canvasExists = await elasticChart.canvasExists();
+        return canvasExists;
+      });
+
+      await PageObjects.discover.saveSearch('persisted hidden histogram');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.clickNewSearchButton();
+      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(true);
     });
   });
 }

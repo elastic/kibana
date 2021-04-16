@@ -12,6 +12,8 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiTitle,
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
@@ -20,9 +22,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
+
+import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import {
   useGetOneAgentPolicy,
@@ -33,10 +36,11 @@ import {
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
-import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
-import { PackagePoliciesView, SettingsView } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+
+import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { PackagePoliciesView, SettingsView } from './components';
 
 const Divider = styled.div`
   width: 0;
@@ -82,23 +86,42 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText className="eui-textBreakWord">
-            <h1>
-              {isLoading ? (
-                <Loading />
-              ) : (
-                (agentPolicy && agentPolicy.name) || (
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.policyDetailsTitle"
-                    defaultMessage="Policy '{id}'"
-                    values={{
-                      id: policyId,
-                    }}
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <EuiFlexGroup alignItems="center" wrap responsive={false} gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h1>
+                    {(agentPolicy && agentPolicy.name) || (
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.policyDetailsTitle"
+                        defaultMessage="Policy '{id}'"
+                        values={{ id: policyId }}
+                      />
+                    )}
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              {agentPolicy?.is_managed && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    title="Hosted agent policy"
+                    content={i18n.translate(
+                      'xpack.fleet.policyDetails.policyDetailsHostedPolicyTooltip',
+                      {
+                        defaultMessage:
+                          'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+                      }
+                    )}
+                    type="lock"
+                    size="l"
+                    color="subdued"
                   />
-                )
+                </EuiFlexItem>
               )}
-            </h1>
-          </EuiText>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
 
         {agentPolicy && agentPolicy.description ? (

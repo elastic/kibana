@@ -8,9 +8,9 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { stackManagementSchema } from './schema';
 import { UsageStats } from './types';
 import { REDACTED_KEYWORD } from '../../../common/constants';
+import { stackManagementSchema } from './schema';
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
@@ -27,7 +27,6 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
         obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
       }, {});
-
     return modifiedEntries;
   };
 }

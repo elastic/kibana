@@ -83,13 +83,13 @@ export class TOCEntryButton extends Component<Props, State> {
         />
       );
       tooltipContent = this.props.layer.getErrors();
-    } else if (this.props.layer.isLayerLoading()) {
-      icon = <EuiLoadingSpinner size="m" />;
     } else if (!this.props.layer.isVisible()) {
       icon = <EuiIcon size="m" type="eyeClosed" />;
       tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
         defaultMessage: `Layer is hidden.`,
       });
+    } else if (this.props.layer.isLayerLoading()) {
+      icon = <EuiLoadingSpinner size="m" />;
     } else if (!this.props.layer.showAtZoomLevel(this.props.zoom)) {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();

@@ -23,7 +23,12 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertFlyoutCloseReason,
+  AlertTypeRegistryContract,
+} from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
@@ -38,8 +43,10 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose(): void;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 
@@ -47,10 +54,12 @@ export const AlertEdit = ({
   initialAlert,
   onClose,
   reloadAlerts,
+  onSave,
   alertTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertEditProps) => {
+  const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
     alert: cloneDeep(initialAlert),
   });
@@ -81,7 +90,7 @@ export const AlertEdit = ({
     if (hasAlertChanged(alert, initialAlert, true)) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
-      onClose();
+      onClose(AlertFlyoutCloseReason.CANCELED);
     }
   };
 
@@ -91,9 +100,9 @@ export const AlertEdit = ({
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{alertName}'",
+            defaultMessage: "Updated '{ruleName}'",
             values: {
-              alertName: newAlert.name,
+              ruleName: newAlert.name,
             },
           })
         );
@@ -112,7 +121,7 @@ export const AlertEdit = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
-            defaultMessage: 'Cannot update alert.',
+            defaultMessage: 'Cannot update rule.',
           })
       );
     }
@@ -130,7 +139,7 @@ export const AlertEdit = ({
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit alert"
+                defaultMessage="Edit rule"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
             </h3>
@@ -148,7 +157,7 @@ export const AlertEdit = ({
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
-                      { defaultMessage: 'This alert has actions that are disabled' }
+                      { defaultMessage: 'This rule has actions that are disabled' }
                     )}
                   />
                   <EuiSpacer />
@@ -197,9 +206,9 @@ export const AlertEdit = ({
                       const savedAlert = await onSaveAlert();
                       setIsSaving(false);
                       if (savedAlert) {
-                        onClose();
-                        if (reloadAlerts) {
-                          reloadAlerts();
+                        onClose(AlertFlyoutCloseReason.SAVED);
+                        if (onSaveHandler) {
+                          onSaveHandler();
                         }
                       }
                     }}
@@ -218,7 +227,7 @@ export const AlertEdit = ({
           <ConfirmAlertClose
             onConfirm={() => {
               setIsConfirmAlertCloseModalOpen(false);
-              onClose();
+              onClose(AlertFlyoutCloseReason.CANCELED);
             }}
             onCancel={() => {
               setIsConfirmAlertCloseModalOpen(false);

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../mock';
-import { PAGE_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
 import { Route } from 'react-router-dom';
-import { CreatePackagePolicyPage } from './index';
 import React from 'react';
-import { CreatePackagePolicyRouteState } from '../../../types';
 import { act } from 'react-test-renderer';
+
+import type { MockedFleetStartServices, TestRenderer } from '../../../mock';
+import { createTestRendererMock } from '../../../mock';
+import { PAGE_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
+import type { CreatePackagePolicyRouteState } from '../../../types';
+
+import { CreatePackagePolicyPage } from './index';
 
 describe('when on the package policy create page', () => {
   const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-0.3.7' });

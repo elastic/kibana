@@ -26,6 +26,8 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
+export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
+
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
@@ -106,9 +108,10 @@ export const LOOK_BACK_INTERVAL =
 export const LOOK_BACK_TIME_TYPE =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
-export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
+export const MACHINE_LEARNING_DROPDOWN_INPUT =
+  '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
-export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+export const MACHINE_LEARNING_DROPDOWN_ITEM = '.euiFilterSelectItem';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 

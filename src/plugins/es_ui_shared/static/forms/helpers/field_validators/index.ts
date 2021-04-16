@@ -7,6 +7,7 @@
  */
 
 export * from './empty_field';
+export * from './max_length';
 export * from './min_length';
 export * from './min_selectable_selection';
 export * from './url';

@@ -19,11 +19,12 @@ import {
   setUISettings,
   setInjectedMetadata,
   setMapServiceSettings,
+  setDocLinks,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsEmsPluginSetup } from '../../maps_ems/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
@@ -45,7 +46,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -63,7 +64,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations, mapsEms }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -73,7 +74,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setUISettings(core.uiSettings);
 
     setMapServiceSettings(
-      new MapServiceSettings(mapsLegacy.config, this.initializerContext.env.packageInfo.version)
+      new MapServiceSettings(mapsEms.config, this.initializerContext.env.packageInfo.version)
     );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
@@ -81,7 +82,7 @@ export class VegaPlugin implements Plugin<void, void> {
       plugins: {
         data,
       },
-      getServiceSettings: mapsLegacy.getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
@@ -96,5 +97,6 @@ export class VegaPlugin implements Plugin<void, void> {
     setNotifications(core.notifications);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
+    setDocLinks(core.docLinks);
   }
 }

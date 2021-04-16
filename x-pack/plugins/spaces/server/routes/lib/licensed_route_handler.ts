@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler, RequestHandlerContext } from 'kibana/server';
+import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
+
 import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 
 export const createLicensedRouteHandler = <

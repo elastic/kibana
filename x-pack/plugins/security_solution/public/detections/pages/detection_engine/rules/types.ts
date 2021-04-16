@@ -6,7 +6,7 @@
  */
 
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerts/common';
+import { AlertAction } from '../../../../../../alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
@@ -126,7 +126,7 @@ export interface AboutStepRiskScore {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
-  machineLearningJobId: string;
+  machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   ruleType: Type;
   timeline: FieldValueTimeline;
@@ -153,15 +153,17 @@ export interface DefineStepRuleJson {
   anomaly_threshold?: number;
   index?: string[];
   filters?: Filter[];
-  machine_learning_job_id?: string;
+  machine_learning_job_id?: string[];
   saved_id?: string;
   query?: string;
   language?: string;
   threshold?: {
     field: string[];
     value: number;
-    cardinality_field: string;
-    cardinality_value: number;
+    cardinality: Array<{
+      field: string;
+      value: number;
+    }>;
   };
   threat_query?: string;
   threat_mapping?: ThreatMapping;

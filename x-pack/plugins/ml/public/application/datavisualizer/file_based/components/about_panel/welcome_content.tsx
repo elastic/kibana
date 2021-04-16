@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { ExperimentalBadge } from '../experimental_badge';
-import { getMaxBytesFormatted } from '../utils';
+
+import { useMlKibana } from '../../../../contexts/kibana';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
@@ -30,7 +31,16 @@ export const WelcomeContent: FC = () => {
     }
   );
 
-  const maxFileSize = getMaxBytesFormatted();
+  const {
+    services: { fileUpload },
+  } = useMlKibana();
+
+  if (fileUpload === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File upload plugin not available');
+    return null;
+  }
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">

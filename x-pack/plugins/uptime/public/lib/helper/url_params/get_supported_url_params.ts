@@ -22,6 +22,7 @@ export interface UptimeUrlParams {
   search: string;
   statusFilter: string;
   focusConnectorField?: boolean;
+  query?: string;
 }
 
 const {
@@ -75,6 +76,7 @@ export const getSupportedUrlParams = (params: {
     statusFilter,
     pagination,
     focusConnectorField,
+    query,
   } = filteredParams;
 
   return {
@@ -96,5 +98,6 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
+    query: query || '',
   };
 };

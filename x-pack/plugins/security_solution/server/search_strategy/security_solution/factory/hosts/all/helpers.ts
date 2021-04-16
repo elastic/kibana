@@ -8,10 +8,13 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { HostsEdges } from '../../../../../../common/search_strategy/security_solution/hosts';
-
-import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
-import { toStringArray } from '../../../../helpers/to_array';
+import {
+  HostAggEsItem,
+  HostBuckets,
+  HostsEdges,
+  HostValue,
+} from '../../../../../../common/search_strategy/security_solution/hosts';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const HOSTS_FIELDS: readonly string[] = [
   '_id',
@@ -33,7 +36,11 @@ export const formatHostEdgesData = (
       flattenedFields.cursor.value = hostId || '';
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
-        return set(`node.${fieldName}`, toStringArray(fieldValue), flattenedFields);
+        return set(
+          `node.${fieldName}`,
+          toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+          flattenedFields
+        );
       }
       return flattenedFields;
     },

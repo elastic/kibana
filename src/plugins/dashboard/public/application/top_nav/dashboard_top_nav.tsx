@@ -10,6 +10,13 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import UseUnmount from 'react-use/lib/useUnmount';
+import {
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  SolutionToolbar,
+} from '../../../../presentation_util/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -19,7 +26,12 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../services/embeddable';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
+import {
+  getSavedObjectFinder,
+  SavedObjectSaveOpts,
+  SaveResult,
+  showSaveModal,
+} from '../../services/saved_objects';
 
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
@@ -37,13 +49,12 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
-import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
+import { DashboardConstants } from '../../dashboard_constants';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
-import { SavedDashboardSaveOpts } from '../lib/save_dashboard';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -98,6 +109,8 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
+  const stateTransferService = embeddable.getStateTransfer();
+
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
@@ -110,7 +123,9 @@ export function DashboardTopNav({
         id || DASHBOARD_PANELS_UNSAVED_ID
       );
     }
-    return () => visibleSubscription.unsubscribe();
+    return () => {
+      visibleSubscription.unsubscribe();
+    };
   }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
@@ -140,11 +155,25 @@ export function DashboardTopNav({
   const createNew = useCallback(async () => {
     const type = 'visualization';
     const factory = embeddable.getEmbeddableFactory(type);
+
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
+
     await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
+
+  const createNewVisType = useCallback(
+    (newVisType: string) => async () => {
+      stateTransferService.navigateToEditor('visualize', {
+        path: `#/create?type=${encodeURIComponent(newVisType)}`,
+        state: {
+          originatingApp: DashboardConstants.DASHBOARDS_ID,
+        },
+      });
+    },
+    [stateTransferService]
+  );
 
   const clearAddPanel = useCallback(() => {
     if (state.addPanelOverlay) {
@@ -162,7 +191,6 @@ export function DashboardTopNav({
 
       function switchViewMode() {
         dashboardStateManager.switchViewMode(newMode);
-        dashboardStateManager.restorePanels();
 
         if (savedDashboard?.id && allowByValueEmbeddables) {
           const { getFullEditPath, title, id } = savedDashboard;
@@ -176,7 +204,7 @@ export function DashboardTopNav({
       }
 
       function discardChanges() {
-        dashboardStateManager.resetState(true);
+        dashboardStateManager.resetState();
         dashboardStateManager.clearUnsavedPanels();
 
         // We need to do a hard reset of the timepicker. appState will not reload like
@@ -221,7 +249,8 @@ export function DashboardTopNav({
    * @resolved {String} - The id of the doc
    */
   const save = useCallback(
-    async (saveOptions: SavedDashboardSaveOpts) => {
+    async (saveOptions: SavedObjectSaveOpts) => {
+      setIsSaveInProgress(true);
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function (id) {
           if (id) {
@@ -235,11 +264,18 @@ export function DashboardTopNav({
 
             dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
-              redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
+              redirectTo({
+                id,
+                // editMode: true,
+                destination: 'dashboard',
+                useReplace: true,
+              });
             } else {
+              dashboardStateManager.resetState();
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
             }
           }
+          setIsSaveInProgress(false);
           return { id };
         })
         .catch((error) => {
@@ -354,7 +390,7 @@ export function DashboardTopNav({
     }
 
     setIsSaveInProgress(true);
-    save({ stayInEditMode: true }).then((response: SaveResult) => {
+    save({}).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
         dashboardStateManager.setTitle(currentTitle);
@@ -447,6 +483,10 @@ export function DashboardTopNav({
     share,
   ]);
 
+  UseUnmount(() => {
+    clearAddPanel();
+  });
+
   const getNavBarProps = () => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || state.chromeIsVisible) && !dashboardStateManager.getFullScreenMode();
@@ -468,7 +508,7 @@ export function DashboardTopNav({
     const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
       hideWriteControls: dashboardCapabilities.hideWriteControls,
       isNewDashboard: !savedDashboard.id,
-      isDirty: dashboardStateManager.isDirty,
+      isDirty: dashboardStateManager.getIsDirty(timefilter),
       isSaveInProgress,
     });
 
@@ -522,11 +562,51 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
+
+  const quickButtons = [
+    {
+      iconType: 'visText',
+      createType: i18n.translate('dashboard.solutionToolbar.markdownQuickButtonLabel', {
+        defaultMessage: 'Markdown',
+      }),
+      onClick: createNewVisType('markdown'),
+      'data-test-subj': 'dashboardMarkdownQuickButton',
+    },
+    {
+      iconType: 'controlsHorizontal',
+      createType: i18n.translate('dashboard.solutionToolbar.inputControlsQuickButtonLabel', {
+        defaultMessage: 'Input control',
+      }),
+      onClick: createNewVisType('input_control_vis'),
+      'data-test-subj': 'dashboardInputControlsQuickButton',
+    },
+  ];
+
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.VIEW ? (
-        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+        <SolutionToolbar>
+          {{
+            primaryActionButton: (
+              <PrimaryActionButton
+                label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+                  defaultMessage: 'Create panel',
+                })}
+                onClick={createNew}
+                iconType="plusInCircleFilled"
+                data-test-subj="dashboardAddNewPanelButton"
+              />
+            ),
+            quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+            addFromLibraryButton: (
+              <AddFromLibraryButton
+                onClick={addFromLibrary}
+                data-test-subj="dashboardAddPanelButton"
+              />
+            ),
+          }}
+        </SolutionToolbar>
       ) : null}
     </>
   );

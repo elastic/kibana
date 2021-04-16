@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -21,7 +22,7 @@ import {
   AlertMemoryUsageNodeStats,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_MEMORY_USAGE,
@@ -32,10 +33,10 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 export class MemoryUsageAlert extends BaseAlert {
@@ -68,7 +69,7 @@ export class MemoryUsageAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -82,7 +83,7 @@ export class MemoryUsageAlert extends BaseAlert {
     const startMs = endMs - parsedDuration;
 
     const stats = await fetchMemoryUsageNodeStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       startMs,

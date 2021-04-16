@@ -17,11 +17,13 @@ import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
+export type BuiltEsQuery = ReturnType<typeof esQuery.buildEsQuery>;
+
 interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string | Query;
+  query?: string | Query | BuiltEsQuery;
   center?: LogEntryCursor;
   columns?: LogSourceConfigurationProperties['logColumns'];
 }
@@ -80,12 +82,10 @@ export function useLogStream({
       return undefined;
     } else if (typeof query === 'string') {
       return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
-    } else if (query.language === 'kuery') {
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
-    } else if (query.language === 'lucene') {
-      return esQuery.luceneStringToDsl(query.query as string);
+    } else if ('language' in query) {
+      return getEsQueryFromQueryObject(query);
     } else {
-      return undefined;
+      return query;
     }
   }, [query]);
 
@@ -266,6 +266,15 @@ export function useLogStream({
     isLoadingMore,
     isReloading,
   };
+}
+
+function getEsQueryFromQueryObject(query: Query) {
+  switch (query.language) {
+    case 'kuery':
+      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
+    case 'lucene':
+      return esQuery.luceneStringToDsl(query.query as string);
+  }
 }
 
 export const [LogStreamProvider, useLogStreamContext] = createContainer(useLogStream);

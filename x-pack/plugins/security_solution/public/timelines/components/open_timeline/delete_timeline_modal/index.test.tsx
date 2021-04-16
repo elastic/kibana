@@ -7,8 +7,18 @@
 
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import { DeleteTimelineModalOverlay } from '.';
+import { TimelineType } from '../../../../../common/types/timeline';
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useParams: jest.fn(),
+  };
+});
 
 describe('DeleteTimelineModal', () => {
   const savedObjectId = 'abcd';
@@ -19,6 +29,10 @@ describe('DeleteTimelineModal', () => {
     savedObjectIds: [savedObjectId],
     title: 'Privilege Escalation',
   };
+
+  beforeAll(() => {
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.default });
+  });
 
   describe('showModalState', () => {
     test('it does NOT render the modal when isModalOpen is false', () => {

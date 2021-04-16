@@ -24,6 +24,7 @@ import {
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
+import { injectReferences } from '././../../common/migrations/references';
 
 interface Settings {
   showMapVisualizationTypes: boolean;
@@ -124,8 +125,7 @@ async function isFieldGeoShape(
   if (!indexPattern) {
     return false;
   }
-  const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
-  return fieldsForIndexPattern.some(
+  return indexPattern.fields.some(
     (fieldDescriptor: IFieldType) => fieldDescriptor.name && fieldDescriptor.name === geoField!
   );
 }
@@ -191,13 +191,9 @@ async function filterIndexPatternsByField(fields: string[]) {
   await Promise.all(
     indexPatternIds.map(async (indexPatternId: string) => {
       const indexPattern = await indexPatternsService.get(indexPatternId);
-      const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(
-        indexPattern
-      );
       const containsField = fields.some((field: string) =>
-        fieldsForIndexPattern.some(
-          (fieldDescriptor: IFieldType) =>
-            fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
+        indexPattern.fields.some(
+          (fieldDescriptor) => fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
         )
       );
       if (containsField) {
@@ -310,7 +306,15 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   const layerLists: LayerDescriptor[][] = [];
   await execTransformOverMultipleSavedObjectPages<MapSavedObjectAttributes>(
     MAP_SAVED_OBJECT_TYPE,
-    (savedObjects) => layerLists.push(...getLayerLists(savedObjects))
+    (savedObjects) => {
+      const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
+        return {
+          ...savedObject,
+          ...injectReferences(savedObject),
+        };
+      });
+      return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
+    }
   );
   const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
 

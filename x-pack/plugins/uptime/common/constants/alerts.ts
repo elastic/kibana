@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionGroup } from '../../../alerts/common';
+import { ActionGroup } from '../../../alerting/common';
 
 export type MonitorStatusActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
 export type TLSActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.tls'>;

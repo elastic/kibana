@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent, AgentPolicy } from '../../../../../types';
+
+import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
@@ -54,7 +55,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               <LinkAndRevision
                 href={getHref('policy_details', { policyId: agentPolicy.id })}
                 title={agentPolicy.name || agent.policy_id}
-                revision={agentPolicy.revision}
+                revision={agent.policy_revision || undefined}
               >
                 {agentPolicy.name || agentPolicy.id}
               </LinkAndRevision>

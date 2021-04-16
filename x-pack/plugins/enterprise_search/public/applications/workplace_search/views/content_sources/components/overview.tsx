@@ -116,7 +116,7 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyDocumentSummary">
+        <EuiPanel paddingSize="l" data-test-subj="EmptyDocumentSummary">
           <EuiEmptyPrompt
             title={<h2>{SOURCES_NO_CONTENT_TITLE}</h2>}
             iconType="documents"
@@ -127,12 +127,10 @@ export const Overview: React.FC = () => {
     );
 
     return (
-      <div className="content-section">
-        <div className="section-header">
-          <EuiTitle size="xs">
-            <h4>{CONTENT_SUMMARY_TITLE}</h4>
-          </EuiTitle>
-        </div>
+      <>
+        <EuiTitle size="xs">
+          <h4>{CONTENT_SUMMARY_TITLE}</h4>
+        </EuiTitle>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
         {!!summary &&
@@ -157,7 +155,7 @@ export const Overview: React.FC = () => {
               </EuiTableBody>
             </EuiTable>
           ))}
-      </div>
+      </>
     );
   };
 
@@ -165,7 +163,7 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyActivitySummary">
+        <EuiPanel paddingSize="l" data-test-subj="EmptyActivitySummary">
           <EuiEmptyPrompt
             title={<h2>{EMPTY_ACTIVITY_TITLE}</h2>}
             iconType="clock"
@@ -180,7 +178,7 @@ export const Overview: React.FC = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{EVENT_HEADER}</EuiTableHeaderCell>
           {!custom && <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>}
-          <EuiTableHeaderCell>{TIME_HEADER}</EuiTableHeaderCell>
+          <EuiTableHeaderCell align="right">{TIME_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
@@ -203,7 +201,7 @@ export const Overview: React.FC = () => {
                   </EuiText>
                 </EuiTableRowCell>
               )}
-              <EuiTableRowCell>
+              <EuiTableRowCell align="right">
                 <EuiText size="xs">{time}</EuiText>
               </EuiTableRowCell>
             </EuiTableRow>
@@ -213,15 +211,13 @@ export const Overview: React.FC = () => {
     );
 
     return (
-      <div className="content-section">
-        <div className="section-header">
-          <EuiTitle size="xs">
-            <h3>{RECENT_ACTIVITY_TITLE}</h3>
-          </EuiTitle>
-        </div>
+      <>
+        <EuiTitle size="xs">
+          <h3>{RECENT_ACTIVITY_TITLE}</h3>
+        </EuiTitle>
         <EuiSpacer size="s" />
         {activities.length === 0 ? emptyState : activitiesTable}
-      </div>
+      </>
     );
   };
 
@@ -235,9 +231,10 @@ export const Overview: React.FC = () => {
         {groups.map((group, index) => (
           <EuiFlexItem key={index}>
             <EuiPanelTo
+              hasShadow={false}
+              color="subdued"
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
-              className="euiPanel--inset"
             >
               <EuiText size="s" className="eui-textTruncate">
                 <strong>{group.name}</strong>
@@ -256,7 +253,7 @@ export const Overview: React.FC = () => {
         <h4>{CONFIGURATION_TITLE}</h4>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
           {details.map((detail, index) => (
             <EuiFlexGroup
@@ -284,7 +281,7 @@ export const Overview: React.FC = () => {
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={aclImage} size="l" color="primary" />
@@ -306,7 +303,7 @@ export const Overview: React.FC = () => {
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel className="euiPanel--inset" data-test-subj="DocumentPermissionsDisabled">
+      <EuiPanel hasShadow={false} color="subdued" data-test-subj="DocumentPermissionsDisabled">
         <EuiText size="s">
           <EuiFlexGroup wrap gutterSize="m" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -337,7 +334,7 @@ export const Overview: React.FC = () => {
   );
 
   const sourceStatus = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
@@ -361,7 +358,7 @@ export const Overview: React.FC = () => {
   );
 
   const permissionsStatus = (
-    <EuiPanel data-test-subj="PermissionsStatus">
+    <EuiPanel hasShadow={false} color="subdued" data-test-subj="PermissionsStatus">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{STATUS_HEADING}</EuiTextColor>
@@ -397,7 +394,7 @@ export const Overview: React.FC = () => {
   );
 
   const credentials = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{CREDENTIALS_TITLE}</EuiTextColor>
@@ -417,7 +414,7 @@ export const Overview: React.FC = () => {
     title: string;
     children: React.ReactNode;
   }) => (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">{DOCUMENTATION_LINK_TITLE}</EuiTextColor>
@@ -432,7 +429,7 @@ export const Overview: React.FC = () => {
   );
 
   const documentPermssionsLicenseLocked = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <LicenseBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
@@ -455,7 +452,7 @@ export const Overview: React.FC = () => {
       <ViewContentHeader title="Source overview" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" direction="column">
+          <EuiFlexGroup gutterSize="xl" direction="column">
             <EuiFlexItem>
               <DocumentSummary data-test-subj="DocumentSummary" />
             </EuiFlexItem>

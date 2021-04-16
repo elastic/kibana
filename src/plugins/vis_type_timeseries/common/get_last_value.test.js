@@ -13,12 +13,20 @@ describe('getLastValue(data)', () => {
     expect(getLastValue('foo')).toBe('foo');
   });
 
+  test('should returns 0 as a value when not an array', () => {
+    expect(getLastValue(0)).toBe(0);
+  });
+
   test('should returns the last value', () => {
     expect(getLastValue([[1, 2]])).toBe(2);
   });
 
+  test('should return 0 as a valid value', () => {
+    expect(getLastValue([[0, 0]])).toBe(0);
+  });
+
   test('should returns the default value ', () => {
-    expect(getLastValue()).toBe(0);
+    expect(getLastValue()).toBe('-');
   });
 
   test('should returns 0 if second to last is not defined (default)', () => {
@@ -27,10 +35,6 @@ describe('getLastValue(data)', () => {
         [1, null],
         [2, null],
       ])
-    ).toBe(0);
-  });
-
-  test('should allows to override the default value', () => {
-    expect(getLastValue(null, '-')).toBe('-');
+    ).toBe('-');
   });
 });

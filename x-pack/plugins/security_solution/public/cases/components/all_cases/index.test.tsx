@@ -11,10 +11,10 @@ import moment from 'moment-timezone';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
-import { casesStatus, useGetCasesMockState } from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -24,6 +24,7 @@ import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCasesColumns } from './columns';
 import { AllCases } from '.';
+import { StatusAll } from '../status';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -111,6 +112,11 @@ describe('AllCases', () => {
   });
 
   it('should render AllCases', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -144,6 +150,11 @@ describe('AllCases', () => {
   });
 
   it('should render the stats', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
+    });
+
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -202,6 +213,7 @@ describe('AllCases', () => {
   it('should render empty fields', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       data: {
         ...defaultGetCases.data,
         cases: [
@@ -240,6 +252,80 @@ describe('AllCases', () => {
     });
   });
 
+  it('should render correct actions for case (with type individual and filter status open)', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="action-open"]').exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
+      ).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
+    });
+  });
+
+  it('should enable correct actions for sub cases', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [
+          {
+            ...defaultGetCases.data.cases[0],
+            id: 'my-case-with-subcases',
+            createdAt: null,
+            createdBy: null,
+            status: null,
+            subCases: [
+              {
+                id: 'sub-case-id',
+              },
+            ],
+            tags: null,
+            title: null,
+            totalComment: null,
+            totalAlerts: null,
+            type: CaseType.collection,
+          },
+        ],
+      },
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find(
+        '[data-test-subj="sub-cases-table-my-case-with-subcases"] [data-test-subj="euiCollapsedItemActionsButton"]'
+      )
+      .last()
+      .simulate('click');
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toEqual(true);
+      expect(
+        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
+      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toEqual(
+        true
+      );
+      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
+        false
+      );
+    });
+  });
+
   it('should not render case link or actions on modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -263,8 +349,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
       expect(setQueryParams).toBeCalledWith({
         page: 1,
         perPage: 5,
@@ -280,9 +366,10 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -297,6 +384,15 @@ describe('AllCases', () => {
   it('opens case when row action icon clicked', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [
+          {
+            ...defaultGetCases.data.cases[0],
+            status: CaseStatuses.closed,
+          },
+        ],
+      },
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
@@ -305,9 +401,11 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -325,9 +423,11 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
@@ -342,7 +442,8 @@ describe('AllCases', () => {
   it('Bulk delete', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      selectedCases: useGetCasesMockState.data.cases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
+      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
     });
 
     useDeleteCasesMock
@@ -360,26 +461,105 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().simulate('click');
+
+    wrapper
+      .find(
+        '[data-test-subj="confirm-delete-case-modal"] [data-test-subj="confirmModalConfirmButton"]'
+      )
+      .last()
+      .simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().simulate('click');
       expect(handleToggleModal).toBeCalled();
 
-      wrapper
-        .find(
-          '[data-test-subj="confirm-delete-case-modal"] [data-test-subj="confirmModalConfirmButton"]'
-        )
-        .last()
-        .simulate('click');
-      expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-        useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
+      expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
+        ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
+        {
+          id: collectionCase.id,
+          title: collectionCase.title,
+          type: collectionCase.type,
+        },
+      ]);
+    });
+  });
+
+  it('Renders only bulk delete on status all', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: StatusAll },
+      selectedCases: [...useGetCasesMockState.data.cases],
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').exists()).toEqual(
+        false
       );
+      expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
+      ).toEqual(false);
+    });
+  });
+
+  it('Renders correct bulk actoins for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+      selectedCases: [
+        ...useGetCasesMockState.data.cases,
+        {
+          ...useGetCasesMockState.data.cases[0],
+          type: CaseType.collection,
+        },
+      ],
+    });
+
+    useDeleteCasesMock
+      .mockReturnValueOnce({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: false,
+      })
+      .mockReturnValue({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: true,
+      });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
+      ).toEqual(true);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
+      ).toEqual(true);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
+      ).toEqual(false);
     });
   });
 
   it('Bulk close status update', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       selectedCases: useGetCasesMockState.data.cases,
     });
 
@@ -388,9 +568,10 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().simulate('click');
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.closed);
     });
   });
@@ -410,9 +591,9 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.open);
     });
   });
@@ -420,6 +601,7 @@ describe('AllCases', () => {
   it('Bulk in-progress status update', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
       selectedCases: useGetCasesMockState.data.cases,
     });
 
@@ -428,9 +610,9 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-      wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(
         useGetCasesMockState.data.cases,
         CaseStatuses['in-progress']
@@ -526,8 +708,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalled();
     });
   });
@@ -547,8 +729,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
       expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
     });
   });
@@ -559,8 +741,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalledWith({
         closedAt: null,
         closedBy: null,
@@ -614,8 +796,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
     await waitFor(() => {
-      wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).not.toHaveBeenCalled();
     });
   });
@@ -626,10 +808,9 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
         sortField: 'closedAt',
       });
@@ -642,12 +823,11 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
-        sortField: 'updatedAt',
+        sortField: 'createdAt',
       });
     });
   });
@@ -658,10 +838,9 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
       expect(setQueryParams).toBeCalledWith({
         sortField: 'createdAt',
       });
@@ -674,9 +853,8 @@ describe('AllCases', () => {
         <AllCases userCanCrud={true} isModal={false} />
       </TestProviders>
     );
-
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
       expect(wrapper.find('button[data-test-subj="case-status-filter-open"]').text()).toBe(
         'Open (20)'
       );

@@ -15,7 +15,7 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPluginSetupDeps } from '../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -23,6 +23,7 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
+import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -51,7 +52,8 @@ const withCore = makeDecorator({
                   timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
                 },
               },
-            } as unknown) as ObservabilityPluginSetupDeps,
+            } as unknown) as ObservabilityPublicPluginsStart,
+            observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
           }}
         >
           <EuiThemeProvider>

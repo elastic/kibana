@@ -204,6 +204,7 @@ export const mockGlobalState: State = {
     timelineById: {
       test: {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -214,7 +215,7 @@ export const mockGlobalState: State = {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: {},

@@ -229,7 +229,7 @@ export interface CoreConfigUsageData {
   savedObjects: {
     customIndex: boolean;
     maxImportPayloadBytes: number;
-    maxImportExportSizeBytes: number;
+    maxImportExportSize: number;
   };
 
   // uiSettings: {
