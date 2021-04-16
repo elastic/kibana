@@ -512,7 +512,7 @@ server.securityResponseHeaders:
 ----
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
-`null`. To disable, set to `null`. *Default:* `max-age=31536000` (1 year)
+`null`. To disable, set to `null`. *Default:* `null`
 
 a| [[server-securityResponseHeaders-xContentTypeOptions]]
 ----
@@ -538,9 +538,9 @@ a| [[server-securityResponseHeaders-permissionsPolicy]]
 server.securityResponseHeaders:
   permissionsPolicy:
 ----
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header is used in all
-responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`. To disable,
-set to `null`. *Default:* `"camera=(), microphone=()"` (disables the camera and microphone APIs in the browser)
+| experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
+is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
+To disable, set to `null`. *Default:* `null`
 
 a| [[server-securityResponseHeaders-disableEmbedding]]
 ----

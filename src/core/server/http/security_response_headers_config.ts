@@ -11,9 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-    defaultValue: 'max-age=31536000', // 1 year in seconds
-    // Note: we do not use the 'includeSubDomains' directive by default because it could break installations where Kibana is served on the
-    // same domain as another (non-HTTPS) website
+    defaultValue: null,
   }),
   xContentTypeOptions: schema.oneOf([schema.literal('nosniff'), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
@@ -35,7 +33,9 @@ export const securityResponseHeadersSchema = schema.object({
     { defaultValue: 'no-referrer-when-downgrade' }
   ),
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
-    defaultValue: 'camera=(), microphone=()', // disables camera and microphone access in Kibana and any embedded pages
+    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
+    // Note: Feature-Policy is superseded by Permissions-Policy; the link above is temporary until MDN releases an updated page
+    defaultValue: null,
   }),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
 });

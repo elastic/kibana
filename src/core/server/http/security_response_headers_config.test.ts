@@ -18,9 +18,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     expect(result.disableEmbedding).toBe(false);
     expect(result.securityResponseHeaders).toMatchInlineSnapshot(`
       Object {
-        "Permissions-Policy": "camera=(), microphone=()",
         "Referrer-Policy": "no-referrer-when-downgrade",
-        "Strict-Transport-Security": "max-age=31536000",
         "X-Content-Type-Options": "nosniff",
       }
     `);
@@ -28,7 +26,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
 
   describe('strictTransportSecurity', () => {
     it('a custom value results in the expected Strict-Transport-Security header', () => {
-      const strictTransportSecurity = 'max-age=10000; includeSubDomains';
+      const strictTransportSecurity = 'max-age=31536000; includeSubDomains';
       const config = schema.validate({ strictTransportSecurity });
       const result = parse(config);
       expect(result.securityResponseHeaders['Strict-Transport-Security']).toEqual(

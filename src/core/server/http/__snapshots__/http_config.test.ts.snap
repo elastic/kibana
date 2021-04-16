@@ -66,9 +66,9 @@ Object {
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "disableEmbedding": false,
-    "permissionsPolicy": "camera=(), microphone=()",
+    "permissionsPolicy": null,
     "referrerPolicy": "no-referrer-when-downgrade",
-    "strictTransportSecurity": "max-age=31536000",
+    "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
   "socketTimeout": 120000,

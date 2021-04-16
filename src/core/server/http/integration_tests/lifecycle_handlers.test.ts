@@ -55,14 +55,14 @@ describe('core lifecycle handlers', () => {
           name: kibanaName,
           securityResponseHeaders: {
             // reflects default config
-            strictTransportSecurity: 'max-age=31536000',
+            strictTransportSecurity: null,
             xContentTypeOptions: 'nosniff',
             referrerPolicy: 'strict-origin-when-cross-origin',
-            permissionsPolicy: 'camera=(), microphone=()',
+            permissionsPolicy: null,
           },
           customResponseHeaders: {
             'some-header': 'some-value',
-            'permissions-policy': 'display-capture=(self)', // overrides a header that is defined by securityResponseHeaders
+            'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
           },
           xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
           requestId: {
@@ -127,10 +127,8 @@ describe('core lifecycle handlers', () => {
 
     const expectedHeaders = {
       [nameHeader]: kibanaName,
-      'strict-transport-security': 'max-age=31536000',
       'x-content-type-options': 'nosniff',
-      'referrer-policy': 'strict-origin-when-cross-origin',
-      'permissions-policy': 'display-capture=(self)',
+      'referrer-policy': 'strict-origin',
       'some-header': 'some-value',
     };
 
