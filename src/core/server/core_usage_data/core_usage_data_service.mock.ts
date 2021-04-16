@@ -132,6 +132,7 @@ const createStartContractMock = () => {
         },
       })
     ),
+    getConfigsUsageData: jest.fn(),
   };
 
   return startContract;

@@ -11,13 +11,13 @@ import {
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/mocks';
-import { registerCoreUsageCollector } from './core_usage_collector';
+import { registerConfigUsageCollector } from './register_config_usage_collector';
 import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
-import type { CoreUsageData } from '../../../../../core/server';
+import type { ConfigUsageData } from '../../../../../core/server';
 
 const logger = loggingSystemMock.createLogger();
 
-describe('telemetry_core', () => {
+describe('kibana_config_usage', () => {
   let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
@@ -28,17 +28,17 @@ describe('telemetry_core', () => {
 
   const collectorFetchContext = createCollectorFetchContextMock();
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
-  const getCoreUsageDataReturnValue = (Symbol('core telemetry') as any) as CoreUsageData;
-  coreUsageDataStart.getCoreUsageData.mockResolvedValue(getCoreUsageDataReturnValue);
+  const mockConfigUsage = (Symbol('config usage telemetry') as any) as ConfigUsageData;
+  coreUsageDataStart.getConfigsUsageData.mockResolvedValue(mockConfigUsage);
 
-  beforeAll(() => registerCoreUsageCollector(usageCollectionMock, () => coreUsageDataStart));
+  beforeAll(() => registerConfigUsageCollector(usageCollectionMock, () => coreUsageDataStart));
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();
-    expect(collector.type).toBe('core');
+    expect(collector.type).toBe('kibana_config_usage');
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(collectorFetchContext)).toEqual(getCoreUsageDataReturnValue);
+    expect(await collector.fetch(collectorFetchContext)).toEqual(mockConfigUsage);
   });
 });

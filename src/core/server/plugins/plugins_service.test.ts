@@ -78,7 +78,7 @@ const createPlugin = (
     manifest: {
       id,
       version,
-      configPath: `${configPath}${disabled ? '-disabled' : ''}`,
+      configPath: disabled ? configPath.concat('-disabled') : configPath,
       kibanaVersion,
       requiredPlugins,
       requiredBundles,
@@ -374,7 +374,6 @@ describe('PluginsService', () => {
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
-
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith(
         {
@@ -471,6 +470,90 @@ describe('PluginsService', () => {
       const { pluginPaths } = await pluginsService.discover({ environment: environmentSetup });
 
       expect(pluginPaths).toEqual(['/plugin-A-path', '/plugin-B-path']);
+    });
+
+    it('ppopulates pluginConfigUsageDescriptors with plugins exposeToUsage property', async () => {
+      const pluginA = createPlugin('plugin-with-expose-usage', {
+        path: 'plugin-with-expose-usage',
+        configPath: 'pathA',
+      });
+
+      jest.doMock(
+        join('plugin-with-expose-usage', 'server'),
+        () => ({
+          config: {
+            exposeToUsage: {
+              test: true,
+              nested: {
+                prop: true,
+              },
+            },
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      const pluginB = createPlugin('plugin-with-array-configPath', {
+        path: 'plugin-with-array-configPath',
+        configPath: ['plugin', 'pathB'],
+      });
+
+      jest.doMock(
+        join('plugin-with-array-configPath', 'server'),
+        () => ({
+          config: {
+            exposeToUsage: {
+              test: true,
+            },
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      jest.doMock(
+        join('plugin-without-expose', 'server'),
+        () => ({
+          config: {
+            schema: schema.maybe(schema.any()),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+
+      const pluginC = createPlugin('plugin-without-expose', {
+        path: 'plugin-without-expose',
+        configPath: 'pathC',
+      });
+
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([pluginA, pluginB, pluginC]),
+      });
+
+      const mockPluginConfigUsageDescriptors = new Map();
+      // @ts-ignore
+      pluginsService['pluginConfigUsageDescriptors'] = mockPluginConfigUsageDescriptors;
+      await pluginsService.discover({ environment: environmentSetup });
+
+      expect(mockPluginConfigUsageDescriptors).toMatchInlineSnapshot(`
+        Map {
+          "pathA" => Object {
+            "nested.prop": true,
+            "test": true,
+          },
+          "plugin.pathB" => Object {
+            "test": true,
+          },
+        }
+      `);
     });
   });
 
@@ -621,6 +704,19 @@ describe('PluginsService', () => {
         expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
         expect(initialized).toBe(false);
       });
+    });
+  });
+
+  describe('#getExposedPluginConfigsToUsage', () => {
+    it('returns pluginConfigUsageDescriptors', () => {
+      expect(pluginsService.getExposedPluginConfigsToUsage()).toEqual(new Map());
+
+      const mockPluginConfigUsageDescriptors = Symbol('test');
+      // @ts-ignore
+      pluginsService['pluginConfigUsageDescriptors'] = mockPluginConfigUsageDescriptors;
+      expect(pluginsService.getExposedPluginConfigsToUsage()).toEqual(
+        mockPluginConfigUsageDescriptors
+      );
     });
   });
 
