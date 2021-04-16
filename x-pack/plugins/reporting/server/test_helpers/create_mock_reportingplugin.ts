@@ -37,7 +37,6 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
-    elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
     basePath: { set: jest.fn() },
     router: setupMock.router,
     security: setupMock.security,
@@ -144,7 +143,7 @@ export const createMockReportingCore = async (
 ) => {
   const mockReportingCore = ({
     getConfig: () => createMockConfig(config),
-    getElasticsearchService: () => setupDepsMock?.elasticsearch,
+    getEsClient: () => startDepsMock?.esClient,
     getDataService: () => startDepsMock?.data,
   } as unknown) as ReportingCore;
 

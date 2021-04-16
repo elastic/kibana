@@ -11,11 +11,7 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
@@ -54,18 +50,6 @@ beforeEach(async () => {
   };
   const mockSchema = createMockConfigSchema(reportingConfig);
   mockReporting = await createMockReportingCore(mockSchema);
-
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
-  mockReporting.setConfig(createMockConfig(mockSchema));
 
   (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });

@@ -47,7 +47,7 @@ export class ReportingPlugin
 
     registerUiSettings(core);
 
-    const { elasticsearch, http } = core;
+    const { http } = core;
     const { features, licensing, security, spaces, taskManager } = plugins;
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
@@ -55,7 +55,6 @@ export class ReportingPlugin
 
     reportingCore.pluginSetup({
       features,
-      elasticsearch,
       licensing,
       basePath,
       router,
