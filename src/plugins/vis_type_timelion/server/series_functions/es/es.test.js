@@ -131,6 +131,7 @@ describe('es', () => {
           'sum:\\:beer',
           'percentiles:\\:\\:bytes:1.2,1.3,2.7',
           'percentiles:\\:bytes\\:123:20.0,50.0,100.0',
+          'percentiles:a:2',
         ];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
@@ -147,6 +148,9 @@ describe('es', () => {
         });
         expect(agg.time_buckets.aggs['percentiles(:bytes:123)']).toEqual({
           percentiles: { field: ':bytes:123', percents: [20.0, 50.0, 100.0] },
+        });
+        expect(agg.time_buckets.aggs['percentiles(a)']).toEqual({
+          percentiles: { field: 'a', percents: [2] },
         });
       });
 
