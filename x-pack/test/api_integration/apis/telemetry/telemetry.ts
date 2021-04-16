@@ -106,6 +106,12 @@ export default function ({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload(archive));
 
       it('should pass the schema validations', () => {
+        const excludedFromSchema = {
+          properties: {
+            kibana_config_usage: { type: 'pass_through' },
+          },
+        };
+
         const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
 
         // Merging root to monitoring because `kibana` may be passed in some cases for old collection methods reporting to a newer monitoring cluster
@@ -114,7 +120,10 @@ export default function ({ getService }: FtrProviderContext) {
           // It's nested because of the way it's collected and declared
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
-        const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+        const plugins = deepmerge(
+          deepmerge(ossPluginsTelemetrySchema, excludedFromSchema),
+          xpackPluginsTelemetrySchema
+        );
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
           monitoring.forEach((stats) => {
