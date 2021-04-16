@@ -22,7 +22,7 @@ export interface State {
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   errorExists: number;
-  selectedOS: OsType;
+  selectedOS?: OsType;
 }
 
 export type Action =

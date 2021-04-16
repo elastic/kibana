@@ -49,7 +49,8 @@ interface BuilderExceptionListItemProps {
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: IIndexPattern,
-    type: ExceptionListType
+    type: ExceptionListType,
+    osTypes: OsTypeArray
   ) => IIndexPattern;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;

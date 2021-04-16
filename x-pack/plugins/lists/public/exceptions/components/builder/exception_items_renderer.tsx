@@ -67,7 +67,7 @@ const initialState: State = {
   errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
-  selectedOS: null,
+  selectedOS: undefined,
 };
 
 export interface OnChangeProps {
@@ -368,7 +368,7 @@ export const ExceptionBuilderComponent = ({
   }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
   useEffect(() => {
-    if (onOSSelectionChange) {
+    if (onOSSelectionChange && selectedOS) {
       onOSSelectionChange(selectedOS);
     }
   }, [onOSSelectionChange, selectedOS]);

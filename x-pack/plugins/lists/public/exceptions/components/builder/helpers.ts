@@ -267,24 +267,6 @@ export const getUpdatedEntriesOnDelete = (
   }
 };
 
-// export const filterIndexPatterns = (
-//   patterns: IIndexPattern,
-//   type: ExceptionListType,
-//   osTypes: OsTypeArray
-// ): IIndexPattern => {
-//   return type === 'endpoint' && osTypes.includes('linux')
-//     ? {
-//         ...patterns,
-//         fields: patterns.fields.filter(({ name }) => exceptionableLinuxFields.includes(name)),
-//       }
-//     : type === 'endpoint'
-//     ? {
-//         ...patterns,
-//         fields: patterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
-//       }
-//     : patterns;
-// };
-
 /**
  * Returns filtered index patterns based on the field - if a user selects to
  * add nested entry, should only show nested fields, if item is the parent
@@ -299,7 +281,7 @@ export const getFilteredIndexPatterns = (
   item: FormattedBuilderEntry,
   type: ExceptionListType,
   osTypes?: OsTypeArray,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType, o: OsTypeArray) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern
 ): IIndexPattern => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
