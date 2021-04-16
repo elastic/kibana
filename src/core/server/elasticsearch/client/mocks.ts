@@ -16,6 +16,7 @@ const createInternalClientMock = (
   res?: MockedTransportRequestPromise<unknown>
 ): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
+  // @ts-expect-error @elastic/elasticsearch Client should be class
   const client = new Client({
     node: 'http://localhost',
   }) as any;

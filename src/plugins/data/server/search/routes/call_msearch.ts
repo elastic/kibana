@@ -8,6 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import type { estypes } from '@elastic/elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
@@ -78,7 +79,9 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         body: {
           ...response,
           body: {
-            responses: response.body.responses?.map((r) => shimHitsTotal(r)),
+            responses: response.body.responses?.map((r) =>
+              shimHitsTotal(r as estypes.MultiSearchResult)
+            ),
           },
         },
       };

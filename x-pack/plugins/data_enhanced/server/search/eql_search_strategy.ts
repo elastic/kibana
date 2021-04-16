@@ -52,8 +52,10 @@ export const eqlSearchStrategyProvider = (
             };
         const promise = id
           ? client.get({ ...params, id }, request.options)
-          : client.search(params as EqlSearchStrategyRequest['params'], request.options);
+          : // @ts-expect-error undefined in not assignable to the search request
+            client.search(params as EqlSearchStrategyRequest['params'], request.options);
         const response = await shimAbortSignal(promise, options.abortSignal);
+        // @ts-expect-error _shards is optional in @elastic/elasticsearch EqlGetResponse
         return toEqlKibanaSearchResponse(response as ApiResponse<EqlSearchResponse>);
       };
 

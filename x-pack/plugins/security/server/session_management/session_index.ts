@@ -339,6 +339,7 @@ export class SessionIndex {
         try {
           await this.options.elasticsearchClient.indices.putTemplate({
             name: sessionIndexTemplateName,
+            // @ts-expect-error @elastic/elasticsearch Property incompatible
             body: getSessionIndexTemplate(this.indexName),
           });
           this.options.logger.debug('Successfully created session index template.');

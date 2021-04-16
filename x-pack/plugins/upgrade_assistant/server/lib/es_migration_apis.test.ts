@@ -35,7 +35,10 @@ describe('getUpgradeAssistantStatus', () => {
     asApiResponse(deprecationsResponse)
   );
 
-  esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
+  esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(
+    // @ts-expect-error not full interface
+    asApiResponse(resolvedIndices)
+  );
 
   it('calls /_migration/deprecations', async () => {
     await getUpgradeAssistantStatus(esClient, false);

@@ -88,7 +88,7 @@ export const fetchIndices = (
 
 export interface IndexNotFound {
   type: 'index_not_found_exception';
-  index: string;
+  index?: string;
 }
 /**
  * Sets a write block in place for the given index. If the response includes
@@ -305,7 +305,7 @@ export const cloneIndex = (
 };
 
 interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason: string; index: string }>;
+  error: Option.Option<{ type: string; reason: string; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
@@ -367,7 +367,6 @@ const waitForTask = (
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
-        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
@@ -720,7 +719,7 @@ export const createIndex = (
           // started
           timeout: DEFAULT_TIMEOUT,
           body: {
-            mappings,
+            mappings: mappings as estypes.TypeMapping,
             aliases: aliasesObject,
             settings: {
               index: {
@@ -813,7 +812,7 @@ export const updateAndPickupMappings = (
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        body: mappings,
+        body: mappings as estypes.TypeMapping,
       })
       .then((res) => {
         // Ignore `acknowledged: false`. When the coordinating node accepts

@@ -205,6 +205,8 @@ export function registerPolicyRoutes({
           name: '*',
           expand_wildcards: 'all',
         });
+        // @ts-expect-error @elastic/elasticsearch ResolveIndexAliasItem doesn't declare attributes
+        // https://github.com/elastic/elasticsearch/pull/57626
         const resolvedIndicesResponse = response.body as ResolveIndexResponseFromES;
 
         const body: PolicyIndicesResponse = {

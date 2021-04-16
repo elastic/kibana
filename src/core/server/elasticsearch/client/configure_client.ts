@@ -19,6 +19,7 @@ export const configureClient = (
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
 
+  // @ts-expect-error @elastic/elasticsearch Client should be class
   const client = new Client(clientOptions);
   addLogging(client, logger.get('query', type));
 
