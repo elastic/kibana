@@ -41,7 +41,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailRequest');
 
-      return await monacoEditor.getCodeEditorValue();
+      return await monacoEditor.getCodeEditorValue(1);
     }
 
     public async getMapBounds(): Promise<object> {

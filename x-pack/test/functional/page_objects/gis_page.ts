@@ -630,7 +630,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
-      const responseBody = await monacoEditor.getCodeEditorValue();
+      const responseBody = await monacoEditor.getCodeEditorValue(1);
       return JSON.parse(responseBody);
     }
 
