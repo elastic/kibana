@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('Search session example', () => {
     const appId = 'searchExamples';
@@ -30,11 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const toast = await toasts.getToastElement(1);
       expect(toast).not.to.be(undefined);
-
       await testSubjects.click('responseTab');
-      const codeBlock = await testSubjects.find('responseCodeBlock');
-      const visibleText = await codeBlock.getVisibleText();
-      expect(visibleText.indexOf('__other__')).to.be.greaterThan(-1);
+
+      await retry.waitFor('has other bucket', async () => {
+        const codeBlock = await testSubjects.find('responseCodeBlock');
+        const visibleText = await codeBlock.getVisibleText();
+        return visibleText.indexOf('__other__') > -1;
+      });
     });
   });
 }
