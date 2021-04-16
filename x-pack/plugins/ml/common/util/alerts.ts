@@ -38,7 +38,7 @@ export function getLookbackInterval(jobs: CombinedJobWithStats[]): number {
   return Math.max(2 * narrowBucketLength, 2 * bucketSpanInSeconds) + queryDelayInSeconds + 1;
 }
 
-export function getTopNBuckets(job: CombinedJobWithStats): number {
+export function getTopNBuckets(job: Job): number {
   const bucketSpan = parseInterval(job.analysis_config.bucket_span);
 
   if (bucketSpan === null) {

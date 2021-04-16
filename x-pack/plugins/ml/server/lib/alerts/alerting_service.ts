@@ -27,7 +27,7 @@ import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
-import { resolveLookbackInterval } from '../../../common/util/alerts';
+import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 
 type AggResultsResponse = { key?: number } & {
@@ -341,7 +341,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
-      return;
+      throw new Error("Couldn't find the job with provided id");
     }
 
     const maxBucket = resolveMaxTimeInterval(
@@ -448,12 +448,12 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
   };
 
   /**
-   * Fetches anomalies
+   * Fetches the most recent anomaly.
    * @param params - Alert params
    */
-  const fetchResults = async (
+  const fetchResult = async (
     params: MlAnomalyDetectionAlertParams
-  ): Promise<AlertExecutionResult[] | undefined> => {
+  ): Promise<AlertExecutionResult | undefined> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
       ...(params.jobSelection.groupIds ?? []),
@@ -484,6 +484,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const lookBackTimeInterval =
       params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
+
+    const topNBuckets = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
     const requestBody = {
       size: 0,
@@ -533,7 +535,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             ...getResultTypeAggRequest(params.resultType, params.severity),
             truncate: {
               bucket_sort: {
-                size: params.topNBuckets ?? 1,
+                size: topNBuckets ?? 1,
               },
             },
           },
@@ -564,13 +566,16 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       };
     };
 
-    const formatter = getResultsFormatter(params.resultType);
-    const topResults = result.alerts_over_time.buckets
-      .filter((v) => v.max_score.value >= params.severity)
-      .map(formatter)
-      .filter(isDefined);
+    if (result.alerts_over_time.buckets.length === 0) {
+      return;
+    }
 
-    return topResults;
+    // Find the most anomalous result from the top N buckets
+    const topResult = result.alerts_over_time.buckets.reduce((prev, current) =>
+      prev.max_score.value > current.max_score.value ? prev : current
+    );
+
+    return getResultsFormatter(params.resultType)(topResult);
   };
 
   /**
@@ -662,13 +667,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const res = await fetchResults(params);
+      const result = await fetchResult(params);
 
-      if (!res) {
-        throw new Error('No results found');
-      }
-
-      const result = res[0];
       if (!result) return;
 
       const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);
