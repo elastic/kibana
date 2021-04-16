@@ -20,7 +20,7 @@ const legacyUrlAliasType: SavedObjectsType = {
       // other properties exist, but we aren't querying or aggregating on those, so we don't need to specify them (because we use `dynamic: false` above)
     },
   },
-  hidden: true,
+  hidden: false,
 };
 
 /**

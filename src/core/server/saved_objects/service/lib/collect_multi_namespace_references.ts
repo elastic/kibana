@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { QueryContainer } from '@elastic/elasticsearch/api/types';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
 
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
+import type { SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import { SavedObjectsFindResult } from '../saved_objects_client';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
+import type {
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**
@@ -22,9 +28,9 @@ import type { RepositoryEsClient } from './repository_es_client';
 const MAX_REFERENCE_GRAPH_DEPTH = 20;
 
 /**
- * When we search for an object's matching aliases, we use a point-in-time which will only stay alive this long.
+ * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000.
  */
-const PIT_KEEP_ALIVE = '1m';
+const ALIAS_SEARCH_PER_PAGE = 100;
 
 /**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
@@ -100,19 +106,11 @@ export interface CollectMultiNamespaceReferencesParams {
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
+  createPointInTimeFinder: (
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions
+  ) => ISavedObjectsPointInTimeFinder;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
-}
-
-/**
- * Additional options exposed for unit tests.
- *
- * @internal
- */
-export interface CollectMultiNamespaceReferencesParamsInternal
-  extends CollectMultiNamespaceReferencesParams {
-  /** Default: 1000 */
-  searchPerPage?: number;
 }
 
 /**
@@ -125,10 +123,10 @@ export async function collectMultiNamespaceReferences({
   client,
   serializer,
   getIndexForType,
+  createPointInTimeFinder,
   objects,
   options = {},
-  searchPerPage,
-}: CollectMultiNamespaceReferencesParamsInternal): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+}: CollectMultiNamespaceReferencesParams): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
   if (!objects.length) {
     return { objects: [] };
   }
@@ -211,13 +209,7 @@ export async function collectMultiNamespaceReferences({
     return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
   });
 
-  const aliasesMap = await checkLegacyUrlAliases(
-    client,
-    serializer,
-    getIndexForType,
-    objectsWithContext,
-    searchPerPage
-  );
+  const aliasesMap = await checkLegacyUrlAliases(createPointInTimeFinder, objectsWithContext);
   const results = objectsWithContext.map((obj) => {
     const key = `${obj.type}:${obj.id}`;
     const val = aliasesMap.get(key);
@@ -231,63 +223,45 @@ export async function collectMultiNamespaceReferences({
 }
 
 async function checkLegacyUrlAliases(
-  client: RepositoryEsClient,
-  serializer: SavedObjectsSerializer,
-  getIndexForType: (type: string) => string,
-  objects: SavedObjectReferenceWithContext[],
-  perPage = 1000
+  createPointInTimeFinder: (
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions
+  ) => ISavedObjectsPointInTimeFinder,
+  objects: SavedObjectReferenceWithContext[]
 ) {
   const filteredObjects = objects.filter(({ spaces }) => spaces.length !== 0);
   if (!filteredObjects.length) {
     return new Map<string, Set<string>>();
   }
-  let pitId: string | undefined;
-  const index = getIndexForType(LEGACY_URL_ALIAS_TYPE);
+  const filter = createAliasKueryFilter(filteredObjects);
+  const finder = createPointInTimeFinder({
+    type: LEGACY_URL_ALIAS_TYPE,
+    perPage: ALIAS_SEARCH_PER_PAGE,
+    filter,
+    searchBehavior: 'page',
+  });
   const aliasesMap = new Map<string, Set<string>>();
   let error: Error | undefined;
   try {
-    const { body } = await client.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
-    pitId = body.id;
-
-    const query = createAliasQuery(filteredObjects);
-    let lastResultsCount = 0;
-    let from = 0;
-    do {
-      const results = await client.search<SavedObjectsRawDocSource>({
-        // don't specify index, since we are using the pit
-        body: {
-          pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
-          query,
-          from,
-        },
-        size: perPage,
-      });
-      const hits = results.body.hits.hits;
-
-      // @ts-expect-error Hit._source may be undefined
-      const aliases = hits.map((hit) => serializer.rawToSavedObject<LegacyUrlAlias>(hit));
-      for (const alias of aliases) {
-        const { sourceId, targetType, targetNamespace } = alias.attributes;
-        const key = `${targetType}:${sourceId}`;
-        const val = aliasesMap.get(key) ?? new Set<string>();
-        val.add(targetNamespace);
-        aliasesMap.set(key, val);
-      }
-
-      lastResultsCount = hits.length;
-      from += lastResultsCount;
-    } while (lastResultsCount >= perPage); // end the loop when there are fewer hits than our perPage size
+    const responses: Array<SavedObjectsFindResult<LegacyUrlAlias>> = [];
+    for await (const response of finder.find<LegacyUrlAlias>()) {
+      responses.push(...response.saved_objects);
+    }
+    for (const alias of responses) {
+      const { sourceId, targetType, targetNamespace } = alias.attributes;
+      const key = `${targetType}:${sourceId}`;
+      const val = aliasesMap.get(key) ?? new Set<string>();
+      val.add(targetNamespace);
+      aliasesMap.set(key, val);
+    }
   } catch (e) {
     error = e;
   }
 
-  if (pitId) {
-    try {
-      await client.closePointInTime({ body: { id: pitId } });
-    } catch (e) {
-      if (!error) {
-        error = e;
-      }
+  try {
+    await finder.close();
+  } catch (e) {
+    if (!error) {
+      error = e;
     }
   }
 
@@ -297,21 +271,15 @@ async function checkLegacyUrlAliases(
   return aliasesMap;
 }
 
-function createAliasQuery(objects: SavedObjectReferenceWithContext[]): QueryContainer {
-  return {
-    bool: {
-      minimum_should_match: 1,
-      must: [{ term: { type: LEGACY_URL_ALIAS_TYPE } }],
-      should: objects.map(({ type, id }) => ({
-        bool: {
-          must: [
-            { term: { [`${LEGACY_URL_ALIAS_TYPE}.targetType`]: type } },
-            { term: { [`${LEGACY_URL_ALIAS_TYPE}.sourceId`]: id } },
-          ],
-        },
-      })),
-    },
-  };
+function createAliasKueryFilter(objects: SavedObjectReferenceWithContext[]) {
+  const { buildNode } = esKuery.nodeTypes.function;
+  const kueryNodes = objects.reduce<unknown[]>((acc, { type, id }) => {
+    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.targetType`, type);
+    const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.sourceId`, id);
+    acc.push(buildNode('and', [match1, match2]));
+    return acc;
+  }, []);
+  return buildNode('or', kueryNodes);
 }
 
 /** Parses a 'type:id' key string and returns an object with a `type` field and an `id` field */

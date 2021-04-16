@@ -1294,6 +1294,7 @@ export class SavedObjectsRepository {
       client: this.client,
       serializer: this._serializer,
       getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
       objects,
       options,
     });

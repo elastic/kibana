@@ -18,10 +18,18 @@ type PointInTimeFinderClient = Pick<
 /**
  * @public
  */
-export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
-  SavedObjectsFindOptions,
-  'page' | 'pit' | 'searchAfter'
->;
+export interface SavedObjectsCreatePointInTimeFinderOptions
+  extends Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'> {
+  /**
+   * Controls the search behavior of the `find` function:
+   *
+   *  * `'searchAfter'`: sort the results by updated_at, and iterate through results using the last hit sort value
+   *  * `'page'`: do not sort the results, and instead iterate through the results in sequential pages
+   *
+   * Default: `'searchAfter'`
+   */
+  searchBehavior?: 'searchAfter' | 'page';
+}
 
 /**
  * @public
@@ -46,7 +54,7 @@ export interface ISavedObjectsPointInTimeFinder {
    * This will open a new Point-In-Time (PIT), and continue paging until a set
    * of results is received that's smaller than the designated `perPage` size.
    */
-  find: () => AsyncGenerator<SavedObjectsFindResponse>;
+  find: <T>() => AsyncGenerator<SavedObjectsFindResponse<T>>;
   /**
    * Closes the Point-In-Time associated with this finder instance.
    *
@@ -67,13 +75,15 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
+  readonly #searchBehavior: 'searchAfter' | 'page';
   #open: boolean = false;
   #pitId?: string;
 
   constructor(
-    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    finderOptions: SavedObjectsCreatePointInTimeFinderOptions,
     { logger, client }: PointInTimeFinderDependencies
   ) {
+    const { searchBehavior = 'searchAfter', ...findOptions } = finderOptions;
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;
     this.#findOptions = {
@@ -82,9 +92,10 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
       perPage: 1000,
       ...findOptions,
     };
+    this.#searchBehavior = searchBehavior;
   }
 
-  async *find() {
+  async *find<T>() {
     if (this.#open) {
       throw new Error(
         'Point In Time has already been opened for this finder instance. ' +
@@ -96,13 +107,13 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
     await this.open();
 
     let lastResultsCount: number;
+    let page = 1;
     let lastHitSortValue: estypes.Id[] | undefined;
     do {
-      const results = await this.findNext({
-        findOptions: this.#findOptions,
-        id: this.#pitId,
-        searchAfter: lastHitSortValue,
-      });
+      const results =
+        this.#searchBehavior === 'searchAfter'
+          ? await this.findNextAfter<T>(lastHitSortValue)
+          : await this.findNextPage<T>(page++);
       this.#pitId = results.pit_id;
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = this.getLastHitSortValue(results);
@@ -152,24 +163,27 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
     }
   }
 
-  private async findNext({
-    findOptions,
-    id,
-    searchAfter,
-  }: {
-    findOptions: SavedObjectsFindOptions;
-    id?: string;
-    searchAfter?: estypes.Id[];
-  }) {
+  private async findNextAfter<T>(searchAfter?: estypes.Id[]) {
+    return await this.findNext<T>({
+      // Sort fields are required to use searchAfter, so we set some defaults here
+      sortField: 'updated_at',
+      sortOrder: 'desc',
+      searchAfter,
+      ...this.#findOptions,
+    });
+  }
+
+  private async findNextPage<T>(page: number) {
+    return await this.findNext<T>({ page, ...this.#findOptions });
+  }
+
+  private async findNext<T>(findOptions: SavedObjectsFindOptions) {
+    const id = this.#pitId;
     try {
-      return await this.#client.find({
-        // Sort fields are required to use searchAfter, so we set some defaults here
-        sortField: 'updated_at',
-        sortOrder: 'desc',
+      return await this.#client.find<T>({
         // Bump keep_alive by 2m on every new request to allow for the ES client
         // to make multiple retries in the event of a network failure.
         pit: id ? { id, keepAlive: '2m' } : undefined,
-        searchAfter,
         ...findOptions,
       });
     } catch (e) {

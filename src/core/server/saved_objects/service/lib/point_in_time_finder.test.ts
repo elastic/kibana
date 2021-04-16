@@ -206,6 +206,63 @@ describe('createPointInTimeFinder()', () => {
         })
       );
     });
+
+    test(`works with searchBehavior='page'`, async () => {
+      openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+      find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [mockHits[0]],
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 0,
+      });
+      find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [mockHits[1]],
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 0,
+      });
+      find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [],
+        per_page: 1,
+        pit_id: 'abc123',
+        page: 0,
+      });
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+        perPage: 1,
+        searchBehavior: 'page',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
+      });
+      const hits: SavedObjectsFindResult[] = [];
+      for await (const result of finder.find()) {
+        hits.push(...result.saved_objects);
+      }
+
+      expect(hits.length).toBe(2);
+      expect(openPointInTimeForType).toHaveBeenCalledTimes(1);
+      expect(closePointInTime).toHaveBeenCalledTimes(1);
+      // called 3 times since we need a 3rd request to check if we
+      // are done paginating through results.
+      expect(find).toHaveBeenCalledTimes(3);
+      expect(find).toHaveBeenNthCalledWith(1, expect.objectContaining({ page: 1 }));
+      expect(find).toHaveBeenNthCalledWith(2, expect.objectContaining({ page: 2 }));
+      expect(find).toHaveBeenNthCalledWith(3, expect.objectContaining({ page: 3 }));
+    });
   });
 
   describe('#close', () => {
