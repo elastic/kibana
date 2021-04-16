@@ -28,9 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Jan 1, 2016 @ 00:00:00.000'
       );
       await testSubjects.click('searchSourceWithOther');
-
-      const toast = await toasts.getToastElement(1);
-      expect(toast).not.to.be(undefined);
       await testSubjects.click('responseTab');
 
       await retry.waitFor('has other bucket', async () => {
