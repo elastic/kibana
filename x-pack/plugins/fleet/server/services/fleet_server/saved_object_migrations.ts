@@ -23,15 +23,10 @@ import type {
 } from '../../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
 import { appContextService } from '../app_context';
-import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
 import { invalidateAPIKeys } from '../api_keys';
 
 export async function runFleetServerMigration() {
-  // If Agents are not setup skip as there is nothing to migrate
-  if (!(await isAgentsSetup(getInternalUserSOClient()))) {
-    return;
-  }
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
 }
 
