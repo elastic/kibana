@@ -76,7 +76,7 @@ class PackagePolicyService {
     }
     if (parentAgentPolicy.is_managed && !options?.force) {
       throw new IngestManagerError(
-        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
       );
     }
     if (
