@@ -13,7 +13,12 @@ import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { useOsqueryPolicies } from './use_osquery_policies';
 import { AgentGrouper } from './agent_grouper';
-import { getNumAgentsInGrouping, generateAgentCheck, getNumOverlapped } from './helpers';
+import {
+  getNumAgentsInGrouping,
+  generateAgentCheck,
+  getNumOverlapped,
+  generateAgentSelection,
+} from './helpers';
 
 import { SELECT_AGENT_LABEL, generateSelectedAgentsMessage } from './translations';
 
@@ -21,38 +26,30 @@ import {
   AGENT_GROUP_KEY,
   SelectedGroups,
   AgentOptionValue,
-  GroupOptionValue,
   GroupOption,
+  AgentSelection,
 } from './types';
 
-export interface AgentsSelection {
-  agents: string[];
-  allAgentsSelected: boolean;
-  platformsSelected: string[];
-  policiesSelected: string[];
-}
-
 interface AgentsTableProps {
-  agentSelection: AgentsSelection;
-  onChange: (payload: AgentsSelection) => void;
+  agentSelection: AgentSelection;
+  onChange: (payload: AgentSelection) => void;
 }
 
 const perPage = 10;
+const DEBOUNCE_DELAY = 100; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
   const [debouncedSearchValue, setDebouncedSearchValue] = useState<string>('');
   useDebounce(
     () => {
-      // reset the page, update the real search value, set the typing flag
-      setPage(1);
+      // update the real search value, set the typing flag
       setDebouncedSearchValue(searchValue);
       setModifyingSearch(false);
     },
-    100,
+    DEBOUNCE_DELAY,
     [searchValue]
   );
 
@@ -64,12 +61,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const grouper = useMemo(() => new AgentGrouper(), []);
   const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
     perPage,
-    page,
   });
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
-  const [lastLabel, setLastLabel] = useState<string>('');
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
 
@@ -78,73 +73,23 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     grouper.setTotalAgents(totalNumAgents);
     grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
     grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents, page > 1);
+    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
     const newOptions = grouper.generateOptions();
     setOptions(newOptions);
-    if (newOptions.length) {
-      const lastGroup = newOptions[newOptions.length - 1].options;
-      if (lastGroup?.length) {
-        setLastLabel(lastGroup[lastGroup.length - 1].label);
-      }
-    }
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, page, grouper]);
+  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {
       // TODO?: optimize this by making the selection computation incremental
-      const newAgentSelection: AgentsSelection = {
-        agents: [],
-        allAgentsSelected: false,
-        platformsSelected: [],
-        policiesSelected: [],
-      };
-      // parse through the selections to be able to determine how many are actually selected
-      const selectedAgents: AgentOptionValue[] = [];
-      const selectedGroups: SelectedGroups = {
-        policy: {},
-        platform: {},
-      };
-
-      // TODO: clean this up, make it less awkward
-      for (const opt of selection) {
-        const groupType = opt.value?.groupType;
-        let value;
-        switch (groupType) {
-          case AGENT_GROUP_KEY.All:
-            newAgentSelection.allAgentsSelected = true;
-            break;
-          case AGENT_GROUP_KEY.Platform:
-            value = opt.value as GroupOptionValue;
-            if (!newAgentSelection.allAgentsSelected) {
-              // we don't need to calculate diffs when all agents are selected
-              selectedGroups.platform[opt.value?.id ?? opt.label] = value.size;
-            }
-            newAgentSelection.platformsSelected.push(opt.label);
-            break;
-          case AGENT_GROUP_KEY.Policy:
-            value = opt.value as GroupOptionValue;
-            if (!newAgentSelection.allAgentsSelected) {
-              // we don't need to calculate diffs when all agents are selected
-              selectedGroups.policy[opt.value?.id ?? opt.label] = value.size;
-            }
-            newAgentSelection.policiesSelected.push(opt.label);
-            break;
-          case AGENT_GROUP_KEY.Agent:
-            value = opt.value as AgentOptionValue;
-            if (!newAgentSelection.allAgentsSelected) {
-              // we don't need to count how many agents are selected if they are all selected
-              selectedAgents.push(value);
-            }
-            if (value?.id) {
-              newAgentSelection.agents.push(value.id);
-            }
-            break;
-          default:
-            // this should never happen!
-            // eslint-disable-next-line no-console
-            console.error(`unknown group type ${groupType}`);
-        }
-      }
+      const {
+        newAgentSelection,
+        selectedAgents,
+        selectedGroups,
+      }: {
+        newAgentSelection: AgentSelection;
+        selectedAgents: AgentOptionValue[];
+        selectedGroups: SelectedGroups;
+      } = generateAgentSelection(selection);
       if (newAgentSelection.allAgentsSelected) {
         setNumAgentsSelected(totalNumAgents);
       } else {
@@ -164,36 +109,26 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     [groups, onChange, totalNumAgents]
   );
 
-  const renderOption = useCallback(
-    (option, searchVal, contentClassName) => {
-      const { label, value, key } = option;
-      if (label === lastLabel) {
-        setPage((p) => p + 1);
-      }
-      return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-        <EuiHealth color={value?.online ? 'success' : 'danger'}>
-          <span className={contentClassName}>
-            <EuiHighlight search={searchVal}>{label}</EuiHighlight>
-            &nbsp;
-            <span>({key})</span>
-          </span>
-        </EuiHealth>
-      ) : (
+  const renderOption = useCallback((option, searchVal, contentClassName) => {
+    const { label, value } = option;
+    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
+      <EuiHealth color={value?.online ? 'success' : 'danger'}>
         <span className={contentClassName}>
-          <span>[{value?.size}]</span>
-          &nbsp;
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
-          &nbsp;
-          {value?.id && label !== value?.id && <span>({value?.id})</span>}
         </span>
-      );
-    },
-    [lastLabel]
-  );
+      </EuiHealth>
+    ) : (
+      <span className={contentClassName}>
+        <span>[{value?.size ?? 0}]</span>
+        &nbsp;
+        <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+      </span>
+    );
+  }, []);
 
   const onSearchChange = useCallback((v: string) => {
     // set the typing flag and update the search value
-    setModifyingSearch(true);
+    setModifyingSearch(v !== '');
     setSearchValue(v);
   }, []);
 
@@ -205,6 +140,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         placeholder={SELECT_AGENT_LABEL}
         isLoading={modifyingSearch || groupsLoading || agentsLoading}
         options={options}
+        isClearable={true}
         fullWidth={true}
         onSearchChange={onSearchChange}
         selectedOptions={selectedOptions}

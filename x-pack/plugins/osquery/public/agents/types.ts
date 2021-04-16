@@ -32,6 +32,14 @@ export interface SelectedGroups {
 
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
+export interface AgentSelection {
+  agents: string[];
+  allAgentsSelected: boolean;
+  platformsSelected: string[];
+  policiesSelected: string[];
+}
+
+
 interface BaseGroupOption {
   id?: string;
   groupType: AGENT_GROUP_KEY;

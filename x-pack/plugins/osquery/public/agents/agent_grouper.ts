@@ -85,7 +85,8 @@ export class AgentGrouper {
           opts.push({
             label,
             options: (data as Group[]).map(({ name, id, size: groupSize }) => ({
-              label: name,
+              label: name !== id ? `${name} (${id})` : name,
+              key: id,
               color: getColor(groupType),
               value: { groupType, id, size: groupSize },
             })),
@@ -95,7 +96,7 @@ export class AgentGrouper {
           opts.push({
             label,
             options: (data as Agent[]).map((agent: Agent) => ({
-              label: agent.local_metadata.host.hostname,
+              label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
               key: agent.local_metadata.elastic.agent.id,
               color,
               value: {

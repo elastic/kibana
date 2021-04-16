@@ -15,30 +15,29 @@ interface UseAllAgents {
 }
 
 interface RequestOptions {
-  perPage: number;
-  page: number;
+  perPage?: number;
+  page?: number;
 }
 
 // TODO: break out the paginated vs all cases into separate hooks
 export const useAllAgents = (
   { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
   searchValue = '',
-  opts: RequestOptions = { perPage: 9000, page: 1 }
+  opts: RequestOptions = { perPage: 9000 }
 ) => {
-  const { perPage, page } = opts;
+  const { perPage } = opts;
   const { http } = useKibana().services;
   const { isLoading: agentsLoading, data: agentData } = useQuery(
-    ['agents', osqueryPolicies, searchValue, page, perPage],
+    ['agents', osqueryPolicies, searchValue, perPage],
     async () => {
       let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
       if (searchValue) {
-        kuery += ` and local_metadata.host.hostname:*${searchValue}*`;
+        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elatic.agent.id:/${searchValue}/)`;
       }
       return await http.get('/api/fleet/agents', {
         query: {
           kuery,
           perPage,
-          page,
         },
       });
     },
