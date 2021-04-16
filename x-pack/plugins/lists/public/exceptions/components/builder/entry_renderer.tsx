@@ -200,11 +200,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
         selectedField={entry.field}
         operator={entry.operator}
-        isDisabled={
-          isDisabled ||
-          indexPattern == null ||
-          (indexPattern != null && indexPattern.fields.length === 0)
-        }
+        isDisabled={isFieldComponentDisabled}
         operatorOptions={operatorOptions}
         isLoading={false}
         isClearable={false}
