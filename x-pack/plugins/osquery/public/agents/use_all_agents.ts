@@ -14,16 +14,31 @@ interface UseAllAgents {
   osqueryPoliciesLoading: boolean;
 }
 
-export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents) => {
-  // TODO: properly fetch these in an async manner
+interface RequestOptions {
+  perPage: number;
+  page: number;
+}
+
+// TODO: break out the paginated vs all cases into separate hooks
+export const useAllAgents = (
+  { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
+  searchValue = '',
+  opts: RequestOptions = { perPage: 9000, page: 1 }
+) => {
+  const { perPage, page } = opts;
   const { http } = useKibana().services;
   const { isLoading: agentsLoading, data: agentData } = useQuery(
-    ['agents', osqueryPolicies],
+    ['agents', osqueryPolicies, searchValue, page, perPage],
     async () => {
+      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+      if (searchValue) {
+        kuery += ` and local_metadata.host.hostname:*${searchValue}*`;
+      }
       return await http.get('/api/fleet/agents', {
         query: {
-          kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
-          perPage: 9000,
+          kuery,
+          perPage,
+          page,
         },
       });
     },

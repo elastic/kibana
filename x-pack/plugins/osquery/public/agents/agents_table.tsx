@@ -5,30 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiComboBox, EuiHealth, EuiHighlight } from '@elastic/eui';
 
+import { useDebounce } from 'react-use';
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { useOsqueryPolicies } from './use_osquery_policies';
-import { Agent } from '../../common/shared_imports';
-import {
-  getNumAgentsInGrouping,
-  generateAgentCheck,
-  getNumOverlapped,
-  generateColorPicker,
-} from './helpers';
+import { AgentGrouper } from './agent_grouper';
+import { getNumAgentsInGrouping, generateAgentCheck, getNumOverlapped } from './helpers';
+
+import { SELECT_AGENT_LABEL, generateSelectedAgentsMessage } from './translations';
 
 import {
-  ALL_AGENTS_LABEL,
-  AGENT_PLATFORMS_LABEL,
-  AGENT_POLICY_LABEL,
-  SELECT_AGENT_LABEL,
-  AGENT_SELECTION_LABEL,
-  generateSelectedAgentsMessage,
-} from './translations';
-
-import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue, Group } from './types';
+  AGENT_GROUP_KEY,
+  SelectedGroups,
+  AgentOptionValue,
+  GroupOptionValue,
+  GroupOption,
+} from './types';
 
 export interface AgentsSelection {
   agents: string[];
@@ -42,81 +37,61 @@ interface AgentsTableProps {
   onChange: (payload: AgentsSelection) => void;
 }
 
-type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
-
-const getColor = generateColorPicker();
-
-const generateOptions = (groupType: AGENT_GROUP_KEY, label: string, collection: Group[]) => {
-  return {
-    label,
-    options: collection.map(({ name, id, size }) => ({
-      label: name,
-      color: getColor(groupType),
-      value: { groupType, id, size },
-    })),
-  };
-}
+const perPage = 10;
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
+  // search related
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState<string>('');
+  useDebounce(
+    () => {
+      // reset the page, update the real search value, set the typing flag
+      setPage(1);
+      setDebouncedSearchValue(searchValue);
+      setModifyingSearch(false);
+    },
+    100,
+    [searchValue]
+  );
+
+  // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
   const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
     osqueryPolicyData
   );
-  const { agents } = useAllAgents(osqueryPolicyData);
-  const [loading, setLoading] = useState<boolean>(true);
+  const grouper = useMemo(() => new AgentGrouper(), []);
+  const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
+    perPage,
+    page,
+  });
+
+  // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
+  const [lastLabel, setLastLabel] = useState<string>('');
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
 
   useEffect(() => {
-    const allAgentsLabel = ALL_AGENTS_LABEL;
-    const opts: GroupOption[] = [
-      {
-        label: allAgentsLabel,
-        options: [
-          {
-            label: allAgentsLabel,
-            value: { groupType: AGENT_GROUP_KEY.All, size: totalNumAgents },
-            color: getColor(AGENT_GROUP_KEY.All),
-          },
-        ],
-      },
-    ];
-
-    if (groups.platforms.length > 0) {
-      const groupType = AGENT_GROUP_KEY.Platform;
-      opts.push(generateOptions(groupType, AGENT_PLATFORMS_LABEL, groups.platforms))
+    // update the groups when groups or agents have changed
+    grouper.setTotalAgents(totalNumAgents);
+    grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
+    grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
+    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents, page > 1);
+    const newOptions = grouper.generateOptions();
+    setOptions(newOptions);
+    if (newOptions.length) {
+      const lastGroup = newOptions[newOptions.length - 1].options;
+      if (lastGroup?.length) {
+        setLastLabel(lastGroup[lastGroup.length - 1].label);
+      }
     }
-
-    if (groups.policies.length > 0) {
-      const groupType = AGENT_GROUP_KEY.Policy;
-      opts.push(generateOptions(groupType, AGENT_POLICY_LABEL, groups.policies))
-    }
-
-    if (agents && agents.length > 0) {
-      const groupType = AGENT_GROUP_KEY.Agent;
-      opts.push({
-        label: AGENT_SELECTION_LABEL,
-        options: (agents as Agent[]).map((agent: Agent) => ({
-          label: agent.local_metadata.host.hostname,
-          key: agent.local_metadata.elastic.agent.id,
-          color: getColor(groupType),
-          value: {
-            groupType,
-            groups: { policy: agent.policy_id ?? '', platform: agent.local_metadata.os.platform },
-            id: agent.local_metadata.elastic.agent.id,
-            online: agent.active,
-          },
-        })),
-      });
-    }
-    setLoading(false);
-    setOptions(opts);
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents]);
+  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, page, grouper]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {
-      // TODO?: optimize this by making it incremental
+      // TODO?: optimize this by making the selection computation incremental
       const newAgentSelection: AgentsSelection = {
         agents: [],
         allAgentsSelected: false,
@@ -189,36 +164,49 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     [groups, onChange, totalNumAgents]
   );
 
-  const renderOption = useCallback((option, searchValue, contentClassName) => {
-    const { label, value, key } = option;
-    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.online ? 'success' : 'danger'}>
+  const renderOption = useCallback(
+    (option, searchVal, contentClassName) => {
+      const { label, value, key } = option;
+      if (label === lastLabel) {
+        setPage((p) => p + 1);
+      }
+      return value?.groupType === AGENT_GROUP_KEY.Agent ? (
+        <EuiHealth color={value?.online ? 'success' : 'danger'}>
+          <span className={contentClassName}>
+            <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+            &nbsp;
+            <span>({key})</span>
+          </span>
+        </EuiHealth>
+      ) : (
         <span className={contentClassName}>
-          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+          <span>[{value?.size}]</span>
           &nbsp;
-          <span>({key})</span>
+          <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+          &nbsp;
+          {value?.id && label !== value?.id && <span>({value?.id})</span>}
         </span>
-      </EuiHealth>
-    ) : (
-      <span className={contentClassName}>
-        <span>[{value?.size}]</span>
-        &nbsp;
-        <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-        &nbsp;
-        {value?.id && label !== value?.id && (<span>({value?.id})</span>)}
-      </span>
-    );
+      );
+    },
+    [lastLabel]
+  );
+
+  const onSearchChange = useCallback((v: string) => {
+    // set the typing flag and update the search value
+    setModifyingSearch(true);
+    setSearchValue(v);
   }, []);
+
   return (
     <div>
-      <h2>{SELECT_AGENT_LABEL}</h2>
       {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
       &nbsp;
       <EuiComboBox
-        placeholder="Select or create options"
-        isLoading={loading}
+        placeholder={SELECT_AGENT_LABEL}
+        isLoading={modifyingSearch || groupsLoading || agentsLoading}
         options={options}
         fullWidth={true}
+        onSearchChange={onSearchChange}
         selectedOptions={selectedOptions}
         onChange={onSelection}
         renderOption={renderOption}

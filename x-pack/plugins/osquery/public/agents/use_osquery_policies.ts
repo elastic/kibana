@@ -15,13 +15,11 @@ export const useOsqueryPolicies = () => {
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies } = useQuery(
     ['osqueryPolicies'],
     async () => {
-      const d = await http.get('/api/fleet/package_policies', {
+      return await http.get('/api/fleet/package_policies', {
         query: {
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:osquery_manager`,
         },
       });
-      console.log('init', d)
-      return d
     },
     { select: (data) => data.items.map((p: { policy_id: string }) => p.policy_id) }
   );

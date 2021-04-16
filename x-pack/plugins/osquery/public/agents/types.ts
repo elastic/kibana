@@ -6,6 +6,7 @@
  */
 
 import { TermsAggregate } from '@elastic/elasticsearch/api/types';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 interface BaseDataPoint {
   key: string;
@@ -28,6 +29,8 @@ export interface Overlap {
 export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
+
+export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
 interface BaseGroupOption {
   id?: string;
