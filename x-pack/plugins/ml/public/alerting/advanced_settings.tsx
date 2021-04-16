@@ -12,7 +12,9 @@ import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { MlAnomalyDetectionAlertAdvancedSettings } from '../../common/types/alerts';
 import { TimeIntervalControl } from './time_interval_control';
@@ -42,6 +44,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         gutterSize={'s'}
+        titleSize={'xxs'}
         title={
           <h4>
             <FormattedMessage
@@ -51,10 +54,12 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
           </h4>
         }
         description={
-          <FormattedMessage
-            id="xpack.ml.anomalyDetectionAlert.lookbackIntervalDescription"
-            defaultMessage="Lookback interval description"
-          />
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.ml.anomalyDetectionAlert.lookbackIntervalDescription"
+              defaultMessage="Time interval to query the anomalies data during each rule condition check. By default, it is derived from the job's bucket span and datafeed's query delay."
+            />
+          </EuiText>
         }
       >
         <TimeIntervalControl
@@ -73,26 +78,29 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
 
       <EuiDescribedFormGroup
         gutterSize={'s'}
+        titleSize={'xxs'}
         title={
           <h4>
             <FormattedMessage
               id="xpack.ml.anomalyDetectionAlert.topNBucketsLabel"
-              defaultMessage="Top N buckets"
+              defaultMessage="Number of latest buckets"
             />
           </h4>
         }
         description={
-          <FormattedMessage
-            id="xpack.ml.anomalyDetectionAlert.topNBucketsDescription"
-            defaultMessage="Top N buckets description"
-          />
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.ml.anomalyDetectionAlert.topNBucketsDescription"
+              defaultMessage="The number of latest buckets to check to obtain the highest anomaly."
+            />
+          </EuiText>
         }
       >
         <EuiFormRow
           label={
             <FormattedMessage
               id="xpack.ml.anomalyDetectionAlert.topNBucketsLabel"
-              defaultMessage="Top N buckets"
+              defaultMessage="Number of latest buckets"
             />
           }
         >
@@ -105,6 +113,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <EuiHorizontalRule margin={'m'} />
     </EuiAccordion>
   );
 });
