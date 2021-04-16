@@ -52,57 +52,57 @@ describe('kibana_usage_collection', () => {
         })
       )
     ).resolves.toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "isReady": true,
-                "type": "ui_counters",
-              },
-              Object {
-                "isReady": true,
-                "type": "usage_counters",
-              },
-              Object {
-                "isReady": false,
-                "type": "kibana_stats",
-              },
-              Object {
-                "isReady": true,
-                "type": "kibana",
-              },
-              Object {
-                "isReady": false,
-                "type": "stack_management",
-              },
-              Object {
-                "isReady": false,
-                "type": "ui_metric",
-              },
-              Object {
-                "isReady": false,
-                "type": "application_usage",
-              },
-              Object {
-                "isReady": false,
-                "type": "cloud_provider",
-              },
-              Object {
-                "isReady": true,
-                "type": "csp",
-              },
-              Object {
-                "isReady": false,
-                "type": "core",
-              },
-              Object {
-                "isReady": false,
-                "type": "kibana_config_usage",
-              },
-              Object {
-                "isReady": true,
-                "type": "localization",
-              },
-            ]
-          `);
+      Array [
+        Object {
+          "isReady": true,
+          "type": "ui_counters",
+        },
+        Object {
+          "isReady": true,
+          "type": "usage_counters",
+        },
+        Object {
+          "isReady": false,
+          "type": "kibana_stats",
+        },
+        Object {
+          "isReady": true,
+          "type": "kibana",
+        },
+        Object {
+          "isReady": false,
+          "type": "stack_management",
+        },
+        Object {
+          "isReady": false,
+          "type": "ui_metric",
+        },
+        Object {
+          "isReady": false,
+          "type": "application_usage",
+        },
+        Object {
+          "isReady": false,
+          "type": "cloud_provider",
+        },
+        Object {
+          "isReady": true,
+          "type": "csp",
+        },
+        Object {
+          "isReady": false,
+          "type": "core",
+        },
+        Object {
+          "isReady": false,
+          "type": "kibana_config_usage",
+        },
+        Object {
+          "isReady": true,
+          "type": "localization",
+        },
+      ]
+    `);
   });
 
   test('Runs the start method without issues', () => {
