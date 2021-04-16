@@ -110,7 +110,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAggBasedVisualizations();
       await dashboardAddPanel.clickVisType('metric');
-      await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
+      await testSubjects.click('savedObjectTitlelogstash-*');
       await testSubjects.exists('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
     }
