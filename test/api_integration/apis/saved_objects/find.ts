@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SavedObject } from '../../../../src/core/server';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -17,12 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('find', () => {
-    let KIBANA_VERSION: string;
-
-    before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
-    });
-
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -32,33 +25,9 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 1,
-              saved_objects: [
-                {
-                  type: 'visualization',
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzE4LDJd',
-                  attributes: {
-                    title: 'Count of requests',
-                  },
-                  score: 0,
-                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                  coreMigrationVersion: KIBANA_VERSION,
-                  namespaces: ['default'],
-                  references: [
-                    {
-                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                      type: 'index-pattern',
-                    },
-                  ],
-                  updated_at: '2017-09-21T18:51:23.794Z',
-                },
-              ],
-            });
+            expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+              'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            ]);
             expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           }));
 
@@ -129,33 +98,12 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                ],
-              });
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([{ id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] }]);
               expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
@@ -166,53 +114,15 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 2,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzE4LDJd',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                  {
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    namespaces: ['foo-ns'],
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    score: 0,
-                    type: 'visualization',
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIyLDJd',
-                  },
-                ],
-              });
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] },
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['foo-ns'] },
+              ]);
             }));
       });
 
@@ -224,42 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    attributes: {
-                      title: 'Count of requests',
-                      visState: resp.body.saved_objects[0].attributes.visState,
-                      uiStateJSON: '{"spy":{"mode":{"name":null,"fill":false}}}',
-                      description: '',
-                      version: 1,
-                      kibanaSavedObjectMeta: {
-                        searchSourceJSON:
-                          resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
-                            .searchSourceJSON,
-                      },
-                    },
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      },
-                    ],
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    coreMigrationVersion: KIBANA_VERSION,
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzE4LDJd',
-                  },
-                ],
-              });
+              expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+                'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              ]);
             }));
 
         it('wrong type should return 400 with Bad Request', async () =>
