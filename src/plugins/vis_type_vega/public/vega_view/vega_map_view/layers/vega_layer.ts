@@ -18,7 +18,7 @@ export interface VegaLayerContext {
 export function initVegaLayer({
   id,
   map: mapInstance,
-  context: { vegaView, updateVegaView },
+  context: { vegaView, vegaControls, updateVegaView },
 }: LayerParameters<VegaLayerContext>) {
   const vegaLayer: CustomLayerInterface = {
     id,
@@ -34,7 +34,7 @@ export function initVegaLayer({
       vegaContainer.style.height = mapCanvas.style.height;
 
       mapContainer.appendChild(vegaContainer);
-      vegaView.initialize(vegaContainer);
+      vegaView.initialize(vegaContainer, vegaControls);
     },
     render() {
       updateVegaView(mapInstance, vegaView);
