@@ -136,17 +136,12 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectFinderUi.Unnamed.$1",
                 "type": "CompoundType",
                 "label": "props",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "savedObjects",
-                    "scope": "public",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectFinderUiProps",
-                    "text": "SavedObjectFinderUiProps"
-                  }
+                  "SavedObjectFinderUiProps"
                 ],
                 "description": [],
                 "source": {
@@ -272,6 +267,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.$1",
                 "type": "Any",
                 "label": "SavedObjectClass",
                 "isRequired": true,
@@ -285,6 +281,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.$2",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -297,7 +294,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "description": [],
                 "source": {
@@ -325,6 +322,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.get.$1",
                 "type": "CompoundType",
                 "label": "opts",
                 "isRequired": false,
@@ -355,6 +353,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.urlFor.$1",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -385,6 +384,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.delete.$1",
                 "type": "CompoundType",
                 "label": "ids",
                 "isRequired": true,
@@ -411,13 +411,7 @@
             "label": "mapHitSource",
             "signature": [
               "(source: Record<string, unknown>, id: string, references?: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => Record<string, unknown>"
             ],
             "description": [
@@ -425,6 +419,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$1",
                 "type": "Object",
                 "label": "source",
                 "isRequired": true,
@@ -438,6 +433,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$2",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -451,17 +447,12 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.$3",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "description": [],
@@ -486,13 +477,7 @@
             "label": "mapSavedObjectApiHits",
             "signature": [
               "({ attributes, id, references, }: { attributes: Record<string, unknown>; id: string; references?: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; }) => Record<string, unknown>"
             ],
             "description": [
@@ -500,7 +485,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }",
+                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences",
                 "type": "Object",
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
                 "tags": [],
@@ -508,7 +493,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.attributes",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.attributes",
                     "type": "Object",
                     "label": "attributes",
                     "description": [],
@@ -522,7 +507,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.id",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.id",
                     "type": "string",
                     "label": "id",
                     "description": [],
@@ -533,7 +518,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.references",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.references",
                     "type": "Array",
                     "label": "references",
                     "description": [],
@@ -542,13 +527,7 @@
                       "lineNumber": 116
                     },
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "common",
-                        "docId": "kibCorePluginApi",
-                        "section": "def-common.SavedObjectReference",
-                        "text": "SavedObjectReference"
-                      },
+                      "SavedObjectReference",
                       "[] | undefined"
                     ]
                   }
@@ -586,6 +565,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.find.$1",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -599,6 +579,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.find.$2",
                 "type": "CompoundType",
                 "label": "sizeOrOptions",
                 "isRequired": true,
@@ -786,6 +767,7 @@
         ],
         "children": [
           {
+            "id": "def-public.checkForDuplicateTitle.$1",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -807,6 +789,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$2",
             "type": "boolean",
             "label": "isTitleDuplicateConfirmed",
             "isRequired": true,
@@ -820,6 +803,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$3",
             "type": "Function",
             "label": "onTitleDuplicate",
             "isRequired": false,
@@ -833,18 +817,13 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.$4",
             "type": "Object",
             "label": "services",
             "isRequired": true,
             "signature": [
               "Pick<",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectKibanaServices",
-                "text": "SavedObjectKibanaServices"
-              },
+              "SavedObjectKibanaServices",
               ", \"savedObjectsClient\" | \"overlays\">"
             ],
             "description": [],
@@ -867,6 +846,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getSavedObjectFinder.$1",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -886,6 +866,7 @@
             }
           },
           {
+            "id": "def-public.getSavedObjectFinder.$2",
             "type": "Object",
             "label": "uiSettings",
             "isRequired": true,
@@ -946,7 +927,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.isErrorNonFatal.error",
+            "id": "def-public.isErrorNonFatal.$1.error",
             "type": "Object",
             "label": "error",
             "tags": [],
@@ -954,7 +935,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.isErrorNonFatal.error.message",
+                "id": "def-public.isErrorNonFatal.$1.error.message",
                 "type": "string",
                 "label": "message",
                 "description": [],
@@ -998,6 +979,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SavedObjectSaveModalOrigin.$1",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -1048,7 +1030,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1070,17 +1052,12 @@
         ],
         "children": [
           {
+            "id": "def-public.saveWithConfirmation.$1",
             "type": "Object",
             "label": "source",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ],
             "description": [
               "- serialized version of this object what will be indexed into elasticsearch."
@@ -1091,14 +1068,14 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.savedObject",
+            "id": "def-public.saveWithConfirmation.$2.savedObject",
             "type": "Object",
             "label": "savedObject",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-public.saveWithConfirmation.savedObject.getEsType",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.getEsType",
                 "type": "Function",
                 "label": "getEsType",
                 "signature": [
@@ -1115,7 +1092,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.title",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.title",
                 "type": "string",
                 "label": "title",
                 "description": [],
@@ -1126,7 +1103,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.displayName",
+                "id": "def-public.saveWithConfirmation.$2.savedObject.displayName",
                 "type": "string",
                 "label": "displayName",
                 "description": [],
@@ -1142,6 +1119,7 @@
             }
           },
           {
+            "id": "def-public.saveWithConfirmation.$3",
             "type": "Object",
             "label": "options",
             "isRequired": true,
@@ -1163,7 +1141,7 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.services",
+            "id": "def-public.saveWithConfirmation.$4.services",
             "type": "Object",
             "label": "services",
             "tags": [],
@@ -1171,7 +1149,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.savedObjectsClient",
+                "id": "def-public.saveWithConfirmation.$4.services.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "description": [],
@@ -1188,12 +1166,12 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ]
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.overlays",
+                "id": "def-public.saveWithConfirmation.$4.services.overlays",
                 "type": "Object",
                 "label": "overlays",
                 "description": [],
@@ -1240,6 +1218,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.showSaveModal.$1",
             "type": "Object",
             "label": "saveModal",
             "isRequired": true,
@@ -1253,6 +1232,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.$2",
             "type": "Function",
             "label": "I18nContext",
             "isRequired": true,
@@ -1266,6 +1246,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.$3",
             "type": "Function",
             "label": "Wrapper",
             "isRequired": false,
@@ -1535,21 +1516,9 @@
             },
             "signature": [
               "() => { attributes: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               "; references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ]
           },
@@ -1612,13 +1581,7 @@
             },
             "signature": [
               "(opts: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectCreationOpts",
-                "text": "SavedObjectCreationOpts"
-              },
+              "SavedObjectCreationOpts",
               ") => Record<string, unknown>"
             ]
           },
@@ -1912,13 +1875,7 @@
               "lineNumber": 49
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | undefined"
             ]
           }
@@ -1992,21 +1949,9 @@
             },
             "signature": [
               "((opts: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectAttributesAndRefs",
-                "text": "SavedObjectAttributesAndRefs"
-              },
+              "SavedObjectAttributesAndRefs",
               ") => ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectAttributesAndRefs",
-                "text": "SavedObjectAttributesAndRefs"
-              },
+              "SavedObjectAttributesAndRefs",
               ") | undefined"
             ]
           },
@@ -2030,13 +1975,7 @@
                 "text": "SavedObject"
               },
               ">(object: T, references: ",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => void) | undefined"
             ]
           },
@@ -2450,6 +2389,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getIconForSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2495,6 +2435,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getTooltipForSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2540,6 +2481,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.showSavedObject.$1",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,

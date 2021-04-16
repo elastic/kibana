@@ -19,6 +19,12 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
 } from '../../common';
+import {
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_LATEST_KEYWORD,
+} from '../constants';
+
+import { escapeSearchQueryPhrase } from './saved_object';
 
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation } from './epm/packages';
@@ -61,14 +67,29 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await Promise.all(
-    packages.map(({ name, version, force }) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version, force)
+    packages.map(({ name, version }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
     )
   );
 
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.all(
     policies.map(async (preconfiguredAgentPolicy) => {
+      // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
+      const preconfigurationId = String(preconfiguredAgentPolicy.id);
+      const searchParams = {
+        searchFields: ['preconfiguration_id'],
+        search: escapeSearchQueryPhrase(preconfigurationId),
+      };
+      const deletionRecords = await soClient.find({
+        type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+        ...searchParams,
+      });
+      const wasDeleted = deletionRecords.total > 0;
+      if (wasDeleted) {
+        return { created: false, deleted: preconfigurationId };
+      }
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
@@ -122,22 +143,32 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
-        policy,
+        policy!,
         installedPackagePolicies!,
         defaultOutput
       );
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        agentPolicyService.update(soClient, esClient, policy.id, { is_managed: true });
+        agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
       }
     }
   }
 
   return {
-    policies: preconfiguredPolicies.map((p) => ({
-      id: p.policy.id,
-      updated_at: p.policy.updated_at,
-    })),
+    policies: preconfiguredPolicies.map((p) =>
+      p.policy
+        ? {
+            id: p.policy.id,
+            updated_at: p.policy.updated_at,
+          }
+        : {
+            id: p.deleted,
+            updated_at: i18n.translate('xpack.fleet.preconfiguration.policyDeleted', {
+              defaultMessage: 'Preconfigured policy {id} was deleted; skipping creation',
+              values: { id: p.deleted },
+            }),
+          }
+    ),
     packages: preconfiguredPackages.map((pkg) => pkgToPkgKey(pkg)),
   };
 }
@@ -155,35 +186,33 @@ async function addPreconfiguredPolicyPackages(
   >,
   defaultOutput: Output
 ) {
-  return await Promise.all(
-    installedPackagePolicies.map(async ({ installedPackage, name, description, inputs }) =>
-      addPackageToAgentPolicy(
-        soClient,
-        esClient,
-        installedPackage,
-        agentPolicy,
-        defaultOutput,
-        name,
-        description,
-        (policy) => overridePackageInputs(policy, inputs)
-      )
-    )
-  );
+  // Add packages synchronously to avoid overwriting
+  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+    await addPackageToAgentPolicy(
+      soClient,
+      esClient,
+      installedPackage,
+      agentPolicy,
+      defaultOutput,
+      name,
+      description,
+      (policy) => overridePackageInputs(policy, inputs)
+    );
+  }
 }
 
 async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
-  pkgVersion: string,
-  force?: boolean
+  pkgVersion: string
 ) {
+  const isLatest = pkgVersion === PRECONFIGURATION_LATEST_KEYWORD;
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,
     esClient,
-    pkgVersion,
-    force,
+    pkgVersion: isLatest ? undefined : pkgVersion,
   });
 }
 

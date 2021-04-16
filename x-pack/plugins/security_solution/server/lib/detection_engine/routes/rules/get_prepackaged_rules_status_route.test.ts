@@ -23,7 +23,7 @@ import {
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: () => {
+    getLatestPrepackagedRules: async () => {
       return [
         {
           rule_id: 'rule-1',

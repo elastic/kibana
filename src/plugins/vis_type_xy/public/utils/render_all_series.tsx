@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 
 import { DatatableRow } from '../../../expressions/public';
+import { METRIC_TYPES } from '../../../data/public';
 
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig } from '../types';
@@ -71,9 +72,17 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(
-        ({ aggId, accessor }) => aggId?.includes(paramId) && accessor !== null
-      );
+      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
+        if (
+          aggType === METRIC_TYPES.PERCENTILES ||
+          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
+          aggType === METRIC_TYPES.STD_DEV
+        ) {
+          return aggId?.includes(paramId) && accessor !== null;
+        } else {
+          return aggId === paramId && accessor !== null;
+        }
+      });
       if (!show || !yAspects.length) {
         return null;
       }
