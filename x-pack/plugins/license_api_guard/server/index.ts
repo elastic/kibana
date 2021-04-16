@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export * from './download_artifact';
+export { License } from './license';
+
+/** dummy plugin*/
+export function plugin() {
+  return new (class LicenseApiGuardPlugin {
+    setup() {}
+    start() {}
+  })();
+}

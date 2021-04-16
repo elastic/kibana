@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/license_api_guard'],
+};
