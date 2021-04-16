@@ -224,24 +224,20 @@ export const getEsPackage = async (
       );
       const dataStreamManifest = safeLoad(soResDataStreamManifest.attributes.data_utf8);
       const {
-        title: dataStreamTitle,
-        release,
         ingest_pipeline: ingestPipeline,
-        type,
         dataset,
         streams: manifestStreams,
+        ...dataStreamManifestProps
       } = dataStreamManifest;
       const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
-        title: dataStreamTitle,
-        release,
         package: pkgName,
         ingest_pipeline: ingestPipeline || 'default',
         path: dataStreamPath,
-        type,
         streams,
+        ...dataStreamManifestProps,
       });
     })
   );
