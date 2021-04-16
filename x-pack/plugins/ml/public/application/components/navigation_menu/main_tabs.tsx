@@ -161,7 +161,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         const defaultPathId = (TAB_DATA[id].pathId || id) as MlUrlGeneratorState['page'];
 
         return disabled ? (
-          <div className="euiTab">
+          <div className="euiTab" key={`div-${id}-key`}>
             <EuiTab
               key={`tab-${id}-key`}
               className={'mlNavigationMenu__mainTab'}
