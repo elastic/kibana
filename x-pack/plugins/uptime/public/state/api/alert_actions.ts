@@ -122,6 +122,7 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
           observerLocation: '{{state.observerLocation}}',
         },
       ],
+      indexOverride: null,
     };
   }
   return {
