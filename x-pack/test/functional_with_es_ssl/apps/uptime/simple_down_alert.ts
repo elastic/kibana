@@ -111,7 +111,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('disable simple status alert', async () => {
       await testSubjects.click('uptimeDisableSimpleDownAlert' + monitorId);
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('uptimeEnableSimpleDownAlert' + monitorId);
+      await retry.try(async ()=>{
+        await testSubjects.existOrFail('uptimeEnableSimpleDownAlert' + monitorId);
+      });
     });
   });
 };
