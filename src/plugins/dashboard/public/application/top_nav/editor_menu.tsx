@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
 import { SolutionToolbarPopover } from '../../../../presentation_util/public';
 import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
