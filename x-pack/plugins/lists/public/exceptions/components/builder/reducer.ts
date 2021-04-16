@@ -6,7 +6,6 @@
  */
 
 import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../common';
-import { OsType } from '../../../../common/schemas';
 
 import { ExceptionsBuilderExceptionItem } from './types';
 import { getDefaultEmptyEntry } from './helpers';
@@ -22,7 +21,6 @@ export interface State {
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   errorExists: number;
-  selectedOS?: OsType;
 }
 
 export type Action =
@@ -54,10 +52,6 @@ export type Action =
   | {
       type: 'setErrorsExist';
       errorExists: boolean;
-    }
-  | {
-      type: 'setSelectedOS';
-      selectedOS: OsType;
     };
 
 export const exceptionsBuilderReducer = () => (state: State, action: Action): State => {
@@ -126,12 +120,6 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
       return {
         ...state,
         errorExists: errTotal < 0 ? 0 : errTotal,
-      };
-    }
-    case 'setSelectedOS': {
-      return {
-        ...state,
-        selectedOS: action.selectedOS,
       };
     }
     default:

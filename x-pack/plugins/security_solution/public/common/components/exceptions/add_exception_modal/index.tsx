@@ -22,6 +22,8 @@ import {
   EuiFormRow,
   EuiText,
   EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import {
   hasEqlSequenceQuery,
@@ -133,7 +135,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
-  const [selectedOS, setSelectedOS] = useState<OsType>('windows');
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
     signalIndexName,
@@ -302,16 +303,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return alertData !== undefined;
   }, [alertData]);
 
-  const handleOSSelectionChange = useCallback(
-    (os: OsType): void => {
-      setSelectedOS(os);
-    },
-    [setSelectedOS]
-  );
+  const [selectedOs, setSelectedOs] = useState<OsType | undefined>();
 
   const osTypesSelection = useMemo((): OsTypeArray => {
-    return hasAlertData ? retrieveAlertOsTypes(alertData) : [selectedOS];
-  }, [hasAlertData, alertData, selectedOS]);
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [selectedOs] : [];
+  }, [hasAlertData, alertData, selectedOs]);
 
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -362,6 +358,50 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
     return false;
   }, [maybeRule]);
+
+  const OsOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsType>
+  > => {
+    return [
+      {
+        label: 'Windows',
+        value: 'windows',
+      },
+      {
+        label: 'macOS',
+        value: 'macos',
+      },
+      {
+        label: 'Linux',
+        value: 'linux',
+      },
+    ];
+  }, []);
+
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions): void => {
+      setSelectedOs(selectedOptions[0].value);
+    },
+    [setSelectedOs]
+  );
+
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
+    return OsOptions.filter((option) => {
+      return selectedOs === option.value;
+    });
+  }, [selectedOs, OsOptions]);
+
+  const singleSelectionOptions = useMemo(() => {
+    return { asPlainText: true };
+  }, []);
+
+  const hasOsSelection = useMemo(() => {
+    return exceptionListType === 'endpoint' && !hasAlertData;
+  }, [exceptionListType, hasAlertData]);
+
+  const isExceptionBuilderFormDisabled = useMemo(() => {
+    return hasOsSelection && selectedOs === undefined;
+  }, [hasOsSelection, selectedOs]);
 
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -415,6 +455,21 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
+              {exceptionListType === 'endpoint' && !hasAlertData && (
+                <>
+                  <EuiFormRow label="Selected OS">
+                    <EuiComboBox
+                      placeholder="Select an OS"
+                      singleSelection={singleSelectionOptions}
+                      options={OsOptions}
+                      selectedOptions={selectedOStoOptions}
+                      onChange={handleOSSelectionChange}
+                      isClearable={false}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <ExceptionBuilder.ExceptionBuilderComponent
                 allowLargeValueLists={
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
@@ -432,11 +487,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 isOrDisabled={false}
                 isAndDisabled={false}
                 isNestedDisabled={false}
-                hasOSSelection={exceptionListType === 'endpoint' && !hasAlertData}
-                onOSSelectionChange={handleOSSelectionChange}
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}
+                isDisabled={isExceptionBuilderFormDisabled}
               />
 
               <EuiSpacer />

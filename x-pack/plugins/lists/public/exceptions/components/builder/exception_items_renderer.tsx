@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useReducer } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 
@@ -30,7 +23,7 @@ import {
   exceptionListItemSchema,
 } from '../../../../common';
 import { AndOrBadge } from '../and_or_badge';
-import { OsType, OsTypeArray } from '../../../../common/schemas';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -67,7 +60,6 @@ const initialState: State = {
   errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
-  selectedOS: undefined,
 };
 
 export interface OnChangeProps {
@@ -82,8 +74,6 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes: OsTypeArray;
-  hasOSSelection?: boolean;
-  onOSSelectionChange?: (arg: OsType) => void;
   indexPatterns: IIndexPattern;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
@@ -97,6 +87,7 @@ export interface ExceptionBuilderProps {
   ) => IIndexPattern;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
+  isDisabled?: boolean;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -114,8 +105,7 @@ export const ExceptionBuilderComponent = ({
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
-  hasOSSelection = false,
-  onOSSelectionChange,
+  isDisabled = false,
   osTypes,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
@@ -126,7 +116,6 @@ export const ExceptionBuilderComponent = ({
       disableNested,
       disableOr,
       errorExists,
-      selectedOS,
       exceptions,
       exceptionsToDelete,
     },
@@ -194,16 +183,6 @@ export const ExceptionBuilderComponent = ({
       dispatch({
         shouldDisable,
         type: 'setDisableOr',
-      });
-    },
-    [dispatch]
-  );
-
-  const setSelectedOS = useCallback(
-    (os: OsType): void => {
-      dispatch({
-        selectedOS: os,
-        type: 'setSelectedOS',
       });
     },
     [dispatch]
@@ -368,10 +347,8 @@ export const ExceptionBuilderComponent = ({
   }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
   useEffect(() => {
-    if (onOSSelectionChange && selectedOS) {
-      onOSSelectionChange(selectedOS);
-    }
-  }, [onOSSelectionChange, selectedOS]);
+    setUpdateExceptions([]);
+  }, [osTypes, setUpdateExceptions]);
 
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
@@ -393,64 +370,8 @@ export const ExceptionBuilderComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const OSOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
-    EuiComboBoxOptionOption<OsType>
-  > => {
-    return [
-      {
-        label: 'Windows',
-        value: 'windows',
-      },
-      {
-        label: 'macOS',
-        value: 'macos',
-      },
-      {
-        label: 'Linux',
-        value: 'linux',
-      },
-    ];
-  }, []);
-
-  const handleOSSelectionChange = useCallback(
-    (selectedOptions): void => {
-      setSelectedOS(selectedOptions[0].value);
-      setUpdateExceptions([]);
-    },
-    [setSelectedOS, setUpdateExceptions]
-  );
-
-  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
-    return OSOptions.filter((option) => {
-      return selectedOS === option.value;
-    });
-  }, [selectedOS, OSOptions]);
-
-  const singleSelectionOptions = useMemo(() => {
-    return { asPlainText: true };
-  }, []);
-
-  const requiresOsSelection = useMemo(() => {
-    return hasOSSelection && selectedOS === undefined;
-  }, [hasOSSelection, selectedOS]);
-
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
-      {hasOSSelection && (
-        <>
-          <EuiFormRow label="Selected OS">
-            <EuiComboBox
-              placeholder="Select an OS"
-              singleSelection={singleSelectionOptions}
-              options={OSOptions}
-              selectedOptions={selectedOStoOptions}
-              onChange={handleOSSelectionChange}
-              isClearable={false}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">
@@ -489,7 +410,7 @@ export const ExceptionBuilderComponent = ({
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
-                isDisabled={requiresOsSelection}
+                isDisabled={isDisabled}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -505,9 +426,9 @@ export const ExceptionBuilderComponent = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
-              isOrDisabled={requiresOsSelection || (isOrDisabled ? isOrDisabled : disableOr)}
-              isAndDisabled={requiresOsSelection || disableAnd}
-              isNestedDisabled={requiresOsSelection || disableNested}
+              isOrDisabled={isDisabled || (isOrDisabled ? isOrDisabled : disableOr)}
+              isAndDisabled={isDisabled || disableAnd}
+              isNestedDisabled={isDisabled || disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}

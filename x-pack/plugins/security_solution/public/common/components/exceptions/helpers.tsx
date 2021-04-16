@@ -58,17 +58,20 @@ export const filterIndexPatterns = (
   type: ExceptionListType,
   osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
-    ? (name: string) =>
-        exceptionableLinuxFields.includes(name) || exceptionableFields.includes(name)
-    : (name: string) =>
-        exceptionableWindowsMacFields.includes(name) || exceptionableFields.includes(name);
-  return type === 'endpoint'
-    ? {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
-      }
-    : patterns;
+  if (type === 'endpoint') {
+    const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
+      ? (name: string) =>
+          exceptionableLinuxFields.includes(name) || exceptionableFields.includes(name)
+      : (name: string) =>
+          exceptionableWindowsMacFields.includes(name) || exceptionableFields.includes(name);
+
+    return {
+      ...patterns,
+      fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
+    };
+  } else {
+    return patterns;
+  }
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
