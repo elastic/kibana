@@ -15,7 +15,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { LoadingState, EmptyState } from './components';
-import { EnginesTable } from './engines_table';
+import { EnginesTable } from './components/tables/engines_table';
+import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
 import { EnginesOverview } from './';
 
@@ -41,7 +42,11 @@ describe('EnginesOverview', () => {
     },
     metaEnginesLoading: false,
     hasPlatinumLicense: false,
+    // AppLogic
     myRole: { canManageEngines: false },
+    // MetaEnginesTableLogic
+    expandedSourceEngines: {},
+    conflictingEnginesSets: {},
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -120,7 +125,7 @@ describe('EnginesOverview', () => {
         });
         const wrapper = shallow(<EnginesOverview />);
 
-        expect(wrapper.find(EnginesTable)).toHaveLength(2);
+        expect(wrapper.find(MetaEnginesTable)).toHaveLength(1);
         expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
 
@@ -147,7 +152,7 @@ describe('EnginesOverview', () => {
               metaEngines: [],
             });
             const wrapper = shallow(<EnginesOverview />);
-            const metaEnginesTable = wrapper.find(EnginesTable).last().dive();
+            const metaEnginesTable = wrapper.find(MetaEnginesTable).dive();
             const emptyPrompt = metaEnginesTable.dive().find(EuiEmptyPrompt).dive();
 
             expect(
@@ -199,10 +204,10 @@ describe('EnginesOverview', () => {
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };
 
-        wrapper.find(EnginesTable).first().simulate('change', pageEvent);
+        wrapper.find(EnginesTable).simulate('change', pageEvent);
         expect(actions.onEnginesPagination).toHaveBeenCalledWith(1);
 
-        wrapper.find(EnginesTable).last().simulate('change', pageEvent);
+        wrapper.find(MetaEnginesTable).simulate('change', pageEvent);
         expect(actions.onMetaEnginesPagination).toHaveBeenCalledWith(1);
       });
     });
