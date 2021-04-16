@@ -230,13 +230,25 @@ describe('useTimelineEvents', () => {
 
       // useEffect on params request
       await waitForNextUpdate();
-      rerender({ ...props, startDate, endDate });
+      rerender({
+        ...props,
+        startDate,
+        endDate,
+        language: 'eql',
+        eqlOptions: {
+          eventCategoryField: 'category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: 'find it EQL',
+          size: 100,
+        },
+      });
       // useEffect on params request
       await waitForNextUpdate();
-      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mockReset();
       result.current[1].loadPage(4);
       await waitForNextUpdate();
-      expect(mockSearch).toHaveBeenCalledTimes(3);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 });
