@@ -7,8 +7,6 @@
 
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
-import { ElasticsearchClient } from 'kibana/server';
-import moment from 'moment';
 import { Duration } from 'moment/moment';
 import { MlClient } from '../ml_client';
 import {
@@ -29,6 +27,8 @@ import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
+import { resolveLookbackInterval } from '../../../common/util/alerts';
+import type { DatafeedsService } from '../../models/job_service/datafeeds';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -41,11 +41,20 @@ type AggResultsResponse = { key?: number } & {
 };
 
 /**
+ * Mapping for result types and corresponding score fields.
+ */
+const resultTypeScoreMapping = {
+  [ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
+  [ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
+  [ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
+};
+
+/**
  * Alerting related server-side methods
  * @param mlClient
- * @param esClient
+ * @param datafeedsService
  */
-export function alertingServiceProvider(mlClient: MlClient, esClient: ElasticsearchClient) {
+export function alertingServiceProvider(mlClient: MlClient, datafeedsService: DatafeedsService) {
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
@@ -375,7 +384,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE),
+                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
               },
             },
             ...(params.includeInterim
@@ -436,6 +445,132 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       : // @ts-expect-error
         [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
+  };
+
+  /**
+   * Fetches anomalies
+   * @param params - Alert params
+   */
+  const fetchResults = async (
+    params: MlAnomalyDetectionAlertParams
+  ): Promise<AlertExecutionResult[] | undefined> => {
+    const jobAndGroupIds = [
+      ...(params.jobSelection.jobIds ?? []),
+      ...(params.jobSelection.groupIds ?? []),
+    ];
+
+    // Extract jobs from group ids and make sure provided jobs assigned to a current space
+    const jobsResponse = (
+      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
+    ).body.jobs;
+
+    if (jobsResponse.length === 0) {
+      // Probably assigned groups don't contain any jobs anymore.
+      return;
+    }
+
+    const jobIds = jobsResponse.map((v) => v.job_id);
+
+    const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
+    const maxBucketInSeconds = resolveMaxTimeInterval(
+      jobsResponse.map((v) => v.analysis_config.bucket_span)
+    );
+
+    if (maxBucketInSeconds === undefined) {
+      // Technically it's not possible, just in case.
+      throw new Error('Unable to resolve a valid bucket length');
+    }
+
+    const lookBackTimeInterval =
+      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
+
+    const requestBody = {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { job_id: jobIds },
+            },
+            {
+              terms: {
+                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+              },
+            },
+            {
+              range: {
+                timestamp: {
+                  gte: `now-${lookBackTimeInterval}s`,
+                },
+              },
+            },
+            ...(params.includeInterim
+              ? []
+              : [
+                  {
+                    term: { is_interim: false },
+                  },
+                ]),
+          ],
+        },
+      },
+      aggs: {
+        alerts_over_time: {
+          date_histogram: {
+            field: 'timestamp',
+            fixed_interval: `${maxBucketInSeconds}s`,
+            order: {
+              _key: 'desc' as const,
+            },
+          },
+          aggs: {
+            max_score: {
+              max: {
+                field: resultTypeScoreMapping[params.resultType],
+              },
+            },
+            ...getResultTypeAggRequest(params.resultType, params.severity),
+            truncate: {
+              bucket_sort: {
+                size: params.topNBuckets ?? 1,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await mlClient.anomalySearch<{ body: { aggregations: { test: number } } }>(
+      {
+        // @ts-expect-error
+        body: requestBody,
+      },
+      jobIds
+    );
+
+    const result = response.body.aggregations as {
+      alerts_over_time: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: number;
+            key_as_string: string;
+            max_score: {
+              value: number;
+            };
+          } & AggResultsResponse
+        >;
+      };
+    };
+
+    const formatter = getResultsFormatter(params.resultType);
+    const topResults = result.alerts_over_time.buckets
+      .filter((v) => v.max_score.value >= params.severity)
+      .map(formatter)
+      .filter(isDefined);
+
+    return topResults;
   };
 
   /**
@@ -527,11 +662,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const checkIntervalGap = previousStartedAt
-        ? moment.duration(moment(startedAt).diff(previousStartedAt))
-        : undefined;
-
-      const res = await fetchAnomalies(params, undefined, checkIntervalGap);
+      const res = await fetchResults(params);
 
       if (!res) {
         throw new Error('No results found');

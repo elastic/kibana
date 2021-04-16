@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import { CombinedJobWithStats } from '../types/anomaly_detection_jobs';
+import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
 import { isDefined } from '../types/guards';
 import { parseInterval } from './parse_interval';
 
 const narrowBucketLength = 60;
+
+export function resolveLookbackInterval(jobs: Job[], datafeeds: Datafeed[]): number {
+  const bucketSpanInSeconds = Math.ceil(
+    resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span)) ?? 0
+  );
+  const queryDelayInSeconds = Math.ceil(
+    resolveMaxTimeInterval(datafeeds.map((v) => v.query_delay).filter(isDefined)) ?? 0
+  );
+
+  return Math.max(2 * narrowBucketLength, 2 * bucketSpanInSeconds) + queryDelayInSeconds + 1;
+}
 
 /**
  * Resolved the lookback interval for the rule
