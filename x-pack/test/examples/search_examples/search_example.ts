@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker']);
-  const toasts = getService('toasts');
   const retry = getService('retry');
 
   describe('Search session example', () => {
@@ -28,9 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Jan 1, 2016 @ 00:00:00.000'
       );
       await testSubjects.click('searchSourceWithOther');
-      await testSubjects.click('responseTab');
 
       await retry.waitFor('has other bucket', async () => {
+        await testSubjects.click('responseTab');
         const codeBlock = await testSubjects.find('responseCodeBlock');
         const visibleText = await codeBlock.getVisibleText();
         return visibleText.indexOf('__other__') > -1;
