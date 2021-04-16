@@ -33,7 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('Matrix DNS Histogram', () => {
+  // FIX: https://github.com/elastic/kibana/issues/97378
+  describe.skip('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
       before(() => esArchiver.load('security_solution/matrix_dns_histogram/large_dns_query'));
       after(() => esArchiver.unload('security_solution/matrix_dns_histogram/large_dns_query'));
