@@ -17,8 +17,9 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -27,7 +28,7 @@ import { BrowserFields, DocValueFields } from '../../../../common/containers/sou
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { HostIsolationContent } from '../../../../detections/components/host_isolation/content';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -71,6 +72,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [hostIsolationPanelOpen, setHostIsolationPanel] = useState(false);
 
+  const showAlertDetails = useCallback(() => {
+    setHostIsolationPanel(false);
+  }, []);
+
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
   const isEndpointAlert =
@@ -85,20 +90,29 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <EuiFlyoutHeader hasBorder>
         {hostIsolationPanelOpen ? (
           <>
-            <EuiTitle size="s">
-              <h3>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              iconSide="left"
+              flush="left"
+              onClick={() => showAlertDetails()}
+            >
+              <EuiText size="xs">
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.hostIsolation.backToAlertDetails"
+                    defaultMessage="Alert details"
+                  />
+                </p>
+              </EuiText>
+            </EuiButtonEmpty>
+            <EuiTitle>
+              <h2>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
                   defaultMessage="Isolate host"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
-            <EuiButtonEmpty flush="left" onClick={() => setHostIsolationPanel(false)}>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolation.backToAlertDetails"
-                defaultMessage="Back to alert details"
-              />
-            </EuiButtonEmpty>
           </>
         ) : (
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
@@ -106,7 +120,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
         {hostIsolationPanelOpen ? (
-          <HostIsolationContent details={detailsData} />
+          <HostIsolationPanel details={detailsData} cancelCallback={showAlertDetails} />
         ) : (
           <ExpandableEvent
             browserFields={browserFields}
@@ -138,6 +152,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="l" />
         </EuiFlyoutFooter>
       )}
     </>

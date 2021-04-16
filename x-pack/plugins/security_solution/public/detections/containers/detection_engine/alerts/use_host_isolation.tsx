@@ -7,64 +7,62 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { isSecurityAppError } from '../../../../common/utils/api';
 import { createHostIsolation } from './api';
 
 interface HostIsolationStatus {
   loading: boolean;
-  isIsolated: boolean;
+  isolateHost: () => Promise<boolean>;
 }
 
 interface UseHostIsolationProps {
   agentId: string;
+  comment: string;
 }
 
-export const useHostIsolation = ({ agentId }: UseHostIsolationProps): HostIsolationStatus => {
-  const [loading, setLoading] = useState(true);
-  const [isolated, setIsolated] = useState(false);
+export const useHostIsolation = ({
+  agentId,
+  comment,
+}: UseHostIsolationProps): HostIsolationStatus => {
+  const [loading, setLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
+  const isolateHost = useCallback(async () => {
     let isSubscribed = true;
+    let isolated = false;
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const isolationStatus = await createHostIsolation({ agentId });
+    try {
+      setLoading(true);
+      const isolationStatus = await createHostIsolation({ agentId, comment });
 
-        if (isSubscribed && isolationStatus != null) {
-          if (isolationStatus.action) {
-            setIsolated(true);
-          }
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setIsolated(false);
-        }
-        // 500 error
-        if (isSecurityAppError(error) && error.body.status_code !== 404) {
-          errorToToaster({
-            title: i18n.translate('xpack.securitySolution.hostIsolation.apiError', {
-              defaultMessage: 'Stuff went wrong',
-            }),
-            error,
-            dispatchToaster,
-          });
+      if (isSubscribed && isolationStatus != null) {
+        if (isolationStatus.action) {
+          isolated = true;
         }
       }
+    } catch (error) {
       if (isSubscribed) {
-        setLoading(false);
+        isolated = false;
       }
-    };
-
-    if (!isEmpty(agentId)) {
-      fetchData();
+      // 500 error
+      if (isSecurityAppError(error) && error.body.status_code !== 404) {
+        errorToToaster({
+          title: i18n.translate('xpack.securitySolution.hostIsolation.apiError', {
+            defaultMessage: 'Stuff went wrong',
+          }),
+          error,
+          dispatchToaster,
+        });
+      }
     }
-    return () => {
-      isSubscribed = false;
-    };
-  }, [agentId, dispatchToaster]);
-  return { loading, isIsolated: isolated };
+    if (isSubscribed) {
+      setLoading(false);
+    }
+
+    isSubscribed = false;
+    return isolated;
+  }, [agentId, comment, dispatchToaster]);
+  return { loading, isolateHost };
 };
