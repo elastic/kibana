@@ -39,7 +39,6 @@ export interface AgentSelection {
   policiesSelected: string[];
 }
 
-
 interface BaseGroupOption {
   id?: string;
   groupType: AGENT_GROUP_KEY;
