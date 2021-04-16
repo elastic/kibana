@@ -51,6 +51,7 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import { addIdToItem, removeIdFromItem } from '../../../../common';
 import exceptionableFields from './exceptionable_fields.json';
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
+import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
@@ -58,8 +59,10 @@ export const filterIndexPatterns = (
   osTypes: OsTypeArray
 ): IIndexPattern => {
   const osFilterForEndpoint: (name: string) => boolean = osTypes.includes('linux')
-    ? (name: string) => exceptionableLinuxFields.includes(name)
-    : (name: string) => exceptionableFields.includes(name);
+    ? (name: string) =>
+        exceptionableLinuxFields.includes(name) || exceptionableFields.includes(name)
+    : (name: string) =>
+        exceptionableWindowsMacFields.includes(name) || exceptionableFields.includes(name);
   return type === 'endpoint'
     ? {
         ...patterns,

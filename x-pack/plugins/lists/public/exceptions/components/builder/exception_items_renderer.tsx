@@ -430,8 +430,8 @@ export const ExceptionBuilderComponent = ({
     return { asPlainText: true };
   }, []);
 
-  const hasSelectedOs = useMemo(() => {
-    return hasOSSelection && selectedOS === null;
+  const requiresOsSelection = useMemo(() => {
+    return hasOSSelection && selectedOS === undefined;
   }, [hasOSSelection, selectedOS]);
 
   return (
@@ -489,7 +489,7 @@ export const ExceptionBuilderComponent = ({
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
-                isDisabled={hasSelectedOs}
+                isDisabled={requiresOsSelection}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -505,9 +505,9 @@ export const ExceptionBuilderComponent = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
-              isOrDisabled={hasSelectedOs || (isOrDisabled ? isOrDisabled : disableOr)}
-              isAndDisabled={hasSelectedOs || disableAnd}
-              isNestedDisabled={hasSelectedOs || disableNested}
+              isOrDisabled={requiresOsSelection || (isOrDisabled ? isOrDisabled : disableOr)}
+              isAndDisabled={requiresOsSelection || disableAnd}
+              isNestedDisabled={requiresOsSelection || disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}
