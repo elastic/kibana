@@ -7,7 +7,7 @@
  */
 
 import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry, PluginConfigUsageDescriptors } from '..';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
 
 /**
  * @internal

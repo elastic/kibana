@@ -15,6 +15,7 @@ import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import { assertTelemetryPayload, flatKeys } from './utils';
+import { merge } from 'lodash';
 
 async function retrieveTelemetry(
   supertest: supertestAsPromised.SuperTest<supertestAsPromised.Test>
@@ -56,7 +57,18 @@ export default function ({ getService }: FtrProviderContext) {
       it('should pass the schema validation', () => {
         try {
           assertTelemetryPayload(
-            { root: ossRootTelemetrySchema, plugins: ossPluginsTelemetrySchema },
+            {
+              root: ossRootTelemetrySchema,
+              /**
+               * set 'kibana_config_usage' type to 'pass_through'
+               * This collector is excluded in the telemetryrc.json file
+               */
+              plugins: merge(ossPluginsTelemetrySchema, {
+                properties: {
+                  kibana_config_usage: { type: 'pass_through' }
+                }
+              }),
+            },
             stats
           );
         } catch (err) {
@@ -86,6 +98,33 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.be.an('object');
+        // non-default kibana configs. Configs set at 'test/api_integration/config.js'.
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.eql({
+          'elasticsearch.username': '[redacted]',
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.hosts': '[redacted]',
+          'elasticsearch.healthCheck.delay': 3600000,
+          'plugins.paths': '[redacted]',
+          'logging.json': false,
+          'server.port': 5620,
+          'server.xsrf.disableProtection': true,
+          'server.compression.referrerWhitelist': '[redacted]',
+          'server.maxPayload': 1679958,
+          'status.allowAnonymous': true,
+          'home.disableWelcomeScreen': true,
+          'data.search.aggs.shardDelay.enabled': true,
+          'security.showInsecureClusterWarning': false,
+          'telemetry.banner': false,
+          'telemetry.url': '[redacted]',
+          'telemetry.optInStatusUrl': '[redacted]',
+          'telemetry.optIn': false,
+          'newsfeed.service.urlRoot': '[redacted]',
+          'newsfeed.service.pathTemplate': '[redacted]',
+          'savedObjects.maxImportPayloadBytes': 10485760,
+          'savedObjects.maxImportExportSize': 10001,
+          'usageCollection.usageCounters.bufferDuration': 0
+        });
 
         // Testing stack_stats.data
         expect(stats.stack_stats.data).to.be.an('object');
