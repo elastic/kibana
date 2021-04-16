@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { isEsError } from '../../../../src/plugins/es_ui_shared/server';
-export { License } from '../../license_api_guard/server';
+export { License } from './license';
+
+/** dummy plugin*/
+export function plugin() {
+  return new (class LicenseApiGuardPlugin {
+    setup() {}
+    start() {}
+  })();
+}
