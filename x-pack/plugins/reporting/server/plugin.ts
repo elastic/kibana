@@ -47,7 +47,7 @@ export class ReportingPlugin
 
     registerUiSettings(core);
 
-    const { elasticsearch, http } = core;
+    const { http } = core;
     const { features, licensing, security, spaces } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
 
@@ -56,7 +56,6 @@ export class ReportingPlugin
 
     reportingCore.pluginSetup({
       features,
-      elasticsearch,
       licensing,
       basePath,
       router,
@@ -95,7 +94,12 @@ export class ReportingPlugin
 
       const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);
       const store = new ReportingStore(reportingCore, logger);
-      const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
+      const esqueue = await createQueueFactory(
+        reportingCore,
+        store,
+        logger,
+        core.elasticsearch.client.asInternalUser
+      ); // starts polling for pending jobs
 
       reportingCore.pluginStart({
         browserDriverFactory,

@@ -10,7 +10,6 @@ import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
-  ElasticsearchServiceSetup,
   IClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
@@ -35,7 +34,6 @@ export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
-  elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
@@ -187,11 +185,6 @@ export class ReportingCore {
       throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
     }
     return this.pluginSetupDeps;
-  }
-
-  // NOTE: Uses the Legacy API
-  public getElasticsearchService() {
-    return this.getPluginSetupDeps().elasticsearch;
   }
 
   private async getSavedObjectsClient(request: KibanaRequest) {
