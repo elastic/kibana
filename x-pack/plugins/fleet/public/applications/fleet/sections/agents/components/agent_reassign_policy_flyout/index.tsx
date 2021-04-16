@@ -60,6 +60,15 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     }
   }, [agentPolicies, selectedAgentPolicyId]);
 
+  const policySelectOptions = useMemo(() => {
+    return agentPolicies
+      .filter((policy) => !policy.is_managed)
+      .map((agentPolicy) => ({
+        value: agentPolicy.id,
+        text: agentPolicy.name,
+      }));
+  }, [agentPolicies]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function onSubmit() {
     try {
@@ -129,10 +138,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
               <EuiSelect
                 fullWidth
                 isLoading={agentPoliciesRequest.isLoading}
-                options={agentPolicies.map((agentPolicy) => ({
-                  value: agentPolicy.id,
-                  text: agentPolicy.name,
-                }))}
+                options={policySelectOptions}
                 value={selectedAgentPolicyId}
                 onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
               />
