@@ -34,6 +34,7 @@ import { emptyLabel } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { renderEndzoneTooltip } from '../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
+import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -64,7 +65,7 @@ export const TimeSeries = ({
   syncColors,
   palettesService,
   interval,
-  shouldDropLastBucket,
+  isLastBucketDropped,
 }) => {
   const chartRef = useRef();
   // const [palettesRegistry, setPalettesRegistry] = useState(null);
@@ -83,17 +84,11 @@ export const TimeSeries = ({
     };
   }, []);
 
-  const tooltipFormatter = decorateFormatter(xAxisFormatter);
-  const seriesData = series.length && series[0].data;
-  const tooltipHeaderFormatter =
-    shouldDropLastBucket && seriesData?.length
-      ? renderEndzoneTooltip(
-          interval,
-          seriesData[0][0],
-          seriesData[seriesData.length - 1][0],
-          tooltipFormatter
-        )
-      : tooltipFormatter;
+  let tooltipFormatter = decorateFormatter(xAxisFormatter);
+  if (!isLastBucketDropped) {
+    const { domainStart, domainEnd } = calculateDomainForSeries(series);
+    tooltipFormatter = renderEndzoneTooltip(interval, domainStart, domainEnd, tooltipFormatter);
+  }
 
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
@@ -164,7 +159,7 @@ export const TimeSeries = ({
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: tooltipHeaderFormatter,
+          headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
       />
@@ -323,5 +318,5 @@ TimeSeries.propTypes = {
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
   interval: PropTypes.number,
-  shouldDropLastBucket: PropTypes.bool,
+  isLastBucketDropped: PropTypes.bool,
 };

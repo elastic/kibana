@@ -239,7 +239,7 @@ class TimeseriesVisualization extends Component {
             syncColors={syncColors}
             palettesService={palettesService}
             interval={interval}
-            shouldDropLastBucket={Boolean(
+            isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
                 model.series.some((series) => series.series_drop_last_bucket)
             )}
