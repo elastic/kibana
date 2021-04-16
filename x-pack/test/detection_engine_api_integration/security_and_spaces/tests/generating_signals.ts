@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { orderBy } from 'lodash';
+import { orderBy, get } from 'lodash';
 
 import {
   EqlCreateSchema,
@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL Rules', () => {
-        it('generates signals from EQL non-sequence queries', async () => {
+        it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
@@ -336,6 +336,24 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           });
+        });
+
+        it('generates up to max_signals for non-sequence EQL queries', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'any where true',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 100, [id]);
+          const signals = await getSignalsByIds(supertest, [id], 1000);
+          const filteredSignals = signals.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 1
+          );
+          expect(filteredSignals.length).eql(100);
         });
 
         it('uses the provided event_category_override', async () => {
@@ -460,19 +478,25 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('generates signals from EQL sequences in the expected form', async () => {
+        it('generates building block signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
-            query: 'sequence by host.name [any where true] [any where true]',
+            query: 'sequence by host.name [anomoly where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
           const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
-          const signal = signals.hits.hits[0]._source.signal;
+          const buildingBlock = signals.hits.hits.find(
+            (signal) =>
+              signal._source.signal.depth === 1 &&
+              get(signal._source, 'signal.original_event.category') === 'anomoly'
+          );
+          expect(buildingBlock).not.eql(undefined);
+          const signal = buildingBlock!._source.signal;
 
           expect(signal).eql({
             rule: signal.rule,
@@ -483,26 +507,26 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
+                id: 'VhXOBmkBR346wHgnLP8T',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
             ],
             original_event: {
-              action: 'error',
-              category: 'user-login',
+              action: 'changed-promiscuous-mode-on-device',
+              category: 'anomoly',
               module: 'auditd',
             },
             parent: {
               depth: 0,
-              id: 'gCF0B2kBR346wHgnb7m0',
+              id: 'VhXOBmkBR346wHgnLP8T',
               index: 'auditbeat-8.0.0-2019.02.19-000001',
               type: 'event',
             },
             parents: [
               {
                 depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
+                id: 'VhXOBmkBR346wHgnLP8T',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -513,17 +537,17 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('generates building block signals from EQL sequences in the expected form', async () => {
+        it('generates shell signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
-            query: 'sequence by host.name [any where true] [any where true]',
+            query: 'sequence by host.name [anomoly where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 10, [id]);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
@@ -538,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'gCF0B2kBR346wHgnb7m0',
+                id: 'VhXOBmkBR346wHgnLP8T',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -551,7 +575,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 depth: 0,
-                id: 'CCF0B2kBR346wHgngLtX',
+                id: '4hbXBmkBR346wHgn6fdp',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -583,6 +607,32 @@ export default ({ getService }: FtrProviderContext) => {
               version: SIGNALS_TEMPLATE_VERSION,
             },
           });
+        });
+
+        it('generates up to max_signals with an EQL rule', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'sequence by host.name [any where true] [any where true]',
+          };
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
+          // alert for each event in the sequence, so max_signals=100 results in 200 building blocks in addition to
+          // 100 regular alerts
+          await waitForSignalsToBePresent(supertest, 300, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id], 1000);
+          expect(signalsOpen.hits.hits.length).eql(300);
+          const shellSignals = signalsOpen.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 2
+          );
+          const buildingBlocks = signalsOpen.hits.hits.filter(
+            (signal) => signal._source.signal.depth === 1
+          );
+          expect(shellSignals.length).eql(100);
+          expect(buildingBlocks.length).eql(200);
         });
       });
 
