@@ -28,6 +28,7 @@ import { ConfigValidator } from './config_validator';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
+import { isDefined } from '../../common/types/guards';
 
 interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
@@ -121,10 +122,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   const advancedSettings = useMemo(() => {
     let { lookbackInterval, topNBuckets } = alertParams;
-    if ((lookbackInterval === undefined || lookbackInterval === '') && jobConfigs.length > 0) {
+
+    if ((!isDefined(lookbackInterval) || lookbackInterval === '') && jobConfigs.length > 0) {
       lookbackInterval = `${getLookbackInterval(jobConfigs)}s`;
     }
-    if (topNBuckets === undefined && jobConfigs.length > 0) {
+    if (!isDefined(topNBuckets) && jobConfigs.length > 0) {
       topNBuckets = getTopNBuckets(jobConfigs[0]);
     }
     return {
@@ -132,6 +134,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       topNBuckets,
     };
   }, [alertParams.lookbackInterval, alertParams.topNBuckets, jobConfigs]);
+
+  const resultParams = useMemo(() => {
+    return {
+      ...alertParams,
+      ...advancedSettings,
+    };
+  }, [alertParams, advancedSettings]);
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
@@ -158,7 +167,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         errors={errors.jobSelection}
       />
 
-      <ConfigValidator jobConfigs={jobConfigs} alertInterval={alertInterval} />
+      <ConfigValidator
+        jobConfigs={jobConfigs}
+        alertInterval={alertInterval}
+        alertParams={resultParams}
+      />
 
       <ResultTypeSelector
         value={alertParams.resultType}
