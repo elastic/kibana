@@ -293,6 +293,75 @@ export default function ({ getService }: FtrProviderContext) {
             }));
       });
 
+      describe('using aggregations', () => {
+        it('should return 200 with valid response for a valid aggregation', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'visualization.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                aggregations: {
+                  type_count: {
+                    value: 1,
+                  },
+                },
+                page: 1,
+                per_page: 0,
+                saved_objects: [],
+                total: 1,
+              });
+            }));
+
+        it('should return a 400 when referencing an invalid SO attribute', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'dashboard.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.field] Invalid attribute path: dashboard.attributes.version: Bad Request',
+                statusCode: 400,
+              });
+            }));
+
+        it('should return a 400 when using a forbidden aggregation option', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: {
+                    max: {
+                      field: 'visualization.attributes.version',
+                      script: 'Bad script is bad',
+                    },
+                  },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.script]: definition for this key is missing: Bad Request',
+                statusCode: 400,
+              });
+            }));
+      });
+
       describe('`has_reference` and `has_reference_operator` parameters', () => {
         before(() => esArchiver.load('saved_objects/references'));
         after(() => esArchiver.unload('saved_objects/references'));
