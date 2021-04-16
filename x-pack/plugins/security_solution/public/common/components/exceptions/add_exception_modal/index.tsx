@@ -457,9 +457,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <EuiSpacer />
               {exceptionListType === 'endpoint' && !hasAlertData && (
                 <>
-                  <EuiFormRow label="Selected OS">
+                  <EuiFormRow label={i18n.OPERATING_SYSTEM_LABEL}>
                     <EuiComboBox
-                      placeholder="Select an OS"
+                      placeholder={i18n.OPERATING_SYSTEM_PLACEHOLDER}
                       singleSelection={singleSelectionOptions}
                       options={OsOptions}
                       selectedOptions={selectedOStoOptions}
