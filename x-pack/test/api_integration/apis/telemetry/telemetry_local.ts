@@ -51,8 +51,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should pass the schema validation', () => {
+      const excludedFromSchema = {
+        properties: {
+          kibana_config_usage: { type: 'pass_through' },
+        },
+      };
+
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+      const plugins = deepmerge(
+        deepmerge(ossPluginsTelemetrySchema, excludedFromSchema),
+        xpackPluginsTelemetrySchema
+      );
+
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {
