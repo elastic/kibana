@@ -100,7 +100,7 @@
     "@elastic/apm-rum-react": "^1.2.5",
     "@elastic/charts": "28.0.1",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath/npm_module",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.4",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.6",
     "@elastic/ems-client": "7.12.0",
     "@elastic/eui": "32.0.4",
     "@elastic/filesaver": "1.1.2",

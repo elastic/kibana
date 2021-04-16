@@ -1389,10 +1389,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.4":
-  version "8.0.0-canary.4"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.4.tgz#6f1a592974941baae347eb8c66a2006848349717"
-  integrity sha512-UexFloloyvGOhvMc1ePRHCy89sjQL6rPTTZkXAB/GcC8rCvA3mgSnIY2+Ylvctdv9o4l+M4Bkw8azICulyhwMg==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.6":
+  version "8.0.0-canary.6"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.6.tgz#8406f3a35fbebb1a8990ab5a045f44f122314444"
+  integrity sha512-IYij5MMTya3eAa37iHuGL7ZIZbKhDNiMNvzKr9iB8g91otprAWsF8m7n1+Nb4++6Z6sv7X06+wM+REfvFBrC3Q==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
