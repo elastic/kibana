@@ -25,13 +25,7 @@
             "lineNumber": 38
           },
           "signature": [
-            {
-              "pluginId": "telemetry",
-              "scope": "public",
-              "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryService",
-              "text": "TelemetryService"
-            }
+            "TelemetryService"
           ]
         },
         {
@@ -45,13 +39,7 @@
             "lineNumber": 39
           },
           "signature": [
-            {
-              "pluginId": "telemetry",
-              "scope": "public",
-              "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryNotifications",
-              "text": "TelemetryNotifications"
-            }
+            "TelemetryNotifications"
           ]
         },
         {
@@ -94,13 +82,7 @@
             "lineNumber": 34
           },
           "signature": [
-            {
-              "pluginId": "telemetry",
-              "scope": "public",
-              "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryService",
-              "text": "TelemetryService"
-            }
+            "TelemetryService"
           ]
         }
       ],
@@ -131,6 +113,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.FetcherTask.Unnamed.$1",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -142,7 +125,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ optIn?: boolean | undefined; } & { enabled: boolean; url: string; allowChangingOptInStatus: boolean; config: string; banner: boolean; optInStatusUrl: string; sendUsageFrom: \"server\" | \"browser\"; }>>"
+                  "<Readonly<{ optIn?: boolean | undefined; } & { enabled: boolean; url: string; allowChangingOptInStatus: boolean; config: string; banner: boolean; optInStatusUrl: string; sendUsageFrom: \"browser\" | \"server\"; }>>"
                 ],
                 "description": [],
                 "source": {
@@ -172,18 +155,13 @@
                 "text": "CoreStart"
               },
               ", { telemetryCollectionManager }: ",
-              {
-                "pluginId": "telemetry",
-                "scope": "server",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-server.FetcherTaskDepsStart",
-                "text": "FetcherTaskDepsStart"
-              },
+              "FetcherTaskDepsStart",
               ") => void"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.FetcherTask.start.$1",
                 "type": "Object",
                 "label": "{ savedObjects, elasticsearch }",
                 "isRequired": true,
@@ -203,17 +181,12 @@
                 }
               },
               {
+                "id": "def-server.FetcherTask.start.$2",
                 "type": "Object",
                 "label": "{ telemetryCollectionManager }",
                 "isRequired": true,
                 "signature": [
-                  {
-                    "pluginId": "telemetry",
-                    "scope": "server",
-                    "docId": "kibTelemetryPluginApi",
-                    "section": "def-server.FetcherTaskDepsStart",
-                    "text": "FetcherTaskDepsStart"
-                  }
+                  "FetcherTaskDepsStart"
                 ],
                 "description": [],
                 "source": {
@@ -279,6 +252,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.buildDataTelemetryPayload.$1",
             "type": "Array",
             "label": "indices",
             "isRequired": true,
@@ -312,15 +286,16 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.getClusterUuids.$1",
             "type": "Object",
             "label": "{ esClient }",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionConfig",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
                 "text": "StatsCollectionConfig"
               }
             ],
@@ -333,7 +308,13 @@
         ],
         "signature": [
           "({ esClient }: ",
-          "StatsCollectionConfig",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionConfig",
+            "text": "StatsCollectionConfig"
+          },
           ") => Promise<{ clusterUuid: string; }[]>"
         ],
         "description": [
@@ -353,15 +334,16 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.getLocalStats.$1",
             "type": "Array",
             "label": "clustersDetails",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.ClusterDetails",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.ClusterDetails",
                 "text": "ClusterDetails"
               },
               "[]"
@@ -373,15 +355,16 @@
             }
           },
           {
+            "id": "def-server.getLocalStats.$2",
             "type": "Object",
             "label": "config",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionConfig",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
                 "text": "StatsCollectionConfig"
               }
             ],
@@ -392,15 +375,16 @@
             }
           },
           {
+            "id": "def-server.getLocalStats.$3",
             "type": "Object",
             "label": "context",
             "isRequired": true,
             "signature": [
               {
-                "pluginId": "telemetry",
-                "scope": "common",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-common.StatsCollectionContext",
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionContext",
                 "text": "StatsCollectionContext"
               }
             ],
@@ -413,11 +397,29 @@
         ],
         "signature": [
           "(clustersDetails: ",
-          "ClusterDetails",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.ClusterDetails",
+            "text": "ClusterDetails"
+          },
           "[], config: ",
-          "StatsCollectionConfig",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionConfig",
+            "text": "StatsCollectionConfig"
+          },
           ", context: ",
-          "StatsCollectionContext",
+          {
+            "pluginId": "telemetryCollectionManager",
+            "scope": "server",
+            "docId": "kibTelemetryCollectionManagerPluginApi",
+            "section": "def-server.StatsCollectionContext",
+            "text": "StatsCollectionContext"
+          },
           ") => Promise<{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: any; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",
@@ -453,7 +455,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, uiSettingsClient: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, uiSettingsClient: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -466,6 +468,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.handleOldSettings.$1",
             "type": "Object",
             "label": "savedObjectsClient",
             "isRequired": true,
@@ -478,7 +481,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ],
             "description": [],
             "source": {
@@ -487,6 +490,7 @@
             }
           },
           {
+            "id": "def-server.handleOldSettings.$2",
             "type": "Object",
             "label": "uiSettingsClient",
             "isRequired": true,

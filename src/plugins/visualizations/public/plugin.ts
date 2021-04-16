@@ -62,7 +62,6 @@ import {
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
-import { DashboardStart } from '../../dashboard/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 
 /**
@@ -97,7 +96,6 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
-  dashboard: DashboardStart;
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
@@ -145,7 +143,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, savedObjects }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
