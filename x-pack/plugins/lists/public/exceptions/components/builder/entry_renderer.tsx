@@ -52,7 +52,7 @@ export interface EntryItemProps {
   listTypeSpecificIndexPatternFilter?: (
     pattern: IIndexPattern,
     type: ExceptionListType,
-    osTypes: OsTypeArray
+    osTypes?: OsTypeArray
   ) => IIndexPattern;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
