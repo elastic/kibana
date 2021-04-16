@@ -13,6 +13,7 @@ import type { LayerParameters } from './types';
 export interface VegaLayerContext {
   vegaView: View;
   updateVegaView: (map: Map, view: View) => void;
+  vegaControls: any;
 }
 
 export function initVegaLayer({
