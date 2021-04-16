@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const find = getService('find');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
