@@ -127,10 +127,10 @@ describe('es', () => {
           'sum:beer',
           'avg:bytes',
           'percentiles:bytes',
-          'cardinality::sample',
-          'sum::beer',
-          'percentiles::bytes:1',
-          'percentiles:::bytes:1.2,1.3,2.7',
+          'cardinality:\\:sample',
+          'sum:\\:beer',
+          'percentiles:\\:\\:bytes:1.2,1.3,2.7',
+          'percentiles:\\:bytes\\:123:20.0,50.0,100.0',
         ];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
@@ -142,11 +142,11 @@ describe('es', () => {
           cardinality: { field: ':sample' },
         });
         expect(agg.time_buckets.aggs['sum(:beer)']).toEqual({ sum: { field: ':beer' } });
-        expect(agg.time_buckets.aggs['percentiles(:bytes)']).toEqual({
-          percentiles: { field: ':bytes', percents: [1] },
-        });
         expect(agg.time_buckets.aggs['percentiles(::bytes)']).toEqual({
           percentiles: { field: '::bytes', percents: [1.2, 1.3, 2.7] },
+        });
+        expect(agg.time_buckets.aggs['percentiles(:bytes:123)']).toEqual({
+          percentiles: { field: ':bytes:123', percents: [20.0, 50.0, 100.0] },
         });
       });
 
@@ -330,7 +330,7 @@ describe('es', () => {
 
     describe('config.split', () => {
       test('adds terms aggs, in order, under the filters agg', () => {
-        config.split = ['beer:5', 'wine:10', ':lemo:nade::15'];
+        config.split = ['beer:5', 'wine:10', ':lemo:nade::15', ':jui:ce:723::45'];
         const request = fn(config, tlConfig, emptyScriptedFields);
 
         let aggs = request.params.body.aggs.q.aggs;
@@ -348,6 +348,12 @@ describe('es', () => {
         expect(aggs[':lemo:nade:'].meta.type).toEqual('split');
         expect(aggs[':lemo:nade:'].terms.field).toEqual(':lemo:nade:');
         expect(aggs[':lemo:nade:'].terms.size).toEqual(15);
+
+        aggs = aggs[':lemo:nade:'].aggs;
+        expect(aggs).toHaveProperty(':jui:ce:723:');
+        expect(aggs[':jui:ce:723:'].meta.type).toEqual('split');
+        expect(aggs[':jui:ce:723:'].terms.field).toEqual(':jui:ce:723:');
+        expect(aggs[':jui:ce:723:'].terms.size).toEqual(45);
       });
 
       test('adds scripted terms aggs, in order, under the filters agg', () => {

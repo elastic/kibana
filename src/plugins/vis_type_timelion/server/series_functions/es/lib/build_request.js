@@ -49,7 +49,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   let aggCursor = aggs.q.aggs;
 
   (config.split || []).forEach((clause) => {
-    const [field, arg] = clause.split(/:(\d+)/);
+    const [field, arg] = clause.split(/:(\d+$)/);
     if (field && arg) {
       const termsAgg = buildAggBody(field, scriptedFields);
       termsAgg.size = parseInt(arg, 10);

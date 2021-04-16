@@ -41,7 +41,9 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
         },
       };
     } else if (metricName && metricArgs) {
-      const [field, percentArgs] = metricArgs.split(/:(\d.*)/);
+      const splittedArgs = metricArgs.split(/(.+[^\\]):/).filter(Boolean);
+      const field = splittedArgs[0].replace(/\\:/g, ':');
+      const percentArgs = splittedArgs[1];
       const metricKey = metricName + '(' + field + ')';
 
       metricBody[metricKey] = { [metricName]: buildAggBody(field, scriptedFields) };

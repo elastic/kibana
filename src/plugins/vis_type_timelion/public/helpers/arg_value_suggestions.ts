@@ -82,11 +82,14 @@ export function getArgValueSuggestions() {
               containsFieldName(valueSplit[1], field) &&
               !indexPatternsUtils.isNestedField(field)
           )
-          .map((field) => ({
-            name: `${valueSplit[0]}:${field.name}`,
-            help: field.type,
-            insertText: field.name,
-          }));
+          .map((field) => {
+            const suggestionValue = field.name.replaceAll(':', '\\:');
+            return {
+              name: `${valueSplit[0]}:${suggestionValue}`,
+              help: field.type,
+              insertText: suggestionValue,
+            };
+          });
       },
       async split(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
