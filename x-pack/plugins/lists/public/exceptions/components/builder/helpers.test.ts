@@ -303,6 +303,7 @@ describe('Exception builder helpers', () => {
           payloadIndexPattern,
           payloadItem,
           'endpoint',
+          ['windows'],
           filterIndexPatterns
         );
         const expected: IIndexPattern = {
@@ -319,6 +320,7 @@ describe('Exception builder helpers', () => {
           payloadIndexPattern,
           payloadItem,
           'endpoint',
+          ['windows'],
           filterIndexPatterns
         );
         const expected: IIndexPattern = {

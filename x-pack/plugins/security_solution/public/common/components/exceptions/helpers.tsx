@@ -56,9 +56,9 @@ import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.js
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
   type: ExceptionListType,
-  osTypes: OsTypeArray
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const osFilterForEndpoint: (name: string) => boolean = osTypes.includes('linux')
+  const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
     ? (name: string) =>
         exceptionableLinuxFields.includes(name) || exceptionableFields.includes(name)
     : (name: string) =>
