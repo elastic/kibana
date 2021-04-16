@@ -450,7 +450,13 @@ def allCiTasks() {
     },
     jest: {
       workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
-        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+        catchErrors {
+          scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+        }
+
+        catchErrors {
+          runbld.junit()
+        }
       }
     },
     xpackJest: {
