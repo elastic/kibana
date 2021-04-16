@@ -66,6 +66,8 @@ describe('getNetworkEvents', () => {
               },
               is_navigation_request: false,
               timestamp: 1607942799183375,
+              transfer_size: 1000,
+              resource_size: 1000,
             },
           },
           http: {
@@ -242,7 +244,6 @@ describe('getNetworkEvents', () => {
       Object {
         "events": Array [
           Object {
-            "bytesDownloadedCompressed": 337,
             "certificates": Object {
               "issuer": "DigiCert TLS RSA SHA256 2020 CA1",
               "subjectName": "syndication.twitter.com",
@@ -258,6 +259,7 @@ describe('getNetworkEvents', () => {
               "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/88.0.4324.0 Safari/537.36",
             },
             "requestSentTime": 3287154.973,
+            "resourceSize": 1000,
             "responseHeaders": Object {
               "cache_control": "no-cache, no-store, must-revalidate, pre-check=0, post-check=0",
               "content_encoding": "gzip",
@@ -292,6 +294,7 @@ describe('getNetworkEvents', () => {
               "total": 143.27800000000934,
               "wait": 141.81299999972907,
             },
+            "transferSize": 1000,
             "url": "www.test.com",
           },
         ],

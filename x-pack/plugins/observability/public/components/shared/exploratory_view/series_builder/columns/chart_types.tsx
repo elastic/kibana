@@ -66,7 +66,7 @@ export function XYChartTypesSelect({
 
   const { data = [], loading } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 
-  let vizTypes = data ?? [];
+  let vizTypes = data;
 
   if ((excludeChartTypes ?? []).length > 0) {
     vizTypes = vizTypes.filter(({ id }) => !excludeChartTypes?.includes(id as SeriesType));
@@ -95,6 +95,7 @@ export function XYChartTypesSelect({
   return (
     <EuiSuperSelect
       compressed
+      prepend="Chart type"
       valueOfSelected={value}
       isLoading={loading}
       options={options}
