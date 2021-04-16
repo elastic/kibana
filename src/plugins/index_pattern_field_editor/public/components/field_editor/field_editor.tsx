@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
   EuiCode,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
@@ -138,6 +139,11 @@ const geti18nTexts = (): {
   },
 });
 
+const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
+  defaultMessage:
+    'Changing name or type can break searches and visualizations that rely on this field.',
+});
+
 const formDeserializer = (field: Field): FieldFormInternal => {
   let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
   if (!field.type) {
@@ -204,6 +210,11 @@ const FieldEditorComponent = ({
     clearSyntaxError();
   }, [type, clearSyntaxError]);
 
+  const [{ name: updatedName, type: updatedType }] = useFormData({ form });
+  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
+  const typeHasChanged =
+    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
       <EuiFlexGroup>
@@ -231,6 +242,18 @@ const FieldEditorComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {(nameHasChanged || typeHasChanged) && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut
+            color="warning"
+            title={changeWarning}
+            iconType="alert"
+            size="s"
+            data-test-subj="changeWarning"
+          />
+        </>
+      )}
       <EuiSpacer size="xl" />
 
       {/* Set custom label */}
