@@ -10,12 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiRange,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { MlAnomalyDetectionAlertAdvancedSettings } from '../../common/types/alerts';
 import { TimeIntervalControl } from './time_interval_control';
 import { numberValidator, timeIntervalInputValidator } from '../../common/util/validators';
@@ -98,27 +96,15 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
             />
           }
         >
-          <EuiRange
-            showInput
-            showRange
-            showValue
-            showTicks
-            tickInterval={1}
-            step={1}
+          <EuiFieldNumber
             value={value.topNBuckets ?? TOP_N_BUCKETS_COUNT}
             min={1}
-            max={5}
             onChange={(e) => {
-              // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
               onChange({ topNBuckets: Number(e.target.value) });
             }}
-            aria-label={i18n.translate('xpack.ml.anomalyDetectionAlert.topNBucketsLabel', {
-              defaultMessage: 'Top N buckets',
-            })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <EuiHorizontalRule margin={'m'} />
     </EuiAccordion>
   );
 });
