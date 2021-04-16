@@ -40,6 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(emptyWidgetExists).to.be(true);
     });
 
+    it('should open add panel when add button is clicked', async () => {
+      await dashboardAddPanel.clickOpenAddPanel();
+      const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
+      expect(isAddPanelOpen).to.be(true);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('should add new visualization from dashboard', async () => {
       await dashboardVisualizations.createAndAddMarkdown({
         name: 'Dashboard Test Markdown',
