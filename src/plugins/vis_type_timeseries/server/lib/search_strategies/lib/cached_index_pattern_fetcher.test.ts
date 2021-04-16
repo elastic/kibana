@@ -7,10 +7,13 @@
  */
 
 import { IndexPattern, IndexPatternsService } from 'src/plugins/data/server';
+import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import {
   getCachedIndexPatternFetcher,
   CachedIndexPatternFetcher,
 } from './cached_index_pattern_fetcher';
+
+jest.mock('../../../../common/index_patterns_utils');
 
 describe('CachedIndexPatternFetcher', () => {
   let mockedIndices: IndexPattern[] | [];
@@ -24,6 +27,8 @@ describe('CachedIndexPatternFetcher', () => {
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
     } as unknown) as IndexPatternsService;
+
+    (fetchIndexPattern as jest.Mock).mockClear();
 
     cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService);
   });
@@ -51,6 +56,14 @@ describe('CachedIndexPatternFetcher', () => {
           "indexPatternString": "indexTitle",
         }
       `);
+    });
+
+    test('should cache once', async () => {
+      await cachedIndexPatternFetcher('indexTitle');
+      await cachedIndexPatternFetcher('indexTitle');
+      await cachedIndexPatternFetcher('indexTitle');
+
+      expect(fetchIndexPattern as jest.Mock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -85,6 +98,21 @@ describe('CachedIndexPatternFetcher', () => {
           "indexPatternString": "",
         }
       `);
+    });
+
+    test('should cache once', async () => {
+      mockedIndices = [
+        {
+          id: 'indexId',
+          title: 'indexTitle',
+        },
+      ] as IndexPattern[];
+
+      await cachedIndexPatternFetcher({ id: 'indexId' });
+      await cachedIndexPatternFetcher({ id: 'indexId' });
+      await cachedIndexPatternFetcher({ id: 'indexId' });
+
+      expect(fetchIndexPattern as jest.Mock).toHaveBeenCalledTimes(1);
     });
   });
 });
