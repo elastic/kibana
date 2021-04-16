@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return text;
   }
 
-  describe('Search session client side cache', () => {
+  describe.skip('Search session client side cache', () => {
     const appId = 'searchExamples';
 
     before(async function () {
