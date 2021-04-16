@@ -7,7 +7,12 @@
     "ruleRegistry"
   ],
   "requiredPlugins": [
-    "alerting"
+    "alerting",
+    "triggersActionsUi"
   ],
-  "server": true
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": [
+    "common"
+  ]
 }
