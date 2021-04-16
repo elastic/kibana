@@ -27,7 +27,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
-      expect(tasks).to.eql(['Goes out on Wednesdays!', 'new task', 'Take the garbage out']);
+      expect(tasks).to.eql(['Goes out on Wednesdays!', 'Take the garbage out']);
     });
   });
 }
