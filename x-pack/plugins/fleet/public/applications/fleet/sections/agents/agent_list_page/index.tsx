@@ -41,7 +41,7 @@ import { AgentPolicySummaryLine, ContextMenuActions } from '../../../components'
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentHealth,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
@@ -379,7 +379,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
-            <AgentPolicySummaryLine policy={agentPolicy} />
+            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
@@ -488,7 +488,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ) : null}
       {agentToReassign && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout
+          <AgentReassignAgentPolicyModal
             agents={[agentToReassign]}
             onClose={() => {
               setAgentToReassign(undefined);

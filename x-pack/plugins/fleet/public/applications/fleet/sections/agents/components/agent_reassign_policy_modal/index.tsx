@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
+  EuiConfirmModal,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiFlyoutFooter,
   EuiSelect,
   EuiFormRow,
   EuiText,
@@ -38,7 +35,7 @@ interface Props {
   agents: Agent[] | string;
 }
 
-export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
+export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
 }) => {
@@ -62,7 +59,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 
   const policySelectOptions = useMemo(() => {
     return agentPolicies
-      .filter((policy) => !policy.is_managed)
+      .filter((policy) => policy && !policy.is_managed)
       .map((agentPolicy) => ({
         value: agentPolicy.id,
         text: agentPolicy.name,
@@ -105,77 +102,62 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentReassigmentFlyoutTitle">
-        <EuiTitle size="m">
-          <h2 id="FleetAgentReassigmentFlyoutTitle">
-            <FormattedMessage
-              id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-              defaultMessage="Assign new agent policy"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.fleet.agentReassignPolicy.flyoutDescription"
-            defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
-            values={{
-              count: isSingleAgent ? 1 : 0,
-            }}
-          />
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
+    <EuiConfirmModal
+      title={
+        <FormattedMessage
+          id="xpack.fleet.agentReassignPolicy.flyoutTitle"
+          defaultMessage="Assign new agent policy"
+        />
+      }
+      onCancel={onClose}
+      onConfirm={onSubmit}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.fleet.agentReassignPolicy.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonDisabled={
+        isSubmitting || (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
+          defaultMessage="Assign policy"
+        />
+      }
+      buttonColor="danger"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.agentReassignPolicy.flyoutDescription"
+          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+          values={{
+            count: isSingleAgent ? 1 : 0,
+          }}
+        />
+      </p>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.fleet.agentReassignPolicy.selectPolicyLabel', {
+              defaultMessage: 'Agent policy',
+            })}
+          >
+            <EuiSelect
               fullWidth
-              label={i18n.translate('xpack.fleet.agentReassignPolicy.selectPolicyLabel', {
-                defaultMessage: 'Agent policy',
-              })}
-            >
-              <EuiSelect
-                fullWidth
-                isLoading={agentPoliciesRequest.isLoading}
-                options={policySelectOptions}
-                value={selectedAgentPolicyId}
-                onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+              isLoading={agentPoliciesRequest.isLoading}
+              options={policySelectOptions}
+              value={selectedAgentPolicyId}
+              onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
 
-        {selectedAgentPolicyId && (
-          <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
-              <FormattedMessage
-                id="xpack.fleet.agentReassignPolicy.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id}
-              fill
-              onClick={onSubmit}
-              isLoading={isSubmitting}
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
-                defaultMessage="Assign policy"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+      {selectedAgentPolicyId && <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />}
+    </EuiConfirmModal>
   );
 };
