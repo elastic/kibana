@@ -10,14 +10,10 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
   EuiSpacer,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
   EuiSelect,
   EuiFormRow,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
