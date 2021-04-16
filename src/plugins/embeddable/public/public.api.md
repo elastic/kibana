@@ -600,6 +600,7 @@ export class EmbeddableStateTransfer {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;
+        openInNewTab?: boolean;
         state: EmbeddableEditorState;
     }): Promise<void>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"

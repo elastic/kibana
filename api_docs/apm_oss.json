@@ -60,6 +60,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createDjangoAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -73,6 +74,7 @@
             }
           },
           {
+            "id": "def-server.createDjangoAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -104,6 +106,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createDotNetAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -117,6 +120,7 @@
             }
           },
           {
+            "id": "def-server.createDotNetAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -148,6 +152,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createFlaskAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -161,6 +166,7 @@
             }
           },
           {
+            "id": "def-server.createFlaskAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -192,6 +198,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createGoAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -205,6 +212,7 @@
             }
           },
           {
+            "id": "def-server.createGoAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -236,6 +244,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createJavaAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -249,6 +258,7 @@
             }
           },
           {
+            "id": "def-server.createJavaAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -280,6 +290,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createJsAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -311,6 +322,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createNodeAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -324,6 +336,7 @@
             }
           },
           {
+            "id": "def-server.createNodeAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -355,6 +368,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createPhpAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -368,6 +382,7 @@
             }
           },
           {
+            "id": "def-server.createPhpAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -399,6 +414,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createRackAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -412,6 +428,7 @@
             }
           },
           {
+            "id": "def-server.createRackAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
@@ -443,6 +460,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.createRailsAgentInstructions.$1",
             "type": "string",
             "label": "apmServerUrl",
             "isRequired": true,
@@ -456,6 +474,7 @@
             }
           },
           {
+            "id": "def-server.createRailsAgentInstructions.$2",
             "type": "string",
             "label": "secretToken",
             "isRequired": true,
