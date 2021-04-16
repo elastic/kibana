@@ -32,7 +32,7 @@ export class AnomalySwimlaneEmbeddableFactory
     name: this.getDisplayName(),
     getIconForSavedObject: () => 'empty',
     getTooltipForSavedObject: () =>
-      i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+      i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.description', {
         defaultMessage: 'View anomaly detection results in a timeline.',
       }),
   };
