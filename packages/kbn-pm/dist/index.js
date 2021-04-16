@@ -48512,7 +48512,13 @@ async function runBazel(bazelArgs, offline = false, runOpts = {}) {
   await runBazelCommandWithRunner('bazel', bazelArgs, offline, runOpts);
 }
 async function runIBazel(bazelArgs, offline = false, runOpts = {}) {
-  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, runOpts);
+  const extendedEnv = _objectSpread({
+    IBAZEL_USE_LEGACY_WATCHER: '0'
+  }, runOpts === null || runOpts === void 0 ? void 0 : runOpts.env);
+
+  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, _objectSpread(_objectSpread({}, runOpts), {}, {
+    env: extendedEnv
+  }));
 }
 
 /***/ }),
