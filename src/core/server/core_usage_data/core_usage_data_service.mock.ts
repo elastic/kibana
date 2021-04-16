@@ -95,6 +95,13 @@ const createStartContractMock = () => {
               supportedProtocols: ['TLSv1.1', 'TLSv1.2'],
               truststoreConfigured: false,
             },
+            securityResponseHeaders: {
+              strictTransportSecurity: null,
+              xContentTypeOptions: 'nosniff',
+              referrerPolicy: 'no-referrer-when-downgrade',
+              permissionsPolicyConfigured: false,
+              disableEmbedding: false,
+            },
             xsrf: {
               disableProtection: false,
               allowlistConfigured: false,

@@ -225,6 +225,15 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             keystoreConfigured: isConfigured.record(http.ssl.keystore),
             truststoreConfigured: isConfigured.record(http.ssl.truststore),
           },
+          securityResponseHeaders: {
+            strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity,
+            xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions,
+            referrerPolicy: http.securityResponseHeaders.referrerPolicy,
+            permissionsPolicyConfigured: isConfigured.string(
+              http.securityResponseHeaders.permissionsPolicy ?? undefined
+            ),
+            disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+          },
         },
 
         logging: {

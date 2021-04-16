@@ -238,6 +238,38 @@ export function getCoreUsageCollector(
               },
             },
           },
+          securityResponseHeaders: {
+            strictTransportSecurity: {
+              type: 'keyword',
+              _meta: {
+                description: 'The strictTransportSecurity response header, if it is configured.',
+              },
+            },
+            xContentTypeOptions: {
+              type: 'keyword',
+              _meta: {
+                description: 'The xContentTypeOptions response header, if it is configured.',
+              },
+            },
+            referrerPolicy: {
+              type: 'keyword',
+              _meta: { description: 'The referrerPolicy response header, if it is configured.' },
+            },
+            permissionsPolicyConfigured: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if the permissionsPolicy response header has been configured.',
+              },
+            },
+            disableEmbedding: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if security headers to disable embedding have been configured.',
+              },
+            },
+          },
         },
 
         logging: {
