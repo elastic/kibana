@@ -758,6 +758,10 @@ class AgentPolicyService {
         soClient,
         agentPolicy.package_policies
       )) || { _fallback: DEFAULT_PERMISSIONS };
+
+      permissions._elastic_agent_checks = {
+        cluster: DEFAULT_PERMISSIONS.cluster,
+      };
     } else {
       permissions = {
         _fallback: DEFAULT_PERMISSIONS,
