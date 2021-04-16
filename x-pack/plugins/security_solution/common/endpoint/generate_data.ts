@@ -92,18 +92,7 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [
-  {
-    name: 'Ubuntu',
-    full: 'Ubuntu 10',
-    version: '10.0',
-    platform: 'Ubuntu',
-    family: 'linux',
-    Ext: {
-      variant: 'Ubuntu',
-    },
-  },
-];
+const Linux: OSFields[] = [];
 
 const Mac: OSFields[] = [];
 
@@ -462,16 +451,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
-        os: {
-          name: 'Ubuntu',
-          full: 'Ubuntu 10',
-          version: '10.0',
-          platform: 'Ubuntu',
-          family: 'linux',
-          Ext: {
-            variant: 'Ubuntu',
-          },
-        },
+        os: this.randomChoice(OS),
       },
       Endpoint: {
         status: EndpointStatus.enrolled,
