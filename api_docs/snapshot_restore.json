@@ -164,6 +164,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.PLUGIN.getI18nName.$1",
                 "type": "Any",
                 "label": "i18n",
                 "isRequired": true,
@@ -205,7 +206,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-s3'",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositorys3",
             "type": "string",
             "label": "'repository-s3'",
             "description": [],
@@ -226,7 +227,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-hdfs'",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryhdfs",
             "type": "string",
             "label": "'repository-hdfs'",
             "description": [],
@@ -247,7 +248,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-azure'",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryazure",
             "type": "string",
             "label": "'repository-azure'",
             "description": [],
@@ -268,7 +269,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-gcs'",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositorygcs",
             "type": "string",
             "label": "'repository-gcs'",
             "description": [],
