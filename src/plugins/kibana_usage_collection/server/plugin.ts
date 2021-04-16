@@ -34,6 +34,7 @@ import {
   registerUiCountersUsageCollector,
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
+  registerConfigUsageCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -104,6 +105,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     );
     registerCspCollector(usageCollection, coreSetup.http);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
+    registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
     registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
   }
 }

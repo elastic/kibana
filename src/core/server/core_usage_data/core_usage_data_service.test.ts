@@ -35,7 +35,24 @@ describe('CoreUsageDataService', () => {
     });
 
   let service: CoreUsageDataService;
-  const configService = configServiceMock.create();
+  const mockConfig = {
+    ui_metric: {},
+    elasticsearch: { username: 'kibana_system', password: 'changeme' },
+    plugins: { paths: ['some_path', 'another_path'] },
+    server: { port: 5603, basePath: '/zvt', rewriteBasePath: true },
+    logging: { json: false },
+    usageCollection: {
+      uiCounters: {
+        debug: true,
+        username: 'some_user',
+      },
+    },
+  };
+
+  const configService = configServiceMock.create({
+    getConfig$: mockConfig,
+  });
+
   configService.atPath.mockImplementation((path) => {
     if (path === 'elasticsearch') {
       return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
@@ -146,6 +163,7 @@ describe('CoreUsageDataService', () => {
 
         const { getCoreUsageData } = service.start({
           savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage: new Map(),
           elasticsearch,
         });
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
@@ -271,6 +289,302 @@ describe('CoreUsageDataService', () => {
               },
             },
           }
+        `);
+      });
+    });
+
+    describe('getConfigsUsageData', () => {
+      const elasticsearch = elasticsearchServiceMock.createStart();
+      const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+      let exposedConfigsToUsage: Map<string, Record<string, boolean>>;
+      beforeEach(() => {
+        exposedConfigsToUsage = new Map();
+      });
+
+      describe('config explicitly exposed to usage', () => {
+        it('returns [redacted] on unsafe complete match', async () => {
+          exposedConfigsToUsage.set('usageCollection', {
+            'uiCounters.debug': false,
+          });
+          exposedConfigsToUsage.set('server', {
+            basePath: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'usageCollection.uiCounters.debug',
+            'server.basePath',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "server.basePath": "[redacted]",
+              "usageCollection.uiCounters.debug": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe complete match', async () => {
+          exposedConfigsToUsage.set('server', {
+            basePath: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['server.basePath']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "server.basePath": "/zvt",
+            }
+          `);
+        });
+
+        it('returns [redacted] on unsafe parent match', async () => {
+          exposedConfigsToUsage.set('usageCollection', {
+            uiCounters: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'usageCollection.uiCounters.debug',
+            'usageCollection.uiCounters.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "usageCollection.uiCounters.debug": "[redacted]",
+              "usageCollection.uiCounters.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe parent match', async () => {
+          exposedConfigsToUsage.set('usageCollection', {
+            uiCounters: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'usageCollection.uiCounters.debug',
+            'usageCollection.uiCounters.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "usageCollection.uiCounters.debug": true,
+              "usageCollection.uiCounters.username": "some_user",
+            }
+          `);
+        });
+
+        it('returns [redacted] on implicit arrays', async () => {
+          exposedConfigsToUsage.set('plugins', {
+            paths: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "plugins.paths": Array [
+                "some_path",
+                "another_path",
+              ],
+            }
+          `);
+        });
+      });
+
+      describe('config not explicitly exposed to usage', () => {
+        it('returns [redacted] for string configs', async () => {
+          exposedConfigsToUsage.set('usageCollection', {
+            uiCounters: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'usageCollection.uiCounters.debug',
+            'usageCollection.uiCounters.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "usageCollection.uiCounters.debug": "[redacted]",
+              "usageCollection.uiCounters.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe parent match', async () => {
+          configService.getUsedPaths.mockResolvedValue([
+            'elasticsearch.password',
+            'elasticsearch.username',
+            'usageCollection.uiCounters.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "elasticsearch.password": "[redacted]",
+              "elasticsearch.username": "[redacted]",
+              "usageCollection.uiCounters.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns [redacted] on implicit arrays', async () => {
+          configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "plugins.paths": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value for numbers', async () => {
+          configService.getUsedPaths.mockResolvedValue(['server.port']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "server.port": 5603,
+            }
+          `);
+        });
+
+        it('returns config value for booleans', async () => {
+          configService.getUsedPaths.mockResolvedValue([
+            'usageCollection.uiCounters.debug',
+            'logging.json',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "logging.json": false,
+              "usageCollection.uiCounters.debug": true,
+            }
+          `);
+        });
+
+        it('ignores exposed to usage configs but not used', async () => {
+          exposedConfigsToUsage.set('usageCollection', {
+            uiCounters: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['logging.json']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "logging.json": false,
+            }
+          `);
+        });
+      });
+
+      it('loops over all used configs once each', async () => {
+        configService.getUsedPaths.mockResolvedValue([
+          'usageCollection.uiCounters.debug',
+          'logging.json',
+        ]);
+
+        exposedConfigsToUsage.set('usageCollection', {
+          uiCounters: true,
+        });
+
+        const { getConfigsUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage,
+          elasticsearch,
+        });
+
+        const mockGetMarkedAsSafe = jest.fn().mockReturnValue({});
+        // @ts-ignore
+        service['getMarkedAsSafe'] = mockGetMarkedAsSafe;
+        await getConfigsUsageData();
+
+        expect(mockGetMarkedAsSafe).toBeCalledTimes(2);
+        expect(mockGetMarkedAsSafe.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Map {
+                "usageCollection" => Object {
+                  "uiCounters": true,
+                },
+              },
+              "usageCollection",
+              "usageCollection.uiCounters.debug",
+            ],
+            Array [
+              Map {
+                "usageCollection" => Object {
+                  "uiCounters": true,
+                },
+              },
+              undefined,
+              "logging.json",
+            ],
+          ]
         `);
       });
     });

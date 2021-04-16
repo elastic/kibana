@@ -7,7 +7,7 @@
  */
 
 import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry, PluginConfigUsageDescriptors } from '..';
 
 /**
  * @internal
@@ -121,6 +121,18 @@ export interface CoreUsageData extends CoreUsageStats {
   services: CoreServicesUsageData;
   environment: CoreEnvironmentUsageData;
 }
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ConfigUsageData = Record<string, any | any[]>
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
 /**
  * Usage data from Core services
@@ -263,4 +275,5 @@ export interface CoreUsageDataStart {
    * @internal
    * */
   getCoreUsageData(): Promise<CoreUsageData>;
+  getConfigsUsageData(): Promise<ConfigUsageData>;
 }

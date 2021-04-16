@@ -70,7 +70,33 @@ export interface PluginConfigDescriptor<T = any> {
    * {@link PluginConfigSchema}
    */
   schema: PluginConfigSchema<T>;
+  /**
+   * Expose non-default configs to usage collection to be sent via telemetry.
+   * set a config to `true` to report the actual changed config value.
+   * set a config to `false` to report the changed config value as [redacted].
+   *
+   * All changed configs except booleans and numbers will be reported
+   * as [redacted] unless otherwise specified.
+   *
+   * {@link MakeUsageFromSchema}
+   */
+  exposeToUsage?: MakeUsageFromSchema<T>;
 }
+
+/**
+ * List of configuration values that will be exposed to usage collection.
+ * If parent node or actual config path is set to `true` then the actual value
+ * of these configs will be reoprted.
+ * If parent node or actual config path is set to `false` then the config
+ * will be reported as [redacted].
+ *
+ * @public
+ */
+export type MakeUsageFromSchema<T> = {
+  [Key in keyof T]?: T[Key] extends object
+  ? MakeUsageFromSchema<T[Key]> | boolean
+  : boolean;
+};
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays

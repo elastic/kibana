@@ -7,7 +7,9 @@
  */
 
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, first } from 'rxjs/operators';
+import { get } from 'lodash';
+import { hasConfigPathIntersection } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
@@ -16,11 +18,12 @@ import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import {
+import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
   CoreUsageDataSetup,
+  ConfigUsageData,
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
@@ -29,6 +32,8 @@ import { coreUsageStatsType } from './core_usage_stats';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
+
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -39,6 +44,7 @@ export interface SetupDeps {
 export interface StartDeps {
   savedObjects: SavedObjectsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
+  exposedConfigsToUsage: ExposedConfigsToUsage;
 }
 
 /**
@@ -256,6 +262,77 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
+  private getMarkedAsSafe(exposedConfigsToUsage: ExposedConfigsToUsage, pluginId?: string, usedPath?: string):
+    { explicitlyMarked: boolean, isSafe: boolean } {
+
+    if (!pluginId || !usedPath) return { explicitlyMarked: false, isSafe: false };
+    const exposeDetails = exposedConfigsToUsage.get(pluginId);
+    if (!exposeDetails) {
+      return { explicitlyMarked: false, isSafe: false };
+    };
+
+    const exposeKeyDetails = Object.keys(exposeDetails).find(exposeKey => {
+      const fullPath = `${pluginId}.${exposeKey}`;
+      const hasIntersection = hasConfigPathIntersection(usedPath, fullPath);
+
+      return hasIntersection;
+    });
+    if (!exposeKeyDetails) {
+      return { explicitlyMarked: false, isSafe: false };
+    }
+
+    const isSafe = exposeDetails[exposeKeyDetails];
+    if (typeof isSafe === 'boolean') {
+      return { explicitlyMarked: true, isSafe };
+    }
+
+    return { explicitlyMarked: false, isSafe: false };
+  }
+
+  private async getNonDefaultKibanaConfigs(exposedConfigsToUsage: ExposedConfigsToUsage): Promise<ConfigUsageData> {
+    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const nonDefaultConfigs = config.toRaw();
+    const usedPaths = await this.configService.getUsedPaths();
+    const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
+
+    return usedPaths.reduce((acc, usedPath) => {
+      const configValue = get(nonDefaultConfigs, usedPath);
+      const pluginId = exposedConfigsKeys.find(exposedConfigsKey => usedPath.startsWith(exposedConfigsKey));
+      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(exposedConfigsToUsage, pluginId, usedPath);
+
+      // explicitly marked as safe
+      if (explicitlyMarked && isSafe) {
+        acc[usedPath] = configValue;
+      }
+
+      // explicitly marked as unsafe
+      if (explicitlyMarked && !isSafe) {
+        acc[usedPath] = '[redacted]';
+      }
+
+      /**
+       * not all types of values may contain sensitive values.
+       * Report boolean and number configs if not explicitly marked as unsafe.
+      */
+      if (!explicitlyMarked) {
+        switch (typeof configValue) {
+          case 'number':
+          case 'boolean':
+            acc[usedPath] = configValue;
+            break;
+          case 'undefined':
+            acc[usedPath] = 'undefined';
+            break;
+          default: {
+            acc[usedPath] = '[redacted]';
+          }
+        }
+      }
+
+      return acc;
+    }, {} as Record<string, any | any[]>);
+  }
+
   setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
     metrics
       .getOpsMetrics$()
@@ -316,11 +393,14 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     return { registerType, getClient } as CoreUsageDataSetup;
   }
 
-  start({ savedObjects, elasticsearch }: StartDeps) {
+  start({ savedObjects, elasticsearch, exposedConfigsToUsage }: StartDeps) {
     return {
-      getCoreUsageData: () => {
-        return this.getCoreUsageData(savedObjects, elasticsearch);
+      getCoreUsageData: async () => {
+        return await this.getCoreUsageData(savedObjects, elasticsearch);
       },
+      getConfigsUsageData: async () => {
+        return await this.getNonDefaultKibanaConfigs(exposedConfigsToUsage);
+      }
     };
   }
 

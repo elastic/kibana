@@ -64,6 +64,7 @@ import {
   CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
+  ConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
@@ -74,6 +75,7 @@ export type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
 };
 
 export { bootstrap } from './bootstrap';
@@ -256,6 +258,7 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  MakeUsageFromSchema,
 } from './plugins';
 
 export {
@@ -410,6 +413,7 @@ export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
 export type { CoreUsageDataStart } from './core_usage_data';
+
 
 /**
  * Plugin specific context passed to a route handler.
