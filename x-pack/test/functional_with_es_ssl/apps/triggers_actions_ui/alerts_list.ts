@@ -27,6 +27,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
+  async function getAlert(alertId: string) {
+    const { body: alert } = await supertest
+      .get(`/api/alerting/rule/${alertId}`)
+      .set('kbn-xsrf', 'foo')
+      .expect(200);
+    return alert;
+  }
+
   async function createFailingAlert() {
     return await createAlert({
       rule_type_id: 'test.failing',
@@ -128,11 +136,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'disableSwitch',
-        'true'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.enabled).to.be(false);
+      });
     });
 
     it('should re-enable single alert', async () => {
@@ -144,11 +151,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'disableSwitch',
-        'true'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.enabled).to.be(false);
+      });
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -156,11 +162,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'disableSwitch',
-        'false'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.enabled).to.be(true);
+      });
     });
 
     it('should mute single alert', async () => {
@@ -172,11 +177,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.mute_all).to.be(true);
+      });
     });
 
     it('should unmute single alert', async () => {
@@ -188,11 +192,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.mute_all).to.be(true);
+      });
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -200,11 +203,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'false'
-      );
+      await retry.try(async () => {
+        const updatedAlert = await getAlert(createdAlert.id);
+        expect(updatedAlert.mute_all).to.be(false);
+      });
     });
 
     it('should delete single alert', async () => {
