@@ -17,11 +17,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('GeoJSON import layer panel', () => {
     before(async () => {
-      await security.testUser.setRoles([
-        'global_maps_all',
-        'geoall_data_writer',
-        'global_index_pattern_management_all',
-      ]);
+      await security.testUser.setRoles(['global_maps_all', 'global_index_pattern_management_all']);
       await PageObjects.maps.openNewMap();
     });
 

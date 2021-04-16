@@ -17,15 +17,15 @@ export function registerConfigUsageCollector(
   const collector = usageCollection.makeUsageCollector<ConfigUsageData | undefined>({
     type: 'kibana_config_usage',
     isReady: () => typeof getCoreUsageDataService() !== 'undefined',
-    schema: {
-      // DYNAMIC_KEY: {
-      //   type: 'text',
-      //   _meta: {
-      //     description:
-      //       'Translation file hash. If the hash is different it indicates that a custom translation file is used',
-      //   },
-      // },
-    },
+    /**
+     * No schema for this collector.
+     * This collector will collect non-default configs from all plugins.
+     * Mapping each config to the schema is inconvenient for developers
+     * and would result in 100's of extra field mappings.
+     *
+     * We'll experiment with flattened type and runtime fields before comitting to a schema.
+     */
+    schema: {},
     fetch: async () => {
       const coreUsageDataService = getCoreUsageDataService()
       if (!coreUsageDataService) {

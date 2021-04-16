@@ -25,7 +25,7 @@ import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } fr
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
   tuples: totalToFromTuples,
-  ruleParams,
+  ruleSO,
   exceptionsList,
   services,
   listClient,
@@ -35,21 +35,12 @@ export const searchAfterAndBulkCreate = async ({
   inputIndexPattern,
   signalsIndex,
   filter,
-  actions,
-  name,
-  createdAt,
-  createdBy,
-  updatedBy,
-  updatedAt,
-  interval,
-  enabled,
   pageSize,
   refresh,
-  tags,
-  throttle,
   buildRuleMessage,
   enrichment = identity,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
@@ -218,22 +209,12 @@ export const searchAfterAndBulkCreate = async ({
           } = await singleBulkCreate({
             buildRuleMessage,
             filteredEvents: enrichedEvents,
-            ruleParams,
+            ruleSO,
             services,
             logger,
             id,
             signalsIndex,
-            actions,
-            name,
-            createdAt,
-            createdBy,
-            updatedAt,
-            updatedBy,
-            interval,
-            enabled,
             refresh,
-            tags,
-            throttle,
           });
           toReturn = mergeReturns([
             toReturn,
@@ -252,13 +233,7 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(
-            logger,
-            eventsTelemetry,
-            filteredEvents,
-            ruleParams,
-            buildRuleMessage
-          );
+          sendAlertTelemetryEvents(logger, eventsTelemetry, filteredEvents, buildRuleMessage);
         }
 
         if (!hasSortId && !hasBackupSortId) {

@@ -9,6 +9,8 @@ import type { EuiBreadcrumb } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
+import type { ChromeStart } from 'src/core/public';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {
@@ -81,8 +83,8 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
     if (onChange) {
       onChange(breadcrumbs);
     } else if (services.chrome) {
-      services.chrome.setBreadcrumbs(breadcrumbs);
-      services.chrome.docTitle.change(getDocTitle(breadcrumbs));
+      const setBreadcrumbs = createBreadcrumbsChangeHandler(services.chrome);
+      setBreadcrumbs(breadcrumbs);
     }
   };
 
@@ -137,4 +139,18 @@ export function getDocTitle(breadcrumbs: BreadcrumbProps[], maxBreadcrumbs = 2) 
     .slice(0, maxBreadcrumbs)
     .reverse()
     .map(({ text }) => text);
+}
+
+export function createBreadcrumbsChangeHandler(
+  chrome: Pick<ChromeStart, 'docTitle' | 'setBreadcrumbs'>,
+  setBreadcrumbs = chrome.setBreadcrumbs
+) {
+  return (breadcrumbs: BreadcrumbProps[]) => {
+    setBreadcrumbs(breadcrumbs);
+    if (breadcrumbs.length === 0) {
+      chrome.docTitle.reset();
+    } else {
+      chrome.docTitle.change(getDocTitle(breadcrumbs));
+    }
+  };
 }
