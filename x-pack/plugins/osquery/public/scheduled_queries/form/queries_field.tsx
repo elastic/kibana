@@ -20,9 +20,31 @@ import { OsqueryPackUploader } from './pack_uploader';
 
 interface QueriesFieldProps {
   field: FieldHook<PackagePolicyInput[]>;
+  scheduledQueryId: string;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
+interface GetNewStreamProps {
+  id: string;
+  interval: string;
+  query: string;
+  scheduledQueryId: string;
+}
+
+const getNewStream = ({ id, interval, query, scheduledQueryId }: GetNewStreamProps) => ({
+  data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
+  enabled: true,
+  id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryId}`,
+  vars: {
+    id: { type: 'text', value: id },
+    type: 'integer',
+    interval: {
+      value: interval,
+    },
+    query: { type: 'text', value: query },
+  },
+});
+
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryId }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
 
@@ -87,25 +109,18 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
     (newQuery) => {
       setValue(
         produce((draft) => {
-          draft[0].streams.push({
-            data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
-            enabled: true,
-            id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-900083be-ef20-4b25-9896-e0485cf7e88b`,
-            vars: {
-              id: { type: 'text', value: newQuery.id },
-              interval: {
-                type: 'integer',
-                value: newQuery.interval,
-              },
-              query: { type: 'text', value: newQuery.query },
-            },
-          });
+          draft[0].streams.push(
+            getNewStream({
+              ...newQuery,
+              scheduledQueryId,
+            })
+          );
           return draft;
         })
       );
       handleHideAddFlyout();
     },
-    [handleHideAddFlyout, setValue]
+    [handleHideAddFlyout, scheduledQueryId, setValue]
   );
 
   const handlePackUpload = useCallback(
@@ -113,26 +128,21 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
       setValue(
         produce((draft) => {
           forEach(newQueries, (newQuery, newQueryId) => {
-            draft[0].streams.push({
-              data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
-              enabled: true,
-              id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-900083be-ef20-4b25-9896-e0485cf7e88b`,
-              vars: {
-                id: { type: 'text', value: newQueryId },
-                interval: {
-                  type: 'integer',
-                  value: newQuery.interval,
-                },
-                query: { type: 'text', value: newQuery.query },
-              },
-            });
+            draft[0].streams.push(
+              getNewStream({
+                id: newQueryId,
+                interval: newQuery.interval,
+                query: newQuery.query,
+                scheduledQueryId,
+              })
+            );
           });
 
           return draft;
         })
       );
     },
-    [setValue]
+    [scheduledQueryId, setValue]
   );
 
   return (

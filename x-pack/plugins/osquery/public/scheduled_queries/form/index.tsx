@@ -254,7 +254,11 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
 
         <EuiHorizontalRule />
 
-        <CommonUseField path="inputs" component={QueriesField} />
+        <CommonUseField
+          path="inputs"
+          component={QueriesField}
+          scheduledQueryId={defaultValue?.id ?? ''}
+        />
 
         <CommonUseField path="enabled" component={GhostFormField} />
         <CommonUseField path="output_id" component={GhostFormField} />
