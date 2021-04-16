@@ -78,7 +78,7 @@ export interface ThreatIndicatorRule extends CustomRule {
 }
 
 export interface MachineLearningRule {
-  machineLearningJob: string;
+  machineLearningJobs: string[];
   anomalyScoreThreshold: string;
   name: string;
   description: string;
@@ -244,7 +244,7 @@ export const newThresholdRule: ThresholdRule = {
 };
 
 export const machineLearningRule: MachineLearningRule = {
-  machineLearningJob: 'linux_anomalous_network_service',
+  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
