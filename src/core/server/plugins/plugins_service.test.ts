@@ -538,12 +538,10 @@ describe('PluginsService', () => {
         plugin$: from([pluginA, pluginB, pluginC]),
       });
 
-      const mockPluginConfigUsageDescriptors = new Map();
-      // @ts-ignore
-      pluginsService['pluginConfigUsageDescriptors'] = mockPluginConfigUsageDescriptors;
       await pluginsService.discover({ environment: environmentSetup });
 
-      expect(mockPluginConfigUsageDescriptors).toMatchInlineSnapshot(`
+      // eslint-disable-next-line dot-notation
+      expect(pluginsService['pluginConfigUsageDescriptors']).toMatchInlineSnapshot(`
         Map {
           "pathA" => Object {
             "nested.prop": true,
@@ -709,14 +707,15 @@ describe('PluginsService', () => {
 
   describe('#getExposedPluginConfigsToUsage', () => {
     it('returns pluginConfigUsageDescriptors', () => {
-      expect(pluginsService.getExposedPluginConfigsToUsage()).toEqual(new Map());
-
-      const mockPluginConfigUsageDescriptors = Symbol('test');
-      // @ts-ignore
-      pluginsService['pluginConfigUsageDescriptors'] = mockPluginConfigUsageDescriptors;
-      expect(pluginsService.getExposedPluginConfigsToUsage()).toEqual(
-        mockPluginConfigUsageDescriptors
-      );
+      // eslint-disable-next-line dot-notation
+      pluginsService['pluginConfigUsageDescriptors'].set('test', { enabled: true });
+      expect(pluginsService.getExposedPluginConfigsToUsage()).toMatchInlineSnapshot(`
+        Map {
+          "test" => Object {
+            "enabled": true,
+          },
+        }
+      `);
     });
   });
 

@@ -13,7 +13,6 @@ export function registerConfigUsageCollector(
   usageCollection: UsageCollectionSetup,
   getCoreUsageDataService: () => CoreUsageDataStart
 ) {
-
   const collector = usageCollection.makeUsageCollector<ConfigUsageData | undefined>({
     type: 'kibana_config_usage',
     isReady: () => typeof getCoreUsageDataService() !== 'undefined',
@@ -27,13 +26,13 @@ export function registerConfigUsageCollector(
      */
     schema: {},
     fetch: async () => {
-      const coreUsageDataService = getCoreUsageDataService()
+      const coreUsageDataService = getCoreUsageDataService();
       if (!coreUsageDataService) {
         return;
       }
 
       return await coreUsageDataService.getConfigsUsageData();
-    }
+    },
   });
 
   usageCollection.registerCollector(collector);

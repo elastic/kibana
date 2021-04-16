@@ -414,7 +414,6 @@ export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup 
 
 export type { CoreUsageDataStart } from './core_usage_data';
 
-
 /**
  * Plugin specific context passed to a route handler.
  *

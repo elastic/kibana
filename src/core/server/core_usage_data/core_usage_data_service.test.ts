@@ -321,7 +321,6 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-
           await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
             Object {
               "server.basePath": "[redacted]",
@@ -559,8 +558,8 @@ describe('CoreUsageDataService', () => {
         });
 
         const mockGetMarkedAsSafe = jest.fn().mockReturnValue({});
-        // @ts-ignore
-        service['getMarkedAsSafe'] = mockGetMarkedAsSafe;
+        // @ts-expect-error
+        service.getMarkedAsSafe = mockGetMarkedAsSafe;
         await getConfigsUsageData();
 
         expect(mockGetMarkedAsSafe).toBeCalledTimes(2);

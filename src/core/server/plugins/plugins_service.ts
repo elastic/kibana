@@ -16,12 +16,7 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import {
-  DiscoveredPlugin,
-  PluginConfigDescriptor,
-  PluginName,
-  InternalPluginInfo,
-} from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginName, InternalPluginInfo } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
@@ -223,7 +218,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             }
             if (configDescriptor.exposeToUsage) {
               this.pluginConfigUsageDescriptors.set(
-                Array.isArray(plugin.configPath)? plugin.configPath.join('.') : plugin.configPath,
+                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
                 getFlattenedObject(configDescriptor.exposeToUsage)
               );
             }

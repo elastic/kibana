@@ -262,16 +262,18 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
-  private getMarkedAsSafe(exposedConfigsToUsage: ExposedConfigsToUsage, pluginId?: string, usedPath?: string):
-    { explicitlyMarked: boolean, isSafe: boolean } {
-
+  private getMarkedAsSafe(
+    exposedConfigsToUsage: ExposedConfigsToUsage,
+    pluginId?: string,
+    usedPath?: string
+  ): { explicitlyMarked: boolean; isSafe: boolean } {
     if (!pluginId || !usedPath) return { explicitlyMarked: false, isSafe: false };
     const exposeDetails = exposedConfigsToUsage.get(pluginId);
     if (!exposeDetails) {
       return { explicitlyMarked: false, isSafe: false };
-    };
+    }
 
-    const exposeKeyDetails = Object.keys(exposeDetails).find(exposeKey => {
+    const exposeKeyDetails = Object.keys(exposeDetails).find((exposeKey) => {
       const fullPath = `${pluginId}.${exposeKey}`;
       const hasIntersection = hasConfigPathIntersection(usedPath, fullPath);
 
@@ -289,7 +291,9 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     return { explicitlyMarked: false, isSafe: false };
   }
 
-  private async getNonDefaultKibanaConfigs(exposedConfigsToUsage: ExposedConfigsToUsage): Promise<ConfigUsageData> {
+  private async getNonDefaultKibanaConfigs(
+    exposedConfigsToUsage: ExposedConfigsToUsage
+  ): Promise<ConfigUsageData> {
     const config = await this.configService.getConfig$().pipe(first()).toPromise();
     const nonDefaultConfigs = config.toRaw();
     const usedPaths = await this.configService.getUsedPaths();
@@ -297,8 +301,14 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
 
     return usedPaths.reduce((acc, usedPath) => {
       const configValue = get(nonDefaultConfigs, usedPath);
-      const pluginId = exposedConfigsKeys.find(exposedConfigsKey => usedPath.startsWith(exposedConfigsKey));
-      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(exposedConfigsToUsage, pluginId, usedPath);
+      const pluginId = exposedConfigsKeys.find((exposedConfigsKey) =>
+        usedPath.startsWith(exposedConfigsKey)
+      );
+      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
+        exposedConfigsToUsage,
+        pluginId,
+        usedPath
+      );
 
       // explicitly marked as safe
       if (explicitlyMarked && isSafe) {
@@ -313,7 +323,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
       /**
        * not all types of values may contain sensitive values.
        * Report boolean and number configs if not explicitly marked as unsafe.
-      */
+       */
       if (!explicitlyMarked) {
         switch (typeof configValue) {
           case 'number':
@@ -400,7 +410,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
       },
       getConfigsUsageData: async () => {
         return await this.getNonDefaultKibanaConfigs(exposedConfigsToUsage);
-      }
+      },
     };
   }
 

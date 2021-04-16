@@ -93,9 +93,7 @@ export interface PluginConfigDescriptor<T = any> {
  * @public
  */
 export type MakeUsageFromSchema<T> = {
-  [Key in keyof T]?: T[Key] extends object
-  ? MakeUsageFromSchema<T[Key]> | boolean
-  : boolean;
+  [Key in keyof T]?: T[Key] extends object ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
 };
 
 /**

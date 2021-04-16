@@ -381,6 +381,9 @@ export { ConfigPath }
 
 export { ConfigService }
 
+// @internal
+export type ConfigUsageData = Record<string, any | any[]>;
+
 // @public
 export interface ContextSetup {
     createContextContainer(): IContextContainer;
@@ -551,6 +554,8 @@ export interface CoreUsageData extends CoreUsageStats {
 
 // @internal
 export interface CoreUsageDataStart {
+    // (undocumented)
+    getConfigsUsageData(): Promise<ConfigUsageData>;
     getCoreUsageData(): Promise<CoreUsageData>;
 }
 
@@ -1653,6 +1658,11 @@ export { LogMeta }
 export { LogRecord }
 
 // @public
+export type MakeUsageFromSchema<T> = {
+    [Key in keyof T]?: T[Key] extends object ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
+};
+
+// @public
 export interface MetricsServiceSetup {
     readonly collectionInterval: number;
     getOpsMetrics$: () => Observable<OpsMetrics>;
@@ -1838,6 +1848,7 @@ export interface PluginConfigDescriptor<T = any> {
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
     };
+    exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
 
@@ -3224,9 +3235,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:293:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:296:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:401:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:317:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:317:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:320:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:425:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

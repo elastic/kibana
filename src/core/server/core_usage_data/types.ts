@@ -126,7 +126,7 @@ export interface CoreUsageData extends CoreUsageStats {
  * Type describing Core's usage data payload
  * @internal
  */
-export type ConfigUsageData = Record<string, any | any[]>
+export type ConfigUsageData = Record<string, any | any[]>;
 
 /**
  * Type describing Core's usage data payload

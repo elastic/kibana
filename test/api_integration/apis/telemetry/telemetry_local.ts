@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
+import { merge, omit } from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
 import { basicUsageCounters } from './__fixtures__/usage_counters';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -15,7 +16,6 @@ import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import { assertTelemetryPayload, flatKeys } from './utils';
-import { merge } from 'lodash';
 
 async function retrieveTelemetry(
   supertest: supertestAsPromised.SuperTest<supertestAsPromised.Test>
@@ -65,8 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
                */
               plugins: merge(ossPluginsTelemetrySchema, {
                 properties: {
-                  kibana_config_usage: { type: 'pass_through' }
-                }
+                  kibana_config_usage: { type: 'pass_through' },
+                },
               }),
             },
             stats
@@ -100,14 +100,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
         expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.be.an('object');
         // non-default kibana configs. Configs set at 'test/api_integration/config.js'.
-        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.eql({
+        expect(omit(stats.stack_stats.kibana.plugins.kibana_config_usage, 'server.port')).to.eql({
           'elasticsearch.username': '[redacted]',
           'elasticsearch.password': '[redacted]',
           'elasticsearch.hosts': '[redacted]',
           'elasticsearch.healthCheck.delay': 3600000,
           'plugins.paths': '[redacted]',
           'logging.json': false,
-          'server.port': 5620,
           'server.xsrf.disableProtection': true,
           'server.compression.referrerWhitelist': '[redacted]',
           'server.maxPayload': 1679958,
@@ -123,8 +122,11 @@ export default function ({ getService }: FtrProviderContext) {
           'newsfeed.service.pathTemplate': '[redacted]',
           'savedObjects.maxImportPayloadBytes': 10485760,
           'savedObjects.maxImportExportSize': 10001,
-          'usageCollection.usageCounters.bufferDuration': 0
+          'usageCollection.usageCounters.bufferDuration': 0,
         });
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage['server.port']).to.be.a(
+          'number'
+        );
 
         // Testing stack_stats.data
         expect(stats.stack_stats.data).to.be.an('object');
