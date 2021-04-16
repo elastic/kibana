@@ -11,14 +11,16 @@ import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
+import { ReportingConfigType } from '../../config';
 import {
-  createMockReportingCore,
+  createMockConfig,
+  createMockConfigSchema,
   createMockLevelLogger,
   createMockPluginSetup,
-  createMockConfigSchema,
+  createMockReportingCore,
 } from '../../test_helpers';
-import { registerDiagnoseConfig } from './config';
 import type { ReportingRequestHandlerContext } from '../../types';
+import { registerDiagnoseConfig } from './config';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -28,7 +30,7 @@ describe('POST /diagnose/config', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let core: ReportingCore;
   let mockSetupDeps: any;
-  let config: any;
+  let config: ReportingConfigType;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
   const mockLogger = createMockLevelLogger();
@@ -83,7 +85,11 @@ describe('POST /diagnose/config', () => {
   });
 
   it('returns a 200 with help text when not configured properly', async () => {
-    config.get.mockImplementation(() => 10485760);
+    core.setConfig(
+      createMockConfig(
+        createMockConfigSchema({ queue: { timeout: 120000 }, csv: { maxSizeBytes: 10485760 } })
+      )
+    );
     mockEsClient.cluster.getSettings.mockResolvedValueOnce({
       body: {
         defaults: {

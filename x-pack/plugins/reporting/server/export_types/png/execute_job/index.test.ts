@@ -9,7 +9,11 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../../test_helpers';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
@@ -50,9 +54,7 @@ beforeEach(async () => {
   });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-
-  // @ts-ignore over-riding config method
-  mockReporting.config = mockReportingConfig;
+  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 
   (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
