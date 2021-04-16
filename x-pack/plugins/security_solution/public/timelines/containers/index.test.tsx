@@ -159,7 +159,7 @@ describe('useTimelineEvents', () => {
           loadPage: result.current[1].loadPage,
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
-          totalCount: 31,
+          totalCount: 32,
           updatedAt: result.current[1].updatedAt,
         },
       ]);
@@ -202,7 +202,7 @@ describe('useTimelineEvents', () => {
           loadPage: result.current[1].loadPage,
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
-          totalCount: 31,
+          totalCount: 32,
           updatedAt: result.current[1].updatedAt,
         },
       ]);
