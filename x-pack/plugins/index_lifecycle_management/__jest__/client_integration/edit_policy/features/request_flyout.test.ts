@@ -51,7 +51,7 @@ describe('<EditPolicy /> request flyout', () => {
               actions: {
                 rollover: {
                   max_age: '30d',
-                  max_size: '50gb',
+                  max_primary_shard_size: '50gb',
                 },
               },
             },
