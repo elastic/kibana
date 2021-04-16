@@ -504,6 +504,11 @@ export interface ApplyGlobalFilterActionContext {
 // @public (undocumented)
 export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
 
+// Warning: (ae-missing-release-tag) "AutoRefreshDoneFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AutoRefreshDoneFn = () => void;
+
 // Warning: (ae-forgotten-export) The symbol "DateFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "baseFormattersPublic" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1553,9 +1558,7 @@ export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
 export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
     onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
-    fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
-    maxIndexPatterns?: number;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1672,6 +1675,10 @@ export interface ISearchOptions {
     isRestore?: boolean;
     isStored?: boolean;
     legacyHitsTotal?: boolean;
+    // Warning: (ae-forgotten-export) The symbol "RequestResponder" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    requestResponder?: RequestResponder;
     sessionId?: string;
     strategy?: string;
 }
@@ -1780,6 +1787,8 @@ export enum KBN_FIELD_TYPES {
     IP = "ip",
     // (undocumented)
     IP_RANGE = "ip_range",
+    // (undocumented)
+    MISSING = "missing",
     // (undocumented)
     MURMUR3 = "murmur3",
     // (undocumented)
@@ -2023,6 +2032,8 @@ export const QueryStringInput: (props: QueryStringInputProps) => JSX.Element;
 // @public (undocumented)
 export interface QueryStringInputProps {
     // (undocumented)
+    autoSubmit?: boolean;
+    // (undocumented)
     bubbleSubmitEvent?: boolean;
     // (undocumented)
     className?: string;
@@ -2070,6 +2081,8 @@ export interface QueryStringInputProps {
     //
     // (undocumented)
     size?: SuggestionsListSize;
+    // (undocumented)
+    storageKey?: string;
     // (undocumented)
     submitOnBlur?: boolean;
 }
@@ -2288,7 +2301,6 @@ export const search: {
             timeRange: import("../common").TimeRange | undefined;
         } | undefined;
     };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
     tabifyAggResponse: typeof tabifyAggResponse;
     tabifyGetColumns: typeof tabifyGetColumns;
@@ -2424,7 +2436,7 @@ export class SearchSource {
     getId(): string;
     getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K];
     getParent(): SearchSource | undefined;
-    getSearchRequestBody(): Promise<any>;
+    getSearchRequestBody(): any;
     getSerializedFields(recurse?: boolean): SearchSourceFields;
     // Warning: (ae-incompatible-release-tags) The symbol "history" is marked as @public, but its signature references "SearchRequest" which is marked as @internal
     //
@@ -2643,6 +2655,18 @@ export const UI_SETTINGS: {
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
 };
 
+// Warning: (ae-missing-release-tag) "waitUntilNextSessionCompletes$" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export function waitUntilNextSessionCompletes$(sessionService: ISessionService, { waitForIdle }?: WaitUntilNextSessionCompletesOptions): import("rxjs").Observable<SearchSessionState>;
+
+// Warning: (ae-missing-release-tag) "WaitUntilNextSessionCompletesOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface WaitUntilNextSessionCompletesOptions {
+    waitForIdle?: number;
+}
+
 
 // Warnings were encountered during analysis:
 //
@@ -2690,7 +2714,6 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "validateIndexPattern" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "flattenHitWrapper" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:238:27 - (ae-forgotten-export) The symbol "formatHitProvider" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:404:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts

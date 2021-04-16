@@ -9,7 +9,7 @@ import 'jest';
 import React from 'react';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { MonitorDetails, MonitorSummary, makePing } from '../../../../../common/runtime_types';
-import { shallowWithRouter } from '../../../../lib/helper/enzyme_helpers';
+import { shallowWithRouter } from '../../../../lib';
 
 describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;

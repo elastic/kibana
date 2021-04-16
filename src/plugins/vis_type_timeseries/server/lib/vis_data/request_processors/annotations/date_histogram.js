@@ -10,6 +10,7 @@ import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+import { validateField } from '../../../../../common/fields_utils';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -18,13 +19,18 @@ export function dateHistogram(
   panel,
   annotation,
   esQueryConfig,
-  indexPattern,
+  annotationIndex,
   capabilities,
   uiSettings
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const timeField = annotation.time_field;
+    const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
+
+    if (panel.use_kibana_indexes) {
+      validateField(timeField, annotationIndex);
+    }
+
     const { bucketSize, intervalString } = getBucketSize(
       req,
       'auto',

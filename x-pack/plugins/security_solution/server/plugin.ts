@@ -62,7 +62,6 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
@@ -206,7 +205,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -349,34 +347,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const taskManager = plugins.taskManager;
-      const fleetServerEnabled = parseExperimentalConfigValue(this.config.enableExperimental)
-        .fleetServerEnabled;
+      const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
       );
 
-      manifestManager = new ManifestManager(
-        {
-          savedObjectsClient,
-          artifactClient,
-          exceptionListClient,
-          packagePolicyService: plugins.fleet.packagePolicyService,
-          logger,
-          cache: this.artifactsCache,
-        },
-        fleetServerEnabled
-      );
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        packagePolicyService: plugins.fleet.packagePolicyService,
+        logger,
+        cache: this.artifactsCache,
+        experimentalFeatures,
+      });
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        migrateArtifactsToFleet(
-          savedObjectsClient,
-          artifactClient,
-          logger,
-          fleetServerEnabled
-        ).finally(() => {
-          logger.info('Fleet setup complete - Starting ManifestTask');
+        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
+          logger.info('Dependent plugin setup complete - Starting ManifestTask');
 
           if (this.manifestTask) {
             this.manifestTask.start({

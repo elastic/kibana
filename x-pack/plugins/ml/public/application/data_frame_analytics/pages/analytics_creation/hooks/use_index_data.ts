@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EuiDataGridColumn } from '@elastic/eui';
-
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
+import { RuntimeMappings } from '../../../../../../common/types/fields';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
+import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
   getFieldsFromKibanaIndexPattern,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
@@ -26,32 +30,71 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
+  getCombinedRuntimeMappings,
 } from '../../../../components/data_grid';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
-import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common';
 
 type IndexSearchResponse = estypes.SearchResponse;
+
+interface MLEuiDataGridColumn extends EuiDataGridColumn {
+  isRuntimeFieldColumn?: boolean;
+}
+
+function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
+  return Object.keys(runtimeMappings).map((id) => {
+    const field = runtimeMappings[id];
+    const schema = getDataGridSchemaFromESFieldType(field.type as estypes.RuntimeField['type']);
+    return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
+  });
+}
+
+function getInitialColumns(indexPattern: IndexPattern) {
+  const { fields } = newJobCapsServiceAnalytics;
+  const columns = fields.map((field: any) => {
+    const schema =
+      getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
+
+    return {
+      id: field.name,
+      schema,
+      isExpandable: schema !== 'boolean',
+      isRuntimeFieldColumn: false,
+    };
+  });
+
+  // Add runtime fields defined in index pattern to columns
+  if (indexPattern) {
+    const computedFields = indexPattern?.getComputedFields();
+
+    if (isRuntimeMappings(computedFields.runtimeFields)) {
+      Object.keys(computedFields.runtimeFields).forEach((runtimeField) => {
+        const schema = getDataGridSchemaFromESFieldType(
+          computedFields.runtimeFields[runtimeField].type
+        );
+        columns.push({
+          id: runtimeField,
+          schema,
+          isExpandable: schema !== 'boolean',
+          isRuntimeFieldColumn: true,
+        });
+      });
+    }
+  }
+  return columns;
+}
 
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: Record<string, any> | undefined,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
   const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
     indexPattern,
   ]);
-
-  // EuiDataGrid State
-  const columns: EuiDataGridColumn[] = [
-    ...indexPatternFields.map((id) => {
-      const field = indexPattern.fields.getByName(id);
-      const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema, isExpandable: schema !== 'boolean' };
-    }),
-  ];
-
+  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>(getInitialColumns(indexPattern));
   const dataGrid = useDataGrid(columns);
 
   const {
@@ -75,6 +118,8 @@ export const useIndexData = (
     setErrorMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+
     const sort: EsSorting = sortingColumns.reduce((s, column) => {
       s[column.id] = { order: column.direction };
       return s;
@@ -88,14 +133,26 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
+        ...(isRuntimeMappings(combinedRuntimeMappings)
+          ? { runtime_mappings: combinedRuntimeMappings }
+          : {}),
       },
     };
 
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
-
       const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+      if (isRuntimeMappings(runtimeMappings)) {
+        // remove old runtime field from columns
+        const updatedColumns = columns.filter((col) => col.isRuntimeFieldColumn === false);
+        setColumns([
+          ...updatedColumns,
+          ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
+        ]);
+      } else {
+        setColumns(getInitialColumns(indexPattern));
+      }
       setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
       setRowCountRelation(
         typeof resp.hits.total === 'number'
@@ -115,13 +172,18 @@ export const useIndexData = (
       getIndexData();
     }
     // custom comparison
-  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [
+    indexPattern.title,
+    indexPatternFields,
+    JSON.stringify([query, pagination, sortingColumns, runtimeMappings]),
+  ]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
     indexPattern,
   ]);
 
   const fetchColumnChartsData = async function (fieldHistogramsQuery: Record<string, any>) {
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(indexPattern, runtimeMappings);
     try {
       const columnChartsData = await dataLoader.loadFieldHistograms(
         columns
@@ -130,7 +192,9 @@ export const useIndexData = (
             fieldName: cT.id,
             type: getFieldType(cT.schema),
           })),
-        fieldHistogramsQuery
+        fieldHistogramsQuery,
+        DEFAULT_SAMPLER_SHARD_SIZE,
+        combinedRuntimeMappings
       );
       dataGrid.setColumnCharts(columnChartsData);
     } catch (e) {
@@ -146,7 +210,7 @@ export const useIndexData = (
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
-    JSON.stringify([query, dataGrid.visibleColumns]),
+    JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);

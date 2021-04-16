@@ -20,13 +20,14 @@ import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
+import { EqlRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from '../build_bulk_body';
 import { getInputIndex } from '../get_input_output_index';
 import { RuleStatusService } from '../rule_status_service';
 import { bulkInsertSignals, filterDuplicateSignals } from '../single_bulk_create';
 import {
-  EqlRuleAttributes,
+  AlertAttributes,
   EqlSignalSearchResponse,
   SearchAfterAndBulkCreateReturnType,
   WrappedSignalHit,
@@ -43,7 +44,7 @@ export const eqlExecutor = async ({
   logger,
   refresh,
 }: {
-  rule: SavedObject<EqlRuleAttributes>;
+  rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;

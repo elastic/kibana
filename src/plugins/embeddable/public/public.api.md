@@ -282,7 +282,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     getRoot(): IEmbeddable | IContainer;
     // (undocumented)
     getTitle(): string;
-    getUpdated$(): Readonly<Rx.Observable<void>>;
+    getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>>;
     // (undocumented)
     readonly id: string;
     // (undocumented)
@@ -600,6 +600,7 @@ export class EmbeddableStateTransfer {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;
+        openInNewTab?: boolean;
         state: EmbeddableEditorState;
     }): Promise<void>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
