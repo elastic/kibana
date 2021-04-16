@@ -48,6 +48,10 @@ import type {
   FullAgentPolicyOutputPermissions,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_PERMISSIONS,
+} from '../services/package_policies_to_agent_permissions';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -59,22 +63,6 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
-
-const DEFAULT_PERMISSIONS = {
-  cluster: ['monitor'],
-  indices: [
-    {
-      names: [
-        'logs-*',
-        'metrics-*',
-        'traces-*',
-        'synthetics-*',
-        '.logs-endpoint.diagnostic.collection-*',
-      ],
-      privileges: ['auto_configure', 'create_doc'],
-    },
-  ],
-};
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -766,9 +754,10 @@ class AgentPolicyService {
     let permissions: FullAgentPolicyOutputPermissions;
 
     if (hasTightPermissions) {
-      permissions = {
-        _fallback: DEFAULT_PERMISSIONS,
-      };
+      permissions = (await storedPackagePoliciesToAgentPermissions(
+        soClient,
+        agentPolicy.package_policies
+      )) || { _fallback: DEFAULT_PERMISSIONS };
     } else {
       permissions = {
         _fallback: DEFAULT_PERMISSIONS,
