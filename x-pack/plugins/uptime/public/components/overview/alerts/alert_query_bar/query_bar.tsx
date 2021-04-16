@@ -12,24 +12,21 @@ import { QueryStringInput } from '../../../../../../../../src/plugins/data/publi
 import { useIndexPattern } from '../../query_bar/use_index_pattern';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
-import { useGetUrlParams } from '../../../../hooks';
 
 interface Props {
   query: string;
   onChange: (query: string) => void;
 }
 
-export const AlertQueryBar = ({ query, onChange }: Props) => {
+export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   const { index_pattern: indexPattern } = useIndexPattern();
 
-  const { search } = useGetUrlParams();
-
-  const [inputVal, setInputVal] = useState<string>(search ?? '');
+  const [inputVal, setInputVal] = useState<string>(query);
 
   useEffect(() => {
-    onChange(search);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    onChange(query);
+    setInputVal(query);
+  }, [onChange, query]);
 
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
