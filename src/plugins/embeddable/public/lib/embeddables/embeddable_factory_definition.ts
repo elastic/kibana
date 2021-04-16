@@ -34,5 +34,7 @@ export type EmbeddableFactoryDefinition<
         | 'inject'
         | 'migrations'
         | 'grouping'
+        | 'getIconType'
+        | 'getDescription'
       >
     >;

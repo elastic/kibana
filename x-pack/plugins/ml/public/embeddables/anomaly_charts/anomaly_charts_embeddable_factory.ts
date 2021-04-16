@@ -28,16 +28,6 @@ export class AnomalyChartsEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput> {
   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
-  public readonly savedObjectMetaData = {
-    type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    name: this.getDisplayName(),
-    getIconForSavedObject: () => 'empty',
-    getTooltipForSavedObject: () =>
-      i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.description', {
-        defaultMessage: 'View anomaly detection results in a chart.',
-      }),
-  };
-
   public readonly grouping = [
     {
       id: PLUGIN_ID,
@@ -57,6 +47,12 @@ export class AnomalyChartsEmbeddableFactory
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
       defaultMessage: 'Anomaly chart',
+    });
+  }
+
+  public getDescription() {
+    return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.description', {
+      defaultMessage: 'View anomaly detection results in a chart.',
     });
   }
 

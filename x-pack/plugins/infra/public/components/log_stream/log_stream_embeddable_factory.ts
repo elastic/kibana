@@ -22,16 +22,6 @@ export class LogStreamEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput> {
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
-  public readonly savedObjectMetaData = {
-    name: this.getDisplayName(),
-    type: LOG_STREAM_EMBEDDABLE,
-    getIconForSavedObject: () => 'logsApp',
-    getTooltipForSavedObject: () =>
-      i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-        defaultMessage: 'Add a table of live streaming logs.',
-      }),
-  };
-
   constructor(private getStartServices: StartServicesAccessor<InfraClientStartDeps>) {}
 
   public async isEditable() {
@@ -48,6 +38,16 @@ export class LogStreamEmbeddableFactoryDefinition
     return i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
       defaultMessage: 'Log stream',
     });
+  }
+
+  public getDescription() {
+    return i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+      defaultMessage: 'Add a table of live streaming logs.',
+    });
+  }
+
+  public getIconType() {
+    return 'logsApp';
   }
 
   public async getExplicitInput() {

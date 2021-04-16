@@ -70,6 +70,16 @@ export interface EmbeddableFactory<
   getDisplayName(): string;
 
   /**
+   * Returns an EUI Icon type to be displayed in a menu.
+   */
+  getIconType(): string;
+
+  /**
+   * Returns a description about the embeddable.
+   */
+  getDescription(): string;
+
+  /**
    * If false, this type of embeddable can't be created with the "createNew" functionality. Instead,
    * use createFromSavedObject, where an existing saved object must first exist.
    */

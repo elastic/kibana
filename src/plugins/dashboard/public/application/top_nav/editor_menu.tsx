@@ -157,17 +157,9 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const getEmbeddableFactoryMenuItem = (
     factory: EmbeddableFactoryDefinition
   ): EuiContextMenuPanelItemDescriptor => {
-    const icon = factory?.savedObjectMetaData?.getIconForSavedObject
-      ? (factory.savedObjectMetaData.getIconForSavedObject(
-          {} as SimpleSavedObject<SavedObjectAttributes>
-        ) as EuiContextMenuItemIcon)
-      : 'empty';
+    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
-    const toolTipContent = factory?.savedObjectMetaData?.getTooltipForSavedObject
-      ? (factory.savedObjectMetaData.getTooltipForSavedObject(
-          {} as SimpleSavedObject<SavedObjectAttributes>
-        ) as EuiContextMenuItemIcon)
-      : undefined;
+    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
 
     return {
       name: factory.getDisplayName(),
