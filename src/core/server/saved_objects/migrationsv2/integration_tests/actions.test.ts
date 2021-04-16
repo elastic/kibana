@@ -66,11 +66,7 @@ describe('migration actions', () => {
     // Create test fixture data:
     await createIndex(client, 'existing_index_with_docs', {
       dynamic: true,
-      properties: {
-        updated_at: { type: 'date' },
-        title: { type: 'text' },
-        type: { type: 'text' },
-      },
+      properties: {},
     })();
     const sourceDocs = ([
       { _source: { title: 'doc 1' } },
@@ -426,13 +422,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
           "doc 3",
-          "saved object 4",
           "f-agent-event 5",
+          "saved object 4",
         ]
       `);
     });
@@ -464,7 +460,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_excluded_docs',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
@@ -494,13 +490,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_2',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -546,13 +542,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_3',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -596,13 +592,13 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_4',
         outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
+      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
         Array [
           "doc 1",
           "doc 2",
           "doc 3_updated",
-          "saved object 4_updated",
           "f-agent-event 5_updated",
+          "saved object 4_updated",
         ]
       `);
     });
@@ -901,7 +897,7 @@ describe('migration actions', () => {
         undefined
       )()) as Either.Right<ReadWithPit>;
 
-      expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title))
+      expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title).sort())
         .toMatchInlineSnapshot(`
         Array [
           "doc 1",

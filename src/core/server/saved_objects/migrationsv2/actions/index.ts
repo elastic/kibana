@@ -468,18 +468,16 @@ export const readWithPit = (
   return client
     .search<SavedObjectsRawDoc>({
       body: {
-        // Sort fields are required to use searchAfter, so we set some defaults here
+        // Sort fields are required to use searchAfter
         sort: {
-          updated_at: { order: 'desc' },
+          // the most efficient option as order is not important for the migration
+          _shard_doc: { order: 'desc' },
         },
         pit: { id: pitId, keep_alive: pitKeepAlive },
         size: batchSize,
         search_after: searchAfter,
         // Exclude saved object types
-        query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
-          () => undefined,
-          (query) => query
-        )(unusedTypesQuery),
+        query: Option.isSome(unusedTypesQuery) ? unusedTypesQuery.value : undefined,
       },
     })
     .then((response) => {
