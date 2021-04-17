@@ -26,7 +26,7 @@ interface UseAgentGroups {
 export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
   const { data } = useKibana().services;
 
-  const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies)
+  const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);
   const [policies, setPolicies] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,15 +78,17 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
           policies: newPolicies,
         } = processAggregations(responseData.rawResponse.aggregations);
 
-        setPlatforms(newPlatforms)
+        setPlatforms(newPlatforms);
         setOverlap(newOverlap);
-        setPolicies(newPolicies.map(p => {
-          const name = agentPolicyById[p.id]?.name ?? p.name
-          return {
-            ...p,
-            name
-          }
-        }));
+        setPolicies(
+          newPolicies.map((p) => {
+            const name = agentPolicyById[p.id]?.name ?? p.name;
+            return {
+              ...p,
+              name,
+            };
+          })
+        );
       }
 
       setLoading(false);
