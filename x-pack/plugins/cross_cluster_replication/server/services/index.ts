@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { License } from './license';
 export { addBasePath } from './add_base_path';
