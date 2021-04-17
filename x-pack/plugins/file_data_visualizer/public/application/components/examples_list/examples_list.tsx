@@ -41,7 +41,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   }
 
   return (
-    <div data-test-subj="fieldDataExamplesList">
+    <div data-test-subj="mlFieldDataExamplesList">
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.fileDataVisualizer.fieldDataCard.examplesList.title"
