@@ -33,6 +33,7 @@ describe('processAggregations', () => {
     const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([
       {
+        id: 'darwin',
         name: 'darwin',
         size: 200,
       },
@@ -59,10 +60,12 @@ describe('processAggregations', () => {
     expect(platforms).toEqual([]);
     expect(policies).toEqual([
       {
+        id: '8cd01a60-8a74-11eb-86cb-c58693443a4f',
         name: '8cd01a60-8a74-11eb-86cb-c58693443a4f',
         size: 100,
       },
       {
+        id: '8cd06880-8a74-11eb-86cb-c58693443a4f',
         name: '8cd06880-8a74-11eb-86cb-c58693443a4f',
         size: 100,
       },
@@ -107,16 +110,19 @@ describe('processAggregations', () => {
     const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([
       {
+        id: 'darwin',
         name: 'darwin',
         size: 200,
       },
     ]);
     expect(policies).toEqual([
       {
+        id: '8cd01a60-8a74-11eb-86cb-c58693443a4f',
         name: '8cd01a60-8a74-11eb-86cb-c58693443a4f',
         size: 100,
       },
       {
+        id: '8cd06880-8a74-11eb-86cb-c58693443a4f',
         name: '8cd06880-8a74-11eb-86cb-c58693443a4f',
         size: 100,
       },
