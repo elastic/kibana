@@ -81,15 +81,19 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         return;
       }
 
-      if (inputFiles.length && !SUPPORTED_PACK_EXTENSIONS.includes(inputFiles[0].type)) {
+      if (
+        inputFiles.length &&
+        ((!!inputFiles[0].type.length && !SUPPORTED_PACK_EXTENSIONS.includes(inputFiles[0].type)) ||
+          !inputFiles[0].name.endsWith('.conf'))
+      ) {
         packName.current = '';
-        // @ts-expect-error update types
-        filePickerRef.current?.removeFiles(new Event('fake'));
         setIsInvalid(
           `File type ${
             inputFiles[0].type
           } is not supported please upload ${SUPPORTED_PACK_EXTENSIONS.join(' or ')} config file`
         );
+        // @ts-expect-error update types
+        filePickerRef.current?.removeFiles(new Event('fake'));
         return;
       }
 

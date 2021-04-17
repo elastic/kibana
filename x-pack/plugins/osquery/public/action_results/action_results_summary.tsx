@@ -33,23 +33,11 @@ interface ActionResultsSummaryProps {
   isLive?: boolean;
 }
 
-const renderErrorMessage = (error: string) => {
-  return (
-    <>
-      <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
-        {error}
-      </EuiCodeBlock>
-      {error === 'action undefined' ? (
-        <EuiIconTip
-          aria-label="Info"
-          type="iInCircle"
-          color="info"
-          content="Agent may need to be restarted to apply Osquery config properly"
-        />
-      ) : null}
-    </>
-  );
-};
+const renderErrorMessage = (error: string) => (
+  <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
+    {error}
+  </EuiCodeBlock>
+);
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
@@ -170,7 +158,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       },
       {
         field: 'fields.rows[0]',
-        name: '# rows',
+        name: 'Number of result rows',
         render: renderRowsColumn,
       },
       {

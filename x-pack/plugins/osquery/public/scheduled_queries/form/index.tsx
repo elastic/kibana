@@ -225,15 +225,10 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
         <EuiDescribedFormGroup
           title={<h3>{'Scheduled query group settings'}</h3>}
           fullWidth
-          description={
-            <>
-              A single text field that can be used to display additional text. It can have{' '}
-              <EuiLink href="http://www.elastic.co" target="_blank">
-                links
-              </EuiLink>{' '}
-              or any other type of content.
-            </>
-          }
+          description={`Scheduled query groups include one or more queries that are run
+              at a set interval and are associated with an agent policy.
+              When you define a scheduled query group, it is added as a new
+              Osquery Manager policy.`}
         >
           <CommonUseField path="name" />
 
