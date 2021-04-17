@@ -32,6 +32,7 @@
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.lens": "plugins/lens",
+    "xpack.licenseApiGuard": "plugins/license_api_guard",
     "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "plugins/lists",

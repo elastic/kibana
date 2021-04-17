@@ -973,6 +973,58 @@ describe('7.13.0', () => {
       },
     });
   });
+
+  test('security solution ML alert with string in machineLearningJobId is converted to an array', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        anomalyThreshold: 20,
+        machineLearningJobId: 'my_job_id',
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          anomalyThreshold: 20,
+          machineLearningJobId: ['my_job_id'],
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
+
+  test('security solution ML alert with an array in machineLearningJobId is preserved', () => {
+    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        anomalyThreshold: 20,
+        machineLearningJobId: ['my_job_id', 'my_other_job_id'],
+      },
+    });
+
+    expect(migration713(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          anomalyThreshold: 20,
+          machineLearningJobId: ['my_job_id', 'my_other_job_id'],
+          exceptionsList: [],
+          riskScoreMapping: [],
+          severityMapping: [],
+          threat: [],
+        },
+      },
+    });
+  });
 });
 
 function getUpdatedAt(): string {

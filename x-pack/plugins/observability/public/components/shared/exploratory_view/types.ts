@@ -57,7 +57,7 @@ export interface DataSeries {
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested: string }>;
+  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
@@ -91,7 +91,7 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

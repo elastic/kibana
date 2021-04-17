@@ -1699,6 +1699,12 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "threat_match",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           { "name": "zeek", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null

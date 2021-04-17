@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import styled from 'styled-components';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 
 interface Props {
   reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
@@ -23,19 +25,29 @@ export function ReportTypesCol({ reportTypes }: Props) {
     setSeries,
   } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { indexPattern } = useIndexPatternContext();
+  const { loading, hasData, selectedApp } = useAppIndexPatternContext();
+
+  if (!loading && !hasData && selectedApp) {
+    return (
+      <FormattedMessage
+        id="xpack.observability.reportTypeCol.nodata"
+        defaultMessage="No data available"
+      />
+    );
+  }
 
   return reportTypes?.length > 0 ? (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <FlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
         <EuiFlexItem key={reportType}>
           <EuiButton
+            fullWidth
             size="s"
             iconSide="right"
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            isDisabled={!indexPattern}
+            isDisabled={loading}
             onClick={() => {
               if (reportType === selectedReportType) {
                 setSeries(NEW_SERIES_KEY, {
@@ -56,7 +68,7 @@ export function ReportTypesCol({ reportTypes }: Props) {
           </EuiButton>
         </EuiFlexItem>
       ))}
-    </EuiFlexGroup>
+    </FlexGroup>
   ) : (
     <EuiText color="subdued">{SELECTED_DATA_TYPE_FOR_REPORT}</EuiText>
   );
@@ -66,3 +78,7 @@ export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
   'xpack.observability.expView.reportType.noDataType',
   { defaultMessage: 'Select a data type to start building a series.' }
 );
+
+const FlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;

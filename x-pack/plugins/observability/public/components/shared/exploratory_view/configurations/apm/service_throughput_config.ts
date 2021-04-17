@@ -8,6 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants/constants';
 import { buildPhraseFilter } from '../utils';
+import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
 export function getServiceThroughputLensConfig({
   seriesId,
@@ -40,7 +41,7 @@ export function getServiceThroughputLensConfig({
       'user_agent.device.name',
     ],
     filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, [TRANSACTION_DURATION]: 'Throughput' },
     reportDefinitions: [
       {
         field: 'service.name',

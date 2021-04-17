@@ -112,7 +112,10 @@ describe('syncData', () => {
 
     // @ts-expect-error
     const call = syncContext.stopLoading.getCall(0);
-    expect(call.args[2]).toEqual(defaultConfig);
+    expect(call.args[2]!.minSourceZoom).toEqual(defaultConfig.minSourceZoom);
+    expect(call.args[2]!.maxSourceZoom).toEqual(defaultConfig.maxSourceZoom);
+    expect(call.args[2]!.layerName).toEqual(defaultConfig.layerName);
+    expect(call.args[2]!.urlTemplate!.startsWith(defaultConfig.urlTemplate)).toEqual(true);
   });
 
   it('Should not resync when no changes to source params', async () => {
@@ -185,7 +188,12 @@ describe('syncData', () => {
 
         // @ts-expect-error
         const call = syncContext.stopLoading.getCall(0);
-        expect(call.args[2]).toEqual({ ...defaultConfig, ...changes });
+
+        const newMeta = { ...defaultConfig, ...changes };
+        expect(call.args[2]!.minSourceZoom).toEqual(newMeta.minSourceZoom);
+        expect(call.args[2]!.maxSourceZoom).toEqual(newMeta.maxSourceZoom);
+        expect(call.args[2]!.layerName).toEqual(newMeta.layerName);
+        expect(call.args[2]!.urlTemplate!.startsWith(newMeta.urlTemplate)).toEqual(true);
       });
     });
   });
