@@ -32,7 +32,7 @@ export const useAllAgents = (
     async () => {
       let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
       if (searchValue) {
-        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elatic.agent.id:/${searchValue}/)`;
+        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elastic.agent.id:/${searchValue}/)`;
       }
       return await http.get('/api/fleet/agents', {
         query: {
