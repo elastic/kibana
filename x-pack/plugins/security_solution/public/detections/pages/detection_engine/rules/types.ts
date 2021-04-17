@@ -126,7 +126,7 @@ export interface AboutStepRiskScore {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
-  machineLearningJobId: string;
+  machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   ruleType: Type;
   timeline: FieldValueTimeline;
@@ -153,7 +153,7 @@ export interface DefineStepRuleJson {
   anomaly_threshold?: number;
   index?: string[];
   filters?: Filter[];
-  machine_learning_job_id?: string;
+  machine_learning_job_id?: string[];
   saved_id?: string;
   query?: string;
   language?: string;
