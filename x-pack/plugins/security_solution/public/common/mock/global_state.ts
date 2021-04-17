@@ -35,7 +35,6 @@ import { mockIndexPattern } from './index_pattern';
 export const mockGlobalState: State = {
   app: {
     enableExperimental: {
-      fleetServerEnabled: false,
       trustedAppsByPolicyEnabled: false,
       eventFilteringEnabled: false,
       metricsEntitiesEnabled: false,
