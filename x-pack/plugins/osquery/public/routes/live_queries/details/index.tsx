@@ -29,6 +29,7 @@ import { useActionResults } from '../../../action_results/use_action_results';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../../queries/edit/tabs';
 import { LiveQueryDetailsActionsMenu } from './actions_menu';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const Divider = styled.div`
   width: 0;
@@ -38,7 +39,8 @@ const Divider = styled.div`
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
-  const liveQueryListProps = useRouterNavigate('live_query');
+  useBreadcrumbs('live_query_details', { liveQueryId: actionId });
+  const liveQueryListProps = useRouterNavigate('live_queries');
 
   const { data } = useActionDetails({ actionId });
   const { data: actionResultsData } = useActionResults({
@@ -70,16 +72,6 @@ const LiveQueryDetailsPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     [liveQueryListProps]

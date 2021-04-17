@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './scheduled_queries_table';
+export * from './scheduled_query_groups_table';

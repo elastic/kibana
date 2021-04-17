@@ -59,14 +59,14 @@ const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = 
   );
 };
 
-interface ScheduledQueryQueriesTableProps {
+interface ScheduledQueryGroupQueriesTableProps {
   data: Pick<PackagePolicy, 'inputs'>;
   editMode?: boolean;
   onDeleteClick?: (item: PackagePolicyInputStream) => void;
   onEditClick?: (item: PackagePolicyInputStream) => void;
 }
 
-const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTableProps> = ({
+const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQueriesTableProps> = ({
   data,
   editMode = false,
   onDeleteClick,
@@ -164,4 +164,4 @@ const ScheduledQueryQueriesTableComponent: React.FC<ScheduledQueryQueriesTablePr
   );
 };
 
-export const ScheduledQueryQueriesTable = React.memo(ScheduledQueryQueriesTableComponent);
+export const ScheduledQueryGroupQueriesTable = React.memo(ScheduledQueryGroupQueriesTableComponent);

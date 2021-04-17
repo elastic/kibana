@@ -44,7 +44,7 @@ export const buildResultsQuery = ({
         count_by_agent_id: {
           terms: {
             field: 'agent.id',
-            size: 100,
+            size: 10000,
           },
         },
       },

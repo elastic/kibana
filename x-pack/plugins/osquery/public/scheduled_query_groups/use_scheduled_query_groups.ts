@@ -17,7 +17,7 @@ import {
 } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
-export const useScheduledQueries = () => {
+export const useScheduledQueryGroups = () => {
   const { http } = useKibana().services;
 
   return useQuery<ListResult<PackagePolicy>>(

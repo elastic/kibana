@@ -17,7 +17,7 @@ interface ActionTableResultsButtonProps {
 }
 
 const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ actionId }) => {
-  const navProps = useRouterNavigate(`live_query/${actionId}`);
+  const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   return <EuiButtonIcon iconType="visTable" {...navProps} />;
 });

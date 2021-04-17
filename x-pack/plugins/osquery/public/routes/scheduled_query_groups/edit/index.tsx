@@ -18,14 +18,19 @@ import { useParams } from 'react-router-dom';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { ScheduledQueryForm } from '../../../scheduled_queries/form';
-import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_query';
+import { ScheduledQueryGroupForm } from '../../../scheduled_query_groups/form';
+import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
-const EditScheduledQueryPageComponent = () => {
-  const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
-  const queryDetailsLinkProps = useRouterNavigate(`scheduled_queries/${scheduledQueryId}`);
+const EditScheduledQueryGroupPageComponent = () => {
+  const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
+  const queryDetailsLinkProps = useRouterNavigate(
+    `scheduled_query_groups/${scheduledQueryGroupId}`
+  );
 
-  const { data } = useScheduledQuery({ scheduledQueryId });
+  const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
+
+  useBreadcrumbs('scheduled_query_group_edit', { scheduledQueryGroupName: data?.name ?? '' });
 
   const LeftColumn = useMemo(
     () => (
@@ -54,16 +59,6 @@ const EditScheduledQueryPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.editScheduledQuery.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     [data?.name, queryDetailsLinkProps]
@@ -74,10 +69,10 @@ const EditScheduledQueryPageComponent = () => {
       {!data ? (
         <EuiLoadingContent lines={10} />
       ) : (
-        <ScheduledQueryForm editMode={true} defaultValue={data} />
+        <ScheduledQueryGroupForm editMode={true} defaultValue={data} />
       )}
     </WithHeaderLayout>
   );
 };
 
-export const EditScheduledQueryPage = React.memo(EditScheduledQueryPageComponent);
+export const EditScheduledQueryGroupPage = React.memo(EditScheduledQueryGroupPageComponent);

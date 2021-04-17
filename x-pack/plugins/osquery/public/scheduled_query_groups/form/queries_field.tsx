@@ -13,27 +13,27 @@ import React, { useCallback, useState } from 'react';
 import { PackagePolicyInput, PackagePolicyInputStream } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
-import { ScheduledQueryQueriesTable } from '../scheduled_query_queries_table';
+import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_group_queries_table';
 import { AddQueryFlyout } from './add_query_flyout';
 import { EditQueryFlyout } from './edit_query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 
 interface QueriesFieldProps {
   field: FieldHook<PackagePolicyInput[]>;
-  scheduledQueryId: string;
+  scheduledQueryGroupId: string;
 }
 
 interface GetNewStreamProps {
   id: string;
   interval: string;
   query: string;
-  scheduledQueryId: string;
+  scheduledQueryGroupId: string;
 }
 
-const getNewStream = ({ id, interval, query, scheduledQueryId }: GetNewStreamProps) => ({
+const getNewStream = ({ id, interval, query, scheduledQueryGroupId }: GetNewStreamProps) => ({
   data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
   enabled: true,
-  id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryId}`,
+  id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-${scheduledQueryGroupId}`,
   vars: {
     id: { type: 'text', value: id },
     type: 'integer',
@@ -44,7 +44,7 @@ const getNewStream = ({ id, interval, query, scheduledQueryId }: GetNewStreamPro
   },
 });
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryId }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryGroupId }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
 
@@ -112,7 +112,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
           draft[0].streams.push(
             getNewStream({
               ...newQuery,
-              scheduledQueryId,
+              scheduledQueryGroupId,
             })
           );
           return draft;
@@ -120,7 +120,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
       );
       handleHideAddFlyout();
     },
-    [handleHideAddFlyout, scheduledQueryId, setValue]
+    [handleHideAddFlyout, scheduledQueryGroupId, setValue]
   );
 
   const handlePackUpload = useCallback(
@@ -133,7 +133,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
                 id: newQueryId,
                 interval: newQuery.interval,
                 query: newQuery.query,
-                scheduledQueryId,
+                scheduledQueryGroupId,
               })
             );
           });
@@ -142,7 +142,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
         })
       );
     },
-    [scheduledQueryId, setValue]
+    [scheduledQueryGroupId, setValue]
   );
 
   return (
@@ -156,7 +156,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
       </EuiFlexGroup>
       <EuiSpacer />
       {field.value && field.value[0].streams?.length ? (
-        <ScheduledQueryQueriesTable
+        <ScheduledQueryGroupQueriesTable
           editMode={true}
           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           data={{ inputs: field.value }}

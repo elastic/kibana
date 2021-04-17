@@ -11,8 +11,10 @@ import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';
 import { LiveQueryDetailsPage } from './details';
+import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 
 const LiveQueriesComponent = () => {
+  useBreadcrumbs('live_queries');
   const match = useRouteMatch();
 
   return (

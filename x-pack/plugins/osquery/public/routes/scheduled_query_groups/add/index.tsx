@@ -11,11 +11,13 @@ import React, { useMemo } from 'react';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { ScheduledQueryForm } from '../../../scheduled_queries/form';
+import { ScheduledQueryGroupForm } from '../../../scheduled_query_groups/form';
 import { useOsqueryIntegration } from '../../../common/hooks';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
-const NewScheduledQueryPageComponent = () => {
-  const scheduledQueryListProps = useRouterNavigate('scheduled_queries');
+const AddScheduledQueryGroupPageComponent = () => {
+  useBreadcrumbs('scheduled_query_group_add');
+  const scheduledQueryListProps = useRouterNavigate('scheduled_query_groups');
   const { data: osqueryIntegration } = useOsqueryIntegration();
 
   const packageInfo = useMemo(() => {
@@ -34,7 +36,7 @@ const NewScheduledQueryPageComponent = () => {
         <EuiFlexItem>
           <EuiButtonEmpty iconType="arrowLeft" {...scheduledQueryListProps} flush="left" size="xs">
             <FormattedMessage
-              id="xpack.osquery.newScheduledQuery.viewScheduledQueriesListTitle"
+              id="xpack.osquery.addScheduledQueryGroup.viewScheduledQueryGroupsListTitle"
               defaultMessage="View all scheduled query groups"
             />
           </EuiButtonEmpty>
@@ -43,22 +45,12 @@ const NewScheduledQueryPageComponent = () => {
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.osquery.newScheduledQuery.pageTitle"
-                defaultMessage="New scheduled query group"
+                id="xpack.osquery.addScheduledQueryGroup.pageTitle"
+                defaultMessage="Add scheduled query group"
               />
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.newScheduledQuery.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     [scheduledQueryListProps]
@@ -66,9 +58,9 @@ const NewScheduledQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      {packageInfo && <ScheduledQueryForm packageInfo={packageInfo} />}
+      {packageInfo && <ScheduledQueryGroupForm packageInfo={packageInfo} />}
     </WithHeaderLayout>
   );
 };
 
-export const NewScheduledQueryPage = React.memo(NewScheduledQueryPageComponent);
+export const AddScheduledQueryGroupPage = React.memo(AddScheduledQueryGroupPageComponent);

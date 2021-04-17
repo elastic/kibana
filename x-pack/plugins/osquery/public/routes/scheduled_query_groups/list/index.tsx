@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { ActionsTable } from '../../../actions/actions_table';
 import { WithHeaderLayout } from '../../../components/layouts';
+import { ScheduledQueryGroupsTable } from '../../../scheduled_query_groups/scheduled_query_groups_table';
 
-const LiveQueriesPageComponent = () => {
-  const newQueryLinkProps = useRouterNavigate('live_query/new');
+const ScheduledQueryGroupsPageComponent = () => {
+  const newQueryLinkProps = useRouterNavigate('scheduled_query_groups/add');
 
   const LeftColumn = useMemo(
     () => (
@@ -23,22 +23,12 @@ const LiveQueriesPageComponent = () => {
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.osquery.liveQueryList.pageTitle"
-                defaultMessage="Live queries history"
+                id="xpack.osquery.scheduledQueryList.pageTitle"
+                defaultMessage="Scheduled query groups"
               />
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryList.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     []
@@ -48,8 +38,8 @@ const LiveQueriesPageComponent = () => {
     () => (
       <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
         <FormattedMessage
-          id="xpack.osquery.liveQueryList.newLiveQueryButtonLabel"
-          defaultMessage="New live query"
+          id="xpack.osquery.scheduledQueryList.addScheduledQueryButtonLabel"
+          defaultMessage="Add scheduled query group"
         />
       </EuiButton>
     ),
@@ -58,9 +48,9 @@ const LiveQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      <ActionsTable />
+      <ScheduledQueryGroupsTable />
     </WithHeaderLayout>
   );
 };
 
-export const LiveQueriesPage = React.memo(LiveQueriesPageComponent);
+export const ScheduledQueryGroupsPage = React.memo(ScheduledQueryGroupsPageComponent);

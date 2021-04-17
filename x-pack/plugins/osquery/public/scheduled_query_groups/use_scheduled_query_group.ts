@@ -14,17 +14,20 @@ import {
   packagePolicyRouteService,
 } from '../../../fleet/common';
 
-interface UseScheduledQuery {
-  scheduledQueryId: string;
+interface UseScheduledQueryGroup {
+  scheduledQueryGroupId: string;
   skip?: boolean;
 }
 
-export const useScheduledQuery = ({ scheduledQueryId, skip = false }: UseScheduledQuery) => {
+export const useScheduledQueryGroup = ({
+  scheduledQueryGroupId,
+  skip = false,
+}: UseScheduledQueryGroup) => {
   const { http } = useKibana().services;
 
   return useQuery<GetOnePackagePolicyResponse, unknown, PackagePolicy>(
-    ['scheduledQuery', { scheduledQueryId }],
-    () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryId)),
+    ['scheduledQueryGroup', { scheduledQueryGroupId }],
+    () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryGroupId)),
     {
       keepPreviousData: true,
       enabled: !skip,

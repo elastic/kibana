@@ -12,8 +12,8 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 export const buildActionResultsQuery = ({
   actionId,
   filterQuery,
+  // pagination: { activePage, querySize },
   sort,
-  pagination: { activePage, querySize },
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -61,8 +61,8 @@ export const buildActionResultsQuery = ({
         },
       },
       query: { bool: { filter } },
-      from: activePage * querySize,
-      size: querySize,
+      // from: activePage * querySize,
+      size: 10000, // querySize,
       track_total_hits: true,
       fields: ['*'],
       sort: [

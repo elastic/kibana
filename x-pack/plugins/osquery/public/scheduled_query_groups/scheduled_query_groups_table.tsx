@@ -17,11 +17,11 @@ import {
 } from '../../../fleet/common';
 import { pagePathGetters } from '../../../fleet/public';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
-import { useScheduledQueries } from './use_scheduled_queries';
+import { useScheduledQueryGroups } from './use_scheduled_query_groups';
 import { ActiveStateSwitch } from './active_state_switch';
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
-  <EuiLink {...useRouterNavigate(`scheduled_queries/${id}`)}>{name}</EuiLink>
+  <EuiLink {...useRouterNavigate(`scheduled_query_groups/${id}`)}>{name}</EuiLink>
 );
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
@@ -30,13 +30,13 @@ const renderName = (_: unknown, item: PackagePolicy) => (
   <ScheduledQueryName id={item.id} name={item.name} />
 );
 
-const ScheduledQueriesTableComponent = () => {
+const ScheduledQueryGroupsTableComponent = () => {
   const {
     application: { getUrlForApp },
     http,
   } = useKibana().services;
 
-  const { data } = useScheduledQueries();
+  const { data } = useScheduledQueryGroups();
 
   const uniqAgentPolicyIds = useMemo<string[]>(() => {
     if (!data?.items) {
@@ -132,4 +132,4 @@ const ScheduledQueriesTableComponent = () => {
   );
 };
 
-export const ScheduledQueriesTable = React.memo(ScheduledQueriesTableComponent);
+export const ScheduledQueryGroupsTable = React.memo(ScheduledQueryGroupsTableComponent);

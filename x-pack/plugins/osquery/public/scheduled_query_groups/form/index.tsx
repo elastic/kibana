@@ -13,7 +13,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiDescribedFormGroup,
-  EuiLink,
   EuiSpacer,
   EuiAccordion,
   EuiBottomBar,
@@ -41,13 +40,13 @@ const FORM_ID = 'scheduledQueryForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-interface ScheduledQueryFormProps {
+interface ScheduledQueryGroupFormProps {
   defaultValue?: PackagePolicy;
   packageInfo?: PackagePolicyPackage;
   editMode?: boolean;
 }
 
-const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
+const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> = ({
   defaultValue,
   packageInfo,
   editMode = false,
@@ -73,7 +72,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
   );
 
   const cancelButtonProps = useRouterNavigate(
-    `scheduled_queries/${editMode ? defaultValue?.id : ''}`
+    `scheduled_query_groups/${editMode ? defaultValue?.id : ''}`
   );
 
   const {
@@ -95,12 +94,12 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
     {
       onSuccess: (data) => {
         if (!editMode) {
-          navigateToApp('osquery', { path: `scheduled_queries/${data.item.id}` });
+          navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
           toasts.addSuccess(`Successfully scheduled '${data.item.name}'`);
           return;
         }
 
-        navigateToApp('osquery', { path: `scheduled_queries/${data.item.id}` });
+        navigateToApp('osquery', { path: `scheduled_query_groups/${data.item.id}` });
         toasts.addSuccess(`Successfully updated '${data.item.name}'`);
       },
       onError: (error) => {
@@ -252,7 +251,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
         <CommonUseField
           path="inputs"
           component={QueriesField}
-          scheduledQueryId={defaultValue?.id ?? ''}
+          scheduledQueryGroupId={defaultValue?.id ?? null}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />
@@ -300,4 +299,4 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
   );
 };
 
-export const ScheduledQueryForm = React.memo(ScheduledQueryFormComponent);
+export const ScheduledQueryGroupForm = React.memo(ScheduledQueryGroupFormComponent);

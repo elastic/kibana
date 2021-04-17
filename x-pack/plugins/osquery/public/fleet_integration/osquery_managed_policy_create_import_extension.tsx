@@ -23,7 +23,7 @@ import {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
-import { ScheduledQueryQueriesTable } from '../scheduled_queries/scheduled_query_queries_table';
+import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 
@@ -130,7 +130,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     }
   }, [editMode, replace]);
 
-  const scheduledQueriesTableData = useMemo(() => {
+  const scheduledQueryGroupTableData = useMemo(() => {
     const policyWithoutEmptyQueries = produce(newPolicy, (draft) => {
       draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
       return draft;
@@ -184,10 +184,10 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       />
       <EuiSpacer />
 
-      {editMode && scheduledQueriesTableData.inputs[0].streams.length ? (
+      {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ScheduledQueryQueriesTable data={scheduledQueriesTableData as PackagePolicy} />
+            <ScheduledQueryGroupQueriesTable data={scheduledQueryGroupTableData as PackagePolicy} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}

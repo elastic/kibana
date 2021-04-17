@@ -13,11 +13,13 @@ import qs from 'query-string';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { LiveQuery } from '../../../live_query';
+import { LiveQuery } from '../../../live_queries';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const NewLiveQueryPageComponent = () => {
+  useBreadcrumbs('live_query_new');
   const location = useLocation();
-  const liveQueryListProps = useRouterNavigate('live_query');
+  const liveQueryListProps = useRouterNavigate('live_queries');
 
   const formDefaultValue = useMemo(() => {
     const queryParams = qs.parse(location.search);
@@ -57,16 +59,6 @@ const NewLiveQueryPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.newLiveQuery.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     [liveQueryListProps]

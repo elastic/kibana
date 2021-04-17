@@ -11,7 +11,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
@@ -23,8 +22,9 @@ import styled from 'styled-components';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_query';
-import { ScheduledQueryQueriesTable } from '../../../scheduled_queries/scheduled_query_queries_table';
+import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
+import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const Divider = styled.div`
   width: 0;
@@ -32,14 +32,16 @@ const Divider = styled.div`
   border-left: ${({ theme }) => theme.eui.euiBorderThin};
 `;
 
-const ScheduledQueryDetailsPageComponent = () => {
-  const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
-  const scheduledQueriesListProps = useRouterNavigate('scheduled_queries');
-  const editQueryLinkProps = useRouterNavigate(`scheduled_queries/${scheduledQueryId}/edit`);
+const ScheduledQueryGroupDetailsPageComponent = () => {
+  const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
+  const scheduledQueryGroupsListProps = useRouterNavigate('scheduled_query_groups');
+  const editQueryLinkProps = useRouterNavigate(
+    `scheduled_query_groups/${scheduledQueryGroupId}/edit`
+  );
 
-  const { data } = useScheduledQuery({ scheduledQueryId });
+  const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
 
-  console.error('data', data);
+  useBreadcrumbs('scheduled_query_group_details', { scheduledQueryGroupName: data?.name ?? '' });
 
   const LeftColumn = useMemo(
     () => (
@@ -47,7 +49,7 @@ const ScheduledQueryDetailsPageComponent = () => {
         <EuiFlexItem>
           <EuiButtonEmpty
             iconType="arrowLeft"
-            {...scheduledQueriesListProps}
+            {...scheduledQueryGroupsListProps}
             flush="left"
             size="xs"
           >
@@ -71,19 +73,9 @@ const ScheduledQueryDetailsPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageSubtitle"
-                defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
-    [data?.name, scheduledQueriesListProps]
+    [data?.name, scheduledQueryGroupsListProps]
   );
 
   const RightColumn = useMemo(
@@ -123,13 +115,9 @@ const ScheduledQueryDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {/* <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {data?.actionDetails._source?.data?.query}
-      </EuiCodeBlock> */}
-      <EuiSpacer />
-      {data && <ScheduledQueryQueriesTable data={data} />}
+      {data && <ScheduledQueryGroupQueriesTable data={data} />}
     </WithHeaderLayout>
   );
 };
 
-export const ScheduledQueryDetailsPage = React.memo(ScheduledQueryDetailsPageComponent);
+export const ScheduledQueryGroupDetailsPage = React.memo(ScheduledQueryGroupDetailsPageComponent);

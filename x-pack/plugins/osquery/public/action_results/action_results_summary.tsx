@@ -17,7 +17,6 @@ import {
   EuiDescriptionList,
   EuiInMemoryTable,
   EuiCodeBlock,
-  EuiIconTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -139,13 +138,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const columns = useMemo(
     () => [
       {
-        field: 'fields.completed_at[0]',
+        field: 'status',
         name: 'Status',
-        sortable: true,
         // @ts-expect-error update types
         // eslint-disable-next-line react/display-name
-        render: (value, item) => {
-          if (!value) return 'pending';
+        render: (_, item) => {
+          if (!item.fields.completed_at) return 'pending';
           if (item.fields['error.keyword']) return 'error';
           return <>{'success'}</>;
         },
@@ -172,20 +170,11 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   const pagination = useMemo(
     () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: totalCount ?? 0,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: 20,
+      pageSizeOptions: [10, 20, 50, 100],
     }),
-    [totalCount, pageIndex, pageSize]
+    []
   );
-
-  // const onTableChange = useCallback(({ page = {} }) => {
-  //   const { index, size } = page;
-
-  //   setPageIndex(index);
-  //   setPageSize(size);
-  // }, []);
 
   return (
     <>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
@@ -29,8 +29,8 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     () =>
       getUrlForApp('osquery', {
         path: agentPolicyId
-          ? `/live_query/new?agentPolicyId=${agentPolicyId}`
-          : ' `/live_query/new',
+          ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
+          : ' `/live_queries/new',
       }),
     [agentPolicyId, getUrlForApp]
   );
@@ -41,28 +41,28 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
         event.preventDefault();
         navigateToApp('osquery', {
           path: agentPolicyId
-            ? `/live_query/new?agentPolicyId=${agentPolicyId}`
-            : ' `/live_query/new',
+            ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
+            : ' `/live_queries/new',
         });
       }
     },
     [agentPolicyId, navigateToApp]
   );
 
-  const scheduleQueriesHref = getUrlForApp('osquery', {
+  const scheduleQueryGroupsHref = getUrlForApp('osquery', {
     path: integrationPolicyId
-      ? `/scheduled_queries/${integrationPolicyId}/edit`
-      : `/scheduled_queries`,
+      ? `/scheduled_query_groups/${integrationPolicyId}/edit`
+      : `/scheduled_query_groups`,
   });
 
-  const scheduleQueriesClick = useCallback(
+  const scheduleQueryGroupsClick = useCallback(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp('osquery', {
           path: integrationPolicyId
-            ? `/scheduled_queries/${integrationPolicyId}/edit`
-            : `/scheduled_queries`,
+            ? `/scheduled_query_groups/${integrationPolicyId}/edit`
+            : `/scheduled_query_groups`,
         });
       }
     },
@@ -79,36 +79,16 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
           onClick={liveQueryClick}
           description={''}
           isDisabled={isDisabled}
-          footer={
-            <EuiButtonEmpty
-              iconType="iInCircle"
-              size="xs"
-              href="http://google.com"
-              aria-label="See more details about Live queries"
-            >
-              {'More details'}
-            </EuiButtonEmpty>
-          }
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xl" type="clock" />}
-          title="Schedule queries"
+          title="Schedule query group"
           description={''}
           isDisabled={isDisabled}
-          href={scheduleQueriesHref}
-          onClick={scheduleQueriesClick}
-          footer={
-            <EuiButtonEmpty
-              iconType="iInCircle"
-              size="xs"
-              href="http://google.com"
-              aria-label="See more details about Scheduled query groups"
-            >
-              {'More details'}
-            </EuiButtonEmpty>
-          }
+          href={scheduleQueryGroupsHref}
+          onClick={scheduleQueryGroupsClick}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

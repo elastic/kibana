@@ -10,22 +10,17 @@ import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
 import { agentPolicyRouteService } from '../../../fleet/common';
 
-interface UseAgentPolicies {
+interface UseAgentPolicy {
   policyId: string;
   skip?: boolean;
 }
 
-export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicies) => {
+export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
   const { http } = useKibana().services;
 
   return useQuery(
     ['agentPolicy', { policyId }],
-    () =>
-      http.get(agentPolicyRouteService.getInfoPath(policyId), {
-        query: {
-          perPage: 100,
-        },
-      }),
+    () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
     {
       enabled: !skip,
       keepPreviousData: true,
