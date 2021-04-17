@@ -15,18 +15,33 @@ interface UseAllAgents {
   osqueryPoliciesLoading: boolean;
 }
 
-export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents) => {
-  // TODO: properly fetch these in an async manner
+interface RequestOptions {
+  perPage?: number;
+  page?: number;
+}
+
+// TODO: break out the paginated vs all cases into separate hooks
+export const useAllAgents = (
+  { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
+  searchValue = '',
+  opts: RequestOptions = { perPage: 9000 }
+) => {
+  const { perPage } = opts;
   const { http } = useKibana().services;
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
-    ['agents', osqueryPolicies],
-    () =>
-      http.get(agentRouteService.getListPath(), {
+    ['agents', osqueryPolicies, searchValue, perPage],
+    () => {
+      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+      if (searchValue) {
+        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elastic.agent.id:/${searchValue}/)`;
+      }
+      return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
-          perPage: 9000,
+          kuery,
+          perPage,
         },
-      }),
+      });
+    },
     {
       enabled: !osqueryPoliciesLoading,
     }
