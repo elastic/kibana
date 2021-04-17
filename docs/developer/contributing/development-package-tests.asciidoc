@@ -18,12 +18,7 @@ pip3 install --user ansible
 # Darwin
 brew install python3
 pip3 install --user ansible
-```
-* https://docs.ansible.com/ansible/latest/collections/ansible/posix/firewalld_module.html[ansible.posix.firewalld]
-+
-```
-ansible-galaxy collection install ansible.posix
-```
+
 * https://www.vagrantup.com/downloads[Vagrant]
 * https://www.virtualbox.org/wiki/Downloads[Virtualbox]
 
