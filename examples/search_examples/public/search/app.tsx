@@ -280,7 +280,7 @@ export const SearchExamplesApp = ({
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket) => {
+  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
     doSearchSourceSearch(withOtherBucket);
   };
 
