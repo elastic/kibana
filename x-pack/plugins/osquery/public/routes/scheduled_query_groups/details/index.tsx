@@ -25,6 +25,7 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
 import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
 
 const Divider = styled.div`
   width: 0;
@@ -87,20 +88,18 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
             <EuiDescriptionListTitle className="eui-textNoWrap">
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.kpis.agentsFailedCountLabelText"
-                defaultMessage="Agents failed"
+                defaultMessage="Policy"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {/* <EuiTextColor color={actionResultsData?.aggregations.failed ? 'danger' : 'default'}>
-                {actionResultsData?.aggregations.failed}
-              </EuiTextColor> */}
+              {data?.policy_id ? <AgentsPolicyLink policyId={data?.policy_id} /> : null}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="agents_failed_count_divider">
           <Divider />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count">
+        <EuiFlexItem grow={false} key="edit_button">
           <EuiButton fill {...editQueryLinkProps} iconType="pencil">
             <FormattedMessage
               id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
@@ -110,7 +109,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [editQueryLinkProps]
+    [data?.policy_id, editQueryLinkProps]
   );
 
   return (

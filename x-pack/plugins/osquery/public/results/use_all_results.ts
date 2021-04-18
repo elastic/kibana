@@ -33,7 +33,6 @@ export interface ResultsArgs {
 interface UseAllResults {
   actionId: string;
   activePage: number;
-  agentId?: string;
   direction: Direction;
   limit: number;
   sortField: string;
@@ -45,7 +44,6 @@ interface UseAllResults {
 export const useAllResults = ({
   actionId,
   activePage,
-  agentId,
   direction,
   limit,
   sortField,
@@ -62,7 +60,6 @@ export const useAllResults = ({
         .search<ResultsRequestOptions, ResultsStrategyResponse>(
           {
             actionId,
-            agentId,
             factoryQueryType: OsqueryQueries.results,
             filterQuery: createFilter(filterQuery),
             pagination: generateTablePaginationOptions(activePage, limit),

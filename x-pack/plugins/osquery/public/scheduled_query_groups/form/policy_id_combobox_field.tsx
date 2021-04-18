@@ -101,7 +101,6 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
         singleSelection: { asPlainText: true },
         noSuggestions: false,
         isClearable: false,
-        'data-test-subj': 'searchableSnapshotCombobox',
         selectedOptions,
         renderOption,
         ...euiFieldProps,

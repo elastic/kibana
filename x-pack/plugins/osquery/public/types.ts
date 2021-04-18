@@ -27,7 +27,7 @@ export interface AppPluginStartDependencies {
 export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
-  fleet?: FleetStart;
+  fleet: FleetStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 

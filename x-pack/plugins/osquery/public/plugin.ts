@@ -33,7 +33,11 @@ import {
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
 
-export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
+export function toggleOsqueryPlugin(
+  updater$: Subject<AppUpdater>,
+  http: CoreStart['http'],
+  registerExtension?: StartPlugins['fleet']['registerExtension']
+) {
   http
     .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
     .then(({ response }) => {
@@ -41,6 +45,14 @@ export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreSta
         (integration) =>
           integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
       );
+
+      if (installed && registerExtension) {
+        registerExtension({
+          package: OSQUERY_INTEGRATION_NAME,
+          view: 'package-detail-custom',
+          component: LazyOsqueryManagedCustomButtonExtension,
+        });
+      }
 
       updater$.next(() => ({
         navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
@@ -120,7 +132,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       const { registerExtension } = plugins.fleet;
 
       if (config.enabled) {
-        toggleOsqueryPlugin(this.appUpdater$, core.http);
+        toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
       }
 
       registerExtension({
@@ -133,12 +145,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-edit',
         component: LazyOsqueryManagedPolicyEditExtension,
-      });
-
-      registerExtension({
-        package: OSQUERY_INTEGRATION_NAME,
-        view: 'package-detail-custom',
-        component: LazyOsqueryManagedCustomButtonExtension,
       });
     } else {
       this.appUpdater$.next(() => ({

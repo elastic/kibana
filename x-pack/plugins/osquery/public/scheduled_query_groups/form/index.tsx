@@ -75,14 +75,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     `scheduled_query_groups/${editMode ? defaultValue?.id : ''}`
   );
 
-  const {
-    // data,
-    isLoading,
-    mutateAsync,
-    // isError,
-    // isSuccess,
-    // error
-  } = useMutation(
+  const { isLoading, mutateAsync } = useMutation(
     (payload: Record<string, unknown>) =>
       editMode && defaultValue?.id
         ? http.put(packagePolicyRouteService.getUpdatePath(defaultValue.id), {

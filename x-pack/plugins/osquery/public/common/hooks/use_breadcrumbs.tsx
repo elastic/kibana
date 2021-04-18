@@ -50,7 +50,7 @@ const breadcrumbGetters: {
       }),
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.newLiveQueryPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newLiveQueryPageTitle', {
         defaultMessage: 'New',
       }),
     },
@@ -84,7 +84,7 @@ const breadcrumbGetters: {
       }),
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.addScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.addScheduledQueryGroupsPageTitle', {
         defaultMessage: 'Add',
       }),
     },
@@ -114,199 +114,11 @@ const breadcrumbGetters: {
       text: scheduledQueryGroupName,
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.editScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.editScheduledQueryGroupsPageTitle', {
         defaultMessage: 'Edit',
       }),
     },
   ],
-  // integrations: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-  //       defaultMessage: 'Integrations',
-  //     }),
-  //   },
-  // ],
-  // integrations_all: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.integrations(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-  //       defaultMessage: 'Integrations',
-  //     }),
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.allIntegrationsPageTitle', {
-  //       defaultMessage: 'All',
-  //     }),
-  //   },
-  // ],
-  // integrations_installed: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.integrations(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-  //       defaultMessage: 'Integrations',
-  //     }),
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
-  //       defaultMessage: 'Installed',
-  //     }),
-  //   },
-  // ],
-  // integration_details_overview: ({ pkgTitle }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.integrations(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-  //       defaultMessage: 'Integrations',
-  //     }),
-  //   },
-  //   { text: pkgTitle },
-  // ],
-  // integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.integrations(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationPageTitle', {
-  //       defaultMessage: 'Integration',
-  //     }),
-  //   },
-  //   {
-  //     href: pagePathGetters.integration_details_policies({ pkgkey }),
-  //     text: pkgTitle,
-  //   },
-  //   { text: policyName },
-  // ],
-  // policies: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-  //       defaultMessage: 'Policies',
-  //     }),
-  //   },
-  // ],
-  // policies_list: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-  //       defaultMessage: 'Policies',
-  //     }),
-  //   },
-  // ],
-  // policy_details: ({ policyName }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.policies(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-  //       defaultMessage: 'Policies',
-  //     }),
-  //   },
-  //   { text: policyName },
-  // ],
-  // add_integration_from_policy: ({ policyName, policyId }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.policies(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-  //       defaultMessage: 'Policies',
-  //     }),
-  //   },
-  //   {
-  //     href: pagePathGetters.policy_details({ policyId }),
-  //     text: policyName,
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-  //       defaultMessage: 'Add integration',
-  //     }),
-  //   },
-  // ],
-  // add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.integrations(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-  //       defaultMessage: 'Integrations',
-  //     }),
-  //   },
-  //   {
-  //     href: pagePathGetters.integration_details_overview({ pkgkey }),
-  //     text: pkgTitle,
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-  //       defaultMessage: 'Add integration',
-  //     }),
-  //   },
-  // ],
-  // edit_integration: ({ policyName, policyId }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.policies(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-  //       defaultMessage: 'Policies',
-  //     }),
-  //   },
-  //   {
-  //     href: pagePathGetters.policy_details({ policyId }),
-  //     text: policyName,
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.editPackagePolicyPageTitle', {
-  //       defaultMessage: 'Edit integration',
-  //     }),
-  //   },
-  // ],
-  // fleet: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-  //       defaultMessage: 'Agents',
-  //     }),
-  //   },
-  // ],
-  // fleet_agent_list: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-  //       defaultMessage: 'Agents',
-  //     }),
-  //   },
-  // ],
-  // fleet_agent_details: ({ agentHost }) => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.fleet(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-  //       defaultMessage: 'Agents',
-  //     }),
-  //   },
-  //   { text: agentHost },
-  // ],
-  // fleet_enrollment_tokens: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     href: pagePathGetters.fleet(),
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.agentsPageTitle', {
-  //       defaultMessage: 'Agents',
-  //     }),
-  //   },
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.enrollmentTokensPageTitle', {
-  //       defaultMessage: 'Enrollment tokens',
-  //     }),
-  //   },
-  // ],
-  // data_streams: () => [
-  //   BASE_BREADCRUMB,
-  //   {
-  //     text: i18n.translate('xpack.fleet.breadcrumbs.datastreamsPageTitle', {
-  //       defaultMessage: 'Data streams',
-  //     }),
-  //   },
-  // ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

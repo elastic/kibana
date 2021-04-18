@@ -42,12 +42,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const { data: agentStatus } = useAgentStatus({ policyId: item.policy_id });
   const { data: agentPolicy } = useAgentPolicy({ policyId: item.policy_id });
 
-  const {
-    // data,
-    isLoading,
-    mutate,
-    // error
-  } = useMutation(
+  const { isLoading, mutate } = useMutation(
     ({ id, ...payload }: UpdatePackagePolicy & { id: string }) =>
       http.put(packagePolicyRouteService.getUpdatePath(id), {
         body: JSON.stringify(payload),

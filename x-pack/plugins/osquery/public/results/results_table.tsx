@@ -28,17 +28,13 @@ interface ResultsTableComponentProps {
   isLive?: boolean;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
-  actionId,
-  agentId,
-  isLive,
-}) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, isLive }) => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
-    (fleetAgentId) =>
+    (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.fleet_agent_details({ fleetAgentId }),
+        path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
       }),
     [getUrlForApp]
   );
@@ -64,7 +60,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { data: allResultsData } = useAllResults({
     actionId,
-    agentId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
@@ -90,11 +85,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // @ts-expect-error update types
         const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
 
-        return (
-          <EuiLink href={getFleetAppUrl(agentIdValue)} target="_blank">
-            {value}
-          </EuiLink>
-        );
+        return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
       }
 
       return !isEmpty(value) ? value : '-';
@@ -125,25 +116,22 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       .sort()
       .reduce((acc, fieldName) => {
         if (fieldName === 'agent.name') {
-          return [
-            ...acc,
-            {
-              id: fieldName,
-              displayAsText: 'agent',
-              defaultSortDirection: Direction.asc,
-            },
-          ];
+          acc.push({
+            id: fieldName,
+            displayAsText: 'agent',
+            defaultSortDirection: Direction.asc,
+          });
+
+          return acc;
         }
 
         if (fieldName.startsWith('osquery.')) {
-          return [
-            ...acc,
-            {
-              id: fieldName,
-              displayAsText: fieldName.split('.')[1],
-              defaultSortDirection: Direction.asc,
-            },
-          ];
+          acc.push({
+            id: fieldName,
+            displayAsText: fieldName.split('.')[1],
+            defaultSortDirection: Direction.asc,
+          });
+          return acc;
         }
 
         return acc;

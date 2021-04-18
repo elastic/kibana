@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { find, uniq, map } from 'lodash/fp';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { UseQueryResult, useQueries } from 'react-query';
 
-import {
-  GetOneAgentPolicyResponse,
-  PackagePolicy,
-  agentPolicyRouteService,
-} from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
-import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { PackagePolicy } from '../../../fleet/common';
+import { useRouterNavigate } from '../common/lib/kibana';
 import { useScheduledQueryGroups } from './use_scheduled_query_groups';
 import { ActiveStateSwitch } from './active_state_switch';
+import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`scheduled_query_groups/${id}`)}>{name}</EuiLink>
@@ -31,48 +25,9 @@ const renderName = (_: unknown, item: PackagePolicy) => (
 );
 
 const ScheduledQueryGroupsTableComponent = () => {
-  const {
-    application: { getUrlForApp },
-    http,
-  } = useKibana().services;
-
   const { data } = useScheduledQueryGroups();
 
-  const uniqAgentPolicyIds = useMemo<string[]>(() => {
-    if (!data?.items) {
-      return [];
-    }
-
-    return uniq(map('policy_id', data.items));
-  }, [data?.items]);
-
-  const agentPolicies = useQueries(
-    uniqAgentPolicyIds.map((policyId) => ({
-      queryKey: ['agentPolicy', policyId],
-      queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
-    }))
-  ) as Array<UseQueryResult<GetOneAgentPolicyResponse>>;
-
-  const renderAgentPolicy = useCallback(
-    (policyId) => {
-      const policyDetails: UseQueryResult<GetOneAgentPolicyResponse> | undefined = find(
-        ['data.item.id', policyId],
-        agentPolicies
-      );
-
-      return (
-        <EuiLink
-          href={getUrlForApp('fleet', {
-            path: `#` + pagePathGetters.policy_details({ policyId }),
-          })}
-          target="_blank"
-        >
-          {policyDetails?.data?.item?.name ?? policyId}
-        </EuiLink>
-      );
-    },
-    [agentPolicies, getUrlForApp]
-  );
+  const renderAgentPolicy = useCallback((policyId) => <AgentsPolicyLink policyId={policyId} />, []);
 
   const renderQueries = useCallback(
     (streams: PackagePolicy['inputs'][0]['streams']) => <>{streams.length}</>,
@@ -92,19 +47,21 @@ const ScheduledQueryGroupsTableComponent = () => {
       {
         field: 'policy_id',
         name: 'Policy',
-        truncate: true,
+        truncateText: true,
         render: renderAgentPolicy,
       },
       {
         field: 'inputs[0].streams',
         name: 'Number of queries',
         render: renderQueries,
+        width: '150px',
       },
       {
         field: 'enabled',
         name: 'Active',
         sortable: true,
         align: 'right',
+        width: '80px',
         render: renderActive,
       },
     ],
