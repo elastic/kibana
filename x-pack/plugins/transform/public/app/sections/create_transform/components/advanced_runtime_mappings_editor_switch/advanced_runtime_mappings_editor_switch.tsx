@@ -11,32 +11,20 @@ import { i18n } from '@kbn/i18n';
 import { SwitchModal } from './switch_modal';
 import { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
 
-interface Props extends ReturnType<typeof useAdvancedRuntimeMappingsEditor> {
-  applyChanges: () => void;
-}
+type Props = ReturnType<typeof useAdvancedRuntimeMappingsEditor>;
 export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
   const {
-    actions: {
-      setRuntimeMappingsUpdated,
-      toggleRuntimeMappingsEditor,
-      setRuntimeMappingsEditorSwitchModalVisible,
-    },
+    actions: { toggleRuntimeMappingsEditor, setRuntimeMappingsEditorSwitchModalVisible },
     state: {
       isRuntimeMappingsEditorEnabled,
       isRuntimeMappingsEditorSwitchModalVisible,
       advancedEditorRuntimeMappingsLastApplied,
       advancedRuntimeMappingsConfig,
-      isRuntimeMappingsEditorApplyButtonEnabled,
     },
-
-    applyChanges,
   } = props;
 
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
-    if (reset === true) {
-      setRuntimeMappingsUpdated(false);
-    }
     toggleRuntimeMappingsEditor(reset);
   };
 
@@ -66,11 +54,9 @@ export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
       {isRuntimeMappingsEditorSwitchModalVisible && (
         <SwitchModal
           onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
-          confirmButtonDisabled={!isRuntimeMappingsEditorApplyButtonEnabled}
           onConfirm={() => {
             setRuntimeMappingsEditorSwitchModalVisible(false);
-            applyChanges();
-            toggleEditorHandler();
+            toggleEditorHandler(true);
           }}
         />
       )}

@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   onCancel: () => void;
   onConfirm: () => void;
-  confirmButtonDisabled?: boolean;
 }
 
 const modalTitle = i18n.translate('xpack.transform.stepDefineForm.runtimeEditorSwitchModalTitle', {
@@ -29,24 +28,24 @@ const cancelButtonText = i18n.translate(
 const applyChangesText = i18n.translate(
   'xpack.transform.stepDefineForm.runtimeEditorSwitchModalConfirmButtonText',
   {
-    defaultMessage: 'Apply changes',
+    defaultMessage: 'Disable editor',
   }
 );
 const modalMessage = i18n.translate(
   'xpack.transform.stepDefineForm.runtimeEditorSwitchModalBodyText',
   {
-    defaultMessage: `The changes in the editor haven't been applied yet.`,
+    defaultMessage: `The changes in the advanced editor haven't been applied yet. By disabling the editor you will lose your edits.`,
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, confirmButtonDisabled = false }) => (
+export const SwitchModal: FC<Props> = ({ onCancel, onConfirm }) => (
   <EuiConfirmModal
     title={modalTitle}
     onCancel={onCancel}
     onConfirm={onConfirm}
     cancelButtonText={cancelButtonText}
     confirmButtonText={applyChangesText}
-    confirmButtonDisabled={confirmButtonDisabled}
+    buttonColor="danger"
     defaultFocusedButton="confirm"
   >
     <p>{modalMessage}</p>
