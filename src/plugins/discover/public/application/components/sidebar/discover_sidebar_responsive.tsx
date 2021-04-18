@@ -34,6 +34,7 @@ import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/discover_state';
+import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -121,7 +122,9 @@ export interface DiscoverSidebarResponsiveProps {
      */
     showUnmappedFields: boolean;
   };
-
+  /**
+   * callback to execute on edit runtime field
+   */
   onEditRuntimeField: () => void;
 }
 
@@ -160,6 +163,31 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   };
 
+  const { indexPatternFieldEditor } = props.services;
+  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const canEditIndexPatternField = !!indexPatternFieldEditPermission && props.useNewFieldsApi;
+
+  const editField = (fieldName?: string) => {
+    if (!canEditIndexPatternField || !props.selectedIndexPattern) {
+      return;
+    }
+    const ref = indexPatternFieldEditor.openEditor({
+      ctx: {
+        indexPattern: props.selectedIndexPattern,
+      },
+      fieldName,
+      onSave: async () => {
+        props.onEditRuntimeField();
+      },
+    });
+    if (setFieldEditorRef) {
+      setFieldEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  };
+
   return (
     <>
       {props.isClosed ? null : (
@@ -168,7 +196,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             {...props}
             fieldFilter={fieldFilter}
             setFieldFilter={setFieldFilter}
-            setFieldEditorRef={setFieldEditorRef}
+            editField={editField}
           />
         </EuiHideFor>
       )}
@@ -189,6 +217,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               indexPatterns={props.indexPatterns}
               state={props.state}
               setAppState={props.setAppState}
+            />
+            <DiscoverIndexPatternManagement
+              services={props.services}
+              selectedIndexPattern={props.selectedIndexPattern}
+              editField={editField}
+              useNewFieldsApi={props.useNewFieldsApi}
             />
           </section>
           <EuiSpacer size="s" />
@@ -246,6 +280,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   alwaysShowActionButtons={true}
                   setFieldEditorRef={setFieldEditorRef}
                   closeFlyout={closeFlyout}
+                  editField={editField}
                 />
               </div>
             </EuiFlyout>
