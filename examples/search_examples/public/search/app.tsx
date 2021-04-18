@@ -367,6 +367,7 @@ export const SearchExamplesApp = ({
                   setIndexPattern(newIndexPattern);
                 }}
                 isClearable={false}
+                data-test-subj="indexPatternSelector"
               />
             </EuiFlexItem>
             <EuiFlexItem>
