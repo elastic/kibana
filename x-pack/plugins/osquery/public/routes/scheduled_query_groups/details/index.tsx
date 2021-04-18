@@ -8,7 +8,6 @@
 import {
   EuiButtonEmpty,
   EuiButton,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -26,6 +25,7 @@ import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_sche
 import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const Divider = styled.div`
   width: 0;
@@ -61,7 +61,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.scheduledQueryDetails.pageTitle"
@@ -72,7 +72,8 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
                 }}
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -87,7 +88,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
           <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
             <EuiDescriptionListTitle className="eui-textNoWrap">
               <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.kpis.agentsFailedCountLabelText"
+                id="xpack.osquery.scheduleQueryGroup.kpis.policyLabelText"
                 defaultMessage="Policy"
               />
             </EuiDescriptionListTitle>

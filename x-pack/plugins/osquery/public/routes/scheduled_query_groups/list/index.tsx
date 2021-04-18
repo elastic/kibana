@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { ScheduledQueryGroupsTable } from '../../../scheduled_query_groups/scheduled_query_groups_table';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const ScheduledQueryGroupsPageComponent = () => {
   const newQueryLinkProps = useRouterNavigate('scheduled_query_groups/add');
@@ -20,14 +21,15 @@ const ScheduledQueryGroupsPageComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.scheduledQueryList.pageTitle"
                 defaultMessage="Scheduled query groups"
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

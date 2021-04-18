@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingContent,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
@@ -21,6 +15,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ScheduledQueryGroupForm } from '../../../scheduled_query_groups/form';
 import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const EditScheduledQueryGroupPageComponent = () => {
   const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
@@ -46,7 +41,7 @@ const EditScheduledQueryGroupPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editScheduledQuery.pageTitle"
@@ -57,7 +52,8 @@ const EditScheduledQueryGroupPageComponent = () => {
                 }}
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

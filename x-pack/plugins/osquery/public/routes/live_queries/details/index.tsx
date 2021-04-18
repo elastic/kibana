@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiText,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +29,7 @@ import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../../queries/edit/tabs';
 import { LiveQueryDetailsActionsMenu } from './actions_menu';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const Divider = styled.div`
   width: 0;
@@ -63,14 +63,15 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.pageTitle"
                 defaultMessage="Live query details"
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

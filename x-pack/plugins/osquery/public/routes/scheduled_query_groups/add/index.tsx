@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
@@ -14,6 +14,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ScheduledQueryGroupForm } from '../../../scheduled_query_groups/form';
 import { useOsqueryIntegration } from '../../../common/hooks';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const AddScheduledQueryGroupPageComponent = () => {
   useBreadcrumbs('scheduled_query_group_add');
@@ -42,14 +43,15 @@ const AddScheduledQueryGroupPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.addScheduledQueryGroup.pageTitle"
                 defaultMessage="Add scheduled query group"
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

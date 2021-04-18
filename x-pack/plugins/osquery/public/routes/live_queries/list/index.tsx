@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
@@ -13,6 +13,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueriesPageComponent = () => {
   useBreadcrumbs('live_queries');
@@ -22,14 +23,15 @@ const LiveQueriesPageComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiText>
+          <BetaBadgeRowWrapper>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryList.pageTitle"
                 defaultMessage="Live queries history"
               />
             </h1>
-          </EuiText>
+            <BetaBadge />
+          </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
