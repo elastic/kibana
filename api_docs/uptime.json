@@ -16,17 +16,12 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.initServerWithKibana.$1",
             "type": "Object",
             "label": "server",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCoreSetup",
-                "text": "UptimeCoreSetup"
-              }
+              "UptimeCoreSetup"
             ],
             "description": [],
             "source": {
@@ -35,17 +30,12 @@
             }
           },
           {
+            "id": "def-server.initServerWithKibana.$2",
             "type": "Object",
             "label": "plugins",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.UptimeCorePlugins",
-                "text": "UptimeCorePlugins"
-              }
+              "UptimeCorePlugins"
             ],
             "description": [],
             "source": {
@@ -103,13 +93,7 @@
             },
             "signature": [
               "(options: ",
-              {
-                "pluginId": "uptime",
-                "scope": "server",
-                "docId": "kibUptimePluginApi",
-                "section": "def-server.KibanaRouteOptions",
-                "text": "KibanaRouteOptions"
-              },
+              "KibanaRouteOptions",
               ") => void"
             ]
           }

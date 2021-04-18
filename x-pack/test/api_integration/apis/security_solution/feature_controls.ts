@@ -58,7 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  describe('feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/97355
+  describe.skip('feature controls', () => {
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';

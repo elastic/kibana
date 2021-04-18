@@ -34,7 +34,7 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-ignore
+  // @ts-expect-error
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -51,7 +51,7 @@ describe('rule helpers', () => {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -204,7 +204,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -246,7 +246,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {

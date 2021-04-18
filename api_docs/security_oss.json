@@ -25,13 +25,7 @@
             "lineNumber": 26
           },
           "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceSetup",
-              "text": "InsecureClusterServiceSetup"
-            }
+            "InsecureClusterServiceSetup"
           ]
         }
       ],
@@ -60,13 +54,7 @@
             "lineNumber": 30
           },
           "signature": [
-            {
-              "pluginId": "securityOss",
-              "scope": "public",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-public.InsecureClusterServiceStart",
-              "text": "InsecureClusterServiceStart"
-            }
+            "InsecureClusterServiceStart"
           ]
         },
         {
@@ -81,13 +69,7 @@
           },
           "signature": [
             "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
-            {
-              "pluginId": "core",
-              "scope": "common",
-              "docId": "kibCorePluginApi",
-              "section": "def-common.Capabilities",
-              "text": "Capabilities"
-            },
+            "Capabilities",
             ">; }"
           ]
         }
@@ -145,13 +127,7 @@
           },
           "signature": [
             "(provider: () => ",
-            {
-              "pluginId": "securityOss",
-              "scope": "server",
-              "docId": "kibSecurityOssPluginApi",
-              "section": "def-server.AnonymousAccessService",
-              "text": "AnonymousAccessService"
-            },
+            "AnonymousAccessService",
             ") => void"
           ]
         }

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutProps,
@@ -17,57 +16,46 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertItem } from './alerts_table';
+import { asDuration } from '../../../common/utils/formatters';
+import { TopAlert } from './alerts_table';
 
-type AlertsFlyoutProps = AlertItem & EuiFlyoutProps;
+type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
 
 export function AlertsFlyout(props: AlertsFlyoutProps) {
-  const {
-    actualValue,
-    affectedEntity,
-    expectedValue,
-    onClose,
-    reason,
-    severity,
-    severityLog,
-    status,
-    duration,
-    type,
-  } = props;
-  const timestamp = props['@timestamp'];
+  const { onClose, alert } = props;
 
   const overviewListItems = [
     {
       title: 'Status',
-      description: status || '-',
+      description: alert.active ? 'Active' : 'Recovered',
     },
     {
       title: 'Severity',
-      description: severity || '-', // TODO: badge and "(changed 2 min ago)"
+      description: alert.severityLevel || '-', // TODO: badge and "(changed 2 min ago)"
     },
-    {
-      title: 'Affected entity',
-      description: affectedEntity || '-', // TODO: link to entity
-    },
+    // {
+    //   title: 'Affected entity',
+    //   description: affectedEntity || '-', // TODO: link to entity
+    // },
     {
       title: 'Triggered',
-      description: timestamp, // TODO: format date
+      description: alert.start, // TODO: format date
     },
     {
       title: 'Duration',
-      description: duration || '-', // TODO: format duration
+      description: asDuration(alert.duration, { extended: true }) || '-', // TODO: format duration
     },
+    // {
+    //   title: 'Expected value',
+    //   description: expectedValue || '-',
+    // },
+    // {
+    //   title: 'Actual value',
+    //   description: actualValue || '-',
+    // },
     {
-      title: 'Expected value',
-      description: expectedValue || '-',
-    },
-    {
-      title: 'Actual value',
-      description: actualValue || '-',
-    },
-    {
-      title: 'Type',
-      description: type || '-',
+      title: 'Rule type',
+      description: alert.ruleCategory || '-',
     },
   ];
 
@@ -87,7 +75,7 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
             ]}
             items={overviewListItems}
           />
-          <EuiSpacer />
+          {/* <EuiSpacer />
           <EuiTitle size="xs">
             <h4>Severity log</h4>
           </EuiTitle>
@@ -105,7 +93,7 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
               },
             ]}
             items={severityLog ?? []}
-          />
+          /> */}
         </>
       ),
     },
@@ -123,7 +111,7 @@ export function AlertsFlyout(props: AlertsFlyoutProps) {
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="xs">
-          <h2>{reason}</h2>
+          <h2>{alert.ruleName}</h2>
         </EuiTitle>
         <EuiTabbedContent size="s" tabs={tabs} />
       </EuiFlyoutHeader>
