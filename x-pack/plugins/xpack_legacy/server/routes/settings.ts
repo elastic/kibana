@@ -42,9 +42,7 @@ export function registerSettingsRoute({
       validate: false,
     },
     async (context, req, res) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
       const collectorFetchContext = {
-        callCluster: callAsCurrentUser,
         esClient: context.core.elasticsearch.client.asCurrentUser,
         soClient: context.core.savedObjects.client,
       };
