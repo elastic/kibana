@@ -121,10 +121,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <AdvancedRuntimeMappingsEditorSwitch
-                      {...props.runtimeMappingsEditor}
-                      applyChanges={applyChanges}
-                    />
+                    <AdvancedRuntimeMappingsEditorSwitch {...props.runtimeMappingsEditor} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy
