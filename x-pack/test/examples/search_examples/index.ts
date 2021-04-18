@@ -11,7 +11,7 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('search examples', function () {
+  describe.only('search examples', function () {
     this.tags('ciGroup13');
     before(async () => {
       await esArchiver.emptyKibanaIndex();

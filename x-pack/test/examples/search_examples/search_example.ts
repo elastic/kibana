@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const retry = getService('retry');
 
-  describe.skip('Search session example', () => {
+  describe('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
