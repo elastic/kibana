@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 
@@ -67,24 +68,32 @@ const ActionsTableComponent = () => {
     () => [
       {
         field: 'query',
-        name: 'Query',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
+          defaultMessage: 'Query',
+        }),
         truncateText: true,
         render: renderQueryColumn,
       },
       {
         field: 'agents',
-        name: 'Agents',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
         width: '100px',
         render: renderAgentsColumn,
       },
       {
         field: 'created_at',
-        name: 'Created at',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
+          defaultMessage: 'Created at',
+        }),
         width: '200px',
         render: renderTimestampColumn,
       },
       {
-        name: 'View details',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
+          defaultMessage: 'View details',
+        }),
         actions: [
           {
             render: renderActionsColumn,

@@ -13,6 +13,7 @@ import {
   EuiDataGridColumn,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -118,7 +119,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
         if (fieldName === 'agent.name') {
           acc.push({
             id: fieldName,
-            displayAsText: 'agent',
+            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
+              defaultMessage: 'agent',
+            }),
             defaultSortDirection: Direction.asc,
           });
 

@@ -60,6 +60,7 @@ export function toggleOsqueryPlugin(
     })
     .catch(() => {
       updater$.next(() => ({
+        status: AppStatus.inaccessible,
         navLinkStatus: AppNavLinkStatus.hidden,
       }));
     });

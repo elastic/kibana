@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
@@ -74,7 +75,9 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xl" type="console" />}
-          title="Run live queries"
+          title={i18n.translate('xpack.osquery.fleetIntegration.runLiveQueriesButtonText', {
+            defaultMessage: 'Run live queries',
+          })}
           href={liveQueryHref}
           onClick={liveQueryClick}
           description={''}
@@ -84,7 +87,9 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xl" type="clock" />}
-          title="Schedule query group"
+          title={i18n.translate('xpack.osquery.fleetIntegration.scheduleQueryGroupsButtonText', {
+            defaultMessage: 'Schedule query groups',
+          })}
           description={''}
           isDisabled={isDisabled}
           href={scheduleQueryGroupsHref}

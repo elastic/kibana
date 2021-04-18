@@ -8,6 +8,7 @@
 import { EuiButton, EuiSteps, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
 
@@ -99,6 +100,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     queryStatus,
   ]);
 
+  const queryComponentProps = useMemo(
+    () => ({
+      disabled: queryStatus === 'disabled',
+    }),
+    [queryStatus]
+  );
+
   const formSteps: EuiContainedStepProps[] = useMemo(
     () => [
       {
@@ -117,16 +125,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <UseField
               path="query"
               component={LiveQueryQueryField}
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              componentProps={{
-                disabled: queryStatus === 'disabled',
-              }}
+              componentProps={queryComponentProps}
             />
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
-                  {'Submit'}
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
+                    defaultMessage="Submit"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -144,7 +152,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         status: resultsStatus,
       },
     ],
-    [actionId, agentIds, agentSelected, queryStatus, queryValueProvided, resultsStatus, submit]
+    [
+      actionId,
+      agentIds,
+      agentSelected,
+      queryComponentProps,
+      queryStatus,
+      queryValueProvided,
+      resultsStatus,
+      submit,
+    ]
   );
 
   return (

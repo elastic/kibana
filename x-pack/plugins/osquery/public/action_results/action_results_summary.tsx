@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import { i18n } from '@kbn/i18n';
 import {
   EuiLink,
   EuiFlexGroup,
@@ -50,7 +51,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [pageSize, setPageSize] = useState(50);
   const {
     // @ts-expect-error update types
-    data: { aggregations, edges, totalCount },
+    data: { aggregations, edges },
   } = useActionResults({
     actionId,
     activePage: pageIndex,
@@ -81,19 +82,30 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const listItems = useMemo(
     () => [
       {
-        title: 'Agents queried',
+        title: i18n.translate(
+          'xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText',
+          {
+            defaultMessage: 'Agents queried',
+          }
+        ),
         description: agentIds?.length,
       },
       {
-        title: 'Successful',
+        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.successfulLabelText', {
+          defaultMessage: 'Successful',
+        }),
         description: aggregations.successful,
       },
       {
-        title: 'Not yet responded',
+        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
+          defaultMessage: 'Not yet responded',
+        }),
         description: notRespondedCount,
       },
       {
-        title: 'Failed',
+        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.failedLabelText', {
+          defaultMessage: 'Failed',
+        }),
         description: (
           <EuiTextColor color={aggregations.failed ? 'danger' : 'default'}>
             {aggregations.failed}
@@ -135,37 +147,60 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [logsResults]
   );
 
+  const renderStatusColumn = useCallback((_, item) => {
+    if (!item.fields.completed_at) {
+      return i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+        defaultMessage: 'pending',
+      });
+    }
+
+    if (item.fields['error.keyword']) {
+      return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+        defaultMessage: 'error',
+      });
+    }
+
+    return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+      defaultMessage: 'success',
+    });
+  }, []);
+
   const columns = useMemo(
     () => [
       {
         field: 'status',
-        name: 'Status',
-        // @ts-expect-error update types
-        // eslint-disable-next-line react/display-name
-        render: (_, item) => {
-          if (!item.fields.completed_at) return 'pending';
-          if (item.fields['error.keyword']) return 'error';
-          return <>{'success'}</>;
-        },
+        name: i18n.translate('xpack.osquery.liveQueryActionResults.table.statusColumnTitle', {
+          defaultMessage: 'Status',
+        }),
+        render: renderStatusColumn,
       },
       {
         field: 'fields.agent_id[0]',
-        name: 'Agent ID',
+        name: i18n.translate('xpack.osquery.liveQueryActionResults.table.agentIdColumnTitle', {
+          defaultMessage: 'Agent Id',
+        }),
         truncateText: true,
         render: renderAgentIdColumn,
       },
       {
         field: 'fields.rows[0]',
-        name: 'Number of result rows',
+        name: i18n.translate(
+          'xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle',
+          {
+            defaultMessage: 'Number of result rows',
+          }
+        ),
         render: renderRowsColumn,
       },
       {
         field: 'fields.error[0]',
-        name: 'Error',
+        name: i18n.translate('xpack.osquery.liveQueryActionResults.table.errorColumnTitle', {
+          defaultMessage: 'Error',
+        }),
         render: renderErrorMessage,
       },
     ],
-    [renderAgentIdColumn, renderRowsColumn]
+    [renderAgentIdColumn, renderRowsColumn, renderStatusColumn]
   );
 
   const pagination = useMemo(

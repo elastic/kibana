@@ -6,6 +6,7 @@
  */
 
 import { EuiBetaBadge, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -18,12 +19,18 @@ const Wrapper = styled.div`
   padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
+const betaBadgeLabel = i18n.translate('xpack.osquery.common.tabBetaBadgeLabel', {
+  defaultMessage: 'Beta',
+});
+
+const betaBadgeTooltipContent = i18n.translate('xpack.osquery.common.tabBetaBadgeTooltipContent', {
+  defaultMessage:
+    'This feature is under active development. Extra functionality is coming, and some functionality may change.',
+});
+
 const BetaBadgeComponent = () => (
   <Wrapper>
-    <EuiBetaBadge
-      label="Beta"
-      tooltipContent="This module is not GA. Please help us by reporting any bugs."
-    />
+    <EuiBetaBadge label={betaBadgeLabel} tooltipContent={betaBadgeTooltipContent} />
   </Wrapper>
 );
 

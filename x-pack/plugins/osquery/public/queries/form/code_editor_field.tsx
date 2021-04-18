@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash/fp';
 import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
@@ -19,7 +20,10 @@ interface CodeEditorFieldProps {
 const OsquerySchemaLink = React.memo(() => (
   <EuiText size="xs">
     <EuiLink href="https://osquery.io/schema/4.7.0" target="_blank">
-      {'Osquery schema'}
+      <FormattedMessage
+        id="xpack.osquery.codeEditorField.osquerySchemaLinkLabel"
+        defaultMessage="Osquery schema"
+      />
     </EuiLink>
   </EuiText>
 ));

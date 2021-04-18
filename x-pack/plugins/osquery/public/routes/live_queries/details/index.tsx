@@ -57,7 +57,7 @@ const LiveQueryDetailsPageComponent = () => {
         <EuiFlexItem>
           <EuiButtonEmpty iconType="arrowLeft" {...liveQueryListProps} flush="left" size="xs">
             <FormattedMessage
-              id="xpack.osquery.liveQueryDetails.viewLiveQueriesListTitle"
+              id="xpack.osquery.liveQueryDetails.viewLiveQueriesHistoryTitle"
               defaultMessage="View live queries history"
             />
           </EuiButtonEmpty>

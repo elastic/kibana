@@ -16,7 +16,13 @@ import { useOsqueryIntegration } from '../common/hooks';
 
 const ManageIntegrationLinkComponent = () => {
   const {
-    application: { getUrlForApp, navigateToApp },
+    application: {
+      getUrlForApp,
+      navigateToApp,
+      capabilities: {
+        osquery: { save: hasSaveUICapabilities },
+      },
+    },
   } = useKibana().services;
   const { data: osqueryIntegration } = useOsqueryIntegration();
 
@@ -50,7 +56,7 @@ const ManageIntegrationLinkComponent = () => {
     [navigateToApp, osqueryIntegration]
   );
 
-  return integrationHref ? (
+  return hasSaveUICapabilities && integrationHref ? (
     <EuiFlexItem>
       {
         // eslint-disable-next-line @elastic/eui/href-or-on-click

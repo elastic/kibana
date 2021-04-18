@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { produce } from 'immer';
 
+import { i18n } from '@kbn/i18n';
 import {
   agentRouteService,
   agentPolicyRouteService,
@@ -146,7 +147,10 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
-                title="Save the integration to access the options below"
+                title={i18n.translate(
+                  'xpack.osquery.fleetIntegration.saveIntegrationCalloutTitle',
+                  { defaultMessage: 'Save the integration to access the options below' }
+                )}
                 iconType="save"
               />
             </EuiFlexItem>

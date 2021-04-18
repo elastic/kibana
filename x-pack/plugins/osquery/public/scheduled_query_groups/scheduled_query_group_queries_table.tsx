@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 
@@ -53,7 +51,6 @@ const ViewResultsInDiscoverAction: React.FC<ViewResultsInDiscoverActionProps> = 
     <EuiButtonIcon
       iconType="visTable"
       href={discoverUrl}
-      target="_blank"
       aria-label={`Check results of ${item.vars?.id.value} in Discover`}
     />
   );
@@ -100,6 +97,20 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     [onEditClick]
   );
 
+  const renderQueryColumn = useCallback(
+    (query: string) => (
+      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+        {query}
+      </EuiCodeBlock>
+    ),
+    []
+  );
+
+  const renderDiscoverResultsAction = useCallback(
+    (item) => <ViewResultsInDiscoverAction item={item} />,
+    []
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -115,15 +126,11 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
       {
         field: 'vars.query.value',
         name: 'Query',
-        render: (query: string) => (
-          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-            {query}
-          </EuiCodeBlock>
-        ),
+        render: renderQueryColumn,
       },
       {
-        name: 'Actions',
-        width: '80px',
+        name: editMode ? 'Actions' : 'View results',
+        width: '120px',
         actions: editMode
           ? [
               {
@@ -135,12 +142,12 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
             ]
           : [
               {
-                render: (item) => <ViewResultsInDiscoverAction item={item} />,
+                render: renderDiscoverResultsAction,
               },
             ],
       },
     ],
-    [editMode, renderDeleteAction, renderEditAction]
+    [editMode, renderDeleteAction, renderDiscoverResultsAction, renderEditAction, renderQueryColumn]
   );
 
   const sorting = useMemo(

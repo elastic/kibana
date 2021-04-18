@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -31,7 +32,10 @@ const LiveQueryDetailsActionsMenuComponent: React.FC<LiveQueryDetailsActionsMenu
   const items = useMemo(
     () => [
       <EuiContextMenuItem key="copy" icon="copy" {...discoverLinkProps}>
-        {'View results in Discover'}
+        <FormattedMessage
+          id="xpack.osquery.liveQueryResults.viewResultsInDiscoverLabel"
+          defaultMessage="View results in Discover"
+        />
       </EuiContextMenuItem>,
     ],
     [discoverLinkProps]
@@ -40,7 +44,10 @@ const LiveQueryDetailsActionsMenuComponent: React.FC<LiveQueryDetailsActionsMenu
   const button = useMemo(
     () => (
       <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-        {'Actions'}
+        <FormattedMessage
+          id="xpack.osquery.liveQueryResults.actionsMenuButtonLabel"
+          defaultMessage="Actions"
+        />
       </EuiButton>
     ),
     [onButtonClick]
