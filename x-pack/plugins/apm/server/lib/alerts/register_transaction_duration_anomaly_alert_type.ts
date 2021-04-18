@@ -18,7 +18,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
   AlertType,
