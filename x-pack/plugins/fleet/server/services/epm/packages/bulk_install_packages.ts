@@ -45,7 +45,11 @@ export async function bulkInstallPackages({
           skipPostInstall: true,
         });
         if (installResult.error) {
-          return { name: packageName, error: installResult.error };
+          return {
+            name: packageName,
+            error: installResult.error,
+            installType: installResult.installType,
+          };
         } else {
           return {
             name: packageName,
@@ -75,7 +79,11 @@ export async function bulkInstallPackages({
     const packageName = packagesToInstall[index];
     if (result.status === 'fulfilled') {
       if (result.value && result.value.error) {
-        return { name: packageName, error: result.value.error };
+        return {
+          name: packageName,
+          error: result.value.error,
+          installType: result.value.installType,
+        };
       } else {
         return result.value;
       }
