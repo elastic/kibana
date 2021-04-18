@@ -33,7 +33,7 @@ const advancedEditorsSidebarWidth = '220px';
 const COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.indexPreview.copyRuntimeMappingsClipboardTooltip',
   {
-    defaultMessage: 'Copy Dev Console statement of the runtime mappings to the clipboard.',
+    defaultMessage: 'Copy Dev Console statement of the runtime fields to the clipboard.',
   }
 );
 
