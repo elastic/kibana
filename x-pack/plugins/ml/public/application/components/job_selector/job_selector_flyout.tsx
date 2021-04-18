@@ -31,6 +31,8 @@ import {
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import { JobSelectionMaps } from './job_selector';
+import { useStorage } from '../../contexts/ml/use_storage';
+import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
@@ -71,11 +73,15 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     },
   } = useMlKibana();
 
+  const [applyTimeRangeConfig, setApplyTimeRange] = useStorage<ApplyTimeRangeConfig>(
+    ML_APPLY_TIME_RANGE_CONFIG
+  );
+
+  const applyTimeRange = applyTimeRangeConfig ?? true;
   const [newSelection, setNewSelection] = useState(selectedIds);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
-  const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
