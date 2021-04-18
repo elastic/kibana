@@ -49,8 +49,11 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
     const setupStatus = await setupIngestManager(soClient, esClient);
     const body: PostIngestSetupResponse = {
       isInitialized: true,
-      nonFatalPackageUpgradeErrors: setupStatus.nonFatalPackageUpgradeErrors,
     };
+
+    if (setupStatus.nonFatalPackageUpgradeErrors.length > 0) {
+      body.nonFatalPackageUpgradeErrors = setupStatus.nonFatalPackageUpgradeErrors;
+    }
 
     return response.ok({
       body,
