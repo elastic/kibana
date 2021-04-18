@@ -44,8 +44,7 @@ import {
   INVESTIGATION_NOTES_TEXTAREA,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
-  MACHINE_LEARNING_DROPDOWN,
-  MACHINE_LEARNING_LIST,
+  MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TACTIC_BUTTON,
@@ -86,6 +85,7 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
+  MACHINE_LEARNING_DROPDOWN_ITEM,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -434,14 +434,17 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  cy.get(MACHINE_LEARNING_DROPDOWN).click({ force: true });
-  cy.contains(MACHINE_LEARNING_LIST, rule.machineLearningJob).click();
+  rule.machineLearningJobs.forEach((machineLearningJob) => {
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+    cy.contains(MACHINE_LEARNING_DROPDOWN_ITEM, machineLearningJob).click();
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+  });
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
     force: true,
   });
   getDefineContinueButton().should('exist').click({ force: true });
 
-  cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
 };
 
 export const goToDefineStepTab = () => {
@@ -476,7 +479,7 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForAlertsToPopulate = async () => {
+export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
@@ -485,7 +488,7 @@ export const waitForAlertsToPopulate = async () => {
         .invoke('text')
         .then((countText) => {
           const alertCount = parseInt(countText, 10) || 0;
-          return alertCount > 0;
+          return alertCount >= alertCountThreshold;
         });
     },
     { interval: 500, timeout: 12000 }
