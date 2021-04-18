@@ -19,7 +19,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { baseRuleFieldMap } from '../common';
+import type { BaseRuleFieldMap } from '../common';
 import { RuleRegistry } from './rule_registry';
 
 interface RuleRegistrySetupPlugins {
@@ -40,7 +40,7 @@ export class Plugin
 
   public setup(core: CoreSetup<RuleRegistryStartPlugins>, plugins: RuleRegistrySetupPlugins) {
     const rootRegistry = new RuleRegistry({
-      fieldMap: baseRuleFieldMap,
+      fieldMap: {} as BaseRuleFieldMap,
       alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
     });
     return {
