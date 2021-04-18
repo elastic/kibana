@@ -31,8 +31,6 @@ import {
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import { JobSelectionMaps } from './job_selector';
-import { useStorage } from '../../contexts/ml/use_storage';
-import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
@@ -53,6 +51,8 @@ export interface JobSelectorFlyoutProps {
   timeseriesOnly: boolean;
   maps: JobSelectionMaps;
   withTimeRangeSelector?: boolean;
+  applyTimeRangeConfig?: boolean;
+  setApplyTimeRangeConfig?: (v: boolean) => void;
 }
 
 export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
@@ -64,6 +64,8 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   onSelectionConfirmed,
   onFlyoutClose,
   maps,
+  applyTimeRangeConfig,
+  setApplyTimeRangeConfig,
   withTimeRangeSelector = true,
 }) => {
   const {
@@ -73,11 +75,11 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     },
   } = useMlKibana();
 
-  const [applyTimeRangeConfig, setApplyTimeRange] = useStorage<ApplyTimeRangeConfig>(
-    ML_APPLY_TIME_RANGE_CONFIG
-  );
+  const [applyTimeRangeState, setApplyTimeRangeState] = useState<boolean>(true);
 
-  const applyTimeRange = applyTimeRangeConfig ?? true;
+  const handleToggleApplyTimeRange = setApplyTimeRangeConfig ?? setApplyTimeRangeState;
+  const applyTimeRange = applyTimeRangeConfig ?? applyTimeRangeState;
+
   const [newSelection, setNewSelection] = useState(selectedIds);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -124,7 +126,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   }
 
   function toggleTimerangeSwitch() {
-    setApplyTimeRange(!applyTimeRange);
+    handleToggleApplyTimeRange(!applyTimeRange);
   }
 
   function clearSelection() {
