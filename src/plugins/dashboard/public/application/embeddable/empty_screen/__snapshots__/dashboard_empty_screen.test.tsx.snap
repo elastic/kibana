@@ -287,7 +287,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
             <h3
               className="euiTitle euiTitle--xsmall"
             >
-              Add your first panel
+              Add your first visualization
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -617,9 +617,11 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
                       className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
@@ -962,9 +964,11 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
                       className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
