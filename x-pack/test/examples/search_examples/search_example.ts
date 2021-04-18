@@ -22,21 +22,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await comboBox.set('indexPatternSelector', 'logstash-*');
       await comboBox.set('searchBucketField', 'geo.src');
       await comboBox.set('searchMetricField', 'memory');
-    });
-
-    it('should have an other bucket', async () => {
       await PageObjects.timePicker.setAbsoluteRange(
         'Mar 1, 2015 @ 00:00:00.000',
         'Nov 1, 2015 @ 00:00:00.000'
       );
+    });
+
+    it('should have an other bucket', async () => {
       await testSubjects.click('searchSourceWithOther');
       await testSubjects.click('responseTab');
       const codeBlock = await testSubjects.find('responseCodeBlock');
       await retry.waitFor('get code block', async () => {
         const visibleText = await codeBlock.getVisibleText();
         const parsedResponse = JSON.parse(visibleText);
-        const otherBucket = parsedResponse.aggregations[1].buckets[2];
-        return otherBucket.key === '__other__' && otherBucket.doc_count === 9039;
+        const buckets = parsedResponse.aggregations[1].buckets;
+        return (
+          buckets.length === 3 && buckets[2].key === '__other__' && buckets[2].doc_count === 9039
+        );
+      });
+    });
+
+    it('should not have an other bucket', async () => {
+      await testSubjects.click('searchSourceWithoutOther');
+      await testSubjects.click('responseTab');
+      const codeBlock = await testSubjects.find('responseCodeBlock');
+      await retry.waitFor('get code block', async () => {
+        const visibleText = await codeBlock.getVisibleText();
+        const parsedResponse = JSON.parse(visibleText);
+        const buckets = parsedResponse.aggregations[1].buckets;
+        return buckets.length === 2;
       });
     });
   });
