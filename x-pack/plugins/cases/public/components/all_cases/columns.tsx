@@ -53,7 +53,7 @@ const TagWrapper = styled(EuiBadgeGroup)`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
-interface GetCasesColumn {
+export interface GetCasesColumn {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
