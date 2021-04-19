@@ -12,13 +12,13 @@ import { LocationDurationLine } from '../../../../common/types';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
 import { AnomalyRecords } from '../../../state/actions';
 import { DurationChartComponent } from '../../common/charts';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
 
 interface DurationChartProps {
   loading: boolean;
   hasMLJob: boolean;
   anomalies: AnomalyRecords | null;
   locationDurationLines: LocationDurationLine[];
+  exploratoryViewLink: string;
 }
 
 /**
@@ -28,28 +28,15 @@ interface DurationChartProps {
  * @param props The props required for this component to render properly
  */
 export const MonitorDurationComponent = ({
+  exploratoryViewLink,
   locationDurationLines,
   anomalies,
   loading,
   hasMLJob,
 }: DurationChartProps) => {
-  const exploratoryViewLink = createExploratoryViewUrl(
-    {
-      [`${serviceName}-page-views`]: {
-        reportType: 'pld',
-        time: { from: rangeFrom!, to: rangeTo! },
-        reportDefinitions: {
-          'service.name': serviceName?.[0] as string,
-        },
-        ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
-      },
-    },
-    http?.basePath.get()
-  );
-
   return (
     <EuiPanel paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
@@ -72,7 +59,7 @@ export const MonitorDurationComponent = ({
           <MLIntegrationComponent />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" isDisabled={!serviceName?.[0]} href={exploratoryViewLink}>
+          <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>
             <FormattedMessage id="xpack.apm.csm.pageViews.analyze" defaultMessage="Analyze" />
           </EuiButton>
         </EuiFlexItem>
