@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct error rate data 1`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct error rate data 1`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -69,7 +69,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct error rate data 2`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct error rate data 2`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -138,7 +138,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct latency data 1`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct latency data 1`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -207,7 +207,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct latency data 2`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct latency data 2`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -276,7 +276,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct throughput data 1`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct throughput data 1`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -345,7 +345,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns data with previous period returns correct throughput data 2`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns data with previous period returns correct throughput data 2`] = `
 Array [
   Object {
     "x": 1607436720000,
@@ -414,7 +414,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 1`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns the correct data 1`] = `
 Array [
   Object {
     "x": 1607435820000,
@@ -543,7 +543,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 2`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns the correct data 2`] = `
 Array [
   Object {
     "x": 1607435820000,
@@ -672,7 +672,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 3`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns the correct data 3`] = `
 Array [
   Object {
     "x": 1607435820000,
@@ -801,7 +801,7 @@ Array [
 ]
 `;
 
-exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data for latency aggregation 99th percentile 1`] = `
+exports[`APM API tests basic apm_8.0.0 Transaction groups detailed statistics when data is loaded returns the correct data for latency aggregation 99th percentile 1`] = `
 Array [
   Object {
     "x": 1607435820000,

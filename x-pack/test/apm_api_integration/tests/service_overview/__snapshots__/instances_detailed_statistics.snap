@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Service overview instances comparison statistics when data is loaded fetching data with comparison returns the right data for current and previous periods 5`] = `
+exports[`APM API tests basic apm_8.0.0 Service overview instances detailed statistics when data is loaded fetching data with comparison returns the right data for current and previous periods 5`] = `
 Object {
   "currentPeriod": Object {
     "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c": Object {
@@ -675,7 +675,7 @@ Object {
 }
 `;
 
-exports[`APM API tests basic apm_8.0.0 Service overview instances comparison statistics when data is loaded fetching data without comparison returns the right data 3`] = `
+exports[`APM API tests basic apm_8.0.0 Service overview instances detailed statistics when data is loaded fetching data without comparison returns the right data 3`] = `
 Object {
   "currentPeriod": Object {
     "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c": Object {

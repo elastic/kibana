@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
-type TransactionsGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
+type TransactionsGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,13 +22,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   registry.when(
-    'Transaction groups primary statistics when data is not loaded',
+    'Transaction groups main statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/primary_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -47,13 +47,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Transaction groups primary statistics when data is loaded',
+    'Transaction groups main statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/primary_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
@@ -125,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data for latency aggregation 99th percentile', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/primary_statistics`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/main_statistics`,
             query: {
               start,
               end,
