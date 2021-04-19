@@ -413,16 +413,6 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
-    public async clickMarkdownQuickButton() {
-      log.debug('Click markdown quick button');
-      await testSubjects.click('dashboardMarkdownQuickButton');
-    }
-
-    public async clickInputControlsQuickButton() {
-      log.debug('Click input controls quick button');
-      await testSubjects.click('dashboardInputControlsQuickButton');
-    }
-
     /**
      *
      * @param dashboardTitle {String}
