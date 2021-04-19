@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const bodySchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
 
@@ -70,11 +69,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
 }
 
-export function registerGetRoute({
-  router,
-  lib: { handleEsError },
-  getLicenseStatus,
-}: RouteDependencies) {
+export function registerGetRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/indices',
@@ -82,7 +77,7 @@ export function registerGetRoute({
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { pattern } = request.body;
 
       try {

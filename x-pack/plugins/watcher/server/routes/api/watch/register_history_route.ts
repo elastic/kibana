@@ -11,7 +11,6 @@ import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
@@ -51,8 +50,8 @@ function fetchHistoryItems(dataClient: IScopedClusterClient, watchId: any, start
 
 export function registerHistoryRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.get(
     {
@@ -62,7 +61,7 @@ export function registerHistoryRoute({
         query: querySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
       const { startTime } = request.query;
 

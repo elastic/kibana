@@ -10,7 +10,6 @@ import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item/index';
 
@@ -35,8 +34,8 @@ function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: 
 
 export function registerLoadHistoryRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.get(
     {
@@ -45,7 +44,7 @@ export function registerLoadHistoryRoute({
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const id = request.params.id;
 
       try {

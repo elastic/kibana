@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -35,8 +34,8 @@ function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: 
 
 export function registerVisualizeRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.post(
     {
@@ -45,7 +44,7 @@ export function registerVisualizeRoute({
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
       const body = watch.getVisualizeQuery(options);

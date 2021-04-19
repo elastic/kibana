@@ -9,7 +9,6 @@ import { DeleteWatchResponse } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
@@ -45,7 +44,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
   });
 }
 
-export function registerDeleteRoute({ router, getLicenseStatus }: RouteDependencies) {
+export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/watches/delete',
@@ -53,7 +52,7 @@ export function registerDeleteRoute({ router, getLicenseStatus }: RouteDependenc
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const results = await deleteWatches(ctx.core.elasticsearch.client, request.body.watchIds);
       return response.ok({ body: { results } });
     })

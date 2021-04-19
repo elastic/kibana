@@ -268,9 +268,11 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
               className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -1300,9 +1302,11 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
               className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -2027,9 +2031,11 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
               className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -2754,9 +2760,11 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
               className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -3481,9 +3489,11 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
               className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div

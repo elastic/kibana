@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -24,8 +23,8 @@ function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
 
 export function registerDeleteRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.delete(
     {
@@ -34,7 +33,7 @@ export function registerDeleteRoute({
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {

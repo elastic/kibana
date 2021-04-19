@@ -11,7 +11,6 @@ import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status/index';
 import { RouteDependencies } from '../../../../types';
-import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -29,8 +28,8 @@ function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, ac
 
 export function registerAcknowledgeRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.put(
     {
@@ -39,7 +38,7 @@ export function registerAcknowledgeRoute({
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId, actionId } = request.params;
 
       try {

@@ -10,6 +10,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      role="main"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"

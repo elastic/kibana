@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
@@ -29,8 +28,8 @@ function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
 
 export function registerListFieldsRoute({
   router,
+  license,
   lib: { handleEsError },
-  getLicenseStatus,
 }: RouteDependencies) {
   router.post(
     {
@@ -39,7 +38,7 @@ export function registerListFieldsRoute({
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { indexes } = request.body;
 
       try {

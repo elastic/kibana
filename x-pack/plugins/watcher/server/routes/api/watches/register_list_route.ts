@@ -10,7 +10,6 @@ import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
@@ -29,17 +28,13 @@ function fetchWatches(dataClient: IScopedClusterClient) {
     .then(({ body: response }) => fetchAllFromScroll(response, dataClient));
 }
 
-export function registerListRoute({
-  router,
-  lib: { handleEsError },
-  getLicenseStatus,
-}: RouteDependencies) {
+export function registerListRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       try {
         const hits = await fetchWatches(ctx.core.elasticsearch.client);
         const watches = hits.map((hit: any) => {

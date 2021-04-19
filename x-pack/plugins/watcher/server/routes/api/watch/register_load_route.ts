@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 import { RouteDependencies } from '../../../types';
@@ -25,11 +24,7 @@ function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
     .then(({ body }) => body);
 }
 
-export function registerLoadRoute({
-  router,
-  lib: { handleEsError },
-  getLicenseStatus,
-}: RouteDependencies) {
+export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: '/api/watcher/watch/{id}',
@@ -37,7 +32,7 @@ export function registerLoadRoute({
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const id = request.params.id;
 
       try {

@@ -7,11 +7,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
 import { esKuery } from '../../es_query';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -23,7 +24,7 @@ export const validateConvertFilterToKueryNode = (
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -109,7 +110,15 @@ export const validateFilterKueryNode = ({
   return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
     if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
       localNestedKeys = ast.value;
+    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+      const key = ast.value.replace('.attributes', '');
+      const mappingKey = 'properties.' + key.split('.').join('.properties.');
+      const field = get(indexMapping, mappingKey);
+      if (field != null && field.type === 'nested') {
+        localNestedKeys = ast.value;
+      }
     }
+
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
       return [
@@ -121,7 +130,7 @@ export const validateFilterKueryNode = ({
           storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
           path: `${myPath}.arguments`,
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
-          nestedKeys: localNestedKeys,
+          nestedKeys: localNestedKeys || nestedKeys,
         }),
       ];
     }
@@ -226,7 +235,7 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
     return true;
   }
 
-  // If the path is for a flattned type field, we'll assume the mappings are defined.
+  // If the path is for a flattened type field, we'll assume the mappings are defined.
   const keys = key.split('.');
   for (let i = 0; i < keys.length; i++) {
     const path = `properties.${keys.slice(0, i + 1).join('.properties.')}`;

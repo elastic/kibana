@@ -9,7 +9,6 @@ import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchClusterSettings(client: IScopedClusterClient) {
   return client.asCurrentUser.cluster
@@ -20,17 +19,13 @@ function fetchClusterSettings(client: IScopedClusterClient) {
     .then(({ body }) => body);
 }
 
-export function registerLoadRoute({
-  router,
-  lib: { handleEsError },
-  getLicenseStatus,
-}: RouteDependencies) {
+export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: '/api/watcher/settings',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       try {
         const settings = await fetchClusterSettings(ctx.core.elasticsearch.client);
         return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });

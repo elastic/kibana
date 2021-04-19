@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   id: schema.string(),
@@ -25,11 +24,7 @@ const bodySchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export function registerSaveRoute({
-  router,
-  lib: { handleEsError },
-  getLicenseStatus,
-}: RouteDependencies) {
+export function registerSaveRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: '/api/watcher/watch/{id}',
@@ -38,7 +33,7 @@ export function registerSaveRoute({
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(getLicenseStatus, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { id } = request.params;
       const { type, isNew, isActive, ...watchConfig } = request.body;
 

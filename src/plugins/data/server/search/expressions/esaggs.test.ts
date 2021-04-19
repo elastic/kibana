@@ -108,11 +108,13 @@ describe('esaggs expression function - server', () => {
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
-      aggs: { foo: 'bar' },
+      aggs: {
+        foo: 'bar',
+        hierarchical: args.metricsAtAllLevels,
+      },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
