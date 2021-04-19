@@ -68,7 +68,7 @@ export const ENABLE_ML_JOB_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobWarningTitle',
   {
     defaultMessage:
-      'This ML job is not currently running. Please set this job to run via "ML job settings" before activating this rule.',
+      'One or more selected ML jobs are not currently running. Please set these job(s) to run via "ML job settings" before activating this rule.',
   }
 );
 

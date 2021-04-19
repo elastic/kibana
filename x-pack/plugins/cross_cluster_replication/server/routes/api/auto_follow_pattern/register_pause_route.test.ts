@@ -8,9 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../shared_imports';
+import { isEsError, License } from '../../../shared_imports';
 import { formatEsError } from '../../../lib/format_es_error';
-import { License } from '../../../services';
 import { mockRouteContext } from '../test_lib';
 import { registerPauseRoute } from './register_pause_route';
 
