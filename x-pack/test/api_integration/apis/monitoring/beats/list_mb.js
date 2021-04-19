@@ -13,7 +13,7 @@ export default function ({ getService }) {
 
   describe('list mb', () => {
     describe('with restarted beat instance', () => {
-      const archive = 'monitoring/beats-with-restarted-instance_mb';
+      const archive = 'monitoring/beats_with_restarted_instance_mb';
       const timeRange = {
         min: '2018-02-09T20:49:00Z',
         max: '2018-02-09T21:50:00Z',
