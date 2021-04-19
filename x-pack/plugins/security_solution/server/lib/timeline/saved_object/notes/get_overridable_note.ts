@@ -9,6 +9,11 @@ import { NoteResult, SavedNote } from '../../../../../common/types/timeline/note
 import { FrameworkRequest } from '../../../framework';
 import { getNote } from './saved_object';
 
+/**
+ * When importing timeline with an existing note by others, we don't want override the owner.
+ *  In this case we can set overrideOwner to false to keep the original author
+ */
+
 export const getOverridableNote = async (
   frameworkRequest: FrameworkRequest,
   note: NoteResult,
