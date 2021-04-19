@@ -31,13 +31,13 @@ const cancelButtonText = i18n.translate(
 const applyChangesText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalConfirmButtonText',
   {
-    defaultMessage: 'Disable editor',
+    defaultMessage: 'Close editor',
   }
 );
 const modalMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.runtimeEditorSwitchModalBodyText',
   {
-    defaultMessage: `The changes in the editor haven't been applied yet. By disabling the editor you will lose your edits.`,
+    defaultMessage: `The changes in the editor haven't been applied yet. By closing the editor you will lose your edits.`,
   }
 );
 

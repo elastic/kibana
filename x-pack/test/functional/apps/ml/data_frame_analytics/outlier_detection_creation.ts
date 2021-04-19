@@ -72,6 +72,11 @@ export default function ({ getService }: FtrProviderContext) {
             // anti-aliasing
             { color: '#F5F7FA', percentage: 30 },
           ],
+          runtimeFieldsEditorContent: [
+            '{',
+            '  "lowercase_central_air": {',
+            '    "type": "keyword",',
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
