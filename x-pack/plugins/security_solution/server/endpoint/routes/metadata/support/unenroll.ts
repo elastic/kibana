@@ -57,8 +57,8 @@ export async function findAllUnenrolledAgentIds(
     //      NOT enrolled with an Agent Policy that has endpoint
     // 2b.  If we don't have a list of agent policies, then we don't want any active agent at all
     const kuery = `(active : false) OR (active: true${
-      includeAgentPolicyFilter ? ` AND NOT policy_id:(${policyIdString}` : ''
-    } ))`;
+      includeAgentPolicyFilter ? ` AND NOT policy_id:(${policyIdString})` : ''
+    } )`;
 
     return {
       page: pageNum,
