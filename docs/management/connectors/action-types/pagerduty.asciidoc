@@ -41,6 +41,20 @@ Secrets defines sensitive information for the connector type.
 `routingKey`:: A string that corresponds to *Integration Key*.
 
 [float]
+[[define-pagerduty-ui]]
+==== Define connector in Stack Management
+
+Define PagerDuty connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/pagerduty-connector.png[PagerDuty connector]
+
+Test PagerDuty action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/pagerduty-params-test.png[PagerDuty params test]
+
+[float]
 [[pagerduty-action-configuration]]
 ==== Action configuration
 
@@ -70,14 +84,14 @@ By integrating PagerDuty with rules, you can:
 
 [float]
 [[pagerduty-support]]
-===== Support
+==== Support
 If you need help with this integration, get in touch with the {kib} team by visiting
 https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {kib} Help menu.
 You can also select the {kib} category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
-===== Integration with PagerDuty walkthrough
+==== Integration with PagerDuty walkthrough
 
 [[pagerduty-in-pagerduty]]
 *In PagerDuty*
@@ -101,7 +115,7 @@ and select *Elastic Alerts* from the *Integration Type* menu.
 You will be redirected to the *Integrations* tab for your service. An Integration Key is generated on this screen.
 +
 [role="screenshot"]
-image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab]
+image::images/pagerduty-integration.png[PagerDuty Integrations tab]
 
 . Save this key, as you will use it when you configure the integration with Elastic in the next section.
 
