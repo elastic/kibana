@@ -1,8 +1,8 @@
 [[save-open-search]]
 == Save a search
 A saved search persists your current view of Discover for
-later retrieval and reuse. You can reload a saved search into Discover, a
-dd it to a dashboard, and use it as the basis for a visualization.
+later retrieval and reuse. You can reload a saved search into Discover,
+add it to a dashboard, and use it as the basis for a visualization.
 
 A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
 
