@@ -961,6 +961,7 @@
           ],
           "children": [
             {
+              "id": "def-public.SpacesOssPluginSetup.registerSpacesApi.$1",
               "type": "Object",
               "label": "provider",
               "isRequired": true,
