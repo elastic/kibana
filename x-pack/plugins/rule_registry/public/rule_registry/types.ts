@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertTypeRegistryContract } from '../../../triggers_actions_ui/public';
-import { BaseRuleFieldMap, FieldMap } from '../../common';
+import type { AlertTypeRegistryContract } from '../../../triggers_actions_ui/public';
+import type { BaseRuleFieldMap, FieldMap } from '../../common';
 
 export interface RuleRegistryConstructorOptions<TFieldMap extends BaseRuleFieldMap> {
   fieldMap: TFieldMap;
