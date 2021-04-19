@@ -34,6 +34,7 @@ describe('Component', () => {
         ariaLabel={longString}
         url={url}
         onClick={jest.fn()}
+        highestIndex={10}
       />
     );
 
@@ -45,7 +46,13 @@ describe('Component', () => {
 
   it('renders screen reader only text', () => {
     const { getByTestId } = render(
-      <MiddleTruncatedText index={1} text={longString} ariaLabel={longString} url={url} />
+      <MiddleTruncatedText
+        index={1}
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        highestIndex={10}
+      />
     );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
@@ -55,7 +62,13 @@ describe('Component', () => {
 
   it('renders external link', () => {
     const { getByText } = render(
-      <MiddleTruncatedText index={1} text={longString} ariaLabel={longString} url={url} />
+      <MiddleTruncatedText
+        index={1}
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        highestIndex={10}
+      />
     );
     const link = getByText('Open resource in new tab').closest('a');
 
@@ -72,6 +85,7 @@ describe('Component', () => {
         ariaLabel={longString}
         url={url}
         onClick={handleClick}
+        highestIndex={10}
       />
     );
     const button = getByTestId('middleTruncatedTextButton1');
