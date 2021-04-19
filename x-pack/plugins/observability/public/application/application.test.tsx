@@ -10,6 +10,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
+import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
 import { renderApp } from './';
 
 describe('renderApp', () => {
@@ -51,7 +52,12 @@ describe('renderApp', () => {
     } as unknown) as AppMountParameters;
 
     expect(() => {
-      const unmount = renderApp(core, plugins, params);
+      const unmount = renderApp({
+        core,
+        plugins,
+        appMountParameters: params,
+        observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      });
       unmount();
     }).not.toThrowError();
   });

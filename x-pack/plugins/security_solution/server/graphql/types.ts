@@ -300,6 +300,7 @@ export enum RowRendererId {
   system_fim = 'system_fim',
   system_security_event = 'system_security_event',
   system_socket = 'system_socket',
+  threat_match = 'threat_match',
   zeek = 'zeek',
 }
 

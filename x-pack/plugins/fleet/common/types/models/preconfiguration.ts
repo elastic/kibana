@@ -28,6 +28,4 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
   >;
 }
 
-export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'> {
-  force?: boolean;
-}
+export type PreconfiguredPackage = Omit<PackagePolicyPackage, 'title'>;
