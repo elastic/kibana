@@ -2560,7 +2560,7 @@
         },
         "layerTypes": {
           "properties": {
-            "EMS_BASEMAP": {
+            "ems_basemap": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2576,7 +2576,7 @@
                 }
               }
             },
-            "EMS_REGION": {
+            "ems_region": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2592,7 +2592,7 @@
                 }
               }
             },
-            "ES_AGG_CLUSTERS": {
+            "es_agg_clusters": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2608,7 +2608,7 @@
                 }
               }
             },
-            "ES_AGG_GRIDS": {
+            "es_agg_grids": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2624,7 +2624,7 @@
                 }
               }
             },
-            "ES_AGG_HEATMAP": {
+            "es_agg_heatmap": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2640,7 +2640,7 @@
                 }
               }
             },
-            "ES_TOP_HITS": {
+            "es_top_hits": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2656,7 +2656,7 @@
                 }
               }
             },
-            "ES_DOCS": {
+            "es_docs": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2672,7 +2672,7 @@
                 }
               }
             },
-            "ES_POINT_TO_POINT": {
+            "es_point_to_point": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2688,7 +2688,7 @@
                 }
               }
             },
-            "ES_TRACKS": {
+            "es_tracks": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2704,7 +2704,7 @@
                 }
               }
             },
-            "KBN_REGION": {
+            "kbn_region": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2720,7 +2720,7 @@
                 }
               }
             },
-            "KBN_TMS_RASTER": {
+            "kbn_tms_raster": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2736,7 +2736,7 @@
                 }
               }
             },
-            "UX_TMS_MVT": {
+            "ux_tms_mvt": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2752,7 +2752,7 @@
                 }
               }
             },
-            "UX_TMS_RASTER": {
+            "ux_tms_raster": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2768,7 +2768,7 @@
                 }
               }
             },
-            "UX_WMS": {
+            "ux_wms": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2788,7 +2788,7 @@
         },
         "scalingOptions": {
           "properties": {
-            "LIMIT": {
+            "limit": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2804,7 +2804,7 @@
                 }
               }
             },
-            "CLUSTERS": {
+            "clusters": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2820,7 +2820,7 @@
                 }
               }
             },
-            "MVT": {
+            "mvt": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2840,7 +2840,7 @@
         },
         "joins": {
           "properties": {
-            "TERM": {
+            "term": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2860,7 +2860,7 @@
         },
         "basemaps": {
           "properties": {
-            "AUTO": {
+            "auto": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2876,7 +2876,7 @@
                 }
               }
             },
-            "DARK": {
+            "dark": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2892,7 +2892,7 @@
                 }
               }
             },
-            "ROADMAP": {
+            "roadmap": {
               "properties": {
                 "min": {
                   "type": "long"
@@ -2908,7 +2908,7 @@
                 }
               }
             },
-            "ROADMAP_DESATURATED": {
+            "roadmap_desaturated": {
               "properties": {
                 "min": {
                   "type": "long"
