@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { parse, format } from 'url';
+import { uniqBy } from 'lodash';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -31,9 +32,14 @@ export function AlertDetails({ alerts }: AlertDetailProps) {
     urlParams: { rangeFrom, rangeTo },
   } = useUrlParams();
 
+  const collapsedAlerts = uniqBy(
+    alerts,
+    (alert) => alert['kibana.rac.alert.id']!
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {alerts.map((alert) => {
+      {collapsedAlerts.map((alert) => {
         const ruleType = apmRuleRegistry.getTypeByRuleId(alert['rule.id']!);
         const formatted = {
           link: undefined,

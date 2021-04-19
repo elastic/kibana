@@ -9,7 +9,6 @@ import { ValuesType } from 'utility-types';
 import { RectAnnotation } from '@elastic/charts';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { rgba } from 'polished';
-import { AlertType } from '../../../../../common/alert_types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type Alert = ValuesType<
@@ -18,19 +17,8 @@ type Alert = ValuesType<
 
 function getAlertColor({ theme, ruleId }: { ruleId: string; theme: EuiTheme }) {
   switch (ruleId) {
-    case AlertType.ErrorCount:
-      // TODO: pick color
+    default:
       return theme.eui.euiColorVis2;
-
-    case AlertType.TransactionDuration:
-      return theme.eui.euiColorVis1;
-
-    case AlertType.TransactionErrorRate:
-      return theme.eui.euiColorVis7;
-
-    case AlertType.TransactionDurationAnomaly:
-      // TODO: pick color
-      return theme.eui.euiColorVis3;
   }
 }
 

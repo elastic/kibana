@@ -126,7 +126,9 @@ export function LatencyChart({ height }: Props) {
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={anomalyTimeseries}
           alerts={alerts.filter(
-            (alert) => alert['rule.id'] === AlertType.TransactionDuration
+            (alert) =>
+              alert['rule.id'] === AlertType.TransactionDuration ||
+              alert['rule.id'] === AlertType.TransactionDurationAnomaly
           )}
         />
       </EuiFlexItem>
