@@ -35,7 +35,7 @@ import {
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
-export async function getServiceTransactionGroupComparisonStatistics({
+export async function getServiceTransactionGroupDetailedStatistics({
   environment,
   kuery,
   serviceName,
@@ -69,7 +69,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
   }>
 > {
   return withApmSpan(
-    'get_service_transaction_group_comparison_statistics',
+    'get_service_transaction_group_detailed_statistics',
     async () => {
       const { apmEventClient } = setup;
       const { intervalString } = getBucketSize({ start, end, numBuckets });
@@ -185,7 +185,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
   );
 }
 
-export async function getServiceTransactionGroupComparisonStatisticsPeriods({
+export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   serviceName,
   transactionNames,
   setup,
@@ -224,7 +224,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
     kuery,
   };
 
-  const currentPeriodPromise = getServiceTransactionGroupComparisonStatistics({
+  const currentPeriodPromise = getServiceTransactionGroupDetailedStatistics({
     ...commonProps,
     start,
     end,
@@ -232,7 +232,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
 
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
-      ? getServiceTransactionGroupComparisonStatistics({
+      ? getServiceTransactionGroupDetailedStatistics({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
