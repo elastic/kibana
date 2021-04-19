@@ -16,6 +16,7 @@
   // Sticky footer doesn't correct work with inline-flex in Firefox.
   // As footer the last element I don't see any reason to use inline-flex for this element.
   // Display: flex fixes jumping on hover in Firefox.
+  // Created issue on EUI (https://github.com/elastic/eui/issues/4729)
   .euiDataGrid--stickyFooter .euiDataGridFooter {
     display: flex;
   }
