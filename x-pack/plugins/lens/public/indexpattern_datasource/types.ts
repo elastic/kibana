@@ -87,6 +87,7 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }
 
 export interface IndexPatternRef {
