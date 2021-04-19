@@ -10,11 +10,10 @@ import { RenderResult, act, render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
-import { Ecs } from '../../../../../../../common/ecs';
 import { Provider } from 'react-redux';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ThemeProvider } from 'styled-components';
-import { createGlobalNoMiddlewareStore } from '../../../test_utils';
+import { createGlobalNoMiddlewareStore, event } from '../../../test_utils';
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
@@ -22,45 +21,6 @@ import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
 
-const event: Ecs = {
-  _id: 'unLfz3gB2mJZsMY3ytx3',
-  timestamp: '2021-04-14T15:34:15.330Z',
-  _index: '.ds-logs-endpoint.events.process-default-2021.04.12-000001',
-  event: {
-    category: ['network'],
-    id: ['2c4f51be-7736-4ab8-a255-54e7023c4653'],
-    kind: ['event'],
-    type: ['start'],
-  },
-  host: {
-    name: ['Host-tvs68wo3qc'],
-    os: {
-      family: ['windows'],
-    },
-    id: ['a563b365-2bee-40df-adcd-ae84d889f523'],
-    ip: ['10.242.233.187'],
-  },
-  user: {
-    name: ['uegem17ws4'],
-    domain: ['hr8jofpkxp'],
-  },
-  agent: {
-    type: ['endpoint'],
-  },
-  process: {
-    hash: {
-      md5: ['c4653870-99b8-4f36-abde-24812d08a289'],
-    },
-    parent: {
-      pid: [4852],
-    },
-    pid: [3652],
-    name: ['lsass.exe'],
-    args: ['"C:\\lsass.exe" \\6z9'],
-    entity_id: ['9qotd1i8rf'],
-    executable: ['C:\\lsass.exe'],
-  },
-};
 const mockTheme = getMockTheme({
   eui: {
     paddingSizes: { m: '2' },

@@ -25,9 +25,18 @@ const eventFilterCreate = async (
   store: ImmutableMiddlewareAPI<EventFilterListPageState, AppAction>,
   eventFilterService: EventFilterService
 ) => {
+  const submissionResourceState = store.getState().form.submissionResourceState;
   try {
     const formEntry = store.getState().form.entry;
     if (!formEntry) return;
+    store.dispatch({
+      type: 'eventFilterFormStateChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      },
+    });
+
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
 
     const exception = await eventFilterService.addEventFilter(sanitizedEntry);
@@ -44,7 +53,7 @@ const eventFilterCreate = async (
       payload: {
         type: 'FailedResourceState',
         error: error.body || error,
-        lastLoadedState: getLastLoadedResourceState(store.getState().form.submissionResourceState),
+        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
       },
     });
   }

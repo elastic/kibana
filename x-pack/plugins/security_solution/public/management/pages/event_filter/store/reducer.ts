@@ -57,19 +57,19 @@ const eventFilterChangeForm: CaseReducer<EventFilterChangeForm> = (state, action
   };
 };
 
-const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
-  return {
-    ...state,
-    form: {
-      ...state.form,
-      isLoadingAction: true,
-      submissionResourceState: {
-        type: 'LoadingResourceState',
-        previousState: { type: 'UninitialisedResourceState' },
-      },
-    },
-  };
-};
+// const eventFilterCreateStart: CaseReducer<EventFilterCreateStart> = (state, action) => {
+//   return {
+//     ...state,
+//     form: {
+//       ...state.form,
+//       isLoadingAction: true,
+//       submissionResourceState: {
+//         type: 'LoadingResourceState',
+//         previousState: { type: 'UninitialisedResourceState' },
+//       },
+//     },
+//   };
+// };
 
 const eventFilterFormStateChanged: CaseReducer<EventFilterFormStateChanged> = (state, action) => {
   return {
@@ -90,8 +90,8 @@ export const eventFilterPageReducer: StateReducer = (
       return eventFilterInitForm(state, action);
     case 'eventFilterChangeForm':
       return eventFilterChangeForm(state, action);
-    case 'eventFilterCreateStart':
-      return eventFilterCreateStart(state, action);
+    // case 'eventFilterCreateStart':
+    //   return eventFilterCreateStart(state, action);
     case 'eventFilterFormStateChanged':
       return eventFilterFormStateChanged(state, action);
   }
