@@ -8,18 +8,13 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.LazyLogStreamWrapper.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "infra",
-                "scope": "public",
-                "docId": "kibInfraPluginApi",
-                "section": "def-public.LogStreamProps",
-                "text": "LogStreamProps"
-              },
+              "LogStreamProps",
               ">"
             ],
             "description": [],
@@ -198,10 +193,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/server/plugin.ts",
-          "lineNumber": 65
+          "lineNumber": 64
         },
         "signature": [
-          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; container?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly query: Readonly<{} & { partitionSize: number; partitionFactor: number; }>; }"
+          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; timestamp?: string | undefined; container?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
         ],
         "initialIsOpen": false
       }
@@ -222,24 +217,18 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 76
+            "lineNumber": 75
           },
           "signature": [
             "(sourceId: string, sourceProperties: ",
-            {
-              "pluginId": "infra",
-              "scope": "common",
-              "docId": "kibInfraPluginApi",
-              "section": "def-common.InfraStaticSourceConfiguration",
-              "text": "InfraStaticSourceConfiguration"
-            },
+            "InfraStaticSourceConfiguration",
             ") => void"
           ]
         }
       ],
       "source": {
         "path": "x-pack/plugins/infra/server/plugin.ts",
-        "lineNumber": 75
+        "lineNumber": 74
       },
       "lifecycle": "setup",
       "initialIsOpen": true
