@@ -64,18 +64,18 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
       <EuiModalBody>
         <EuiImage
           src={getAssetsPath('./announcement.jpg')}
-          alt={i18n.translate('xpack.fleet.fleetServerUpgradeModal.announcementImg', {
-            defaultMessage: 'Announcement Image',
+          alt={i18n.translate('xpack.fleet.fleetServerUpgradeModal.announcementImageAlt', {
+            defaultMessage: 'Fleet Server upgrade announcement',
           })}
         />
         <EuiSpacer size="m" />
         <EuiText>
           {isCloud ? (
             <FormattedMessage
-              id="xpack.fleet.fleetServerUpgradeModal.textPart1Cloud"
-              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had APM on Elastic Cloud, we've upgraded it to APM & Fleet. {strong} To continue using Fleet, you must install a Fleet Server and the new version of Elastic Agent on each host. Learn more in our {link}."
+              id="xpack.fleet.fleetServerUpgradeModal.cloudDescriptionMessage"
+              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had APM on Elastic Cloud, we've upgraded it to APM & Fleet. {existingAgentsMessage} To continue using Fleet, you must install a Fleet Server and the new version of Elastic Agent on each host. Learn more in our {link}."
               values={{
-                strong: (
+                existingAgentsMessage: (
                   <strong>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerUpgradeModal.existingAgentText"
@@ -98,10 +98,10 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
             />
           ) : (
             <FormattedMessage
-              id="xpack.fleet.fleetServerUpgradeModal.textPart1OnPremise"
-              defaultMessage="Fleet Server is now available and it provides improved scalability and security. {strong} To continue using Fleet, you must install a Fleet Server and the new version of Elastic Agent on each host. Learn more in our {link}."
+              id="xpack.fleet.fleetServerUpgradeModal.onPremDescriptionMessage"
+              defaultMessage="Fleet Server is now available and it provides improved scalability and security. {existingAgentsMessage} To continue using Fleet, you must install a Fleet Server and the new version of Elastic Agent on each host. Learn more in our {link}."
               values={{
-                strong: (
+                existingAgentsMessage: (
                   <strong>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerUpgradeModal.existingAgentText"
@@ -127,7 +127,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
         <EuiSpacer size="l" />
         <EuiText>
           <FormattedMessage
-            id="xpack.fleet.fleetServerUpgradeModal.textPart1"
+            id="xpack.fleet.fleetServerUpgradeModal.breakingChangeMessage"
             defaultMessage="This is a breaking change, which is why we are making it in a beta release. We are sorry for the inconvenience. Please share {link} if you have questions or need help."
             values={{
               link: (
