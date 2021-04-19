@@ -82,6 +82,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { pageIndex, sort } = tableOptions;
@@ -132,6 +133,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       direction,
       field,
       comparisonType,
+      comparisonEnabled,
     ]
   );
 

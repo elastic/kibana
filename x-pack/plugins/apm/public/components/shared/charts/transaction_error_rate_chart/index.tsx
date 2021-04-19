@@ -68,6 +68,7 @@ export function TransactionErrorRateChart({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(

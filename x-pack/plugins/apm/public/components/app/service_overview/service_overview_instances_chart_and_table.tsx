@@ -83,6 +83,7 @@ export function ServiceOverviewInstancesChartAndTable({
       start,
       end,
       comparisonType,
+      comparisonEnabled,
     },
   } = useUrlParams();
 
@@ -90,6 +91,7 @@ export function ServiceOverviewInstancesChartAndTable({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const {
@@ -153,6 +155,7 @@ export function ServiceOverviewInstancesChartAndTable({
       field,
       direction,
       comparisonType,
+      comparisonEnabled,
     ]
   );
 

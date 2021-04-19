@@ -77,6 +77,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -128,6 +129,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       direction,
       field,
       comparisonType,
+      comparisonEnabled,
     ]
   );
 
