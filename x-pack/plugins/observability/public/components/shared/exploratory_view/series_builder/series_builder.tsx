@@ -228,9 +228,12 @@ export function SeriesBuilder() {
   );
 }
 
-const INITIATING_VIEW = i18n.translate('xpack.observability.expView.seriesBuilder.initView', {
-  defaultMessage: 'Initiating view ...',
-});
+export const INITIATING_VIEW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.initView',
+  {
+    defaultMessage: 'Initiating view ...',
+  }
+);
 
 const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
