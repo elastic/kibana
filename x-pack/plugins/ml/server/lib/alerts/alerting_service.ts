@@ -448,7 +448,9 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
   };
 
   /**
-   * Fetches the most recent anomaly.
+   * Fetches the most recent anomaly according the top N buckets within the lookback interval
+   * that satisfies a rule criteria.
+   *
    * @param params - Alert params
    */
   const fetchResult = async (
@@ -485,7 +487,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     const lookBackTimeInterval =
       params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
 
-    const topNBuckets = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
+    const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
     const requestBody = {
       size: 0,
@@ -535,7 +537,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             ...getResultTypeAggRequest(params.resultType, params.severity),
             truncate: {
               bucket_sort: {
-                size: topNBuckets ?? 1,
+                size: topNBuckets,
               },
             },
           },
