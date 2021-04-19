@@ -20,25 +20,23 @@ const getThreatSummaryRows = (
   data: TimelineEventsDetailsItem[],
   timelineId: string,
   eventId: string
-) => {
-  return data
-    .reduce((acc, { field, originalValue }) => {
-      const index = SORTED_THREAT_SUMMARY_FIELDS.indexOf(field);
-      if (index > -1) {
-        acc[index] = {
-          title: field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
-          description: {
-            values: Array.isArray(originalValue) ? originalValue : [originalValue],
-            contextId: timelineId,
-            eventId,
-            fieldName: field,
-          },
-        };
-      }
-      return acc;
-    }, [] as Array<ThreatSummaryRow | undefined>)
-    .filter((item: ThreatSummaryRow | undefined): item is ThreatSummaryRow => !!item);
-};
+) =>
+  SORTED_THREAT_SUMMARY_FIELDS.map((threatSummaryField) => {
+    const item = data.find(({ field }) => field === threatSummaryField);
+    if (item) {
+      const { field, originalValue } = item;
+      return {
+        title: field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
+        description: {
+          values: Array.isArray(originalValue) ? originalValue : [originalValue],
+          contextId: timelineId,
+          eventId,
+          fieldName: field,
+        },
+      };
+    }
+    return null;
+  }).filter((item: ThreatSummaryRow | null): item is ThreatSummaryRow => !!item);
 
 const getDescription = ({
   contextId,
