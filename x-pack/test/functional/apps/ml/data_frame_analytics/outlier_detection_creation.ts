@@ -82,11 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
             status: 'stopped',
             progress: '100',
           },
-          runtimeFieldsEditorContent: [
-            '{',
-            '  "lowercase_central_air": {',
-            '    "type": "keyword",',
-          ],
         },
       },
     ];
