@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
 
 describe('fetch_all_from_scroll', () => {
-  let mockScopedClusterClient;
+  const mockScopedClusterClient = {};
 
   beforeEach(() => {
-    mockScopedClusterClient = elasticsearchClientMock.createElasticsearchClient();
+    mockScopedClusterClient.asCurrentUser = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   describe('#fetchAllFromScroll', () => {
@@ -29,9 +29,9 @@ describe('fetch_all_from_scroll', () => {
         });
       });
 
-      it('should not call callWithRequest', () => {
+      it('should not call asCurrentUser.scroll', () => {
         return fetchAllFromScroll(mockSearchResults, mockScopedClusterClient).then(() => {
-          expect(mockScopedClusterClient.asCurrentUser).not.toHaveBeenCalled();
+          expect(mockScopedClusterClient.asCurrentUser.scroll).not.toHaveBeenCalled();
         });
       });
     });
@@ -59,8 +59,8 @@ describe('fetch_all_from_scroll', () => {
         };
 
         mockScopedClusterClient.asCurrentUser.scroll
-          .mockReturnValueOnce(Promise.resolve(mockResponse1))
-          .mockReturnValueOnce(Promise.resolve(mockResponse2));
+          .mockResolvedValueOnce({ body: mockResponse1 })
+          .mockResolvedValueOnce({ body: mockResponse2 });
       });
 
       it('should return the hits from the response', () => {
@@ -71,7 +71,7 @@ describe('fetch_all_from_scroll', () => {
         );
       });
 
-      it('should call callWithRequest', () => {
+      it('should call asCurrentUser.scroll', () => {
         return fetchAllFromScroll(mockInitialSearchResults, mockScopedClusterClient).then(() => {
           expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenCalledTimes(2);
 
