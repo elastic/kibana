@@ -30,7 +30,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';

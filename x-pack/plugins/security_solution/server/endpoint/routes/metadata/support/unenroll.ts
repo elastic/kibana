@@ -20,7 +20,10 @@ export async function findAllUnenrolledAgentIds(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery: '(active : false) OR (NOT packages : "endpoint" AND active : true)',
+      // FIXME: remove temporary work-around after https://github.com/elastic/beats/pull/25070 is implemented
+      //        makes it into a snapshot build.
+      // kuery: '(active : false) OR (NOT packages : "endpoint" AND active : true)',
+      kuery: '(active : false)',
     };
   };
 

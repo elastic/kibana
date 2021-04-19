@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { InfraSource } from '../../sources';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
@@ -26,18 +25,19 @@ import {
   GroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
 
 const COMPOSITE_GROUP_SIZE = 40;
 
 export async function getChartPreviewData(
   requestContext: InfraPluginRequestHandlerContext,
-  sourceConfiguration: InfraSource,
+  resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const indexPattern = sourceConfiguration.configuration.logAlias;
-  const timestampField = sourceConfiguration.configuration.fields.timestamp;
+  const indexPattern = resolvedLogSourceConfiguration.indices;
+  const timestampField = resolvedLogSourceConfiguration.timestampField;
 
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
