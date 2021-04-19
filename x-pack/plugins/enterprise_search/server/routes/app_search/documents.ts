@@ -20,10 +20,9 @@ export function registerDocumentsRoutes({
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          documents: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-        }),
+        body: schema.buffer(),
       },
+      options: { body: { parse: false } },
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/documents/new',

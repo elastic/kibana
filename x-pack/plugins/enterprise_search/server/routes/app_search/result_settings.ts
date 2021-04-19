@@ -9,8 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
-const resultFields = schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }));
-
 export function registerResultSettingsRoutes({
   router,
   enterpriseSearchRequestHandler,
@@ -36,10 +34,9 @@ export function registerResultSettingsRoutes({
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          result_fields: resultFields,
-        }),
+        body: schema.buffer(),
       },
+      options: { body: { parse: false } },
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/result_settings',
@@ -53,11 +50,9 @@ export function registerResultSettingsRoutes({
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          query: schema.string(),
-          result_fields: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' })),
-        }),
+        body: schema.buffer(),
       },
+      options: { body: { parse: false } },
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/sample_response_search',

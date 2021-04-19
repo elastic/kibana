@@ -61,6 +61,12 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
+  getBodyAsString(request: KibanaRequest<unknown, unknown, unknown>): string | undefined {
+    if (Buffer.isBuffer(request.body)) return request.body.toString();
+    if (this.isEmptyObj(request.body as object)) return undefined;
+    return JSON.stringify(request.body);
+  }
+
   createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
@@ -79,9 +85,7 @@ export class EnterpriseSearchRequestHandler {
         // Set up API options
         const { method } = request.route;
         const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
-        const body = !this.isEmptyObj(request.body as object)
-          ? JSON.stringify(request.body)
-          : undefined;
+        const body = this.getBodyAsString(request);
 
         // Call the Enterprise Search API
         const apiResponse = await fetch(url, { method, headers, body });
