@@ -40,17 +40,17 @@ const fieldFormats = {
 describe('ObservabilityIndexPatterns', function () {
   const { data } = mockCore();
   data!.indexPatterns.get = jest.fn().mockReturnValue({ title: 'index-*' });
-  data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: indexPatternList.rum });
+  data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: indexPatternList.ux });
   data!.indexPatterns.updateSavedObject = jest.fn();
 
   it('should return index pattern for app', async function () {
     const obsv = new ObservabilityIndexPatterns(data!);
 
-    const indexP = await obsv.getIndexPattern('rum');
+    const indexP = await obsv.getIndexPattern('ux');
 
     expect(indexP).toEqual({ title: 'index-*' });
 
-    expect(data?.indexPatterns.get).toHaveBeenCalledWith(indexPatternList.rum);
+    expect(data?.indexPatterns.get).toHaveBeenCalledWith(indexPatternList.ux);
     expect(data?.indexPatterns.get).toHaveBeenCalledTimes(1);
   });
 
@@ -61,9 +61,9 @@ describe('ObservabilityIndexPatterns', function () {
 
     const obsv = new ObservabilityIndexPatterns(data!);
 
-    const indexP = await obsv.getIndexPattern('rum');
+    const indexP = await obsv.getIndexPattern('ux');
 
-    expect(indexP).toEqual({ id: indexPatternList.rum });
+    expect(indexP).toEqual({ id: indexPatternList.ux });
 
     expect(data?.indexPatterns.createAndSave).toHaveBeenCalledWith({
       fieldFormats,
@@ -77,7 +77,7 @@ describe('ObservabilityIndexPatterns', function () {
   it('should return getFieldFormats', function () {
     const obsv = new ObservabilityIndexPatterns(data!);
 
-    expect(obsv.getFieldFormats('rum')).toEqual(fieldFormats);
+    expect(obsv.getFieldFormats('ux')).toEqual(fieldFormats);
   });
 
   it('should validate field formats', async function () {
@@ -85,7 +85,7 @@ describe('ObservabilityIndexPatterns', function () {
 
     const obsv = new ObservabilityIndexPatterns(data!);
 
-    await obsv.validateFieldFormats('rum', mockIndexPattern);
+    await obsv.validateFieldFormats('ux', mockIndexPattern);
 
     expect(data?.indexPatterns.updateSavedObject).toHaveBeenCalledTimes(1);
     expect(data?.indexPatterns.updateSavedObject).toHaveBeenCalledWith(
