@@ -30,6 +30,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.asHttpRequestExecutionSource.$1",
             "type": "Object",
             "label": "source",
             "isRequired": true,
@@ -71,18 +72,13 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.asSavedObjectExecutionSource.$1",
             "type": "Object",
             "label": "source",
             "isRequired": true,
             "signature": [
               "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               ", \"type\" | \"id\">"
             ],
             "description": [],
@@ -381,11 +377,12 @@
             "type": "Function",
             "label": "renderParameterTemplates",
             "signature": [
-              "((params: Params, variables: Record<string, unknown>) => Params) | undefined"
+              "((params: Params, variables: Record<string, unknown>, actionId?: string | undefined) => Params) | undefined"
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.ActionType.renderParameterTemplates.$1",
                 "type": "Uncategorized",
                 "label": "params",
                 "isRequired": true,
@@ -395,10 +392,11 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 110
+                  "lineNumber": 111
                 }
               },
               {
+                "id": "def-server.ActionType.renderParameterTemplates.$2",
                 "type": "Object",
                 "label": "variables",
                 "isRequired": true,
@@ -408,7 +406,21 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 110
+                  "lineNumber": 112
+                }
+              },
+              {
+                "id": "def-server.ActionType.renderParameterTemplates.$3",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/actions/server/types.ts",
+                  "lineNumber": 113
                 }
               }
             ],
@@ -427,16 +439,10 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 111
+              "lineNumber": 115
             },
             "signature": [
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ExecutorType",
-                "text": "ExecutorType"
-              },
+              "ExecutorType",
               "<Config, Secrets, Params, ExecutorResultData>"
             ]
           }
@@ -486,13 +492,7 @@
               "lineNumber": 56
             },
             "signature": [
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.Services",
-                "text": "Services"
-              }
+              "Services"
             ]
           },
           {
@@ -616,10 +616,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "signature": [
-          "{ readonly documents: Record<string, any>[]; }"
+          "{ readonly documents: Record<string, any>[]; readonly indexOverride: string | null; }"
         ],
         "initialIsOpen": false
       },
@@ -661,7 +661,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
-          "lineNumber": 46
+          "lineNumber": 48
         },
         "signature": [
           "{ readonly message: string; }"
@@ -823,7 +823,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
-          "lineNumber": 43
+          "lineNumber": 54
         },
         "signature": [
           "\".index\""
@@ -868,7 +868,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
-          "lineNumber": 54
+          "lineNumber": 56
         },
         "signature": [
           "\".slack\""
@@ -992,6 +992,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginSetupContract.registerType.$1",
               "type": "Object",
               "label": "actionType",
               "isRequired": true,
@@ -1008,7 +1009,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 85
+                "lineNumber": 88
               }
             }
           ],
@@ -1016,13 +1017,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 79
+            "lineNumber": 82
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 78
+        "lineNumber": 81
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1044,6 +1045,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.isActionTypeEnabled.$1",
               "type": "string",
               "label": "id",
               "isRequired": true,
@@ -1053,11 +1055,11 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 90
+                "lineNumber": 93
               }
             },
             {
-              "id": "def-server.PluginStartContract.isActionTypeEnabled.options",
+              "id": "def-server.PluginStartContract.isActionTypeEnabled.$2.options",
               "type": "Object",
               "label": "options",
               "tags": [],
@@ -1065,19 +1067,19 @@
               "children": [
                 {
                   "tags": [],
-                  "id": "def-server.PluginStartContract.isActionTypeEnabled.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionTypeEnabled.$2.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 90
+                    "lineNumber": 93
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 90
+                "lineNumber": 93
               }
             }
           ],
@@ -1085,7 +1087,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 90
+            "lineNumber": 93
           }
         },
         {
@@ -1098,6 +1100,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.isActionExecutable.$1",
               "type": "string",
               "label": "actionId",
               "isRequired": true,
@@ -1107,10 +1110,11 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 92
+                "lineNumber": 95
               }
             },
             {
+              "id": "def-server.PluginStartContract.isActionExecutable.$2",
               "type": "string",
               "label": "actionTypeId",
               "isRequired": true,
@@ -1120,11 +1124,11 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 93
+                "lineNumber": 96
               }
             },
             {
-              "id": "def-server.PluginStartContract.isActionExecutable.options",
+              "id": "def-server.PluginStartContract.isActionExecutable.$3.options",
               "type": "Object",
               "label": "options",
               "tags": [],
@@ -1132,19 +1136,19 @@
               "children": [
                 {
                   "tags": [],
-                  "id": "def-server.PluginStartContract.isActionExecutable.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionExecutable.$3.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 94
+                    "lineNumber": 97
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 94
+                "lineNumber": 97
               }
             }
           ],
@@ -1152,7 +1156,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 91
+            "lineNumber": 94
           }
         },
         {
@@ -1181,6 +1185,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.getActionsClientWithRequest.$1",
               "type": "Object",
               "label": "request",
               "isRequired": true,
@@ -1197,7 +1202,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 96
+                "lineNumber": 99
               }
             }
           ],
@@ -1205,7 +1210,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 96
+            "lineNumber": 99
           }
         },
         {
@@ -1234,6 +1239,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.getActionsAuthorizationWithRequest.$1",
               "type": "Object",
               "label": "request",
               "isRequired": true,
@@ -1250,7 +1256,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 97
+                "lineNumber": 100
               }
             }
           ],
@@ -1258,7 +1264,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 97
+            "lineNumber": 100
           }
         },
         {
@@ -1269,7 +1275,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 98
+            "lineNumber": 101
           },
           "signature": [
             {
@@ -1287,11 +1293,12 @@
           "type": "Function",
           "label": "renderActionParameterTemplates",
           "signature": [
-            "<Params extends Record<string, unknown> = Record<string, unknown>>(actionTypeId: string, params: Params, variables: Record<string, unknown>) => Params"
+            "<Params extends Record<string, unknown> = Record<string, unknown>>(actionTypeId: string, actionId: string, params: Params, variables: Record<string, unknown>) => Params"
           ],
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.$1",
               "type": "string",
               "label": "actionTypeId",
               "isRequired": true,
@@ -1301,10 +1308,25 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 100
+                "lineNumber": 103
               }
             },
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.$2",
+              "type": "string",
+              "label": "actionId",
+              "isRequired": true,
+              "signature": [
+                "string"
+              ],
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/actions/server/plugin.ts",
+                "lineNumber": 104
+              }
+            },
+            {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.$3",
               "type": "Uncategorized",
               "label": "params",
               "isRequired": true,
@@ -1314,10 +1336,11 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 101
+                "lineNumber": 105
               }
             },
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.$4",
               "type": "Object",
               "label": "variables",
               "isRequired": true,
@@ -1327,7 +1350,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 102
+                "lineNumber": 106
               }
             }
           ],
@@ -1335,13 +1358,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 99
+            "lineNumber": 102
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 89
+        "lineNumber": 92
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1350,6 +1373,38 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "id": "def-common.buildAlertHistoryDocument",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.buildAlertHistoryDocument.$1",
+            "type": "Object",
+            "label": "variables",
+            "isRequired": true,
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "signature": [
+          "(variables: Record<string, unknown>) => { event: { kind: string; }; kibana?: { alert: { actionGroupName?: string; actionGroup?: string; context?: { [x: string]: Record<string, unknown>; }; id?: string; }; }; rule?: { type?: string; space?: string; params?: { [x: string]: Record<string, unknown>; }; name?: string; id?: string; }; message?: unknown; tags?: string[]; '@timestamp': string; } | null"
+        ],
+        "description": [],
+        "label": "buildAlertHistoryDocument",
+        "source": {
+          "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+          "lineNumber": 14
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "id": "def-common.isActionTypeExecutorResult",
         "type": "Function",
@@ -1360,6 +1415,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.isActionTypeExecutorResult.$1",
             "type": "Unknown",
             "label": "result",
             "isRequired": true,
@@ -1647,6 +1703,63 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
+        "id": "def-common.ALERT_HISTORY_PREFIX",
+        "type": "string",
+        "label": "ALERT_HISTORY_PREFIX",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"kibana-alert-history-\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.AlertHistoryDefaultIndexName",
+        "type": "string",
+        "label": "AlertHistoryDefaultIndexName",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.AlertHistoryDocumentTemplate",
+        "type": "CompoundType",
+        "label": "AlertHistoryDocumentTemplate",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+          "lineNumber": 73
+        },
+        "signature": [
+          "Readonly<{ event: { kind: string; }; kibana?: { alert: { actionGroupName?: string; actionGroup?: string; context?: { [x: string]: Record<string, unknown>; }; id?: string; }; }; rule?: { type?: string; space?: string; params?: { [x: string]: Record<string, unknown>; }; name?: string; id?: string; }; message?: unknown; tags?: string[]; '@timestamp': string; }> | null"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.AlertHistoryEsIndexConnectorId",
+        "type": "string",
+        "label": "AlertHistoryEsIndexConnectorId",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "\"preconfigured-alert-history-es-index\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.AsApiContract",
         "type": "Type",
         "label": "AsApiContract",
@@ -1669,7 +1782,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/common/index.ts",
-          "lineNumber": 10
+          "lineNumber": 12
         },
         "signature": [
           "\"/api/actions\""

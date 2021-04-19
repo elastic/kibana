@@ -61,6 +61,7 @@ pageLoadAssetSize:
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204
+  ruleRegistry: 100000
   savedObjects: 108518
   savedObjectsManagement: 101836
   savedObjectsTagging: 59482
@@ -88,6 +89,7 @@ pageLoadAssetSize:
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
   visTypeMetric: 42790
+  visTypePie: 34051
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -100,8 +102,7 @@ pageLoadAssetSize:
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  visTypePie: 34051
-  presentationUtil: 28545
+  presentationUtil: 49767
   spacesOss: 18817
   indexPatternFieldEditor: 90489
   osquery: 107090
