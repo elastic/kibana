@@ -9,7 +9,6 @@
     "isolatedModules": true,
   },
   "include": [
-    "common/**/*",
     "public/**/*",
     "server/**/*",
     "types/**/*",
