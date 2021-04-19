@@ -620,36 +620,38 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      <EuiHorizontalRule margin="none" />
       {viewMode !== ViewMode.VIEW ? (
-        <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
-          {{
-            primaryActionButton: (
-              <PrimaryActionButton
-                isDarkModeEnabled={IS_DARK_THEME}
-                label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-                  defaultMessage: 'Create visualization',
-                })}
-                onClick={createNewVisType(lensAlias)}
-                iconType="lensApp"
-                data-test-subj="dashboardAddNewPanelButton"
-              />
-            ),
-            quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-            addFromLibraryButton: (
-              <AddFromLibraryButton
-                onClick={addFromLibrary}
-                data-test-subj="dashboardAddPanelButton"
-              />
-            ),
-            extraButtons: [
-              <EditorMenu
-                createNewVisType={createNewVisType}
-                dashboardContainer={dashboardContainer}
-              />,
-            ],
-          }}
-        </SolutionToolbar>
+        <>
+          <EuiHorizontalRule margin="none" />
+          <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
+            {{
+              primaryActionButton: (
+                <PrimaryActionButton
+                  isDarkModeEnabled={IS_DARK_THEME}
+                  label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+                    defaultMessage: 'Create visualization',
+                  })}
+                  onClick={createNewVisType(lensAlias)}
+                  iconType="lensApp"
+                  data-test-subj="dashboardAddNewPanelButton"
+                />
+              ),
+              quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+              addFromLibraryButton: (
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />
+              ),
+              extraButtons: [
+                <EditorMenu
+                  createNewVisType={createNewVisType}
+                  dashboardContainer={dashboardContainer}
+                />,
+              ],
+            }}
+          </SolutionToolbar>
+        </>
       ) : null}
     </>
   );
