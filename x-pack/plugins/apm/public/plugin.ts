@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { ConfigSchema } from '.';
-import {
-  FetchDataParams,
-  FormatterRuleRegistry,
-  HasDataParams,
-  ObservabilityPublicSetup,
-} from '../../observability/public';
+import { i18n } from '@kbn/i18n';
+import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
   CoreSetup,
@@ -20,28 +15,35 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
 } from '../../alerting/public';
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import {
+import type { FeaturesPluginSetup } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { MapsStartApi } from '../../maps/public';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import type {
+  FetchDataParams,
+  HasDataParams,
+  ObservabilityPublicSetup,
+} from '../../observability/public';
+import { FormatterRuleRegistry } from '../../observability/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
+import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { MapsStartApi } from '../../maps/public';
-import { apmRuleRegistrySettings } from '../common/rules';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
@@ -142,6 +144,32 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        // !! Need to be kept in sync with the routes in x-pack/plugins/apm/public/components/app/Main/route_config/index.tsx
+        searchDeepLinks: [
+          {
+            id: 'services',
+            title: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+              defaultMessage: 'Services',
+            }),
+            path: '/services',
+          },
+          {
+            id: 'traces',
+            title: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+              defaultMessage: 'Traces',
+            }),
+            path: '/traces',
+          },
+          {
+            id: 'service-map',
+            title: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+              defaultMessage: 'Service Map',
+            }),
+            path: '/service-map',
+          },
+        ],
+      },
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
@@ -162,6 +190,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const apmRuleRegistry = plugins.observability.ruleRegistry.create({
       ...apmRuleRegistrySettings,
+      fieldMap: {} as APMRuleFieldMap,
       ctor: FormatterRuleRegistry,
     });
 

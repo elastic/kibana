@@ -88,13 +88,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        resetSourceState: () => false,
+        resetSourceState: () => true,
       },
     ],
     buttonLoading: [

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-// import { curry } from 'lodash';
-// import { ActionTypeExecutorResult } from '../../actions/server/types';
+import { i18n } from '@kbn/i18n';
 import {
+  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -19,7 +19,7 @@ import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
-// import { initSavedObjects } from './saved_objects';
+import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
 
@@ -46,18 +46,45 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,
       service: this.osqueryAppContextService,
-      config: (): Promise<ConfigType> => Promise.resolve(config),
+      config: (): ConfigType => config,
     };
 
-    // initSavedObjects(core.savedObjects);
-    defineRoutes(router, osqueryContext);
+    plugins.features.registerKibanaFeature({
+      id: 'osquery',
+      name: i18n.translate('xpack.osquery.featureRegistry.osqueryFeatureName', {
+        defaultMessage: 'Osquery',
+      }),
+      order: 4000,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['osquery', 'kibana'],
+      catalogue: ['osquery'],
+      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+      privileges: {
+        all: {
+          app: ['osquery', 'kibana'],
+          api: ['osquery', 'osquery_write'],
+          catalogue: ['osquery'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show', 'save'],
+        },
+        read: {
+          app: ['osquery', 'kibana'],
+          api: ['osquery'],
+          catalogue: ['osquery'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show'],
+        },
+      },
+    });
 
-    // plugins.actions.registerType({
-    //   id: '.osquery',
-    //   name: 'Osquery',
-    //   minimumLicenseRequired: 'gold',
-    //   executor: curry(executor)({}),
-    // });
+    initSavedObjects(core.savedObjects, osqueryContext);
+    defineRoutes(router, osqueryContext);
 
     core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
@@ -89,7 +116,3 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.osqueryAppContextService.stop();
   }
 }
-
-// async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
-//   return { status: 'ok', data: {}, actionId: execOptions.actionId };
-// }
