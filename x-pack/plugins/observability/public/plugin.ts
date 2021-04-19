@@ -107,7 +107,7 @@ export class Plugin
       updater$,
     });
 
-    if (config.enableAlertingExperience) {
+    if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
         title: 'Alerts',

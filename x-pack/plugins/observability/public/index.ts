@@ -22,7 +22,7 @@ export type {
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
 export interface ConfigSchema {
-  enableAlertingExperience: boolean;
+  unsafe: { alertingExperience: { enabled: boolean } };
 }
 
 export const plugin: PluginInitializer<

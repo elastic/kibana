@@ -13,7 +13,7 @@ The rule registry plugin creates a root rule registry, with the mappings defined
 Set
 
 ```yaml
-xpack.ruleRegistry.writeEnabled: true
+xpack.ruleRegistry.unsafe.write.enabled: true
 ```
 
 in your Kibana configuration to allow the Rule Registry to write events to the alert indices.

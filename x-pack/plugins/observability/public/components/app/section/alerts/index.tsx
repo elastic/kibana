@@ -39,7 +39,7 @@ interface Props {
 export function AlertsSection({ alerts }: Props) {
   const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
-  const href = config.enableAlertingExperience
+  const href = config.unsafe.alertingExperience.enabled
     ? '/app/observability/alerts'
     : '/app/management/insightsAndAlerting/triggersActions/alerts';
 

@@ -17,7 +17,7 @@ export * from './types';
 
 export const config = {
   exposeToBrowser: {
-    enableAlertingExperience: true,
+    unsafe: { alertingExperience: { enabled: true } },
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -25,7 +25,9 @@ export const config = {
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
-    enableAlertingExperience: schema.boolean({ defaultValue: false }),
+    unsafe: schema.object({
+      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+    }),
   }),
 };
 

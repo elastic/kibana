@@ -10,7 +10,7 @@ case management.
 If you have:
 
 ```yaml
-xpack.observability.enableAlertingExperience: true
+xpack.observability.unsafe.alertingExperience.enabled: true
 ```
 
 In your Kibana configuration, the Alerts and Cases pages will be available.
@@ -19,7 +19,7 @@ This will only enable the UI for these pages. In order to have alert data indexe
 you'll need to enable writing in the [Rule Registry plugin](../rule_registry/README.md):
 
 ```yaml
-xpack.ruleRegistry.writeEnabled: true
+xpack.ruleRegistry.unsafe.write.enabled: true
 ```
 
 When both of the these are set to `true`, your alerts should show on the alerts page.
