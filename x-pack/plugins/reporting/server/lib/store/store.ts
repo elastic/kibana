@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchServiceSetup } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
 import { indexTimestamp } from './index_timestamp';
@@ -27,58 +27,58 @@ const checkReportIsEditable = (report: Report) => {
 export class ReportingStore {
   private readonly indexPrefix: string;
   private readonly indexInterval: string;
-  private client: ElasticsearchServiceSetup['legacy']['client'];
-  private logger: LevelLogger;
+  private client?: ElasticsearchClient;
 
-  constructor(reporting: ReportingCore, logger: LevelLogger) {
-    const config = reporting.getConfig();
-    const elasticsearch = reporting.getElasticsearchService();
+  constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
+    const config = reportingCore.getConfig();
 
-    this.client = elasticsearch.legacy.client;
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
-    this.logger = logger;
+  }
+
+  private async getClient() {
+    if (!this.client) {
+      ({ asInternalUser: this.client } = await this.reportingCore.getEsClient());
+    }
+
+    return this.client;
   }
 
   private async createIndex(indexName: string) {
-    return await this.client
-      .callAsInternalUser('indices.exists', {
-        index: indexName,
-      })
-      .then((exists) => {
-        if (exists) {
-          return exists;
-        }
+    const client = await this.getClient();
+    const { body: exists } = await client.indices.exists({ index: indexName });
 
-        const indexSettings = {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
-        };
-        const body = {
-          settings: indexSettings,
-          mappings: {
-            properties: mapping,
-          },
-        };
+    if (exists) {
+      return exists;
+    }
 
-        return this.client
-          .callAsInternalUser('indices.create', {
-            index: indexName,
-            body,
-          })
-          .then(() => true)
-          .catch((err: Error) => {
-            const isIndexExistsError = err.message.match(/resource_already_exists_exception/);
-            if (isIndexExistsError) {
-              // Do not fail a job if the job runner hits the race condition.
-              this.logger.warn(`Automatic index creation failed: index already exists: ${err}`);
-              return;
-            }
+    const indexSettings = {
+      number_of_shards: 1,
+      auto_expand_replicas: '0-1',
+    };
+    const body = {
+      settings: indexSettings,
+      mappings: {
+        properties: mapping,
+      },
+    };
 
-            this.logger.error(err);
-            throw err;
-          });
-      });
+    try {
+      await client.indices.create({ index: indexName, body });
+
+      return true;
+    } catch (error) {
+      const isIndexExistsError = error.message.match(/resource_already_exists_exception/);
+      if (isIndexExistsError) {
+        // Do not fail a job if the job runner hits the race condition.
+        this.logger.warn(`Automatic index creation failed: index already exists: ${error}`);
+        return;
+      }
+
+      this.logger.error(error);
+
+      throw error;
+    }
   }
 
   /*
@@ -86,7 +86,7 @@ export class ReportingStore {
    */
   private async indexReport(report: Report) {
     const doc = {
-      index: report._index,
+      index: report._index!,
       id: report._id,
       body: {
         ...report.toEsDocsJSON()._source,
@@ -95,14 +95,20 @@ export class ReportingStore {
         status: statuses.JOB_STATUS_PENDING,
       },
     };
-    return await this.client.callAsInternalUser('index', doc);
+
+    const client = await this.getClient();
+    const { body } = await client.index(doc);
+
+    return body;
   }
 
   /*
    * Called from addReport, which handles any errors
    */
   private async refreshIndex(index: string) {
-    return await this.client.callAsInternalUser('indices.refresh', { index });
+    const client = await this.getClient();
+
+    return client.indices.refresh({ index });
   }
 
   public async addReport(report: Report): Promise<Report> {
@@ -138,13 +144,16 @@ export class ReportingStore {
     try {
       checkReportIsEditable(report);
 
-      return await this.client.callAsInternalUser('update', {
+      const client = await this.getClient();
+      const { body } = await client.update<Report>({
         id: report._id,
-        index: report._index,
+        index: report._index!,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         body: { doc },
       });
+
+      return (body as unknown) as Report;
     } catch (err) {
       this.logger.error('Error in setting report processing status!');
       this.logger.error(err);
@@ -161,13 +170,16 @@ export class ReportingStore {
     try {
       checkReportIsEditable(report);
 
-      return await this.client.callAsInternalUser('update', {
+      const client = await this.getClient();
+      const { body } = await client.update<Report>({
         id: report._id,
-        index: report._index,
+        index: report._index!,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         body: { doc },
       });
+
+      return (body as unknown) as Report;
     } catch (err) {
       this.logger.error('Error in setting report failed status!');
       this.logger.error(err);
@@ -188,13 +200,16 @@ export class ReportingStore {
       };
       checkReportIsEditable(report);
 
-      return await this.client.callAsInternalUser('update', {
+      const client = await this.getClient();
+      const { body } = await client.update<Report>({
         id: report._id,
-        index: report._index,
+        index: report._index!,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         body: { doc },
       });
+
+      return (body as unknown) as Report;
     } catch (err) {
       this.logger.error('Error in setting report complete status!');
       this.logger.error(err);
