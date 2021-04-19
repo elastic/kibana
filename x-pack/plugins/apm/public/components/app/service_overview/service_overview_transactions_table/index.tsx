@@ -115,7 +115,6 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         };
       });
     },
-    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
@@ -128,7 +127,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       pageIndex,
       direction,
       field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
       comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
   );

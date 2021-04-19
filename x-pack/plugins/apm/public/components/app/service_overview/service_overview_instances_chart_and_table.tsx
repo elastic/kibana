@@ -135,13 +135,13 @@ export function ServiceOverviewInstancesChartAndTable({
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
         return {
+          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
           primaryStatsRequestId: uuid(),
           primaryStatsItems,
           primaryStatsItemCount: response.serviceInstances.length,
         };
       });
     },
-    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
@@ -154,7 +154,9 @@ export function ServiceOverviewInstancesChartAndTable({
       pageIndex,
       field,
       direction,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
       comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
   );
