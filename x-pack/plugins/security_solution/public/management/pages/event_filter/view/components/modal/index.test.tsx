@@ -17,6 +17,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '../../../../../../../public/shared_imports';
+import { getInitialExceptionFromEvent } from '../../../store/utils';
 
 jest.mock('../form');
 jest.mock('../notification');
@@ -90,8 +91,9 @@ describe('Event filter modal', () => {
       fireEvent.click(confirmButton);
     });
     expect(store.getState()!.management!.eventFilter!.form!.submissionResourceState.type).toBe(
-      'LoadingResourceState'
+      'UninitialisedResourceState'
     );
+    expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
   });
 
   it('should close when exception has been submitted correctly', () => {

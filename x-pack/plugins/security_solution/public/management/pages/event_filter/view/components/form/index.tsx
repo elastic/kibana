@@ -69,10 +69,17 @@ export const EventFilterForm: React.FC<EventFilterFormProps> = memo(({ allowSele
       if (isEmpty(arg.exceptionItems)) return;
       dispatch({
         type: 'eventFilterChangeForm',
-        payload: { entry: arg.exceptionItems[0], hasItemsError: arg.errorExists },
+        payload: {
+          entry: {
+            ...arg.exceptionItems[0],
+            name: exception?.name ?? '',
+            comments: exception?.comments ?? [],
+          },
+          hasItemsError: arg.errorExists,
+        },
       });
     },
-    [dispatch]
+    [dispatch, exception?.name, exception?.comments]
   );
 
   const handleOnChangeName = useCallback(
