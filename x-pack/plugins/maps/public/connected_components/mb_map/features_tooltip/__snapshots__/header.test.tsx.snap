@@ -7,11 +7,26 @@ exports[`isLocked 1`] = `
     gutterSize="s"
   >
     <EuiFlexItem
+      className="mapFeatureTooltip_layerIcon"
+      grow={false}
+      key="layerIcon"
+    >
+      <span>
+        mockIcon
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="eui-textTruncate"
       grow={true}
       key="layerName"
     >
       <EuiTextColor>
-        myLayerName
+        <h4
+          className="eui-textTruncate"
+          title="myLayerName"
+        >
+          myLayerName
+        </h4>
       </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem
@@ -39,11 +54,26 @@ exports[`render 1`] = `
     gutterSize="s"
   >
     <EuiFlexItem
+      className="mapFeatureTooltip_layerIcon"
+      grow={false}
+      key="layerIcon"
+    >
+      <span>
+        mockIcon
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="eui-textTruncate"
       grow={true}
       key="layerName"
     >
       <EuiTextColor>
-        myLayerName
+        <h4
+          className="eui-textTruncate"
+          title="myLayerName"
+        >
+          myLayerName
+        </h4>
       </EuiTextColor>
     </EuiFlexItem>
   </EuiFlexGroup>

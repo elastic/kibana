@@ -58,12 +58,19 @@ export class Header extends Component<Props, State> {
 
   render() {
     const items: ReactNode[] = [];
+    if (this.state.layerIcon) {
+      items.push(
+        <EuiFlexItem grow={false} key="layerIcon" className="mapFeatureTooltip_layerIcon">
+          {this.state.layerIcon}
+        </EuiFlexItem>
+      );
+    }
+
     if (this.state.layerName) {
       items.push(
         <EuiFlexItem grow={true} key="layerName" className="eui-textTruncate">
           <EuiTextColor>
             <h4 className="eui-textTruncate" title={this.state.layerName}>
-              <span className="mapTocEntry__layerNameIcon">{this.state.layerIcon}</span>
               {this.state.layerName}
             </h4>
           </EuiTextColor>

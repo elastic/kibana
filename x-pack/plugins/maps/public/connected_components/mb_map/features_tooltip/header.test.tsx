@@ -8,10 +8,22 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Header } from './header';
+import { ILayer } from '../../../classes/layers/layer';
+
+const layerMock = ({
+  getDisplayName: async () => {
+    return 'myLayerName';
+  },
+  getCustomIconAndTooltipContent: () => {
+    return {
+      icon: <span>mockIcon</span>,
+    };
+  },
+} as unknown) as ILayer;
 
 const defaultProps = {
-  getLayerName: async (layerId: string) => {
-    return 'myLayerName';
+  findLayerById: (layerId: string) => {
+    return layerMock;
   },
   isLocked: false,
   layerId: 'myLayerId',
