@@ -7,8 +7,8 @@
  */
 
 import { buildAggBody } from './agg_body';
-import { search } from '../../../../../../plugins/data/server';
-import { METRIC_TYPES } from '../../../../../data/common/search/aggs/metrics/index';
+import { search, METRIC_TYPES } from '../../../../../data/server';
+
 const { dateHistogramInterval } = search.aggs;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
@@ -32,6 +32,8 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
   (config.metric || []).forEach((metric) => {
     const metricBody = {};
     const [metricName, metricArgs] = metric.split(/:(.+)/);
+    console.log('METRIC_TYPES.COUNT', METRIC_TYPES.COUNT);
+    console.log('METRIC_TYPES.PERCENTILES', METRIC_TYPES.PERCENTILES);
     if (metricName === METRIC_TYPES.COUNT) {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
       // It simplifies the aggregation tree walking code considerably
