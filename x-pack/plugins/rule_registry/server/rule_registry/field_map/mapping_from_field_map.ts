@@ -6,7 +6,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { FieldMap, Mappings } from '../types';
+import { FieldMap } from '../../../common';
+import { Mappings } from '../types';
 
 export function mappingFromFieldMap(fieldMap: FieldMap): Mappings {
   const mappings = {
