@@ -7,9 +7,7 @@
 
 import {
   EuiBasicTableColumn,
-  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
