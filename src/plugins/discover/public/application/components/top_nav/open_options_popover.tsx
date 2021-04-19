@@ -29,12 +29,12 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   } = getServices();
   const isLegacy = uiSettings.get('doc_table:legacy');
 
-  const linkText = isLegacy
-    ? i18n.translate('discover.openOptionsPopover.switchToDataGridText', {
-        defaultMessage: 'Go to Advanced Settings',
+  const mode = isLegacy
+    ? i18n.translate('discover.openOptionsPopover.dataGridText', {
+        defaultMessage: 'Data grid',
       })
-    : i18n.translate('discover.openOptionsPopover.switchToLegacyText', {
-        defaultMessage: 'Go to Advanced Settings',
+    : i18n.translate('discover.openOptionsPopover.legacyTableText', {
+        defaultMessage: 'Legacy table',
       });
 
   return (
@@ -42,7 +42,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>
-            <strong>Current view mode:</strong> <EuiCode>Data grid</EuiCode>
+            <strong>Current view mode:</strong>{' '}
+            <EuiCode data-test-subj="docTableMode">{mode}</EuiCode>
           </p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -59,7 +60,9 @@ export function OptionsPopover(props: OptionsPopoverProps) {
           fullWidth
           href={addBasePath('/app/management/kibana/settings?query=Use legacy table')}
         >
-          {linkText}
+          {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
+            defaultMessage: 'Go to Advanced Settings',
+          })}
         </EuiButton>
       </div>
     </EuiWrappingPopover>

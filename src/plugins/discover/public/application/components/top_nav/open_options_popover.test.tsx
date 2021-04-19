@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiLink } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { getServices } from '../../../kibana_services';
 
 jest.mock('../../../kibana_services', () => {
@@ -32,19 +32,18 @@ jest.mock('../../../kibana_services', () => {
 
 import { OptionsPopover } from './open_options_popover';
 
-test('should contain a link with the correct text if datagrid is selected', () => {
+test('should display the correct text if datagrid is selected', () => {
   const element = document.createElement('div');
-  const component = shallow(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
-  expect(component.find(EuiLink).length).toBe(1);
-  expect(component.find(EuiLink).text()).toBe('Switch to legacy table');
+  const component = mountWithIntl(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
+  expect(findTestSubject(component, 'docTableMode').text()).toBe('Legacy table');
 });
 
-test('should contain a link with the correct text if legacy table is selected', () => {
+test('should display the correct text if legacy table is selected', () => {
   const {
     core: { uiSettings },
   } = getServices();
   uiSettings.set('doc_table:legacy', true);
   const element = document.createElement('div');
-  const component = shallow(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
-  expect(component.find(EuiLink).text()).toBe('Switch to data grid');
+  const component = mountWithIntl(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
+  expect(findTestSubject(component, 'docTableMode').text()).toBe('Data grid');
 });
