@@ -8,7 +8,6 @@
 
 require('core-js/stable');
 require('regenerator-runtime/runtime');
-require('custom-event-polyfill');
 
 if (typeof window.Event === 'object') {
   // IE11 doesn't support unknown event types, required by react-use
@@ -17,6 +16,4 @@ if (typeof window.Event === 'object') {
 }
 
 require('whatwg-fetch');
-require('abortcontroller-polyfill/dist/polyfill-patch-fetch');
-require('./vendor/childnode_remove_polyfill');
 require('symbol-observable');

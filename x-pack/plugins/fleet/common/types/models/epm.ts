@@ -30,7 +30,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
@@ -50,6 +50,7 @@ export enum KibanaAssetType {
   indexPattern = 'index_pattern',
   map = 'map',
   lens = 'lens',
+  securityRule = 'security_rule',
   mlModule = 'ml_module',
 }
 
@@ -64,6 +65,7 @@ export enum KibanaSavedObjectType {
   map = 'map',
   lens = 'lens',
   mlModule = 'ml-module',
+  securityRule = 'security-rule',
 }
 
 export enum ElasticsearchAssetType {

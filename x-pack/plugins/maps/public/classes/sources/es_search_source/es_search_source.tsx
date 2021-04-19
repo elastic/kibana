@@ -61,53 +61,11 @@ import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
+import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
-
-export interface ScriptField {
-  source: string;
-  lang: string;
-}
-
-function getDocValueAndSourceFields(
-  indexPattern: IndexPattern,
-  fieldNames: string[],
-  dateFormat: string
-): {
-  docValueFields: Array<string | { format: string; field: string }>;
-  sourceOnlyFields: string[];
-  scriptFields: Record<string, { script: ScriptField }>;
-} {
-  const docValueFields: Array<string | { format: string; field: string }> = [];
-  const sourceOnlyFields: string[] = [];
-  const scriptFields: Record<string, { script: ScriptField }> = {};
-  fieldNames.forEach((fieldName) => {
-    const field = getField(indexPattern, fieldName);
-    if (field.scripted) {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script || '',
-          lang: field.lang || '',
-        },
-      };
-    } else if (field.readFromDocValues) {
-      const docValueField =
-        field.type === 'date'
-          ? {
-              field: fieldName,
-              format: dateFormat,
-            }
-          : fieldName;
-      docValueFields.push(docValueField);
-    } else {
-      sourceOnlyFields.push(fieldName);
-    }
-  });
-
-  return { docValueFields, sourceOnlyFields, scriptFields };
-}
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
@@ -748,23 +706,21 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const dsl = await searchSource.getSearchRequestBody();
+    const dsl = searchSource.getSearchRequestBody();
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
+      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const geoField = await this._getGeoField();
 
     const urlTemplate = `${mvtUrlServicePath}\
-?x={x}\
-&y={y}\
-&z={z}\
-&geometryFieldName=${this._descriptor.geoField}\
+?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
 &geoFieldType=${geoField.type}`;
+
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

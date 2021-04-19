@@ -13,18 +13,12 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import {
   ServiceOverviewInstancesTable,
   TableOptions,
 } from './service_overview_instances_table';
-
-// We're hiding this chart until these issues are resolved in the 7.13 timeframe:
-//
-// * [[APM] Tooltips for instances latency distribution chart](https://github.com/elastic/kibana/issues/88852)
-// * [[APM] x-axis on the instance bubble chart is broken](https://github.com/elastic/kibana/issues/92631)
-//
-// import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -215,13 +209,13 @@ export function ServiceOverviewInstancesChartAndTable({
 
   return (
     <>
-      {/* <EuiFlexItem grow={3}>
+      <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={data.items}
-          status={status}
+          items={primaryStatsItems}
+          status={primaryStatsStatus}
         />
-      </EuiFlexItem> */}
+      </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable

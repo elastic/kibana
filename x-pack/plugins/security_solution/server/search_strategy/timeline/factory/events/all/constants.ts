@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
+
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
   'signal.status',
@@ -230,4 +232,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.established',
   'zeek.ssl.resumed',
   'zeek.ssl.version',
+  ...CTI_ROW_RENDERER_FIELDS,
 ];
