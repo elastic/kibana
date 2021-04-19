@@ -596,7 +596,7 @@ export const createCase = async (
   auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
-    .post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
@@ -633,10 +633,12 @@ export const createComment = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   caseId: string,
   params: CommentRequest,
-  expectedHttpCode: number = 200
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } = { user: superUser, space: null }
 ): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
-    .post(`${CASES_URL}/${caseId}/comments`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);
@@ -816,15 +818,25 @@ export const getAllCasesStatuses = async (
   return statuses;
 };
 
-export const getCase = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  includeComments: boolean = false,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse> => {
+export const getCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
-    .get(`${CASES_URL}/${caseId}?includeComments=${includeComments}`)
+    .get(
+      `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
+    )
     .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
     .send()
     .expect(expectedHttpCode);
 

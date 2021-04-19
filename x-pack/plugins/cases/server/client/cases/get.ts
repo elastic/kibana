@@ -43,7 +43,7 @@ export const get = async (
   { id, includeComments, includeSubCaseComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const { savedObjectsClient, caseService, logger } = clientArgs;
+  const { savedObjectsClient, caseService, logger, authorization: auth, auditLogger } = clientArgs;
 
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
@@ -71,6 +71,15 @@ export const get = async (
         soClient: savedObjectsClient,
         id,
       });
+    }
+
+    try {
+      await auth.ensureAuthorized(theCase.attributes.owner, Operations.getCase);
+    } catch (error) {
+      auditLogger?.log(
+        createAuditMsg({ operation: Operations.getCase, error, savedObjectID: theCase.id })
+      );
+      throw error;
     }
 
     if (!includeComments) {
