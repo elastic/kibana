@@ -171,7 +171,7 @@ export class FeaturesTooltip extends Component {
         <Header
           key={this.state.currentFeature.layerId}
           layerId={this.state.currentFeature.layerId}
-          getLayerName={this.props.getLayerName}
+          findLayerById={this.props.findLayerById}
           isLocked={this.props.isLocked}
           onClose={this.props.closeTooltip}
         />

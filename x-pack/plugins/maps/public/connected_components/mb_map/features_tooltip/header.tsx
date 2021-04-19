@@ -14,35 +14,42 @@ import {
   EuiFlexItem,
   EuiTextColor,
 } from '@elastic/eui';
+import { ILayer } from '../../../classes/layers/layer';
 
 interface Props {
-  getLayerName: (layerId: string) => Promise<string>;
+  findLayerById: (layerId: string) => ILayer;
   isLocked: boolean;
   layerId: string;
   onClose: () => void;
 }
 
 interface State {
+  layerIcon: ReactNode;
   layerName: string | null;
 }
 
 export class Header extends Component<Props, State> {
   private _isMounted = false;
-  state: State = { layerName: null };
+  state: State = {
+    layerIcon: null,
+    layerName: null,
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadLayerName();
+    this._loadLayerState();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadLayerName() {
-    const layerName = await this.props.getLayerName(this.props.layerId);
+  async _loadLayerState() {
+    const layer = this.props.findLayerById(this.props.layerId);
+    const layerName = await layer.getDisplayName();
+    const customIconAndTooltipContent = layer.getCustomIconAndTooltipContent();
     if (this._isMounted) {
-      this.setState({ layerName });
+      this.setState({ layerIcon: customIconAndTooltipContent.icon, layerName });
     }
   }
 
@@ -53,6 +60,7 @@ export class Header extends Component<Props, State> {
         <EuiFlexItem grow={true} key="layerName" className="eui-textTruncate">
           <EuiTextColor>
             <h4 className="eui-textTruncate" title={this.state.layerName}>
+              <span className="mapTocEntry__layerNameIcon">{this.state.layerIcon}</span>
               {this.state.layerName}
             </h4>
           </EuiTextColor>
