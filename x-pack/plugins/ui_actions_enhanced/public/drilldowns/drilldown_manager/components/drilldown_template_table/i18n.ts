@@ -52,10 +52,10 @@ export const txtSingleItemCloneActionLabel = i18n.translate(
   }
 );
 
-export const txtCloneButtonLabel = (count: number) =>
-  i18n.translate('xpack.uiActionsEnhanced.components.DrilldownTemplateTable.cloneButtonLabel', {
-    defaultMessage: 'Clone ({count})',
-    description: 'Label of drilldown template table cloning button.',
+export const txtCopyButtonLabel = (count: number) =>
+  i18n.translate('xpack.uiActionsEnhanced.components.DrilldownTemplateTable.copyButtonLabel', {
+    defaultMessage: 'Copy ({count})',
+    description: 'Label of drilldown template table bottom copy button.',
     values: {
       count,
     },
