@@ -111,7 +111,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [openExceptionModal, setOpenAddEventExceptionModal] = useState<boolean>(false);
+  const [openAddEventExceptionModal, setOpenAddEventExceptionModal] = useState<boolean>(false);
   const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
@@ -129,7 +129,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal(null);
   }, []);
 
-  const closeAddEventFilterModal = useCallback((): void => {
+  const closeAddEventExceptionModal = useCallback((): void => {
     setOpenAddEventExceptionModal(false);
   }, []);
 
@@ -451,8 +451,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onRuleChange={onRuleChange}
         />
       )}
-      {openExceptionModal && ecsRowData != null && (
-        <EventFilterModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
+      {openAddEventExceptionModal && ecsRowData != null && (
+        <EventFilterModal data={ecsRowData} onCancel={closeAddEventExceptionModal} />
       )}
     </>
   );

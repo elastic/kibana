@@ -23,7 +23,7 @@ export const getCreationSuccessMessage = (
 };
 
 export const getCreationErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
+  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle', {
     defaultMessage: 'There was an error creating the new exception: "{error}"',
     values: { error: creationError.message },
   });
