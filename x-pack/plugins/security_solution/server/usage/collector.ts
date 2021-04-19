@@ -193,7 +193,7 @@ export const registerCollector: RegisterCollector = ({
               },
               rule_type: {
                 type: 'keyword',
-                _meta: { description: 'The type of detection rule. ie eql, query..' },
+                _meta: { description: 'The type of detection rule. ie eql, query...' },
               },
               rule_version: { type: 'long', _meta: { description: 'The version of the rule' } },
               enabled: {
@@ -290,7 +290,7 @@ export const registerCollector: RegisterCollector = ({
         },
       },
     },
-    isReady: () => kibanaIndex.length > 0 && signalsIndex.length > 0,
+    isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;

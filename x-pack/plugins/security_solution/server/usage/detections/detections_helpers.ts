@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '../../../../../../src/core/server';
-import { MlPluginSetup } from '../../../../ml/server';
+import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 import {
   DetectionRulesUsage,
@@ -65,7 +65,7 @@ interface DetectionRuleParms {
 
 /* eslint-disable complexity */
 
-const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
+const isElasticRule = (tags: string[] = []) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
 /**
  * Default detection rule usage count
@@ -352,7 +352,6 @@ export const getRulesUsage = async (
 
     if (ruleResults.hits?.hits?.length > 0) {
       rulesUsage = ruleResults.hits.hits.reduce((usage, hit) => {
-        // @ts-expect-error _source is optional
         const isElastic = isElasticRule(hit._source?.alert.tags);
         const isEnabled = Boolean(hit._source?.alert.enabled);
 
@@ -410,14 +409,14 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobs(jobsType);
 
-      const jobDetailsCache = new Map();
+      const jobDetailsCache = new Map<string, Job>();
       jobDetails.jobs.forEach((detail) => jobDetailsCache.set(detail.job_id, detail));
 
       const datafeedStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .datafeedStats();
 
-      const datafeedStatsCache = new Map();
+      const datafeedStatsCache = new Map<string, DatafeedStats>();
       datafeedStats.datafeeds.forEach((datafeedStat) =>
         datafeedStatsCache.set(`${datafeedStat.datafeed_id}`, datafeedStat)
       );
@@ -499,14 +498,13 @@ export const getDetectionRuleMetrics = async (
     size: 10_000,
   };
 
-  let detectionAlertsResp: AlertsAggregationResponse | undefined;
+  let detectionAlertsResp: AlertsAggregationResponse;
 
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
 
-    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
-    ({ body: detectionAlertsResp } = await esClient.search({
-      index: signalsIndex,
+    ({ body: detectionAlertsResp } = (await esClient.search({
+      index: `${signalsIndex}*`,
       size: 0,
       body: {
         aggs: {
@@ -529,7 +527,7 @@ export const getDetectionRuleMetrics = async (
           },
         },
       },
-    }));
+    })) as { body: AlertsAggregationResponse });
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
       type: 'cases-comments',
@@ -551,15 +549,14 @@ export const getDetectionRuleMetrics = async (
       return cache;
     }, new Map<string, number>());
 
-    const alertBuckets = detectionAlertsResp!.aggregations?.detectionAlerts?.buckets ?? [];
+    const alertBuckets = detectionAlertsResp.aggregations?.detectionAlerts?.buckets ?? [];
 
-    const alertsCache = new Map();
+    const alertsCache = new Map<string, number>();
     alertBuckets.map((bucket) => alertsCache.set(bucket.key, bucket.doc_count));
 
     if (ruleResults.hits?.hits?.length > 0) {
-      const ruleObjects = ruleResults.hits?.hits?.map((hit) => {
+      const ruleObjects = ruleResults.hits.hits.map((hit) => {
         const ruleId = hit._id.split(':')[1];
-        // @ts-expect-error _source is optional
         const isElastic = isElasticRule(hit._source?.alert.tags);
         return {
           rule_name: hit._source?.alert.name,
