@@ -25,7 +25,9 @@ const Span = styled.span`
 `;
 
 const EmptyThreatDetailsViewComponent: React.FC<{}> = () => {
-  const threatIntelDocsUrl = useKibana().services.docLinks.links.filebeat.threatIntelModule;
+  const threatIntelDocsUrl = `${
+    useKibana().services.docLinks.links.filebeat.base
+  }/filebeat-module-threatintel.html`;
 
   return (
     <EmptyThreatDetailsViewContainer data-test-subj="empty-threat-details-view">

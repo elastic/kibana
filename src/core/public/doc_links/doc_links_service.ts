@@ -45,7 +45,6 @@ export class DocLinksService {
           elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
           startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
           exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
-          threatIntelModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-threatintel.html`,
         },
         auditbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
@@ -414,7 +413,6 @@ export interface DocLinksStart {
       readonly elasticsearchModule: string;
       readonly startup: string;
       readonly exportedFields: string;
-      readonly threatIntelModule: string;
     };
     readonly auditbeat: {
       readonly base: string;
