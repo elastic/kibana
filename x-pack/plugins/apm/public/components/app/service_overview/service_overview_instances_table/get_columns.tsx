@@ -34,9 +34,7 @@ import { getLatencyColumnLabel } from '../get_latency_column_label';
 import { InstanceActionsMenu } from './instance_actions_menu';
 import { MainStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 
-type ServiceInstanceDetailedStatistics = APIReturnType<
-  'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'
->;
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
@@ -225,7 +223,7 @@ export function getColumns({
     },
     {
       width: '40px',
-      render: (instanceItem: PrimaryStatsServiceInstanceItem) => {
+      render: (instanceItem: MainStatsServiceInstanceItem) => {
         return (
           <ActionMenu
             id="instanceActionMenu"
@@ -256,7 +254,7 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (instanceItem: PrimaryStatsServiceInstanceItem) => {
+      render: (instanceItem: MainStatsServiceInstanceItem) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}

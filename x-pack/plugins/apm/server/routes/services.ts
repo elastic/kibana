@@ -710,15 +710,10 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceAnnotationsCreateRoute)
   .add(serviceErrorGroupsMainStatisticsRoute)
   .add(serviceErrorGroupsDetailedStatisticsRoute)
-  .add(serviceThroughputRoute)
-<<<<<<< HEAD
-  .add(serviceInstancesPrimaryStatisticsRoute)
-  .add(serviceInstancesComparisonStatisticsRoute)
   .add(serviceInstancesMetadataDetails)
-=======
+  .add(serviceThroughputRoute)
   .add(serviceInstancesMainStatisticsRoute)
   .add(serviceInstancesDetailedStatisticsRoute)
->>>>>>> 83824ab13a24da809e152a15ac4269d78f09a37f
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute);
