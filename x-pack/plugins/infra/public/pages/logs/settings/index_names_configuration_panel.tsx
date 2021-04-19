@@ -122,6 +122,6 @@ const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
 const deprecationCalloutTitle = i18n.translate(
   'xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationTitle',
   {
-    defaultMessage: 'Deprecated Configuration Option',
+    defaultMessage: 'Deprecated configuration option',
   }
 );
