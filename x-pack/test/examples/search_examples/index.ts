@@ -24,5 +24,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     });
 
     loadTestFile(require.resolve('./search_session_example'));
+    loadTestFile(require.resolve('./search_example'));
+    loadTestFile(require.resolve('./search_sessions_cache'));
   });
 }
