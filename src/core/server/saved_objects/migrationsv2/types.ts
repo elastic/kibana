@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Option from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
@@ -48,6 +38,38 @@ export interface BaseState extends ControlState {
   readonly outdatedDocumentsQuery: Record<string, unknown>;
   readonly retryCount: number;
   readonly retryDelay: number;
+  /**
+   * How many times to retry a step that fails with retryable_es_client_error
+   * such as a statusCode: 503 or a snapshot_in_progress_exception.
+   *
+   * We don't want to immediately crash Kibana and cause a reboot for these
+   * intermittent. However, if we're still receiving e.g. a 503 after 10 minutes
+   * this is probably not just a temporary problem so we stop trying and exit
+   * with a fatal error.
+   *
+   * Because of the exponential backoff the total time we will retry such errors
+   * is:
+   * max_retry_time = 2+4+8+16+32+64*(RETRY_ATTEMPTS-5) + ACTION_DURATION*RETRY_ATTEMPTS
+   *
+   * For RETRY_ATTEMPTS=15 (default), ACTION_DURATION=0
+   * max_retry_time = 11.7 minutes
+   */
+  readonly retryAttempts: number;
+
+  /**
+   * The number of documents to fetch from Elasticsearch server to run migration over.
+   *
+   * The higher the value, the faster the migration process will be performed since it reduces
+   * the number of round trips between Kibana and Elasticsearch servers.
+   * For the migration speed, we have to pay the price of increased memory consumption.
+   *
+   * Since batchSize defines the number of documents, not their size, it might happen that
+   * Elasticsearch fails a request with circuit_breaking_exception when it retrieves a set of
+   * saved objects of significant size.
+   *
+   * In this case, you should set a smaller batchSize value and restart the migration process again.
+   */
+  readonly batchSize: number;
   readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
   /**
    * The current alias e.g. `.kibana` which always points to the latest
@@ -68,6 +90,11 @@ export interface BaseState extends ControlState {
    * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
    */
   readonly tempIndex: string;
+  /* When reindexing we use a source query to exclude saved objects types which
+   * are no longer used. These saved objects will still be kept in the outdated
+   * index for backup purposes, but won't be available in the upgraded index.
+   */
+  readonly unusedTypesQuery: Option.Option<estypes.QueryContainer>;
 }
 
 export type InitState = BaseState & {
@@ -101,6 +128,13 @@ export type FatalState = BaseState & {
   /** The reason the migration was terminated */
   readonly reason: string;
 };
+
+export interface WaitForYellowSourceState extends BaseState {
+  /** Wait for the source index to be yellow before requesting it. */
+  readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndex: string;
+  readonly sourceIndexMappings: IndexMapping;
+}
 
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
@@ -264,6 +298,7 @@ export type State =
   | FatalState
   | InitState
   | DoneState
+  | WaitForYellowSourceState
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import {
   EuiFormRow,
@@ -28,29 +30,45 @@ import {
 } from '../../../../common/index_controls';
 import { useKibana } from '../../../../common/lib/kibana';
 
+interface TimeFieldOptions {
+  value: string;
+  text: string;
+}
+
 const IndexActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EsIndexActionConnector>
 > = ({ action, editActionConfig, errors, readOnly }) => {
   const { http, docLinks } = useKibana().services;
   const { index, refresh, executionTimeField } = action.config;
-  const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
+  const [showTimeFieldCheckbox, setShowTimeFieldCheckboxState] = useState<boolean>(
+    executionTimeField != null
+  );
+  const [hasTimeFieldCheckbox, setHasTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
   );
 
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>([
-    firstFieldOption,
-  ]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+
+  const setTimeFields = (fields: TimeFieldOptions[]) => {
+    if (fields.length > 0) {
+      setShowTimeFieldCheckboxState(true);
+      setTimeFieldOptions([firstFieldOption, ...fields]);
+    } else {
+      setHasTimeFieldCheckboxState(false);
+      setShowTimeFieldCheckboxState(false);
+      setTimeFieldOptions([]);
+    }
+  };
 
   useEffect(() => {
     const indexPatternsFunction = async () => {
       setIndexPatterns(await getIndexPatterns());
       if (index) {
         const currentEsFields = await getFields(http!, [index]);
-        const timeFields = getTimeFieldOptions(currentEsFields as any);
-        setTimeFieldOptions([firstFieldOption, ...timeFields]);
+        setTimeFields(getTimeFieldOptions(currentEsFields as any));
       }
     };
     indexPatternsFunction();
@@ -86,10 +104,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
               defaultMessage="Use * to broaden your query."
             />
             <EuiSpacer size="s" />
-            <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html`}
-              target="_blank"
-            >
+            <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
                 defaultMessage="Configuring index connector."
@@ -124,13 +139,11 @@ const IndexActionConnectorFields: React.FunctionComponent<
 
             // reset time field and expression fields if indices are deleted
             if (indices.length === 0) {
-              setTimeFieldOptions([]);
+              setTimeFields([]);
               return;
             }
             const currentEsFields = await getFields(http!, indices);
-            const timeFields = getTimeFieldOptions(currentEsFields as any);
-
-            setTimeFieldOptions([firstFieldOption, ...timeFields]);
+            setTimeFields(getTimeFieldOptions(currentEsFields as any));
           }}
           onSearchChange={async (search) => {
             setIsIndiciesLoading(true);
@@ -173,38 +186,40 @@ const IndexActionConnectorFields: React.FunctionComponent<
         }
       />
       <EuiSpacer size="m" />
-      <EuiSwitch
-        data-test-subj="hasTimeFieldCheckbox"
-        checked={hasTimeFieldCheckbox || false}
-        disabled={readOnly}
-        onChange={() => {
-          setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
-          // if changing from checked to not checked (hasTimeField === true),
-          // set time field to null
-          if (hasTimeFieldCheckbox) {
-            editActionConfig('executionTimeField', null);
+      {showTimeFieldCheckbox && (
+        <EuiSwitch
+          data-test-subj="hasTimeFieldCheckbox"
+          checked={hasTimeFieldCheckbox || false}
+          disabled={readOnly}
+          onChange={() => {
+            setHasTimeFieldCheckboxState(!hasTimeFieldCheckbox);
+            // if changing from checked to not checked (hasTimeField === true),
+            // set time field to null
+            if (hasTimeFieldCheckbox) {
+              editActionConfig('executionTimeField', null);
+            }
+          }}
+          label={
+            <>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
+                defaultMessage="Define time field for each document"
+              />
+              <EuiIconTip
+                position="right"
+                type="questionInCircle"
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
+                  {
+                    defaultMessage: `Set this time field to the time the document was indexed.`,
+                  }
+                )}
+              />
+            </>
           }
-        }}
-        label={
-          <>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-              defaultMessage="Define time field for each document"
-            />
-            <EuiIconTip
-              position="right"
-              type="questionInCircle"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
-                {
-                  defaultMessage: `Automatically add a time field to each document when it's indexed.`,
-                }
-              )}
-            />
-          </>
-        }
-      />
-      {hasTimeFieldCheckbox ? (
+        />
+      )}
+      {hasTimeFieldCheckbox && (
         <>
           <EuiSpacer size="m" />
           <EuiFormRow
@@ -234,7 +249,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
             />
           </EuiFormRow>
         </>
-      ) : null}
+      )}
     </>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
@@ -13,22 +14,28 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
+import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineModel } from '../../../store/timeline/model';
-import { EventDetails } from '../event_details';
-import { ToggleExpandedEvent } from '../../../store/timeline/actions';
+import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { DetailsPanel } from '../../side_panel';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -49,6 +56,14 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;
   padding: 0;
+
+  &.euiFlyoutFooter {
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
+  }
+`;
+
+const ExitFullScreenContainer = styled.div`
+  width: 180px;
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
@@ -70,6 +85,8 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -89,12 +106,21 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   pinnedEventIds,
   onEventClosed,
-  showEventDetails,
+  renderCellValue,
+  rowRenderers,
+  showExpandedDetails,
   sort,
 }) => {
   const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
     SourcererScopeName.timeline
   );
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
+
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -143,8 +169,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const timelineQuerySortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
+        type: columnType,
         direction: sortDirection as Direction,
       })),
     [sort]
@@ -157,7 +184,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     docValueFields,
     endDate: '',
     id: `pinned-${timelineId}`,
-    indexNames: [''],
+    indexNames: existingIndexNames,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery,
@@ -167,22 +194,35 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timerangeKind: undefined,
   });
 
-  const handleOnEventClosed = useCallback(() => {
+  const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
   return (
     <>
-      <FullWidthFlexGroup>
+      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         <ScrollableFlexItem grow={2}>
+          {timelineFullScreen && setTimelineFullScreen != null && (
+            <ExitFullScreenContainer>
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            </ExitFullScreenContainer>
+          )}
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={sort}
                 tabType={TimelineTabs.pinned}
                 totalPages={calculateTotalPages({
@@ -192,7 +232,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               <Footer
@@ -212,16 +252,16 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
-        {showEventDetails && (
+        {showExpandedDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
-              <EventDetails
+              <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                handleOnPanelClosed={handleOnPanelClosed}
                 tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
-                handleOnEventClosed={handleOnEventClosed}
               />
             </ScrollableFlexItem>
           </>
@@ -237,7 +277,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const {
       columns,
-      expandedEvent,
+      expandedDetail,
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
@@ -250,7 +290,8 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
-      showEventDetails: !!expandedEvent[TimelineTabs.pinned]?.eventId,
+      showExpandedDetails:
+        !!expandedDetail[TimelineTabs.pinned] && !!expandedDetail[TimelineTabs.pinned]?.panelView,
       sort,
     };
   };
@@ -258,8 +299,8 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  onEventClosed: (args: ToggleExpandedEvent) => {
-    dispatch(timelineActions.toggleExpandedEvent(args));
+  onEventClosed: (args: ToggleDetailPanel) => {
+    dispatch(timelineActions.toggleDetailPanel(args));
   },
 });
 
@@ -273,7 +314,7 @@ const PinnedTabContent = connector(
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
-      prevProps.showEventDetails === nextProps.showEventDetails &&
+      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

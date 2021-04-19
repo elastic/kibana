@@ -1,21 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import {
+  registerBootstrapRouteMock,
+  bootstrapRendererMock,
+  getSettingValueMock,
+  getStylesheetPathsMock,
+} from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
 
@@ -53,9 +49,22 @@ describe('RenderingService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new RenderingService(mockRenderingServiceParams);
+
+    getSettingValueMock.mockImplementation((settingName: string) => settingName);
+    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
   });
 
   describe('setup()', () => {
+    it('calls `registerBootstrapRoute` with the correct parameters', async () => {
+      await service.setup(mockRenderingSetupDeps);
+
+      expect(registerBootstrapRouteMock).toHaveBeenCalledTimes(1);
+      expect(registerBootstrapRouteMock).toHaveBeenCalledWith({
+        router: expect.any(Object),
+        renderer: bootstrapRendererMock,
+      });
+    });
+
     describe('render()', () => {
       let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
       let render: InternalRenderingServiceSetup['render'];
@@ -111,6 +120,28 @@ describe('RenderingService', () => {
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('calls `getStylesheetPaths` with the correct parameters', async () => {
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          if (settingName === 'theme:version') {
+            return 'v8';
+          }
+          return settingName;
+        });
+
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
       });
     });
   });

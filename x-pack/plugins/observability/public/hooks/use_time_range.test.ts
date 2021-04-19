@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useTimeRange } from './use_time_range';
 import * as pluginContext from './use_plugin_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
+import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -35,7 +37,8 @@ describe('useTimeRange', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown) as ObservabilityPublicPluginsStart,
+      observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
       from: '2020-10-08T05:00:00.000Z',
@@ -75,7 +78,8 @@ describe('useTimeRange', () => {
                 },
               },
             },
-          } as unknown) as ObservabilityPluginSetupDeps,
+          } as unknown) as ObservabilityPublicPluginsStart,
+          observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {

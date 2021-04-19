@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -15,6 +16,7 @@ import {
   indexPatternTitleSchema,
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
+import { RuntimeMappings } from '../../common/types/fields';
 
 function getOverallStats(
   client: IScopedClusterClient,
@@ -25,7 +27,8 @@ function getOverallStats(
   samplerShardSize: number,
   timeFieldName: string,
   earliestMs: number,
-  latestMs: number
+  latestMs: number,
+  runtimeMappings: RuntimeMappings
 ) {
   const dv = new DataVisualizer(client);
   return dv.getOverallStats(
@@ -36,7 +39,8 @@ function getOverallStats(
     samplerShardSize,
     timeFieldName,
     earliestMs,
-    latestMs
+    latestMs,
+    runtimeMappings
   );
 }
 
@@ -50,7 +54,8 @@ function getStatsForFields(
   earliestMs: number,
   latestMs: number,
   interval: number,
-  maxExamples: number
+  maxExamples: number,
+  runtimeMappings: RuntimeMappings
 ) {
   const dv = new DataVisualizer(client);
   return dv.getStatsForFields(
@@ -62,7 +67,8 @@ function getStatsForFields(
     earliestMs,
     latestMs,
     interval,
-    maxExamples
+    maxExamples,
+    runtimeMappings
   );
 }
 
@@ -71,10 +77,17 @@ function getHistogramsForFields(
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings: RuntimeMappings
 ) {
   const dv = new DataVisualizer(client);
-  return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
+  return dv.getHistogramsForFields(
+    indexPatternTitle,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings
+  );
 }
 
 /**
@@ -108,7 +121,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
       try {
         const {
           params: { indexPatternTitle },
-          body: { query, fields, samplerShardSize },
+          body: { query, fields, samplerShardSize, runtimeMappings },
         } = request;
 
         const results = await getHistogramsForFields(
@@ -116,7 +129,8 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
           indexPatternTitle,
           query,
           fields,
-          samplerShardSize
+          samplerShardSize,
+          runtimeMappings
         );
 
         return response.ok({
@@ -164,9 +178,9 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
             latest,
             interval,
             maxExamples,
+            runtimeMappings,
           },
         } = request;
-
         const results = await getStatsForFields(
           client,
           indexPatternTitle,
@@ -177,7 +191,8 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
           earliest,
           latest,
           interval,
-          maxExamples
+          maxExamples,
+          runtimeMappings
         );
 
         return response.ok({
@@ -228,6 +243,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
             timeFieldName,
             earliest,
             latest,
+            runtimeMappings,
           },
         } = request;
 
@@ -240,7 +256,8 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
           samplerShardSize,
           timeFieldName,
           earliest,
-          latest
+          latest,
+          runtimeMappings
         );
 
         return response.ok({

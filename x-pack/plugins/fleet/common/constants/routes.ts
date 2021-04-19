@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 // Base API paths
 
 export const API_ROOT = `/api/fleet`;
@@ -29,6 +31,7 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
 };
 
 // Data stream API routes
@@ -94,11 +97,6 @@ export const AGENT_API_ROUTES = {
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
 };
-export const AGENT_API_ROUTES_7_9 = {
-  CHECKIN_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/checkin`,
-  ACKS_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/acks`,
-  ENROLL_PATTERN: `${FLEET_API_ROOT_7_9}/agents/enroll`,
-};
 
 export const ENROLLMENT_API_KEY_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/enrollment-api-keys`,
@@ -116,3 +114,8 @@ export const AGENTS_SETUP_API_ROUTES = {
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
 
 export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
+
+// Policy preconfig API routes
+export const PRECONFIGURATION_API_ROUTES = {
+  PUT_PRECONFIG: `${API_ROOT}/setup/preconfiguration`,
+};

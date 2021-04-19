@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-
 import { patchComment } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
@@ -56,6 +55,7 @@ interface UpdateComment {
   commentId: string;
   commentUpdate: string;
   fetchUserActions: () => void;
+  subCaseId?: string;
   updateCase: (newCase: Case) => void;
   version: string;
 }
@@ -70,6 +70,8 @@ export const useUpdateComment = (): UseUpdateComment => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const dispatchUpdateComment = useCallback(
     async ({
@@ -77,43 +79,53 @@ export const useUpdateComment = (): UseUpdateComment => {
       commentId,
       commentUpdate,
       fetchUserActions,
+      subCaseId,
       updateCase,
       version,
     }: UpdateComment) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
       try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: commentId });
+
         const response = await patchComment(
           caseId,
           commentId,
           commentUpdate,
           version,
-          abortCtrl.signal
+          abortCtrlRef.current.signal,
+          subCaseId
         );
-        if (!cancel) {
+
+        if (!isCancelledRef.current) {
           updateCase(response);
           fetchUserActions();
           dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE', payload: commentId });
         }
       }
-      return () => {
-        cancel = true;
-        abortCtrl.abort();
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  useEffect(() => {
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
+  }, []);
 
   return { ...state, patchComment: dispatchUpdateComment };
 };

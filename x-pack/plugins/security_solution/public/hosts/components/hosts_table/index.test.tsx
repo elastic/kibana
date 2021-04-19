@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -65,14 +65,14 @@ describe('Hosts Table', () => {
       const wrapper = shallow(
         <TestProviders store={store}>
           <HostsTable
-            data={mockData.Hosts.edges}
+            data={mockData}
             id="hostsQuery"
             isInspect={false}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+            fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.Hosts.pageInfo)}
-            totalCount={mockData.Hosts.totalCount}
+            showMorePagesIndicator={false}
+            totalCount={-1}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -92,14 +92,10 @@ describe('Hosts Table', () => {
                 id="hostsQuery"
                 isInspect={false}
                 loading={false}
-                data={mockData.Hosts.edges}
-                totalCount={mockData.Hosts.totalCount}
-                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-                showMorePagesIndicator={getOr(
-                  false,
-                  'showMorePagesIndicator',
-                  mockData.Hosts.pageInfo
-                )}
+                data={mockData}
+                totalCount={0}
+                fakeTotalCount={-1}
+                showMorePagesIndicator={false}
                 loadPage={loadPage}
                 type={hostsModel.HostsType.page}
               />

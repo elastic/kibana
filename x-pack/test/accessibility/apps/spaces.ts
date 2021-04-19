@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
@@ -17,13 +18,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  describe('Kibana spaces page meets a11y validations', () => {
+  // flaky
+  // https://github.com/elastic/kibana/issues/77933
+  // https://github.com/elastic/kibana/issues/96625
+  describe.skip('Kibana spaces page meets a11y validations', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
-    it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
+    it.skip('a11y test for manage spaces menu from top nav on Kibana home', async () => {
       await PageObjects.spaceSelector.openSpacesNav();
       await retry.waitFor(
         'Manage spaces option visible',
@@ -32,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for manage spaces page', async () => {
+    it.skip('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await toasts.dismissAllToasts();

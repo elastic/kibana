@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { spacesMock } from '../../../spaces/server/mocks';
+
+import { checkAccess } from './check_access';
 
 jest.mock('./enterprise_search_config_api', () => ({
   callEnterpriseSearchConfigAPI: jest.fn(),
 }));
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
-
-import { checkAccess } from './check_access';
-import { spacesMock } from '../../../spaces/server/mocks';
 
 const enabledSpace = {
   id: 'space',

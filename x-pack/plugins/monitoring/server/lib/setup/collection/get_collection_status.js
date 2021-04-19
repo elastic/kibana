@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, uniq } from 'lodash';
@@ -233,7 +234,8 @@ function isBeatFromAPM(bucket) {
 }
 
 async function hasNecessaryPermissions(req) {
-  const securityFeature = req.server.plugins.monitoring.info.getSecurityFeature();
+  const licenseService = await req.server.plugins.monitoring.info.getLicenseService();
+  const securityFeature = licenseService.getSecurityFeature();
   if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
     return true;
   }

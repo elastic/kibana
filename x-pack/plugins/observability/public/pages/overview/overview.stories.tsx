@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { makeDecorator } from '@storybook/addons';
@@ -9,12 +10,12 @@ import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPluginSetupDeps } from '../../plugin';
-import { EuiThemeProvider } from '../../typings';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -22,6 +23,7 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
+import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -50,7 +52,8 @@ const withCore = makeDecorator({
                   timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
                 },
               },
-            } as unknown) as ObservabilityPluginSetupDeps,
+            } as unknown) as ObservabilityPublicPluginsStart,
+            observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
           }}
         >
           <EuiThemeProvider>

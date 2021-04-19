@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
+
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
-  createSpaces,
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
   createMockSavedObjectsRepository,
+  createMockSavedObjectsService,
+  createSpaces,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
-  createMockSavedObjectsService,
 } from '../__fixtures__';
-import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
-import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
-  coreMock,
-} from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
 import { initShareToSpacesApi } from './share_to_space';
-import { spacesConfig } from '../../../lib/__fixtures__';
-import { ObjectType } from '@kbn/config-schema';
-import { SpacesClientService } from '../../../spaces_client';
-import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('share to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -59,7 +64,6 @@ describe('share to space', () => {
     initShareToSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,

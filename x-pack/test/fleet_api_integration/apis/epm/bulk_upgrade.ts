@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -50,8 +51,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
       });
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
@@ -62,8 +62,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
 
         const err = body.response[1] as IBulkInstallPackageHTTPError;
         expect(err.statusCode).equal(404);
@@ -78,12 +77,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
         let entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
 
         entry = body.response[1] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal(null);
-        expect(entry.newVersion).equal('0.1.0');
+        expect(entry.version).equal('0.1.0');
         expect(entry.name).equal('overrides');
       });
     });
@@ -102,8 +99,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal(null);
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
       });
     });
   });

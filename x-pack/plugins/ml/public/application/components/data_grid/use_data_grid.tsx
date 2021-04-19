@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../common/types/es_client';
+import { ChartData } from '../../../../common/types/field_histograms';
+
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
-import { INIT_MAX_COLUMNS } from './common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
 import {
+  ChartsVisible,
   ColumnId,
   DataGridItem,
   IndexPagination,
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
+  RowCountRelation,
   UseDataGridReturnType,
 } from './types';
-import { ChartData } from './use_column_chart';
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -31,18 +36,22 @@ export const useDataGrid = (
 ): UseDataGridReturnType => {
   const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
 
+  const [ccsWarning, setCcsWarning] = useState(false);
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
+  const [rowCountRelation, setRowCountRelation] = useState<RowCountRelation>(undefined);
   const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const [chartsVisible, setChartsVisible] = useState(false);
+  const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
 
   const toggleChartVisibility = () => {
-    setChartsVisible(!chartsVisible);
+    if (chartsVisible !== undefined) {
+      setChartsVisible(!chartsVisible);
+    }
   };
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
@@ -104,7 +113,7 @@ export const useDataGrid = (
             <ColumnChart
               chartData={chartData}
               columnType={c}
-              dataTestSubj={`mlDataGridChart-${index}`}
+              dataTestSubj={`mlDataGridChart-${c.id}`}
             />
           ) : undefined,
       };
@@ -130,7 +139,21 @@ export const useDataGrid = (
     });
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
+  // Initialize the mini histogram charts toggle button.
+  // On load `chartsVisible` is set to `undefined`, the button will be disabled.
+  // Once we know how many rows have been returned,
+  // we decide whether to show or hide the charts by default.
+  useEffect(() => {
+    if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
+      setChartsVisible(
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
+          rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE
+      );
+    }
+  }, [chartsVisible, rowCount, rowCountRelation]);
+
   return {
+    ccsWarning,
     chartsVisible,
     chartsButtonVisible: true,
     columnsWithCharts,
@@ -143,11 +166,14 @@ export const useDataGrid = (
     pagination,
     resetPagination,
     rowCount,
+    rowCountRelation,
     setColumnCharts,
+    setCcsWarning,
     setErrorMessage,
     setNoDataMessage,
     setPagination,
     setRowCount,
+    setRowCountRelation,
     setSortingColumns,
     setStatus,
     setTableItems,

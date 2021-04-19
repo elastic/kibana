@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -16,12 +18,12 @@ import {
   ThreadPoolRejectionsAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert, RawAlertInstance } from '../../../alerts/common';
+import { Alert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -65,7 +67,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
 
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -77,7 +79,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       Globals.app.config.ui.max_bucket_size,

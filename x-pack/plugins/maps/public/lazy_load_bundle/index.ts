@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -12,6 +13,8 @@ import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
 import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
+import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
@@ -52,6 +55,7 @@ interface LazyLoadedMapModules {
     emsLayerId,
     leftFieldName,
     termsFieldName,
+    termsSize,
     colorSchema,
     indexPatternId,
     indexPatternTitle,
@@ -62,6 +66,7 @@ interface LazyLoadedMapModules {
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
+    termsSize?: number;
     colorSchema: string;
     indexPatternId?: string;
     indexPatternTitle?: string;
@@ -69,6 +74,8 @@ interface LazyLoadedMapModules {
     metricFieldName?: string;
   }) => LayerDescriptor | null;
   createBasemapLayerDescriptor: () => LayerDescriptor | null;
+  createESSearchSourceLayerDescriptor: (params: CreateLayerDescriptorParams) => LayerDescriptor;
+  suggestEMSTermJoinConfig: (config: SampleValuesConfig) => Promise<EMSTermJoinConfig | null>;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -88,6 +95,8 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
       createBasemapLayerDescriptor,
+      createESSearchSourceLayerDescriptor,
+      suggestEMSTermJoinConfig,
     } = await import('./lazy');
 
     resolve({
@@ -101,6 +110,8 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
       createBasemapLayerDescriptor,
+      createESSearchSourceLayerDescriptor,
+      suggestEMSTermJoinConfig,
     });
   });
   return loadModulesPromise;

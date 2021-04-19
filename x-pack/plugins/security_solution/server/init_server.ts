@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
-import { createHostsResolvers } from './graphql/hosts';
 import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createScalarDateResolvers } from './graphql/scalar_date';
@@ -23,7 +24,6 @@ import { AppBackendLibs } from './lib/types';
 export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createHostsResolvers(libs) as IResolvers,
       createNoteResolvers(libs) as IResolvers,
       createPinnedEventResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,

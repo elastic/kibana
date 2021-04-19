@@ -19,6 +19,8 @@ def label(size) {
       return 'docker && tests-xl-highmem'
     case 'xxl':
       return 'docker && tests-xxl && gobld/machineType:custom-64-270336'
+    case 'n2-standard-16':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
   }
 
   error "unknown size '${size}'"
@@ -99,6 +101,7 @@ def base(Map params, Closure closure) {
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${checkoutInfo.branch}",
       "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
+      "BUILD_TS_REFS_DISABLE=true", // no need to build ts refs in bootstrap
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),

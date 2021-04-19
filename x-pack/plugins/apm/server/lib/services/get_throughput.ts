@@ -1,53 +1,60 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
+  environment?: string;
+  kuery?: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   transactionType: string;
+  start: number;
+  end: number;
 }
 
-type ESResponse = PromiseReturnType<typeof fetcher>;
-
-function transform(response: ESResponse) {
-  const buckets = response.aggregations?.throughput?.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: y }) => ({ x, y }));
-}
-
-async function fetcher({
+function fetcher({
+  environment,
+  kuery,
   searchAggregatedTransactions,
   serviceName,
   setup,
   transactionType,
+  start,
+  end,
 }: Options) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   const params = {
@@ -62,12 +69,19 @@ async function fetcher({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        throughput: {
+        timeseries: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            throughput: {
+              rate: {
+                unit: 'minute' as const,
+              },
+            },
           },
         },
       },
@@ -77,8 +91,17 @@ async function fetcher({
   return apmEventClient.search(params);
 }
 
-export async function getThroughput(options: Options) {
-  return {
-    throughput: transform(await fetcher(options)),
-  };
+export function getThroughput(options: Options) {
+  return withApmSpan('get_throughput_for_service', async () => {
+    const response = await fetcher(options);
+
+    return (
+      response.aggregations?.timeseries.buckets.map((bucket) => {
+        return {
+          x: bucket.key,
+          y: bucket.throughput.value,
+        };
+      }) ?? []
+    );
+  });
 }

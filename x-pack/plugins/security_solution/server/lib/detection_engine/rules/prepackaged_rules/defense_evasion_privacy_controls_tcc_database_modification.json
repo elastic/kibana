@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of sqlite3 to directly modify the Transparency, Consent, and Control (TCC) SQLite database. This may indicate an attempt to bypass macOS privacy controls, including access to sensitive resources like the system camera, microphone, address book, and calendar.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Privacy Control Bypass via TCCDB Modification",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"sqlite*\" and \n process.args : \"/*/Application Support/com.apple.TCC/TCC.db\"\n",
+  "references": [
+    "https://applehelpwriter.com/2016/08/29/discovering-how-dropbox-hacks-your-mac/",
+    "https://github.com/bp88/JSS-Scripts/blob/master/TCC.db Modifier.sh",
+    "https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8"
+  ],
+  "risk_score": 47,
+  "rule_id": "eea82229-b002-470e-a9e1-00be38b14d32",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

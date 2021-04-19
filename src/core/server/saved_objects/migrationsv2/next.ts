@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { pipe } from 'fp-ts/lib/pipeable';
-import {
+import type {
   AllActionStates,
   ReindexSourceToTempState,
   MarkVersionIndexReady,
@@ -43,6 +32,7 @@ import {
   CreateNewTargetState,
   CloneTempToSource,
   SetTempWriteBlock,
+  WaitForYellowSourceState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -65,6 +55,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
+    WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
+      Actions.waitForIndexStatusYellow(client, state.sourceIndex),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
@@ -72,7 +64,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex(client, state.tempIndex, state.tempIndexMappings),
     REINDEX_SOURCE_TO_TEMP: (state: ReindexSourceToTempState) =>
-      Actions.reindex(client, state.sourceIndex.value, state.tempIndex, Option.none, false),
+      Actions.reindex(
+        client,
+        state.sourceIndex.value,
+        state.tempIndex,
+        Option.none,
+        false,
+        state.unusedTypesQuery
+      ),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock(client, state.tempIndex),
     REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK: (state: ReindexSourceToTempWaitForTaskState) =>
@@ -84,7 +83,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, state.targetIndex, state.outdatedDocumentsQuery),
+      Actions.searchForOutdatedDocuments(client, {
+        batchSize: state.batchSize,
+        targetIndex: state.targetIndex,
+        outdatedDocumentsQuery: state.outdatedDocumentsQuery,
+      }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
@@ -111,7 +114,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.legacyIndex,
         state.sourceIndex.value,
         state.preMigrationScript,
-        false
+        false,
+        state.unusedTypesQuery
       ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),

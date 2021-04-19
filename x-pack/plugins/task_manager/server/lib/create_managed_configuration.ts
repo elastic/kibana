@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { interval, merge, of, Observable } from 'rxjs';
 import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Logger } from '../../../../../src/core/server';
+import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -75,11 +77,11 @@ function createMaxWorkersScan(logger: Logger, startingMaxWorkers: number) {
     }
     if (newMaxWorkers !== previousMaxWorkers) {
       logger.debug(
-        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} error(s)`
+        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
       if (previousMaxWorkers === startingMaxWorkers) {
         logger.warn(
-          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" error(s).`
+          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
@@ -104,11 +106,11 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
     }
     if (newPollInterval !== previousPollInterval) {
       logger.debug(
-        `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} error(s)`
+        `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
       if (previousPollInterval === startingPollInterval) {
         logger.warn(
-          `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" error(s).`
+          `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
@@ -120,7 +122,11 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
   return merge(
     // Flush error count at fixed interval
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
-    errors$.pipe(filter((e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e)))
+    errors$.pipe(
+      filter(
+        (e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e) || isEsCannotExecuteScriptError(e)
+      )
+    )
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter

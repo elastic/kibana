@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,8 +17,10 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
-  metric?: string;
+export type MetricExpression = Omit<MetricExpressionParams, 'metric' | 'timeSize' | 'timeUnit'> & {
+  metric?: MetricExpressionParams['metric'];
+  timeSize?: MetricExpressionParams['timeSize'];
+  timeUnit?: MetricExpressionParams['timeUnit'];
 };
 
 export enum AGGREGATION_TYPES {
@@ -53,7 +56,7 @@ export interface ExpressionChartData {
 
 export interface AlertParams {
   criteria: MetricExpression[];
-  groupBy?: string[];
+  groupBy?: string | string[];
   filterQuery?: string;
   sourceId: string;
   filterQueryText?: string;

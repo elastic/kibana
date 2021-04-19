@@ -7,16 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  e | <code>any</code> |  |
-|  timeoutSignal | <code>AbortSignal</code> |  |
+|  e | <code>KibanaServerError &#124; AbortError</code> |  |
 |  options | <code>ISearchOptions</code> |  |
+|  isTimeout | <code>boolean</code> |  |
 
 <b>Returns:</b>
 

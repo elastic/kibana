@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
+import { inRange } from 'lodash';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
-import { NotFoundError } from './errors';
+import { AnomalyThresholdRangeError, NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
@@ -19,9 +20,10 @@ import {
   InfraStaticSourceConfiguration,
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
-  StaticSourceConfigurationRuntimeType,
   InfraSource,
-} from '../../../common/http_api/source_api';
+  sourceConfigurationConfigFilePropertiesRT,
+  SourceConfigurationConfigFileProperties,
+} from '../../../common/source_configuration/source_configuration';
 import { InfraConfig } from '../../../server';
 
 interface Libs {
@@ -103,6 +105,9 @@ export class InfraSources {
     source: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = source;
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
 
     const newSourceConfiguration = mergeSourceConfiguration(
       staticDefaultSourceConfiguration,
@@ -139,6 +144,10 @@ export class InfraSources {
     sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = sourceProperties;
+
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
 
     const { configuration, version } = await this.getSourceConfiguration(
       savedObjectsClient,
@@ -190,19 +199,32 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration = pipe(
-      runtimeTypes
-        .type({
-          sources: runtimeTypes.type({
-            default: StaticSourceConfigurationRuntimeType,
-          }),
-        })
-        .decode(this.libs.config),
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
+      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
       map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
       fold(constant({}), identity)
     );
 
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
+    // config file sources in 8.0.0.
+    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
+      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
+        logAlias?: string;
+      } = {
+        ...staticSourceConfiguration,
+        logIndices: {
+          type: 'index_name',
+          indexName: staticSourceConfiguration.logAlias,
+        },
+      };
+      delete convertedStaticSourceConfiguration.logAlias;
+      return mergeSourceConfiguration(
+        defaultSourceConfiguration,
+        convertedStaticSourceConfiguration
+      );
+    } else {
+      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    }
   }
 
   private async getSavedSourceConfiguration(

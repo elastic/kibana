@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo } from 'react';
-import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
+import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
 import { useLogIndicesConfigurationFormState } from './indices_configuration_form_state';
 import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
 
 export const useLogSourceConfigurationFormState = (
-  configuration?: LogSourceConfigurationProperties
+  configuration?: ResolvedLogSourceConfiguration
 ) => {
   const indicesConfigurationFormState = useLogIndicesConfigurationFormState({
     initialFormState: useMemo(
@@ -19,9 +20,9 @@ export const useLogSourceConfigurationFormState = (
           ? {
               name: configuration.name,
               description: configuration.description,
-              logAlias: configuration.logAlias,
-              tiebreakerField: configuration.fields.tiebreaker,
-              timestampField: configuration.fields.timestamp,
+              logAlias: configuration.indices,
+              tiebreakerField: configuration.tiebreakerField,
+              timestampField: configuration.timestampField,
             }
           : undefined,
       [configuration]
@@ -33,7 +34,7 @@ export const useLogSourceConfigurationFormState = (
       () =>
         configuration
           ? {
-              logColumns: configuration.logColumns,
+              logColumns: configuration.columns,
             }
           : undefined,
       [configuration]

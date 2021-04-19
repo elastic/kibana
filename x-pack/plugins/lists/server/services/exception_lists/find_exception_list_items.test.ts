@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LIST_ID } from '../../../common/constants.mock';
@@ -17,7 +18,18 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list'],
       });
       expect(filter).toEqual(
-        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: some-list-id)'
+        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "some-list-id")'
+      );
+    });
+
+    test('It should create a filter escaping quotes in list ids', () => {
+      const filter = getExceptionListsItemFilter({
+        filter: [],
+        listId: ['list-id-"-with-quote'],
+        savedObjectType: ['exception-list'],
+      });
+      expect(filter).toEqual(
+        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-id-\\"-with-quote")'
       );
     });
 
@@ -28,7 +40,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list'],
       });
       expect(filter).toEqual(
-        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: some-list-id) AND exception-list.attributes.name: "Sample Endpoint Exception List")'
+        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "some-list-id") AND exception-list.attributes.name: "Sample Endpoint Exception List")'
       );
     });
 
@@ -39,7 +51,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list', 'exception-list-agnostic'],
       });
       expect(filter).toEqual(
-        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: list-1) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-2)'
+        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2")'
       );
     });
 
@@ -50,7 +62,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list', 'exception-list-agnostic'],
       });
       expect(filter).toEqual(
-        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: list-1) AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-2)'
+        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2")'
       );
     });
 
@@ -61,7 +73,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list', 'exception-list-agnostic', 'exception-list-agnostic'],
       });
       expect(filter).toEqual(
-        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: list-1) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-2) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-3)'
+        '(exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3")'
       );
     });
 
@@ -72,7 +84,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list', 'exception-list-agnostic', 'exception-list-agnostic'],
       });
       expect(filter).toEqual(
-        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: list-1) AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-2) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-3)'
+        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3")'
       );
     });
 
@@ -87,7 +99,7 @@ describe('find_exception_list_items', () => {
         savedObjectType: ['exception-list', 'exception-list-agnostic', 'exception-list-agnostic'],
       });
       expect(filter).toEqual(
-        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: list-1) AND exception-list.attributes.name: "Sample Endpoint Exception List 1") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-2) AND exception-list.attributes.name: "Sample Endpoint Exception List 2") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: list-3) AND exception-list.attributes.name: "Sample Endpoint Exception List 3")'
+        '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List 1") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") AND exception-list.attributes.name: "Sample Endpoint Exception List 2") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3") AND exception-list.attributes.name: "Sample Endpoint Exception List 3")'
       );
     });
   });

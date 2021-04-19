@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -16,10 +18,11 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+
 import { SO_SEARCH_LIMIT } from '../../../../constants';
-import { Agent } from '../../../../types';
+import type { Agent } from '../../../../types';
 import {
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
@@ -145,12 +148,21 @@ export const AgentBulkActions: React.FunctionComponent<{
     },
   ];
 
+  const showSelectEverything =
+    selectionMode === 'manual' &&
+    selectedAgents.length === selectableAgents &&
+    selectableAgents < totalAgents;
+
+  const totalActiveAgents = totalAgents - totalInactiveAgents;
+  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
+  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+
   return (
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout
-            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+          <AgentReassignAgentPolicyModal
+            agents={agents}
             onClose={() => {
               setIsReassignFlyoutOpen(false);
               refreshAgents();
@@ -161,10 +173,8 @@ export const AgentBulkActions: React.FunctionComponent<{
       {isUnenrollModalOpen && (
         <EuiPortal>
           <AgentUnenrollAgentModal
-            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
-            agentCount={
-              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
-            }
+            agents={agents}
+            agentCount={agentCount}
             onClose={() => {
               setIsUnenrollModalOpen(false);
               refreshAgents();
@@ -176,10 +186,8 @@ export const AgentBulkActions: React.FunctionComponent<{
         <EuiPortal>
           <AgentUpgradeAgentModal
             version={kibanaVersion}
-            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
-            agentCount={
-              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
-            }
+            agents={agents}
+            agentCount={agentCount}
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgents();
@@ -227,12 +235,9 @@ export const AgentBulkActions: React.FunctionComponent<{
                   >
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.agentsSelected"
-                      defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
+                      defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
                       values={{
-                        count:
-                          selectionMode === 'manual'
-                            ? selectedAgents.length
-                            : Math.min(totalAgents - totalInactiveAgents, SO_SEARCH_LIMIT),
+                        count: selectionMode === 'manual' ? selectedAgents.length : 'all',
                       }}
                     />
                   </Button>
@@ -245,9 +250,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                 <EuiContextMenu initialPanelId={0} panels={panels} />
               </EuiPopover>
             </EuiFlexItem>
-            {selectionMode === 'manual' &&
-            selectedAgents.length === selectableAgents &&
-            selectableAgents < totalAgents ? (
+            {showSelectEverything ? (
               <EuiFlexItem grow={false}>
                 <Button
                   size="xs"

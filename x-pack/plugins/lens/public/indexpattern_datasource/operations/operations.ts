@@ -1,22 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { memoize } from 'lodash';
 import { OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
   GenericOperationDefinition,
   OperationType,
+  renameOperationsMapping,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
 
 export { operationDefinitionMap } from './definitions';
-
+/**
+ * Map aggregation names from Elasticsearch to Lens names.
+ * Used when loading indexpatterns to map metadata (i.e. restrictions)
+ */
+export function translateToOperationName(agg: string): OperationType {
+  return agg in renameOperationsMapping ? renameOperationsMapping[agg] : (agg as OperationType);
+}
 /**
  * Returns all available operation types as a list at runtime.
  * This will be an array of each member of the union type `OperationType`
@@ -57,13 +65,20 @@ export function getSortScoreByPriority(
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
  */
-export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
+export function getOperationTypesForField(
+  field: IndexPatternField,
+  filterOperations?: (operation: OperationMetadata) => boolean
+): OperationType[] {
   return operationDefinitions
-    .filter(
-      (operationDefinition) =>
-        operationDefinition.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field)
-    )
+    .filter((operationDefinition) => {
+      if (operationDefinition.input !== 'field') {
+        return false;
+      }
+      const possibleOperation = operationDefinition.getPossibleOperationForField(field);
+      return filterOperations
+        ? possibleOperation && filterOperations(possibleOperation)
+        : possibleOperation;
+    })
     .sort(getSortScoreByPriority)
     .map(({ type }) => type);
 }
@@ -179,3 +194,5 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 
   return Object.values(operationByMetadata);
 }
+
+export const memoizedGetAvailableOperationsByMetadata = memoize(getAvailableOperationsByMetadata);

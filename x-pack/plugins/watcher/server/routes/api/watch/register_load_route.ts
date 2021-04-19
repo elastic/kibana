@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 import { RouteDependencies } from '../../../types';
@@ -23,15 +22,15 @@ function fetchWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   });
 }
 
-export function registerLoadRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerLoadRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/watch/{id}',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const id = request.params.id;
 
       try {
@@ -60,7 +59,7 @@ export function registerLoadRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

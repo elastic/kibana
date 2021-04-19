@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT =
   'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT';
 
 export class DashboardHelloWorldOnlyRangeSelectDrilldown
-  implements Drilldown<Config, typeof SELECT_RANGE_TRIGGER> {
+  implements Drilldown<Config, RangeSelectContext> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT;
 
   public readonly order = 7;
@@ -57,7 +58,7 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
 
   public readonly isConfigValid = (
     config: Config,
-    context: BaseActionFactoryContext<typeof SELECT_RANGE_TRIGGER>
+    context: BaseActionFactoryContext
   ): config is Config => {
     // eslint-disable-next-line no-console
     console.log('Showcasing, that can access action factory context:', context);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import apm from 'elastic-apm-node';
@@ -87,6 +88,7 @@ export function screenshotsObservableFactory(
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async (itemsCount) => {
+                // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
                 const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
                 await Promise.all([
                   driver.setViewport(viewport, logger),
@@ -133,7 +135,7 @@ export function screenshotsObservableFactory(
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
                     : getDefaultElementPosition(layout.getViewport(1));
-                  const screenshots = await getScreenshots(driver, elements, logger);
+                  const screenshots = await getScreenshots(driver, layout, elements, logger);
                   const { timeRange, error: setupError } = data;
                   return {
                     timeRange,

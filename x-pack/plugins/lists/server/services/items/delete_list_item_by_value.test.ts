@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -60,8 +61,8 @@ describe('delete_list_item_by_value', () => {
         },
       },
       index: '.items',
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,6 +23,7 @@ test('Should render metrics expression for metrics', () => {
   const component = shallow(
     <MetricsExpression
       {...defaultProps}
+      rightFields={['foobar', 'prop1']}
       metrics={[
         { type: 'count', label: 'my count' }, // should ignore label
         { type: 'max' }, // incomplete - no field, should not be included in expression

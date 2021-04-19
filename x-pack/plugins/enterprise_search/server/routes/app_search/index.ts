@@ -1,19 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RouteDependencies } from '../../plugin';
 
-import { registerEnginesRoutes } from './engines';
+import { registerAnalyticsRoutes } from './analytics';
+import { registerApiLogsRoutes } from './api_logs';
 import { registerCredentialsRoutes } from './credentials';
+import { registerCurationsRoutes } from './curations';
+import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
+import { registerEnginesRoutes } from './engines';
+import { registerOnboardingRoutes } from './onboarding';
+import { registerResultSettingsRoutes } from './result_settings';
+import { registerRoleMappingsRoutes } from './role_mappings';
+import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSettingsRoutes } from './settings';
-import { registerDocumentRoutes } from './documents';
 
 export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerEnginesRoutes(dependencies);
   registerCredentialsRoutes(dependencies);
   registerSettingsRoutes(dependencies);
+  registerAnalyticsRoutes(dependencies);
+  registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerCurationsRoutes(dependencies);
+  registerSearchSettingsRoutes(dependencies);
+  registerRoleMappingsRoutes(dependencies);
+  registerResultSettingsRoutes(dependencies);
+  registerApiLogsRoutes(dependencies);
+  registerOnboardingRoutes(dependencies);
 };

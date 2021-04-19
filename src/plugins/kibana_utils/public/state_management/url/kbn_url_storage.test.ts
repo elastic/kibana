@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import '../../storage/hashed_item_store/mock';
 import {
   History,
@@ -60,6 +50,22 @@ describe('kbn_url_storage', () => {
         `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=(test:'123')"`
       );
       const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
+      expect(retrievedState2).toEqual(state2);
+    });
+
+    it('should set expanded state to url before hash', () => {
+      let newUrl = setStateToKbnUrl('_s', state1, { useHash: false, storeInHashQuery: false }, url);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')#/yourApp"`
+      );
+      const retrievedState1 = getStateFromKbnUrl('_s', newUrl, { getFromHashQuery: false });
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToKbnUrl('_s', state2, { useHash: false, storeInHashQuery: false }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana?_s=(test:'123')#/yourApp"`
+      );
+      const retrievedState2 = getStateFromKbnUrl('_s', newUrl, { getFromHashQuery: false });
       expect(retrievedState2).toEqual(state2);
     });
 

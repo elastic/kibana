@@ -1,64 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
+
 import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  hasInitialized: boolean;
   ilmEnabled: boolean;
-  configuredLimits: Partial<ConfiguredLimits>;
-  account: Partial<Account>;
-  myRole: Partial<Role>;
+  configuredLimits: ConfiguredLimits;
+  account: Account;
+  myRole: Role;
 }
 interface AppActions {
-  initializeAppData(props: InitialAppData): Required<InitialAppData>;
   setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<InitialAppData>>>({
   path: ['enterprise_search', 'app_search', 'app_logic'],
   actions: {
-    initializeAppData: (props) => props,
     setOnboardingComplete: () => true,
   },
-  reducers: {
-    hasInitialized: [
-      false,
-      {
-        initializeAppData: () => true,
-      },
-    ],
+  reducers: ({ props }) => ({
     account: [
-      {},
+      props.appSearch,
       {
-        initializeAppData: (_, { appSearch: account }) => account || {},
         setOnboardingComplete: (account) => ({
           ...account,
           onboardingComplete: true,
         }),
       },
     ],
-    configuredLimits: [
-      {},
-      {
-        initializeAppData: (_, { configuredLimits }) => configuredLimits?.appSearch || {},
-      },
-    ],
-    ilmEnabled: [
-      false,
-      {
-        initializeAppData: (_, { ilmEnabled }) => !!ilmEnabled,
-      },
-    ],
-  },
+    configuredLimits: [props.configuredLimits.appSearch, {}],
+    ilmEnabled: [props.ilmEnabled, {}],
+  }),
   selectors: {
     myRole: [
       (selectors) => [selectors.account],

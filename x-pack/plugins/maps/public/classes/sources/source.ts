@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
@@ -10,13 +11,14 @@ import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 
 import { IField } from '../fields/field';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { PreIndexedShape } from '../../../common/elasticsearch_util';
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -32,12 +34,6 @@ export type ImmutableSourceProperty = {
 export type Attribution = {
   url: string;
   label: string;
-};
-
-export type PreIndexedShape = {
-  index: string;
-  id: string | number;
-  path: string;
 };
 
 export interface ISource {
@@ -88,7 +84,7 @@ export class AbstractSource implements ISource {
   }
 
   async supportsFitToBounds(): Promise<boolean> {
-    return true;
+    return false;
   }
 
   /**

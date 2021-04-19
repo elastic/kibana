@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
@@ -17,11 +18,14 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { getIndexPatternsMock } from './mocks';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import { InfraSource } from '../../../common/source_configuration/source_configuration';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -121,7 +125,7 @@ describe('LogEntry search strategy', () => {
     expect(response.rawResponse.data).toEqual({
       id: 'HIT_ID',
       index: 'HIT_INDEX',
-      key: {
+      cursor: {
         time: 1605116827143,
         tiebreaker: 1,
       },
@@ -195,13 +199,16 @@ describe('LogEntry search strategy', () => {
   });
 });
 
-const createSourceConfigurationMock = () => ({
+const createSourceConfigurationMock = (): InfraSource => ({
   id: 'SOURCE_ID',
   origin: 'stored' as const,
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'some-test-id',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
@@ -214,6 +221,7 @@ const createSourceConfigurationMock = () => ({
       timestamp: 'TIMESTAMP_FIELD',
       tiebreaker: 'TIEBREAKER_FIELD',
     },
+    anomalyThreshold: 20,
   },
 });
 
@@ -244,6 +252,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  searchSessionsClient: createSearchSessionsClientMock(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
@@ -252,4 +261,5 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
+  indexPatterns: getIndexPatternsMock(),
 });

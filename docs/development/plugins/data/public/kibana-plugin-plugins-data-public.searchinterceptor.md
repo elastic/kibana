@@ -26,8 +26,9 @@ export declare class SearchInterceptor
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [getSerializableOptions(options)](./kibana-plugin-plugins-data-public.searchinterceptor.getserializableoptions.md) |  |  |
 |  [getTimeoutMode()](./kibana-plugin-plugins-data-public.searchinterceptor.gettimeoutmode.md) |  |  |
-|  [handleSearchError(e, timeoutSignal, options)](./kibana-plugin-plugins-data-public.searchinterceptor.handlesearcherror.md) |  |  |
-|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
+|  [handleSearchError(e, options, isTimeout)](./kibana-plugin-plugins-data-public.searchinterceptor.handlesearcherror.md) |  |  |
+|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
 |  [showError(e)](./kibana-plugin-plugins-data-public.searchinterceptor.showerror.md) |  |  |
 

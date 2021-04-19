@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { applyDeprecations } from './apply_deprecations';
@@ -43,8 +32,9 @@ describe('applyDeprecations', () => {
     expect(handlerC).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handlers with correct arguments', () => {
-    const logger = () => undefined;
+  it('passes path to addDeprecation factory', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
     const alteredConfig = { foo: 'bar' };
 
@@ -54,11 +44,33 @@ describe('applyDeprecations', () => {
     applyDeprecations(
       initialConfig,
       [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
-      logger
+      createAddDeprecation
     );
 
-    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', logger);
-    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', logger);
+    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', addDeprecation);
+    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', addDeprecation);
+    expect(createAddDeprecation).toBeCalledTimes(2);
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(1, 'pathA');
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(2, 'pathB');
+  });
+
+  it('calls handlers with correct arguments', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+    const alteredConfig = { foo: 'bar' };
+
+    const handlerA = jest.fn().mockReturnValue(alteredConfig);
+    const handlerB = jest.fn().mockImplementation((conf) => conf);
+
+    applyDeprecations(
+      initialConfig,
+      [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
+      createAddDeprecation
+    );
+
+    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', addDeprecation);
+    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', addDeprecation);
   });
 
   it('returns the migrated config', () => {

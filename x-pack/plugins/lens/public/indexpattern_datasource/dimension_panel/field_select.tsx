@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './field_select.scss';
@@ -31,7 +32,7 @@ export interface FieldChoice {
   operationType: OperationType;
 }
 
-export interface FieldSelectProps extends EuiComboBoxProps<{}> {
+export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOption['value']> {
   currentIndexPattern: IndexPattern;
   selectedOperationType?: OperationType;
   selectedField?: string;

@@ -17,7 +17,11 @@ You can add text labels to your Point features by configuring label style proper
 |*Label color*
 |The text color.
 |*Label size*
-|The size of the text font, in pixels.
+|The size of the text, in pixels.
+|*Label&nbsp;border&nbsp;color*
+|The color of the label border.
+|*Label&nbsp;border&nbsp;width*
+|The width of the label border.
 |===
 
 You can symbolize Point features as *Circle markers* or *Icons*.
@@ -70,6 +74,16 @@ image::maps/images/maki-icons.png[]
 |The border width of the polygon features.
 |*Fill color*
 |The fill color of the polygon features.
+|*Label*
+|Specifies label content. For polygons, the label is positioned at the polygon centroid. For multi-polygons, the label is positioned at the largest polygon centroid.
+|*Label color*
+|The text color.
+|*Label size*
+|The size of the text, in pixels.
+|*Label&nbsp;border&nbsp;color*
+|The color of the label border.
+|*Label&nbsp;border&nbsp;width*
+|The width of the label border.
 |===
 
 
@@ -83,4 +97,14 @@ image::maps/images/maki-icons.png[]
 |The color of the line features.
 |*Border width*
 |The width of the line features.
+|*Label*
+|Specifies label content. For lines, the label is positioned at the center of the line. For multi-lines, the label is positioned at the center of the longest line.
+|*Label color*
+|The text color.
+|*Label size*
+|The size of the text, in pixels.
+|*Label&nbsp;border&nbsp;color*
+|The color of the label border.
+|*Label&nbsp;border&nbsp;width*
+|The width of the label border.
 |===

@@ -1,0 +1,165 @@
+[[tsvb]]
+=== TSVB
+
+*TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
+most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, your data must have a date field. 
+
+[role="screenshot"]
+image::visualize/images/tsvb-screenshot.png[TSVB overview]
+
+[float]
+[[tsvb-required-choices]]
+==== Open and set up TSVB
+
+Open *TSVB*, then make sure the required settings are configured.
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *TSVB*.
+
+. In *TSVB*, click *Panel options*, then make sure the following settings are configured:
+
+* *Index pattern*
+* *Time field*
+* *Interval*
+
+. Select a *Drop last bucket* option. It is dropped by default because the time filter intersects the time range of the last bucket, but can be enabled to see the partial data.
+
+. In the *Panel filter* field, specify any <<kuery-query, KQL filters>> to select specific documents.
+
+[float]
+[[configure-the-data-series]]
+==== Configure the series
+
+Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation. 
+For each series, the *Options* control the styling and {es} options, and are inherited from *Panel options*.
+When you have separate options for each series, you can compare different {es} indices, and view two time ranges from the same index. 
+
+To configure the value of each series, select the function, then configure the function inputs. Only the last function is displayed.
+
+. From the *Aggregation* dropdown, select the function for the series. 
+
+. To display each group separately, select one of the following options from the *Group by* dropdown:
+
+* *Filters* &mdash; Groups the data into the specified filters. To differentiate the groups, assign a color to each filter.
+
+* *Terms* &mdash; Displays the top values of the field. The color is only configurable in the *Time Series* chart. To configure, click *Options*, then select an option from the *Split color theme* dropdown.
+
+. Click *Options*, then configure the inputs for the function. 
+
+[float]
+[[configure-the-visualizations]]
+==== TSVB visualization options
+
+The configuration options differ for each *TSVB* visualization.
+
+[float]
+[[tsvb-time-series]]
+===== Time Series
+
+By default, the y-axis displays the full range of data, including zero. To automatically scale the y-axis from
+the minimum to maximum values of the data, click *Data > Options > Fill*, then enter `0` in the *Fill* field.
+You can add annotations to the x-axis based on timestamped documents in a separate {es} index.
+
+[float]
+[[all-chart-types-except-time-series]]
+===== All chart types except Time Series
+
+The *Data timerange mode* dropdown in *Panel options* controls the timespan that *TSVB* uses to match documents.
+*Last value* is unable to match all documents, only the specific interval. *Entire timerange* matches all documents specified in the time filter.
+
+[float]
+[[metric-topn-gauge]]
+===== Metric, Top N, and Gauge
+
+*Color rules* in *Panel options* contains conditional coloring based on the values. 
+
+[float]
+[[topn-table]]
+===== Top N and Table
+
+When you click a series, *TSVB* applies a filter based on the series name. 
+To change this behavior, click *Panel options*, then specify a URL in the *Item URL* field, which opens a URL instead of applying a filter on click. 
+
+[float]
+[[tsvb-markdown]]
+===== Markdown
+
+The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS using the LESS syntax.
+
+[float]
+[[tsvb-function-reference]]
+==== TSVB function reference
+
+*TSVB* provides you with shortcuts for some frequently-used functions.
+
+*Filter Ratio*::
+  Returns a percent value by calculating a metric on two sets of documents. 
+  For example, calculate the error rate as a percentage of the overall events over time.
+
+*Counter Rate*::
+  Used when dealing with monotonically increasing counters. Shortcut for *Max*, *Derivative*, and *Positive Only*.
+
+*Positive Only*::
+  Removes any negative values from the results, which can be used as a post-processing step
+  after a derivative.
+
+*Series Agg*::
+  Applies a function to all of the *Group by* series to reduce the values to a single number.
+  This function must always be the last metric in the series.
+  For example, if the *Time Series* visualization shows 10 series, the sum *Series Agg* calculates
+  the sum of all 10 bars and output a single Y value per X value. This is often confused
+  with the overall sum function, which outputs a single Y value per unique series.
+
+*Math*::
+  The math context is able to do simple and advanced calculations per series.
+  This function must always be the last metric in the series.
+
+[float]
+[[tsvb-faq]]
+==== Frequently asked questions
+
+For answers to frequently asked *TSVB* question, review the following. 
+
+[float]
+===== Why is my TSVB visualization missing data?
+
+It depends, but most often there are two causes:
+
+* For *Time series* visualizations with a derivative function, the time interval can be too small. Derivatives require sequential values. 
+
+* For all other *TSVB* visualizations, the cause is probably the *Data timerange mode*, which is controlled by *Panel options > Data timerange mode > Entire time range*.
+By default, *TSVB* displays the last whole bucket. For example, if the time filter is set to *Last 24 hours*, and the
+current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30 to 9:40.
+
+[float]
+===== How do I calculate the difference between two data series?
+
+Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+
+[float]
+===== How do I compare the current versus previous month?
+
+*TSVB* can display two series with time offsets, but it can't perform math across series. To add a time offset:
+
+. Click *Clone Series*, then choose a color for the new series.
++
+[role="screenshot"]
+image::images/tsvb_clone_series.png[Clone Series action]
+  
+. Click *Options*, then enter the offset value in the *Offset series time by* field.
+
+[float]
+===== How do I calculate a month over month change?
+  
+The ability to calculate a month over month change is not fully supported in *TSVB*, but there is a special case that is supported _if_ the
+time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the *Derivative* to get the absolute monthly change. To convert to a percent, 
+add the *Math* function with the `params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
+
+For other types of month over month calculations, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+
+[float]
+===== How do I calculate the duration between the start and end of an event?
+  
+Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
+*TSVB* requires that the duration is pre-calculated.

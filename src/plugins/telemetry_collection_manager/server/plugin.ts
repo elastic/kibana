@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -26,7 +15,8 @@ import {
   Logger,
   IClusterClient,
   SavedObjectsServiceStart,
-  ILegacyClusterClient,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'src/core/server';
 
 import {
@@ -40,8 +30,8 @@ import {
   UsageStatsPayload,
   StatsCollectionContext,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -53,7 +43,6 @@ export class TelemetryCollectionManagerPlugin
   private collectionStrategy: CollectionStrategy<any> | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
-  private legacyElasticsearchClient?: ILegacyClusterClient;
   private elasticsearchClient?: IClusterClient;
   private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
@@ -77,7 +66,6 @@ export class TelemetryCollectionManagerPlugin
   }
 
   public start(core: CoreStart) {
-    this.legacyElasticsearchClient = core.elasticsearch.legacy.client; // TODO: Remove when all the collectors have migrated
     this.elasticsearchClient = core.elasticsearch.client;
     this.savedObjectsService = core.savedObjects;
 
@@ -129,22 +117,46 @@ export class TelemetryCollectionManagerPlugin
     config: StatsGetterConfig,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig | undefined {
-    const callCluster = config.unencrypted
-      ? this.legacyElasticsearchClient?.asScoped(config.request).callAsCurrentUser
-      : this.legacyElasticsearchClient?.callAsInternalUser;
-    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    const esClient = config.unencrypted
-      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
-      : this.elasticsearchClient?.asInternalUser;
-    // Scope the saved objects client appropriately and pass to the stats collection config
-    const soClient = config.unencrypted
-      ? this.savedObjectsService?.getScopedClient(config.request)
-      : this.savedObjectsService?.createInternalRepository();
+    const esClient = this.getElasticsearchClient(config);
+    const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
-    if (callCluster && esClient && soClient) {
-      return { callCluster, usageCollection, esClient, soClient, kibanaRequest };
+    if (esClient && soClient) {
+      return { usageCollection, esClient, soClient, kibanaRequest };
+    }
+  }
+
+  /**
+   * Returns the ES client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see".
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
+    return config.unencrypted
+      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
+      : this.elasticsearchClient?.asInternalUser;
+  }
+
+  /**
+   * Returns the SavedObjects client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see"
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
+    if (config.unencrypted) {
+      // Intentionally using the scoped client here to make use of all the security wrappers.
+      // It also returns spaces-scoped telemetry.
+      return this.savedObjectsService?.getScopedClient(config.request);
+    } else if (this.savedObjectsService) {
+      // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`
+      // to ensure some best practices when collecting "all the telemetry"
+      // (i.e.: `.find` requests should query all spaces)
+      return new TelemetrySavedObjectsClient(this.savedObjectsService.createInternalRepository());
     }
   }
 
@@ -220,7 +232,7 @@ export class TelemetryCollectionManagerPlugin
               return usageData;
             }
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            return await encryptTelemetry(usageData, {
               useProdKey: this.isDistributable,
             });
           }

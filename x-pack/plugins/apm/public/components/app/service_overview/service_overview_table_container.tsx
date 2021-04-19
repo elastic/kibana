@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
-import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
  * The height for a table on the overview page. Is the height of a 5-row basic
@@ -23,7 +24,7 @@ const tableHeight = 282;
  *
  * Hide the empty message when we don't yet have any items and are still loading.
  */
-const ServiceOverviewTableContainerDiv = styled.div<{
+const ServiceOverviewTableContainerDiv = euiStyled.div<{
   isEmptyAndLoading: boolean;
   shouldUseMobileLayout: boolean;
 }>`
@@ -58,12 +59,12 @@ export function ServiceOverviewTableContainer({
   children?: ReactNode;
   isEmptyAndLoading: boolean;
 }) {
-  const shouldUseMobileLayout = useShouldUseMobileLayout();
+  const { isMedium } = useBreakPoints();
 
   return (
     <ServiceOverviewTableContainerDiv
       isEmptyAndLoading={isEmptyAndLoading}
-      shouldUseMobileLayout={shouldUseMobileLayout}
+      shouldUseMobileLayout={isMedium}
     >
       {children}
     </ServiceOverviewTableContainerDiv>

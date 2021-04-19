@@ -1,14 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    rollup?: RollupContext;
-  }
-}
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -18,7 +13,6 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
@@ -31,21 +25,9 @@ import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
-import { isEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
-
-interface RollupContext {
-  client: ILegacyScopedClusterClient;
-}
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  // Extend the elasticsearchJs client with additional endpoints.
-  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-
-  return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
-}
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -91,18 +73,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('rollup', async (context, request) => {
-      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.rollupEsClient.asScoped(request),
-      };
-    });
-
     registerApiRoutes({
       router: http.createRouter(),
       license: this.license,
       lib: {
-        isEsError,
+        handleEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
       },
@@ -119,11 +94,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         value: true,
         description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
           defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
+              which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],
         schema: schema.boolean(),
+        requiresPageReload: true,
       },
     });
 

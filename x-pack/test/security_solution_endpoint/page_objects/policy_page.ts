@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -9,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   return {
     /**
@@ -69,7 +69,6 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
-      await browser.scrollTop();
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();

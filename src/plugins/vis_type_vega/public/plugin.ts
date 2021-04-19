@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
@@ -27,17 +17,19 @@ import {
   setData,
   setInjectedVars,
   setUISettings,
-  setMapsLegacyConfig,
   setInjectedMetadata,
+  setMapServiceSettings,
+  setDocLinks,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings } from '../../maps_legacy/public';
+import { IServiceSettings, MapsEmsPluginSetup } from '../../maps_ems/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
+import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -54,7 +46,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsLegacy: any;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -63,30 +55,34 @@ export interface VegaPluginStartDependencies {
 }
 
 /** @internal */
-export class VegaPlugin implements Plugin<Promise<void>, void> {
+export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
-    { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations, mapsEms }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
+
     setUISettings(core.uiSettings);
-    setMapsLegacyConfig(mapsLegacy.config);
+
+    setMapServiceSettings(
+      new MapServiceSettings(mapsEms.config, this.initializerContext.env.packageInfo.version)
+    );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
         data,
       },
-      getServiceSettings: mapsLegacy.getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
@@ -94,12 +90,13 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
-    visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
+    visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
   public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
+    setDocLinks(core.docLinks);
   }
 }

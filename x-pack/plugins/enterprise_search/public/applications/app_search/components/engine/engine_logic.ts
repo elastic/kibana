@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -9,7 +10,8 @@ import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
 import { IIndexingStatus } from '../../../shared/types';
-import { EngineDetails } from './types';
+
+import { EngineDetails, EngineTypes } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
@@ -64,17 +66,19 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       '',
       {
         setEngineName: (_, { engineName }) => engineName,
+        clearEngine: () => '',
       },
     ],
     engineNotFound: [
       false,
       {
         setEngineNotFound: (_, { notFound }) => notFound,
+        clearEngine: () => false,
       },
     ],
   },
   selectors: ({ selectors }) => ({
-    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === 'meta'],
+    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
     hasSchemaConflicts: [
       () => [selectors.engine],

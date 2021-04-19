@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from 'kibana/public';
@@ -67,7 +68,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'available' },
+        data: { logIndexStatus: 'available' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -81,7 +82,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'empty' },
+        data: { logIndexStatus: 'empty' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -95,7 +96,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'missing' },
+        data: { logIndexStatus: 'missing' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -111,7 +112,10 @@ describe('Logs UI Observability Homepage Functions', () => {
       mockedCallFetchLogSourceConfigurationAPI.mockResolvedValue({
         data: {
           configuration: {
-            logAlias: 'filebeat-*',
+            logIndices: {
+              type: 'index_pattern',
+              indexPatternId: 'some-test-id',
+            },
             fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
           },
         },

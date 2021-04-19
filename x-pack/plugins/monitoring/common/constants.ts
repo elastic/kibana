@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -95,23 +96,6 @@ export const CALCULATE_DURATION_UNTIL = 'until';
  * In order to show ML Jobs tab in the Elasticsearch section / tab navigation, license must be supported
  */
 export const ML_SUPPORTED_LICENSES = ['trial', 'platinum', 'enterprise'];
-
-/**
- * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
- *
- * @type {Object}
- */
-export const CLOUD_METADATA_SERVICES = {
-  // We explicitly call out the version, 2016-09-02, rather than 'latest' to avoid unexpected changes
-  AWS_URL: 'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document',
-
-  // 2017-04-02 is the first GA release of this API
-  AZURE_URL: 'http://169.254.169.254/metadata/instance?api-version=2017-04-02',
-
-  // GCP documentation shows both 'metadata.google.internal' (mostly) and '169.254.169.254' (sometimes)
-  // To bypass potential DNS changes, the IP was used because it's shared with other cloud services
-  GCP_URL_PREFIX: 'http://169.254.169.254/computeMetadata/v1/instance',
-};
 
 /**
  * Constants used by Logstash monitoring code
@@ -252,6 +236,7 @@ export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monit
 export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
 export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
+export const ALERT_LARGE_SHARD_SIZE = `${ALERT_PREFIX}shard_size`;
 
 /**
  * Legacy alerts details/label for server and public use
@@ -471,6 +456,30 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert if any CCR read exceptions have been detected.',
     }),
   },
+  [ALERT_LARGE_SHARD_SIZE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
+          defaultMessage: `Notify when average shard size exceeds this value`,
+        }),
+        type: AlertParamType.Number,
+        append: 'GB',
+      },
+      indexPattern: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label', {
+          defaultMessage: `Check the following index patterns`,
+        }),
+        placeholder: 'eg: data-*, *prod-data, -.internal-data*',
+        type: AlertParamType.TextField,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.shardSize.label', {
+      defaultMessage: 'Shard size',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
+      defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
+    }),
+  },
 };
 
 export const ALERT_PANEL_MENU = [
@@ -494,6 +503,7 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_CPU_USAGE },
       { alertName: ALERT_DISK_USAGE },
       { alertName: ALERT_MEMORY_USAGE },
+      { alertName: ALERT_LARGE_SHARD_SIZE },
     ],
   },
   {
@@ -527,6 +537,7 @@ export const ALERTS = [
   ALERT_THREAD_POOL_SEARCH_REJECTIONS,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 ];
 
 /**
@@ -551,6 +562,11 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
  * See x-pack/plugins/actions/server/builtin_action_types/log.ts
  */
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
+
+/**
+ * To enable modifing of alerts in under actions
+ */
+export const ALERT_REQUIRES_APP_CONTEXT = true;
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
 

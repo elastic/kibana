@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
@@ -35,7 +36,16 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
-  threshold?: { field: string | undefined; value: number } | undefined;
+  threshold?:
+    | {
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
+      }
+    | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
 }

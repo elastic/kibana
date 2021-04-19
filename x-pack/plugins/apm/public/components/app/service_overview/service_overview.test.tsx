@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -21,8 +22,12 @@ import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_b
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
-import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  getCallApmApiSpy,
+  getCreateCallApmApiSpy,
+} from '../../../services/rest/callApmApiSpy';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -45,7 +50,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider
-            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+            params={{
+              rangeFrom: 'now-15m',
+              rangeTo: 'now',
+              latencyAggregationType: LatencyAggregationType.avg,
+            }}
           >
             {children}
           </MockUrlParamsContextProvider>
@@ -74,35 +83,32 @@ describe('ServiceOverview', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
+    /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'GET /api/apm/services/{serviceName}/error_groups': {
-        error_groups: [],
-        total_error_groups: 0,
+      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
+        error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
-        transactionGroups: [],
+      'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
+        transactionGroups: [] as any[],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'GET /api/apm/services/{serviceName}/service_overview_instances': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
     };
+    /* eslint-enable @typescript-eslint/naming-convention */
 
-    jest
-      .spyOn(callApmApiModule, 'createCallApmApi')
-      .mockImplementation(() => {});
-
-    const callApmApi = jest
-      .spyOn(callApmApiModule, 'callApmApi')
-      .mockImplementation(({ endpoint }) => {
+    const callApmApiSpy = getCallApmApiSpy().mockImplementation(
+      ({ endpoint }) => {
         const response = calls[endpoint as keyof typeof calls];
 
         return response
           ? Promise.resolve(response)
           : Promise.reject(`Response for ${endpoint} is not defined`);
-      });
+      }
+    );
+
+    getCreateCallApmApiSpy().mockImplementation(() => callApmApiSpy as any);
     jest
       .spyOn(useTransactionBreakdownHooks, 'useTransactionBreakdown')
       .mockReturnValue({
@@ -119,7 +125,7 @@ describe('ServiceOverview', () => {
     );
 
     await waitFor(() =>
-      expect(callApmApi).toHaveBeenCalledTimes(Object.keys(calls).length)
+      expect(callApmApiSpy).toHaveBeenCalledTimes(Object.keys(calls).length)
     );
 
     expect((await findAllByText('Latency')).length).toBeGreaterThan(0);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -30,7 +31,7 @@ export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateC
         <p>
           <FormattedMessage
             id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
-            defaultMessage="Choose the action(s) to take when the rule matches an anomaly."
+            defaultMessage="Choose the actions to take when the job rule matches an anomaly."
           />
         </p>
       </EuiText>

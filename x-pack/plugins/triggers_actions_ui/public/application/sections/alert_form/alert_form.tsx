@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,13 +33,14 @@ import {
   EuiNotificationBadge,
   EuiErrorBoundary,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-} from '../../../../../alerts/common/parse_duration';
+} from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
@@ -58,7 +61,7 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
@@ -99,25 +102,72 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   }
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
-        defaultMessage: 'Alert trigger is required.',
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
+        defaultMessage: 'Rule type is required.',
+      })
+    );
+  }
+  const emptyConnectorActions = alertObject.actions.find(
+    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
+  );
+  if (emptyConnectorActions !== undefined) {
+    errors.actionConnectors.push(
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
+        defaultMessage: 'Action for {actionTypeId} connector is required.',
+        values: { actionTypeId: emptyConnectorActions.actionTypeId },
       })
     );
   }
   return validationResult;
 }
 
-const hasErrors: (errors: IErrorObject) => boolean = (errors) =>
+export function getAlertErrors(
+  alert: Alert,
+  actionTypeRegistry: ActionTypeRegistryContract,
+  alertTypeModel: AlertTypeModel | null
+) {
+  const alertParamsErrors: IErrorObject = alertTypeModel
+    ? alertTypeModel.validate(alert.params).errors
+    : [];
+  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
+  const alertErrors = {
+    ...alertParamsErrors,
+    ...alertBaseErrors,
+  } as IErrorObject;
+
+  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
+    return {
+      ...prev,
+      [alertAction.id]: actionTypeRegistry
+        .get(alertAction.actionTypeId)
+        ?.validateParams(alertAction.params).errors,
+    };
+  }, {}) as Record<string, IErrorObject>;
+  return {
+    alertParamsErrors,
+    alertBaseErrors,
+    alertActionsErrors,
+    alertErrors,
+  };
+}
+
+export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasErrors(errorList as IErrorObject);
+    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
 
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject
+  validationResult: IErrorObject,
+  actionsErrors: Record<string, IErrorObject>
 ): alertObject is Alert {
-  return !hasErrors(validationResult);
+  return (
+    !hasObjectErrors(validationResult) &&
+    Object.keys(actionsErrors).find((actionErrorsKey) =>
+      hasObjectErrors(actionsErrors[actionErrorsKey])
+    ) === undefined
+  );
 }
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
@@ -227,8 +277,8 @@ export const AlertForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadRuleTypesMessage',
+            { defaultMessage: 'Unable to load rule types' }
           ),
         });
       }
@@ -531,8 +581,8 @@ export const AlertForm = ({
             fallback={
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypeParamsDescription"
-                  defaultMessage="Loading alert type params…"
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingRuleTypeParamsDescription"
+                  defaultMessage="Loading rule type params…"
                 />
               </SectionLoading>
             }
@@ -541,6 +591,7 @@ export const AlertForm = ({
               alertParams={alert.params}
               alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
               alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setAlertParams={setAlertParams}
               setAlertProperty={setAlertProperty}
@@ -558,33 +609,42 @@ export const AlertForm = ({
       alertTypeModel &&
       alert.alertTypeId &&
       selectedAlertType ? (
-        <ActionForm
-          actions={alert.actions}
-          setHasActionsDisabled={setHasActionsDisabled}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={selectedAlertType.actionVariables}
-          defaultActionGroupId={defaultActionGroupId}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
-            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
-          }
-          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
-            actionGroup.id === selectedAlertType.recoveryActionGroup.id
-              ? {
-                  ...actionGroup,
-                  omitOptionalMessageVariables: true,
-                  defaultActionMessage: recoveredActionGroupMessage,
-                }
-              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
-          )}
-          getDefaultActionParams={getDefaultActionParams}
-          setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
-          setActionGroupIdByIndex={(group: string, index: number) =>
-            setActionProperty('group', group, index)
-          }
-          setActions={setActions}
-          setActionParamsProperty={setActionParamsProperty}
-          actionTypeRegistry={actionTypeRegistry}
-        />
+        <>
+          {errors.actionConnectors.length >= 1 ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
+          <ActionForm
+            actions={alert.actions}
+            setHasActionsDisabled={setHasActionsDisabled}
+            setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+            messageVariables={selectedAlertType.actionVariables}
+            defaultActionGroupId={defaultActionGroupId}
+            isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+              isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+            }
+            actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+              actionGroup.id === selectedAlertType.recoveryActionGroup.id
+                ? {
+                    ...actionGroup,
+                    omitOptionalMessageVariables: true,
+                    defaultActionMessage: recoveredActionGroupMessage,
+                  }
+                : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+            )}
+            getDefaultActionParams={getDefaultActionParams}
+            setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
+            setActionGroupIdByIndex={(group: string, index: number) =>
+              setActionProperty('group', group, index)
+            }
+            setActions={setActions}
+            setActionParamsProperty={setActionParamsProperty}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        </>
       ) : null}
     </Fragment>
   );
@@ -709,6 +769,7 @@ export const AlertForm = ({
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
+                  data-test-subj="intervalInputUnit"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -754,8 +815,8 @@ export const AlertForm = ({
                     className="actActionForm__getMoreActionsLink"
                   >
                     <FormattedMessage
-                      defaultMessage="Get more alert types"
-                      id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
+                      defaultMessage="Get more rule types"
+                      id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
                     />
                   </EuiLink>
                 </EuiTitle>
@@ -765,8 +826,8 @@ export const AlertForm = ({
               <EuiTitle size="xxs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.alertTypeSelectLabel"
-                    defaultMessage="Select alert type"
+                    id="xpack.triggersActionsUI.sections.alertForm.ruleTypeSelectLabel"
+                    defaultMessage="Select rule type"
                   />
                 </h5>
               </EuiTitle>
@@ -801,6 +862,13 @@ export const AlertForm = ({
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiSpacer />
+          {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
           {alertTypeNodes}
         </Fragment>
       ) : alertTypesIndex ? (
@@ -808,8 +876,8 @@ export const AlertForm = ({
       ) : (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypesDescription"
-            defaultMessage="Loading alert types…"
+            id="xpack.triggersActionsUI.sections.alertForm.loadingRuleTypesDescription"
+            defaultMessage="Loading rule types…"
           />
         </SectionLoading>
       )}
@@ -825,8 +893,8 @@ const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Alert types"
+          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypesTitle"
+          defaultMessage="You have not been authorized to {operation} any Rule types"
           values={{ operation }}
         />
       </h2>
@@ -835,8 +903,8 @@ const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
       <div>
         <p role="banner">
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypes"
-            defaultMessage="In order to {operation} an Alert you need to have been granted the appropriate privileges."
+            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypes"
+            defaultMessage="In order to {operation} a Rule you need to have been granted the appropriate privileges."
             values={{ operation }}
           />
         </p>

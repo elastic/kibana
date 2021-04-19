@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -15,7 +16,12 @@ import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { ValidationResult, Alert } from '../../../triggers_actions_ui/public/types';
+import {
+  ValidationResult,
+  Alert,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
@@ -88,8 +94,13 @@ describe('alert_form', () => {
     id: 'alert-action-type',
     iconClass: '',
     selectMessage: '',
-    validateConnector: validationMethod,
-    validateParams: validationMethod,
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
+    },
+    validateParams: (): GenericValidationResult<unknown> => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
   };

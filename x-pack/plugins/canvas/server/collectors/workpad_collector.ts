@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
@@ -229,7 +229,6 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     variables: variableInfo,
   };
 }
-type ESResponse = SearchResponse<WorkpadSearch>;
 
 const workpadCollector: TelemetryCollector = async function (kibanaIndex, esClient) {
   const searchParams = {
@@ -240,10 +239,10 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, esClie
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
+  const { body: esResponse } = await esClient.search<WorkpadSearch>(searchParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
-    const workpads = esResponse.hits.hits.map((hit) => hit._source[CANVAS_TYPE]);
+    const workpads = esResponse.hits.hits.map((hit) => hit._source![CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }
 

@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Lateral Movement via Startup Folder",
   "query": "file where event.type in (\"creation\", \"change\") and\n /* via RDP TSClient mounted share or SMB */\n  (process.name : \"mstsc.exe\" or process.pid == 4) and\n   file.path : \"C:\\\\*\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\"\n",
   "references": [
@@ -50,13 +51,21 @@
       },
       "technique": [
         {
-          "id": "T1060",
-          "name": "Registry Run Keys / Startup Folder",
-          "reference": "https://attack.mitre.org/techniques/T1060/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

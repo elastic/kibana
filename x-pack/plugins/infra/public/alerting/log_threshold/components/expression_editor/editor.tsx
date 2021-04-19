@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
@@ -14,10 +15,12 @@ import {
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
-  PartialAlertParams,
   Comparator,
   isRatioAlert,
+  PartialAlertParams,
+  PartialCountAlertParams,
   PartialCriteria as PartialCriteriaType,
+  PartialRatioAlertParams,
   ThresholdType,
   timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
@@ -47,7 +50,7 @@ interface LogsContextMeta {
 
 const DEFAULT_BASE_EXPRESSION = {
   timeSize: 5,
-  timeUnit: 'm',
+  timeUnit: 'm' as const,
 };
 
 const DEFAULT_FIELD = 'log.level';
@@ -60,7 +63,9 @@ const createDefaultCriterion = (
     ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
     : { field: undefined, comparator: undefined, value: undefined };
 
-const createDefaultCountAlertParams = (availableFields: LogIndexField[]) => ({
+const createDefaultCountAlertParams = (
+  availableFields: LogIndexField[]
+): PartialCountAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
@@ -69,15 +74,17 @@ const createDefaultCountAlertParams = (availableFields: LogIndexField[]) => ({
   criteria: [createDefaultCriterion(availableFields, 'error')],
 });
 
-const createDefaultRatioAlertParams = (availableFields: LogIndexField[]) => ({
+const createDefaultRatioAlertParams = (
+  availableFields: LogIndexField[]
+): PartialRatioAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
     comparator: Comparator.GT,
   },
   criteria: [
-    createDefaultCriterion(availableFields, 'error'),
-    createDefaultCriterion([], 'warning'),
+    [createDefaultCriterion(availableFields, 'error')],
+    [createDefaultCriterion(availableFields, 'warning')],
   ],
 });
 
@@ -95,7 +102,11 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogSourceProvider sourceId={sourceId} fetch={http!.fetch}>
+        <LogSourceProvider
+          sourceId={sourceId}
+          fetch={http!.fetch}
+          indexPatternsService={props.data.indexPatterns}
+        >
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
@@ -108,10 +119,10 @@ export const ExpressionEditor: React.FC<
 export const SourceStatusWrapper: React.FC = ({ children }) => {
   const {
     initialize,
-    isLoadingSourceStatus,
+    loadSource,
+    isLoadingSourceConfiguration,
+    hasFailedLoadingSource,
     isUninitialized,
-    hasFailedLoadingSourceStatus,
-    loadSourceStatus,
   } = useLogSourceContext();
 
   useMount(() => {
@@ -120,13 +131,13 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
 
   return (
     <>
-      {isLoadingSourceStatus || isUninitialized ? (
+      {isLoadingSourceConfiguration || isUninitialized ? (
         <div>
           <EuiSpacer size="m" />
           <EuiLoadingSpinner size="l" />
           <EuiSpacer size="m" />
         </div>
-      ) : hasFailedLoadingSourceStatus ? (
+      ) : hasFailedLoadingSource ? (
         <EuiCallOut
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
@@ -134,7 +145,7 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
           color="danger"
           iconType="alert"
         >
-          <EuiButton onClick={loadSourceStatus} iconType="refresh">
+          <EuiButton onClick={loadSource} iconType="refresh">
             {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
               defaultMessage: 'Try again',
             })}
@@ -152,7 +163,7 @@ export const Editor: React.FC<
 > = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { sourceId, sourceStatus } = useLogSourceContext();
+  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
 
   const {
     criteria: criteriaErrors,
@@ -162,24 +173,24 @@ export const Editor: React.FC<
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    if (sourceStatus?.logIndexFields) {
-      return sourceStatus.logIndexFields.filter((field) => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
     }
-  }, [sourceStatus]);
+  }, [resolvedSourceConfiguration]);
 
   const groupByFields = useMemo(() => {
-    if (sourceStatus?.logIndexFields) {
-      return sourceStatus.logIndexFields.filter((field) => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
     }
-  }, [sourceStatus]);
+  }, [resolvedSourceConfiguration]);
 
   const updateThreshold = useCallback(
     (thresholdParams) => {

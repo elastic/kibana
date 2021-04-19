@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
@@ -20,7 +22,6 @@ import {
   getPinOnClick,
   InvestigateInResolverAction,
 } from '../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
@@ -37,20 +38,19 @@ interface Props {
   actionsColumnWidth: number;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  expanded: boolean;
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   notesCount: number;
-  onEventToggled: () => void;
+  onEventDetailsPanelOpened: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   onRuleChange?: () => void;
   hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
@@ -69,22 +69,21 @@ export const EventColumnView = React.memo<Props>(
     actionsColumnWidth,
     ariaRowindex,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     eventIdToNoteIds,
-    expanded,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
     notesCount,
-    onEventToggled,
+    onEventDetailsPanelOpened,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
     refetch,
     hasRowRenderers,
     onRuleChange,
+    renderCellValue,
     selectedEventIds,
     showCheckboxes,
     showNotes,
@@ -176,7 +175,6 @@ export const EventColumnView = React.memo<Props>(
                 ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
                 key="attach-to-case"
                 ecsRowData={ecsData}
-                disabled={eventType !== 'signal'}
               />,
             ]
           : []),
@@ -219,23 +217,21 @@ export const EventColumnView = React.memo<Props>(
           checked={Object.keys(selectedEventIds).includes(id)}
           columnValues={columnValues}
           onRowSelected={onRowSelected}
-          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
           loadingEventIds={loadingEventIds}
-          onEventToggled={onEventToggled}
+          onEventDetailsPanelOpened={onEventDetailsPanelOpened}
           showCheckboxes={showCheckboxes}
         />
-
         <DataDrivenColumns
           _id={id}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
           hasRowRenderers={hasRowRenderers}
           notesCount={notesCount}
+          renderCellValue={renderCellValue}
           tabType={tabType}
           timelineId={timelineId}
         />

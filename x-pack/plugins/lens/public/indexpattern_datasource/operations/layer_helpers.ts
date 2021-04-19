@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _, { partition } from 'lodash';
+import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -23,6 +25,8 @@ interface ColumnChange {
   columnId: string;
   indexPattern: IndexPattern;
   field?: IndexPatternField;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -40,6 +44,8 @@ export function insertNewColumn({
   columnId,
   field,
   indexPattern,
+  visualizationGroups,
+  targetGroup,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -59,17 +65,17 @@ export function insertNewColumn({
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation.isBucketed);
-    if (isBucketed) {
-      return updateDefaultLabels(
-        addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
-        indexPattern
-      );
-    } else {
-      return updateDefaultLabels(
-        addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
-        indexPattern
-      );
-    }
+    const addOperationFn = isBucketed ? addBucket : addMetric;
+    return updateDefaultLabels(
+      addOperationFn(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer }),
+        columnId,
+        visualizationGroups,
+        targetGroup
+      ),
+      indexPattern
+    );
   }
 
   if (operationDefinition.input === 'fullReference') {
@@ -78,9 +84,6 @@ export function insertNewColumn({
     }
     let tempLayer = { ...layer };
     const referenceIds = operationDefinition.requiredReferences.map((validation) => {
-      // TODO: This logic is too simple because it's not using fields. Once we have
-      // access to the operationSupportMatrix, we should validate the metadata against
-      // the possible fields
       const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
         isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
       );
@@ -104,6 +107,8 @@ export function insertNewColumn({
             columnId: newId,
             op: def.type,
             indexPattern,
+            visualizationGroups,
+            targetGroup,
           });
         } else if (validFields.length === 1) {
           // Recursively update the layer for each new reference
@@ -113,6 +118,8 @@ export function insertNewColumn({
             op: def.type,
             indexPattern,
             field: validFields[0],
+            visualizationGroups,
+            targetGroup,
           });
         } else {
           tempLayer = {
@@ -140,7 +147,9 @@ export function insertNewColumn({
       addOperationFn(
         tempLayer,
         operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
-        columnId
+        columnId,
+        visualizationGroups,
+        targetGroup
       ),
       indexPattern
     );
@@ -162,7 +171,9 @@ export function insertNewColumn({
         addBucket(
           layer,
           operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
-          columnId
+          columnId,
+          visualizationGroups,
+          targetGroup
         ),
         indexPattern
       );
@@ -203,7 +214,9 @@ export function insertNewColumn({
     addOperationFn(
       layer,
       operationDefinition.buildColumn({ ...baseOptions, layer, field }),
-      columnId
+      columnId,
+      visualizationGroups,
+      targetGroup
     ),
     indexPattern
   );
@@ -215,6 +228,7 @@ export function replaceColumn({
   indexPattern,
   op,
   field,
+  visualizationGroups,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -240,42 +254,82 @@ export function replaceColumn({
 
     tempLayer = resetIncomplete(tempLayer, columnId);
 
-    if (previousDefinition.input === 'fullReference') {
-      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+    if (operationDefinition.input === 'fullReference') {
+      return applyReferenceTransition({
+        layer: tempLayer,
+        columnId,
+        previousColumn,
+        op,
+        indexPattern,
+        visualizationGroups,
       });
     }
 
-    tempLayer = resetIncomplete(tempLayer, columnId);
+    // Makes common inferences about what the user meant when switching away from a reference:
+    // 1. Switching from "Differences of max" to "max" will promote as-is
+    // 2. Switching from "Differences of avg of bytes" to "max" will keep the field, but change operation
+    if (
+      previousDefinition.input === 'fullReference' &&
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.length === 1
+    ) {
+      const previousReferenceId = (previousColumn as ReferenceBasedIndexPatternColumn)
+        .references[0];
+      const referenceColumn = layer.columns[previousReferenceId];
+      if (referenceColumn) {
+        const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
 
-    if (operationDefinition.input === 'fullReference') {
-      const referenceIds = operationDefinition.requiredReferences.map(() => generateId());
-
-      const newLayer = {
-        ...tempLayer,
-        columns: {
-          ...tempLayer.columns,
-          [columnId]: operationDefinition.buildColumn({
-            ...baseOptions,
+        if (referencedOperation.type === op) {
+          // Unit tests are labelled as case a1, case a2
+          tempLayer = deleteColumn({
             layer: tempLayer,
-            referenceIds,
-            previousColumn,
-          }),
-        },
-      };
-      return updateDefaultLabels(
-        {
-          ...tempLayer,
-          columnOrder: getColumnOrder(newLayer),
-          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-        },
-        indexPattern
-      );
+            columnId: previousReferenceId,
+            indexPattern,
+          });
+
+          tempLayer = {
+            ...tempLayer,
+            columns: {
+              ...tempLayer.columns,
+              [columnId]: copyCustomLabel({ ...referenceColumn }, previousColumn),
+            },
+          };
+          return updateDefaultLabels(
+            {
+              ...tempLayer,
+              columnOrder: getColumnOrder(tempLayer),
+              columns: adjustColumnReferencesForChangedColumn(tempLayer, columnId),
+            },
+            indexPattern
+          );
+        } else if (
+          !field &&
+          'sourceField' in referenceColumn &&
+          referencedOperation.input === 'field' &&
+          operationDefinition.input === 'field'
+        ) {
+          // Unit test is case a3
+          const matchedField = indexPattern.getFieldByName(referenceColumn.sourceField);
+          if (matchedField && operationDefinition.getPossibleOperationForField(matchedField)) {
+            field = matchedField;
+          }
+        }
+      }
+    }
+
+    // This logic comes after the transitions because they need to look at previous columns
+    if (previousDefinition.input === 'fullReference') {
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+        tempLayer = deleteColumn({
+          layer: tempLayer,
+          columnId: id,
+          indexPattern,
+        });
+      });
     }
 
     if (operationDefinition.input === 'none') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
-      newColumn = adjustLabel(newColumn, previousColumn);
+      newColumn = copyCustomLabel(newColumn, previousColumn);
 
       const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
       return updateDefaultLabels(
@@ -289,6 +343,10 @@ export function replaceColumn({
     }
 
     if (!field) {
+      // if no field is available perform a full clean of the column from the layer
+      if (previousDefinition.input === 'fullReference') {
+        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+      }
       return {
         ...tempLayer,
         incompleteColumns: {
@@ -298,8 +356,18 @@ export function replaceColumn({
       };
     }
 
+    const validOperation = operationDefinition.getPossibleOperationForField(field);
+    if (!validOperation) {
+      return {
+        ...tempLayer,
+        incompleteColumns: {
+          ...(tempLayer.incompleteColumns ?? {}),
+          [columnId]: { operationType: op },
+        },
+      };
+    }
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-    newColumn = adjustLabel(newColumn, previousColumn);
+    newColumn = copyCustomLabel(newColumn, previousColumn);
 
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
@@ -317,41 +385,307 @@ export function replaceColumn({
     previousColumn.sourceField !== field.name
   ) {
     // Same operation, new field
-    const newColumn = operationDefinition.onFieldChange(previousColumn, field);
-
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
-
-    const newLayer = { ...layer, columns: { ...layer.columns, [columnId]: newColumn } };
-    return updateDefaultLabels(
-      {
-        ...resetIncomplete(layer, columnId),
-        columnOrder: getColumnOrder(newLayer),
-        columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-      },
-      indexPattern
+    const newColumn = copyCustomLabel(
+      operationDefinition.onFieldChange(previousColumn, field),
+      previousColumn
     );
+
+    const newLayer = resetIncomplete(
+      { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
+      columnId
+    );
+    return {
+      ...newLayer,
+      columnOrder: getColumnOrder(newLayer),
+      columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
+    };
   } else {
     throw new Error('nothing changed');
   }
 }
 
-function adjustLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
+export function canTransition({
+  layer,
+  columnId,
+  op,
+  field,
+  indexPattern,
+  filterOperations,
+  visualizationGroups,
+}: ColumnChange & {
+  filterOperations: (meta: OperationMetadata) => boolean;
+}): boolean {
+  const previousColumn = layer.columns[columnId];
+  if (!previousColumn) {
+    return true;
+  }
+
+  if (previousColumn.operationType === op) {
+    return true;
+  }
+
+  try {
+    const newLayer = replaceColumn({
+      layer,
+      columnId,
+      op,
+      field,
+      indexPattern,
+      visualizationGroups,
+    });
+    const newDefinition = operationDefinitionMap[op];
+    const newColumn = newLayer.columns[columnId];
+    return (
+      Boolean(newColumn) &&
+      !newLayer.incompleteColumns?.[columnId] &&
+      filterOperations(newColumn) &&
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Function to transition to a fullReference from any different operation.
+ * It is always possible to transition to a fullReference, but there are multiple
+ * passes needed to copy all the previous state. These are the passes in priority
+ * order, each of which has a unit test:
+ *
+ * 1. Case ref1: referenced columns are an exact match
+ *    Side effect: Modifies the reference list directly
+ * 2. Case new1: the previous column is an exact match.
+ *    Side effect: Deletes and then inserts the previous column
+ * 3. Case new2: the reference supports `none` inputs, like filters. not visible in the UI.
+ *    Side effect: Inserts a new column
+ * 4. Case new3, new4: Fuzzy matching on the previous field
+ *    Side effect: Inserts a new column, or an incomplete column
+ * 5. Fuzzy matching based on the previous references (case new6)
+ *    Side effect: Inserts a new column, or an incomplete column
+ *    Side effect: Modifies the reference list directly
+ * 6. Case new6: Fall back by generating the column with empty references
+ */
+function applyReferenceTransition({
+  layer,
+  columnId,
+  previousColumn,
+  op,
+  indexPattern,
+  visualizationGroups,
+}: {
+  layer: IndexPatternLayer;
+  columnId: string;
+  previousColumn: IndexPatternColumn;
+  op: OperationType;
+  indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+}): IndexPatternLayer {
+  const operationDefinition = operationDefinitionMap[op];
+
+  if (operationDefinition.input !== 'fullReference') {
+    throw new Error(`Requirements for transitioning are not met`);
+  }
+
+  let hasExactMatch = false;
+  let hasFieldMatch = false;
+
+  const unusedReferencesQueue =
+    'references' in previousColumn
+      ? [...(previousColumn as ReferenceBasedIndexPatternColumn).references]
+      : [];
+
+  const referenceIds = operationDefinition.requiredReferences.map((validation) => {
+    const newId = generateId();
+
+    // First priority is to use any references that can be kept (case ref1)
+    if (unusedReferencesQueue.length) {
+      const otherColumn = layer.columns[unusedReferencesQueue[0]];
+      if (isColumnValidAsReference({ validation, column: otherColumn })) {
+        return unusedReferencesQueue.shift()!;
+      }
+    }
+
+    // Second priority is to wrap around the previous column (case new1)
+    if (!hasExactMatch && isColumnValidAsReference({ validation, column: previousColumn })) {
+      hasExactMatch = true;
+
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [newId]: {
+            ...previousColumn,
+            // drop the filter for the referenced column because the wrapping operation
+            // is filterable as well and will handle it one level higher.
+            filter: operationDefinition.filterable ? undefined : previousColumn.filter,
+          },
+        },
+      };
+      layer = {
+        ...layer,
+        columnOrder: getColumnOrder(newLayer),
+        columns: adjustColumnReferencesForChangedColumn(newLayer, newId),
+      };
+      return newId;
+    }
+
+    // Look for any fieldless operations that can be inserted directly (case new2)
+    if (validation.input.includes('none')) {
+      const validOperations = operationDefinitions.filter((def) => {
+        if (def.input !== 'none') return;
+        return isOperationAllowedAsReference({
+          validation,
+          operationType: def.type,
+          indexPattern,
+        });
+      });
+
+      if (validOperations.length === 1) {
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: validOperations[0].type,
+          indexPattern,
+          visualizationGroups,
+        });
+        return newId;
+      }
+    }
+
+    // Try to reuse the previous field by finding a possible operation. Because we've alredy
+    // checked for an exact operation match, this is guaranteed to be different from previousColumn
+    if (!hasFieldMatch && 'sourceField' in previousColumn && validation.input.includes('field')) {
+      const defIgnoringfield = operationDefinitions
+        .filter(
+          (def) =>
+            def.input === 'field' &&
+            isOperationAllowedAsReference({ validation, operationType: def.type, indexPattern })
+        )
+        .sort(getSortScoreByPriority);
+
+      // No exact match found, so let's determine that the current field can be reused
+      const defWithField = defIgnoringfield.filter((def) => {
+        const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
+        if (!previousField) return;
+        return isOperationAllowedAsReference({
+          validation,
+          operationType: def.type,
+          field: previousField,
+          indexPattern,
+        });
+      });
+
+      if (defWithField.length > 0) {
+        // Found the best match that keeps the field (case new3)
+        hasFieldMatch = true;
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: defWithField[0].type,
+          indexPattern,
+          field: indexPattern.getFieldByName(previousColumn.sourceField),
+          visualizationGroups,
+        });
+        return newId;
+      } else if (defIgnoringfield.length === 1) {
+        // Can't use the field, but there is an exact match on the operation (case new4)
+        hasFieldMatch = true;
+        layer = {
+          ...layer,
+          incompleteColumns: {
+            ...layer.incompleteColumns,
+            [newId]: { operationType: defIgnoringfield[0].type },
+          },
+        };
+        return newId;
+      }
+    }
+
+    // Look for field-based references that we can use to assign a new field-based operation from (case new5)
+    if (unusedReferencesQueue.length) {
+      const otherColumn = layer.columns[unusedReferencesQueue[0]];
+      if (otherColumn && 'sourceField' in otherColumn && validation.input.includes('field')) {
+        const previousField = indexPattern.getFieldByName(otherColumn.sourceField);
+        if (previousField) {
+          const defWithField = operationDefinitions
+            .filter(
+              (def) =>
+                def.input === 'field' &&
+                isOperationAllowedAsReference({
+                  validation,
+                  operationType: def.type,
+                  field: previousField,
+                  indexPattern,
+                })
+            )
+            .sort(getSortScoreByPriority);
+
+          if (defWithField.length > 0) {
+            layer = insertNewColumn({
+              layer,
+              columnId: newId,
+              op: defWithField[0].type,
+              indexPattern,
+              field: previousField,
+              visualizationGroups,
+            });
+            return newId;
+          }
+        }
+      }
+    }
+
+    // The reference is too ambiguous at this point, but instead of throwing an error (case new6)
+    return newId;
+  });
+
+  if (unusedReferencesQueue.length) {
+    unusedReferencesQueue.forEach((id: string) => {
+      layer = deleteColumn({
+        layer,
+        columnId: id,
+        indexPattern,
+      });
+    });
+  }
+
+  layer = {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: operationDefinition.buildColumn({
+        indexPattern,
+        layer,
+        referenceIds,
+        previousColumn,
+      }),
+    },
+  };
+  return updateDefaultLabels(
+    {
+      ...layer,
+      columnOrder: getColumnOrder(layer),
+      columns: adjustColumnReferencesForChangedColumn(layer, columnId),
+    },
+    indexPattern
+  );
+}
+
+function copyCustomLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
   const adjustedColumn = { ...newColumn };
   if (previousColumn.customLabel) {
     adjustedColumn.customLabel = true;
     adjustedColumn.label = previousColumn.label;
   }
-
   return adjustedColumn;
 }
 
 function addBucket(
   layer: IndexPatternLayer,
   column: IndexPatternColumn,
-  addedColumnId: string
+  addedColumnId: string,
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup?: string
 ): IndexPatternLayer {
   const [buckets, metrics, references] = getExistingColumnGroups(layer);
 
@@ -374,12 +708,54 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
+  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+    columnOrder: getColumnOrder(tempLayer),
+  };
+}
+
+export function reorderByGroups(
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup: string | undefined,
+  updatedColumnOrder: string[],
+  addedColumnId: string
+) {
+  const hidesColumnGrouping =
+    targetGroup && visualizationGroups.find((group) => group.groupId === targetGroup)?.hideGrouping;
+
+  // if column grouping is disabled, keep bucket aggregations in the same order as the groups
+  // if grouping is known
+  if (hidesColumnGrouping) {
+    const orderedVisualizationGroups = [...visualizationGroups];
+    orderedVisualizationGroups.sort((group1, group2) => {
+      if (typeof group1.nestingOrder === undefined) {
+        return -1;
+      }
+      if (typeof group2.nestingOrder === undefined) {
+        return 1;
+      }
+      return group1.nestingOrder! - group2.nestingOrder!;
+    });
+    const columnGroupIndex: Record<string, number> = {};
+    updatedColumnOrder.forEach((columnId) => {
+      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+        (group) =>
+          (columnId === addedColumnId && group.groupId === targetGroup) ||
+          group.accessors.some((acc) => acc.columnId === columnId)
+      );
+    });
+
+    updatedColumnOrder.sort((a, b) => {
+      return columnGroupIndex[a] - columnGroupIndex[b];
+    });
+  }
 }
 
 function addMetric(
@@ -394,7 +770,11 @@ function addMetric(
       [addedColumnId]: column,
     },
   };
-  return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+  return {
+    ...tempLayer,
+    columnOrder: getColumnOrder(tempLayer),
+    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
+  };
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
@@ -557,9 +937,17 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
-    isColumnTransferable(column, newIndexPattern)
-  );
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) => {
+    if ('references' in column) {
+      return (
+        isColumnTransferable(column, newIndexPattern) &&
+        column.references.every((columnId) =>
+          isColumnTransferable(layer.columns[columnId], newIndexPattern)
+        )
+      );
+    }
+    return isColumnTransferable(column, newIndexPattern);
+  });
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
@@ -583,15 +971,19 @@ export function updateLayerIndexPattern(
  * - All column references are valid
  * - All prerequisites are met
  */
-export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined {
-  const errors: string[] = [];
-
-  Object.entries(layer.columns).forEach(([columnId, column]) => {
-    const def = operationDefinitionMap[column.operationType];
-    if (def.getErrorMessage) {
-      errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
-    }
-  });
+export function getErrorMessages(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern
+): string[] | undefined {
+  const errors: string[] = Object.entries(layer.columns)
+    .flatMap(([columnId, column]) => {
+      const def = operationDefinitionMap[column.operationType];
+      if (def.getErrorMessage) {
+        return def.getErrorMessage(layer, columnId, indexPattern);
+      }
+    })
+    // remove the undefined values
+    .filter((v: string | undefined): v is string => v != null);
 
   return errors.length ? errors : undefined;
 }
@@ -663,4 +1055,21 @@ export function resetIncomplete(layer: IndexPatternLayer, columnId: string): Ind
   const incompleteColumns = { ...(layer.incompleteColumns ?? {}) };
   delete incompleteColumns[columnId];
   return { ...layer, incompleteColumns };
+}
+
+export function isColumnValidAsReference({
+  column,
+  validation,
+}: {
+  column: IndexPatternColumn;
+  validation: RequiredReference;
+}): boolean {
+  if (!column) return false;
+  const operationType = column.operationType;
+  const operationDefinition = operationDefinitionMap[operationType];
+  return (
+    validation.input.includes(operationDefinition.input) &&
+    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    validation.validateMetadata(column)
+  );
 }

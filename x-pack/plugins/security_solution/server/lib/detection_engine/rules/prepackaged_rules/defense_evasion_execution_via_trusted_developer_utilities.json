@@ -6,12 +6,14 @@
   "false_positives": [
     "These programs may be used by Windows developers but use by non-engineers is unusual."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Trusted Developer Application Usage",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(MSBuild.exe or msxsl.exe)",
   "risk_score": 21,
@@ -47,15 +49,10 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1127",
-          "name": "Trusted Developer Utilities Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1127/"
-        }
-      ]
+      "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

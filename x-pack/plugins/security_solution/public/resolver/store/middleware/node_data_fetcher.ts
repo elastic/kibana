@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -37,7 +38,7 @@ export function NodeDataFetcher(
      * This gets the visible nodes that we haven't already requested or received data for
      */
     const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     if (newIDsToRequest.size <= 0) {
       return;

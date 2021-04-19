@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 // import { act, getByText } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { CoreStart } from 'kibana/public';
@@ -15,12 +17,19 @@ import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overvie
 import { HasDataContextProvider } from './has_data_context';
 import * as pluginContext from '../hooks/use_plugin_context';
 import { PluginContextValue } from './plugin_context';
+import { Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 
 const relativeStart = '2020-10-08T06:00:00.000Z';
 const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 function wrapper({ children }: { children: React.ReactElement }) {
-  return <HasDataContextProvider>{children}</HasDataContextProvider>;
+  const history = createMemoryHistory();
+  return (
+    <Router history={history}>
+      <HasDataContextProvider>{children}</HasDataContextProvider>
+    </Router>
+  );
 }
 
 function unregisterAll() {

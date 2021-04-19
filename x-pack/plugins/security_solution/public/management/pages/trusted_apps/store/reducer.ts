@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
@@ -27,6 +28,9 @@ import {
   TrustedAppCreationDialogFormStateUpdated,
   TrustedAppCreationDialogConfirmed,
   TrustedAppCreationDialogClosed,
+  TrustedAppsExistResponse,
+  TrustedAppsPoliciesStateChanged,
+  TrustedAppCreationEditItemStateChanged,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -35,6 +39,7 @@ import {
   initialDeletionDialogState,
   initialTrustedAppsPageState,
 } from './builders';
+import { entriesExistState, trustedAppsListPageActive } from './selectors';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -107,7 +112,7 @@ const trustedAppCreationDialogStarted: CaseReducer<TrustedAppCreationDialogStart
     ...state,
     creationDialog: {
       ...initialCreationDialogState(),
-      formState: { ...action.payload, isValid: true },
+      formState: { ...action.payload, isValid: false },
     },
   };
 };
@@ -119,6 +124,16 @@ const trustedAppCreationDialogFormStateUpdated: CaseReducer<TrustedAppCreationDi
   return {
     ...state,
     creationDialog: { ...state.creationDialog, formState: { ...action.payload } },
+  };
+};
+
+const handleUpdateToEditItemState: CaseReducer<TrustedAppCreationEditItemStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    creationDialog: { ...state.creationDialog, editItem: action.payload },
   };
 };
 
@@ -140,6 +155,26 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   } else {
     return initialTrustedAppsPageState();
   }
+};
+
+const updateEntriesExists: CaseReducer<TrustedAppsExistResponse> = (state, { payload }) => {
+  if (entriesExistState(state) !== payload) {
+    return {
+      ...state,
+      entriesExist: payload,
+    };
+  }
+  return state;
+};
+
+const updatePolicies: CaseReducer<TrustedAppsPoliciesStateChanged> = (state, { payload }) => {
+  if (trustedAppsListPageActive(state)) {
+    return {
+      ...state,
+      policies: payload,
+    };
+  }
+  return state;
 };
 
 export const trustedAppsPageReducer: StateReducer = (
@@ -174,6 +209,9 @@ export const trustedAppsPageReducer: StateReducer = (
     case 'trustedAppCreationDialogFormStateUpdated':
       return trustedAppCreationDialogFormStateUpdated(state, action);
 
+    case 'trustedAppCreationEditItemStateChanged':
+      return handleUpdateToEditItemState(state, action);
+
     case 'trustedAppCreationDialogConfirmed':
       return trustedAppCreationDialogConfirmed(state, action);
 
@@ -182,6 +220,12 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+
+    case 'trustedAppsExistStateChanged':
+      return updateEntriesExists(state, action);
+
+    case 'trustedAppsPoliciesStateChanged':
+      return updatePolicies(state, action);
   }
 
   return state;

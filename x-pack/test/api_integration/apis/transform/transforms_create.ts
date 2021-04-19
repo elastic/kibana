@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
@@ -25,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.api.cleanTransformIndices();
     });
 
-    it('should not allow pivot and latest configs is same transform', async () => {
+    it('should not allow pivot and latest configs in same transform', async () => {
       const transformId = 'test_transform_id';
 
       const { body } = await supertest

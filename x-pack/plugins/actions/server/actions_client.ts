@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
@@ -54,13 +57,13 @@ interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   action: Action;
 }
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
@@ -71,14 +74,14 @@ interface ConstructorOptions {
   auditLogger?: AuditLogger;
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
 }
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: ILegacyScopedClusterClient;
+  private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
@@ -504,10 +507,10 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: ILegacyScopedClusterClient,
+  scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, unknown> = {};
+  const aggs: Record<string, estypes.AggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {
@@ -541,7 +544,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
+  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,
@@ -553,6 +556,7 @@ async function injectExtraFindData(
   });
   return actionResults.map((actionResult) => ({
     ...actionResult,
+    // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
 }

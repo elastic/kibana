@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import React from 'react';
+import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
@@ -49,6 +52,38 @@ export interface Item {
   type: string;
   values: ToStringArray;
 }
+
+export interface AlertSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    value: string;
+    fieldType: string;
+    linkValue: string | undefined;
+  };
+}
+
+export interface ThreatSummaryRow {
+  title: string;
+  description: {
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    values: string[];
+  };
+}
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}
+
+export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -111,6 +146,7 @@ export const getIconFromType = (type: string | null) => {
     case 'date':
       return 'clock';
     case 'ip':
+    case 'geo_point':
       return 'globe';
     case 'object':
       return 'questionInCircle';
@@ -169,4 +205,34 @@ export const onEventDetailsTabKeyPressed = ({
       skipFocus: eventFieldsTableSkipFocus,
     });
   }
+};
+
+const getTitle = (title: string) => (
+  <EuiTitle size="xxs">
+    <h5>{title}</h5>
+  </EuiTitle>
+);
+getTitle.displayName = 'getTitle';
+
+export const getSummaryColumns = (
+  DescriptionComponent:
+    | React.FC<ThreatSummaryRow['description']>
+    | React.FC<AlertSummaryRow['description']>
+    | React.FC<ThreatDetailsRow['description']>
+): Array<EuiBasicTableColumn<SummaryRow>> => {
+  return [
+    {
+      field: 'title',
+      truncateText: false,
+      render: getTitle,
+      width: '120px',
+      name: '',
+    },
+    {
+      field: 'description',
+      truncateText: false,
+      render: DescriptionComponent,
+      name: '',
+    },
+  ];
 };

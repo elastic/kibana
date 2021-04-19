@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
+
 import { getFlattenedObject, isValidNamespace } from '../../../../services';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -223,6 +226,29 @@ export const validatePackagePolicyConfig = (
           values: {
             fieldName: varDef.title || varDef.name,
           },
+        })
+      );
+    }
+    if (varDef.type === 'text' && parsedValue && Array.isArray(parsedValue)) {
+      const invalidStrings = parsedValue.filter((cand) => /^[*&]/.test(cand));
+      // only show one error if multiple strings in array are invalid
+      if (invalidStrings.length > 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.quoteStringErrorMessage', {
+            defaultMessage:
+              'Strings starting with special YAML characters like * or & need to be enclosed in double quotes.',
+          })
+        );
+      }
+    }
+  }
+
+  if (varDef.type === 'text' && parsedValue && !Array.isArray(parsedValue)) {
+    if (/^[*&]/.test(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.quoteStringErrorMessage', {
+          defaultMessage:
+            'Strings starting with special YAML characters like * or & need to be enclosed in double quotes.',
         })
       );
     }

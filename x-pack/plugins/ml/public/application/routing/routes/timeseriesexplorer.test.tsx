@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -44,6 +45,10 @@ jest.mock('../../util/url_state');
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
+jest.mock('../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
 jest.mock('../../contexts/kibana/kibana_context', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
@@ -83,6 +88,11 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
           notifications: {
             toasts: {
               addDanger: () => {},
+            },
+          },
+          docLinks: {
+            links: {
+              ml: { anomalyDetection: jest.fn() },
             },
           },
         },

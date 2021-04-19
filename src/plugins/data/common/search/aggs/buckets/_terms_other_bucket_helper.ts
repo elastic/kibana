@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
@@ -53,7 +43,7 @@ const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: stri
  */
 const getAggResultBuckets = (
   aggConfigs: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>['aggregations'],
   aggWithOtherBucket: IBucketAggConfig,
   key: string
 ) => {
@@ -83,8 +73,8 @@ const getAggResultBuckets = (
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) {
-    return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg?.[aggWithOtherBucket.id]) {
+    return (responseAgg[aggWithOtherBucket.id] as any).buckets;
   }
   return [];
 };
@@ -246,11 +236,11 @@ export const buildOtherBucketAgg = (
 
 export const mergeOtherBucketAggResponse = (
   aggsConfig: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>,
   otherResponse: any,
   otherAgg: IBucketAggConfig,
   requestAgg: Record<string, any>
-) => {
+): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
@@ -287,7 +277,7 @@ export const mergeOtherBucketAggResponse = (
 };
 
 export const updateMissingBucket = (
-  response: any,
+  response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
   agg: IBucketAggConfig
 ) => {

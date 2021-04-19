@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -29,11 +30,12 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-
+import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
 import {
   QueryTabContentComponent,
   Props as QueryTabContentComponentProps,
 } from '../../components/timeline/query_tab_content';
+import { defaultRowRenderers } from '../../components/timeline/body/renderers';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
 import { Direction } from '../../../graphql/types';
@@ -61,6 +63,7 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -80,7 +83,7 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       end: endDate,
       eventType: 'all',
-      expandedEvent: {},
+      expandedDetail: {},
       filters: [],
       isLive: false,
       itemsPerPage: 5,
@@ -88,8 +91,10 @@ describe('epicLocalStorage', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
-      showEventDetails: false,
+      showExpandedDetails: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
@@ -168,6 +173,7 @@ describe('epicLocalStorage', () => {
         sort: [
           {
             columnId: 'event.severity',
+            columnType: 'number',
             sortDirection: Direction.desc,
           },
         ],

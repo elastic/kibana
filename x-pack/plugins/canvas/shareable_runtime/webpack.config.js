@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const path = require('path');
@@ -42,6 +43,7 @@ module.exports = {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
+    symlinks: false,
   },
   module: {
     rules: [

@@ -1,22 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import React, { useState } from 'react';
 
 import {
   EuiSpacer,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
+  EuiDragDropContext,
+  EuiDroppable,
+  EuiDraggable,
+  EuiButtonIconColor,
 } from '@elastic/eui';
-import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema } from '../../../shared/types';
-import { Result } from '../result/result';
+import { Result } from '../result';
 
 export const Library: React.FC = () => {
   const props = {
@@ -68,17 +73,21 @@ export const Library: React.FC = () => {
     length: 'number',
   };
 
+  const [isActionButtonFilled, setIsActionButtonFilled] = useState(false);
+  const actions = [
+    {
+      title: 'Fill this action button',
+      onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
+      iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
+      iconColor: 'primary' as EuiButtonIconColor,
+    },
+  ];
+
   return (
     <>
       <SetPageChrome trail={['Library']} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Library</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle="Library" />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>
@@ -197,7 +206,45 @@ export const Library: React.FC = () => {
             <h3>With a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} shouldLinkToDetailPage={true} />
+          <Result {...props} shouldLinkToDetailPage />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With custom actions</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} actions={actions} />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With custom actions and a link</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} actions={actions} shouldLinkToDetailPage showScore isMetaEngine />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With a drag handle</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiDragDropContext onDragEnd={() => {}}>
+            <EuiDroppable spacing="m" droppableId="DraggableResultsTest">
+              {[1, 2, 3].map((_, i) => (
+                <EuiDraggable
+                  spacing="m"
+                  key={`draggable-${i}`}
+                  index={i}
+                  draggableId={`draggable-${i}`}
+                  customDragHandle
+                >
+                  {(provided) => <Result {...props} dragHandleProps={provided.dragHandleProps} />}
+                </EuiDraggable>
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
           <EuiSpacer />
 
           <EuiSpacer />

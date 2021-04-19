@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
@@ -38,7 +39,7 @@ import {
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { EditorFrameInstance } from '..';
+import { EditorFrameInstance } from '../types';
 
 export interface LensAppState {
   isLoading: boolean;

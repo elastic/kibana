@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../shared_imports';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
@@ -28,15 +27,19 @@ function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) 
   return dataClient.callAsCurrentUser('fieldCaps', params);
 }
 
-export function registerListFieldsRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerListFieldsRoute({
+  router,
+  license,
+  lib: { isEsError },
+}: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/fields',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { indexes } = request.body;
 
       try {
@@ -56,7 +59,7 @@ export function registerListFieldsRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

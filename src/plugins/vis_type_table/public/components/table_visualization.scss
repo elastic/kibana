@@ -18,6 +18,10 @@
   padding: $euiSizeS;
   margin-bottom: $euiSizeL;
 
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+
   > h3 {
     text-align: center;
   }

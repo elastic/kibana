@@ -1,0 +1,258 @@
+
+{
+  "type": "doc",
+  "value": {
+    "id": "HCFxB2kBR346wHgnL4ik",
+    "index": "auditbeat-uncommon-processes",
+    "source": {
+      "@timestamp": "2019-02-19T20:27:31.074Z",
+      "agent": {
+        "ephemeral_id": "8502ef53-ee89-4b0b-a321-e12726f58084",
+        "hostname": "zeek-sensor-san-francisco",
+        "id": "4348052a-b8d2-4577-bca6-aeb71de81993",
+        "type": "auditbeat",
+        "version": "8.0.0"
+      },
+      "cloud": {
+        "instance": {
+          "id": "132972452"
+        },
+        "provider": "digitalocean",
+        "region": "sfo2"
+      },
+      "ecs": {
+        "version": "1.0.0-beta2"
+      },
+      "event": {
+        "action": "process_started",
+        "dataset": "process",
+        "kind": "event",
+        "module": "system"
+      },
+      "host": {
+        "architecture": "x86_64",
+        "containerized": false,
+        "hostname": "zeek-sensor-san-francisco",
+        "id": "2ab45fc1c41e4c84bbd02202a7e5761f",
+        "name": "zeek-sensor-san-francisco",
+        "os": {
+          "codename": "bionic",
+          "family": "debian",
+          "kernel": "4.15.0-45-generic",
+          "name": "Ubuntu",
+          "platform": "ubuntu",
+          "version": "18.04.2 LTS (Bionic Beaver)"
+        }
+      },
+      "message": "Process kworker/u2:0 (PID: 5893) by user root STARTED",
+      "process": {
+        "args": [
+        ],
+        "entity_id": "bba738273633ea1cccc6abba38c5d87c1c7baaad869eaaa59a516c62ddd1dd62",
+        "executable": "",
+        "name": "kworker/u2:0",
+        "pid": 5893,
+        "ppid": 2,
+        "start": "2019-02-19T20:27:27.470Z",
+        "working_directory": "/"
+      },
+      "service": {
+        "type": "system"
+      },
+      "user": {
+        "effective": {
+          "group": {
+            "id": "0"
+          },
+          "id": "0"
+        },
+        "group": {
+          "id": "0",
+          "name": "root"
+        },
+        "id": "0",
+        "name": "root",
+        "saved": {
+          "group": {
+            "id": "0"
+          },
+          "id": "0"
+        }
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AyJ8B2kBR346wHgnJDDU",
+    "index": "auditbeat-uncommon-processes",
+    "source": {
+      "@timestamp": "2019-02-19T20:39:29.051Z",
+      "agent": {
+        "ephemeral_id": "1b4978a0-48be-49b1-ac96-323425b389ab",
+        "hostname": "zeek-sensor-amsterdam",
+        "id": "e52588e6-7aa3-4c89-a2c4-d6bc5c286db1",
+        "type": "auditbeat",
+        "version": "8.0.0"
+      },
+      "cloud": {
+        "instance": {
+          "id": "133551048"
+        },
+        "provider": "digitalocean",
+        "region": "ams3"
+      },
+      "ecs": {
+        "version": "1.0.0-beta2"
+      },
+      "event": {
+        "action": "process_started",
+        "dataset": "process",
+        "kind": "event",
+        "module": "system"
+      },
+      "host": {
+        "architecture": "x86_64",
+        "containerized": false,
+        "hostname": "zeek-sensor-amsterdam",
+        "id": "2ce8b1e7d69e4a1d9c6bcddc473da9d9",
+        "name": "zeek-sensor-amsterdam",
+        "os": {
+          "codename": "bionic",
+          "family": "debian",
+          "kernel": "4.15.0-45-generic",
+          "name": "Ubuntu",
+          "platform": "ubuntu",
+          "version": "18.04.2 LTS (Bionic Beaver)"
+        }
+      },
+      "message": "Process kworker/u2:2 (PID: 32729) by user root STARTED",
+      "process": {
+        "args": [
+        ],
+        "entity_id": "014d841783862c8204967a38a59038f25ae5f7fc9c77293ec4701c6bc39a2e2d",
+        "executable": "",
+        "name": "kworker/u2:2",
+        "pid": 32729,
+        "ppid": 2,
+        "start": "2019-02-19T20:39:21.440Z",
+        "working_directory": "/"
+      },
+      "service": {
+        "type": "system"
+      },
+      "user": {
+        "effective": {
+          "group": {
+            "id": "0"
+          },
+          "id": "0"
+        },
+        "group": {
+          "id": "0",
+          "name": "root"
+        },
+        "id": "0",
+        "name": "root",
+        "saved": {
+          "group": {
+            "id": "0"
+          },
+          "id": "0"
+        }
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dSJ-B2kBR346wHgnV1E4",
+    "index": "auditbeat-uncommon-processes",
+    "source": {
+      "@timestamp": "2019-02-19T20:41:53.180Z",
+      "agent": {
+        "ephemeral_id": "7fddaeb0-9ff1-486f-bca8-b18721c41e7a",
+        "hostname": "suricata-sensor-san-francisco",
+        "id": "cca6c2e3-b17b-41c7-b2ad-5b777cf34abc",
+        "type": "auditbeat",
+        "version": "8.0.0"
+      },
+      "cloud": {
+        "instance": {
+          "id": "132794432"
+        },
+        "provider": "digitalocean",
+        "region": "sfo2"
+      },
+      "ecs": {
+        "version": "1.0.0-beta2"
+      },
+      "event": {
+        "action": "process_started",
+        "dataset": "process",
+        "kind": "event",
+        "module": "system"
+      },
+      "host": {
+        "architecture": "x86_64",
+        "containerized": false,
+        "hostname": "suricata-sensor-san-francisco",
+        "id": "f9c7ca2d33f548a8b37667f6fffc59ce",
+        "name": "suricata-sensor-san-francisco",
+        "os": {
+          "codename": "bionic",
+          "family": "debian",
+          "kernel": "4.15.0-45-generic",
+          "name": "Ubuntu",
+          "platform": "ubuntu",
+          "version": "18.04.2 LTS (Bionic Beaver)"
+        }
+      },
+      "message": "Process sshd (PID: 24911) by user sshd STARTED",
+      "process": {
+        "args": [
+          "sshd: [net]"
+        ],
+        "entity_id": "00efb5cdf11c3040ff7958f56b77681b10f7fd8ca675e34a4de253cdefa3c405",
+        "executable": "/usr/sbin/sshd",
+        "name": "sshd",
+        "pid": 24911,
+        "ppid": 24910,
+        "start": "2019-02-19T20:41:51.400Z",
+        "working_directory": "/run/sshd"
+      },
+      "service": {
+        "type": "system"
+      },
+      "user": {
+        "effective": {
+          "group": {
+            "id": "65534"
+          },
+          "id": "109"
+        },
+        "group": {
+          "id": "65534",
+          "name": "nogroup"
+        },
+        "id": "109",
+        "name": "sshd",
+        "saved": {
+          "group": {
+            "id": "65534"
+          },
+          "id": "109"
+        }
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+

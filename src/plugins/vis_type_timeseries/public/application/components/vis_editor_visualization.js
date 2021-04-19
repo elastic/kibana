@@ -1,34 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get } from 'lodash';
 import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import {
-  getInterval,
-  convertIntervalIntoUnit,
-  isAutoInterval,
-  isGteInterval,
-} from './lib/get_interval';
-import { AUTO_INTERVAL } from '../../../common/constants';
-import { PANEL_TYPES } from '../../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -38,7 +19,6 @@ class VisEditorVisualizationUI extends Component {
     this.state = {
       height: MIN_CHART_HEIGHT,
       dragging: false,
-      panelInterval: 0,
     };
 
     this._visEl = React.createRef();
@@ -75,18 +55,7 @@ class VisEditorVisualizationUI extends Component {
     await this._handler.render(this._visEl.current);
     this.props.eventEmitter.emit('embeddableRendered');
 
-    this._subscription = this._handler.handler.data$.subscribe((data) => {
-      this.setPanelInterval(data.value.visData);
-      onDataChange(data.value);
-    });
-  }
-
-  setPanelInterval(visData) {
-    const panelInterval = getInterval(visData, this.props.model);
-
-    if (this.state.panelInterval !== panelInterval) {
-      this.setState({ panelInterval });
-    }
+    this._subscription = this._handler.handler.data$.subscribe((data) => onDataChange(data.value));
   }
 
   /**
@@ -107,28 +76,6 @@ class VisEditorVisualizationUI extends Component {
       });
     }
   };
-
-  hasShowPanelIntervalValue() {
-    const type = get(this.props, 'model.type', '');
-    const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
-
-    return (
-      [
-        PANEL_TYPES.METRIC,
-        PANEL_TYPES.TOP_N,
-        PANEL_TYPES.GAUGE,
-        PANEL_TYPES.MARKDOWN,
-        PANEL_TYPES.TABLE,
-      ].includes(type) &&
-      (isAutoInterval(interval) || isGteInterval(interval))
-    );
-  }
-
-  getFormattedPanelInterval() {
-    const interval = convertIntervalIntoUnit(this.state.panelInterval, false);
-
-    return interval ? `${interval.unitValue}${interval.unitString}` : null;
-  }
 
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
@@ -163,8 +110,6 @@ class VisEditorVisualizationUI extends Component {
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
-
-    const panelInterval = this.hasShowPanelIntervalValue() && this.getFormattedPanelInterval();
 
     let applyMessage = (
       <FormattedMessage
@@ -203,20 +148,6 @@ class VisEditorVisualizationUI extends Component {
             onChange={onToggleAutoApply}
           />
         </EuiFlexItem>
-
-        {panelInterval && (
-          <EuiFlexItem grow={false}>
-            <EuiText color="default" size="xs">
-              <p>
-                <FormattedMessage
-                  id="visTypeTimeseries.visEditorVisualization.panelInterval"
-                  defaultMessage="Interval: {panelInterval}"
-                  values={{ panelInterval }}
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        )}
 
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">

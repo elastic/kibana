@@ -1,18 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -26,11 +22,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { CANCEL_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
 
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON, FLYOUT_CONTINUE_BUTTON } from '../constants';
-import { DocumentCreationLogic } from '../';
+import { FLYOUT_ARIA_LABEL_ID } from '../constants';
+import { Errors } from '../creation_response_components';
+import { DocumentCreationLogic } from '../index';
 
 export const UploadJsonFile: React.FC = () => (
   <>
@@ -56,13 +55,17 @@ export const FlyoutHeader: React.FC = () => {
 };
 
 export const FlyoutBody: React.FC = () => {
-  const { configuredLimits } = useValues(AppLogic);
-  const maxDocumentByteSize = configuredLimits?.engine?.maxDocumentByteSize;
+  const {
+    configuredLimits: {
+      engine: { maxDocumentByteSize },
+    },
+  } = useValues(AppLogic);
 
+  const { isUploading, errors } = useValues(DocumentCreationLogic);
   const { setFileInput } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiFlyoutBody>
+    <EuiFlyoutBody banner={<Errors />}>
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -80,24 +83,26 @@ export const FlyoutBody: React.FC = () => {
         onChange={(files) => setFileInput(files?.length ? files[0] : null)}
         accept="application/json"
         fullWidth
+        isLoading={isUploading}
+        isInvalid={errors.length > 0}
       />
     </EuiFlyoutBody>
   );
 };
 
 export const FlyoutFooter: React.FC = () => {
-  const { fileInput } = useValues(DocumentCreationLogic);
-  const { closeDocumentCreation } = useActions(DocumentCreationLogic);
+  const { fileInput, isUploading } = useValues(DocumentCreationLogic);
+  const { onSubmitFile, closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill isDisabled={!fileInput}>
-            {FLYOUT_CONTINUE_BUTTON}
+          <EuiButton fill onClick={onSubmitFile} isLoading={isUploading} isDisabled={!fileInput}>
+            {CONTINUE_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

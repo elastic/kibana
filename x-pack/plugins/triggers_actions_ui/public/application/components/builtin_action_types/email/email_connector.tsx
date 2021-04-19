@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useEffect } from 'react';
 import {
   EuiFieldText,
@@ -53,10 +55,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )}
             helpText={
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.emailActionConfig} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
                   defaultMessage="Configure email accounts"
@@ -192,7 +191,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )}
             disabled={readOnly}
-            checked={hasAuth}
+            checked={hasAuth || false}
             onChange={(e) => {
               editActionConfig('hasAuth', e.target.checked);
               if (!e.target.checked) {

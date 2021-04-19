@@ -15,6 +15,7 @@ Having trouble? Here are solutions to common problems you might encounter while 
 * <<reporting-troubleshooting-error-messages>>
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
+* <<reporting-troubleshooting-arm-systems>>
 
 [float]
 [[reporting-diagnostics]]
@@ -125,10 +126,10 @@ all, the full logs from Reporting will be the first place to look. In `kibana.ym
 
 [source,yaml]
 --------------------------------------------------------------------------------
-logging.verbose: true
+logging.root.level: all
 --------------------------------------------------------------------------------
 
-For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+For more information about logging, see <<logging-root-level,Kibana configuration settings>>.
 
 [float]
 [[reporting-troubleshooting-puppeteer-debug-logs]]
@@ -156,3 +157,9 @@ requests to render.
 
 If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
 In this case, try increasing the memory for the {kib} instance to 2GB.
+
+[float]
+[[reporting-troubleshooting-arm-systems]]
+=== ARM systems
+
+Chromium is not compatible with ARM RHEL/CentOS.

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
+import { AppMountParameters, CoreStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
@@ -71,7 +72,7 @@ describe('renderApp', () => {
       embeddable,
     };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core.http as unknown) as HttpSetup);
+    createCallApmApi((core as unknown) as CoreStart);
 
     jest
       .spyOn(window.console, 'warn')

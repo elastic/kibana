@@ -3,12 +3,14 @@
     "Elastic"
   ],
   "description": "Identifies processes running from an Alternate Data Stream. This is uncommon for legitimate processes and sometimes done by adversaries to hide malware.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Process Execution Path - Alternate Data Stream",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.args : \"C:\\\\*:*\"\n",
   "risk_score": 47,
@@ -38,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

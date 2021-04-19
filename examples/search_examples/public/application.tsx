@@ -1,44 +1,74 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router, Route, Redirect } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
-import { SearchExamplesApp } from './components/app';
+import { SearchExamplePage, ExampleLink } from './common/example_page';
+import { SearchExamplesApp } from './search/app';
+import { SearchSessionsExampleApp } from './search_sessions/app';
+import { RedirectAppLinks } from '../../../src/plugins/kibana_react/public';
+
+const LINKS: ExampleLink[] = [
+  {
+    path: '/search',
+    title: 'Search',
+  },
+  {
+    path: '/search-sessions',
+    title: 'Search Sessions',
+  },
+  {
+    path: 'https://github.com/elastic/kibana/blob/master/src/plugins/data/README.mdx',
+    title: 'README (GitHub)',
+  },
+];
 
 export const renderApp = (
-  { notifications, savedObjects, http }: CoreStart,
-  { navigation, data }: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { notifications, savedObjects, http, application }: CoreStart,
+  { data, navigation }: AppPluginStartDependencies,
+  { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <SearchExamplesApp
-      basename={appBasePath}
-      notifications={notifications}
-      savedObjectsClient={savedObjects.client}
-      navigation={navigation}
-      data={data}
-      http={http}
-    />,
+    <I18nProvider>
+      <RedirectAppLinks application={application}>
+        <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
+          <Router history={history}>
+            <Route path={LINKS[0].path}>
+              <SearchExamplesApp
+                notifications={notifications}
+                navigation={navigation}
+                data={data}
+                http={http}
+              />
+            </Route>
+            <Route path={LINKS[1].path}>
+              <SearchSessionsExampleApp
+                navigation={navigation}
+                notifications={notifications}
+                data={data}
+              />
+            </Route>
+            <Route path="/" exact={true}>
+              <Redirect to={LINKS[0].path} />
+            </Route>
+          </Router>
+        </SearchExamplePage>
+      </RedirectAppLinks>
+    </I18nProvider>,
     element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    data.search.session.clear();
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };

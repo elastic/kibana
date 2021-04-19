@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
 
 import { ecsSchema } from './ecs';
-import { hostsSchema } from './hosts';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
@@ -26,7 +26,6 @@ export const schemas = [
   toNumberSchema,
   toDateSchema,
   toBooleanSchema,
-  hostsSchema,
   noteSchema,
   pinnedEventSchema,
   rootSchema,

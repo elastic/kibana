@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
@@ -11,8 +13,6 @@ import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
-
-let supportsFitToBounds: boolean;
 
 class MockSource extends AbstractSource implements ISource {}
 
@@ -27,10 +27,6 @@ class LayerMock extends AbstractLayer implements ILayer {
       sourceDescriptor,
     };
     super({ layerDescriptor, source });
-  }
-
-  async supportsFitToBounds(): Promise<boolean> {
-    return supportsFitToBounds;
   }
 
   isVisible() {
@@ -49,13 +45,10 @@ const defaultProps = {
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
+  supportsFitToBounds: true,
 };
 
 describe('TOCEntryActionsPopover', () => {
-  beforeEach(() => {
-    supportsFitToBounds = true;
-  });
-
   test('is rendered', async () => {
     const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
 
@@ -79,8 +72,9 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
-    supportsFitToBounds = false;
-    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(
+      <TOCEntryActionsPopover {...defaultProps} supportsFitToBounds={false} />
+    );
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

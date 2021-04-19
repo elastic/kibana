@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { waitFor } from '@testing-library/dom';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, EventsViewType } from './event_details';
+import { EventDetails, EventsViewType, EventView, ThreatView } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
@@ -27,10 +28,12 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView as EventView,
+    threatView: EventsViewType.threatSummaryView as ThreatView,
   };
 
   const alertsProps = {
@@ -53,12 +56,6 @@ describe('EventDetails', () => {
       </TestProviders>
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
-  });
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
   });
 
   describe('tabs', () => {
@@ -100,6 +97,29 @@ describe('EventDetails', () => {
           .first()
           .text()
       ).toEqual('Summary');
+    });
+  });
+
+  describe('threat tabs', () => {
+    ['Threat Summary', 'Threat Details'].forEach((tab) => {
+      test(`it renders the ${tab} tab`, () => {
+        expect(
+          alertsWrapper
+            .find('[data-test-subj="threatDetails"]')
+            .find('[role="tablist"]')
+            .containsMatchingElement(<span>{tab}</span>)
+        ).toBeTruthy();
+      });
+    });
+
+    test('the Summary tab is selected by default', () => {
+      expect(
+        alertsWrapper
+          .find('[data-test-subj="threatDetails"]')
+          .find('.euiTab-isSelected')
+          .first()
+          .text()
+      ).toEqual('Threat Summary');
     });
   });
 });

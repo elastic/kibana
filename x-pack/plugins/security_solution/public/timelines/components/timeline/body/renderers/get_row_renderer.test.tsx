@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -16,7 +17,7 @@ import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { rowRenderers } from '.';
+import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
 
 jest.mock('@elastic/eui', () => {
@@ -47,7 +48,7 @@ describe('get_column_renderer', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
@@ -59,7 +60,7 @@ describe('get_column_renderer', () => {
   });
 
   test('should render plain row data when it is a non suricata row', () => {
-    const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
@@ -74,7 +75,7 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a suricata row data when it is a suricata row', () => {
-    const rowRenderer = getRowRenderer(suricata, rowRenderers);
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
@@ -92,7 +93,7 @@ describe('get_column_renderer', () => {
 
   test('should render a suricata row data if event.category is network_traffic', () => {
     suricata.event = { ...suricata.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(suricata, rowRenderers);
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
@@ -110,7 +111,7 @@ describe('get_column_renderer', () => {
 
   test('should render a zeek row data if event.category is network_traffic', () => {
     zeek.event = { ...zeek.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(zeek, rowRenderers);
+    const rowRenderer = getRowRenderer(zeek, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
@@ -128,7 +129,7 @@ describe('get_column_renderer', () => {
 
   test('should render a system row data if event.category is network_traffic', () => {
     system.event = { ...system.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(system, rowRenderers);
+    const rowRenderer = getRowRenderer(system, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: system,
@@ -146,7 +147,7 @@ describe('get_column_renderer', () => {
 
   test('should render a auditd row data if event.category is network_traffic', () => {
     auditd.event = { ...auditd.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(auditd, rowRenderers);
+    const rowRenderer = getRowRenderer(auditd, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,

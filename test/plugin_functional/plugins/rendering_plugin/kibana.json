@@ -1,5 +1,5 @@
 {
-  "id": "rendering_plugin",
+  "id": "renderingPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["rendering_plugin"],

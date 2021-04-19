@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { initialData, useGetCase, UseGetCase } from './use_get_case';
+import { useGetCase, UseGetCase } from './use_get_case';
 import { basicCase } from './mock';
 import * as api from './api';
 
@@ -25,8 +26,8 @@ describe('useGetCase', () => {
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        data: initialData,
-        isLoading: true,
+        data: null,
+        isLoading: false,
         isError: false,
         fetchCase: result.current.fetchCase,
         updateCase: result.current.updateCase,
@@ -101,7 +102,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        data: initialData,
+        data: null,
         isLoading: false,
         isError: true,
         fetchCase: result.current.fetchCase,

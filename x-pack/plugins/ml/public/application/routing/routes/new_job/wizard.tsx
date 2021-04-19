@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse } from 'query-string';
@@ -16,7 +17,10 @@ import { useResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
-import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
+import {
+  loadNewJobCapabilities,
+  ANOMALY_DETECTOR,
+} from '../../../services/new_job_capabilities/load_new_job_capabilities';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
@@ -136,7 +140,8 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
-    jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
+    jobCaps: () =>
+      loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns, ANOMALY_DETECTOR),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 

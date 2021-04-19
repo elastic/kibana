@@ -1,0 +1,80 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "User Account Control (UAC) can help mitigate the impact of malware on Windows hosts. With UAC, apps and tasks always run in the security context of a non-administrator account, unless an administrator specifically authorizes administrator-level access to the system. This rule identifies registry value changes to bypass User Access Control (UAC) protection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Disabling User Account Control via Registry Modification",
+  "query": "registry where event.type == \"change\" and\n  registry.path :\n    (\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\EnableLUA\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\ConsentPromptBehaviorAdmin\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\PromptOnSecureDesktop\"\n    ) and\n  registry.data.strings : \"0\"\n",
+  "references": [
+    "https://www.greyhathacker.net/?p=796",
+    "https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings",
+    "https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-overview"
+  ],
+  "risk_score": 47,
+  "rule_id": "d31f183a-e5b1-451b-8534-ba62bca0b404",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.002",
+              "name": "Bypass User Access Control",
+              "reference": "https://attack.mitre.org/techniques/T1548/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.002",
+              "name": "Bypass User Access Control",
+              "reference": "https://attack.mitre.org/techniques/T1548/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

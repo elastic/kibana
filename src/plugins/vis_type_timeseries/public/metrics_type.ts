@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { EditorController } from './application';
+import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
+import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
@@ -42,7 +32,10 @@ export const metricsVisDefinition = {
           id: '61ca57f1-469d-11e7-af02-69e470af7417',
           color: '#68BC00',
           split_mode: 'everything',
-          split_color_mode: 'kibana',
+          palette: {
+            type: 'palette',
+            name: 'default',
+          },
           metrics: [
             {
               id: '61ca57f2-469d-11e7-af02-69e470af7417',
@@ -61,6 +54,7 @@ export const metricsVisDefinition = {
       ],
       time_field: '',
       index_pattern: '',
+      use_kibana_indexes: true,
       interval: '',
       axis_position: 'left',
       axis_formatter: 'number',
@@ -70,7 +64,9 @@ export const metricsVisDefinition = {
       tooltip_mode: 'show_all',
     },
   },
-  editor: EditorController,
+  editorConfig: {
+    editor: TSVB_EDITOR_NAME,
+  },
   options: {
     showQueryBar: false,
     showFilterBar: false,
@@ -78,12 +74,25 @@ export const metricsVisDefinition = {
   },
   toExpressionAst,
   getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    return [VIS_EVENT_TO_TRIGGER.brush];
   },
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
+    const indexPatternValue = params.index_pattern;
 
-    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+    if (indexPatternValue) {
+      if (isStringTypeIndexPattern(indexPatternValue)) {
+        return await indexPatterns.find(indexPatternValue);
+      }
+
+      if (indexPatternValue.id) {
+        return [await indexPatterns.get(indexPatternValue.id)];
+      }
+    }
+
+    const defaultIndex = await indexPatterns.getDefault();
+
+    return defaultIndex ? [defaultIndex] : [];
   },
 };

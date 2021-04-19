@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import rison from 'rison-node';
-import {
+import type {
   TimeRange,
   Filter,
   Query,
-  esFilters,
   QueryState,
   RefreshInterval,
 } from '../../../../src/plugins/data/public';
+import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
-import { LayerDescriptor } from '../common/descriptor_types';
+import type { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 
@@ -183,6 +185,7 @@ export const createRegionMapUrlGenerator = (
     emsLayerId,
     leftFieldName,
     termsFieldName,
+    termsSize,
     colorSchema,
     indexPatternId,
     indexPatternTitle,
@@ -197,6 +200,7 @@ export const createRegionMapUrlGenerator = (
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
+    termsSize?: number;
     colorSchema: string;
     indexPatternId?: string;
     indexPatternTitle?: string;
@@ -214,6 +218,7 @@ export const createRegionMapUrlGenerator = (
       emsLayerId,
       leftFieldName,
       termsFieldName,
+      termsSize,
       colorSchema,
       indexPatternId,
       indexPatternTitle,

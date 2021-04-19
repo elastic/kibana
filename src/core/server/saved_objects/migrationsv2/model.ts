@@ -1,52 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { cloneDeep } from 'lodash';
-import { AliasAction, FetchIndexResponse, RetryableEsClientError } from './actions';
+import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-
-/**
- * How many times to retry a failing step.
- *
- * Waiting for a task to complete will cause a failing step every time the
- * wait_for_task action times out e.g. the following sequence has 3 retry
- * attempts:
- * LEGACY_REINDEX_WAIT_FOR_TASK (60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (2s delay, 60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (4s delay, 60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (success) -> ...
- *
- * This places an upper limit to how long we will wait for a task to complete.
- * The duration of a step is the time it takes for the action to complete plus
- * the exponential retry delay:
- * max_task_runtime = 2+4+8+16+32+64*(MAX_RETRY_ATTEMPTS-5) + ACTION_DURATION*MAX_RETRY_ATTEMPTS
- *
- * For MAX_RETRY_ATTEMPTS=10, ACTION_DURATION=60
- * max_task_runtime = 16.46 minutes
- */
-const MAX_RETRY_ATTEMPTS = 10;
+import { excludeUnusedTypesQuery } from '../migrations/core';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -70,13 +41,13 @@ function throwBadResponse(state: State, res: any): never {
  * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
  * the given target mappings.
  *
- * @remarks Mapping updates are commutative (deeply merged) by Elasticsearch,
- * except for the _meta key. The source index we're migrating from might
- * contain documents created by a plugin that is disabled in the Kibana
- * instance performing this migration. We merge the
- * _meta.migrationMappingPropertyHashes mappings from the source index into
- * the targetMappings to ensure that any `migrationPropertyHashes` for
- * disabled plugins aren't lost.
+ * @remarks When another instance already completed a migration, the existing
+ * target index might contain documents and mappings created by a plugin that
+ * is disabled in the current Kibana instance performing this migration.
+ * Mapping updates are commutative (deeply merged) by Elasticsearch, except
+ * for the `_meta` key. By merging the `_meta.migrationMappingPropertyHashes`
+ * mappings from the existing target index index into the targetMappings we
+ * ensure that any `migrationPropertyHashes` for disabled plugins aren't lost.
  *
  * Right now we don't use these `migrationPropertyHashes` but it could be used
  * in the future to detect if mappings were changed. If mappings weren't
@@ -104,6 +75,7 @@ function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): b
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
 }
+
 /**
  * Extracts the version number from a >= 7.11 index
  * @param indexName A >= v7.11 index name
@@ -125,12 +97,17 @@ function getAliases(indices: FetchIndexResponse) {
   }, {} as Record<string, string>);
 }
 
-const delayRetryState = <S extends State>(state: S, left: RetryableEsClientError): S => {
-  if (state.retryCount === MAX_RETRY_ATTEMPTS) {
+const delayRetryState = <S extends State>(
+  state: S,
+  errorMessage: string,
+  /** How many times to retry a step that fails */
+  maxRetryAttempts: number
+): S => {
+  if (state.retryCount >= maxRetryAttempts) {
     return {
       ...state,
       controlState: 'FATAL',
-      reason: `Unable to complete the ${state.controlState} step after ${MAX_RETRY_ATTEMPTS} attempts, terminating.`,
+      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`,
     };
   } else {
     const retryCount = state.retryCount + 1;
@@ -144,9 +121,7 @@ const delayRetryState = <S extends State>(state: S, left: RetryableEsClientError
         ...state.logs,
         {
           level: 'error',
-          message: `Action failed with '${
-            left.message
-          }'. Retrying attempt ${retryCount} out of ${MAX_RETRY_ATTEMPTS} in ${
+          message: `Action failed with '${errorMessage}'. Retrying attempt ${retryCount} in ${
             retryDelay / 1000
           } seconds.`,
         },
@@ -185,9 +160,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (Either.isLeft<unknown, unknown>(resW) && resW.left.type === 'retryable_es_client_error') {
+  if (
+    Either.isLeft<unknown, unknown>(resW) &&
+    isLeftTypeof(resW.left, 'retryable_es_client_error')
+  ) {
     // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left);
+    return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
   } else {
     // If the action didn't fail with a retryable_es_client_error, reset the
     // retry counter and retryDelay state
@@ -219,7 +197,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          targetIndexMappings: disableUnknownTypeMappingFields(
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]].mappings
           ),
@@ -246,22 +224,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         // The source index is the index the `.kibana` alias points to
         const source = aliases[stateP.currentAlias];
-        const target = stateP.versionIndex;
         return {
           ...stateP,
-          controlState: 'SET_SOURCE_WRITE_BLOCK',
-          sourceIndex: Option.some(source) as Option.Some<string>,
-          targetIndex: target,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            indices[source].mappings
-          ),
-          versionIndexReadyActions: Option.some<AliasAction[]>([
-            { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
-            { add: { index: target, alias: stateP.currentAlias } },
-            { add: { index: target, alias: stateP.versionAlias } },
-            { remove_index: { index: stateP.tempIndex } },
-          ]),
+          controlState: 'WAIT_FOR_YELLOW_SOURCE',
+          sourceIndex: source,
+          sourceIndexMappings: indices[source].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
@@ -289,7 +256,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          targetIndexMappings: disableUnknownTypeMappingFields(
             stateP.targetIndexMappings,
             indices[stateP.legacyIndex].mappings
           ),
@@ -343,7 +310,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // If the write block failed because the index doesn't exist, it means
       // another instance already completed the legacy pre-migration. Proceed
       // to the next step.
-      if (res.left.type === 'index_not_found_exception') {
+      if (isLeftTypeof(res.left, 'index_not_found_exception')) {
         return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
       } else {
         // @ts-expect-error TS doesn't correctly narrow this type to never
@@ -386,8 +353,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (
-        (left.type === 'index_not_found_exception' && left.index === stateP.legacyIndex) ||
-        left.type === 'target_index_had_write_block'
+        (isLeftTypeof(left, 'index_not_found_exception') && left.index === stateP.legacyIndex) ||
+        isLeftTypeof(left, 'target_index_had_write_block')
       ) {
         // index_not_found_exception for the LEGACY_REINDEX source index:
         // another instance already complete the LEGACY_DELETE step.
@@ -400,12 +367,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // step. However, by not skipping ahead we limit branches in the
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'LEGACY_DELETE' };
-      } else {
+      } else if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
+      } else if (
+        isLeftTypeof(left, 'index_not_found_exception') ||
+        isLeftTypeof(left, 'incompatible_mapping_exception')
+      ) {
         // We don't handle the following errors as the algorithm will never
         // run into these during the LEGACY_REINDEX_WAIT_FOR_TASK step:
         //  - index_not_found_exception for the LEGACY_REINDEX target index
-        //  - strict_dynamic_mapping_exception
+        //  - incompatible_mapping_exception
         throwBadResponse(stateP, left as never);
+      } else {
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'LEGACY_DELETE') {
@@ -415,8 +393,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (
-        left.type === 'remove_index_not_a_concrete_index' ||
-        (left.type === 'index_not_found_exception' && left.index === stateP.legacyIndex)
+        isLeftTypeof(left, 'remove_index_not_a_concrete_index') ||
+        (isLeftTypeof(left, 'index_not_found_exception') && left.index === stateP.legacyIndex)
       ) {
         // index_not_found_exception, another Kibana instance already
         // deleted the legacy index
@@ -429,16 +407,45 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // step. However, by not skipping ahead we limit branches in the
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
-      } else {
+      } else if (
+        isLeftTypeof(left, 'index_not_found_exception') ||
+        isLeftTypeof(left, 'alias_not_found_exception')
+      ) {
         // We don't handle the following errors as the migration algorithm
         // will never cause them to occur:
         // - alias_not_found_exception we're not using must_exist
         // - index_not_found_exception for source index into which we reindex
         //   the legacy index
         throwBadResponse(stateP, left as never);
+      } else {
+        throwBadResponse(stateP, left);
       }
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const source = stateP.sourceIndex;
+      const target = stateP.versionIndex;
+      return {
+        ...stateP,
+        controlState: 'SET_SOURCE_WRITE_BLOCK',
+        sourceIndex: Option.some(source) as Option.Some<string>,
+        targetIndex: target,
+        targetIndexMappings: disableUnknownTypeMappingFields(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        versionIndexReadyActions: Option.some<AliasAction[]>([
+          { remove: { index: source, alias: stateP.currentAlias, must_exist: true } },
+          { add: { index: target, alias: stateP.currentAlias } },
+          { add: { index: target, alias: stateP.versionAlias } },
+          { remove_index: { index: stateP.tempIndex } },
+        ]),
+      };
+    } else {
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -448,11 +455,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CREATE_REINDEX_TEMP',
       };
-    } else {
+    } else if (isLeftTypeof(res.left, 'index_not_found_exception')) {
       // We don't handle the following errors as the migration algorithm
       // will never cause them to occur:
       // - index_not_found_exception
-      return throwBadResponse(stateP, res as never);
+      return throwBadResponse(stateP, res.left as never);
+    } else {
+      return throwBadResponse(stateP, res.left);
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -487,8 +496,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (
-        left.type === 'target_index_had_write_block' ||
-        (left.type === 'index_not_found_exception' && left.index === stateP.tempIndex)
+        isLeftTypeof(left, 'target_index_had_write_block') ||
+        (isLeftTypeof(left, 'index_not_found_exception') && left.index === stateP.tempIndex)
       ) {
         // index_not_found_exception:
         //   another instance completed the MARK_VERSION_INDEX_READY and
@@ -503,10 +512,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'SET_TEMP_WRITE_BLOCK',
         };
-      } else {
-        // Don't handle incompatible_mapping_exception as we will never add a write
-        // block to the temp index or change the mappings.
+      } else if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
+      } else if (
+        isLeftTypeof(left, 'index_not_found_exception') ||
+        isLeftTypeof(left, 'incompatible_mapping_exception')
+      ) {
+        // Don't handle the following errors as the migration algorithm should
+        // never cause them to occur:
+        // - incompatible_mapping_exception the temp index has `dynamic: false`
+        //   mappings
+        // - index_not_found_exception for the source index, we will never
+        //   delete the source index
         throwBadResponse(stateP, left as never);
+      } else {
+        throwBadResponse(stateP, left);
       }
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
@@ -518,7 +542,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       const left = res.left;
-      if (left.type === 'index_not_found_exception') {
+      if (isLeftTypeof(left, 'index_not_found_exception')) {
         // index_not_found_exception:
         //   another instance completed the MARK_VERSION_INDEX_READY and
         //   removed the temp index.
@@ -530,7 +554,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'CLONE_TEMP_TO_TARGET',
         };
       } else {
-        // @ts-expect-error TS doesn't correctly narrow this to never
         throwBadResponse(stateP, left);
       }
     }
@@ -543,7 +566,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       const left = res.left;
-      if (left.type === 'index_not_found_exception') {
+      if (isLeftTypeof(left, 'index_not_found_exception')) {
         // index_not_found_exception means another instance alread completed
         // the MARK_VERSION_INDEX_READY step and removed the temp index
         // We still perform the OUTDATED_DOCUMENTS_* and
@@ -553,8 +576,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH',
         };
+      } else {
+        throwBadResponse(stateP, left);
       }
-      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -621,7 +645,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -642,18 +675,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return { ...stateP, controlState: 'DONE' };
     } else {
       const left = res.left;
-      if (left.type === 'alias_not_found_exception') {
+      if (isLeftTypeof(left, 'alias_not_found_exception')) {
         // the versionIndexReadyActions checks that the currentAlias is still
         // pointing to the source index. If this fails with an
         // alias_not_found_exception another instance has completed a
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-      } else if (
-        left.type === 'remove_index_not_a_concrete_index' ||
-        left.type === 'index_not_found_exception'
-      ) {
-        // We don't handle these errors as the migration algorithm will never
-        // cause them to occur (these are only relevant to the LEGACY_DELETE
+      } else if (isLeftTypeof(left, 'index_not_found_exception')) {
+        if (left.index === stateP.tempIndex) {
+          // another instance has already completed the migration and deleted
+          // the temporary index
+          return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+        } else {
+          // The migration algorithm will never cause a
+          // index_not_found_exception for an index other than the temporary
+          // index handled above.
+          throwBadResponse(stateP, left as never);
+        }
+      } else if (isLeftTypeof(left, 'remove_index_not_a_concrete_index')) {
+        // We don't handle this error as the migration algorithm will never
+        // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
       } else {
@@ -710,12 +751,14 @@ export const createInitialState = ({
   preMigrationScript,
   migrationVersionPerType,
   indexPrefix,
+  migrationsConfig,
 }: {
   kibanaVersion: string;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
 }): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
@@ -729,7 +772,6 @@ export const createInitialState = ({
   };
 
   const reindexTargetMappings: IndexMapping = {
-    // @ts-expect-error we don't allow plugins to set `dynamic`
     dynamic: false,
     properties: {
       type: { type: 'keyword' },
@@ -756,7 +798,10 @@ export const createInitialState = ({
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
+    retryAttempts: migrationsConfig.retryAttempts,
+    batchSize: migrationsConfig.batchSize,
     logs: [],
+    unusedTypesQuery: Option.of(excludeUnusedTypesQuery),
   };
   return initialState;
 };

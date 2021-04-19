@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,6 +12,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
+
+import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
@@ -38,6 +41,11 @@ import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
 
+// @ts-expect-error Not going to convert
+import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
+// @ts-expect-error Not going to convert
+import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
+
 import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
@@ -48,17 +56,20 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  const { presentationUtil } = plugins;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
       <ServicesProvider providers={services}>
-        <I18nProvider>
-          <Provider store={canvasStore}>
-            <App />
-          </Provider>
-        </I18nProvider>
+        <presentationUtil.ContextProvider>
+          <I18nProvider>
+            <Provider store={canvasStore}>
+              <App />
+            </Provider>
+          </I18nProvider>
+        </presentationUtil.ContextProvider>
       </ServicesProvider>
     </KibanaContextProvider>,
     element
@@ -103,7 +114,7 @@ export const initializeCanvas = async (
 
   // Init Registries
   initRegistries();
-  populateRegistries(registries);
+  await populateRegistries(registries);
 
   // Set Badge
   coreStart.chrome.setBadge(
@@ -145,6 +156,17 @@ export const initializeCanvas = async (
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
   destroyRegistries();
+
+  // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.
+  // Remove them when Canvas is unmounted.
+  // see: ../canvas_plugin_src/renderers/plot/plugins/index.ts
+  if (includes($.plot.plugins, size)) {
+    remove($.plot.plugins, size);
+  }
+
+  if (includes($.plot.plugins, text)) {
+    remove($.plot.plugins, text);
+  }
 
   // TODO: Not cleaning these up temporarily.
   // We have an issue where if requests are inflight, and you navigate away,

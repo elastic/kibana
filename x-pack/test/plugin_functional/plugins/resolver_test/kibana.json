@@ -1,5 +1,5 @@
 {
-  "id": "resolver_test",
+  "id": "resolverTest",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "resolverTest"],

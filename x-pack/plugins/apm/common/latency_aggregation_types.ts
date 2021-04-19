@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as t from 'io-ts';
 
 export enum LatencyAggregationType {
@@ -12,7 +14,7 @@ export enum LatencyAggregationType {
 }
 
 export const latencyAggregationTypeRt = t.union([
-  t.literal('avg'),
-  t.literal('p95'),
-  t.literal('p99'),
+  t.literal(LatencyAggregationType.avg),
+  t.literal(LatencyAggregationType.p95),
+  t.literal(LatencyAggregationType.p99),
 ]);

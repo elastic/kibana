@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
+kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
   slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {

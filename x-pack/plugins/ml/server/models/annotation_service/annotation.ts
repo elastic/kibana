@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -289,11 +290,13 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     try {
       const { body } = await asInternalUser.search(params);
 
+      // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
 
+      // @ts-expect-error TODO fix search response types
       const docs: Annotations = get(body, ['hits', 'hits'], []).map((d: EsResult) => {
         // get the original source document and the document id, we need it
         // to identify the annotation when editing/deleting it.

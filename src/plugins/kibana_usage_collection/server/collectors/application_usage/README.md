@@ -10,10 +10,10 @@ To track a sub view inside your application (ie a flyout, a tab, form step, etc)
 
 #### For a React Component
 
-For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component:
+For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component exposed from the `usageCollection` plugin. You will need to add the plugin to plugin's `kibana.json` file as an item in the `optionalPlugins` and `requiredBundles` declarations:
 
 kibana.json
-```
+```json
 {
   "id": "myPlugin",
   "version": "kibana",
@@ -24,39 +24,52 @@ kibana.json
 }
 ```
 
-Flyout component
+At the application level, the application must be wrapped by the `ApplicationUsageTrackingProvider` provided in the `usageCollection`'s setup contract.
+
+For example:
+```typescript jsx
+class MyPlugin implements Plugin {
+  ...
+  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+    const ApplicationUsageTrackingProvider = plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
+    core.application.register({
+      id, 
+      title, 
+      ...,
+      mount: async (params: AppMountParameters) => {
+        ReactDOM.render(
+          <ApplicationUsageTrackingProvider> // Set the tracking context provider at the App level
+            <I18nProvider>
+              <App />
+            </I18nProvider>
+          </ApplicationUsageTrackingProvider>,
+          element
+        );
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+  }
+  ...
+}
 ```
+
+Then, for every component inside the app that requires tracking the time it is on screen, and the number of general clicks:
+```typescript jsx
 import { TrackApplicationView } from 'src/plugins/usage_collection/public';
 
-...
-
-render() {
+const MyTrackedComponent = () => {
   return (
-    <TrackApplicationView
-      viewId="myFlyout"
-      applicationUsageTracker={usageCollection?.applicationUsageTracker}
-    >
-      <MyFlyout />
+    <TrackApplicationView viewId="myComponent">
+      <MyComponent />
     </TrackApplicationView>
   )
 }
 ```
 
-Application Usage will automatically track the active minutes on screen and clicks for both the application and the `MyFlyout` component whenever the component is mounted on the screen. Application Usage pauses counting screen minutes whenever the user is tabbed to another browser window.
+Application Usage will automatically track the active minutes on screen and clicks for both the application and the `MyComponent` component whenever it is mounted on the screen. Application Usage pauses counting screen minutes whenever the user is tabbed to another browser window.
 
-The prop `viewId` is used as a unique identifier for your plugin. `applicationUsageTracker` can be passed directly from `usageCollection` setup or start contracts of the plugin. The Application Id is automatically attached to the tracked usage.
-
-#### Advanced Usage
-
-If you have a custom use case not provided by the Application Usage helpers you can use the `usageCollection.applicationUsageTracker` public api directly.
-
-To start tracking a view: `applicationUsageTracker.trackApplicationViewUsage(viewId)`
-Calling this method will marks the specified `viewId` as active. applicationUsageTracker will start tracking clicks and screen minutes for the view.
-
-To stop tracking a view: `applicationUsageTracker.flushTrackedView(viewId)`
-Calling this method will stop tracking the clicks and screen minutes for that view. Usually once the view is no longer active.
-
-
+The prop `viewId` is used as a unique identifier for your plugin. The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via `core.application.register`.
 ## Application Usage Telemetry Data
 
 This collector reports the number of general clicks and minutes on screen for each registered application in Kibana.

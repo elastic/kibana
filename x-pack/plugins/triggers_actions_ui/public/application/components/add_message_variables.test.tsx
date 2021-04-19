@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -86,5 +87,46 @@ describe('AddMessageVariables', () => {
       description: 'My variable 1 description',
       useWithTripleBracesInTemplates: true,
     });
+  });
+
+  test('it renders deprecated variables as disabled', () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+          },
+          {
+            name: 'deprecatedVar',
+            description: 'This variable is deprecated',
+            deprecated: true,
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="variableMenuButton-myVar"]').getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="variableMenuButton-deprecatedVar"]').getDOMNode()
+    ).toBeDisabled();
+  });
+
+  test(`it does't render when no variables exist`, () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,29 +14,29 @@ import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceId, sourceConfiguration } = useLogSourceContext();
+  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
   const { space } = useActiveKibanaSpace();
 
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
   // React concurrent mode and Suspense in order to handle that more gracefully.
-  if (sourceConfiguration?.configuration.logAlias == null || space == null) {
+  if (!resolvedSourceConfiguration || space == null) {
     return null;
   }
 
   return (
     <LogFlyout.Provider>
       <LogEntryRateModuleProvider
-        indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+        indexPattern={resolvedSourceConfiguration.indices ?? ''}
         sourceId={sourceId}
         spaceId={space.id}
-        timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+        timestampField={resolvedSourceConfiguration.timestampField ?? ''}
       >
         <LogEntryCategoriesModuleProvider
-          indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+          indexPattern={resolvedSourceConfiguration.indices ?? ''}
           sourceId={sourceId}
           spaceId={space.id}
-          timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+          timestampField={resolvedSourceConfiguration.timestampField ?? ''}
         >
           <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
         </LogEntryCategoriesModuleProvider>

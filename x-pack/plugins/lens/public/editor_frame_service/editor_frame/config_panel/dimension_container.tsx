@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './dimension_container.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -16,6 +18,8 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,10 +37,10 @@ export function DimensionContainer({
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     handleClose();
     setFocusTrapIsEnabled(false);
-  };
+  }, [handleClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,8 +51,19 @@ export function DimensionContainer({
     }
   }, [isOpen]);
 
+  const closeOnEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        event.preventDefault();
+        closeFlyout();
+      }
+    },
+    [closeFlyout]
+  );
+
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
+      <EuiWindowEvent event="keydown" handler={closeOnEscape} />
       <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
         <div
           role="dialog"

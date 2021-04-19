@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -93,7 +94,7 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}>"',
+        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -124,8 +125,8 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
-        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}> | undefined)"',
       ]);
       expect(message.schema).toEqual({});
     });

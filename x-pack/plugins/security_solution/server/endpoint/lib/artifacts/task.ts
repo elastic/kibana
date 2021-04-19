@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -10,8 +12,9 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { reportErrors } from './common';
+import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import { isEmptyManifestDiff } from './manifest';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -31,6 +34,7 @@ export interface ManifestTaskStartContract {
 export class ManifestTask {
   private endpointAppContext: EndpointAppContext;
   private logger: Logger;
+  private wasStarted: boolean = false;
 
   constructor(setupContract: ManifestTaskSetupContract) {
     this.endpointAppContext = setupContract.endpointAppContext;
@@ -69,6 +73,8 @@ export class ManifestTask {
   }
 
   public start = async (startContract: ManifestTaskStartContract) => {
+    this.wasStarted = true;
+
     try {
       await startContract.taskManager.ensureScheduled({
         id: this.getTaskId(),
@@ -90,6 +96,12 @@ export class ManifestTask {
   };
 
   public runTask = async (taskId: string) => {
+    // if task was not `.start()`'d yet, then exit
+    if (!this.wasStarted) {
+      this.logger.debug('[runTask()] Aborted. ManifestTask not started yet');
+      return;
+    }
+
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       // old task, return
@@ -112,39 +124,23 @@ export class ManifestTask {
         return;
       }
 
-      // New computed manifest based on current state of exception list
+      // New computed manifest based on current manifest
       const newManifest = await manifestManager.buildNewManifest(oldManifest);
-      const diffs = newManifest.diff(oldManifest);
 
-      // Compress new artifacts
-      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
-      for (const artifactId of adds) {
-        const compressError = await newManifest.compressArtifact(artifactId);
-        if (compressError) {
-          throw compressError;
-        }
-      }
+      const diff = newManifest.diff(oldManifest);
 
-      // Persist new artifacts
-      const artifacts = adds
-        .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
-      if (artifacts.length !== adds.length) {
-        throw new Error('Invalid artifact encountered.');
-      }
-      const persistErrors = await manifestManager.pushArtifacts(artifacts);
+      const persistErrors = await manifestManager.pushArtifacts(
+        diff.additions as InternalArtifactCompleteSchema[]
+      );
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
       }
 
-      // Commit latest manifest state, if different
-      if (diffs.length) {
+      if (!isEmptyManifestDiff(diff)) {
+        // Commit latest manifest state
         newManifest.bumpSemanticVersion();
-        const error = await manifestManager.commit(newManifest);
-        if (error) {
-          throw error;
-        }
+        await manifestManager.commit(newManifest);
       }
 
       // Try dispatching to ingest-manager package policies
@@ -155,8 +151,9 @@ export class ManifestTask {
       }
 
       // Try to clean up superceded artifacts
-      const deletes = diffs.filter((diff) => diff.type === 'delete').map((diff) => diff.id);
-      const deleteErrors = await manifestManager.deleteArtifacts(deletes);
+      const deleteErrors = await manifestManager.deleteArtifacts(
+        diff.removals.map((artifact) => getArtifactId(artifact))
+      );
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }

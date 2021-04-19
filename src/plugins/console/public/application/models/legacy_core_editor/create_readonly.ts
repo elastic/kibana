@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,7 +13,7 @@ import * as OutputMode from './mode/output';
 import smartResize from './smart_resize';
 
 export interface CustomAceEditor extends ace.Editor {
-  update: (text: string, mode?: any, cb?: () => void) => void;
+  update: (text: string, mode?: unknown, cb?: () => void) => void;
   append: (text: string, foldPrevious?: boolean, cb?: () => void) => void;
 }
 
@@ -39,9 +28,9 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: any, cb?: () => void) => {
+  output.update = (val: string, mode?: unknown, cb?: () => void) => {
     if (typeof mode === 'function') {
-      cb = mode;
+      cb = mode as () => void;
       mode = void 0;
     }
 
@@ -76,7 +65,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   (function setupSession(session) {
     session.setMode('ace/mode/text');
-    (session as any).setFoldStyle('markbeginend');
+    ((session as unknown) as { setFoldStyle: (v: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
   })(output.getSession());

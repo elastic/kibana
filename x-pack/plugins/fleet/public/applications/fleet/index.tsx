@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Route, RouteProps } from 'react-router-dom';
-import { CoreStart, AppMountParameters } from 'src/core/public';
-import { FleetConfigType, FleetStartServices } from '../../plugin';
+import type { RouteProps } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
+import type { CoreStart, AppMountParameters } from 'src/core/public';
+
+import type { FleetConfigType, FleetStartServices } from '../../plugin';
+
 import { licenseService } from './hooks';
-import { UIExtensionsStorage } from './types';
+import type { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {

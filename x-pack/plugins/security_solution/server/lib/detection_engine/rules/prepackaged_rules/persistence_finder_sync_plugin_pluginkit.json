@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Finder Sync plugins enable users to extend Finder\u2019s functionality by modifying the user interface. Adversaries may abuse this feature by adding a rogue Finder Plugin to repeatedly execute malicious payloads for persistence.",
+  "false_positives": [
+    "Trusted Finder Sync Plugins"
+  ],
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Finder Sync Plugin Registered and Enabled",
+  "query": "sequence by host.id, user.id with maxspan = 5s\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"pluginkit\" and process.args : \"-a\"]\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"pluginkit\" and\n    process.args : \"-e\" and process.args : \"use\" and process.args : \"-i\" and\n    not process.args :\n    (\n      \"com.google.GoogleDrive.FinderSyncAPIExtension\",\n      \"com.google.drivefs.findersync\",\n      \"com.boxcryptor.osx.Rednif\",\n      \"com.adobe.accmac.ACCFinderSync\",\n      \"com.microsoft.OneDrive.FinderSync\",\n      \"com.insynchq.Insync.Insync-Finder-Integration\",\n      \"com.box.desktop.findersyncext\"\n    )\n  ]\n",
+  "references": [
+    "https://github.com/specterops/presentations/raw/master/Leo Pitt/Hey_Im_Still_in_Here_Modern_macOS_Persistence_SO-CON2020.pdf"
+  ],
+  "risk_score": 47,
+  "rule_id": "37f638ea-909d-4f94-9248-edd21e4a9906",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

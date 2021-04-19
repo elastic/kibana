@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, IUiSettingsClient } from 'kibana/public';
@@ -62,7 +63,6 @@ export class XyVisualization {
           chartsThemeService: charts.theme,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
-          getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
         })
       );
       return getXyVisualization({ paletteService: palettes, data });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRandomString, getRandomNumber } from '@kbn/test/jest';
@@ -53,6 +54,7 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
+  dataStream,
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
@@ -73,12 +75,13 @@ export const getTemplate = ({
       mappings,
       settings,
     },
+    dataStream,
     hasSettings: objHasProperties(settings),
     hasMappings: objHasProperties(mappings),
     hasAliases: objHasProperties(aliases),
     _kbnMeta: {
       type,
-      hasDatastream,
+      hasDatastream: dataStream !== undefined ? true : hasDatastream,
       isLegacy,
     },
   };

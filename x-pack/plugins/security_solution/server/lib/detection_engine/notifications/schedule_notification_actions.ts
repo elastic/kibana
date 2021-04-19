@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerts/server';
+import { AlertInstance } from '../../../../../alerting/server';
+import { RuleParams } from '../schemas/rule_schemas';
 import { SignalSource } from '../signals/types';
-import { RuleTypeParams } from '../types';
 
-export type NotificationRuleTypeParams = RuleTypeParams & {
+export type NotificationRuleTypeParams = RuleParams & {
   name: string;
   id: string;
 };

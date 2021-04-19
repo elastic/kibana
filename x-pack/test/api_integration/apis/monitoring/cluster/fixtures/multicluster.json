@@ -98,15 +98,14 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": false
-    },
-    "clusterMeta": {
-      "enabled": false,
-      "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
+      "enabled": true
     },
     "list": {}
   },
@@ -214,6 +213,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {
@@ -326,6 +328,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -9,11 +10,12 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
+import { CaseStatusWithAllStatus, StatusAll } from '../status';
 import { StatusFilter } from './status_filter';
 
 import * as i18n from './translations';
@@ -24,6 +26,7 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
+  disabledStatuses?: CaseStatuses[];
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -40,7 +43,12 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
-const defaultInitial = { search: '', reporters: [], status: CaseStatuses.open, tags: [] };
+const defaultInitial = {
+  search: '',
+  reporters: [],
+  status: StatusAll,
+  tags: [],
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -49,6 +57,7 @@ const CasesTableFiltersComponent = ({
   onFilterChanged,
   initial = defaultInitial,
   setFilterRefetch,
+  disabledStatuses,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
@@ -123,7 +132,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const onStatusChanged = useCallback(
-    (status: CaseStatuses) => {
+    (status: CaseStatusWithAllStatus) => {
       onFilterChanged({ status });
     },
     [onFilterChanged]
@@ -131,6 +140,7 @@ const CasesTableFiltersComponent = ({
 
   const stats = useMemo(
     () => ({
+      [StatusAll]: null,
       [CaseStatuses.open]: countOpenCases ?? 0,
       [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
       [CaseStatuses.closed]: countClosedCases ?? 0,
@@ -157,6 +167,7 @@ const CasesTableFiltersComponent = ({
               selectedStatus={initial.status}
               onStatusChanged={onStatusChanged}
               stats={stats}
+              disabledStatuses={disabledStatuses}
             />
           </StatusFilterWrapper>
         </EuiFlexGroup>

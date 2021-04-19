@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -16,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FilterAggConfigRange } from '../types';
 
+const BUTTON_SIZE = 40;
 /**
  * Form component for the range filter aggregation for number type fields.
  */
@@ -44,7 +46,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow
             label={
@@ -63,7 +65,8 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               prepend={
                 <EuiButton
-                  style={{ minWidth: '40px' }}
+                  minWidth={BUTTON_SIZE}
+                  style={{ maxWidth: BUTTON_SIZE }}
                   onChange={(e: any) => {
                     updateConfig({ includeFrom: e.target.checked });
                   }}
@@ -93,13 +96,14 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               append={
                 <EuiButton
-                  style={{ minWidth: '40px' }}
+                  minWidth={BUTTON_SIZE}
+                  style={{ maxWidth: BUTTON_SIZE }}
                   onClick={() => {
                     updateConfig({ includeTo: !includeTo });
                   }}
                   fill={includeTo}
                 >
-                  {includeTo ? '≤' : '<'}s
+                  {includeTo ? '≤' : '<'}
                 </EuiButton>
               }
             />

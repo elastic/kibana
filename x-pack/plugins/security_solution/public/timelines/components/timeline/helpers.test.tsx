@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
@@ -331,8 +332,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -349,8 +350,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -367,8 +368,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -385,8 +386,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -450,8 +451,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -468,8 +469,72 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'filter',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+  });
+
+  test('Data Provider & kql filter query with nested field that exists', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    const query = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: 'nestedField.firstAttributes',
+            value: 'exists',
+          },
+          exists: {
+            field: 'nestedField.firstAttributes',
+          },
+          $state: {
+            store: esFilters.FilterStateStore.APP_STATE,
+          },
+        } as Filter,
+      ],
+      kqlQuery: { query: '', language: 'kuery' },
+      kqlMode: 'filter',
+    });
+    const filterQuery = query && query.filterQuery;
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"exists\\":{\\"field\\":\\"nestedField.firstAttributes\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+  });
+
+  test('Data Provider & kql filter query with nested field of a particular value', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    const query = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [
+        {
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          meta: {
+            alias: null,
+            disabled: false,
+            key: 'nestedField.secondAttributes',
+            negate: false,
+            params: { query: 'test' },
+            type: 'phrase',
+          },
+          query: { match_phrase: { 'nestedField.secondAttributes': 'test' } },
+        },
+      ],
+      kqlQuery: { query: '', language: 'kuery' },
+      kqlMode: 'filter',
+    });
+    const filterQuery = query && query.filterQuery;
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"nestedField.secondAttributes\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 

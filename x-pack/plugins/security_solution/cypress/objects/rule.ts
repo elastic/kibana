@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
@@ -53,6 +54,7 @@ export interface CustomRule {
   runsEvery: Interval;
   lookBack: Interval;
   timeline: CompleteTimeline;
+  maxSignals: number;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -69,12 +71,14 @@ export interface OverrideRule extends CustomRule {
 
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
-  indicatorMapping: string;
+  indicatorMappingField: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
-  machineLearningJob: string;
+  machineLearningJobs: string[];
   anomalyScoreThreshold: string;
   name: string;
   description: string;
@@ -173,6 +177,7 @@ export const newRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const existingRule: CustomRule = {
@@ -180,7 +185,7 @@ export const existingRule: CustomRule = {
   name: 'Rule 1',
   description: 'Description for Rule 1',
   index: ['auditbeat-*'],
-  interval: '10s',
+  interval: '100m',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -191,6 +196,9 @@ export const existingRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  // Please do not change, or if you do, needs
+  // to be any number other than default value
+  maxSignals: 500,
 };
 
 export const newOverrideRule: OverrideRule = {
@@ -212,6 +220,7 @@ export const newOverrideRule: OverrideRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThresholdRule: ThresholdRule = {
@@ -231,10 +240,11 @@ export const newThresholdRule: ThresholdRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const machineLearningRule: MachineLearningRule = {
-  machineLearningJob: 'linux_anomalous_network_service',
+  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
@@ -264,6 +274,7 @@ export const eqlRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const eqlSequenceRule: CustomRule = {
@@ -284,12 +295,13 @@ export const eqlSequenceRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['threat-data-*'],
+  index: ['suspicious-*'],
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
@@ -299,10 +311,13 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   note: '# test markdown',
   runsEvery,
   lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMappingField: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline,
+  maxSignals: 100,
 };
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
@@ -317,5 +332,5 @@ export const editedRule = {
 export const expectedExportedRule = (ruleResponse: Cypress.Response) => {
   const jsonrule = ruleResponse.body;
 
-  return `{"author":[],"actions":[],"created_at":"${jsonrule.created_at}","updated_at":"${jsonrule.updated_at}","created_by":"elastic","description":"${jsonrule.description}","enabled":false,"false_positives":[],"from":"now-17520h","id":"${jsonrule.id}","immutable":false,"index":["exceptions-*"],"interval":"10s","rule_id":"rule_testing","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":${jsonrule.risk_score},"risk_score_mapping":[],"name":"${jsonrule.name}","query":"${jsonrule.query}","references":[],"severity":"${jsonrule.severity}","severity_mapping":[],"updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[],"throttle":"no_actions","version":1,"exceptions_list":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"100m","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-17520h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
 };

@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
-import { NewOutput, Output, OutputSOAttributes } from '../types';
+
+import type { SavedObjectsClientContract } from 'src/core/server';
+
+import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { appContextService } from './app_context';
 import { decodeCloudId } from '../../common';
+
+import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 

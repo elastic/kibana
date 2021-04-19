@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -27,6 +28,7 @@ import { useLogSourceConfigurationFormState } from './source_configuration_form_
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { LogSourceConfigurationPropertiesPatch } from '../../../../common/http_api/log_sources';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -34,15 +36,15 @@ export const LogsSettingsPage = () => {
 
   const {
     sourceConfiguration: source,
-    sourceStatus,
     isLoading,
     isUninitialized,
     updateSourceConfiguration,
+    resolvedSourceConfiguration,
   } = useLogSourceContext();
 
   const availableFields = useMemo(
-    () => sourceStatus?.logIndexFields.map((field) => field.name) ?? [],
-    [sourceStatus]
+    () => resolvedSourceConfiguration?.fields.map((field) => field.name) ?? [],
+    [resolvedSourceConfiguration]
   );
 
   const {
@@ -55,10 +57,24 @@ export const LogsSettingsPage = () => {
     isFormDirty,
     isFormValid,
     formStateChanges,
-  } = useLogSourceConfigurationFormState(source?.configuration);
+  } = useLogSourceConfigurationFormState(resolvedSourceConfiguration);
 
   const persistUpdates = useCallback(async () => {
-    await updateSourceConfiguration(formStateChanges);
+    // NOTE / TODO: This is just a temporary workaround until this work is merged with the corresponding UI branch.
+    // Otherwise we would be duplicating work changing the logAlias etc references twice.
+    const patchedProperties: LogSourceConfigurationPropertiesPatch & { logAlias?: string } = {
+      ...formStateChanges,
+      ...(formStateChanges.logAlias
+        ? {
+            logIndices: {
+              type: 'index_name',
+              indexName: formStateChanges.logAlias,
+            },
+          }
+        : {}),
+    };
+    delete patchedProperties.logAlias;
+    await updateSourceConfiguration(patchedProperties);
     resetForm();
   }, [updateSourceConfiguration, resetForm, formStateChanges]);
 
@@ -67,7 +83,7 @@ export const LogsSettingsPage = () => {
     source,
   ]);
 
-  if ((isLoading || isUninitialized) && !source) {
+  if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
     return <SourceLoadingPage />;
   }
   if (!source?.configuration) {

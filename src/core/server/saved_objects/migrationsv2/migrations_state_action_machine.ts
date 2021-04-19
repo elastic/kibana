@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
+import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
@@ -42,7 +31,8 @@ const logStateTransition = (
   logger: Logger,
   logMessagePrefix: string,
   oldState: State,
-  newState: State
+  newState: State,
+  tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
     newState.logs
@@ -50,7 +40,9 @@ const logStateTransition = (
       .forEach((log) => logger[log.level](logMessagePrefix + log.message));
   }
 
-  logger.info(logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}`);
+  logger.info(
+    logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}. took: ${tookMs}ms.`
+  );
 };
 
 const logActionResponse = (
@@ -95,11 +87,12 @@ export async function migrationStateActionMachine({
   model: Model<State>;
 }) {
   const executionLog: ExecutionLog = [];
-  const starteTime = performance.now();
+  const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
+  let prevTimestamp = startTime;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
@@ -126,12 +119,20 @@ export async function migrationStateActionMachine({
           controlState: newState.controlState,
           prevControlState: state.controlState,
         });
-        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State);
+        const now = Date.now();
+        logStateTransition(
+          logger,
+          logMessagePrefix,
+          state,
+          redactedNewState as State,
+          now - prevTimestamp
+        );
+        prevTimestamp = now;
         return newState;
       }
     );
 
-    const elapsedMs = performance.now() - starteTime;
+    const elapsedMs = Date.now() - startTime;
     if (finalState.controlState === 'DONE') {
       logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
       if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {
@@ -164,12 +165,27 @@ export async function migrationStateActionMachine({
       logger.error(
         logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
       );
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      throw new Error(
+        `Unable to complete saved object migrations for the [${
+          initialState.indexPrefix
+        }] index. Please check the health of your Elasticsearch cluster and try again. Error: [${
+          e.body?.error?.type
+        }]: ${e.body?.error?.reason ?? e.message}`
+      );
     } else {
       logger.error(e);
+
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      if (e instanceof CorruptSavedObjectError) {
+        throw new Error(
+          `${e.message} To allow migrations to proceed, please delete this document from the [${initialState.indexPrefix}_${initialState.kibanaVersion}_001] index.`
+        );
+      }
+
+      throw new Error(
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
+      );
     }
-    dumpExecutionLog(logger, logMessagePrefix, executionLog);
-    throw new Error(
-      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${e}`
-    );
   }
 }
