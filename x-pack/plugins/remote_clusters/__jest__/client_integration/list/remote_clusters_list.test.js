@@ -103,9 +103,10 @@ describe('<RemoteClusterList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('remoteClusterSearch'), 'unique');
+    test('search works', () => {
+      const input = find('remoteClusterSearch');
+      input.instance().value = 'unique';
+      input.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
       const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
       expect(tableCellsValues.length).toBe(1);
     });
