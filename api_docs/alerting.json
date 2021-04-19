@@ -26,13 +26,7 @@
           },
           "signature": [
             "(consumer: string, alertType: string, handler: ",
-            {
-              "pluginId": "alerting",
-              "scope": "public",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-public.AlertNavigationHandler",
-              "text": "AlertNavigationHandler"
-            },
+            "AlertNavigationHandler",
             ") => void"
           ]
         },
@@ -48,13 +42,7 @@
           },
           "signature": [
             "(consumer: string, handler: ",
-            {
-              "pluginId": "alerting",
-              "scope": "public",
-              "docId": "kibAlertingPluginApi",
-              "section": "def-public.AlertNavigationHandler",
-              "text": "AlertNavigationHandler"
-            },
+            "AlertNavigationHandler",
             ") => void"
           ]
         }
@@ -125,6 +113,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.parseDuration.$1",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -429,13 +418,7 @@
             },
             "signature": [
               "() => Set<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RegistryAlertType",
-                "text": "RegistryAlertType"
-              },
+              "RegistryAlertType",
               ">"
             ]
           },
@@ -552,13 +535,7 @@
             },
             "signature": [
               "(id: string) => Pick<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertInstance",
-                "text": "AlertInstance"
-              },
+              "AlertInstance",
               "<InstanceState, InstanceContext, ActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
             ]
           }
@@ -620,13 +597,7 @@
             },
             "signature": [
               "{ params?: ",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertTypeParamsValidator",
-                "text": "AlertTypeParamsValidator"
-              },
+              "AlertTypeParamsValidator",
               "<Params> | undefined; } | undefined"
             ]
           },
@@ -697,13 +668,7 @@
               "lineNumber": 128
             },
             "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.ExecutorType",
-                "text": "ExecutorType"
-              },
+              "ExecutorType",
               "<Params, State, InstanceState, InstanceContext, ",
               {
                 "pluginId": "alerting",
@@ -854,7 +819,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
             ]
           }
         ],
@@ -889,6 +854,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerType.$1",
                 "type": "Object",
                 "label": "alertType",
                 "isRequired": true,
@@ -942,13 +908,7 @@
             },
             "signature": [
               "() => Set<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RegistryAlertType",
-                "text": "RegistryAlertType"
-              },
+              "RegistryAlertType",
               ">"
             ]
           },
@@ -978,6 +938,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginStartContract.getAlertsClientWithRequest.$1",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1116,7 +1077,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: <Params extends Record<string, unknown> = never>({ data, options, }: ",
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: <Params extends Record<string, unknown> = never>({ data, options, }: ",
           "CreateOptions",
           "<Params>) => Promise<Pick<",
           {
@@ -1126,7 +1087,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; find: <Params>({ options: { fields, ...options }, }?: { options?: ",
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; find: <Params>({ options: { fields, ...options }, }?: { options?: ",
           "FindOptions",
           " | undefined; }) => Promise<",
           {
@@ -1180,7 +1141,7 @@
           "lineNumber": 178
         },
         "signature": [
-          "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"apiKey\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
+          "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"apiKey\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
         ],
         "initialIsOpen": false
       },
@@ -1239,6 +1200,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getBuiltinActionGroups.$1",
             "type": "Object",
             "label": "customRecoveryGroup",
             "isRequired": false,
@@ -1277,6 +1239,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getDurationNumberInItsUnit.$1",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1308,6 +1271,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getDurationUnitValue.$1",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1339,6 +1303,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.isActionGroupDisabledForActionTypeId.$1",
             "type": "string",
             "label": "actionGroup",
             "isRequired": true,
@@ -1352,6 +1317,7 @@
             }
           },
           {
+            "id": "def-common.isActionGroupDisabledForActionTypeId.$2",
             "type": "string",
             "label": "actionTypeId",
             "isRequired": true,
@@ -1383,6 +1349,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.parseDuration.$1",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1414,6 +1381,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.validateDurationSchema.$1",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1445,6 +1413,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.validateNotifyWhenType.$1",
             "type": "string",
             "label": "notifyWhen",
             "isRequired": true,
@@ -1951,13 +1920,7 @@
               "lineNumber": 47
             },
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
+              "SavedObjectAttributes"
             ]
           }
         ],
@@ -3120,7 +3083,7 @@
           "lineNumber": 78
         },
         "signature": [
-          "{ enabled: boolean; id: string; name: string; params: Params; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: IntervalSchedule; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: AlertExecutionStatus; }"
+          "{ enabled: boolean; id: string; name: string; params: Params; actions: AlertAction[]; tags: string[]; muteAll: boolean; alertTypeId: string; consumer: string; schedule: IntervalSchedule; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: AlertExecutionStatus; }"
         ],
         "initialIsOpen": false
       },
