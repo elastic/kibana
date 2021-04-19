@@ -1,6 +1,5 @@
 [role="xpack"]
 [[pre-configured-connectors]]
-
 === Preconfigured connectors
 
 You can preconfigure a connector to have all the information it needs prior to startup by adding it to the `kibana.yml` file.
