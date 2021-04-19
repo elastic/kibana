@@ -325,7 +325,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
-        securitySolutionTimelineSearchStrategy
+        securitySolutionTimelineSearchStrategy,
+        true
       );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineEqlSearchStrategy',

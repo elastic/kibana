@@ -88,6 +88,7 @@ describe('Search service', () => {
     let searcPluginStart: ISearchStart<IEsSearchRequest, IEsSearchResponse<any>>;
     let mockStrategy: any;
     let mockStrategyNoCancel: jest.Mocked<ISearchStrategy>;
+    let mockStrategyWithKibanaRequest: jest.Mocked<ISearchStrategy>;
     let mockSessionService: ISearchSessionService<any>;
     let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
     const sessionId = '1234';
@@ -103,6 +104,12 @@ describe('Search service', () => {
         search: jest.fn().mockReturnValue(of({})),
       };
 
+      mockStrategyWithKibanaRequest = {
+        search: jest.fn().mockReturnValue(of({})),
+        cancel: jest.fn(),
+        extend: jest.fn(),
+      };
+
       mockSessionClient = createSearchSessionsClientMock();
       mockSessionService = {
         asScopedProvider: () => (request: any) => mockSessionClient,
@@ -114,6 +121,7 @@ describe('Search service', () => {
       });
       pluginSetup.registerSearchStrategy('es', mockStrategy);
       pluginSetup.registerSearchStrategy('nocancel', mockStrategyNoCancel);
+      pluginSetup.registerSearchStrategy('withKibanaRequest', mockStrategyWithKibanaRequest, true);
       pluginSetup.__enhance({
         defaultStrategy: 'es',
         sessionService: mockSessionService,
@@ -238,6 +246,28 @@ describe('Search service', () => {
         await mockScopedClient.search(searchRequest, options).toPromise();
 
         expect(mockSessionClient.trackId).not.toBeCalled();
+      });
+
+      it('includes kibana request in search deps when search strategy registered to include it', async () => {
+        const searchRequest = { params: {} };
+        const options = { strategy: 'withKibanaRequest' };
+
+        await mockScopedClient.search(searchRequest, options).toPromise();
+
+        const [, , deps] = mockStrategyWithKibanaRequest.search.mock.calls[0];
+
+        expect(deps.kibanaRequest).not.toBeUndefined();
+      });
+
+      it('does not include kibana request in search deps when search strategy not registered to include it', async () => {
+        const searchRequest = { params: {} };
+        const options = { strategy: 'es' };
+
+        await mockScopedClient.search(searchRequest, options).toPromise();
+
+        const [, , deps] = mockStrategy.search.mock.calls[0];
+
+        expect(deps.kibanaRequest).toBeUndefined();
       });
     });
 

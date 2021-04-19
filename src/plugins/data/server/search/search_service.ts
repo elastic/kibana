@@ -105,6 +105,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
   private sessionService: ISearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
+  // Map of strategy name : boolean
+  private includeKibanaRequest: Record<string, boolean> = {};
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -251,10 +253,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
     name: string,
-    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
+    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>,
+    includeKibanaRequest?: boolean
   ) => {
     this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
+    this.includeKibanaRequest[name] = includeKibanaRequest ?? false;
   };
 
   private getSearchStrategy = <
@@ -405,8 +409,23 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         >(
           searchRequest: SearchStrategyRequest,
           options: ISearchOptions = {}
-        ) =>
-          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        ) => {
+          // This logic has been added to allow search strategies to add RBAC logic
+          // within their search logic. The entire kibana request is required by the
+          // security plugin to determine user permissions. This is a rather large
+          // object that is not needed by all, so a flag has been added and defaults to false
+          const dependencies = {
+            ...deps,
+            ...(options.strategy != null && this.includeKibanaRequest[options.strategy]
+              ? { kibanaRequest: request }
+              : {}),
+          };
+          return this.search<SearchStrategyRequest, SearchStrategyResponse>(
+            dependencies,
+            searchRequest,
+            options
+          );
+        },
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,

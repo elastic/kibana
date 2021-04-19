@@ -37,6 +37,7 @@ export interface SearchStrategyDependencies {
   esClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
   searchSessionsClient: IScopedSearchSessionsClient;
+  kibanaRequest?: KibanaRequest;
 }
 
 export interface ISearchSetup {
@@ -50,7 +51,8 @@ export interface ISearchSetup {
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
     name: string,
-    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
+    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>,
+    includeKibanaRequest?: boolean
   ) => void;
 
   /**
