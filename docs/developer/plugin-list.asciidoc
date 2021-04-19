@@ -444,8 +444,8 @@ the infrastructure monitoring use-case within Kibana.
 |Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard[licenseApiGuard]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]
+|This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
