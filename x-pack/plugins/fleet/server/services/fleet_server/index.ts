@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from 'kibana/server';
 import { first } from 'rxjs/operators';
 
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
+import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
 
-import { setupFleetServerIndexes } from './elastic_index';
 import { runFleetServerMigration } from './saved_object_migrations';
 
 let _isFleetServerSetup = false;
@@ -20,6 +21,19 @@ let _onResolve: (arg?: any) => void;
 
 export function isFleetServerSetup() {
   return _isFleetServerSetup;
+}
+
+/**
+ * Check if at least one fleet server is connected
+ */
+export async function hasFleetServers(esClient: ElasticsearchClient) {
+  const res = await esClient.search<{}, {}>({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    ignore_unavailable: true,
+  });
+
+  // @ts-expect-error value is number | TotalHits
+  return res.body.hits.total.value > 0;
 }
 
 export async function awaitIfFleetServerSetupPending() {
@@ -45,7 +59,6 @@ export async function startFleetServerSetup() {
   try {
     // We need licence to be initialized before using the SO service.
     await licenseService.getLicenseInformation$()?.pipe(first())?.toPromise();
-    await setupFleetServerIndexes();
     await runFleetServerMigration();
     _isFleetServerSetup = true;
   } catch (err) {

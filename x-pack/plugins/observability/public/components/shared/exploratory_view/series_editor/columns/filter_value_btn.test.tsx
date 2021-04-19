@@ -12,7 +12,7 @@ import { mockUrlStorage, mockUseSeriesFilter, mockUseValuesList, render } from '
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
-} from '../../configurations/data/elasticsearch_fieldnames';
+} from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterValueButton', function () {
   it('should render properly', async function () {

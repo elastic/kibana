@@ -39,28 +39,31 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
   },
 ];
 
-export const buildAlertsRuleIdFilter = (ruleId: string): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.rule.id',
-      params: {
-        query: ruleId,
-      },
-    },
-    query: {
-      match_phrase: {
-        'signal.rule.id': ruleId,
-      },
-    },
-  },
-];
+export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
+  ruleId
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'signal.rule.id',
+            params: {
+              query: ruleId,
+            },
+          },
+          query: {
+            match_phrase: {
+              'signal.rule.id': ruleId,
+            },
+          },
+        },
+      ]
+    : [];
 
-export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
-  ...(showBuildingBlockAlerts
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
+  showBuildingBlockAlerts
     ? []
     : [
         {
@@ -75,8 +78,25 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
-      ]),
-];
+      ];
+
+export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
+  showOnlyThreatIndicatorAlerts
+    ? [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.threat_mapping' },
+        },
+      ]
+    : [];
 
 export const alertsHeaders: ColumnHeaderOptions[] = [
   {

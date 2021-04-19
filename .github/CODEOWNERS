@@ -79,6 +79,7 @@
 
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
@@ -311,6 +312,7 @@
 /x-pack/plugins/console_extensions/  @elastic/es-ui
 /x-pack/plugins/grokdebugger/  @elastic/es-ui
 /x-pack/plugins/index_management/  @elastic/es-ui
+/x-pack/plugins/license_api_guard/  @elastic/es-ui
 /x-pack/plugins/license_management/  @elastic/es-ui
 /x-pack/plugins/painless_lab/  @elastic/es-ui
 /x-pack/plugins/remote_clusters/  @elastic/es-ui

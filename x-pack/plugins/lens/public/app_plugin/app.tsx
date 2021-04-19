@@ -14,6 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -37,6 +38,7 @@ import {
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
@@ -80,6 +82,8 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
+  const startSession = useCallback(() => data.search.session.start(), [data]);
+
   const [state, setState] = useState<LensAppState>(() => {
     return {
       query: data.query.queryString.getQuery(),
@@ -94,7 +98,7 @@ export function App({
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
-      searchSessionId: data.search.session.start(),
+      searchSessionId: startSession(),
     };
   });
 
@@ -176,7 +180,7 @@ export function App({
         setState((s) => ({
           ...s,
           filters: data.query.filterManager.getFilters(),
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
         trackUiEvent('app_filters_updated');
       },
@@ -186,21 +190,26 @@ export function App({
       next: () => {
         setState((s) => ({
           ...s,
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
       },
     });
 
     const autoRefreshSubscription = data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe({
-        next: () => {
+      .pipe(
+        tap(() => {
           setState((s) => ({
             ...s,
-            searchSessionId: data.search.session.start(),
+            searchSessionId: startSession(),
           }));
-        },
-      });
+        }),
+        switchMap((done) =>
+          // best way in lens to estimate that all panels are updated is to rely on search session service state
+          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
@@ -227,6 +236,7 @@ export function App({
     data.query,
     history,
     initialContext,
+    startSession,
   ]);
 
   useEffect(() => {
@@ -645,7 +655,7 @@ export function App({
                 // Time change will be picked up by the time subscription
                 setState((s) => ({
                   ...s,
-                  searchSessionId: data.search.session.start(),
+                  searchSessionId: startSession(),
                 }));
                 trackUiEvent('app_query_change');
               }

@@ -341,10 +341,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
+    if (!agent.policy_id) return true;
 
-    const agentPolicy = agentPolicies.find((p) => p.id === agent.policy_id);
-    const isManaged = agent.policy_id && agentPolicy?.is_managed === true;
-    return !isManaged;
+    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+    const isHosted = agentPolicy?.is_managed === true;
+    return !isHosted;
   };
 
   const columns = [
